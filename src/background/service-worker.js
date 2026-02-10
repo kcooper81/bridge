@@ -7,6 +7,9 @@ import {
   isOnboardingComplete, addItemToProject, addManualItemToProject,
   moveItemToProject, assignActivityToProject, saveProject, createProject,
   deleteProject, saveAIConversation, getProjectConversations,
+  getWorkspaceProfiles, saveWorkspaceProfile, deleteWorkspaceProfile,
+  getActiveWorkspace, setActiveWorkspace, getPinnedProjects, togglePinProject,
+  getFavorites, toggleFavorite, getDailyStats, updateDailyStats,
 } from '../lib/storage.js';
 import { extractDomain, categorizeDomain, buildContextString, computeEngagementScore } from '../lib/utils.js';
 import { inferProject, reclusterProjects } from '../lib/project-inference.js';
@@ -146,6 +149,22 @@ async function captureTabActivity(tab) {
       await updateActivity(lastActivityId, { projectId });
     }
   }
+
+  // Track daily stats
+  try {
+    const today = new Date().toISOString().slice(0, 10);
+    const allStats = await getDailyStats();
+    const todayStats = allStats[today] || { pageViews: 0, domains: [], categories: {} };
+    todayStats.pageViews = (todayStats.pageViews || 0) + 1;
+    if (!todayStats.domains) todayStats.domains = [];
+    if (!todayStats.domains.includes(domain)) todayStats.domains.push(domain);
+    if (!todayStats.categories) todayStats.categories = {};
+    const cat = activityItem.category;
+    todayStats.categories[cat] = (todayStats.categories[cat] || 0) + 1;
+    await updateDailyStats(todayStats);
+  } catch {
+    // Stats tracking is best-effort
+  }
 }
 
 // Track tab activation
@@ -181,6 +200,32 @@ chrome.windows.onFocusChanged.addListener(async (windowId) => {
     }
   } catch {
     // Window may have been closed
+  }
+});
+
+// --- Keyboard Shortcuts ---
+
+chrome.commands.onCommand.addListener(async (command) => {
+  if (command === 'copy-context') {
+    const activeId = await getActiveProjectId();
+    if (!activeId) return;
+    const project = await getProject(activeId);
+    if (!project) return;
+    const context = buildContextString(project);
+    try {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (tab) {
+        await chrome.tabs.sendMessage(tab.id, { type: 'COPY_TO_CLIPBOARD', text: context });
+      }
+    } catch {
+      // Tab may not have content script
+    }
+  }
+
+  if (command === 'toggle-tracking') {
+    const settings = await getSettings();
+    const { updateSettings: doUpdate } = await import('../lib/storage.js');
+    await doUpdate({ trackingEnabled: !settings.trackingEnabled });
   }
 });
 
@@ -350,6 +395,148 @@ async function handleMessage(message, sender) {
         conversationCount: conversations.length,
         toolsUsed,
       };
+    }
+
+    // --- Workspace Profiles ---
+
+    case 'GET_WORKSPACE_PROFILES': {
+      const profiles = await getWorkspaceProfiles();
+      const activeWs = await getActiveWorkspace();
+      return { profiles, activeWorkspace: activeWs };
+    }
+
+    case 'SAVE_WORKSPACE_PROFILE': {
+      const profile = await saveWorkspaceProfile(message.profile);
+      return { success: true, profile };
+    }
+
+    case 'DELETE_WORKSPACE_PROFILE': {
+      await deleteWorkspaceProfile(message.profileId);
+      return { success: true };
+    }
+
+    case 'SET_ACTIVE_WORKSPACE': {
+      await setActiveWorkspace(message.profileId);
+      return { success: true };
+    }
+
+    // --- Pinning & Favorites ---
+
+    case 'GET_PINNED_PROJECTS': {
+      const pinned = await getPinnedProjects();
+      return { pinned };
+    }
+
+    case 'TOGGLE_PIN_PROJECT': {
+      const pinned = await togglePinProject(message.projectId);
+      return { success: true, pinned };
+    }
+
+    case 'GET_FAVORITES': {
+      const favorites = await getFavorites();
+      return { favorites };
+    }
+
+    case 'TOGGLE_FAVORITE': {
+      const favorites = await toggleFavorite(message.item);
+      return { success: true, favorites };
+    }
+
+    // --- Dashboard Data ---
+
+    case 'GET_DASHBOARD_DATA': {
+      const [projects, activeId, log, pinned, favorites, dailyStats, wsProfiles, activeWs] = await Promise.all([
+        getProjects(),
+        getActiveProjectId(),
+        getActivityLog(),
+        getPinnedProjects(),
+        getFavorites(),
+        getDailyStats(),
+        getWorkspaceProfiles(),
+        getActiveWorkspace(),
+      ]);
+
+      const activeProject = activeId ? projects.find(p => p.id === activeId) : null;
+
+      // Compute today's stats from activity log
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      const todayTs = todayStart.getTime();
+      const todayActivity = log.filter(a => a.timestamp >= todayTs);
+      const todayDomains = new Set(todayActivity.map(a => a.domain));
+      const todayTime = todayActivity.reduce((sum, a) => sum + (a.timeSpent || 0), 0);
+      const todayProjects = new Set(todayActivity.map(a => a.projectId).filter(Boolean));
+
+      // Build hourly activity heatmap for today (24 hours)
+      const hourlyActivity = new Array(24).fill(0);
+      todayActivity.forEach(a => {
+        const hour = new Date(a.timestamp).getHours();
+        hourlyActivity[hour]++;
+      });
+
+      // Project time breakdown for today
+      const projectTimeMap = {};
+      todayActivity.forEach(a => {
+        if (a.projectId) {
+          projectTimeMap[a.projectId] = (projectTimeMap[a.projectId] || 0) + (a.timeSpent || 0);
+        }
+      });
+
+      const projectBreakdown = Object.entries(projectTimeMap)
+        .map(([id, time]) => {
+          const proj = projects.find(p => p.id === id);
+          return { id, name: proj?.name || 'Unknown', time };
+        })
+        .sort((a, b) => b.time - a.time)
+        .slice(0, 5);
+
+      // Recent sessions (group consecutive activity by project)
+      const sessions = [];
+      let currentSession = null;
+      for (const activity of todayActivity.slice(0, 50)) {
+        if (currentSession && currentSession.projectId === activity.projectId
+            && activity.timestamp > currentSession.end - 10 * 60 * 1000) {
+          currentSession.end = activity.timestamp;
+          currentSession.items++;
+        } else {
+          if (currentSession) sessions.push(currentSession);
+          const proj = activity.projectId ? projects.find(p => p.id === activity.projectId) : null;
+          currentSession = {
+            projectId: activity.projectId,
+            projectName: proj?.name || activity.domain,
+            start: activity.timestamp,
+            end: activity.timestamp,
+            items: 1,
+            category: activity.category,
+          };
+        }
+      }
+      if (currentSession) sessions.push(currentSession);
+
+      return {
+        projects,
+        activeProject,
+        pinnedProjects: pinned,
+        favorites,
+        workspaceProfiles: wsProfiles,
+        activeWorkspace: activeWs,
+        today: {
+          totalTime: todayTime,
+          pageViews: todayActivity.length,
+          uniqueSites: todayDomains.size,
+          activeProjects: todayProjects.size,
+          hourlyActivity,
+          projectBreakdown,
+          sessions: sessions.slice(0, 8),
+        },
+        dailyStats,
+        recentActivity: todayActivity.slice(0, 10),
+      };
+    }
+
+    case 'UPDATE_DAILY_STATS': {
+      const stats = await updateDailyStats(message.stats);
+      return { success: true, stats };
     }
 
     default:

@@ -8,6 +8,11 @@ export const STORAGE_KEYS = {
   ONBOARDING_COMPLETE: 'contextiq_onboarding_complete',
   TAB_TIME_TRACKING: 'contextiq_tab_time',
   AI_CONVERSATIONS: 'contextiq_ai_conversations',
+  WORKSPACE_PROFILES: 'contextiq_workspace_profiles',
+  ACTIVE_WORKSPACE: 'contextiq_active_workspace',
+  PINNED_PROJECTS: 'contextiq_pinned_projects',
+  FAVORITES: 'contextiq_favorites',
+  DAILY_STATS: 'contextiq_daily_stats',
 };
 
 export const AI_TOOL_PATTERNS = [
@@ -59,6 +64,39 @@ export const DEFAULT_SETTINGS = {
   inactivityThresholdMs: 5 * 60 * 1000, // 5 minutes
   clusteringIntervalMs: 60 * 1000, // 1 minute
   excludedDomains: [],
+  showDashboard: true,
+  showTimeline: true,
+};
+
+export const WORKSPACE_PRESETS = {
+  development: {
+    name: 'Development',
+    icon: 'code',
+    color: '#60a5fa',
+    focusDomains: ['github.com', 'gitlab.com', 'stackoverflow.com', 'npmjs.com', 'developer.mozilla.org'],
+    contextTemplate: 'technical',
+  },
+  research: {
+    name: 'Research',
+    icon: 'search',
+    color: '#fb923c',
+    focusDomains: ['scholar.google.com', 'arxiv.org', 'wikipedia.org', 'medium.com'],
+    contextTemplate: 'research',
+  },
+  design: {
+    name: 'Design',
+    icon: 'palette',
+    color: '#c084fc',
+    focusDomains: ['figma.com', 'dribbble.com', 'behance.net', 'canva.com'],
+    contextTemplate: 'creative',
+  },
+  planning: {
+    name: 'Planning',
+    icon: 'clipboard',
+    color: '#fbbf24',
+    focusDomains: ['notion.so', 'linear.app', 'jira.atlassian.com', 'trello.com'],
+    contextTemplate: 'planning',
+  },
 };
 
 export const ALARM_NAMES = {

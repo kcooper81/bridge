@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "ContextIQ",
-  "version": "0.2.0",
-  "description": "Your AI always knows what you're working on. Deep context capture, full activity timeline, and intelligent project organization.",
+  "version": "0.3.0",
+  "description": "Smart productivity dashboard. Deep context capture, AI conversation bridge, workspace profiles, and intelligent project organization.",
   "permissions": [
     "tabs",
     "activeTab",
@@ -51,5 +51,15 @@
     "16": "src/icons/icon-16.png",
     "48": "src/icons/icon-48.png",
     "128": "src/icons/icon-128.png"
+  },
+  "commands": {
+    "copy-context": {
+      "suggested_key": { "default": "Alt+C" },
+      "description": "Copy active project context to clipboard"
+    },
+    "toggle-tracking": {
+      "suggested_key": { "default": "Alt+T" },
+      "description": "Toggle activity tracking on/off"
+    }
   }
 }

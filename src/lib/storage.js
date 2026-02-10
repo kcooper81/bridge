@@ -297,6 +297,103 @@ export async function getProjectConversations(projectId, excludeTool = null) {
   return convos;
 }
 
+// --- Workspace Profiles ---
+
+export async function getWorkspaceProfiles() {
+  return (await get(STORAGE_KEYS.WORKSPACE_PROFILES)) || [];
+}
+
+export async function saveWorkspaceProfile(profile) {
+  const profiles = await getWorkspaceProfiles();
+  const idx = profiles.findIndex(p => p.id === profile.id);
+  if (idx >= 0) {
+    profiles[idx] = profile;
+  } else {
+    profiles.push(profile);
+  }
+  await set(STORAGE_KEYS.WORKSPACE_PROFILES, profiles);
+  return profile;
+}
+
+export async function deleteWorkspaceProfile(profileId) {
+  const profiles = await getWorkspaceProfiles();
+  await set(STORAGE_KEYS.WORKSPACE_PROFILES, profiles.filter(p => p.id !== profileId));
+}
+
+export async function getActiveWorkspace() {
+  return await get(STORAGE_KEYS.ACTIVE_WORKSPACE);
+}
+
+export async function setActiveWorkspace(profileId) {
+  await set(STORAGE_KEYS.ACTIVE_WORKSPACE, profileId);
+}
+
+// --- Pinned Projects ---
+
+export async function getPinnedProjects() {
+  return (await get(STORAGE_KEYS.PINNED_PROJECTS)) || [];
+}
+
+export async function togglePinProject(projectId) {
+  const pinned = await getPinnedProjects();
+  const idx = pinned.indexOf(projectId);
+  if (idx >= 0) {
+    pinned.splice(idx, 1);
+  } else {
+    pinned.unshift(projectId);
+  }
+  await set(STORAGE_KEYS.PINNED_PROJECTS, pinned);
+  return pinned;
+}
+
+// --- Favorites ---
+
+export async function getFavorites() {
+  return (await get(STORAGE_KEYS.FAVORITES)) || [];
+}
+
+export async function toggleFavorite(item) {
+  const favorites = await getFavorites();
+  const idx = favorites.findIndex(f => f.url === item.url);
+  if (idx >= 0) {
+    favorites.splice(idx, 1);
+  } else {
+    favorites.unshift({
+      url: item.url,
+      title: item.title,
+      domain: item.domain,
+      favIconUrl: item.favIconUrl || '',
+      addedAt: Date.now(),
+    });
+  }
+  const trimmed = favorites.slice(0, 50);
+  await set(STORAGE_KEYS.FAVORITES, trimmed);
+  return trimmed;
+}
+
+// --- Daily Stats ---
+
+export async function getDailyStats() {
+  return (await get(STORAGE_KEYS.DAILY_STATS)) || {};
+}
+
+export async function updateDailyStats(stats) {
+  const today = new Date().toISOString().slice(0, 10);
+  const all = await getDailyStats();
+  all[today] = { ...(all[today] || {}), ...stats };
+
+  // Keep only last 30 days
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - 30);
+  const cutoffStr = cutoff.toISOString().slice(0, 10);
+  for (const key of Object.keys(all)) {
+    if (key < cutoffStr) delete all[key];
+  }
+
+  await set(STORAGE_KEYS.DAILY_STATS, all);
+  return all[today];
+}
+
 // --- Onboarding ---
 
 export async function isOnboardingComplete() {

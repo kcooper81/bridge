@@ -101,6 +101,15 @@
       sendResponse({ selectedText: lastSelectedText });
       return true;
     }
+
+    if (message.type === 'COPY_TO_CLIPBOARD') {
+      navigator.clipboard.writeText(message.text).then(() => {
+        sendResponse({ success: true });
+      }).catch(() => {
+        sendResponse({ success: false });
+      });
+      return true;
+    }
   });
 
   // Also send page content after page load settles (for the service worker to store)

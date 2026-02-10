@@ -53,6 +53,7 @@
         <span class="contextiq-menu-title">Inject Context</span>
       </div>
       <div class="contextiq-menu-project">Loading...</div>
+      <div class="contextiq-menu-stats"></div>
       <div class="contextiq-menu-actions">
         <button class="contextiq-btn contextiq-btn-inject">Insert into chat</button>
         <button class="contextiq-btn contextiq-btn-copy">Copy to clipboard</button>
@@ -65,6 +66,7 @@
   const fab = btn.querySelector('.contextiq-fab');
   const menu = btn.querySelector('.contextiq-menu');
   const menuProject = btn.querySelector('.contextiq-menu-project');
+  const menuStats = btn.querySelector('.contextiq-menu-stats');
   const menuPreview = btn.querySelector('.contextiq-menu-preview');
   const btnInject = btn.querySelector('.contextiq-btn-inject');
   const btnCopy = btn.querySelector('.contextiq-btn-copy');
@@ -98,15 +100,32 @@
 
       if (contextText) {
         const projectResponse = await chrome.runtime.sendMessage({ type: 'GET_ACTIVE_PROJECT' });
-        const projectName = projectResponse.project?.name || 'Unknown Project';
+        const project = projectResponse.project;
+        const projectName = project?.name || 'Unknown Project';
         menuProject.textContent = projectName;
-        menuPreview.textContent = contextText.length > 200
-          ? contextText.slice(0, 200) + '...'
+
+        // Show project stats
+        if (project) {
+          const itemCount = project.items?.length || 0;
+          const tagCount = project.tags?.length || 0;
+          const hasRichContent = project.items?.some(i => i.pageContent) || false;
+          let statsText = `${itemCount} resources`;
+          if (tagCount > 0) statsText += ` | ${tagCount} tags`;
+          if (hasRichContent) statsText += ' | deep context';
+          menuStats.textContent = statsText;
+          menuStats.style.display = 'block';
+        } else {
+          menuStats.style.display = 'none';
+        }
+
+        menuPreview.textContent = contextText.length > 250
+          ? contextText.slice(0, 250) + '...'
           : contextText;
         btnInject.disabled = false;
         btnCopy.disabled = false;
       } else {
         menuProject.textContent = 'No active project';
+        menuStats.style.display = 'none';
         menuPreview.textContent = 'Start browsing to capture context.';
         btnInject.disabled = true;
         btnCopy.disabled = true;

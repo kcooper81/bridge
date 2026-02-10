@@ -1,7 +1,7 @@
 // ContextIQ Storage Layer
 // Abstraction over Chrome local storage with structured data access
 
-import { STORAGE_KEYS, DEFAULT_SETTINGS, MAX_PROJECT_ITEMS, MAX_PROJECTS } from './constants.js';
+import { STORAGE_KEYS, DEFAULT_SETTINGS, MAX_PROJECT_ITEMS, MAX_PROJECTS, MAX_ACTIVITY_LOG } from './constants.js';
 
 /**
  * Get a value from Chrome local storage.
@@ -45,18 +45,59 @@ export async function getActivityLog() {
   return (await get(STORAGE_KEYS.ACTIVITY_LOG)) || [];
 }
 
+/**
+ * Add an activity item with enhanced data:
+ * - pageContent: { description, headings, codeBlocks, selectedText }
+ * - timeSpent: seconds spent on page (updated later)
+ * - referrerUrl: where user came from
+ * - engagementScore: computed from time + interactions
+ */
 export async function addActivity(activity) {
   const log = await getActivityLog();
   log.unshift({
     id: crypto.randomUUID(),
     timestamp: Date.now(),
+    timeSpent: 0,
+    referrerUrl: '',
+    engagementScore: 0,
+    pageContent: null,
+    projectId: null,
+    manuallyAssigned: false,
     ...activity,
   });
 
   const settings = await getSettings();
-  const trimmed = log.slice(0, settings.maxActivityItems);
+  const max = settings.maxActivityItems || MAX_ACTIVITY_LOG;
+  const trimmed = log.slice(0, max);
   await set(STORAGE_KEYS.ACTIVITY_LOG, trimmed);
   return trimmed;
+}
+
+/**
+ * Update an existing activity item by ID (e.g. to add time spent or page content).
+ */
+export async function updateActivity(activityId, updates) {
+  const log = await getActivityLog();
+  const idx = log.findIndex(a => a.id === activityId);
+  if (idx < 0) return null;
+  log[idx] = { ...log[idx], ...updates };
+  await set(STORAGE_KEYS.ACTIVITY_LOG, log);
+  return log[idx];
+}
+
+/**
+ * Get a single activity item by ID.
+ */
+export async function getActivityItem(activityId) {
+  const log = await getActivityLog();
+  return log.find(a => a.id === activityId) || null;
+}
+
+/**
+ * Assign an activity item to a project.
+ */
+export async function assignActivityToProject(activityId, projectId) {
+  return updateActivity(activityId, { projectId, manuallyAssigned: true });
 }
 
 export async function clearActivityLog() {
@@ -135,6 +176,43 @@ export async function removeItemFromProject(projectId, itemId) {
   return project;
 }
 
+/**
+ * Move an item from one project to another.
+ */
+export async function moveItemToProject(fromProjectId, toProjectId, itemId) {
+  const fromProject = await getProject(fromProjectId);
+  if (!fromProject) return null;
+
+  const item = fromProject.items.find(i => i.id === itemId);
+  if (!item) return null;
+
+  // Remove from source
+  fromProject.items = fromProject.items.filter(i => i.id !== itemId);
+  await saveProject(fromProject);
+
+  // Add to destination
+  const result = await addItemToProject(toProjectId, { ...item, id: undefined });
+  return result;
+}
+
+/**
+ * Add a manual item (URL + title) to a project.
+ */
+export async function addManualItemToProject(projectId, url, title) {
+  const { extractDomain, categorizeDomain } = await import('./utils.js');
+  const domain = extractDomain(url);
+  const category = categorizeDomain(domain);
+
+  return addItemToProject(projectId, {
+    url,
+    title: title || url,
+    domain,
+    category,
+    favIconUrl: '',
+    manuallyAdded: true,
+  });
+}
+
 export function createProject(name, items = []) {
   return {
     id: crypto.randomUUID(),
@@ -156,6 +234,19 @@ export async function getActiveProjectId() {
 
 export async function setActiveProjectId(projectId) {
   await set(STORAGE_KEYS.ACTIVE_PROJECT, projectId);
+}
+
+// --- Tab Time Tracking ---
+
+export async function getTabTimeData() {
+  return (await get(STORAGE_KEYS.TAB_TIME_TRACKING)) || {};
+}
+
+export async function updateTabTime(tabKey, seconds) {
+  const data = await getTabTimeData();
+  data[tabKey] = (data[tabKey] || 0) + seconds;
+  await set(STORAGE_KEYS.TAB_TIME_TRACKING, data);
+  return data[tabKey];
 }
 
 // --- Onboarding ---

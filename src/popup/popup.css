@@ -408,10 +408,35 @@ body {
   letter-spacing: -0.1px;
 }
 
+.item-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 1px;
+}
+
 .item-domain {
   font-size: 11px;
   color: var(--text-muted);
-  margin-top: 1px;
+}
+
+.item-time-spent {
+  font-size: 9px;
+  color: var(--accent-hover);
+  background: var(--accent-subtle);
+  padding: 1px 5px;
+  border-radius: 999px;
+}
+
+.item-content-badge {
+  font-size: 8px;
+  color: var(--success);
+  background: rgba(52, 211, 153, 0.1);
+  padding: 1px 5px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  font-weight: 600;
 }
 
 .item-time {
@@ -442,6 +467,29 @@ body {
 .item-remove:hover {
   color: var(--danger);
   background: var(--danger-subtle);
+}
+
+.item-move {
+  opacity: 0;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  font-size: 12px;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: all var(--transition);
+  border-radius: 4px;
+}
+
+.item:hover .item-move {
+  opacity: 1;
+}
+
+.item-move:hover {
+  color: var(--accent-hover);
+  background: var(--accent-subtle);
 }
 
 /* ─── Category Badges ─── */
@@ -639,6 +687,27 @@ body {
 
 .modal input::placeholder {
   color: var(--text-muted);
+}
+
+.modal select {
+  width: 100%;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  margin-bottom: 16px;
+  transition: all var(--transition);
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.modal select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
 }
 
 .modal input:focus {

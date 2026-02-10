@@ -92,6 +92,37 @@ export function timeAgo(timestamp) {
 }
 
 /**
+ * Format seconds into a human-readable duration.
+ */
+export function formatDuration(seconds) {
+  if (!seconds || seconds < 5) return '';
+  if (seconds < 60) return `${Math.round(seconds)}s`;
+  const min = Math.floor(seconds / 60);
+  if (min < 60) return `${min}m`;
+  const hrs = Math.floor(min / 60);
+  const remainMin = min % 60;
+  return remainMin > 0 ? `${hrs}h ${remainMin}m` : `${hrs}h`;
+}
+
+/**
+ * Format a timestamp to a readable date/time string.
+ */
+export function formatDateTime(timestamp) {
+  const d = new Date(timestamp);
+  const now = new Date();
+  const isToday = d.toDateString() === now.toDateString();
+  const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const isYesterday = d.toDateString() === yesterday.toDateString();
+
+  const time = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+  if (isToday) return `Today ${time}`;
+  if (isYesterday) return `Yesterday ${time}`;
+  return `${d.toLocaleDateString([], { month: 'short', day: 'numeric' })} ${time}`;
+}
+
+/**
  * Truncate a string to a max length with ellipsis.
  */
 export function truncate(str, maxLen = 60) {
@@ -128,7 +159,7 @@ export function generateProjectName(keywords, domains) {
 }
 
 /**
- * Build the AI context string for a project.
+ * Build the AI context string for a project — enhanced with deeper data.
  */
 export function buildContextString(project) {
   if (!project) return '';
@@ -139,12 +170,24 @@ export function buildContextString(project) {
     lines.push(`Tags: ${project.tags.join(', ')}`);
   }
 
-  const recentItems = project.items.slice(0, 10);
+  const recentItems = project.items.slice(0, 15);
   if (recentItems.length > 0) {
+    lines.push('');
     lines.push('Active Resources:');
     recentItems.forEach(item => {
       const category = categorizeDomain(extractDomain(item.url));
-      lines.push(`  - [${category}] ${item.title} (${item.url})`);
+      const timeInfo = item.timeSpent ? ` [${formatDuration(item.timeSpent)}]` : '';
+      lines.push(`  - [${category}] ${item.title}${timeInfo} (${item.url})`);
+
+      // Include page content snippets if available
+      if (item.pageContent) {
+        if (item.pageContent.description) {
+          lines.push(`    Description: ${truncate(item.pageContent.description, 150)}`);
+        }
+        if (item.pageContent.codeBlocks && item.pageContent.codeBlocks.length > 0) {
+          lines.push(`    Code snippets found: ${item.pageContent.codeBlocks.length}`);
+        }
+      }
     });
   }
 
@@ -157,4 +200,26 @@ export function buildContextString(project) {
   lines.push('Please use this context to provide relevant, project-aware responses.');
 
   return lines.join('\n');
+}
+
+/**
+ * Compute an engagement score from time spent and page content.
+ */
+export function computeEngagementScore(timeSpent, pageContent) {
+  let score = 0;
+  // Time-based: more time = more engaged
+  if (timeSpent > 5) score += 1;
+  if (timeSpent > 30) score += 1;
+  if (timeSpent > 120) score += 1;
+  if (timeSpent > 300) score += 2;
+
+  // Content richness
+  if (pageContent) {
+    if (pageContent.description) score += 1;
+    if (pageContent.headings && pageContent.headings.length > 0) score += 1;
+    if (pageContent.codeBlocks && pageContent.codeBlocks.length > 0) score += 2;
+    if (pageContent.selectedText) score += 2;
+  }
+
+  return Math.min(score, 10); // Cap at 10
 }

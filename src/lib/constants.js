@@ -6,6 +6,7 @@ export const STORAGE_KEYS = {
   SETTINGS: 'contextiq_settings',
   ACTIVE_PROJECT: 'contextiq_active_project',
   ONBOARDING_COMPLETE: 'contextiq_onboarding_complete',
+  TAB_TIME_TRACKING: 'contextiq_tab_time',
 };
 
 export const AI_TOOL_PATTERNS = [
@@ -50,9 +51,10 @@ export const DEFAULT_SETTINGS = {
   localOnly: true,
   captureUrls: true,
   captureTitles: true,
+  capturePageContent: true,
   autoInferProjects: true,
   aiInjectionMode: 'manual', // 'manual' | 'auto'
-  maxActivityItems: 500,
+  maxActivityItems: 2000,
   inactivityThresholdMs: 5 * 60 * 1000, // 5 minutes
   clusteringIntervalMs: 60 * 1000, // 1 minute
   excludedDomains: [],
@@ -61,7 +63,9 @@ export const DEFAULT_SETTINGS = {
 export const ALARM_NAMES = {
   CLUSTERING: 'contextiq_clustering',
   CLEANUP: 'contextiq_cleanup',
+  TIME_TRACKING: 'contextiq_time_tracking',
 };
 
-export const MAX_PROJECT_ITEMS = 50;
-export const MAX_PROJECTS = 20;
+export const MAX_PROJECT_ITEMS = 100;
+export const MAX_PROJECTS = 50;
+export const MAX_ACTIVITY_LOG = 2000;

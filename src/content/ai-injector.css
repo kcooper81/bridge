@@ -109,11 +109,18 @@
 }
 
 .contextiq-menu-project {
-  padding: 12px 18px;
+  padding: 12px 18px 4px;
   font-size: 15px;
   font-weight: 700;
   color: #f0f0f0;
   letter-spacing: -0.3px;
+}
+
+.contextiq-menu-stats {
+  padding: 0 18px 12px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.35);
+  letter-spacing: 0.2px;
 }
 
 .contextiq-menu-actions {

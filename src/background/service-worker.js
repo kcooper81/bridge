@@ -1,8 +1,14 @@
 // ContextIQ Background Service Worker
-// Handles tab tracking, activity capture, project inference, and messaging
+// Handles tab tracking, activity capture, time tracking, project inference, and messaging
 
-import { getSettings, addActivity, setActiveProjectId, getActiveProjectId, getProjects, getProject, isOnboardingComplete } from '../lib/storage.js';
-import { extractDomain, categorizeDomain, buildContextString } from '../lib/utils.js';
+import {
+  getSettings, addActivity, updateActivity, setActiveProjectId,
+  getActiveProjectId, getProjects, getProject, getActivityLog,
+  isOnboardingComplete, addItemToProject, addManualItemToProject,
+  moveItemToProject, assignActivityToProject, saveProject, createProject,
+  deleteProject,
+} from '../lib/storage.js';
+import { extractDomain, categorizeDomain, buildContextString, computeEngagementScore } from '../lib/utils.js';
 import { inferProject, reclusterProjects } from '../lib/project-inference.js';
 import { summarizeAllProjects } from '../lib/summarizer.js';
 import { ALARM_NAMES } from '../lib/constants.js';
@@ -11,6 +17,9 @@ import { ALARM_NAMES } from '../lib/constants.js';
 let lastActiveTabId = null;
 let lastActiveUrl = '';
 let lastActivityTime = Date.now();
+let lastActivityId = null; // Track current activity for time updates
+let tabStartTime = Date.now(); // When user started viewing current tab
+let currentTabUrl = ''; // URL being timed
 
 // --- Initialization ---
 
@@ -23,33 +32,58 @@ chrome.runtime.onInstalled.addListener(async (details) => {
   // Set up periodic alarms
   chrome.alarms.create(ALARM_NAMES.CLUSTERING, { periodInMinutes: 5 });
   chrome.alarms.create(ALARM_NAMES.CLEANUP, { periodInMinutes: 60 });
+  chrome.alarms.create(ALARM_NAMES.TIME_TRACKING, { periodInMinutes: 1 });
 });
 
 chrome.alarms.onAlarm.addListener(async (alarm) => {
   if (alarm.name === ALARM_NAMES.CLUSTERING) {
     await reclusterProjects();
-    // Auto-summarize after re-clustering
     const projects = await getProjects();
     await summarizeAllProjects(projects);
+  }
+  if (alarm.name === ALARM_NAMES.TIME_TRACKING) {
+    // Flush time for current tab
+    await flushTabTime();
   }
   if (alarm.name === ALARM_NAMES.CLEANUP) {
     // Future: clean up old activity items
   }
 });
 
+// --- Time Tracking ---
+
+async function flushTabTime() {
+  if (!lastActivityId || !tabStartTime) return;
+  const elapsed = Math.floor((Date.now() - tabStartTime) / 1000);
+  if (elapsed < 2) return; // ignore trivial time
+
+  // Cap at 30 minutes per flush to avoid runaway timers
+  const capped = Math.min(elapsed, 1800);
+
+  try {
+    const activity = await updateActivity(lastActivityId, {});
+    if (activity) {
+      const newTime = (activity.timeSpent || 0) + capped;
+      const score = computeEngagementScore(newTime, activity.pageContent);
+      await updateActivity(lastActivityId, { timeSpent: newTime, engagementScore: score });
+    }
+  } catch {
+    // Activity may have been trimmed
+  }
+
+  tabStartTime = Date.now(); // Reset for next interval
+}
+
 // --- Tab Tracking ---
 
 /**
  * Extract email subject from Gmail tab titles.
- * Gmail titles follow the pattern: "Subject - user@gmail.com - Gmail"
  */
 function extractEmailSubject(title, domain) {
   if (domain !== 'mail.google.com') return null;
-  // Gmail title pattern: "Subject - email@example.com - Gmail" or "Inbox (N) - email - Gmail"
   const match = title.match(/^(.+?)\s+-\s+.+@.+\s+-\s+Gmail$/);
   if (match) {
     const subject = match[1].trim();
-    // Skip generic inbox titles like "Inbox" or "Inbox (3)"
     if (/^Inbox(\s*\(\d+\))?$/.test(subject)) return null;
     return subject;
   }
@@ -72,6 +106,9 @@ async function captureTabActivity(tab) {
   // Check excluded domains
   if (settings.excludedDomains.includes(domain)) return;
 
+  // Flush time for the previous tab before switching
+  await flushTabTime();
+
   // Respect captureUrls and captureTitles settings
   const activityItem = {
     url: settings.captureUrls ? tab.url : `https://${domain}/`,
@@ -79,27 +116,35 @@ async function captureTabActivity(tab) {
     domain,
     category: categorizeDomain(domain),
     favIconUrl: tab.favIconUrl || '',
+    referrerUrl: currentTabUrl || '',
   };
 
   // Extract email subject from Gmail tabs
   const emailSubject = extractEmailSubject(tab.title, domain);
   if (emailSubject) {
     activityItem.emailSubject = emailSubject;
-    activityItem.title = emailSubject; // Use subject as the display title
+    activityItem.title = emailSubject;
   }
 
   // Avoid logging duplicate consecutive activity
   if (tab.url === lastActiveUrl) return;
   lastActiveUrl = tab.url;
+  currentTabUrl = tab.url;
   lastActivityTime = Date.now();
+  tabStartTime = Date.now(); // Start timing new tab
 
   // Log activity
-  await addActivity(activityItem);
+  const log = await addActivity(activityItem);
+  lastActivityId = log[0]?.id || null;
 
   // Infer project
   const projectId = await inferProject(activityItem);
   if (projectId) {
     await setActiveProjectId(projectId);
+    // Link activity to project
+    if (lastActivityId) {
+      await updateActivity(lastActivityId, { projectId });
+    }
   }
 }
 
@@ -123,7 +168,11 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 
 // Track window focus changes
 chrome.windows.onFocusChanged.addListener(async (windowId) => {
-  if (windowId === chrome.windows.WINDOW_ID_NONE) return;
+  if (windowId === chrome.windows.WINDOW_ID_NONE) {
+    // Window lost focus — flush time
+    await flushTabTime();
+    return;
+  }
   try {
     const [tab] = await chrome.tabs.query({ active: true, windowId });
     if (tab) {
@@ -138,13 +187,13 @@ chrome.windows.onFocusChanged.addListener(async (windowId) => {
 // --- Message Handling ---
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  handleMessage(message).then(sendResponse).catch(err => {
+  handleMessage(message, sender).then(sendResponse).catch(err => {
     sendResponse({ error: err.message });
   });
   return true; // Keep channel open for async response
 });
 
-async function handleMessage(message) {
+async function handleMessage(message, sender) {
   switch (message.type) {
     case 'GET_ACTIVE_PROJECT': {
       const projectId = await getActiveProjectId();
@@ -189,6 +238,65 @@ async function handleMessage(message) {
     case 'IS_ONBOARDING_COMPLETE': {
       const complete = await isOnboardingComplete();
       return { complete };
+    }
+
+    // --- Enhanced Message Handlers ---
+
+    case 'GET_ACTIVITY_LOG': {
+      const log = await getActivityLog();
+      return { log };
+    }
+
+    case 'ADD_MANUAL_ITEM': {
+      const result = await addManualItemToProject(message.projectId, message.url, message.title);
+      return { success: !!result, project: result };
+    }
+
+    case 'MOVE_ITEM': {
+      const result = await moveItemToProject(message.fromProjectId, message.toProjectId, message.itemId);
+      return { success: !!result, project: result };
+    }
+
+    case 'ASSIGN_ACTIVITY_TO_PROJECT': {
+      // Assign an activity log entry to a project + add it as a project item
+      const activity = await assignActivityToProject(message.activityId, message.projectId);
+      if (activity) {
+        await addItemToProject(message.projectId, {
+          url: activity.url,
+          title: activity.title,
+          domain: activity.domain,
+          category: activity.category,
+          favIconUrl: activity.favIconUrl || '',
+          pageContent: activity.pageContent,
+          timeSpent: activity.timeSpent,
+        });
+      }
+      return { success: !!activity };
+    }
+
+    case 'CREATE_PROJECT': {
+      const newProject = createProject(message.name);
+      newProject.isManual = true;
+      await saveProject(newProject);
+      await setActiveProjectId(newProject.id);
+      return { success: true, project: newProject };
+    }
+
+    case 'DELETE_PROJECT': {
+      await deleteProject(message.projectId);
+      return { success: true };
+    }
+
+    case 'PAGE_CONTENT_EXTRACTED': {
+      // Received from context-extractor content script
+      if (lastActivityId && message.url === lastActiveUrl) {
+        const score = computeEngagementScore(0, message.content);
+        await updateActivity(lastActivityId, {
+          pageContent: message.content,
+          engagementScore: score,
+        });
+      }
+      return { success: true };
     }
 
     default:

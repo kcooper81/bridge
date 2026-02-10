@@ -7,6 +7,7 @@ export const STORAGE_KEYS = {
   ACTIVE_PROJECT: 'contextiq_active_project',
   ONBOARDING_COMPLETE: 'contextiq_onboarding_complete',
   TAB_TIME_TRACKING: 'contextiq_tab_time',
+  AI_CONVERSATIONS: 'contextiq_ai_conversations',
 };
 
 export const AI_TOOL_PATTERNS = [

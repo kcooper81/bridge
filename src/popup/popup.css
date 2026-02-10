@@ -243,23 +243,29 @@ body {
 
 .project-actions {
   display: flex;
-  gap: 8px;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
 .btn-action {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   background: var(--bg-elevated);
   color: var(--text-secondary);
   border: 1px solid var(--border-default);
   border-radius: 999px;
-  padding: 6px 14px;
-  font-size: 12px;
+  padding: 5px 12px;
+  font-size: 11px;
   font-family: inherit;
   font-weight: 500;
   cursor: pointer;
   transition: all var(--transition);
+  white-space: nowrap;
+}
+
+.btn-action svg {
+  flex-shrink: 0;
 }
 
 .btn-action:hover {
@@ -275,6 +281,11 @@ body {
 
 .btn-action-danger {
   margin-left: auto;
+  padding: 5px 8px;
+}
+
+.btn-action-danger span {
+  display: none;
 }
 
 .btn-action-danger:hover {

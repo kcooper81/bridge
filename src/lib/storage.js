@@ -249,6 +249,54 @@ export async function updateTabTime(tabKey, seconds) {
   return data[tabKey];
 }
 
+// --- AI Conversations ---
+
+/**
+ * Get all saved AI conversations for a project.
+ * Structure: { [projectId]: [ { toolName, url, title, turns, savedAt } ] }
+ */
+export async function getAIConversations() {
+  return (await get(STORAGE_KEYS.AI_CONVERSATIONS)) || {};
+}
+
+/**
+ * Save or update an AI conversation snapshot.
+ */
+export async function saveAIConversation(projectId, conversation) {
+  const all = await getAIConversations();
+  if (!all[projectId]) all[projectId] = [];
+
+  // Deduplicate by URL — update existing or add new
+  const existing = all[projectId].findIndex(c => c.url === conversation.url);
+  const entry = {
+    ...conversation,
+    savedAt: Date.now(),
+  };
+
+  if (existing >= 0) {
+    all[projectId][existing] = entry;
+  } else {
+    all[projectId].unshift(entry);
+  }
+
+  // Keep max 20 conversations per project
+  all[projectId] = all[projectId].slice(0, 20);
+  await set(STORAGE_KEYS.AI_CONVERSATIONS, all);
+  return entry;
+}
+
+/**
+ * Get conversations for the active project, optionally excluding a specific tool.
+ */
+export async function getProjectConversations(projectId, excludeTool = null) {
+  const all = await getAIConversations();
+  const convos = all[projectId] || [];
+  if (excludeTool) {
+    return convos.filter(c => c.toolName !== excludeTool);
+  }
+  return convos;
+}
+
 // --- Onboarding ---
 
 export async function isOnboardingComplete() {

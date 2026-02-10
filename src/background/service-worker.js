@@ -6,7 +6,7 @@ import {
   getActiveProjectId, getProjects, getProject, getActivityLog,
   isOnboardingComplete, addItemToProject, addManualItemToProject,
   moveItemToProject, assignActivityToProject, saveProject, createProject,
-  deleteProject,
+  deleteProject, saveAIConversation, getProjectConversations,
 } from '../lib/storage.js';
 import { extractDomain, categorizeDomain, buildContextString, computeEngagementScore } from '../lib/utils.js';
 import { inferProject, reclusterProjects } from '../lib/project-inference.js';
@@ -297,6 +297,59 @@ async function handleMessage(message, sender) {
         });
       }
       return { success: true };
+    }
+
+    // --- AI Conversation Bridge ---
+
+    case 'SAVE_AI_CONVERSATION': {
+      const activeId = await getActiveProjectId();
+      if (!activeId) return { success: false, error: 'No active project' };
+
+      await saveAIConversation(activeId, {
+        toolName: message.toolName,
+        url: message.url,
+        title: message.title,
+        turns: message.turns,
+      });
+      return { success: true };
+    }
+
+    case 'GET_AI_BRIDGE_CONTEXT': {
+      const activeId = await getActiveProjectId();
+      if (!activeId) return { bridgeContext: '', conversationCount: 0, toolsUsed: [] };
+
+      // Get conversations from OTHER tools (not the one currently asking)
+      const conversations = await getProjectConversations(activeId, message.currentTool);
+      if (!conversations.length) return { bridgeContext: '', conversationCount: 0, toolsUsed: [] };
+
+      const toolsUsed = [...new Set(conversations.map(c => c.toolName))];
+
+      // Build the bridge context string
+      const lines = ['--- AI Conversation Bridge ---'];
+      lines.push(`Context from: ${toolsUsed.join(', ')}`);
+      lines.push('');
+
+      // Include recent conversations from other tools
+      const recent = conversations.slice(0, 3);
+      for (const conv of recent) {
+        lines.push(`[${conv.toolName}] ${conv.title || 'Untitled'}`);
+        // Include the last few turns (summarized)
+        const turns = conv.turns.slice(-4);
+        for (const turn of turns) {
+          const prefix = turn.role === 'user' ? 'You' : conv.toolName;
+          const text = turn.text.length > 200 ? turn.text.slice(0, 200) + '...' : turn.text;
+          lines.push(`  ${prefix}: ${text}`);
+        }
+        lines.push('');
+      }
+
+      lines.push('Use this context from previous AI conversations to maintain continuity.');
+
+      return {
+        bridgeContext: lines.join('\n'),
+        conversationCount: conversations.length,
+        toolsUsed,
+      };
     }
 
     default:

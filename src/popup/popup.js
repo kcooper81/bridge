@@ -17,6 +17,8 @@ const emptyState = document.getElementById('empty-state');
 const projectNameEl = document.getElementById('project-name');
 const btnCopyContext = document.getElementById('btn-copy-context');
 const btnResume = document.getElementById('btn-resume');
+const btnAddTag = document.getElementById('btn-add-tag');
+const btnDeleteProject = document.getElementById('btn-delete-project');
 const tagsContainer = document.getElementById('tags-container');
 const tagsList = document.getElementById('tags-list');
 const summaryContainer = document.getElementById('summary-container');
@@ -80,11 +82,11 @@ function showProject(project) {
 
   projectNameEl.textContent = project.name;
 
-  // Tags
+  // Tags (always show container so user can add tags)
   if (project.tags && project.tags.length > 0) {
     tagsContainer.classList.remove('hidden');
     tagsList.innerHTML = project.tags.map(tag =>
-      `<span class="tag">${tag}<span class="tag-remove" data-tag="${tag}">&times;</span></span>`
+      `<span class="tag">${escapeHtml(tag)}<span class="tag-remove" data-tag="${escapeHtml(tag)}">&times;</span></span>`
     ).join('');
   } else {
     tagsContainer.classList.add('hidden');
@@ -182,6 +184,28 @@ function bindEvents() {
     if (response.success) {
       showToast(`Opened ${response.opened} tabs`);
     }
+  });
+
+  btnAddTag.addEventListener('click', async () => {
+    if (!currentProject) return;
+    const tag = prompt('Enter a tag:');
+    if (!tag || !tag.trim()) return;
+    const trimmed = tag.trim();
+    if (!currentProject.tags.includes(trimmed)) {
+      currentProject.tags.push(trimmed);
+      await saveProject(currentProject);
+      showProject(currentProject);
+      showToast('Tag added');
+    }
+  });
+
+  btnDeleteProject.addEventListener('click', async () => {
+    if (!currentProject) return;
+    if (!confirm(`Delete project "${currentProject.name}"?`)) return;
+    await deleteProject(currentProject.id);
+    currentProject = null;
+    await loadProjects();
+    showToast('Project deleted');
   });
 
   // Item click to open tab

@@ -2,8 +2,9 @@
 // Handles tab tracking, activity capture, project inference, and messaging
 
 import { getSettings, addActivity, setActiveProjectId, getActiveProjectId, getProjects, getProject, isOnboardingComplete } from '../lib/storage.js';
-import { extractDomain, categorizeDomain } from '../lib/utils.js';
+import { extractDomain, categorizeDomain, buildContextString } from '../lib/utils.js';
 import { inferProject, reclusterProjects } from '../lib/project-inference.js';
+import { summarizeAllProjects } from '../lib/summarizer.js';
 import { ALARM_NAMES } from '../lib/constants.js';
 
 // --- State ---
@@ -27,6 +28,9 @@ chrome.runtime.onInstalled.addListener(async (details) => {
 chrome.alarms.onAlarm.addListener(async (alarm) => {
   if (alarm.name === ALARM_NAMES.CLUSTERING) {
     await reclusterProjects();
+    // Auto-summarize after re-clustering
+    const projects = await getProjects();
+    await summarizeAllProjects(projects);
   }
   if (alarm.name === ALARM_NAMES.CLEANUP) {
     // Future: clean up old activity items
@@ -140,7 +144,6 @@ async function handleMessage(message) {
     }
 
     case 'GET_CONTEXT_FOR_AI': {
-      const { buildContextString } = await import('../lib/utils.js');
       const activeId = await getActiveProjectId();
       if (!activeId) return { context: '' };
       const project = await getProject(activeId);

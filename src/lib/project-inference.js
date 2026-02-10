@@ -2,7 +2,7 @@
 // Groups tab activity into projects using keyword clustering and domain similarity
 
 import { extractDomain, categorizeDomain, extractKeywords, keywordSimilarity, generateProjectName } from './utils.js';
-import { getProjects, saveProject, createProject, addItemToProject, getSettings } from './storage.js';
+import { getProjects, saveProject, createProject, addItemToProject, deleteProject, getSettings } from './storage.js';
 
 const SIMILARITY_THRESHOLD = 0.15;
 const DOMAIN_BOOST = 0.2;
@@ -133,7 +133,8 @@ export async function reclusterProjects() {
         pA.tags = [...new Set([...pA.tags, ...pB.tags])];
         await saveProject(pA);
 
-        // Remove merged project
+        // Remove merged project from storage and local array
+        await deleteProject(pB.id);
         projects.splice(j, 1);
         j--;
       }

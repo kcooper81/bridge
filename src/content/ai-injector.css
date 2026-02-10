@@ -1,60 +1,93 @@
-/* ContextIQ AI Injector Styles */
+/* ContextIQ AI Injector — Sleek Dark Mode */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 #contextiq-inject-btn {
   position: fixed;
   bottom: 24px;
   right: 24px;
   z-index: 99999;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
+/* ─── FAB Button ─── */
 .contextiq-fab {
   display: flex;
   align-items: center;
-  gap: 6px;
-  background: #8b5cf6;
-  color: white;
-  border: none;
-  border-radius: 24px;
-  padding: 10px 16px;
+  gap: 8px;
+  background: #111111;
+  color: #f0f0f0;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  padding: 10px 18px;
   cursor: pointer;
-  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.4);
-  transition: all 0.2s;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   font-size: 13px;
   font-weight: 600;
 }
 
+.contextiq-fab svg {
+  color: #8b5cf6;
+  filter: drop-shadow(0 0 6px rgba(139, 92, 246, 0.3));
+}
+
 .contextiq-fab:hover {
-  background: #7c3aed;
-  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
-  transform: translateY(-1px);
+  background: #161616;
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+  transform: translateY(-2px) scale(1.02);
+}
+
+.contextiq-fab:active {
+  transform: scale(0.97);
 }
 
 .contextiq-fab-auto {
-  animation: contextiq-pulse 2s ease-in-out infinite;
+  animation: contextiq-pulse 3s ease-in-out infinite;
 }
 
 @keyframes contextiq-pulse {
-  0%, 100% { box-shadow: 0 4px 16px rgba(139, 92, 246, 0.4); }
-  50% { box-shadow: 0 4px 24px rgba(139, 92, 246, 0.7); }
+  0%, 100% {
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+  50% {
+    box-shadow: 0 4px 32px rgba(139, 92, 246, 0.2);
+    border-color: rgba(139, 92, 246, 0.2);
+  }
 }
 
 .contextiq-fab-label {
   font-size: 12px;
   letter-spacing: -0.2px;
+  font-weight: 600;
 }
 
-/* Menu */
+/* ─── Menu Panel ─── */
 .contextiq-menu {
   position: absolute;
-  bottom: 52px;
+  bottom: 56px;
   right: 0;
-  width: 320px;
-  background: #1a1d27;
-  border: 1px solid #2d3140;
-  border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  width: 340px;
+  background: #0b0b0b;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6);
   overflow: hidden;
+  animation: contextiq-menu-in 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes contextiq-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .contextiq-menu.hidden {
@@ -62,50 +95,60 @@
 }
 
 .contextiq-menu-header {
-  padding: 12px 16px;
-  border-bottom: 1px solid #2d3140;
-  background: #242836;
+  padding: 14px 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: #111111;
 }
 
 .contextiq-menu-title {
   font-size: 13px;
   font-weight: 600;
-  color: #e8eaed;
+  color: rgba(255, 255, 255, 0.55);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .contextiq-menu-project {
-  padding: 10px 16px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #8b5cf6;
+  padding: 12px 18px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #f0f0f0;
+  letter-spacing: -0.3px;
 }
 
 .contextiq-menu-actions {
   display: flex;
   gap: 8px;
-  padding: 0 16px 12px;
+  padding: 0 18px 14px;
 }
 
 .contextiq-btn {
   flex: 1;
-  padding: 8px 12px;
-  border: 1px solid #2d3140;
-  border-radius: 8px;
-  background: #242836;
-  color: #e8eaed;
+  padding: 9px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  background: #161616;
+  color: rgba(255, 255, 255, 0.55);
   font-size: 12px;
   font-weight: 500;
+  font-family: inherit;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .contextiq-btn:hover:not(:disabled) {
-  background: #2a2f3e;
-  border-color: #8b5cf6;
+  background: #1c1c1c;
+  color: #f0f0f0;
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
+}
+
+.contextiq-btn:active:not(:disabled) {
+  transform: scale(0.97);
 }
 
 .contextiq-btn:disabled {
-  opacity: 0.4;
+  opacity: 0.3;
   cursor: not-allowed;
 }
 
@@ -113,40 +156,60 @@
   background: #8b5cf6;
   border-color: #8b5cf6;
   color: white;
+  font-weight: 600;
 }
 
 .contextiq-btn-inject:hover:not(:disabled) {
-  background: #7c3aed;
+  background: #a78bfa;
+  border-color: #a78bfa;
+  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.25);
 }
 
 .contextiq-menu-preview {
-  padding: 12px 16px;
-  font-size: 11px;
-  color: #9aa0a6;
-  line-height: 1.5;
+  padding: 14px 18px;
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.35);
+  line-height: 1.6;
   max-height: 160px;
   overflow-y: auto;
-  border-top: 1px solid #2d3140;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
   white-space: pre-wrap;
   word-break: break-word;
 }
 
-/* Feedback toast */
+.contextiq-menu-preview::-webkit-scrollbar {
+  width: 3px;
+}
+
+.contextiq-menu-preview::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+}
+
+/* ─── Feedback Toast ─── */
 .contextiq-feedback {
   position: absolute;
-  bottom: 52px;
+  bottom: 56px;
   right: 0;
-  background: #34d399;
-  color: #0f1117;
-  padding: 8px 16px;
-  border-radius: 8px;
+  background: #111111;
+  color: #34d399;
+  padding: 10px 18px;
+  border-radius: 999px;
   font-size: 12px;
   font-weight: 600;
   white-space: nowrap;
-  animation: contextiq-fade-in 0.2s ease;
+  border: 1px solid rgba(52, 211, 153, 0.15);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  animation: contextiq-fade-in 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @keyframes contextiq-fade-in {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }

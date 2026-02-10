@@ -15,6 +15,7 @@ const btnToggleTracking = document.getElementById('btn-toggle-tracking');
 const projectPanel = document.getElementById('project-panel');
 const emptyState = document.getElementById('empty-state');
 const projectNameEl = document.getElementById('project-name');
+const projectNameInput = document.getElementById('project-name-input');
 const btnCopyContext = document.getElementById('btn-copy-context');
 const btnResume = document.getElementById('btn-resume');
 const btnAddTag = document.getElementById('btn-add-tag');
@@ -225,6 +226,39 @@ function bindEvents() {
     const item = e.target.closest('.item');
     if (item && item.dataset.url) {
       chrome.tabs.create({ url: item.dataset.url });
+    }
+  });
+
+  // Project name inline editing
+  projectNameEl.addEventListener('click', () => {
+    if (!currentProject) return;
+    projectNameEl.classList.add('hidden');
+    projectNameInput.classList.remove('hidden');
+    projectNameInput.value = currentProject.name;
+    projectNameInput.focus();
+    projectNameInput.select();
+  });
+
+  async function commitNameEdit() {
+    const newName = projectNameInput.value.trim();
+    projectNameInput.classList.add('hidden');
+    projectNameEl.classList.remove('hidden');
+    if (!currentProject || !newName || newName === currentProject.name) return;
+    currentProject.name = newName;
+    await saveProject(currentProject);
+    projectNameEl.textContent = newName;
+    // Update the selector option too
+    const opt = projectSelect.querySelector(`option[value="${currentProject.id}"]`);
+    if (opt) opt.textContent = truncate(newName, 40);
+    showToast('Project renamed');
+  }
+
+  projectNameInput.addEventListener('blur', commitNameEdit);
+  projectNameInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); projectNameInput.blur(); }
+    if (e.key === 'Escape') {
+      projectNameInput.value = currentProject?.name || '';
+      projectNameInput.blur();
     }
   });
 

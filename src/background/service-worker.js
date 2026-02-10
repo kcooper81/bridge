@@ -39,6 +39,23 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
 
 // --- Tab Tracking ---
 
+/**
+ * Extract email subject from Gmail tab titles.
+ * Gmail titles follow the pattern: "Subject - user@gmail.com - Gmail"
+ */
+function extractEmailSubject(title, domain) {
+  if (domain !== 'mail.google.com') return null;
+  // Gmail title pattern: "Subject - email@example.com - Gmail" or "Inbox (N) - email - Gmail"
+  const match = title.match(/^(.+?)\s+-\s+.+@.+\s+-\s+Gmail$/);
+  if (match) {
+    const subject = match[1].trim();
+    // Skip generic inbox titles like "Inbox" or "Inbox (3)"
+    if (/^Inbox(\s*\(\d+\))?$/.test(subject)) return null;
+    return subject;
+  }
+  return null;
+}
+
 async function captureTabActivity(tab) {
   if (!tab || !tab.url || !tab.title) return;
 
@@ -55,13 +72,21 @@ async function captureTabActivity(tab) {
   // Check excluded domains
   if (settings.excludedDomains.includes(domain)) return;
 
+  // Respect captureUrls and captureTitles settings
   const activityItem = {
-    url: tab.url,
-    title: tab.title,
+    url: settings.captureUrls ? tab.url : `https://${domain}/`,
+    title: settings.captureTitles ? tab.title : domain,
     domain,
     category: categorizeDomain(domain),
     favIconUrl: tab.favIconUrl || '',
   };
+
+  // Extract email subject from Gmail tabs
+  const emailSubject = extractEmailSubject(tab.title, domain);
+  if (emailSubject) {
+    activityItem.emailSubject = emailSubject;
+    activityItem.title = emailSubject; // Use subject as the display title
+  }
 
   // Avoid logging duplicate consecutive activity
   if (tab.url === lastActiveUrl) return;

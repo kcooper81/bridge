@@ -164,13 +164,45 @@
     setTimeout(() => feedback.remove(), 2000);
   }
 
-  // Auto-injection mode check
+  // Auto-injection mode: inject context when input field gains focus
   async function checkAutoInject() {
     try {
       const response = await chrome.runtime.sendMessage({ type: 'GET_SETTINGS' });
-      if (response.settings?.aiInjectionMode === 'auto') {
-        fab.classList.add('contextiq-fab-auto');
-      }
+      if (response.settings?.aiInjectionMode !== 'auto') return;
+
+      fab.classList.add('contextiq-fab-auto');
+
+      // Wait for input field to appear, then attach focus listener
+      const waitForInput = (retries = 20) => {
+        const input = activeTool.getInput();
+        if (input) {
+          let injected = false;
+          const autoInjectOnFocus = async () => {
+            if (injected) return;
+            injected = true;
+
+            await loadContext();
+            if (!contextText) return;
+
+            if (input.tagName === 'TEXTAREA' || input.tagName === 'INPUT') {
+              if (input.value.trim()) return; // Don't overwrite existing content
+              input.value = contextText + '\n\n---\n\n';
+              input.dispatchEvent(new Event('input', { bubbles: true }));
+            } else {
+              if (input.textContent.trim()) return;
+              input.innerHTML = contextText.replace(/\n/g, '<br>') + '<br><br>---<br><br>';
+              input.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+            showFeedback('Context auto-injected');
+          };
+
+          input.addEventListener('focus', autoInjectOnFocus, { once: true });
+        } else if (retries > 0) {
+          setTimeout(() => waitForInput(retries - 1), 500);
+        }
+      };
+
+      waitForInput();
     } catch {
       // Extension context may be invalidated
     }

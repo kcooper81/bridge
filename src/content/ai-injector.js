@@ -281,8 +281,58 @@
     }
   }
 
-  // Check for bridge context after page settles
-  setTimeout(checkBridgeNotification, 2000);
+  // Check for pending bridged artifact first (higher priority)
+  async function checkPendingBridge() {
+    try {
+      const resp = await chrome.runtime.sendMessage({ type: 'GET_PENDING_BRIDGE' });
+      if (resp && resp.bridge) {
+        // We have a bridged artifact — show notification and auto-inject
+        const bridge = resp.bridge;
+        bridgeBarTool.textContent = bridge.sourceToolName || 'another tool';
+        bridgeBarTopic.textContent = bridge.topic ? `"${bridge.topic}"` : 'Bridged artifact ready';
+        bridgeBar.classList.remove('hidden');
+
+        // Store the bridge text so the insert button uses it
+        bridgePrompt = bridge.text;
+
+        // Update badge
+        badge.textContent = '!';
+        badge.classList.remove('hidden');
+
+        // Also wait for input to be available and auto-inject
+        const waitAndInject = (retries = 30) => {
+          const input = activeTool.getInput();
+          if (input) {
+            // Only auto-inject if input is empty
+            const isEmpty = input.tagName === 'TEXTAREA' || input.tagName === 'INPUT'
+              ? !input.value.trim()
+              : !input.textContent.trim();
+            if (isEmpty) {
+              injectIntoInput(bridge.text);
+              showFeedback(`Bridged from ${bridge.sourceToolName} — context injected`);
+              bridgeBar.classList.add('hidden');
+              bridgeBarDismissed = true;
+            }
+          } else if (retries > 0) {
+            setTimeout(() => waitAndInject(retries - 1), 500);
+          }
+        };
+        setTimeout(() => waitAndInject(), 1000);
+        return true;
+      }
+    } catch {
+      // Extension context may be invalidated
+    }
+    return false;
+  }
+
+  // Check for pending bridge first, then fall back to regular bridge notification
+  setTimeout(async () => {
+    const hadPending = await checkPendingBridge();
+    if (!hadPending) {
+      checkBridgeNotification();
+    }
+  }, 1500);
 
   // Dismiss bridge bar
   bridgeBarDismiss.addEventListener('click', (e) => {

@@ -24,6 +24,7 @@ let lastActivityTime = Date.now();
 let lastActivityId = null; // Track current activity for time updates
 let tabStartTime = Date.now(); // When user started viewing current tab
 let currentTabUrl = ''; // URL being timed
+let pendingBridge = null; // Artifact waiting to be injected into a target AI tool
 
 // --- Initialization ---
 
@@ -529,6 +530,53 @@ async function handleMessage(message, sender) {
     case 'TOGGLE_FAVORITE': {
       const favorites = await toggleFavorite(message.item);
       return { success: true, favorites };
+    }
+
+    // --- Artifact Gallery ---
+
+    case 'GET_ARTIFACT_GALLERY': {
+      // Returns all artifacts across all projects, flattened and sorted by time
+      const allConvos = await getAIConversations();
+      const artifacts = [];
+
+      for (const [projectId, convos] of Object.entries(allConvos)) {
+        for (const conv of convos) {
+          artifacts.push({
+            projectId,
+            toolName: conv.toolName,
+            url: conv.url,
+            title: conv.title,
+            topic: extractConversationTopic(conv.turns),
+            turns: conv.turns || [],
+            codeBlocks: conv.codeBlocks || [],
+            images: conv.images || [],
+            savedAt: conv.savedAt,
+          });
+        }
+      }
+
+      // Sort newest first
+      artifacts.sort((a, b) => b.savedAt - a.savedAt);
+
+      return { artifacts: artifacts.slice(0, 50) };
+    }
+
+    case 'SET_PENDING_BRIDGE': {
+      pendingBridge = {
+        ...message.artifact,
+        timestamp: Date.now(),
+      };
+      return { success: true };
+    }
+
+    case 'GET_PENDING_BRIDGE': {
+      if (pendingBridge && Date.now() - pendingBridge.timestamp < 60000) {
+        const bridge = pendingBridge;
+        pendingBridge = null; // Consume it
+        return { bridge };
+      }
+      pendingBridge = null;
+      return { bridge: null };
     }
 
     // --- Dashboard Data ---

@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "ContextIQ",
-  "version": "0.4.1",
-  "description": "The AI Bridge. Captures browsing context, organizes smart projects, and bridges your AI conversations across ChatGPT, Claude, and Gemini.",
+  "version": "0.5.0",
+  "description": "The AI Bridge. Captures code, images, and conversations from ChatGPT, Claude, and Gemini — then lets you bridge them to any AI tool instantly.",
   "permissions": [
     "tabs",
     "activeTab",

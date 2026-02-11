@@ -484,6 +484,65 @@
       return true;
     }
 
+    if (message.type === 'INSERT_PROMPT') {
+      // Insert prompt text into the active AI tool's input
+      const text = message.text || '';
+      let inserted = false;
+
+      if (activeTool && activeTool.getInput) {
+        // Try to find and fill the input area
+        const selectors = [
+          'textarea[data-id="root"]', // ChatGPT
+          'div.ProseMirror[contenteditable="true"]', // Claude
+          'div[contenteditable="true"]', // Gemini, others
+          'textarea', // Generic
+          'div[role="textbox"]', // Some tools
+        ];
+
+        for (const sel of selectors) {
+          const el = document.querySelector(sel);
+          if (el) {
+            if (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT') {
+              // Set value and dispatch input event for React/Vue
+              const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+                window.HTMLTextAreaElement.prototype, 'value'
+              )?.set || Object.getOwnPropertyDescriptor(
+                window.HTMLInputElement.prototype, 'value'
+              )?.set;
+              if (nativeInputValueSetter) {
+                nativeInputValueSetter.call(el, text);
+              } else {
+                el.value = text;
+              }
+              el.dispatchEvent(new Event('input', { bubbles: true }));
+              el.dispatchEvent(new Event('change', { bubbles: true }));
+              el.focus();
+              inserted = true;
+            } else {
+              // ContentEditable div
+              el.focus();
+              el.textContent = text;
+              el.dispatchEvent(new Event('input', { bubbles: true }));
+              inserted = true;
+            }
+            break;
+          }
+        }
+      }
+
+      sendResponse({ success: inserted });
+      return true;
+    }
+
+    if (message.type === 'COPY_TO_CLIPBOARD') {
+      navigator.clipboard.writeText(message.text || '').then(() => {
+        sendResponse({ success: true });
+      }).catch(() => {
+        sendResponse({ success: false });
+      });
+      return true;
+    }
+
     return false;
   });
 

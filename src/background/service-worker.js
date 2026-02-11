@@ -17,6 +17,13 @@ import { extractDomain, categorizeDomain, buildContextString, computeEngagementS
 import { inferProject, reclusterProjects } from '../lib/project-inference.js';
 import { summarizeAllProjects } from '../lib/summarizer.js';
 import { ALARM_NAMES } from '../lib/constants.js';
+import {
+  getPrompts, getPrompt, createPrompt as newPrompt, savePrompt,
+  deletePrompt, duplicatePrompt, recordPromptUsage, ratePrompt,
+  togglePromptFavorite, searchPrompts, getFolders, saveFolder,
+  deleteFolder, getDepartments, saveDepartment, deleteDepartment,
+  getAnalyticsSummary, installStarterPacks, isStarterInstalled,
+} from '../lib/prompt-storage.js';
 
 // --- State ---
 let lastActiveTabId = null;
@@ -64,6 +71,11 @@ chrome.runtime.onInstalled.addListener(async (details) => {
 
   // Re-inject content scripts into existing AI tool tabs
   await injectIntoExistingTabs();
+
+  // Install starter prompt packs on first install
+  if (details.reason === 'install') {
+    installStarterPacks().catch(() => {});
+  }
 });
 
 // Also set up context menus when the service worker starts
@@ -1001,6 +1013,145 @@ async function handleMessage(message, sender) {
     case 'UPDATE_DAILY_STATS': {
       const stats = await updateDailyStats(message.stats);
       return { success: true, stats };
+    }
+
+    // ═══════════════════════════════════════
+    //  PROMPT MANAGER
+    // ═══════════════════════════════════════
+
+    case 'PROMPT_GET_ALL': {
+      const prompts = await searchPrompts(message.query || '', message.filters || {});
+      return { prompts };
+    }
+
+    case 'PROMPT_GET': {
+      const prompt = await getPrompt(message.promptId);
+      return { prompt };
+    }
+
+    case 'PROMPT_CREATE': {
+      const prompt = newPrompt(message.fields || {});
+      await savePrompt(prompt);
+      return { success: true, prompt };
+    }
+
+    case 'PROMPT_UPDATE': {
+      const existing = await getPrompt(message.promptId);
+      if (!existing) return { error: 'Prompt not found' };
+      const updated = { ...existing, ...message.fields };
+      await savePrompt(updated);
+      return { success: true, prompt: updated };
+    }
+
+    case 'PROMPT_DELETE': {
+      await deletePrompt(message.promptId);
+      return { success: true };
+    }
+
+    case 'PROMPT_DUPLICATE': {
+      const dup = await duplicatePrompt(message.promptId);
+      return { success: !!dup, prompt: dup };
+    }
+
+    case 'PROMPT_USE': {
+      const prompt = await recordPromptUsage(message.promptId);
+      return { success: !!prompt, prompt };
+    }
+
+    case 'PROMPT_RATE': {
+      const prompt = await ratePrompt(message.promptId, message.stars);
+      return { success: !!prompt, prompt };
+    }
+
+    case 'PROMPT_TOGGLE_FAVORITE': {
+      const prompt = await togglePromptFavorite(message.promptId);
+      return { success: !!prompt, prompt };
+    }
+
+    case 'PROMPT_GET_FOLDERS': {
+      const folders = await getFolders();
+      return { folders };
+    }
+
+    case 'PROMPT_SAVE_FOLDER': {
+      const folder = await saveFolder(message.folder);
+      return { success: true, folder };
+    }
+
+    case 'PROMPT_DELETE_FOLDER': {
+      await deleteFolder(message.folderId);
+      return { success: true };
+    }
+
+    case 'PROMPT_GET_DEPARTMENTS': {
+      const departments = await getDepartments();
+      return { departments };
+    }
+
+    case 'PROMPT_SAVE_DEPARTMENT': {
+      const dept = await saveDepartment(message.department);
+      return { success: true, department: dept };
+    }
+
+    case 'PROMPT_DELETE_DEPARTMENT': {
+      await deleteDepartment(message.departmentId);
+      return { success: true };
+    }
+
+    case 'PROMPT_GET_ANALYTICS': {
+      const summary = await getAnalyticsSummary();
+      return { summary };
+    }
+
+    case 'PROMPT_INSTALL_STARTERS': {
+      await installStarterPacks();
+      return { success: true };
+    }
+
+    case 'PROMPT_IS_STARTER_INSTALLED': {
+      const installed = await isStarterInstalled();
+      return { installed };
+    }
+
+    case 'PROMPT_INSERT': {
+      // Insert prompt into active AI tool tab
+      const prompt = await getPrompt(message.promptId);
+      if (!prompt) return { error: 'Prompt not found' };
+
+      // Record usage
+      await recordPromptUsage(message.promptId);
+
+      // Get department constraints if applicable
+      let fullText = prompt.content;
+      if (prompt.departmentId) {
+        const depts = await getDepartments();
+        const dept = depts.find(d => d.id === prompt.departmentId);
+        if (dept) {
+          const rules = [];
+          if (dept.toneRules.length) rules.push(`Tone: ${dept.toneRules.join(', ')}`);
+          if (dept.doList.length) rules.push(`Do: ${dept.doList.join('; ')}`);
+          if (dept.dontList.length) rules.push(`Don't: ${dept.dontList.join('; ')}`);
+          if (rules.length) {
+            fullText += `\n\n[${dept.name} Guidelines: ${rules.join(' | ')}]`;
+          }
+        }
+      }
+
+      // Try to insert into active tab
+      try {
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        if (tab) {
+          await chrome.tabs.sendMessage(tab.id, {
+            type: 'INSERT_PROMPT',
+            text: fullText,
+            promptTitle: prompt.title,
+          });
+        }
+      } catch {
+        // Content script may not be loaded
+      }
+
+      return { success: true, text: fullText };
     }
 
     default:

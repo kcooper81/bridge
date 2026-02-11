@@ -13,6 +13,12 @@ export const STORAGE_KEYS = {
   PINNED_PROJECTS: 'contextiq_pinned_projects',
   FAVORITES: 'contextiq_favorites',
   DAILY_STATS: 'contextiq_daily_stats',
+  // Prompt Manager
+  PROMPTS: 'contextiq_prompts',
+  PROMPT_FOLDERS: 'contextiq_prompt_folders',
+  PROMPT_DEPARTMENTS: 'contextiq_prompt_departments',
+  PROMPT_ANALYTICS: 'contextiq_prompt_analytics',
+  PROMPT_STARTER_INSTALLED: 'contextiq_prompt_starter_installed',
 };
 
 export const AI_TOOL_PATTERNS = [

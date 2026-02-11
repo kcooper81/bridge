@@ -29,56 +29,150 @@
       </div>
     </header>
 
-    <!-- Active Tab Status -->
-    <div class="active-tab-bar" id="active-tab-bar">
-      <div class="active-tab-indicator" id="active-tab-indicator">
-        <span class="active-tab-dot"></span>
-        <span class="active-tab-text" id="active-tab-text">No AI tool detected</span>
-      </div>
-      <span class="active-tab-shortcut">Alt+B to bridge</span>
-    </div>
+    <!-- Main Tab Navigation -->
+    <nav class="main-tabs">
+      <button class="main-tab active" data-tab="prompts">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Prompts
+      </button>
+      <button class="main-tab" data-tab="bridge">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+        Bridge
+      </button>
+    </nav>
 
-    <!-- Search Bar -->
-    <div class="search-bar">
-      <svg class="search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input type="text" id="search-input" class="search-input" placeholder="Search artifacts, code, conversations...">
-    </div>
+    <!-- ═══════════════════════════════════════ -->
+    <!--  PROMPTS TAB                            -->
+    <!-- ═══════════════════════════════════════ -->
+    <div class="tab-content active" id="tab-prompts">
 
-    <!-- Tool Filter Tabs -->
-    <div class="tool-tabs" id="tool-tabs">
-      <button class="tool-tab active" data-tool="all">All</button>
-    </div>
-
-    <!-- Artifact Gallery -->
-    <div class="gallery" id="gallery">
-      <!-- Selection Toolbar -->
-      <div class="selection-toolbar hidden" id="selection-toolbar">
-        <span class="selection-count" id="selection-count">0 selected</span>
-        <button class="selection-action" id="btn-bridge-selected">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
-          Bridge selected
-        </button>
-        <button class="selection-action selection-action-danger" id="btn-delete-selected">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-          Delete
-        </button>
-        <button class="selection-action-cancel" id="btn-cancel-selection">Cancel</button>
-      </div>
-
-      <!-- Empty state -->
-      <div class="gallery-empty" id="gallery-empty">
-        <div class="gallery-empty-icon">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/>
-            <path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
-          </svg>
+      <!-- Prompt Search & Actions Bar -->
+      <div class="prompt-toolbar">
+        <div class="prompt-search-wrap">
+          <svg class="search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="prompt-search" class="prompt-search-input" placeholder="Search prompts...">
         </div>
-        <div class="gallery-empty-title">No artifacts yet</div>
-        <div class="gallery-empty-desc">Visit any AI tool — ContextIQ captures code, images, and conversation highlights so you can bridge them anywhere. Right-click to bridge too!</div>
+        <button class="prompt-add-btn" id="btn-new-prompt" title="Create prompt">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
       </div>
 
-      <!-- Artifacts render here -->
-      <div class="artifact-list" id="artifact-list"></div>
+      <!-- Folder / Category Tabs -->
+      <div class="prompt-category-bar" id="prompt-category-bar">
+        <button class="prompt-cat-tab active" data-folder="all">All</button>
+        <button class="prompt-cat-tab" data-folder="favorites">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          Favorites
+        </button>
+      </div>
+
+      <!-- Sort Bar -->
+      <div class="prompt-sort-bar">
+        <span class="prompt-count" id="prompt-count">0 prompts</span>
+        <div class="prompt-sort-options">
+          <button class="prompt-sort-btn active" data-sort="recent">Recent</button>
+          <button class="prompt-sort-btn" data-sort="popular">Popular</button>
+          <button class="prompt-sort-btn" data-sort="rating">Top Rated</button>
+        </div>
+      </div>
+
+      <!-- Prompt List -->
+      <div class="prompt-list" id="prompt-list">
+        <!-- Empty State -->
+        <div class="prompt-empty" id="prompt-empty">
+          <div class="prompt-empty-icon">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          </div>
+          <div class="prompt-empty-title">No prompts yet</div>
+          <div class="prompt-empty-desc">Get started with our curated starter packs or create your own prompts.</div>
+          <button class="prompt-empty-btn" id="btn-install-starters">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Install Starter Packs
+          </button>
+        </div>
+
+        <!-- Prompt cards render here -->
+        <div id="prompt-cards"></div>
+      </div>
+
+      <!-- Prompt Detail / Editor Panel (slides over) -->
+      <div class="prompt-detail hidden" id="prompt-detail">
+        <div class="prompt-detail-header">
+          <button class="prompt-back-btn" id="btn-prompt-back">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+          </button>
+          <span class="prompt-detail-title" id="prompt-detail-title">Edit Prompt</span>
+          <div class="prompt-detail-actions">
+            <button class="prompt-detail-action" id="btn-prompt-duplicate" title="Duplicate">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            </button>
+            <button class="prompt-detail-action prompt-detail-action-danger" id="btn-prompt-delete" title="Delete">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="prompt-detail-body" id="prompt-detail-body">
+          <!-- Form renders here dynamically -->
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!--  BRIDGE TAB                             -->
+    <!-- ═══════════════════════════════════════ -->
+    <div class="tab-content" id="tab-bridge">
+
+      <!-- Active Tab Status -->
+      <div class="active-tab-bar" id="active-tab-bar">
+        <div class="active-tab-indicator" id="active-tab-indicator">
+          <span class="active-tab-dot"></span>
+          <span class="active-tab-text" id="active-tab-text">No AI tool detected</span>
+        </div>
+        <span class="active-tab-shortcut">Alt+B to bridge</span>
+      </div>
+
+      <!-- Search Bar -->
+      <div class="search-bar">
+        <svg class="search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="search-input" class="search-input" placeholder="Search artifacts, code, conversations...">
+      </div>
+
+      <!-- Tool Filter Tabs -->
+      <div class="tool-tabs" id="tool-tabs">
+        <button class="tool-tab active" data-tool="all">All</button>
+      </div>
+
+      <!-- Artifact Gallery -->
+      <div class="gallery" id="gallery">
+        <!-- Selection Toolbar -->
+        <div class="selection-toolbar hidden" id="selection-toolbar">
+          <span class="selection-count" id="selection-count">0 selected</span>
+          <button class="selection-action" id="btn-bridge-selected">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+            Bridge selected
+          </button>
+          <button class="selection-action selection-action-danger" id="btn-delete-selected">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            Delete
+          </button>
+          <button class="selection-action-cancel" id="btn-cancel-selection">Cancel</button>
+        </div>
+
+        <!-- Empty state -->
+        <div class="gallery-empty" id="gallery-empty">
+          <div class="gallery-empty-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+              <path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+            </svg>
+          </div>
+          <div class="gallery-empty-title">No artifacts yet</div>
+          <div class="gallery-empty-desc">Visit any AI tool — ContextIQ captures code, images, and conversations so you can bridge them anywhere.</div>
+        </div>
+
+        <!-- Artifacts render here -->
+        <div class="artifact-list" id="artifact-list"></div>
+      </div>
     </div>
 
     <!-- Bridge Action Sheet (slides up when bridging) -->

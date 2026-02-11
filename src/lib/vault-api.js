@@ -1,14 +1,108 @@
-// ContextIQ Vault API — Storage abstraction for extension + web
-// When running inside the Chrome extension, delegates to chrome.runtime.sendMessage.
-// When running as a standalone web app, imports storage modules directly and uses
-// localStorage + IndexedDB as a fallback.
+// ContextIQ Vault API — Storage abstraction for extension + supabase + web
+// Priority: (1) Chrome extension → (2) Supabase remote → (3) localStorage fallback
+//
+// Mode detection:
+//   IS_EXTENSION — running inside Chrome extension (service worker messaging)
+//   IS_REMOTE    — Supabase configured + user authenticated (real database)
+//   fallback     — localStorage (offline / demo mode)
 
 const IS_EXTENSION = typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id;
+
+// Dynamic import of supabase-client — only loaded in web mode
+let _sbModule = null;
+async function getSbModule() {
+  if (_sbModule) return _sbModule;
+  if (IS_EXTENSION) return null; // skip in extension
+  try {
+    _sbModule = await import('./supabase-client.js');
+    return _sbModule;
+  } catch { return null; }
+}
+
+// IS_REMOTE is dynamic — user may sign in after page load
+let _remoteClient = null;
+let _remoteUser = null;
+let _remoteOrgId = null;
+
+async function checkRemote() {
+  if (IS_EXTENSION) return false;
+  const mod = await getSbModule();
+  if (!mod || !mod.isConfigured()) return false;
+  try {
+    if (!_remoteClient) _remoteClient = await mod.getClient();
+    if (!_remoteUser) _remoteUser = await mod.getUser();
+    return !!_remoteUser;
+  } catch { return false; }
+}
+
+async function sb() {
+  const mod = await getSbModule();
+  if (!_remoteClient && mod) _remoteClient = await mod.getClient();
+  return _remoteClient;
+}
+
+async function getRemoteUser() {
+  const mod = await getSbModule();
+  return mod ? mod.getUser() : null;
+}
+
+// Cache the user's org_id after first lookup
+async function getOrgId() {
+  if (_remoteOrgId) return _remoteOrgId;
+  const client = await sb();
+  const user = await getRemoteUser();
+  if (!user) return null;
+  const { data } = await client.from('profiles').select('org_id').eq('id', user.id).single();
+  _remoteOrgId = data?.org_id;
+  return _remoteOrgId;
+}
+
+// Reset cached remote state (call on sign-out)
+export function resetRemoteState() {
+  _remoteClient = null;
+  _remoteUser = null;
+  _remoteOrgId = null;
+}
 
 // ── Extension mode: message the service worker ──
 
 function extMsg(type, data = {}) {
   return chrome.runtime.sendMessage({ type, ...data });
+}
+
+// ── Supabase helpers: map DB rows to our app shape ──
+
+function dbPromptToApp(row) {
+  return {
+    id: row.id, title: row.title, content: row.content, description: row.description || '',
+    intendedOutcome: row.intended_outcome || '', tone: row.tone || 'professional',
+    modelRecommendation: row.model_recommendation || '', exampleInput: row.example_input || '',
+    exampleOutput: row.example_output || '', tags: row.tags || [], folderId: row.folder_id,
+    departmentId: row.department_id, owner: row.owner_id, status: row.status || 'approved',
+    version: row.version || 1, versionHistory: [], rating: { total: row.rating_total || 0, count: row.rating_count || 0 },
+    usageCount: row.usage_count || 0, lastUsedAt: row.last_used_at, isFavorite: row.is_favorite || false,
+    createdAt: new Date(row.created_at).getTime(), updatedAt: new Date(row.updated_at).getTime(),
+  };
+}
+
+function appPromptToDb(fields, orgId, userId) {
+  const row = {};
+  if (orgId) row.org_id = orgId;
+  if (userId) row.owner_id = userId;
+  if (fields.title !== undefined) row.title = fields.title;
+  if (fields.content !== undefined) row.content = fields.content;
+  if (fields.description !== undefined) row.description = fields.description;
+  if (fields.intendedOutcome !== undefined) row.intended_outcome = fields.intendedOutcome;
+  if (fields.tone !== undefined) row.tone = fields.tone;
+  if (fields.modelRecommendation !== undefined) row.model_recommendation = fields.modelRecommendation;
+  if (fields.exampleInput !== undefined) row.example_input = fields.exampleInput;
+  if (fields.exampleOutput !== undefined) row.example_output = fields.exampleOutput;
+  if (fields.tags !== undefined) row.tags = fields.tags;
+  if (fields.folderId !== undefined) row.folder_id = fields.folderId;
+  if (fields.departmentId !== undefined) row.department_id = fields.departmentId;
+  if (fields.status !== undefined) row.status = fields.status;
+  if (fields.isFavorite !== undefined) row.is_favorite = fields.isFavorite;
+  return row;
 }
 
 // ── Web mode: in-memory + localStorage adapter ──
@@ -104,11 +198,38 @@ async function webDeleteItem(key, id) {
 
 export const VaultAPI = {
 
+  // ── Mode check ──
+  async isRemote() { return checkRemote(); },
+
   // ── Prompts ──
 
   async getAllData() {
     if (IS_EXTENSION) return extMsg('VAULT_GET_ALL');
-    const s = getWebStore();
+    if (await checkRemote()) {
+      const orgId = await getOrgId();
+      const client = await sb();
+      const [prompts, folders, departments, org, teams, members, collections, standards] = await Promise.all([
+        client.from('prompts').select('*').eq('org_id', orgId).order('updated_at', { ascending: false }),
+        client.from('folders').select('*').eq('org_id', orgId),
+        client.from('departments').select('*').eq('org_id', orgId),
+        client.from('organizations').select('*').eq('id', orgId).single(),
+        client.from('teams').select('*').eq('org_id', orgId),
+        client.from('profiles').select('*').eq('org_id', orgId),
+        client.from('collections').select('*').eq('org_id', orgId),
+        client.from('standards').select('*').eq('org_id', orgId),
+      ]);
+      return {
+        prompts: (prompts.data || []).map(dbPromptToApp),
+        folders: folders.data || [],
+        departments: departments.data || [],
+        org: org.data || null,
+        teams: teams.data || [],
+        members: (members.data || []).map(m => ({ ...m, teamIds: [] })),
+        collections: collections.data || [],
+        standards: (standards.data || []).map(s => ({ ...s, rules: s.rules || {} })),
+        analytics: await this.getAnalytics(),
+      };
+    }
     return {
       prompts: await webGetList(SK.PROMPTS),
       folders: await webGetList(SK.PROMPT_FOLDERS),
@@ -124,11 +245,27 @@ export const VaultAPI = {
 
   async getPrompts(query, filters) {
     if (IS_EXTENSION) return (await extMsg('PROMPT_GET_ALL', { query, filters })).prompts;
+    if (await checkRemote()) {
+      const orgId = await getOrgId();
+      const client = await sb();
+      let q = client.from('prompts').select('*').eq('org_id', orgId).order('updated_at', { ascending: false });
+      const { data } = await q;
+      return (data || []).map(dbPromptToApp);
+    }
     return webGetList(SK.PROMPTS);
   },
 
   async createPrompt(fields) {
     if (IS_EXTENSION) return extMsg('PROMPT_CREATE', { fields });
+    if (await checkRemote()) {
+      const orgId = await getOrgId();
+      const user = await getRemoteUser();
+      const row = { ...appPromptToDb(fields, orgId, user.id), version: 1 };
+      const client = await sb();
+      const { data, error } = await client.from('prompts').insert(row).select().single();
+      if (error) return { error: error.message };
+      return { success: true, prompt: dbPromptToApp(data) };
+    }
     const prompt = {
       id: uuid(), title: '', content: '', description: '', intendedOutcome: '',
       tone: 'professional', modelRecommendation: '', exampleInput: '', exampleOutput: '',
@@ -145,6 +282,21 @@ export const VaultAPI = {
 
   async updatePrompt(promptId, fields) {
     if (IS_EXTENSION) return extMsg('PROMPT_UPDATE', { promptId, fields });
+    if (await checkRemote()) {
+      const client = await sb();
+      // Get current version for history
+      const { data: current } = await client.from('prompts').select('*').eq('id', promptId).single();
+      if (!current) return { error: 'Not found' };
+      const row = appPromptToDb(fields);
+      const contentChanged = (fields.content !== undefined && fields.content !== current.content) || (fields.title !== undefined && fields.title !== current.title);
+      if (contentChanged) {
+        row.version = (current.version || 1) + 1;
+        await client.from('prompt_versions').insert({ prompt_id: promptId, version: current.version, title: current.title, content: current.content });
+      }
+      const { data, error } = await client.from('prompts').update(row).eq('id', promptId).select().single();
+      if (error) return { error: error.message };
+      return { success: true, prompt: dbPromptToApp(data) };
+    }
     const list = await webGetList(SK.PROMPTS);
     const idx = list.findIndex(p => p.id === promptId);
     if (idx < 0) return { error: 'Not found' };
@@ -163,12 +315,27 @@ export const VaultAPI = {
 
   async deletePrompt(promptId) {
     if (IS_EXTENSION) return extMsg('PROMPT_DELETE', { promptId });
+    if (await checkRemote()) {
+      const client = await sb();
+      const { error } = await client.from('prompts').delete().eq('id', promptId);
+      if (error) return { error: error.message };
+      return { success: true };
+    }
     await webDeleteItem(SK.PROMPTS, promptId);
     return { success: true };
   },
 
   async duplicatePrompt(promptId) {
     if (IS_EXTENSION) return extMsg('PROMPT_DUPLICATE', { promptId });
+    if (await checkRemote()) {
+      const client = await sb();
+      const { data: orig } = await client.from('prompts').select('*').eq('id', promptId).single();
+      if (!orig) return { error: 'Not found' };
+      const { id: _id, created_at: _ca, updated_at: _ua, ...rest } = orig;
+      const { data, error } = await client.from('prompts').insert({ ...rest, title: `${orig.title} (copy)`, version: 1, rating_total: 0, rating_count: 0, usage_count: 0 }).select().single();
+      if (error) return { error: error.message };
+      return { success: true, prompt: dbPromptToApp(data) };
+    }
     const list = await webGetList(SK.PROMPTS);
     const orig = list.find(p => p.id === promptId);
     if (!orig) return { error: 'Not found' };
@@ -180,6 +347,17 @@ export const VaultAPI = {
 
   async recordUsage(promptId) {
     if (IS_EXTENSION) return extMsg('PROMPT_USE', { promptId });
+    if (await checkRemote()) {
+      const client = await sb();
+      const user = await getRemoteUser();
+      const orgId = await getOrgId();
+      await client.rpc('', {}).catch(() => {}); // no-op if no rpc
+      const { data } = await client.from('prompts').select('usage_count').eq('id', promptId).single();
+      if (!data) return { error: 'Not found' };
+      await client.from('prompts').update({ usage_count: (data.usage_count || 0) + 1, last_used_at: new Date().toISOString() }).eq('id', promptId);
+      await client.from('usage_events').insert({ org_id: orgId, user_id: user?.id, prompt_id: promptId, action: 'use' });
+      return { success: true };
+    }
     const list = await webGetList(SK.PROMPTS);
     const idx = list.findIndex(p => p.id === promptId);
     if (idx < 0) return { error: 'Not found' };
@@ -191,6 +369,14 @@ export const VaultAPI = {
 
   async ratePrompt(promptId, stars) {
     if (IS_EXTENSION) return extMsg('PROMPT_RATE', { promptId, stars });
+    if (await checkRemote()) {
+      const client = await sb();
+      const { data } = await client.from('prompts').select('rating_total, rating_count').eq('id', promptId).single();
+      if (!data) return { error: 'Not found' };
+      const s = Math.max(1, Math.min(5, Math.round(stars)));
+      await client.from('prompts').update({ rating_total: (data.rating_total || 0) + s, rating_count: (data.rating_count || 0) + 1 }).eq('id', promptId);
+      return { success: true };
+    }
     const list = await webGetList(SK.PROMPTS);
     const idx = list.findIndex(p => p.id === promptId);
     if (idx < 0) return { error: 'Not found' };
@@ -204,6 +390,13 @@ export const VaultAPI = {
 
   async toggleFavorite(promptId) {
     if (IS_EXTENSION) return extMsg('PROMPT_TOGGLE_FAVORITE', { promptId });
+    if (await checkRemote()) {
+      const client = await sb();
+      const { data } = await client.from('prompts').select('is_favorite').eq('id', promptId).single();
+      if (!data) return { error: 'Not found' };
+      await client.from('prompts').update({ is_favorite: !data.is_favorite }).eq('id', promptId);
+      return { success: true };
+    }
     const list = await webGetList(SK.PROMPTS);
     const idx = list.findIndex(p => p.id === promptId);
     if (idx < 0) return { error: 'Not found' };
@@ -216,32 +409,52 @@ export const VaultAPI = {
 
   async getFolders() {
     if (IS_EXTENSION) return (await extMsg('PROMPT_GET_FOLDERS')).folders;
+    if (await checkRemote()) { const client = await sb(); const orgId = await getOrgId(); const { data } = await client.from('folders').select('*').eq('org_id', orgId); return data || []; }
     return webGetList(SK.PROMPT_FOLDERS);
   },
 
   async saveFolder(folder) {
     if (IS_EXTENSION) return extMsg('PROMPT_SAVE_FOLDER', { folder });
+    if (await checkRemote()) {
+      const client = await sb(); const orgId = await getOrgId(); const user = await getRemoteUser();
+      const row = { org_id: orgId, name: folder.name || '', icon: folder.icon || 'folder', color: folder.color || '#8b5cf6', created_by: user?.id };
+      let res;
+      if (folder.id) { res = await client.from('folders').update(row).eq('id', folder.id).select().single(); }
+      else { res = await client.from('folders').insert(row).select().single(); }
+      return { success: !res.error, folder: res.data };
+    }
     return { success: true, folder: await webSaveItem(SK.PROMPT_FOLDERS, folder, { name: 'New Folder', icon: 'folder', color: '#8b5cf6' }) };
   },
 
   async deleteFolder(folderId) {
     if (IS_EXTENSION) return extMsg('PROMPT_DELETE_FOLDER', { folderId });
+    if (await checkRemote()) { const client = await sb(); await client.from('folders').delete().eq('id', folderId); return { success: true }; }
     await webDeleteItem(SK.PROMPT_FOLDERS, folderId);
     return { success: true };
   },
 
   async getDepartments() {
     if (IS_EXTENSION) return (await extMsg('PROMPT_GET_DEPARTMENTS')).departments;
+    if (await checkRemote()) { const client = await sb(); const orgId = await getOrgId(); const { data } = await client.from('departments').select('*').eq('org_id', orgId); return data || []; }
     return webGetList(SK.PROMPT_DEPARTMENTS);
   },
 
   async saveDepartment(department) {
     if (IS_EXTENSION) return extMsg('PROMPT_SAVE_DEPARTMENT', { department });
+    if (await checkRemote()) {
+      const client = await sb(); const orgId = await getOrgId();
+      const row = { org_id: orgId, name: department.name || '' };
+      let res;
+      if (department.id) { res = await client.from('departments').update(row).eq('id', department.id).select().single(); }
+      else { res = await client.from('departments').insert(row).select().single(); }
+      return { success: !res.error, department: res.data };
+    }
     return { success: true, department: await webSaveItem(SK.PROMPT_DEPARTMENTS, department, { name: 'New Dept' }) };
   },
 
   async deleteDepartment(departmentId) {
     if (IS_EXTENSION) return extMsg('PROMPT_DELETE_DEPARTMENT', { departmentId });
+    if (await checkRemote()) { const client = await sb(); await client.from('departments').delete().eq('id', departmentId); return { success: true }; }
     await webDeleteItem(SK.PROMPT_DEPARTMENTS, departmentId);
     return { success: true };
   },
@@ -250,11 +463,27 @@ export const VaultAPI = {
 
   async getOrg() {
     if (IS_EXTENSION) return (await extMsg('TEAM_GET_ORG')).org;
+    if (await checkRemote()) { const client = await sb(); const orgId = await getOrgId(); if (!orgId) return null; const { data } = await client.from('organizations').select('*').eq('id', orgId).single(); return data; }
     return webGetObj(SK.ORG);
   },
 
   async saveOrg(org) {
     if (IS_EXTENSION) return extMsg('TEAM_SAVE_ORG', { org });
+    if (await checkRemote()) {
+      const client = await sb(); const orgId = await getOrgId(); const user = await getRemoteUser();
+      const row = { name: org.name || '', domain: org.domain || '', plan: org.plan || 'free', settings: org.settings || {} };
+      let res;
+      if (orgId) {
+        res = await client.from('organizations').update(row).eq('id', orgId).select().single();
+      } else {
+        res = await client.from('organizations').insert(row).select().single();
+        if (res.data) {
+          _remoteOrgId = res.data.id;
+          await client.from('profiles').update({ org_id: res.data.id }).eq('id', user.id);
+        }
+      }
+      return { success: !res.error, org: res.data };
+    }
     const merged = { id: uuid(), name: '', domain: '', plan: 'free', settings: { enforceStandards: false, requireApproval: false, allowPersonalPrompts: true, defaultVisibility: 'team' }, createdAt: Date.now(), ...(await webGetObj(SK.ORG) || {}), ...org, updatedAt: Date.now() };
     await getWebStore().set(SK.ORG, merged);
     return { success: true, org: merged };
@@ -264,16 +493,26 @@ export const VaultAPI = {
 
   async getTeams() {
     if (IS_EXTENSION) return (await extMsg('TEAM_GET_TEAMS')).teams;
+    if (await checkRemote()) { const client = await sb(); const orgId = await getOrgId(); const { data } = await client.from('teams').select('*').eq('org_id', orgId); return data || []; }
     return webGetList(SK.TEAMS);
   },
 
   async saveTeam(team) {
     if (IS_EXTENSION) return extMsg('TEAM_SAVE_TEAM', { team });
+    if (await checkRemote()) {
+      const client = await sb(); const orgId = await getOrgId();
+      const row = { org_id: orgId, name: team.name || '', description: team.description || '', icon: team.icon || 'users', color: team.color || '#8b5cf6' };
+      let res;
+      if (team.id) { res = await client.from('teams').update(row).eq('id', team.id).select().single(); }
+      else { res = await client.from('teams').insert(row).select().single(); }
+      return { success: !res.error, team: res.data };
+    }
     return { success: true, team: await webSaveItem(SK.TEAMS, team, { name: '', color: '#8b5cf6' }) };
   },
 
   async deleteTeam(teamId) {
     if (IS_EXTENSION) return extMsg('TEAM_DELETE_TEAM', { teamId });
+    if (await checkRemote()) { const client = await sb(); await client.from('teams').delete().eq('id', teamId); return { success: true }; }
     await webDeleteItem(SK.TEAMS, teamId);
     return { success: true };
   },
@@ -282,28 +521,50 @@ export const VaultAPI = {
 
   async getMembers() {
     if (IS_EXTENSION) return (await extMsg('TEAM_GET_MEMBERS')).members;
+    if (await checkRemote()) { const client = await sb(); const orgId = await getOrgId(); const { data } = await client.from('profiles').select('*').eq('org_id', orgId); return (data || []).map(m => ({ ...m, teamIds: [] })); }
     return webGetList(SK.MEMBERS);
   },
 
   async saveMember(member) {
     if (IS_EXTENSION) return extMsg('TEAM_SAVE_MEMBER', { member });
+    if (await checkRemote()) {
+      const client = await sb();
+      const row = { name: member.name || '', role: member.role || 'member' };
+      const { data, error } = await client.from('profiles').update(row).eq('id', member.id).select().single();
+      return { success: !error, member: data };
+    }
     return { success: true, member: await webSaveItem(SK.MEMBERS, member, { name: '', role: 'member', teamIds: [] }) };
   },
 
   async deleteMember(memberId) {
     if (IS_EXTENSION) return extMsg('TEAM_DELETE_MEMBER', { memberId });
+    if (await checkRemote()) { const client = await sb(); await client.from('profiles').update({ org_id: null }).eq('id', memberId); return { success: true }; }
     await webDeleteItem(SK.MEMBERS, memberId);
     return { success: true };
   },
 
   async getCurrentUser() {
     if (IS_EXTENSION) return (await extMsg('TEAM_GET_CURRENT_USER')).user;
+    if (await checkRemote()) {
+      const user = await getRemoteUser();
+      if (!user) return null;
+      const client = await sb();
+      const { data } = await client.from('profiles').select('*').eq('id', user.id).single();
+      return data ? { ...data, isCurrentUser: true, teamIds: [] } : null;
+    }
     const members = await webGetList(SK.MEMBERS);
     return members.find(m => m.isCurrentUser) || null;
   },
 
   async setupUser(name, email, role) {
     if (IS_EXTENSION) return extMsg('TEAM_SETUP_USER', { name, email, role });
+    if (await checkRemote()) {
+      const user = await getRemoteUser();
+      if (!user) return { error: 'Not authenticated' };
+      const client = await sb();
+      const { data } = await client.from('profiles').update({ name, email, role: role || 'admin' }).eq('id', user.id).select().single();
+      return { success: true, user: data };
+    }
     const existing = await this.getCurrentUser();
     if (existing) return { success: true, user: existing };
     const user = { id: uuid(), name, email, role: role || 'admin', isCurrentUser: true, teamIds: [], createdAt: Date.now(), updatedAt: Date.now() };
@@ -317,16 +578,26 @@ export const VaultAPI = {
 
   async getCollections() {
     if (IS_EXTENSION) return (await extMsg('TEAM_GET_COLLECTIONS')).collections;
+    if (await checkRemote()) { const client = await sb(); const orgId = await getOrgId(); const { data } = await client.from('collections').select('*').eq('org_id', orgId); return data || []; }
     return webGetList(SK.COLLECTIONS);
   },
 
   async saveCollection(collection) {
     if (IS_EXTENSION) return extMsg('TEAM_SAVE_COLLECTION', { collection });
+    if (await checkRemote()) {
+      const client = await sb(); const orgId = await getOrgId(); const user = await getRemoteUser();
+      const row = { org_id: orgId, name: collection.name || '', description: collection.description || '', icon: collection.icon || 'folder', color: collection.color || '#8b5cf6', visibility: collection.visibility || 'team', created_by: user?.id, team_id: collection.teamId || null };
+      let res;
+      if (collection.id) { res = await client.from('collections').update(row).eq('id', collection.id).select().single(); }
+      else { res = await client.from('collections').insert(row).select().single(); }
+      return { success: !res.error, collection: res.data };
+    }
     return { success: true, collection: await webSaveItem(SK.COLLECTIONS, collection, { name: '', promptIds: [], visibility: 'team' }) };
   },
 
   async deleteCollection(collId) {
     if (IS_EXTENSION) return extMsg('TEAM_DELETE_COLLECTION', { collId });
+    if (await checkRemote()) { const client = await sb(); await client.from('collections').delete().eq('id', collId); return { success: true }; }
     await webDeleteItem(SK.COLLECTIONS, collId);
     return { success: true };
   },
@@ -335,23 +606,40 @@ export const VaultAPI = {
 
   async getStandards() {
     if (IS_EXTENSION) return (await extMsg('TEAM_GET_STANDARDS')).standards;
+    if (await checkRemote()) { const client = await sb(); const orgId = await getOrgId(); const { data } = await client.from('standards').select('*').eq('org_id', orgId); return (data || []).map(s => ({ ...s, rules: s.rules || {} })); }
     return webGetList(SK.STANDARDS);
   },
 
   async saveStandard(standard) {
     if (IS_EXTENSION) return extMsg('TEAM_SAVE_STANDARD', { standard });
+    if (await checkRemote()) {
+      const client = await sb(); const orgId = await getOrgId(); const user = await getRemoteUser();
+      const row = { org_id: orgId, name: standard.name || '', description: standard.description || '', category: standard.category || 'general', scope: standard.scope || 'org', rules: standard.rules || {}, enforced: standard.enforced || false, created_by: user?.id };
+      let res;
+      if (standard.id && !standard.id.startsWith('std-')) { res = await client.from('standards').update(row).eq('id', standard.id).select().single(); }
+      else { res = await client.from('standards').insert(row).select().single(); }
+      return { success: !res.error, standard: res.data };
+    }
     return { success: true, standard: await webSaveItem(SK.STANDARDS, standard, { name: '', category: 'general', scope: 'org', enforced: false, rules: {} }) };
   },
 
   async deleteStandard(stdId) {
     if (IS_EXTENSION) return extMsg('TEAM_DELETE_STANDARD', { stdId });
+    if (await checkRemote()) { const client = await sb(); await client.from('standards').delete().eq('id', stdId); return { success: true }; }
     await webDeleteItem(SK.STANDARDS, stdId);
     return { success: true };
   },
 
   async installDefaultStandards() {
     if (IS_EXTENSION) return extMsg('TEAM_INSTALL_DEFAULT_STANDARDS');
-    // Web mode: install defaults via local storage
+    if (await checkRemote()) {
+      const client = await sb(); const orgId = await getOrgId(); const user = await getRemoteUser();
+      const { data: existing } = await client.from('standards').select('id').eq('org_id', orgId).limit(1);
+      if (existing?.length > 0) return { success: true };
+      const rows = DEFAULT_STANDARDS.map(s => ({ org_id: orgId, name: s.name, description: s.description, category: s.category, scope: s.scope, rules: s.rules, enforced: false, created_by: user?.id }));
+      await client.from('standards').insert(rows);
+      return { success: true };
+    }
     const existing = await webGetList(SK.STANDARDS);
     if (existing.length > 0) return { success: true };
     for (const std of DEFAULT_STANDARDS) {
@@ -429,6 +717,19 @@ export const VaultAPI = {
 
   async getAnalytics() {
     if (IS_EXTENSION) return (await extMsg('PROMPT_GET_ANALYTICS')).summary;
+    if (await checkRemote()) {
+      const client = await sb(); const orgId = await getOrgId();
+      const { data: prompts } = await client.from('prompts').select('id, title, usage_count, rating_total, rating_count, department_id').eq('org_id', orgId);
+      const all = prompts || [];
+      const totalUses = all.reduce((s, p) => s + (p.usage_count || 0), 0);
+      const rated = all.filter(p => p.rating_count > 0);
+      const avgRating = rated.length ? rated.reduce((s, p) => s + p.rating_total / p.rating_count, 0) / rated.length : 0;
+      const topPrompts = [...all].sort((a, b) => (b.usage_count || 0) - (a.usage_count || 0)).slice(0, 8).map(p => ({ id: p.id, title: p.title, usageCount: p.usage_count }));
+      // Usage events this week
+      const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      const { count } = await client.from('usage_events').select('id', { count: 'exact', head: true }).eq('org_id', orgId).gte('created_at', weekAgo);
+      return { totalPrompts: all.length, totalUses, avgRating: Math.round(avgRating * 10) / 10, usesThisWeek: count || 0, topPrompts, departmentUsage: {} };
+    }
     const prompts = await webGetList(SK.PROMPTS);
     const totalUses = prompts.reduce((s, p) => s + (p.usageCount || 0), 0);
     const rated = prompts.filter(p => p.rating?.count);

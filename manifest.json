@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "ContextIQ",
-  "version": "0.8.0",
-  "description": "AI Prompt Vault + Bridge. Manage, share, and standardize prompts across teams. Bridge conversations across ChatGPT, Claude, Gemini, and more.",
+  "version": "0.9.0",
+  "description": "AI Prompt Vault + Bridge. Manage, share, and standardize prompts across teams. Web app with Supabase backend + Chrome extension.",
   "permissions": [
     "tabs",
     "activeTab",

@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "ContextIQ",
-  "version": "0.7.0",
-  "description": "AI Prompt Manager + Bridge. Manage, share, and insert prompts into any AI tool. Bridge conversations across ChatGPT, Claude, Gemini, and more.",
+  "version": "0.8.0",
+  "description": "AI Prompt Vault + Bridge. Manage, share, and standardize prompts across teams. Bridge conversations across ChatGPT, Claude, Gemini, and more.",
   "permissions": [
     "tabs",
     "activeTab",

@@ -24,6 +24,17 @@ import {
   deleteFolder, getDepartments, saveDepartment, deleteDepartment,
   getAnalyticsSummary, installStarterPacks, isStarterInstalled,
 } from '../lib/prompt-storage.js';
+import {
+  getOrg, saveOrg,
+  getTeams, getTeam, saveTeam, deleteTeam,
+  getMembers, getMember, getCurrentUser, saveMember, deleteMember, setupCurrentUser,
+  getCollections, getCollection, saveCollection, deleteCollection,
+  addPromptToCollection, removePromptFromCollection,
+  getStandards, getStandard, saveStandard, deleteStandard,
+  validatePromptAgainstStandards,
+  exportPromptPack, importPromptPack,
+  installDefaultStandards,
+} from '../lib/team-storage.js';
 
 // --- State ---
 let lastActiveTabId = null;
@@ -1152,6 +1163,134 @@ async function handleMessage(message, sender) {
       }
 
       return { success: true, text: fullText };
+    }
+
+    // ═══════════════════════════════════════
+    //  TEAM & ORGANIZATION
+    // ═══════════════════════════════════════
+
+    case 'TEAM_GET_ORG': {
+      const org = await getOrg();
+      return { org };
+    }
+    case 'TEAM_SAVE_ORG': {
+      const org = await saveOrg(message.org);
+      return { success: true, org };
+    }
+    case 'TEAM_GET_TEAMS': {
+      const teams = await getTeams();
+      return { teams };
+    }
+    case 'TEAM_GET_TEAM': {
+      const team = await getTeam(message.teamId);
+      return { team };
+    }
+    case 'TEAM_SAVE_TEAM': {
+      const team = await saveTeam(message.team);
+      return { success: true, team };
+    }
+    case 'TEAM_DELETE_TEAM': {
+      await deleteTeam(message.teamId);
+      return { success: true };
+    }
+    case 'TEAM_GET_MEMBERS': {
+      const members = await getMembers();
+      return { members };
+    }
+    case 'TEAM_GET_MEMBER': {
+      const member = await getMember(message.memberId);
+      return { member };
+    }
+    case 'TEAM_GET_CURRENT_USER': {
+      const user = await getCurrentUser();
+      return { user };
+    }
+    case 'TEAM_SAVE_MEMBER': {
+      const member = await saveMember(message.member);
+      return { success: true, member };
+    }
+    case 'TEAM_DELETE_MEMBER': {
+      await deleteMember(message.memberId);
+      return { success: true };
+    }
+    case 'TEAM_SETUP_USER': {
+      const user = await setupCurrentUser(message.name, message.email, message.role);
+      return { success: true, user };
+    }
+    case 'TEAM_GET_COLLECTIONS': {
+      const collections = await getCollections();
+      return { collections };
+    }
+    case 'TEAM_GET_COLLECTION': {
+      const collection = await getCollection(message.collId);
+      return { collection };
+    }
+    case 'TEAM_SAVE_COLLECTION': {
+      const collection = await saveCollection(message.collection);
+      return { success: true, collection };
+    }
+    case 'TEAM_DELETE_COLLECTION': {
+      await deleteCollection(message.collId);
+      return { success: true };
+    }
+    case 'TEAM_ADD_PROMPT_TO_COLLECTION': {
+      const coll = await addPromptToCollection(message.collId, message.promptId);
+      return { success: !!coll, collection: coll };
+    }
+    case 'TEAM_REMOVE_PROMPT_FROM_COLLECTION': {
+      const coll = await removePromptFromCollection(message.collId, message.promptId);
+      return { success: !!coll, collection: coll };
+    }
+    case 'TEAM_GET_STANDARDS': {
+      const standards = await getStandards();
+      return { standards };
+    }
+    case 'TEAM_GET_STANDARD': {
+      const standard = await getStandard(message.stdId);
+      return { standard };
+    }
+    case 'TEAM_SAVE_STANDARD': {
+      const standard = await saveStandard(message.standard);
+      return { success: true, standard };
+    }
+    case 'TEAM_DELETE_STANDARD': {
+      await deleteStandard(message.stdId);
+      return { success: true };
+    }
+    case 'TEAM_VALIDATE_PROMPT': {
+      const result = await validatePromptAgainstStandards(message.prompt);
+      return result;
+    }
+    case 'TEAM_EXPORT_PACK': {
+      const pack = await exportPromptPack(message.promptIds, message.packName);
+      return { success: true, pack };
+    }
+    case 'TEAM_IMPORT_PACK': {
+      const result = await importPromptPack(message.packData);
+      return result;
+    }
+    case 'TEAM_INSTALL_DEFAULT_STANDARDS': {
+      await installDefaultStandards();
+      return { success: true };
+    }
+
+    // ═══════════════════════════════════════
+    //  DASHBOARD DATA (combined endpoint)
+    // ═══════════════════════════════════════
+
+    case 'VAULT_GET_ALL': {
+      const [prompts, folders, departments, org, teams, members, collections, standards] = await Promise.all([
+        getPrompts(),
+        getFolders(),
+        getDepartments(),
+        getOrg(),
+        getTeams(),
+        getMembers(),
+        getCollections(),
+        getStandards(),
+      ]);
+      const analytics = await getAnalyticsSummary();
+      return { prompts, folders, departments, org, teams, members, collections, standards, analytics };
     }
 
     default:

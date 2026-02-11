@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ContextIQ — Prompt Vault</title>
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <div id="app" class="app">
+    <!-- ═══════════════════════════════════════ -->
+    <!--  SIDEBAR                                -->
+    <!-- ═══════════════════════════════════════ -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+          <path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+        </svg>
+        <span class="sidebar-brand-text">ContextIQ</span>
+        <span class="sidebar-brand-badge">Vault</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="sidebar-section-label">Prompt Manager</div>
+        <button class="sidebar-item active" data-view="vault">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <span>Prompt Vault</span>
+        </button>
+        <button class="sidebar-item" data-view="collections">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          <span>Collections</span>
+        </button>
+        <button class="sidebar-item" data-view="standards">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <span>Standards</span>
+        </button>
+
+        <div class="sidebar-section-label">Organization</div>
+        <button class="sidebar-item" data-view="team">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span>Team</span>
+        </button>
+        <button class="sidebar-item" data-view="org">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <span>Organization</span>
+        </button>
+
+        <div class="sidebar-section-label">Insights</div>
+        <button class="sidebar-item" data-view="analytics">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          <span>Analytics</span>
+        </button>
+        <button class="sidebar-item" data-view="import-export">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <span>Import / Export</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user" id="sidebar-user">
+          <div class="sidebar-user-avatar" id="sidebar-user-avatar">?</div>
+          <div class="sidebar-user-info">
+            <div class="sidebar-user-name" id="sidebar-user-name">Set up profile</div>
+            <div class="sidebar-user-role" id="sidebar-user-role">Click to configure</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!--  MAIN CONTENT                           -->
+    <!-- ═══════════════════════════════════════ -->
+    <main class="main" id="main">
+
+      <!-- ─── VAULT VIEW ─── -->
+      <div class="view active" id="view-vault">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">Prompt Vault</h1>
+            <p class="view-subtitle">Your secure prompt library. Search, organize, and deploy prompts instantly.</p>
+          </div>
+          <div class="view-header-actions">
+            <button class="btn btn-primary" id="btn-vault-new">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              New Prompt
+            </button>
+          </div>
+        </div>
+
+        <!-- Search & Filter Bar -->
+        <div class="vault-toolbar">
+          <div class="vault-search">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="vault-search" placeholder="Search prompts, tags, content..." autocomplete="off">
+          </div>
+          <div class="vault-filters">
+            <select id="vault-filter-folder" class="vault-select">
+              <option value="">All Folders</option>
+            </select>
+            <select id="vault-filter-dept" class="vault-select">
+              <option value="">All Departments</option>
+            </select>
+            <select id="vault-sort" class="vault-select">
+              <option value="recent">Recent</option>
+              <option value="popular">Most Used</option>
+              <option value="rating">Top Rated</option>
+              <option value="alpha">A-Z</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Stats Row -->
+        <div class="vault-stats" id="vault-stats">
+          <div class="vault-stat">
+            <span class="vault-stat-value" id="stat-total">0</span>
+            <span class="vault-stat-label">Prompts</span>
+          </div>
+          <div class="vault-stat">
+            <span class="vault-stat-value" id="stat-used">0</span>
+            <span class="vault-stat-label">Uses This Week</span>
+          </div>
+          <div class="vault-stat">
+            <span class="vault-stat-value" id="stat-shared">0</span>
+            <span class="vault-stat-label">Shared</span>
+          </div>
+          <div class="vault-stat">
+            <span class="vault-stat-value" id="stat-standards">0</span>
+            <span class="vault-stat-label">Standards Active</span>
+          </div>
+        </div>
+
+        <!-- Prompt Table -->
+        <div class="vault-table-wrap">
+          <table class="vault-table" id="vault-table">
+            <thead>
+              <tr>
+                <th class="vault-th-check"><input type="checkbox" id="vault-select-all"></th>
+                <th>Prompt</th>
+                <th>Folder</th>
+                <th>Tags</th>
+                <th>Rating</th>
+                <th>Uses</th>
+                <th>Updated</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="vault-tbody"></tbody>
+          </table>
+          <div class="vault-empty hidden" id="vault-empty">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <h3>Your vault is empty</h3>
+            <p>Create your first prompt or install starter packs to get going.</p>
+            <button class="btn btn-primary" id="btn-vault-install-starters">Install Starter Packs</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── COLLECTIONS VIEW ─── -->
+      <div class="view" id="view-collections">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">Collections</h1>
+            <p class="view-subtitle">Organize prompts into shared collections for teams and projects.</p>
+          </div>
+          <div class="view-header-actions">
+            <button class="btn btn-primary" id="btn-new-collection">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              New Collection
+            </button>
+          </div>
+        </div>
+        <div class="collections-grid" id="collections-grid"></div>
+        <div class="collections-empty hidden" id="collections-empty">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          <h3>No collections yet</h3>
+          <p>Create collections to group related prompts for sharing with your team.</p>
+        </div>
+      </div>
+
+      <!-- ─── STANDARDS VIEW ─── -->
+      <div class="view" id="view-standards">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">Prompt Standards</h1>
+            <p class="view-subtitle">Define quality standards and rules that prompts must follow.</p>
+          </div>
+          <div class="view-header-actions">
+            <button class="btn btn-secondary" id="btn-install-defaults">Install Defaults</button>
+            <button class="btn btn-primary" id="btn-new-standard">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              New Standard
+            </button>
+          </div>
+        </div>
+        <div class="standards-list" id="standards-list"></div>
+        <div class="standards-empty hidden" id="standards-empty">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <h3>No standards defined</h3>
+          <p>Standards help ensure consistent prompt quality across your organization.</p>
+          <button class="btn btn-primary" id="btn-install-defaults-2">Install Default Standards</button>
+        </div>
+      </div>
+
+      <!-- ─── TEAM VIEW ─── -->
+      <div class="view" id="view-team">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">Team Management</h1>
+            <p class="view-subtitle">Manage teams, invite members, and assign roles.</p>
+          </div>
+          <div class="view-header-actions">
+            <button class="btn btn-primary" id="btn-new-team">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              New Team
+            </button>
+          </div>
+        </div>
+        <div class="team-content">
+          <div class="team-cards" id="team-cards"></div>
+          <div class="team-members-panel" id="team-members-panel">
+            <div class="members-header">
+              <h2 class="members-title">Members</h2>
+              <button class="btn btn-sm btn-primary" id="btn-add-member">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add Member
+              </button>
+            </div>
+            <div class="members-list" id="members-list"></div>
+          </div>
+        </div>
+        <div class="team-empty hidden" id="team-empty">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <h3>No teams yet</h3>
+          <p>Create teams to organize members and share prompts collaboratively.</p>
+        </div>
+      </div>
+
+      <!-- ─── ORG VIEW ─── -->
+      <div class="view" id="view-org">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">Organization Settings</h1>
+            <p class="view-subtitle">Configure your organization profile and global policies.</p>
+          </div>
+        </div>
+        <div class="org-form-wrap">
+          <form class="org-form" id="org-form">
+            <div class="form-group">
+              <label>Organization Name</label>
+              <input type="text" id="org-name" class="form-input" placeholder="Acme Inc.">
+            </div>
+            <div class="form-group">
+              <label>Domain</label>
+              <input type="text" id="org-domain" class="form-input" placeholder="acme.com">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Plan</label>
+                <select id="org-plan" class="form-input">
+                  <option value="free">Free</option>
+                  <option value="pro">Pro</option>
+                  <option value="enterprise">Enterprise</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-section-title">Policies</div>
+            <div class="form-toggle-row">
+              <label class="toggle-label">
+                <input type="checkbox" id="org-enforce-standards">
+                <span>Enforce prompt standards</span>
+              </label>
+            </div>
+            <div class="form-toggle-row">
+              <label class="toggle-label">
+                <input type="checkbox" id="org-require-approval">
+                <span>Require approval for shared prompts</span>
+              </label>
+            </div>
+            <div class="form-toggle-row">
+              <label class="toggle-label">
+                <input type="checkbox" id="org-allow-personal">
+                <span>Allow personal prompts</span>
+              </label>
+            </div>
+            <div class="form-group">
+              <label>Default Visibility</label>
+              <select id="org-default-visibility" class="form-input">
+                <option value="personal">Personal</option>
+                <option value="team">Team</option>
+                <option value="org">Organization</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Save Organization</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- ─── ANALYTICS VIEW ─── -->
+      <div class="view" id="view-analytics">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">Analytics</h1>
+            <p class="view-subtitle">Track prompt usage, team activity, and adoption metrics.</p>
+          </div>
+        </div>
+        <div class="analytics-grid">
+          <div class="analytics-card" id="analytics-overview">
+            <h3>Overview</h3>
+            <div class="analytics-metrics" id="analytics-metrics"></div>
+          </div>
+          <div class="analytics-card" id="analytics-top-prompts">
+            <h3>Top Prompts</h3>
+            <div class="analytics-list" id="analytics-top-list"></div>
+          </div>
+          <div class="analytics-card" id="analytics-departments">
+            <h3>By Department</h3>
+            <div class="analytics-bars" id="analytics-dept-bars"></div>
+          </div>
+          <div class="analytics-card" id="analytics-recent">
+            <h3>Recent Activity</h3>
+            <div class="analytics-timeline" id="analytics-timeline"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── IMPORT / EXPORT VIEW ─── -->
+      <div class="view" id="view-import-export">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">Import / Export</h1>
+            <p class="view-subtitle">Share prompt packs with your team or import from others.</p>
+          </div>
+        </div>
+        <div class="ie-grid">
+          <div class="ie-card">
+            <div class="ie-card-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            </div>
+            <h3>Export Prompt Pack</h3>
+            <p>Select prompts to bundle into a shareable pack file.</p>
+            <button class="btn btn-primary" id="btn-export-pack">Export Selected Prompts</button>
+          </div>
+          <div class="ie-card">
+            <div class="ie-card-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            </div>
+            <h3>Import Prompt Pack</h3>
+            <p>Import a .json prompt pack file to add prompts to your vault.</p>
+            <input type="file" id="import-file" accept=".json" class="hidden">
+            <button class="btn btn-secondary" id="btn-import-pack">Choose File</button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!--  MODAL OVERLAY                          -->
+    <!-- ═══════════════════════════════════════ -->
+    <div class="modal-overlay hidden" id="modal-overlay">
+      <div class="modal" id="modal">
+        <div class="modal-header">
+          <h2 class="modal-title" id="modal-title">Modal</h2>
+          <button class="modal-close" id="modal-close">&times;</button>
+        </div>
+        <div class="modal-body" id="modal-body"></div>
+        <div class="modal-footer" id="modal-footer"></div>
+      </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast hidden" id="toast"></div>
+  </div>
+
+  <script src="dashboard.js" type="module"></script>
+</body>
+</html>

@@ -19,6 +19,12 @@ export const STORAGE_KEYS = {
   PROMPT_DEPARTMENTS: 'contextiq_prompt_departments',
   PROMPT_ANALYTICS: 'contextiq_prompt_analytics',
   PROMPT_STARTER_INSTALLED: 'contextiq_prompt_starter_installed',
+  // Team & Organization
+  ORG: 'contextiq_org',
+  TEAMS: 'contextiq_teams',
+  MEMBERS: 'contextiq_members',
+  COLLECTIONS: 'contextiq_collections',
+  STANDARDS: 'contextiq_standards',
 };
 
 export const AI_TOOL_PATTERNS = [

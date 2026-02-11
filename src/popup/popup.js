@@ -9,7 +9,13 @@ import { truncate } from '../lib/utils.js';
 
 const toast = document.getElementById('toast');
 const btnSettings = document.getElementById('btn-settings');
+const btnOpenVault = document.getElementById('btn-open-vault');
 let activeTab = 'prompts';
+
+// Open Vault dashboard in new tab
+btnOpenVault.addEventListener('click', () => {
+  chrome.tabs.create({ url: chrome.runtime.getURL('src/dashboard/dashboard.html') });
+});
 
 // ── Tab switching ──
 const mainTabs = document.querySelectorAll('.main-tab');

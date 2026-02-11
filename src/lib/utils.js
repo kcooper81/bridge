@@ -228,6 +228,20 @@ export function generateContinuationPrompt(project, conversations, currentTool) 
     lines.push(`I've been discussing this across ${otherTools.join(' and ')}.`);
   }
 
+  // Summarize what artifacts are available
+  let totalCode = 0;
+  let totalImages = 0;
+  for (const c of conversations) {
+    totalCode += (c.codeBlocks || []).length;
+    totalImages += (c.images || []).length;
+  }
+  const artifactHints = [];
+  if (totalCode > 0) artifactHints.push(`${totalCode} code block${totalCode !== 1 ? 's' : ''}`);
+  if (totalImages > 0) artifactHints.push(`${totalImages} generated image${totalImages !== 1 ? 's' : ''}`);
+  if (artifactHints.length > 0) {
+    lines.push(`Artifacts available: ${artifactHints.join(', ')}.`);
+  }
+
   lines.push('');
   lines.push('Here\'s the relevant context:');
   lines.push('');
@@ -260,6 +274,46 @@ export function generateContinuationPrompt(project, conversations, currentTool) 
       lines.push(`  My last question: ${last.text.length > 150 ? last.text.slice(0, 150) + '...' : last.text}`);
     }
 
+    lines.push('');
+  }
+
+  // Include code blocks from conversations (the most valuable bridge content)
+  const allCodeBlocks = [];
+  for (const conv of conversations) {
+    for (const block of (conv.codeBlocks || [])) {
+      allCodeBlocks.push({ ...block, toolName: conv.toolName });
+    }
+  }
+
+  if (allCodeBlocks.length > 0) {
+    lines.push('Code from previous conversations:');
+    lines.push('');
+    // Include up to 3 most recent code blocks
+    for (const block of allCodeBlocks.slice(0, 3)) {
+      const langLabel = block.language ? ` (${block.language})` : '';
+      const sourceLabel = block.source ? ` [${block.source}]` : '';
+      lines.push(`--- From ${block.toolName}${langLabel}${sourceLabel} ---`);
+      lines.push('```' + (block.language || ''));
+      lines.push(block.code.slice(0, 1500));
+      lines.push('```');
+      lines.push('');
+    }
+  }
+
+  // Reference generated images
+  const allImages = [];
+  for (const conv of conversations) {
+    for (const img of (conv.images || [])) {
+      allImages.push({ ...img, toolName: conv.toolName });
+    }
+  }
+
+  if (allImages.length > 0) {
+    lines.push('Generated images from previous conversations:');
+    for (const img of allImages.slice(0, 3)) {
+      const desc = img.alt ? `: "${img.alt}"` : '';
+      lines.push(`  - Image from ${img.toolName}${desc}`);
+    }
     lines.push('');
   }
 

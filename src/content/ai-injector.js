@@ -2,6 +2,36 @@
 // Detects AI tool pages, captures conversation context, and bridges it across tools
 
 (async () => {
+  // --- Shared artifact extraction helpers ---
+
+  function extractCodeBlocksFromEl(el) {
+    const blocks = [];
+    el.querySelectorAll('pre code, pre').forEach(codeEl => {
+      const raw = codeEl.textContent.trim();
+      if (raw.length < 10) return;
+      // Detect language from class name
+      const classes = (codeEl.className || '') + ' ' + (codeEl.parentElement?.className || '');
+      const langMatch = classes.match(/language-(\w+)|lang-(\w+)/);
+      const language = langMatch ? (langMatch[1] || langMatch[2]) : '';
+      blocks.push({ language, code: raw.slice(0, 2000) });
+    });
+    return blocks;
+  }
+
+  function extractImagesFromEl(el) {
+    const images = [];
+    el.querySelectorAll('img[src]').forEach(img => {
+      const src = img.src || '';
+      // Skip tiny icons, avatars, UI chrome
+      const w = img.naturalWidth || img.width || 0;
+      const h = img.naturalHeight || img.height || 0;
+      if (!src || (w > 0 && w < 50) || (h > 0 && h < 50)) return;
+      if (src.startsWith('data:image/svg') || src.includes('/avatar') || src.includes('/icon')) return;
+      images.push({ url: src.slice(0, 500), alt: (img.alt || '').slice(0, 200) });
+    });
+    return images;
+  }
+
   const AI_TOOLS = [
     {
       name: 'ChatGPT',
@@ -18,6 +48,23 @@
           }
         });
         return turns.slice(-6);
+      },
+      getArtifacts: () => {
+        const codeBlocks = [];
+        const images = [];
+        document.querySelectorAll('[data-message-author-role="assistant"]').forEach(el => {
+          codeBlocks.push(...extractCodeBlocksFromEl(el));
+          images.push(...extractImagesFromEl(el));
+        });
+        // ChatGPT canvas panel
+        document.querySelectorAll('[data-testid="canvas-panel"] pre code, .canvas-code-block').forEach(codeEl => {
+          const raw = codeEl.textContent.trim();
+          if (raw.length >= 10) {
+            const langMatch = (codeEl.className || '').match(/language-(\w+)/);
+            codeBlocks.push({ language: langMatch?.[1] || '', code: raw.slice(0, 3000), source: 'canvas' });
+          }
+        });
+        return { codeBlocks: codeBlocks.slice(0, 10), images: images.slice(0, 5) };
       },
     },
     {
@@ -36,6 +83,15 @@
         });
         return turns.slice(-6);
       },
+      getArtifacts: () => {
+        const codeBlocks = [];
+        const images = [];
+        document.querySelectorAll('.model-response, .response-text').forEach(el => {
+          codeBlocks.push(...extractCodeBlocksFromEl(el));
+          images.push(...extractImagesFromEl(el));
+        });
+        return { codeBlocks: codeBlocks.slice(0, 10), images: images.slice(0, 5) };
+      },
     },
     {
       name: 'Claude',
@@ -53,6 +109,26 @@
         });
         return turns.slice(-6);
       },
+      getArtifacts: () => {
+        const codeBlocks = [];
+        const images = [];
+        document.querySelectorAll('[data-testid="ai-message"], .font-claude-message').forEach(el => {
+          codeBlocks.push(...extractCodeBlocksFromEl(el));
+          images.push(...extractImagesFromEl(el));
+        });
+        // Claude artifact viewer
+        document.querySelectorAll('[data-testid="artifact-content"], .artifact-renderer').forEach(el => {
+          const raw = el.textContent.trim();
+          if (raw.length >= 20) {
+            const looksLikeCode = /[{};()=]|function |import |const |class |def |return /.test(raw);
+            if (looksLikeCode) {
+              codeBlocks.push({ language: '', code: raw.slice(0, 3000), source: 'artifact' });
+            }
+          }
+          images.push(...extractImagesFromEl(el));
+        });
+        return { codeBlocks: codeBlocks.slice(0, 10), images: images.slice(0, 5) };
+      },
     },
     {
       name: 'Notion',
@@ -60,6 +136,7 @@
       inputSelector: '.notion-page-content [contenteditable="true"]',
       getInput: () => document.querySelector('.notion-page-content [contenteditable="true"]'),
       getConversation: () => [],
+      getArtifacts: () => ({ codeBlocks: [], images: [] }),
     },
   ];
 
@@ -186,7 +263,13 @@
       if (resp && resp.hasContext) {
         bridgeNotification = resp;
         bridgeBarTool.textContent = resp.latestTool;
-        bridgeBarTopic.textContent = `"${resp.latestTopic}"`;
+        // Show topic + artifact summary
+        let topicText = `"${resp.latestTopic}"`;
+        const hints = [];
+        if (resp.totalCodeBlocks > 0) hints.push(`${resp.totalCodeBlocks} code block${resp.totalCodeBlocks !== 1 ? 's' : ''}`);
+        if (resp.totalImages > 0) hints.push(`${resp.totalImages} image${resp.totalImages !== 1 ? 's' : ''}`);
+        if (hints.length > 0) topicText += ` + ${hints.join(', ')}`;
+        bridgeBarTopic.textContent = topicText;
         bridgeBar.classList.remove('hidden');
 
         // Update badge on FAB
@@ -313,12 +396,15 @@
         .slice(0, 4)
         .map(t => {
           const ago = timeAgoShort(t.savedAt);
+          const badges = [];
+          if (t.codeBlockCount > 0) badges.push(`<span class="contextiq-artifact-badge contextiq-badge-code">${t.codeBlockCount} code</span>`);
+          if (t.imageCount > 0) badges.push(`<span class="contextiq-artifact-badge contextiq-badge-img">${t.imageCount} img</span>`);
           return `
             <div class="contextiq-thread" data-tool="${esc(t.toolName)}">
               <div class="contextiq-thread-icon">${getToolIcon(t.toolName)}</div>
               <div class="contextiq-thread-info">
                 <span class="contextiq-thread-topic">${esc(t.topic)}</span>
-                <span class="contextiq-thread-meta">${esc(t.toolName)} · ${t.turnCount} turns · ${ago}</span>
+                <span class="contextiq-thread-meta">${esc(t.toolName)} · ${t.turnCount} turns${badges.length ? ' · ' : ''} ${badges.join(' ')} · ${ago}</span>
               </div>
             </div>
           `;
@@ -371,11 +457,12 @@
     showFeedback('Copied to clipboard');
   });
 
-  // Save current conversation
+  // Save current conversation + artifacts
   btnSave.addEventListener('click', async (e) => {
     e.stopPropagation();
     const conversation = activeTool.getConversation();
-    if (!conversation.length) {
+    const artifacts = activeTool.getArtifacts();
+    if (!conversation.length && !artifacts.codeBlocks.length && !artifacts.images.length) {
       showFeedback('No conversation to save');
       return;
     }
@@ -387,8 +474,13 @@
         url: window.location.href,
         title: document.title,
         turns: conversation,
+        codeBlocks: artifacts.codeBlocks,
+        images: artifacts.images,
       });
-      showFeedback(`Saved ${conversation.length} turns from ${activeTool.name}`);
+      const parts = [`${conversation.length} turns`];
+      if (artifacts.codeBlocks.length) parts.push(`${artifacts.codeBlocks.length} code blocks`);
+      if (artifacts.images.length) parts.push(`${artifacts.images.length} images`);
+      showFeedback(`Saved ${parts.join(', ')} from ${activeTool.name}`);
     } catch {
       showFeedback('Failed to save conversation');
     }
@@ -450,20 +542,24 @@
     return icons[toolName] || icons.ChatGPT;
   }
 
-  // --- Auto-save conversation periodically ---
-  let lastSavedTurns = 0;
+  // --- Auto-save conversation + artifacts periodically ---
+  let lastSavedHash = '';
   setInterval(async () => {
     try {
       const conversation = activeTool.getConversation();
-      if (conversation.length > lastSavedTurns && conversation.length >= 2) {
+      const artifacts = activeTool.getArtifacts();
+      const hash = `${conversation.length}:${artifacts.codeBlocks.length}:${artifacts.images.length}`;
+      if (hash !== lastSavedHash && (conversation.length >= 2 || artifacts.codeBlocks.length > 0)) {
         await chrome.runtime.sendMessage({
           type: 'SAVE_AI_CONVERSATION',
           toolName: activeTool.name,
           url: window.location.href,
           title: document.title,
           turns: conversation,
+          codeBlocks: artifacts.codeBlocks,
+          images: artifacts.images,
         });
-        lastSavedTurns = conversation.length;
+        lastSavedHash = hash;
       }
     } catch {
       // Extension context may be invalidated

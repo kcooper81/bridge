@@ -356,6 +356,8 @@ async function handleMessage(message, sender) {
         url: message.url,
         title: message.title,
         turns: message.turns,
+        codeBlocks: message.codeBlocks || [],
+        images: message.images || [],
       });
       return { success: true };
     }
@@ -409,17 +411,21 @@ async function handleMessage(message, sender) {
       if (activeId && allConvos[activeId]) {
         for (const conv of allConvos[activeId]) {
           if (!toolSummary[conv.toolName]) {
-            toolSummary[conv.toolName] = { count: 0, lastSaved: 0 };
+            toolSummary[conv.toolName] = { count: 0, lastSaved: 0, codeBlocks: 0, images: 0 };
           }
           toolSummary[conv.toolName].count++;
           toolSummary[conv.toolName].lastSaved = Math.max(
             toolSummary[conv.toolName].lastSaved, conv.savedAt
           );
+          toolSummary[conv.toolName].codeBlocks += (conv.codeBlocks || []).length;
+          toolSummary[conv.toolName].images += (conv.images || []).length;
           threads.push({
             toolName: conv.toolName,
             title: conv.title,
             topic: extractConversationTopic(conv.turns),
             turnCount: conv.turns.length,
+            codeBlockCount: (conv.codeBlocks || []).length,
+            imageCount: (conv.images || []).length,
             savedAt: conv.savedAt,
             url: conv.url,
           });
@@ -445,6 +451,12 @@ async function handleMessage(message, sender) {
       const latestConv = conversations[0];
       const topic = extractConversationTopic(latestConv.turns);
       const toolsUsed = [...new Set(conversations.map(c => c.toolName))];
+      let totalCodeBlocks = 0;
+      let totalImages = 0;
+      for (const c of conversations) {
+        totalCodeBlocks += (c.codeBlocks || []).length;
+        totalImages += (c.images || []).length;
+      }
 
       return {
         hasContext: true,
@@ -454,6 +466,8 @@ async function handleMessage(message, sender) {
         latestTurnCount: latestConv.turns.length,
         latestSavedAt: latestConv.savedAt,
         totalConversations: conversations.length,
+        totalCodeBlocks,
+        totalImages,
         toolsUsed,
       };
     }

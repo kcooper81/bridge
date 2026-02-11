@@ -333,30 +333,38 @@ function renderBridge(summary) {
   bridgeSection.classList.remove('hidden');
   bridgeStatus.textContent = `${summary.totalConversations} conversation${summary.totalConversations !== 1 ? 's' : ''}`;
 
-  // Tool pills
+  // Tool pills with artifact counts
   const tools = Object.entries(summary.toolSummary);
   bridgeToolsEl.innerHTML = tools.map(([name, data]) => {
     const icon = getBridgeToolIcon(name);
+    const artifacts = [];
+    if (data.codeBlocks > 0) artifacts.push(`${data.codeBlocks} code`);
+    if (data.images > 0) artifacts.push(`${data.images} img`);
+    const artifactHint = artifacts.length > 0 ? ` <span class="bridge-tool-artifacts">${artifacts.join(', ')}</span>` : '';
     return `
       <div class="bridge-tool-pill">
         ${icon}
         <span class="bridge-tool-name">${esc(name)}</span>
         <span class="bridge-tool-count">${data.count}</span>
+        ${artifactHint}
       </div>
     `;
   }).join('');
 
-  // Thread list
+  // Thread list with artifact badges
   if (summary.threads.length > 0) {
     bridgeThreadsEl.innerHTML = summary.threads.slice(0, 5).map(t => {
       const ago = timeAgo(t.savedAt);
       const icon = getBridgeToolIcon(t.toolName);
+      const badges = [];
+      if (t.codeBlockCount > 0) badges.push(`<span class="bridge-artifact-badge bridge-badge-code">${t.codeBlockCount} code</span>`);
+      if (t.imageCount > 0) badges.push(`<span class="bridge-artifact-badge bridge-badge-img">${t.imageCount} img</span>`);
       return `
         <div class="bridge-thread" data-url="${esc(t.url)}">
           <div class="bridge-thread-icon">${icon}</div>
           <div class="bridge-thread-info">
             <span class="bridge-thread-topic">${esc(truncate(t.topic, 40))}</span>
-            <span class="bridge-thread-meta">${esc(t.toolName)} · ${t.turnCount} turns · ${ago}</span>
+            <span class="bridge-thread-meta">${esc(t.toolName)} · ${t.turnCount} turns ${badges.join(' ')} · ${ago}</span>
           </div>
         </div>
       `;

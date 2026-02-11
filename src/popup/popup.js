@@ -22,12 +22,24 @@ const AI_TOOLS = [
   { name: 'ChatGPT', key: 'chatgpt', url: 'https://chatgpt.com/', color: '#10a37f' },
   { name: 'Claude', key: 'claude', url: 'https://claude.ai/new', color: '#d97757' },
   { name: 'Gemini', key: 'gemini', url: 'https://gemini.google.com/app', color: '#4285f4' },
+  { name: 'Perplexity', key: 'perplexity', url: 'https://www.perplexity.ai/', color: '#20b8cd' },
+  { name: 'Copilot', key: 'copilot', url: 'https://copilot.microsoft.com/', color: '#7c3aed' },
+  { name: 'DeepSeek', key: 'deepseek', url: 'https://chat.deepseek.com/', color: '#4f8ff7' },
+  { name: 'Grok', key: 'grok', url: 'https://grok.com/', color: '#ef4444' },
+  { name: 'Mistral', key: 'mistral', url: 'https://chat.mistral.ai/', color: '#ff7000' },
+  { name: 'Poe', key: 'poe', url: 'https://poe.com/', color: '#6c5ce7' },
 ];
 
 const TOOL_ICONS = {
   ChatGPT: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
   Claude: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>',
   Gemini: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+  Perplexity: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
+  Copilot: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>',
+  DeepSeek: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>',
+  Grok: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4l16 16M20 4L4 20"/></svg>',
+  Mistral: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>',
+  Poe: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 10h8M8 14h4"/></svg>',
   'Notion AI': '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg>',
 };
 
@@ -352,8 +364,15 @@ function esc(str) {
 }
 
 function getToolKey(toolName) {
-  const map = { ChatGPT: 'chatgpt', Claude: 'claude', Gemini: 'gemini', 'Notion AI': 'notion', Notion: 'notion' };
-  return map[toolName] || 'chatgpt';
+  const map = {
+    ChatGPT: 'chatgpt', Claude: 'claude', Gemini: 'gemini',
+    Perplexity: 'perplexity', Copilot: 'copilot', DeepSeek: 'deepseek',
+    Grok: 'grok', Mistral: 'mistral', Poe: 'poe',
+    HuggingChat: 'huggingchat', Pi: 'pi', Cohere: 'cohere',
+    'You.com': 'youcom', 'Meta AI': 'metaai', Phind: 'phind',
+    'Notion AI': 'notion', Notion: 'notion',
+  };
+  return map[toolName] || toolName.toLowerCase().replace(/[^a-z]/g, '');
 }
 
 function timeAgoShort(ts) {

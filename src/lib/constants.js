@@ -19,6 +19,18 @@ export const AI_TOOL_PATTERNS = [
   { pattern: /chat\.openai\.com|chatgpt\.com/, name: 'ChatGPT', icon: 'chatgpt' },
   { pattern: /gemini\.google\.com/, name: 'Gemini', icon: 'gemini' },
   { pattern: /claude\.ai/, name: 'Claude', icon: 'claude' },
+  { pattern: /perplexity\.ai/, name: 'Perplexity', icon: 'perplexity' },
+  { pattern: /copilot\.microsoft\.com/, name: 'Copilot', icon: 'copilot' },
+  { pattern: /poe\.com/, name: 'Poe', icon: 'poe' },
+  { pattern: /chat\.deepseek\.com/, name: 'DeepSeek', icon: 'deepseek' },
+  { pattern: /grok\.com/, name: 'Grok', icon: 'grok' },
+  { pattern: /chat\.mistral\.ai/, name: 'Mistral', icon: 'mistral' },
+  { pattern: /huggingface\.co\/chat/, name: 'HuggingChat', icon: 'huggingchat' },
+  { pattern: /pi\.ai/, name: 'Pi', icon: 'pi' },
+  { pattern: /coral\.cohere\.com/, name: 'Cohere', icon: 'cohere' },
+  { pattern: /you\.com/, name: 'You.com', icon: 'youcom' },
+  { pattern: /meta\.ai/, name: 'Meta AI', icon: 'metaai' },
+  { pattern: /phind\.com/, name: 'Phind', icon: 'phind' },
   { pattern: /notion\.so/, name: 'Notion AI', icon: 'notion' },
 ];
 

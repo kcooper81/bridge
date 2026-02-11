@@ -1,13 +1,15 @@
 {
   "manifest_version": 3,
   "name": "ContextIQ",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "description": "The AI Bridge. Captures code, images, and conversations from any AI tool — then lets you bridge them to another instantly.",
   "permissions": [
     "tabs",
     "activeTab",
     "storage",
-    "alarms"
+    "alarms",
+    "scripting",
+    "contextMenus"
   ],
   "host_permissions": [
     "<all_urls>"
@@ -51,6 +53,10 @@
     "toggle-tracking": {
       "suggested_key": { "default": "Alt+T" },
       "description": "Toggle activity tracking on/off"
+    },
+    "quick-bridge": {
+      "suggested_key": { "default": "Alt+B" },
+      "description": "Bridge current AI conversation to another tool"
     }
   }
 }

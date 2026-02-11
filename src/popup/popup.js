@@ -1,4 +1,5 @@
-// ContextIQ Artifact Gallery — Bridge your AI tools
+// ContextIQ Artifact Gallery v0.6.0
+// Search, multi-select, delete, active tab status, bridge
 
 import { truncate } from '../lib/utils.js';
 
@@ -7,15 +8,28 @@ const toolTabsEl = document.getElementById('tool-tabs');
 const galleryEmpty = document.getElementById('gallery-empty');
 const artifactListEl = document.getElementById('artifact-list');
 const bridgeSheet = document.getElementById('bridge-sheet');
+const bridgeSheetTitle = document.getElementById('bridge-sheet-title');
 const bridgeSheetTargets = document.getElementById('bridge-sheet-targets');
 const bridgeSheetClose = document.getElementById('bridge-sheet-close');
 const btnSettings = document.getElementById('btn-settings');
 const toast = document.getElementById('toast');
+const searchInput = document.getElementById('search-input');
+const activeTabBar = document.getElementById('active-tab-bar');
+const activeTabIndicator = document.getElementById('active-tab-indicator');
+const activeTabText = document.getElementById('active-tab-text');
+const selectionToolbar = document.getElementById('selection-toolbar');
+const selectionCount = document.getElementById('selection-count');
+const btnBridgeSelected = document.getElementById('btn-bridge-selected');
+const btnDeleteSelected = document.getElementById('btn-delete-selected');
+const btnCancelSelection = document.getElementById('btn-cancel-selection');
 
 // --- State ---
 let allArtifacts = [];
 let activeFilter = 'all';
+let searchQuery = '';
 let bridgingArtifact = null;
+let selectedIndices = new Set();
+let isSelectMode = false;
 
 // --- AI Tool Config ---
 const AI_TOOLS = [
@@ -46,8 +60,25 @@ const TOOL_ICONS = {
 // --- Init ---
 
 async function init() {
-  await loadArtifacts();
+  await Promise.all([loadArtifacts(), loadActiveTabStatus()]);
   bindEvents();
+}
+
+async function loadActiveTabStatus() {
+  try {
+    const resp = await chrome.runtime.sendMessage({ type: 'GET_ACTIVE_TAB_TOOL' });
+    if (resp?.tool) {
+      activeTabText.textContent = `Monitoring ${resp.tool.toolName}`;
+      activeTabIndicator.classList.add('active');
+      activeTabBar.classList.add('detected');
+    } else {
+      activeTabText.textContent = 'No AI tool on active tab';
+      activeTabIndicator.classList.remove('active');
+      activeTabBar.classList.remove('detected');
+    }
+  } catch {
+    activeTabText.textContent = 'No AI tool detected';
+  }
 }
 
 async function loadArtifacts() {
@@ -62,6 +93,30 @@ async function loadArtifacts() {
   renderArtifacts();
 }
 
+// --- Filtering ---
+
+function getFilteredArtifacts() {
+  let filtered = activeFilter === 'all'
+    ? allArtifacts
+    : allArtifacts.filter(a => a.toolName === activeFilter);
+
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    filtered = filtered.filter(a => {
+      const topicMatch = (a.topic || '').toLowerCase().includes(q);
+      const titleMatch = (a.title || '').toLowerCase().includes(q);
+      const toolMatch = (a.toolName || '').toLowerCase().includes(q);
+      const codeMatch = (a.codeBlocks || []).some(b =>
+        (b.code || '').toLowerCase().includes(q) || (b.language || '').toLowerCase().includes(q)
+      );
+      const turnMatch = (a.turns || []).some(t => (t.text || '').toLowerCase().includes(q));
+      return topicMatch || titleMatch || toolMatch || codeMatch || turnMatch;
+    });
+  }
+
+  return filtered;
+}
+
 // --- Render Tool Tabs ---
 
 function renderToolTabs() {
@@ -73,7 +128,6 @@ function renderToolTabs() {
   let html = `<button class="tool-tab ${activeFilter === 'all' ? 'active' : ''}" data-tool="all">All <span class="tool-tab-count">${allArtifacts.length}</span></button>`;
 
   for (const [tool, count] of Object.entries(toolCounts)) {
-    const toolKey = getToolKey(tool);
     const icon = TOOL_ICONS[tool] || TOOL_ICONS.ChatGPT;
     html += `<button class="tool-tab ${activeFilter === tool ? 'active' : ''}" data-tool="${esc(tool)}">${icon} ${esc(tool)} <span class="tool-tab-count">${count}</span></button>`;
   }
@@ -84,13 +138,18 @@ function renderToolTabs() {
 // --- Render Artifacts ---
 
 function renderArtifacts() {
-  const filtered = activeFilter === 'all'
-    ? allArtifacts
-    : allArtifacts.filter(a => a.toolName === activeFilter);
+  const filtered = getFilteredArtifacts();
 
   if (filtered.length === 0) {
     galleryEmpty.classList.remove('hidden');
     artifactListEl.innerHTML = '';
+    if (searchQuery) {
+      galleryEmpty.querySelector('.gallery-empty-title').textContent = 'No matches';
+      galleryEmpty.querySelector('.gallery-empty-desc').textContent = `Nothing found for "${searchQuery}"`;
+    } else {
+      galleryEmpty.querySelector('.gallery-empty-title').textContent = 'No artifacts yet';
+      galleryEmpty.querySelector('.gallery-empty-desc').textContent = 'Visit any AI tool — ContextIQ captures code, images, and conversation highlights so you can bridge them anywhere.';
+    }
     return;
   }
 
@@ -102,6 +161,7 @@ function renderArtifactCard(artifact, idx) {
   const toolKey = getToolKey(artifact.toolName);
   const icon = TOOL_ICONS[artifact.toolName] || TOOL_ICONS.ChatGPT;
   const ago = timeAgoShort(artifact.savedAt);
+  const isSelected = selectedIndices.has(idx);
 
   let previewHtml = '';
   let badges = [];
@@ -131,7 +191,7 @@ function renderArtifactCard(artifact, idx) {
     previewHtml += `<div class="artifact-image-preview">${thumbs}</div>`;
   }
 
-  // Conversation turns (always show if no other previews, or as additional context)
+  // Conversation turns
   if (artifact.turns && artifact.turns.length > 0) {
     badges.push(`<span class="artifact-type conversation">${artifact.turns.length} turns</span>`);
     if (!artifact.codeBlocks?.length && !artifact.images?.length) {
@@ -147,8 +207,11 @@ function renderArtifactCard(artifact, idx) {
     : '';
 
   return `
-    <div class="artifact-card" data-idx="${idx}">
+    <div class="artifact-card ${isSelected ? 'selected' : ''}" data-idx="${idx}">
       <div class="artifact-card-header">
+        <label class="artifact-select" data-idx="${idx}">
+          <input type="checkbox" class="artifact-checkbox" ${isSelected ? 'checked' : ''}>
+        </label>
         <div class="artifact-tool-icon ${toolKey}">${icon}</div>
         <div class="artifact-source">
           <span class="artifact-tool-name">${esc(artifact.toolName)}</span>
@@ -170,6 +233,9 @@ function renderArtifactCard(artifact, idx) {
           <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
           Copy
         </button>
+        <button class="artifact-delete-btn" data-idx="${idx}" title="Delete">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        </button>
       </div>
     </div>
   `;
@@ -177,11 +243,20 @@ function renderArtifactCard(artifact, idx) {
 
 // --- Bridge Action Sheet ---
 
-function showBridgeSheet(artifact) {
-  bridgingArtifact = artifact;
+function showBridgeSheet(artifacts) {
+  const isMulti = Array.isArray(artifacts);
+  bridgingArtifact = artifacts;
 
-  // Show targets that are NOT the source tool
-  const targets = AI_TOOLS.filter(t => t.name !== artifact.toolName);
+  if (isMulti) {
+    bridgeSheetTitle.textContent = `Bridge ${artifacts.length} artifacts to...`;
+  } else {
+    bridgeSheetTitle.textContent = 'Bridge to...';
+  }
+
+  const sourceTool = isMulti ? null : artifacts.toolName;
+  const targets = sourceTool
+    ? AI_TOOLS.filter(t => t.name !== sourceTool)
+    : AI_TOOLS;
 
   bridgeSheetTargets.innerHTML = targets.map(tool => `
     <div class="bridge-target" data-tool-key="${tool.key}" data-tool-name="${tool.name}" data-tool-url="${tool.url}">
@@ -209,36 +284,36 @@ function hideBridgeSheet() {
 async function bridgeToTool(toolName, toolUrl) {
   if (!bridgingArtifact) return;
 
-  // Build the text to bridge
-  const text = buildBridgeText(bridgingArtifact);
+  const isMulti = Array.isArray(bridgingArtifact);
+  const text = isMulti
+    ? bridgingArtifact.map(a => buildBridgeText(a)).join('\n\n---\n\n')
+    : buildBridgeText(bridgingArtifact);
 
-  // Store the pending bridge artifact for the content script to pick up
+  const sourceToolName = isMulti ? 'Multiple tools' : bridgingArtifact.toolName;
+  const topic = isMulti
+    ? `${bridgingArtifact.length} artifacts`
+    : (bridgingArtifact.topic || bridgingArtifact.title);
+
   try {
     await chrome.runtime.sendMessage({
       type: 'SET_PENDING_BRIDGE',
-      artifact: {
-        text,
-        toolName,
-        sourceToolName: bridgingArtifact.toolName,
-        topic: bridgingArtifact.topic || bridgingArtifact.title,
-      },
+      artifact: { text, toolName, sourceToolName, topic },
     });
   } catch {
     // Fall through to clipboard
   }
 
-  // Copy to clipboard as fallback
   try {
     await navigator.clipboard.writeText(text);
   } catch {
     // Clipboard may not be available
   }
 
-  // Open the target tool
   chrome.tabs.create({ url: toolUrl });
 
   showToast(`Bridging to ${toolName} — context copied`);
   hideBridgeSheet();
+  exitSelectMode();
 }
 
 function buildBridgeText(artifact) {
@@ -249,7 +324,6 @@ function buildBridgeText(artifact) {
   }
   lines.push('');
 
-  // Include code blocks
   if (artifact.codeBlocks && artifact.codeBlocks.length > 0) {
     lines.push('Code from previous conversation:');
     lines.push('');
@@ -264,7 +338,6 @@ function buildBridgeText(artifact) {
     }
   }
 
-  // Include image references
   if (artifact.images && artifact.images.length > 0) {
     lines.push('Images from previous conversation:');
     for (const img of artifact.images.slice(0, 5)) {
@@ -277,7 +350,6 @@ function buildBridgeText(artifact) {
     lines.push('');
   }
 
-  // Include conversation highlights
   if (artifact.turns && artifact.turns.length > 0) {
     lines.push('Conversation highlights:');
     const recent = artifact.turns.slice(-6);
@@ -293,10 +365,66 @@ function buildBridgeText(artifact) {
   return lines.join('\n');
 }
 
+// --- Selection Mode ---
+
+function updateSelectionToolbar() {
+  if (selectedIndices.size > 0) {
+    selectionToolbar.classList.remove('hidden');
+    selectionCount.textContent = `${selectedIndices.size} selected`;
+    isSelectMode = true;
+  } else {
+    selectionToolbar.classList.add('hidden');
+    isSelectMode = false;
+  }
+}
+
+function exitSelectMode() {
+  selectedIndices.clear();
+  isSelectMode = false;
+  selectionToolbar.classList.add('hidden');
+  renderArtifacts();
+}
+
+async function deleteArtifacts(indices) {
+  const filtered = getFilteredArtifacts();
+  let deletedCount = 0;
+
+  for (const idx of indices) {
+    const artifact = filtered[idx];
+    if (!artifact) continue;
+    try {
+      const resp = await chrome.runtime.sendMessage({
+        type: 'DELETE_ARTIFACT',
+        savedAt: artifact.savedAt,
+        toolName: artifact.toolName,
+      });
+      if (resp?.success) deletedCount++;
+    } catch {
+      // Ignore individual failures
+    }
+  }
+
+  if (deletedCount > 0) {
+    showToast(`Deleted ${deletedCount} artifact${deletedCount !== 1 ? 's' : ''}`);
+    await loadArtifacts();
+    exitSelectMode();
+  }
+}
+
 // --- Events ---
 
 function bindEvents() {
   btnSettings.addEventListener('click', () => chrome.runtime.openOptionsPage());
+
+  // Search
+  let searchTimer;
+  searchInput.addEventListener('input', () => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+      searchQuery = searchInput.value.trim();
+      renderArtifacts();
+    }, 200);
+  });
 
   // Tool tab filtering
   toolTabsEl.addEventListener('click', (e) => {
@@ -307,28 +435,42 @@ function bindEvents() {
     renderArtifacts();
   });
 
-  // Artifact actions
+  // Artifact actions (delegated)
   artifactListEl.addEventListener('click', (e) => {
+    // Checkbox
+    const checkbox = e.target.closest('.artifact-checkbox');
+    if (checkbox) {
+      const card = checkbox.closest('.artifact-card');
+      const idx = parseInt(card.dataset.idx, 10);
+      if (checkbox.checked) {
+        selectedIndices.add(idx);
+        card.classList.add('selected');
+      } else {
+        selectedIndices.delete(idx);
+        card.classList.remove('selected');
+      }
+      updateSelectionToolbar();
+      return;
+    }
+
+    // Bridge button
     const bridgeBtn = e.target.closest('.artifact-bridge-btn');
     if (bridgeBtn) {
       e.stopPropagation();
       const idx = parseInt(bridgeBtn.dataset.idx, 10);
-      const filtered = activeFilter === 'all'
-        ? allArtifacts
-        : allArtifacts.filter(a => a.toolName === activeFilter);
+      const filtered = getFilteredArtifacts();
       if (filtered[idx]) {
         showBridgeSheet(filtered[idx]);
       }
       return;
     }
 
+    // Copy button
     const copyBtn = e.target.closest('.artifact-copy-btn');
     if (copyBtn) {
       e.stopPropagation();
       const idx = parseInt(copyBtn.dataset.idx, 10);
-      const filtered = activeFilter === 'all'
-        ? allArtifacts
-        : allArtifacts.filter(a => a.toolName === activeFilter);
+      const filtered = getFilteredArtifacts();
       if (filtered[idx]) {
         const text = buildBridgeText(filtered[idx]);
         navigator.clipboard.writeText(text).then(() => {
@@ -337,7 +479,31 @@ function bindEvents() {
       }
       return;
     }
+
+    // Delete button
+    const deleteBtn = e.target.closest('.artifact-delete-btn');
+    if (deleteBtn) {
+      e.stopPropagation();
+      const idx = parseInt(deleteBtn.dataset.idx, 10);
+      deleteArtifacts([idx]);
+      return;
+    }
   });
+
+  // Selection toolbar actions
+  btnBridgeSelected.addEventListener('click', () => {
+    const filtered = getFilteredArtifacts();
+    const selected = [...selectedIndices].map(idx => filtered[idx]).filter(Boolean);
+    if (selected.length > 0) {
+      showBridgeSheet(selected);
+    }
+  });
+
+  btnDeleteSelected.addEventListener('click', () => {
+    deleteArtifacts([...selectedIndices]);
+  });
+
+  btnCancelSelection.addEventListener('click', exitSelectMode);
 
   // Bridge sheet
   bridgeSheetClose.addEventListener('click', hideBridgeSheet);

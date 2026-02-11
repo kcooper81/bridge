@@ -1,5 +1,6 @@
-// ContextIQ Background Service Worker
-// Handles tab tracking, activity capture, time tracking, project inference, and messaging
+// ContextIQ Background Service Worker v0.6.0
+// Handles tab tracking, activity capture, time tracking, project inference,
+// AI tool detection, context menus, badge management, and messaging
 
 import {
   getSettings, addActivity, updateActivity, setActiveProjectId,
@@ -21,16 +22,35 @@ import { ALARM_NAMES } from '../lib/constants.js';
 let lastActiveTabId = null;
 let lastActiveUrl = '';
 let lastActivityTime = Date.now();
-let lastActivityId = null; // Track current activity for time updates
-let tabStartTime = Date.now(); // When user started viewing current tab
-let currentTabUrl = ''; // URL being timed
-let pendingBridge = null; // Artifact waiting to be injected into a target AI tool
+let lastActivityId = null;
+let tabStartTime = Date.now();
+let currentTabUrl = '';
+let pendingBridge = null;
+let detectedTools = {}; // tabId -> { toolName, isHeuristic, url }
+
+// --- AI Tool URL Patterns (for programmatic injection) ---
+const AI_TOOL_URLS = [
+  '*://chatgpt.com/*', '*://chat.openai.com/*',
+  '*://claude.ai/*',
+  '*://gemini.google.com/*',
+  '*://www.perplexity.ai/*', '*://perplexity.ai/*',
+  '*://copilot.microsoft.com/*',
+  '*://poe.com/*',
+  '*://chat.deepseek.com/*',
+  '*://grok.com/*',
+  '*://chat.mistral.ai/*',
+  '*://huggingface.co/chat/*',
+  '*://pi.ai/*',
+  '*://coral.cohere.com/*',
+  '*://you.com/*',
+  '*://meta.ai/*',
+  '*://phind.com/*',
+];
 
 // --- Initialization ---
 
 chrome.runtime.onInstalled.addListener(async (details) => {
   if (details.reason === 'install') {
-    // Open onboarding page
     chrome.tabs.create({ url: chrome.runtime.getURL('src/onboarding/onboarding.html') });
   }
 
@@ -38,7 +58,204 @@ chrome.runtime.onInstalled.addListener(async (details) => {
   chrome.alarms.create(ALARM_NAMES.CLUSTERING, { periodInMinutes: 5 });
   chrome.alarms.create(ALARM_NAMES.CLEANUP, { periodInMinutes: 60 });
   chrome.alarms.create(ALARM_NAMES.TIME_TRACKING, { periodInMinutes: 1 });
+
+  // Create context menus
+  setupContextMenus();
+
+  // Re-inject content scripts into existing AI tool tabs
+  await injectIntoExistingTabs();
 });
+
+// Also set up context menus when the service worker starts
+chrome.runtime.onStartup.addListener(() => {
+  setupContextMenus();
+});
+
+// --- Context Menu Setup ---
+
+function setupContextMenus() {
+  chrome.contextMenus.removeAll(() => {
+    chrome.contextMenus.create({
+      id: 'contextiq-bridge-selection',
+      title: 'Bridge selected text to...',
+      contexts: ['selection'],
+    });
+
+    chrome.contextMenus.create({
+      id: 'contextiq-bridge-page',
+      title: 'Bridge this conversation',
+      contexts: ['page'],
+    });
+
+    chrome.contextMenus.create({
+      id: 'contextiq-bridge-image',
+      title: 'Bridge this image',
+      contexts: ['image'],
+    });
+
+    chrome.contextMenus.create({ id: 'sep1', type: 'separator', contexts: ['page', 'selection', 'image'] });
+
+    // Bridge target submenu items
+    const targets = [
+      { id: 'bridge-to-chatgpt', title: 'ChatGPT', url: 'https://chatgpt.com/' },
+      { id: 'bridge-to-claude', title: 'Claude', url: 'https://claude.ai/new' },
+      { id: 'bridge-to-gemini', title: 'Gemini', url: 'https://gemini.google.com/app' },
+      { id: 'bridge-to-perplexity', title: 'Perplexity', url: 'https://www.perplexity.ai/' },
+      { id: 'bridge-to-copilot', title: 'Copilot', url: 'https://copilot.microsoft.com/' },
+      { id: 'bridge-to-deepseek', title: 'DeepSeek', url: 'https://chat.deepseek.com/' },
+      { id: 'bridge-to-grok', title: 'Grok', url: 'https://grok.com/' },
+      { id: 'bridge-to-mistral', title: 'Mistral', url: 'https://chat.mistral.ai/' },
+      { id: 'bridge-to-poe', title: 'Poe', url: 'https://poe.com/' },
+    ];
+
+    for (const t of targets) {
+      chrome.contextMenus.create({
+        id: t.id,
+        title: `Bridge to ${t.title}`,
+        contexts: ['page', 'selection', 'image'],
+      });
+    }
+  });
+}
+
+// --- Context Menu Handler ---
+
+chrome.contextMenus.onClicked.addListener(async (info, tab) => {
+  const bridgeTargets = {
+    'bridge-to-chatgpt': { name: 'ChatGPT', url: 'https://chatgpt.com/' },
+    'bridge-to-claude': { name: 'Claude', url: 'https://claude.ai/new' },
+    'bridge-to-gemini': { name: 'Gemini', url: 'https://gemini.google.com/app' },
+    'bridge-to-perplexity': { name: 'Perplexity', url: 'https://www.perplexity.ai/' },
+    'bridge-to-copilot': { name: 'Copilot', url: 'https://copilot.microsoft.com/' },
+    'bridge-to-deepseek': { name: 'DeepSeek', url: 'https://chat.deepseek.com/' },
+    'bridge-to-grok': { name: 'Grok', url: 'https://grok.com/' },
+    'bridge-to-mistral': { name: 'Mistral', url: 'https://chat.mistral.ai/' },
+    'bridge-to-poe': { name: 'Poe', url: 'https://poe.com/' },
+  };
+
+  const target = bridgeTargets[info.menuItemId];
+  if (!target) return;
+
+  let bridgeText = '';
+  const sourceTool = detectedTools[tab.id]?.toolName || 'Web page';
+
+  if (info.selectionText) {
+    bridgeText = `[Bridged from ${sourceTool} via ContextIQ]\n\nSelected text:\n${info.selectionText}\n\nPlease continue working with this context.`;
+  } else if (info.srcUrl) {
+    bridgeText = `[Bridged from ${sourceTool} via ContextIQ]\n\nImage: ${info.srcUrl}\n\nPlease analyze or continue working with this image.`;
+  } else {
+    // Bridge full conversation
+    try {
+      const resp = await chrome.tabs.sendMessage(tab.id, { type: 'QUICK_BRIDGE' });
+      if (resp && !resp.error) {
+        const lines = [`[Bridged from ${resp.toolName} via ContextIQ]`];
+        if (resp.codeBlocks?.length > 0) {
+          lines.push('\nCode:');
+          for (const block of resp.codeBlocks.slice(0, 3)) {
+            lines.push('```' + (block.language || ''));
+            lines.push(block.code.slice(0, 2000));
+            lines.push('```');
+          }
+        }
+        if (resp.turns?.length > 0) {
+          lines.push('\nConversation:');
+          for (const turn of resp.turns.slice(-4)) {
+            const role = turn.role === 'user' ? 'You' : resp.toolName;
+            lines.push(`  ${role}: ${turn.text.slice(0, 300)}`);
+          }
+        }
+        lines.push('\nPlease continue from where I left off.');
+        bridgeText = lines.join('\n');
+      }
+    } catch {
+      bridgeText = `[Bridged from ${sourceTool} via ContextIQ]\n\nPage: ${tab.title}\nURL: ${tab.url}\n\nPlease continue working with this context.`;
+    }
+  }
+
+  if (!bridgeText) return;
+
+  // Set pending bridge and open target
+  pendingBridge = {
+    text: bridgeText,
+    toolName: target.name,
+    sourceToolName: sourceTool,
+    topic: info.selectionText ? info.selectionText.slice(0, 50) : (tab.title || '').slice(0, 50),
+    timestamp: Date.now(),
+  };
+
+  chrome.tabs.create({ url: target.url });
+});
+
+// --- Inject into existing tabs on install/update ---
+
+async function injectIntoExistingTabs() {
+  try {
+    const tabs = await chrome.tabs.query({});
+    for (const tab of tabs) {
+      if (!tab.url || tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://')) continue;
+
+      // Check if this is a known AI tool URL
+      const isAITool = AI_TOOL_URLS.some(pattern => {
+        const regex = new RegExp('^' + pattern.replace(/\*/g, '.*').replace(/\//g, '\\/'));
+        return regex.test(tab.url);
+      });
+
+      if (isAITool) {
+        try {
+          // Try to ping the existing content script
+          await chrome.tabs.sendMessage(tab.id, { type: 'PING_CONTENT_SCRIPT' });
+        } catch {
+          // Content script not there — inject it
+          try {
+            await chrome.scripting.executeScript({
+              target: { tabId: tab.id },
+              files: ['src/content/ai-injector.js'],
+            });
+            await chrome.scripting.insertCSS({
+              target: { tabId: tab.id },
+              files: ['src/content/ai-injector.css'],
+            });
+          } catch {
+            // Tab may not be injectable (e.g., about:blank)
+          }
+        }
+      }
+    }
+  } catch {
+    // May not have tabs permission yet
+  }
+}
+
+// --- Badge & Tab Management ---
+
+function updateBadge(tabId, toolName) {
+  if (!toolName) {
+    chrome.action.setBadgeText({ text: '', tabId }).catch(() => {});
+    return;
+  }
+
+  const shortNames = {
+    ChatGPT: 'GPT', Claude: 'CL', Gemini: 'GEM', Perplexity: 'PPX',
+    Copilot: 'COP', DeepSeek: 'DS', Grok: 'GRK', Mistral: 'MST',
+    Poe: 'POE', HuggingChat: 'HF', Pi: 'PI', Cohere: 'COH',
+    'You.com': 'YOU', 'Meta AI': 'MTA', Phind: 'PHD', 'Notion AI': 'NOT',
+  };
+
+  const toolColors = {
+    ChatGPT: '#10a37f', Claude: '#d97757', Gemini: '#4285f4', Perplexity: '#20b8cd',
+    Copilot: '#7c3aed', DeepSeek: '#4f8ff7', Grok: '#ef4444', Mistral: '#ff7000',
+    Poe: '#6c5ce7', HuggingChat: '#ffbf00', Pi: '#8b5cf6', Cohere: '#39594d',
+    'You.com': '#4a90d9', 'Meta AI': '#0084ff', Phind: '#6e56cf', 'Notion AI': '#ffffff',
+  };
+
+  const text = shortNames[toolName] || toolName.slice(0, 3).toUpperCase();
+  const color = toolColors[toolName] || '#8b5cf6';
+
+  chrome.action.setBadgeText({ text, tabId }).catch(() => {});
+  chrome.action.setBadgeBackgroundColor({ color, tabId }).catch(() => {});
+}
+
+// --- Alarms ---
 
 chrome.alarms.onAlarm.addListener(async (alarm) => {
   if (alarm.name === ALARM_NAMES.CLUSTERING) {
@@ -47,7 +264,6 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
     await summarizeAllProjects(projects);
   }
   if (alarm.name === ALARM_NAMES.TIME_TRACKING) {
-    // Flush time for current tab
     await flushTabTime();
   }
   if (alarm.name === ALARM_NAMES.CLEANUP) {
@@ -60,9 +276,8 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
 async function flushTabTime() {
   if (!lastActivityId || !tabStartTime) return;
   const elapsed = Math.floor((Date.now() - tabStartTime) / 1000);
-  if (elapsed < 2) return; // ignore trivial time
+  if (elapsed < 2) return;
 
-  // Cap at 30 minutes per flush to avoid runaway timers
   const capped = Math.min(elapsed, 1800);
 
   try {
@@ -76,14 +291,11 @@ async function flushTabTime() {
     // Activity may have been trimmed
   }
 
-  tabStartTime = Date.now(); // Reset for next interval
+  tabStartTime = Date.now();
 }
 
 // --- Tab Tracking ---
 
-/**
- * Extract email subject from Gmail tab titles.
- */
 function extractEmailSubject(title, domain) {
   if (domain !== 'mail.google.com') return null;
   const match = title.match(/^(.+?)\s+-\s+.+@.+\s+-\s+Gmail$/);
@@ -101,20 +313,15 @@ async function captureTabActivity(tab) {
   const settings = await getSettings();
   if (!settings.trackingEnabled) return;
 
-  // Skip internal pages
   if (tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://') || tab.url.startsWith('about:')) {
     return;
   }
 
   const domain = extractDomain(tab.url);
-
-  // Check excluded domains
   if (settings.excludedDomains.includes(domain)) return;
 
-  // Flush time for the previous tab before switching
   await flushTabTime();
 
-  // Respect captureUrls and captureTitles settings
   const activityItem = {
     url: settings.captureUrls ? tab.url : `https://${domain}/`,
     title: settings.captureTitles ? tab.title : domain,
@@ -124,35 +331,29 @@ async function captureTabActivity(tab) {
     referrerUrl: currentTabUrl || '',
   };
 
-  // Extract email subject from Gmail tabs
   const emailSubject = extractEmailSubject(tab.title, domain);
   if (emailSubject) {
     activityItem.emailSubject = emailSubject;
     activityItem.title = emailSubject;
   }
 
-  // Avoid logging duplicate consecutive activity
   if (tab.url === lastActiveUrl) return;
   lastActiveUrl = tab.url;
   currentTabUrl = tab.url;
   lastActivityTime = Date.now();
-  tabStartTime = Date.now(); // Start timing new tab
+  tabStartTime = Date.now();
 
-  // Log activity
   const log = await addActivity(activityItem);
   lastActivityId = log[0]?.id || null;
 
-  // Infer project
   const projectId = await inferProject(activityItem);
   if (projectId) {
     await setActiveProjectId(projectId);
-    // Link activity to project
     if (lastActivityId) {
       await updateActivity(lastActivityId, { projectId });
     }
   }
 
-  // Track daily stats
   try {
     const today = new Date().toISOString().slice(0, 10);
     const allStats = await getDailyStats();
@@ -175,6 +376,10 @@ chrome.tabs.onActivated.addListener(async (activeInfo) => {
   try {
     const tab = await chrome.tabs.get(activeInfo.tabId);
     await captureTabActivity(tab);
+
+    // Update badge for this tab
+    const toolInfo = detectedTools[activeInfo.tabId];
+    updateBadge(activeInfo.tabId, toolInfo?.toolName || null);
   } catch {
     // Tab may have been closed
   }
@@ -184,13 +389,25 @@ chrome.tabs.onActivated.addListener(async (activeInfo) => {
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (changeInfo.status === 'complete' && tabId === lastActiveTabId) {
     await captureTabActivity(tab);
+
+    // Check if this tab has a detected tool, or try to ping
+    if (!detectedTools[tabId]) {
+      try {
+        const resp = await chrome.tabs.sendMessage(tabId, { type: 'PING_CONTENT_SCRIPT' });
+        if (resp?.toolDetected) {
+          detectedTools[tabId] = { toolName: resp.toolDetected, url: tab.url };
+          updateBadge(tabId, resp.toolDetected);
+        }
+      } catch {
+        // Content script may not be loaded yet
+      }
+    }
   }
 });
 
 // Track window focus changes
 chrome.windows.onFocusChanged.addListener(async (windowId) => {
   if (windowId === chrome.windows.WINDOW_ID_NONE) {
-    // Window lost focus — flush time
     await flushTabTime();
     return;
   }
@@ -203,6 +420,11 @@ chrome.windows.onFocusChanged.addListener(async (windowId) => {
   } catch {
     // Window may have been closed
   }
+});
+
+// Clean up detectedTools when tabs close
+chrome.tabs.onRemoved.addListener((tabId) => {
+  delete detectedTools[tabId];
 });
 
 // --- Keyboard Shortcuts ---
@@ -229,6 +451,62 @@ chrome.commands.onCommand.addListener(async (command) => {
     const { updateSettings: doUpdate } = await import('../lib/storage.js');
     await doUpdate({ trackingEnabled: !settings.trackingEnabled });
   }
+
+  if (command === 'quick-bridge') {
+    // Alt+B — Quick bridge current conversation
+    try {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (!tab) return;
+
+      const resp = await chrome.tabs.sendMessage(tab.id, { type: 'QUICK_BRIDGE' });
+      if (resp && !resp.error && resp.toolName) {
+        // Save the conversation first
+        const activeId = await getActiveProjectId();
+        if (activeId) {
+          await saveAIConversation(activeId, {
+            toolName: resp.toolName,
+            url: resp.url,
+            title: resp.title,
+            turns: resp.turns || [],
+            codeBlocks: resp.codeBlocks || [],
+            images: resp.images || [],
+          });
+        }
+
+        // Build bridge text and store as pending
+        const lines = [`[Bridged from ${resp.toolName} via ContextIQ]`];
+        if (resp.codeBlocks?.length > 0) {
+          lines.push('\nCode:');
+          for (const block of resp.codeBlocks.slice(0, 5)) {
+            lines.push('```' + (block.language || ''));
+            lines.push(block.code.slice(0, 2000));
+            lines.push('```');
+          }
+        }
+        if (resp.turns?.length > 0) {
+          lines.push('\nConversation:');
+          for (const turn of resp.turns.slice(-6)) {
+            const role = turn.role === 'user' ? 'You' : resp.toolName;
+            lines.push(`  ${role}: ${turn.text.slice(0, 300)}`);
+          }
+        }
+        lines.push('\nPlease continue from where I left off.');
+
+        pendingBridge = {
+          text: lines.join('\n'),
+          toolName: '',
+          sourceToolName: resp.toolName,
+          topic: extractConversationTopic(resp.turns || []),
+          timestamp: Date.now(),
+        };
+
+        // Open the popup to let user pick target
+        // The popup will see the pending bridge and show the bridge sheet
+      }
+    } catch {
+      // Tab may not have content script
+    }
+  }
 });
 
 // --- Message Handling ---
@@ -237,11 +515,72 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   handleMessage(message, sender).then(sendResponse).catch(err => {
     sendResponse({ error: err.message });
   });
-  return true; // Keep channel open for async response
+  return true;
 });
 
 async function handleMessage(message, sender) {
   switch (message.type) {
+    case 'AI_TOOL_DETECTED': {
+      // Content script notifies us of detected AI tool
+      const tabId = sender.tab?.id;
+      if (tabId) {
+        detectedTools[tabId] = {
+          toolName: message.toolName,
+          isHeuristic: message.isHeuristic,
+          url: message.url,
+        };
+        updateBadge(tabId, message.toolName);
+      }
+      return { success: true };
+    }
+
+    case 'GET_ACTIVE_TAB_TOOL': {
+      // Popup asks what tool is on the active tab
+      try {
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        if (tab && detectedTools[tab.id]) {
+          return { tool: detectedTools[tab.id] };
+        }
+        // Try pinging
+        if (tab) {
+          try {
+            const resp = await chrome.tabs.sendMessage(tab.id, { type: 'PING_CONTENT_SCRIPT' });
+            if (resp?.toolDetected) {
+              detectedTools[tab.id] = { toolName: resp.toolDetected, url: tab.url };
+              updateBadge(tab.id, resp.toolDetected);
+              return { tool: detectedTools[tab.id] };
+            }
+          } catch {
+            // No content script
+          }
+        }
+      } catch {
+        // No active tab
+      }
+      return { tool: null };
+    }
+
+    case 'DELETE_ARTIFACT': {
+      // Delete a specific conversation/artifact by matching savedAt + toolName
+      const allConvos = await getAIConversations();
+      let deleted = false;
+
+      for (const [projectId, convos] of Object.entries(allConvos)) {
+        const idx = convos.findIndex(c =>
+          c.savedAt === message.savedAt && c.toolName === message.toolName
+        );
+        if (idx !== -1) {
+          convos.splice(idx, 1);
+          // Save back using chrome.storage directly
+          await chrome.storage.local.set({ contextiq_ai_conversations: allConvos });
+          deleted = true;
+          break;
+        }
+      }
+
+      return { success: deleted };
+    }
+
     case 'GET_ACTIVE_PROJECT': {
       const projectId = await getActiveProjectId();
       if (!projectId) return { project: null };
@@ -305,7 +644,6 @@ async function handleMessage(message, sender) {
     }
 
     case 'ASSIGN_ACTIVITY_TO_PROJECT': {
-      // Assign an activity log entry to a project + add it as a project item
       const activity = await assignActivityToProject(message.activityId, message.projectId);
       if (activity) {
         await addItemToProject(message.projectId, {
@@ -335,7 +673,6 @@ async function handleMessage(message, sender) {
     }
 
     case 'PAGE_CONTENT_EXTRACTED': {
-      // Received from context-extractor content script
       if (lastActivityId && message.url === lastActiveUrl) {
         const score = computeEngagementScore(0, message.content);
         await updateActivity(lastActivityId, {
@@ -367,22 +704,18 @@ async function handleMessage(message, sender) {
       const activeId = await getActiveProjectId();
       if (!activeId) return { bridgeContext: '', conversationCount: 0, toolsUsed: [] };
 
-      // Get conversations from OTHER tools (not the one currently asking)
       const conversations = await getProjectConversations(activeId, message.currentTool);
       if (!conversations.length) return { bridgeContext: '', conversationCount: 0, toolsUsed: [] };
 
       const toolsUsed = [...new Set(conversations.map(c => c.toolName))];
 
-      // Build the bridge context string
       const lines = ['--- AI Conversation Bridge ---'];
       lines.push(`Context from: ${toolsUsed.join(', ')}`);
       lines.push('');
 
-      // Include recent conversations from other tools
       const recent = conversations.slice(0, 3);
       for (const conv of recent) {
         lines.push(`[${conv.toolName}] ${conv.title || 'Untitled'}`);
-        // Include the last few turns (summarized)
         const turns = conv.turns.slice(-4);
         for (const turn of turns) {
           const prefix = turn.role === 'user' ? 'You' : conv.toolName;
@@ -535,7 +868,6 @@ async function handleMessage(message, sender) {
     // --- Artifact Gallery ---
 
     case 'GET_ARTIFACT_GALLERY': {
-      // Returns all artifacts across all projects, flattened and sorted by time
       const allConvos = await getAIConversations();
       const artifacts = [];
 
@@ -555,7 +887,6 @@ async function handleMessage(message, sender) {
         }
       }
 
-      // Sort newest first
       artifacts.sort((a, b) => b.savedAt - a.savedAt);
 
       return { artifacts: artifacts.slice(0, 50) };
@@ -572,7 +903,7 @@ async function handleMessage(message, sender) {
     case 'GET_PENDING_BRIDGE': {
       if (pendingBridge && Date.now() - pendingBridge.timestamp < 60000) {
         const bridge = pendingBridge;
-        pendingBridge = null; // Consume it
+        pendingBridge = null;
         return { bridge };
       }
       pendingBridge = null;
@@ -595,7 +926,6 @@ async function handleMessage(message, sender) {
 
       const activeProject = activeId ? projects.find(p => p.id === activeId) : null;
 
-      // Compute today's stats from activity log
       const todayStart = new Date();
       todayStart.setHours(0, 0, 0, 0);
       const todayTs = todayStart.getTime();
@@ -604,14 +934,12 @@ async function handleMessage(message, sender) {
       const todayTime = todayActivity.reduce((sum, a) => sum + (a.timeSpent || 0), 0);
       const todayProjects = new Set(todayActivity.map(a => a.projectId).filter(Boolean));
 
-      // Build hourly activity heatmap for today (24 hours)
       const hourlyActivity = new Array(24).fill(0);
       todayActivity.forEach(a => {
         const hour = new Date(a.timestamp).getHours();
         hourlyActivity[hour]++;
       });
 
-      // Project time breakdown for today
       const projectTimeMap = {};
       todayActivity.forEach(a => {
         if (a.projectId) {
@@ -627,7 +955,6 @@ async function handleMessage(message, sender) {
         .sort((a, b) => b.time - a.time)
         .slice(0, 5);
 
-      // Recent sessions (group consecutive activity by project)
       const sessions = [];
       let currentSession = null;
       for (const activity of todayActivity.slice(0, 50)) {

@@ -29,6 +29,21 @@
       </div>
     </header>
 
+    <!-- Active Tab Status -->
+    <div class="active-tab-bar" id="active-tab-bar">
+      <div class="active-tab-indicator" id="active-tab-indicator">
+        <span class="active-tab-dot"></span>
+        <span class="active-tab-text" id="active-tab-text">No AI tool detected</span>
+      </div>
+      <span class="active-tab-shortcut">Alt+B to bridge</span>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="search-bar">
+      <svg class="search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="search-input" class="search-input" placeholder="Search artifacts, code, conversations...">
+    </div>
+
     <!-- Tool Filter Tabs -->
     <div class="tool-tabs" id="tool-tabs">
       <button class="tool-tab active" data-tool="all">All</button>
@@ -36,6 +51,20 @@
 
     <!-- Artifact Gallery -->
     <div class="gallery" id="gallery">
+      <!-- Selection Toolbar -->
+      <div class="selection-toolbar hidden" id="selection-toolbar">
+        <span class="selection-count" id="selection-count">0 selected</span>
+        <button class="selection-action" id="btn-bridge-selected">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+          Bridge selected
+        </button>
+        <button class="selection-action selection-action-danger" id="btn-delete-selected">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          Delete
+        </button>
+        <button class="selection-action-cancel" id="btn-cancel-selection">Cancel</button>
+      </div>
+
       <!-- Empty state -->
       <div class="gallery-empty" id="gallery-empty">
         <div class="gallery-empty-icon">
@@ -45,7 +74,7 @@
           </svg>
         </div>
         <div class="gallery-empty-title">No artifacts yet</div>
-        <div class="gallery-empty-desc">Visit ChatGPT, Claude, or Gemini — ContextIQ captures code, images, and conversation highlights so you can bridge them to any AI tool.</div>
+        <div class="gallery-empty-desc">Visit any AI tool — ContextIQ captures code, images, and conversation highlights so you can bridge them anywhere. Right-click to bridge too!</div>
       </div>
 
       <!-- Artifacts render here -->
@@ -55,7 +84,7 @@
     <!-- Bridge Action Sheet (slides up when bridging) -->
     <div class="bridge-sheet hidden" id="bridge-sheet">
       <div class="bridge-sheet-header">
-        <span class="bridge-sheet-title">Bridge to...</span>
+        <span class="bridge-sheet-title" id="bridge-sheet-title">Bridge to...</span>
         <button class="bridge-sheet-close" id="bridge-sheet-close">&times;</button>
       </div>
       <div class="bridge-sheet-targets" id="bridge-sheet-targets"></div>

@@ -1,5 +1,5 @@
-// ContextIQ AI Injector Content Script
-// Detects ANY AI tool page, captures conversation context, and bridges it across tools
+// ContextIQ AI Injector Content Script v0.6.0
+// Bulletproof detection: history interception, MutationObserver, real-time capture
 // Runs on all URLs — exits fast if not an AI tool
 
 (async () => {
@@ -38,7 +38,6 @@
   // Generic conversation extraction that works for most chat UIs
   function genericGetConversation() {
     const turns = [];
-    // Try common chat message patterns
     const selectors = [
       '[data-message-author-role]',
       '[data-testid="user-message"], [data-testid="ai-message"]',
@@ -46,6 +45,9 @@
       '.chat-message, .conversation-turn',
       '.human-message, .ai-message',
       '.user-msg, .bot-msg, .assistant-msg',
+      '[class*="message-row"]',
+      '[class*="ChatMessage"]',
+      '[role="article"]',
     ];
 
     for (const sel of selectors) {
@@ -73,7 +75,6 @@
   function genericGetArtifacts() {
     const codeBlocks = extractCodeBlocksFromEl(document.body);
     const images = [];
-    // Only get images from message areas, not the whole page
     document.querySelectorAll('.message, .response, [class*="message"], [class*="response"], [class*="answer"]').forEach(el => {
       images.push(...extractImagesFromEl(el));
     });
@@ -82,17 +83,17 @@
 
   // Generic input finder
   function genericGetInput() {
-    // Try common AI chat input selectors
     const selectors = [
+      '#prompt-textarea',
       'textarea[placeholder*="message" i]',
       'textarea[placeholder*="ask" i]',
       'textarea[placeholder*="chat" i]',
       'textarea[placeholder*="type" i]',
       'textarea[placeholder*="prompt" i]',
+      'textarea[placeholder*="send" i]',
       '[contenteditable="true"].ProseMirror',
       'div[contenteditable="true"][role="textbox"]',
       'div[contenteditable="true"][data-placeholder]',
-      '#prompt-textarea',
       '.chat-input textarea',
       '.input-area textarea',
     ];
@@ -103,7 +104,6 @@
     // Last resort: any large textarea near the bottom
     const textareas = [...document.querySelectorAll('textarea')];
     if (textareas.length > 0) {
-      // Pick the one closest to the bottom of the viewport
       return textareas.sort((a, b) => b.getBoundingClientRect().top - a.getBoundingClientRect().top)[0];
     }
     return document.querySelector('[contenteditable="true"]');
@@ -115,7 +115,7 @@
     {
       name: 'ChatGPT',
       patterns: [/chat\.openai\.com/, /chatgpt\.com/],
-      getInput: () => document.querySelector('#prompt-textarea, textarea[data-id="root"]'),
+      getInput: () => document.querySelector('#prompt-textarea, textarea[data-id="root"], textarea[placeholder*="Message" i]'),
       getConversation: () => {
         const turns = [];
         document.querySelectorAll('[data-message-author-role]').forEach(el => {
@@ -308,29 +308,26 @@
   ];
 
   // --- Heuristic AI Tool Detection ---
-  // For unknown sites that look like AI chat interfaces
 
   function detectAIToolHeuristic() {
     const url = window.location.href.toLowerCase();
     const title = (document.title || '').toLowerCase();
     const hostname = window.location.hostname.toLowerCase();
 
-    // Quick keyword checks on URL/title
     const aiKeywords = ['chat', 'ai', 'assistant', 'copilot', 'llm', 'gpt', 'bot', 'prompt'];
     const hasAIKeyword = aiKeywords.some(kw => url.includes(kw) || title.includes(kw) || hostname.includes(kw));
 
-    // Look for chat-like UI structure
     const hasChatInput = !!document.querySelector(
-      'textarea[placeholder*="message" i], textarea[placeholder*="ask" i], textarea[placeholder*="chat" i], textarea[placeholder*="prompt" i], textarea[placeholder*="type" i]'
+      'textarea[placeholder*="message" i], textarea[placeholder*="ask" i], textarea[placeholder*="chat" i], textarea[placeholder*="prompt" i], textarea[placeholder*="type" i], textarea[placeholder*="send" i]'
     );
 
-    // Check for message-like elements (at least 2 alternating)
     const messagePatterns = [
       '[class*="message"]', '[class*="Message"]',
       '[class*="chat"]', '[class*="Chat"]',
       '[data-role]', '[data-message]',
       '[class*="turn"]', '[class*="Turn"]',
       '[class*="response"]', '[class*="query"]',
+      '[role="article"]',
     ];
     let messageCount = 0;
     for (const pat of messagePatterns) {
@@ -338,23 +335,18 @@
     }
     const hasChatMessages = messageCount >= 2;
 
-    // Check for contenteditable with chat-like context
     const hasContentEditable = !!document.querySelector('[contenteditable="true"][role="textbox"], [contenteditable="true"][data-placeholder]');
 
-    // Score it
     let score = 0;
     if (hasAIKeyword) score += 2;
     if (hasChatInput) score += 3;
     if (hasChatMessages) score += 3;
     if (hasContentEditable) score += 1;
 
-    // Also check meta tags
     const metaDesc = document.querySelector('meta[name="description"]')?.content?.toLowerCase() || '';
     if (aiKeywords.some(kw => metaDesc.includes(kw))) score += 1;
 
-    // Threshold: need at least input + some signal
     if (score >= 4) {
-      // Extract a reasonable name from the hostname
       const parts = hostname.replace('www.', '').split('.');
       const name = parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
 
@@ -374,80 +366,235 @@
 
   function detectActiveTool() {
     const currentUrl = window.location.href;
-
-    // Try known tools first
     const known = AI_TOOLS.find(tool =>
       tool.patterns.some(p => p.test(currentUrl))
     );
     if (known) return known;
-
-    // Try heuristic detection
     return detectAIToolHeuristic();
   }
 
   let activeTool = detectActiveTool();
 
-  // Fast exit if not an AI tool
+  // --- Intercept History API for SPA navigation ---
+  // This catches pushState/replaceState which popstate does NOT fire for
+
+  const _pushState = history.pushState;
+  const _replaceState = history.replaceState;
+
+  history.pushState = function (...args) {
+    _pushState.apply(this, args);
+    window.dispatchEvent(new Event('contextiq:navigation'));
+  };
+
+  history.replaceState = function (...args) {
+    _replaceState.apply(this, args);
+    window.dispatchEvent(new Event('contextiq:navigation'));
+  };
+
+  window.addEventListener('popstate', () => {
+    window.dispatchEvent(new Event('contextiq:navigation'));
+  });
+
+  // --- Unified Navigation Handler ---
+
+  let lastNavUrl = window.location.href;
+
+  function onNavigation() {
+    const currentUrl = window.location.href;
+    if (currentUrl === lastNavUrl) return;
+    lastNavUrl = currentUrl;
+
+    const newTool = detectActiveTool();
+    if (newTool) {
+      activeTool = newTool;
+      if (!window.__contextiq_ui_ready) {
+        initUI(activeTool);
+      } else {
+        // Update existing UI with new tool info
+        updateToolDisplay(activeTool);
+        // Notify background of tool change
+        notifyToolDetected(activeTool);
+      }
+    }
+  }
+
+  window.addEventListener('contextiq:navigation', () => {
+    // Small delay to let DOM settle after SPA navigation
+    setTimeout(onNavigation, 300);
+  });
+
+  // --- Notify background of detected tool (for badge + context menu) ---
+
+  function notifyToolDetected(tool) {
+    try {
+      chrome.runtime.sendMessage({
+        type: 'AI_TOOL_DETECTED',
+        toolName: tool.name,
+        isHeuristic: tool.detected === 'heuristic',
+        url: window.location.href,
+      }).catch(() => {});
+    } catch {
+      // Extension context may be invalidated
+    }
+  }
+
+  // --- Listen for messages from background (re-injection, quick-bridge) ---
+
+  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.type === 'PING_CONTENT_SCRIPT') {
+      sendResponse({
+        alive: true,
+        toolDetected: activeTool?.name || null,
+        url: window.location.href,
+      });
+      return true;
+    }
+
+    if (message.type === 'FORCE_DETECT') {
+      activeTool = detectActiveTool();
+      if (activeTool && !window.__contextiq_ui_ready) {
+        initUI(activeTool);
+      }
+      sendResponse({ detected: activeTool?.name || null });
+      return true;
+    }
+
+    if (message.type === 'QUICK_BRIDGE') {
+      // Triggered by Alt+B or context menu
+      if (activeTool) {
+        const conversation = activeTool.getConversation();
+        const artifacts = activeTool.getArtifacts();
+        sendResponse({
+          toolName: activeTool.name,
+          url: window.location.href,
+          title: document.title,
+          turns: conversation,
+          codeBlocks: artifacts.codeBlocks,
+          images: artifacts.images,
+        });
+      } else {
+        sendResponse({ error: 'No AI tool detected' });
+      }
+      return true;
+    }
+
+    if (message.type === 'GET_SELECTED_TEXT') {
+      const sel = window.getSelection();
+      sendResponse({ text: sel ? sel.toString() : '' });
+      return true;
+    }
+
+    return false;
+  });
+
+  // Fast exit if not an AI tool — but keep watching
   if (!activeTool) {
-    // But keep watching — the user might navigate to an AI tool via SPA
     watchForAITool();
     return;
   }
 
+  // Notify background we're on an AI tool
+  notifyToolDetected(activeTool);
   initUI(activeTool);
 
-  // --- SPA Navigation Watcher ---
-  // Re-detects AI tool on URL changes (handles SPA routing)
+  // --- SPA Navigation Watcher (for pages not yet detected) ---
 
   function watchForAITool() {
-    let lastUrl = window.location.href;
-    let checkCount = 0;
-    const maxChecks = 60; // Check for 30 seconds then stop
+    // Use MutationObserver to detect when chat UI elements appear
+    let detected = false;
+    let recheckCount = 0;
+    const maxRechecks = 120; // 60 seconds
 
-    const check = () => {
-      const currentUrl = window.location.href;
-      if (currentUrl !== lastUrl || checkCount < 5) {
-        lastUrl = currentUrl;
-        const tool = detectActiveTool();
-        if (tool && !window.__contextiq_ui_ready) {
-          activeTool = tool;
+    const observer = new MutationObserver(() => {
+      if (detected) return;
+      recheckCount++;
+
+      // Check every few mutations, not every single one
+      if (recheckCount % 5 !== 0) return;
+
+      const tool = detectActiveTool();
+      if (tool) {
+        detected = true;
+        observer.disconnect();
+        activeTool = tool;
+        notifyToolDetected(tool);
+        if (!window.__contextiq_ui_ready) {
           initUI(tool);
-          return; // Stop checking
         }
       }
-      checkCount++;
-      if (checkCount < maxChecks) {
-        setTimeout(check, 500);
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+
+    // Also poll as fallback (MutationObserver can miss some dynamic loading)
+    const poll = setInterval(() => {
+      if (detected) {
+        clearInterval(poll);
+        return;
       }
-    };
+      const tool = detectActiveTool();
+      if (tool) {
+        detected = true;
+        clearInterval(poll);
+        observer.disconnect();
+        activeTool = tool;
+        notifyToolDetected(tool);
+        if (!window.__contextiq_ui_ready) {
+          initUI(tool);
+        }
+      }
+    }, 2000);
 
-    setTimeout(check, 1000);
+    // Stop after 60 seconds to avoid battery drain
+    setTimeout(() => {
+      if (!detected) {
+        observer.disconnect();
+        clearInterval(poll);
+      }
+    }, 60000);
 
-    // Also listen for history changes (SPA navigation)
-    window.addEventListener('popstate', () => {
+    // Listen for navigation events even while watching
+    window.addEventListener('contextiq:navigation', () => {
+      if (detected) return;
       setTimeout(() => {
         const tool = detectActiveTool();
-        if (tool && !window.__contextiq_ui_ready) {
+        if (tool) {
+          detected = true;
+          observer.disconnect();
+          clearInterval(poll);
           activeTool = tool;
-          initUI(tool);
+          notifyToolDetected(tool);
+          if (!window.__contextiq_ui_ready) {
+            initUI(tool);
+          }
         }
       }, 500);
     });
   }
 
-  // Also watch for SPA nav even on known tools (URL changes within ChatGPT, etc.)
+  // Watch for URL changes within detected AI tools
   let lastKnownUrl = window.location.href;
   setInterval(() => {
     const currentUrl = window.location.href;
     if (currentUrl !== lastKnownUrl) {
       lastKnownUrl = currentUrl;
-      // URL changed within an AI tool — re-check and update auto-save URL
       const newTool = detectActiveTool();
       if (newTool) {
         activeTool = newTool;
+        notifyToolDetected(newTool);
       }
     }
   }, 2000);
+
+  // --- Update tool display without rebuilding entire UI ---
+
+  function updateToolDisplay(tool) {
+    const toolNameEl = document.querySelector('#menu-tool-name');
+    if (toolNameEl) toolNameEl.textContent = tool.name;
+  }
 
   // --- Build and Init the UI ---
 
@@ -480,8 +627,9 @@
           <path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/>
           <path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
         </svg>
-        <span class="contextiq-fab-label">Bridge</span>
+        <span class="contextiq-fab-label" id="contextiq-fab-label">Bridge</span>
         <span class="contextiq-fab-badge hidden" id="contextiq-badge"></span>
+        <span class="contextiq-fab-status" id="contextiq-fab-status">${esc(tool.name)}</span>
       </div>
 
       <!-- Menu Panel -->
@@ -494,6 +642,12 @@
 
         <div class="contextiq-menu-project" id="menu-project">Loading...</div>
         <div class="contextiq-menu-stats" id="menu-stats"></div>
+
+        <!-- Live capture status -->
+        <div class="contextiq-live-status" id="live-status">
+          <span class="contextiq-live-dot"></span>
+          <span class="contextiq-live-text" id="live-text">Watching for conversation...</span>
+        </div>
 
         <!-- Cross-tool conversations -->
         <div class="contextiq-threads" id="menu-threads"></div>
@@ -533,6 +687,8 @@
     const fab = container.querySelector('.contextiq-fab');
     const menu = container.querySelector('.contextiq-menu');
     const badge = container.querySelector('#contextiq-badge');
+    const fabLabel = container.querySelector('#contextiq-fab-label');
+    const fabStatus = container.querySelector('#contextiq-fab-status');
     const bridgeBar = container.querySelector('#contextiq-bridge-bar');
     const bridgeBarTool = container.querySelector('#bridge-bar-tool');
     const bridgeBarTopic = container.querySelector('#bridge-bar-topic');
@@ -541,6 +697,8 @@
     const menuProject = container.querySelector('#menu-project');
     const menuStats = container.querySelector('#menu-stats');
     const menuThreads = container.querySelector('#menu-threads');
+    const liveStatus = container.querySelector('#live-status');
+    const liveText = container.querySelector('#live-text');
     const btnSmartBridge = container.querySelector('#btn-smart-bridge');
     const btnCopy = container.querySelector('#btn-copy');
     const btnSave = container.querySelector('#btn-save');
@@ -549,6 +707,55 @@
     let bridgePrompt = '';
     let isMenuOpen = false;
     let bridgeBarDismissed = false;
+
+    // --- Real-time Conversation Capture via MutationObserver ---
+
+    let liveConversationCount = 0;
+    let liveCodeBlockCount = 0;
+
+    function setupLiveCapture() {
+      let debounceTimer = null;
+
+      const liveObserver = new MutationObserver(() => {
+        // Debounce to avoid excessive processing during streaming
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+          const conversation = activeTool.getConversation();
+          const artifacts = activeTool.getArtifacts();
+
+          const newTurnCount = conversation.length;
+          const newCodeCount = artifacts.codeBlocks.length;
+
+          if (newTurnCount !== liveConversationCount || newCodeCount !== liveCodeBlockCount) {
+            liveConversationCount = newTurnCount;
+            liveCodeBlockCount = newCodeCount;
+
+            // Update live status indicator
+            const parts = [];
+            if (newTurnCount > 0) parts.push(`${newTurnCount} turns`);
+            if (newCodeCount > 0) parts.push(`${newCodeCount} code`);
+            if (artifacts.images.length > 0) parts.push(`${artifacts.images.length} img`);
+
+            if (parts.length > 0) {
+              liveText.textContent = `Capturing: ${parts.join(', ')}`;
+              liveStatus.classList.add('active');
+            } else {
+              liveText.textContent = 'Watching for conversation...';
+              liveStatus.classList.remove('active');
+            }
+          }
+        }, 1000);
+      });
+
+      // Watch the main content area for changes
+      liveObserver.observe(document.body, {
+        childList: true,
+        subtree: true,
+        characterData: true,
+      });
+    }
+
+    setupLiveCapture();
 
     // --- Proactive Bridge Notification ---
 
@@ -747,7 +954,7 @@
         bridgePrompt = bridgeResp?.prompt || '';
         const project = projResp.project;
 
-        // Update tool name in header (in case it changed via SPA nav)
+        // Update tool name in header
         const toolNameEl = container.querySelector('#menu-tool-name');
         if (toolNameEl) toolNameEl.textContent = activeTool.name;
 
@@ -901,11 +1108,23 @@
       const prefix = text + '\n\n---\n\n';
       input.value = prefix + existing;
       input.dispatchEvent(new Event('input', { bubbles: true }));
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+      // Also set selection at end to trigger auto-resize
+      input.setSelectionRange(input.value.length, input.value.length);
+      input.focus();
     } else {
       const prefix = text + '\n\n---\n\n';
       const existingHtml = input.innerHTML;
       input.innerHTML = prefix.replace(/\n/g, '<br>') + existingHtml;
       input.dispatchEvent(new Event('input', { bubbles: true }));
+      input.focus();
+      // Move caret to end
+      const range = document.createRange();
+      range.selectNodeContents(input);
+      range.collapse(false);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
     }
   }
 
@@ -944,7 +1163,6 @@
       Copilot: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>',
       Notion: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg>',
     };
-    // Default icon for unknown tools
     const defaultIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
     return icons[toolName] || defaultIcon;
   }

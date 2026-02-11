@@ -1,4 +1,4 @@
-/* ContextIQ AI Injector — Sleek Dark Mode */
+/* ContextIQ AI Bridge — Sleek Dark Mode */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
@@ -11,32 +11,146 @@
   -webkit-font-smoothing: antialiased;
 }
 
+/* ─── Bridge Notification Bar ─── */
+.contextiq-bridge-bar {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  left: auto;
+  bottom: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(135deg, #111111 0%, #1a1a2e 100%);
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  border-radius: 14px;
+  padding: 10px 14px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 20px rgba(139, 92, 246, 0.08);
+  animation: contextiq-bar-in 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 100000;
+  max-width: 480px;
+}
+
+.contextiq-bridge-bar.hidden {
+  display: none !important;
+}
+
+@keyframes contextiq-bar-in {
+  from {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.contextiq-bridge-bar-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: rgba(139, 92, 246, 0.15);
+  border-radius: 8px;
+  color: #a78bfa;
+  flex-shrink: 0;
+}
+
+.contextiq-bridge-bar-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.contextiq-bridge-bar-label {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 500;
+}
+
+.contextiq-bridge-bar-label strong {
+  color: #a78bfa;
+  font-weight: 700;
+}
+
+.contextiq-bridge-bar-topic {
+  font-size: 12px;
+  color: #f0f0f0;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: -0.2px;
+}
+
+.contextiq-bridge-bar-action {
+  background: #8b5cf6;
+  color: white;
+  border: none;
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  letter-spacing: -0.1px;
+}
+
+.contextiq-bridge-bar-action:hover {
+  background: #a78bfa;
+  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.3);
+  transform: translateY(-1px);
+}
+
+.contextiq-bridge-bar-dismiss {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 18px;
+  cursor: pointer;
+  padding: 2px 4px;
+  line-height: 1;
+  transition: color 0.2s ease;
+  flex-shrink: 0;
+}
+
+.contextiq-bridge-bar-dismiss:hover {
+  color: rgba(255, 255, 255, 0.7);
+}
+
 /* ─── FAB Button ─── */
 .contextiq-fab {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: #111111;
+  background: linear-gradient(135deg, #111111 0%, #1a1a2e 100%);
   color: #f0f0f0;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(139, 92, 246, 0.2);
   border-radius: 999px;
   padding: 10px 18px;
   cursor: pointer;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5), 0 0 12px rgba(139, 92, 246, 0.06);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   font-size: 13px;
   font-weight: 600;
+  position: relative;
 }
 
 .contextiq-fab svg {
-  color: #8b5cf6;
+  color: #a78bfa;
   filter: drop-shadow(0 0 6px rgba(139, 92, 246, 0.3));
 }
 
 .contextiq-fab:hover {
-  background: #161616;
-  border-color: rgba(255, 255, 255, 0.12);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+  background: linear-gradient(135deg, #161616 0%, #222244 100%);
+  border-color: rgba(139, 92, 246, 0.35);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 20px rgba(139, 92, 246, 0.12);
   transform: translateY(-2px) scale(1.02);
 }
 
@@ -51,18 +165,45 @@
 @keyframes contextiq-pulse {
   0%, 100% {
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
-    border-color: rgba(255, 255, 255, 0.08);
+    border-color: rgba(139, 92, 246, 0.2);
   }
   50% {
-    box-shadow: 0 4px 32px rgba(139, 92, 246, 0.2);
-    border-color: rgba(139, 92, 246, 0.2);
+    box-shadow: 0 4px 32px rgba(139, 92, 246, 0.25);
+    border-color: rgba(139, 92, 246, 0.4);
   }
 }
 
 .contextiq-fab-label {
   font-size: 12px;
   letter-spacing: -0.2px;
-  font-weight: 600;
+  font-weight: 700;
+}
+
+.contextiq-fab-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #8b5cf6;
+  color: white;
+  font-size: 9px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.4);
+  animation: contextiq-badge-in 0.3s ease;
+}
+
+.contextiq-fab-badge.hidden {
+  display: none;
+}
+
+@keyframes contextiq-badge-in {
+  from { transform: scale(0); }
+  to { transform: scale(1); }
 }
 
 /* ─── Menu Panel ─── */
@@ -70,7 +211,7 @@
   position: absolute;
   bottom: 56px;
   right: 0;
-  width: 340px;
+  width: 360px;
   background: #0b0b0b;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 16px;
@@ -97,7 +238,7 @@
 .contextiq-menu-header {
   padding: 14px 18px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  background: #111111;
+  background: linear-gradient(135deg, #111111 0%, #1a1a2e 100%);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -105,22 +246,129 @@
 
 .contextiq-menu-title {
   font-size: 13px;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.55);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  font-weight: 700;
+  color: #f0f0f0;
+  letter-spacing: -0.2px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .contextiq-menu-tool {
   font-size: 10px;
   font-weight: 600;
-  color: #8b5cf6;
-  background: rgba(139, 92, 246, 0.1);
-  padding: 2px 8px;
+  color: #a78bfa;
+  background: rgba(139, 92, 246, 0.12);
+  padding: 3px 10px;
   border-radius: 999px;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.2px;
 }
 
+.contextiq-menu-project {
+  padding: 14px 18px 4px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #f0f0f0;
+  letter-spacing: -0.3px;
+}
+
+.contextiq-menu-stats {
+  padding: 0 18px 12px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.35);
+  letter-spacing: 0.1px;
+}
+
+/* ─── Conversation Threads ─── */
+.contextiq-threads {
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.contextiq-threads-label {
+  padding: 10px 18px 4px;
+  font-size: 9px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.25);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.contextiq-thread {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 18px;
+  transition: background 0.15s ease;
+  cursor: default;
+}
+
+.contextiq-thread:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.contextiq-thread-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  color: #a78bfa;
+  background: rgba(139, 92, 246, 0.08);
+}
+
+.contextiq-thread-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.contextiq-thread-topic {
+  font-size: 12px;
+  font-weight: 600;
+  color: #f0f0f0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: -0.2px;
+}
+
+.contextiq-thread-meta {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.3);
+  letter-spacing: 0.1px;
+}
+
+.contextiq-threads-empty {
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: center;
+}
+
+.contextiq-threads-empty span:first-child {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.35);
+  font-weight: 500;
+}
+
+.contextiq-threads-hint {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.2);
+  line-height: 1.4;
+}
+
+.contextiq-threads::-webkit-scrollbar { width: 3px; }
+.contextiq-threads::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.08); border-radius: 3px; }
+
+/* ─── Sections & Actions ─── */
 .contextiq-menu-section {
   padding: 8px 18px;
   border-top: 1px solid rgba(255, 255, 255, 0.04);
@@ -135,72 +383,30 @@
   margin-bottom: 8px;
 }
 
-.contextiq-menu-section .contextiq-menu-actions {
-  padding: 0 0 6px;
-}
-
-.contextiq-btn-bridge {
-  background: #1a1a2e;
-  border-color: rgba(139, 92, 246, 0.2);
-  color: #a78bfa;
-  font-weight: 600;
-}
-
-.contextiq-btn-bridge:hover:not(:disabled) {
-  background: #222244;
-  border-color: rgba(139, 92, 246, 0.4);
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.15);
-}
-
-.contextiq-btn-save {
-  background: rgba(52, 211, 153, 0.08);
-  border-color: rgba(52, 211, 153, 0.15);
-  color: #34d399;
-  font-weight: 600;
-  width: 100%;
-}
-
-.contextiq-btn-save:hover:not(:disabled) {
-  background: rgba(52, 211, 153, 0.15);
-  border-color: rgba(52, 211, 153, 0.3);
-}
-
-.contextiq-menu-project {
-  padding: 12px 18px 4px;
-  font-size: 15px;
-  font-weight: 700;
-  color: #f0f0f0;
-  letter-spacing: -0.3px;
-}
-
-.contextiq-menu-stats {
-  padding: 0 18px 12px;
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.35);
-  letter-spacing: 0.2px;
-}
-
 .contextiq-menu-actions {
   display: flex;
   gap: 6px;
-  padding: 0 18px 14px;
   flex-wrap: wrap;
 }
 
 .contextiq-btn {
   flex: 1;
-  padding: 7px 10px;
+  padding: 8px 12px;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 999px;
+  border-radius: 10px;
   background: #161616;
   color: rgba(255, 255, 255, 0.55);
   font-size: 11px;
   font-weight: 500;
   font-family: inherit;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
 }
 
 .contextiq-btn:hover:not(:disabled) {
@@ -219,6 +425,26 @@
   cursor: not-allowed;
 }
 
+/* Bridge button — hero action */
+.contextiq-btn-bridge {
+  background: linear-gradient(135deg, #1a1a2e 0%, #222244 100%);
+  border-color: rgba(139, 92, 246, 0.25);
+  color: #a78bfa;
+  font-weight: 700;
+  flex: 2;
+}
+
+.contextiq-btn-bridge:hover:not(:disabled) {
+  background: linear-gradient(135deg, #222244 0%, #2a2a55 100%);
+  border-color: rgba(139, 92, 246, 0.45);
+  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.15);
+  color: #c4b5fd;
+}
+
+.contextiq-btn-bridge svg {
+  color: #a78bfa;
+}
+
 .contextiq-btn-inject {
   background: #8b5cf6;
   border-color: #8b5cf6;
@@ -232,25 +458,26 @@
   box-shadow: 0 4px 16px rgba(139, 92, 246, 0.25);
 }
 
-.contextiq-menu-preview {
-  padding: 14px 18px;
-  font-size: 11.5px;
-  color: rgba(255, 255, 255, 0.35);
-  line-height: 1.6;
-  max-height: 160px;
-  overflow-y: auto;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-  white-space: pre-wrap;
-  word-break: break-word;
+.contextiq-btn-copy {
+  min-width: 50px;
 }
 
-.contextiq-menu-preview::-webkit-scrollbar {
-  width: 3px;
+.contextiq-btn-save {
+  background: rgba(52, 211, 153, 0.08);
+  border-color: rgba(52, 211, 153, 0.15);
+  color: #34d399;
+  font-weight: 600;
+  width: 100%;
+  flex: unset;
 }
 
-.contextiq-menu-preview::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 3px;
+.contextiq-btn-save:hover:not(:disabled) {
+  background: rgba(52, 211, 153, 0.15);
+  border-color: rgba(52, 211, 153, 0.3);
+}
+
+.contextiq-btn-save svg {
+  color: #34d399;
 }
 
 /* ─── Feedback Toast ─── */
@@ -258,16 +485,17 @@
   position: absolute;
   bottom: 56px;
   right: 0;
-  background: #111111;
+  background: linear-gradient(135deg, #111111 0%, #0d1b2a 100%);
   color: #34d399;
   padding: 10px 18px;
-  border-radius: 999px;
+  border-radius: 12px;
   font-size: 12px;
   font-weight: 600;
   white-space: nowrap;
-  border: 1px solid rgba(52, 211, 153, 0.15);
+  border: 1px solid rgba(52, 211, 153, 0.2);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
   animation: contextiq-fade-in 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  letter-spacing: -0.1px;
 }
 
 @keyframes contextiq-fade-in {

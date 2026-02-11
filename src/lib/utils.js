@@ -203,6 +203,72 @@ export function buildContextString(project) {
 }
 
 /**
+ * Extract a topic/title from AI conversation turns.
+ */
+export function extractConversationTopic(turns) {
+  if (!turns || turns.length === 0) return 'Untitled conversation';
+  const firstUser = turns.find(t => t.role === 'user');
+  if (!firstUser) return 'AI conversation';
+  const text = firstUser.text.trim();
+  const firstLine = text.split(/[\n.!?]/)[0].trim();
+  if (firstLine.length <= 60) return firstLine;
+  return firstLine.slice(0, 57) + '...';
+}
+
+/**
+ * Generate a smart continuation prompt for bridging AI conversations across tools.
+ */
+export function generateContinuationPrompt(project, conversations, currentTool) {
+  const lines = [];
+
+  lines.push(`I'm continuing work on "${project.name}".`);
+
+  const otherTools = [...new Set(conversations.map(c => c.toolName))];
+  if (otherTools.length > 0) {
+    lines.push(`I've been discussing this across ${otherTools.join(' and ')}.`);
+  }
+
+  lines.push('');
+  lines.push('Here\'s the relevant context:');
+  lines.push('');
+
+  // Key resources (brief)
+  if (project.items && project.items.length > 0) {
+    lines.push('Key resources I\'m working with:');
+    project.items.slice(0, 5).forEach(item => {
+      lines.push(`  - ${item.title} (${item.domain || extractDomain(item.url)})`);
+    });
+    lines.push('');
+  }
+
+  // Conversation threads from other tools
+  const recent = conversations.slice(0, 3);
+  for (const conv of recent) {
+    const topic = extractConversationTopic(conv.turns);
+    lines.push(`Previous discussion on ${conv.toolName}: "${topic}"`);
+
+    const assistantTurns = conv.turns.filter(t => t.role === 'assistant');
+    const userTurns = conv.turns.filter(t => t.role === 'user');
+
+    if (assistantTurns.length > 0) {
+      const last = assistantTurns[assistantTurns.length - 1];
+      lines.push(`  Last response: ${last.text.length > 200 ? last.text.slice(0, 200) + '...' : last.text}`);
+    }
+
+    if (userTurns.length > 1) {
+      const last = userTurns[userTurns.length - 1];
+      lines.push(`  My last question: ${last.text.length > 150 ? last.text.slice(0, 150) + '...' : last.text}`);
+    }
+
+    lines.push('');
+  }
+
+  lines.push('Please continue from where I left off, using the above context.');
+
+  return lines.join('\n');
+}
+
+/**
  * Compute an engagement score from time spent and page content.
  */
 export function computeEngagementScore(timeSpent, pageContent) {

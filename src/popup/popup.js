@@ -43,6 +43,12 @@ const favoritesListEl = document.getElementById('favorites-list');
 const recentListEl = document.getElementById('recent-list');
 const btnSeeAllActivity = document.getElementById('btn-see-all-activity');
 
+// Bridge
+const bridgeSection = document.getElementById('bridge-section');
+const bridgeStatus = document.getElementById('bridge-status');
+const bridgeToolsEl = document.getElementById('bridge-tools');
+const bridgeThreadsEl = document.getElementById('bridge-threads');
+
 // Workspace dropdown
 const workspaceDropdown = document.getElementById('workspace-dropdown');
 const wsListEl = document.getElementById('ws-list');
@@ -106,6 +112,9 @@ async function loadDashboard() {
 
   // Active project card
   renderActiveProjectCard(d.activeProject);
+
+  // AI Bridge
+  loadBridgeSummary();
 
   // All projects
   renderProjectList(d.projects);
@@ -295,6 +304,78 @@ function renderWorkspaceChip(profiles, activeId) {
   btnWorkspace.style.borderColor = '';
 }
 
+// --- AI Bridge ---
+
+async function loadBridgeSummary() {
+  try {
+    const summary = await chrome.runtime.sendMessage({ type: 'GET_AI_BRIDGE_SUMMARY' });
+    renderBridge(summary);
+  } catch {
+    bridgeSection.classList.add('hidden');
+  }
+}
+
+function renderBridge(summary) {
+  if (!summary || summary.totalConversations === 0) {
+    // Show empty state with subtle hint
+    bridgeStatus.textContent = '';
+    bridgeToolsEl.innerHTML = '';
+    bridgeThreadsEl.innerHTML = `
+      <div class="bridge-empty">
+        <span class="bridge-empty-text">No AI conversations captured yet</span>
+        <span class="bridge-empty-hint">Visit ChatGPT, Claude, or Gemini — ContextIQ will auto-save your conversations and bridge them across tools</span>
+      </div>
+    `;
+    bridgeSection.classList.remove('hidden');
+    return;
+  }
+
+  bridgeSection.classList.remove('hidden');
+  bridgeStatus.textContent = `${summary.totalConversations} conversation${summary.totalConversations !== 1 ? 's' : ''}`;
+
+  // Tool pills
+  const tools = Object.entries(summary.toolSummary);
+  bridgeToolsEl.innerHTML = tools.map(([name, data]) => {
+    const icon = getBridgeToolIcon(name);
+    return `
+      <div class="bridge-tool-pill">
+        ${icon}
+        <span class="bridge-tool-name">${esc(name)}</span>
+        <span class="bridge-tool-count">${data.count}</span>
+      </div>
+    `;
+  }).join('');
+
+  // Thread list
+  if (summary.threads.length > 0) {
+    bridgeThreadsEl.innerHTML = summary.threads.slice(0, 5).map(t => {
+      const ago = timeAgo(t.savedAt);
+      const icon = getBridgeToolIcon(t.toolName);
+      return `
+        <div class="bridge-thread" data-url="${esc(t.url)}">
+          <div class="bridge-thread-icon">${icon}</div>
+          <div class="bridge-thread-info">
+            <span class="bridge-thread-topic">${esc(truncate(t.topic, 40))}</span>
+            <span class="bridge-thread-meta">${esc(t.toolName)} · ${t.turnCount} turns · ${ago}</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+  } else {
+    bridgeThreadsEl.innerHTML = '';
+  }
+}
+
+function getBridgeToolIcon(toolName) {
+  const icons = {
+    ChatGPT: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+    Claude: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>',
+    Gemini: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+    'Notion AI': '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg>',
+  };
+  return icons[toolName] || icons.ChatGPT;
+}
+
 // --- Project Detail View ---
 
 function showProjectView(project) {
@@ -378,6 +459,14 @@ function bindEvents() {
     const updated = await updateSettings({ trackingEnabled: !settings.trackingEnabled });
     updateTrackingButton(updated.trackingEnabled);
     showToast(updated.trackingEnabled ? 'Tracking enabled' : 'Tracking paused');
+  });
+
+  // Bridge thread clicks
+  bridgeThreadsEl.addEventListener('click', (e) => {
+    const thread = e.target.closest('.bridge-thread');
+    if (thread && thread.dataset.url) {
+      chrome.tabs.create({ url: thread.dataset.url });
+    }
   });
 
   // Workspace

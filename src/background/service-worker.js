@@ -10,8 +10,9 @@ import {
   getWorkspaceProfiles, saveWorkspaceProfile, deleteWorkspaceProfile,
   getActiveWorkspace, setActiveWorkspace, getPinnedProjects, togglePinProject,
   getFavorites, toggleFavorite, getDailyStats, updateDailyStats,
+  getAIConversations,
 } from '../lib/storage.js';
-import { extractDomain, categorizeDomain, buildContextString, computeEngagementScore } from '../lib/utils.js';
+import { extractDomain, categorizeDomain, buildContextString, computeEngagementScore, extractConversationTopic, generateContinuationPrompt } from '../lib/utils.js';
 import { inferProject, reclusterProjects } from '../lib/project-inference.js';
 import { summarizeAllProjects } from '../lib/summarizer.js';
 import { ALARM_NAMES } from '../lib/constants.js';
@@ -395,6 +396,80 @@ async function handleMessage(message, sender) {
         conversationCount: conversations.length,
         toolsUsed,
       };
+    }
+
+    // --- AI Bridge Enhanced ---
+
+    case 'GET_AI_BRIDGE_SUMMARY': {
+      const allConvos = await getAIConversations();
+      const activeId = await getActiveProjectId();
+      const toolSummary = {};
+      const threads = [];
+
+      if (activeId && allConvos[activeId]) {
+        for (const conv of allConvos[activeId]) {
+          if (!toolSummary[conv.toolName]) {
+            toolSummary[conv.toolName] = { count: 0, lastSaved: 0 };
+          }
+          toolSummary[conv.toolName].count++;
+          toolSummary[conv.toolName].lastSaved = Math.max(
+            toolSummary[conv.toolName].lastSaved, conv.savedAt
+          );
+          threads.push({
+            toolName: conv.toolName,
+            title: conv.title,
+            topic: extractConversationTopic(conv.turns),
+            turnCount: conv.turns.length,
+            savedAt: conv.savedAt,
+            url: conv.url,
+          });
+        }
+      }
+
+      return {
+        toolSummary,
+        threads: threads.sort((a, b) => b.savedAt - a.savedAt).slice(0, 8),
+        totalConversations: threads.length,
+      };
+    }
+
+    case 'GET_BRIDGE_NOTIFICATION': {
+      const activeId = await getActiveProjectId();
+      if (!activeId) return { hasContext: false };
+
+      const project = await getProject(activeId);
+      const conversations = await getProjectConversations(activeId, message.currentTool);
+
+      if (!conversations.length) return { hasContext: false };
+
+      const latestConv = conversations[0];
+      const topic = extractConversationTopic(latestConv.turns);
+      const toolsUsed = [...new Set(conversations.map(c => c.toolName))];
+
+      return {
+        hasContext: true,
+        projectName: project?.name || 'Unknown',
+        latestTopic: topic,
+        latestTool: latestConv.toolName,
+        latestTurnCount: latestConv.turns.length,
+        latestSavedAt: latestConv.savedAt,
+        totalConversations: conversations.length,
+        toolsUsed,
+      };
+    }
+
+    case 'GENERATE_BRIDGE_PROMPT': {
+      const activeId = await getActiveProjectId();
+      if (!activeId) return { prompt: '' };
+
+      const project = await getProject(activeId);
+      if (!project) return { prompt: '' };
+
+      const conversations = await getProjectConversations(activeId, message.currentTool);
+      if (!conversations.length) return { prompt: '' };
+
+      const prompt = generateContinuationPrompt(project, conversations, message.currentTool);
+      return { prompt };
     }
 
     // --- Workspace Profiles ---

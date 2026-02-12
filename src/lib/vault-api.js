@@ -208,7 +208,7 @@ export const VaultAPI = {
     if (await checkRemote()) {
       const orgId = await getOrgId();
       const client = await sb();
-      const [prompts, folders, departments, org, teams, members, collections, standards] = await Promise.all([
+      const [prompts, folders, departments, org, teams, members, collections, standards, teamLinks, collLinks] = await Promise.all([
         client.from('prompts').select('*').eq('org_id', orgId).order('updated_at', { ascending: false }),
         client.from('folders').select('*').eq('org_id', orgId),
         client.from('departments').select('*').eq('org_id', orgId),
@@ -217,15 +217,19 @@ export const VaultAPI = {
         client.from('profiles').select('*').eq('org_id', orgId),
         client.from('collections').select('*').eq('org_id', orgId),
         client.from('standards').select('*').eq('org_id', orgId),
+        client.from('team_members').select('team_id, user_id'),
+        client.from('collection_prompts').select('collection_id, prompt_id'),
       ]);
+      const tLinks = teamLinks.data || [];
+      const cLinks = collLinks.data || [];
       return {
         prompts: (prompts.data || []).map(dbPromptToApp),
         folders: folders.data || [],
         departments: departments.data || [],
         org: org.data || null,
         teams: teams.data || [],
-        members: (members.data || []).map(m => ({ ...m, teamIds: [] })),
-        collections: collections.data || [],
+        members: (members.data || []).map(m => ({ ...m, teamIds: tLinks.filter(l => l.user_id === m.id).map(l => l.team_id) })),
+        collections: (collections.data || []).map(c => ({ ...c, promptIds: cLinks.filter(l => l.collection_id === c.id).map(l => l.prompt_id) })),
         standards: (standards.data || []).map(s => ({ ...s, rules: s.rules || {} })),
         analytics: await this.getAnalytics(),
       };
@@ -351,7 +355,6 @@ export const VaultAPI = {
       const client = await sb();
       const user = await getRemoteUser();
       const orgId = await getOrgId();
-      await client.rpc('', {}).catch(() => {}); // no-op if no rpc
       const { data } = await client.from('prompts').select('usage_count').eq('id', promptId).single();
       if (!data) return { error: 'Not found' };
       await client.from('prompts').update({ usage_count: (data.usage_count || 0) + 1, last_used_at: new Date().toISOString() }).eq('id', promptId);
@@ -521,7 +524,15 @@ export const VaultAPI = {
 
   async getMembers() {
     if (IS_EXTENSION) return (await extMsg('TEAM_GET_MEMBERS')).members;
-    if (await checkRemote()) { const client = await sb(); const orgId = await getOrgId(); const { data } = await client.from('profiles').select('*').eq('org_id', orgId); return (data || []).map(m => ({ ...m, teamIds: [] })); }
+    if (await checkRemote()) {
+      const client = await sb(); const orgId = await getOrgId();
+      const { data: profiles } = await client.from('profiles').select('*').eq('org_id', orgId);
+      const { data: teamLinks } = await client.from('team_members').select('team_id, user_id');
+      return (profiles || []).map(m => ({
+        ...m,
+        teamIds: (teamLinks || []).filter(l => l.user_id === m.id).map(l => l.team_id),
+      }));
+    }
     return webGetList(SK.MEMBERS);
   },
 
@@ -550,7 +561,9 @@ export const VaultAPI = {
       if (!user) return null;
       const client = await sb();
       const { data } = await client.from('profiles').select('*').eq('id', user.id).single();
-      return data ? { ...data, isCurrentUser: true, teamIds: [] } : null;
+      if (!data) return null;
+      const { data: teamLinks } = await client.from('team_members').select('team_id').eq('user_id', user.id);
+      return { ...data, isCurrentUser: true, teamIds: (teamLinks || []).map(l => l.team_id) };
     }
     const members = await webGetList(SK.MEMBERS);
     return members.find(m => m.isCurrentUser) || null;
@@ -578,7 +591,15 @@ export const VaultAPI = {
 
   async getCollections() {
     if (IS_EXTENSION) return (await extMsg('TEAM_GET_COLLECTIONS')).collections;
-    if (await checkRemote()) { const client = await sb(); const orgId = await getOrgId(); const { data } = await client.from('collections').select('*').eq('org_id', orgId); return data || []; }
+    if (await checkRemote()) {
+      const client = await sb(); const orgId = await getOrgId();
+      const { data: colls } = await client.from('collections').select('*').eq('org_id', orgId);
+      const { data: links } = await client.from('collection_prompts').select('collection_id, prompt_id');
+      return (colls || []).map(c => ({
+        ...c,
+        promptIds: (links || []).filter(l => l.collection_id === c.id).map(l => l.prompt_id),
+      }));
+    }
     return webGetList(SK.COLLECTIONS);
   },
 
@@ -650,8 +671,8 @@ export const VaultAPI = {
 
   async validatePrompt(prompt) {
     if (IS_EXTENSION) return extMsg('TEAM_VALIDATE_PROMPT', { prompt });
-    // Web mode validation
-    const standards = await webGetList(SK.STANDARDS);
+    // Validate against enforced standards (remote or local)
+    const standards = (await checkRemote()) ? await this.getStandards() : await webGetList(SK.STANDARDS);
     const violations = [];
     for (const std of standards) {
       if (!std.enforced) continue;
@@ -685,8 +706,15 @@ export const VaultAPI = {
 
   async exportPack(promptIds, packName) {
     if (IS_EXTENSION) return extMsg('TEAM_EXPORT_PACK', { promptIds, packName });
-    const prompts = await webGetList(SK.PROMPTS);
-    const selected = prompts.filter(p => promptIds.includes(p.id));
+    let selected;
+    if (await checkRemote()) {
+      const client = await sb();
+      const { data } = await client.from('prompts').select('*').in('id', promptIds);
+      selected = (data || []).map(dbPromptToApp);
+    } else {
+      const prompts = await webGetList(SK.PROMPTS);
+      selected = prompts.filter(p => promptIds.includes(p.id));
+    }
     const pack = {
       format: 'contextiq-prompt-pack', version: '1.0', name: packName,
       exportedAt: Date.now(), promptCount: selected.length,
@@ -698,18 +726,32 @@ export const VaultAPI = {
   async importPack(packData) {
     if (IS_EXTENSION) return extMsg('TEAM_IMPORT_PACK', { packData });
     if (packData.format !== 'contextiq-prompt-pack') return { success: false, error: 'Invalid format' };
-    const list = await webGetList(SK.PROMPTS);
     let imported = 0;
-    for (const p of (packData.prompts || [])) {
-      list.unshift({
-        id: uuid(), title: p.title || 'Imported', content: p.content || '', description: p.description || '',
-        intendedOutcome: p.intendedOutcome || '', tone: p.tone || 'professional', tags: [...(p.tags || []), 'imported'],
-        folderId: null, departmentId: null, owner: 'You', status: 'approved', version: 1, versionHistory: [],
-        rating: { total: 0, count: 0 }, usageCount: 0, isFavorite: false, createdAt: Date.now(), updatedAt: Date.now(),
-      });
-      imported++;
+    if (await checkRemote()) {
+      const client = await sb(); const orgId = await getOrgId(); const user = await getRemoteUser();
+      const rows = (packData.prompts || []).map(p => ({
+        org_id: orgId, owner_id: user?.id, title: p.title || 'Imported', content: p.content || '',
+        description: p.description || '', intended_outcome: p.intendedOutcome || '', tone: p.tone || 'professional',
+        model_recommendation: p.modelRecommendation || '', example_input: p.exampleInput || '',
+        example_output: p.exampleOutput || '', tags: [...(p.tags || []), 'imported'], status: 'approved', version: 1,
+      }));
+      if (rows.length) {
+        const { data } = await client.from('prompts').insert(rows).select();
+        imported = data?.length || 0;
+      }
+    } else {
+      const list = await webGetList(SK.PROMPTS);
+      for (const p of (packData.prompts || [])) {
+        list.unshift({
+          id: uuid(), title: p.title || 'Imported', content: p.content || '', description: p.description || '',
+          intendedOutcome: p.intendedOutcome || '', tone: p.tone || 'professional', tags: [...(p.tags || []), 'imported'],
+          folderId: null, departmentId: null, owner: 'You', status: 'approved', version: 1, versionHistory: [],
+          rating: { total: 0, count: 0 }, usageCount: 0, isFavorite: false, createdAt: Date.now(), updatedAt: Date.now(),
+        });
+        imported++;
+      }
+      await webSetList(SK.PROMPTS, list);
     }
-    await webSetList(SK.PROMPTS, list);
     return { success: true, imported };
   },
 
@@ -728,19 +770,97 @@ export const VaultAPI = {
       // Usage events this week
       const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
       const { count } = await client.from('usage_events').select('id', { count: 'exact', head: true }).eq('org_id', orgId).gte('created_at', weekAgo);
-      return { totalPrompts: all.length, totalUses, avgRating: Math.round(avgRating * 10) / 10, usesThisWeek: count || 0, topPrompts, departmentUsage: {} };
+      // Department usage
+      const departmentUsage = {};
+      for (const p of all) {
+        if (p.department_id && p.usage_count > 0) {
+          departmentUsage[p.department_id] = (departmentUsage[p.department_id] || 0) + p.usage_count;
+        }
+      }
+      return { totalPrompts: all.length, totalUses, avgRating: Math.round(avgRating * 10) / 10, usesThisWeek: count || 0, topPrompts, departmentUsage };
     }
     const prompts = await webGetList(SK.PROMPTS);
     const totalUses = prompts.reduce((s, p) => s + (p.usageCount || 0), 0);
     const rated = prompts.filter(p => p.rating?.count);
     const avgRating = rated.length ? rated.reduce((s, p) => s + p.rating.total / p.rating.count, 0) / rated.length : 0;
     const topPrompts = [...prompts].sort((a, b) => (b.usageCount || 0) - (a.usageCount || 0)).slice(0, 8);
-    return { totalPrompts: prompts.length, totalUses, avgRating: Math.round(avgRating * 10) / 10, usesThisWeek: 0, topPrompts, departmentUsage: {} };
+    const departmentUsage = {};
+    for (const p of prompts) {
+      if (p.departmentId && (p.usageCount || 0) > 0) {
+        departmentUsage[p.departmentId] = (departmentUsage[p.departmentId] || 0) + p.usageCount;
+      }
+    }
+    // Calculate uses this week from prompts with recent lastUsedAt
+    const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    const usesThisWeek = prompts.filter(p => p.lastUsedAt && p.lastUsedAt > weekAgo).reduce((s, p) => s + (p.usageCount || 0), 0);
+    return { totalPrompts: prompts.length, totalUses, avgRating: Math.round(avgRating * 10) / 10, usesThisWeek, topPrompts, departmentUsage };
   },
 
   async installStarters() {
     if (IS_EXTENSION) return extMsg('PROMPT_INSTALL_STARTERS');
-    // Web mode: no-op for now (starters are complex)
+
+    // Check if already installed
+    const existing = (await checkRemote()) ? await this.getPrompts() : await webGetList(SK.PROMPTS);
+    if (existing.length > 0) return { success: true };
+
+    // Create starter folders
+    const folderDefs = [
+      { name: 'Marketing', icon: 'megaphone', color: '#fb923c' },
+      { name: 'Customer Support', icon: 'headphones', color: '#34d399' },
+      { name: 'Development', icon: 'code', color: '#60a5fa' },
+      { name: 'HR & People', icon: 'users', color: '#c084fc' },
+      { name: 'Sales', icon: 'trending-up', color: '#fb7185' },
+    ];
+    const folderMap = {};
+    for (const f of folderDefs) {
+      const res = await this.saveFolder(f);
+      folderMap[f.name] = res.folder?.id || res.folder?.id;
+    }
+
+    // Create starter prompts
+    const starters = [
+      { title: 'Email Campaign Writer', tone: 'persuasive', folder: 'Marketing', tags: ['email', 'campaign', 'marketing'],
+        content: 'Write a compelling email campaign for [product/service] targeting [audience]. Include:\n1. Subject line (under 50 chars)\n2. Preview text\n3. Email body with hook, problem, solution, social proof, CTA\n4. P.S. line\n\nTone: [professional/casual/urgent]\nGoal: [awareness/conversion/retention]',
+        description: 'Generate complete email campaigns with subject lines, body copy, and CTAs.' },
+      { title: 'Social Media Content Creator', tone: 'engaging', folder: 'Marketing', tags: ['social', 'content', 'marketing'],
+        content: 'Create a social media post for [platform] about [topic].\nBrand voice: [tone]\nGoal: [engagement/traffic/awareness]\nInclude: Hook, body, CTA, hashtags, emoji suggestions.',
+        description: 'Create scroll-stopping social media posts for any platform.' },
+      { title: 'SEO Blog Outline Generator', tone: 'professional', folder: 'Marketing', tags: ['seo', 'blog', 'content'],
+        content: 'Create an SEO-optimized blog post outline for "[target keyword]".\nInclude: SEO title, meta description, H1, 5-8 H2 sections with bullets, FAQ section, word count, related keywords.',
+        description: 'Generate SEO-optimized blog outlines that rank.' },
+      { title: 'Customer Response Template', tone: 'empathetic', folder: 'Customer Support', tags: ['support', 'customer', 'response'],
+        content: 'Write a support response for:\nIssue: [problem]\nSentiment: [frustrated/confused/neutral]\n\n1. Acknowledge empathetically\n2. Explain what happened\n3. Provide clear solution with steps\n4. Offer alternatives\n5. End with reassurance',
+        description: 'Generate empathetic, solution-focused customer responses.' },
+      { title: 'FAQ Article Generator', tone: 'clear', folder: 'Customer Support', tags: ['faq', 'knowledge-base', 'documentation'],
+        content: 'Create a FAQ article for [topic/feature].\nProduct: [name]\nAudience: [technical level]\nGenerate 8-10 Q&A pairs covering: what it does, how to start, common issues, limitations, related features.',
+        description: 'Generate complete FAQ articles for your knowledge base.' },
+      { title: 'Code Review Assistant', tone: 'technical', folder: 'Development', tags: ['code-review', 'development', 'security'],
+        content: 'Review the following code:\n```[language]\n[code]\n```\nAnalyze for:\n1. Bugs & logic errors\n2. Security issues\n3. Performance\n4. Readability\n5. Best practices\n\nFor each issue: severity, line reference, problem, suggested fix.',
+        description: 'Thorough code review covering bugs, security, and best practices.' },
+      { title: 'Debugging Assistant', tone: 'technical', folder: 'Development', tags: ['debugging', 'development', 'troubleshooting'],
+        content: 'Help debug:\nError: [error message]\nExpected: [behavior]\nActual: [behavior]\nEnvironment: [details]\nCode: [relevant code]\n\n1. Explain error in plain English\n2. Root cause\n3. Step-by-step fix\n4. Why the fix works\n5. Prevention tips',
+        description: 'Systematic debugging with root cause analysis.' },
+      { title: 'Test Case Generator', tone: 'technical', folder: 'Development', tags: ['testing', 'development', 'quality'],
+        content: 'Generate tests for:\n```[language]\n[code/feature]\n```\nCover: Happy path (3-5), edge cases, error cases, integration tests.\nFramework: [Jest/pytest/etc]',
+        description: 'Generate thorough test suites including edge cases.' },
+      { title: 'Job Posting Creator', tone: 'professional', folder: 'HR & People', tags: ['hiring', 'job-posting', 'hr'],
+        content: 'Write a job posting for [role].\nCompany: [name]\nLocation: [remote/hybrid/office]\nLevel: [junior/mid/senior]\n\nInclude: Headline, about us, the role, requirements, nice-to-haves, benefits, how to apply.\nUse inclusive language. Under 500 words.',
+        description: 'Create inclusive, compelling job postings.' },
+      { title: 'Cold Outreach Email', tone: 'conversational', folder: 'Sales', tags: ['cold-email', 'outreach', 'sales'],
+        content: 'Write a cold email to [prospect] at [company].\nOur product: [what]\nTheir pain: [problem]\nSocial proof: [stat/customer]\n\nRules: Under 100 words, personalized first line, lead with their problem, one clear CTA.\nGenerate 3 variations: problem-focused, curiosity-driven, social-proof led.',
+        description: 'Short, personalized cold emails that get responses.' },
+      { title: 'Discovery Call Script', tone: 'professional', folder: 'Sales', tags: ['discovery', 'sales', 'qualification'],
+        content: 'Create a discovery call script for [product] to [buyer].\nDuration: [15/30 min]\n\nStructure: Opening, situation questions, problem questions, impact questions, vision questions, solution bridge, next steps.',
+        description: 'Structured discovery call framework that qualifies prospects.' },
+    ];
+
+    for (const s of starters) {
+      await this.createPrompt({
+        title: s.title, content: s.content, description: s.description,
+        tone: s.tone, tags: s.tags, folderId: folderMap[s.folder] || null,
+        status: 'approved',
+      });
+    }
     return { success: true };
   },
 

@@ -52,47 +52,46 @@
     let isAuthenticated = false;
     let isRemoteMode = false;
 
-    if (isConfigured()) {
-      try {
-        // Check if this is an OAuth callback (has code param or hash tokens)
-        const isOAuthCallback = new URLSearchParams(window.location.search).has('code') ||
-          window.location.hash.includes('access_token');
+    try {
+      // Check if this is an OAuth callback (has code param or hash tokens)
+      const isOAuthCallback = new URLSearchParams(window.location.search).has('code') ||
+        window.location.hash.includes('access_token');
 
-        let session = await getSession();
+      let session = await getSession();
 
-        // If no session yet but this is an OAuth callback, wait for token exchange
-        if (!session && isOAuthCallback) {
-          const { getClient } = await import('/src/lib/supabase-client.js');
-          const client = await getClient();
-          session = await new Promise((resolve) => {
-            const timeout = setTimeout(() => resolve(null), 5000);
-            const { data: { subscription } } = client.auth.onAuthStateChange((event, s) => {
-              if (event === 'SIGNED_IN' && s) {
-                clearTimeout(timeout);
-                subscription.unsubscribe();
-                resolve(s);
-              }
-            });
+      // If no session yet but this is an OAuth callback, wait for token exchange
+      if (!session && isOAuthCallback) {
+        const { getClient } = await import('/src/lib/supabase-client.js');
+        const client = await getClient();
+        session = await new Promise((resolve) => {
+          const timeout = setTimeout(() => resolve(null), 5000);
+          const { data: { subscription } } = client.auth.onAuthStateChange((event, s) => {
+            if (event === 'SIGNED_IN' && s) {
+              clearTimeout(timeout);
+              subscription.unsubscribe();
+              resolve(s);
+            }
           });
-          // Clean OAuth params from URL
-          if (session) window.history.replaceState({}, '', '/app');
-        }
-
-        if (!session) {
-          window.location.href = '/';
-        } else {
-          isAuthenticated = true;
-          isRemoteMode = true;
-        }
-      } catch {
-        // Supabase configured but errored — allow demo mode
+        });
+        // Clean OAuth params from URL
+        if (session) window.history.replaceState({}, '', '/app');
       }
+
+      if (!session) {
+        window.location.href = '/';
+      } else {
+        isAuthenticated = true;
+        isRemoteMode = true;
+      }
+    } catch {
+      // Auth check failed — redirect to login
+      window.location.href = '/';
     }
 
     // ── Inject mode badge ──
     const badge = document.createElement('span');
-    badge.className = `app-mode-badge ${isRemoteMode ? 'remote' : 'local'}`;
-    badge.textContent = isRemoteMode ? 'Cloud Sync' : 'Local Demo';
+    badge.className = 'app-mode-badge remote';
+    badge.textContent = 'Cloud Sync';
     document.body.appendChild(badge);
 
     // ── Inject sign out button ──
@@ -110,15 +109,33 @@
       document.body.appendChild(btn);
     }
 
-    // ── First-time org setup ──
+    // ── First-time org setup + populate user profile ──
+    const user = await getUser();
     if (isRemoteMode) {
       const { VaultAPI } = await import('/src/lib/vault-api.js');
       const org = await VaultAPI.getOrg();
       if (!org) {
-        const user = await getUser();
         const domain = user?.email?.split('@')[1] || '';
         const orgName = domain ? domain.split('.')[0].charAt(0).toUpperCase() + domain.split('.')[0].slice(1) : 'My Organization';
         await VaultAPI.saveOrg({ name: orgName, domain });
+      }
+    }
+
+    // ── Populate sidebar user from auth ──
+    if (user) {
+      const name = user.user_metadata?.name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'User';
+      const avatarEl = document.getElementById('sidebar-user-avatar');
+      const nameEl = document.getElementById('sidebar-user-name');
+      const roleEl = document.getElementById('sidebar-user-role');
+      if (nameEl) nameEl.textContent = name;
+      if (roleEl) roleEl.textContent = user.email || '';
+      if (avatarEl) {
+        const avatarUrl = user.user_metadata?.avatar_url || user.user_metadata?.picture;
+        if (avatarUrl) {
+          avatarEl.innerHTML = `<img src="${avatarUrl}" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+        } else {
+          avatarEl.textContent = name.charAt(0).toUpperCase();
+        }
       }
     }
 
@@ -197,8 +214,8 @@
         <div class="vault-toolbar">
           <div class="vault-search"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="vault-search" placeholder="Search prompts, tags, content..." autocomplete="off"></div>
           <div class="vault-filters">
-            <select id="vault-filter-folder" class="vault-select"><option value="">All Folders</option></select>
-            <select id="vault-filter-dept" class="vault-select"><option value="">All Departments</option></select>
+            <div class="vault-filter-group"><select id="vault-filter-folder" class="vault-select"><option value="">All Folders</option></select><button class="vault-manage-btn" id="btn-manage-folders" title="Manage Folders"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v6M12 17v6M4.22 4.22l4.24 4.24M15.54 15.54l4.24 4.24M1 12h6M17 12h6M4.22 19.78l4.24-4.24M15.54 8.46l4.24-4.24"/></svg></button></div>
+            <div class="vault-filter-group"><select id="vault-filter-dept" class="vault-select"><option value="">All Departments</option></select><button class="vault-manage-btn" id="btn-manage-depts" title="Manage Departments"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v6M12 17v6M4.22 4.22l4.24 4.24M15.54 15.54l4.24 4.24M1 12h6M17 12h6M4.22 19.78l4.24-4.24M15.54 8.46l4.24-4.24"/></svg></button></div>
             <select id="vault-sort" class="vault-select"><option value="recent">Recent</option><option value="popular">Most Used</option><option value="rating">Top Rated</option><option value="alpha">A-Z</option></select>
           </div>
         </div>

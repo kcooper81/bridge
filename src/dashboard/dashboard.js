@@ -137,7 +137,7 @@ function renderVaultView() {
 
   document.getElementById('btn-vault-new').onclick = () => openPromptModal();
   document.getElementById('btn-vault-install-starters').onclick = async () => {
-    await VaultAPI.installStarters();
+    await VaultAPI.installDefaultStandards();
     await loadAllData();
     renderVaultView();
     showToast('Starter packs installed!');
@@ -146,6 +146,12 @@ function renderVaultView() {
   document.getElementById('vault-select-all').onchange = (e) => {
     document.querySelectorAll('.vault-row-check').forEach(cb => { cb.checked = e.target.checked; });
   };
+
+  // Folder & Department management
+  const manageFoldersBtn = document.getElementById('btn-manage-folders');
+  if (manageFoldersBtn) manageFoldersBtn.onclick = () => openManageFoldersModal();
+  const manageDeptsBtn = document.getElementById('btn-manage-depts');
+  if (manageDeptsBtn) manageDeptsBtn.onclick = () => openManageDepartmentsModal();
 }
 
 function renderVaultFilters() {
@@ -480,6 +486,108 @@ function gatherPromptFields() {
     exampleInput: document.getElementById('pf-example-in').value.trim(),
     exampleOutput: document.getElementById('pf-example-out').value.trim(),
   };
+}
+
+// ═══════════════════════════════════════
+//  FOLDER & DEPARTMENT MANAGEMENT
+// ═══════════════════════════════════════
+
+function openManageFoldersModal() {
+  const folderColors = ['#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#06b6d4', '#f97316'];
+  const folderIcons = ['folder', 'megaphone', 'headphones', 'code', 'users', 'trending-up'];
+
+  const folderRows = allFolders.map(f => `
+    <div class="manage-row" data-id="${f.id}">
+      <span class="manage-row-color" style="background:${f.color || '#8b5cf6'}"></span>
+      <span class="manage-row-name">${esc(f.name)}</span>
+      <span class="manage-row-count">${allPrompts.filter(p => p.folderId === f.id).length} prompts</span>
+      <button class="vault-action-btn vault-action-danger manage-row-delete" data-id="${f.id}" title="Delete">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+      </button>
+    </div>
+  `).join('') || '<p class="text-muted">No folders yet</p>';
+
+  showModal('Manage Folders', `
+    <div class="manage-list" id="manage-folder-list">${folderRows}</div>
+    <div class="manage-add-form">
+      <input type="text" id="new-folder-name" class="form-input" placeholder="New folder name...">
+      <select id="new-folder-color" class="form-input form-input-sm">${folderColors.map(c => `<option value="${c}" style="background:${c}">${c}</option>`).join('')}</select>
+      <button class="btn btn-primary btn-sm" id="btn-add-folder">Add</button>
+    </div>
+  `, [{ label: 'Done', class: 'btn btn-secondary', action: 'close' }]);
+
+  document.getElementById('btn-add-folder').addEventListener('click', async () => {
+    const name = document.getElementById('new-folder-name').value.trim();
+    if (!name) { showToast('Enter a folder name', 'error'); return; }
+    const color = document.getElementById('new-folder-color').value;
+    await VaultAPI.saveFolder({ name, color, icon: 'folder' });
+    await loadAllData();
+    closeModal();
+    openManageFoldersModal();
+    renderVaultFilters();
+    showToast('Folder created');
+  });
+
+  document.querySelectorAll('.manage-row-delete').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const id = btn.dataset.id;
+      const count = allPrompts.filter(p => p.folderId === id).length;
+      if (count > 0 && !confirm(`This folder has ${count} prompts. Delete anyway? Prompts will be unassigned.`)) return;
+      await VaultAPI.deleteFolder(id);
+      await loadAllData();
+      closeModal();
+      openManageFoldersModal();
+      renderVaultFilters();
+      showToast('Folder deleted');
+    });
+  });
+}
+
+function openManageDepartmentsModal() {
+  const deptRows = allDepartments.map(d => `
+    <div class="manage-row" data-id="${d.id}">
+      <span class="manage-row-name">${esc(d.name)}</span>
+      <span class="manage-row-count">${allPrompts.filter(p => p.departmentId === d.id).length} prompts</span>
+      <button class="vault-action-btn vault-action-danger manage-row-delete" data-id="${d.id}" title="Delete">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+      </button>
+    </div>
+  `).join('') || '<p class="text-muted">No departments yet</p>';
+
+  showModal('Manage Departments', `
+    <div class="manage-list" id="manage-dept-list">${deptRows}</div>
+    <div class="manage-add-form">
+      <input type="text" id="new-dept-name" class="form-input" placeholder="New department name...">
+      <button class="btn btn-primary btn-sm" id="btn-add-dept">Add</button>
+    </div>
+  `, [{ label: 'Done', class: 'btn btn-secondary', action: 'close' }]);
+
+  document.getElementById('btn-add-dept').addEventListener('click', async () => {
+    const name = document.getElementById('new-dept-name').value.trim();
+    if (!name) { showToast('Enter a department name', 'error'); return; }
+    await VaultAPI.saveDepartment({ name });
+    await loadAllData();
+    closeModal();
+    openManageDepartmentsModal();
+    renderVaultFilters();
+    showToast('Department created');
+  });
+
+  document.querySelectorAll('.manage-row-delete').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const id = btn.dataset.id;
+      const count = allPrompts.filter(p => p.departmentId === id).length;
+      if (count > 0 && !confirm(`This department has ${count} prompts. Delete anyway? Prompts will be unassigned.`)) return;
+      await VaultAPI.deleteDepartment(id);
+      await loadAllData();
+      closeModal();
+      openManageDepartmentsModal();
+      renderVaultFilters();
+      showToast('Department deleted');
+    });
+  });
 }
 
 // ═══════════════════════════════════════

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ContextIQ — AI Prompt Vault</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <link rel="stylesheet" href="../dashboard/dashboard.css">
+  <link rel="stylesheet" href="/src/dashboard/dashboard.css">
   <style>
     /* ═══ Auth Page Styles ═══ */
     .auth-page {
@@ -267,12 +267,12 @@
         <button type="submit" class="auth-submit" id="signup-btn">Create Account</button>
       </form>
 
-      <a href="app.html" class="auth-demo-link" id="demo-link">Skip to demo mode (no account needed)</a>
+      <a href="/app" class="auth-demo-link" id="demo-link">Skip to demo mode (no account needed)</a>
     </div>
   </div>
 
   <script type="module">
-    import { isConfigured, signIn, signUp, signInWithOAuth, getSession } from '../lib/supabase-client.js';
+    import { isConfigured, signIn, signUp, signInWithOAuth, getSession } from '/src/lib/supabase-client.js';
 
     const authPage = document.getElementById('auth-page');
     const errorEl = document.getElementById('auth-error');
@@ -295,7 +295,7 @@
       try {
         const session = await getSession();
         if (session) {
-          window.location.href = 'app.html';
+          window.location.href = '/app';
         }
       } catch { /* not logged in */ }
     }
@@ -335,7 +335,7 @@
       btn.textContent = 'Signing in...';
       try {
         await signIn(email, password);
-        window.location.href = 'app.html';
+        window.location.href = '/app';
       } catch (err) {
         showError(err.message || 'Sign in failed');
       }

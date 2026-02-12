@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ContextIQ — Prompt Vault</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <link rel="stylesheet" href="../dashboard/dashboard.css">
+  <link rel="stylesheet" href="/src/dashboard/dashboard.css">
   <style>
     .app-signout-btn {
       position: fixed;
@@ -39,12 +39,12 @@
 <body>
   <!-- Mode badge + sign out injected by JS -->
   <script type="module">
-    import { isConfigured, getSession, getUser, signOut } from '../lib/supabase-client.js';
+    import { isConfigured, getSession, getUser, signOut } from '/src/lib/supabase-client.js';
 
     // resetRemoteState is exported from vault-api
     let resetRemoteState = () => {};
     try {
-      const vaultMod = await import('../lib/vault-api.js');
+      const vaultMod = await import('/src/lib/vault-api.js');
       if (vaultMod.resetRemoteState) resetRemoteState = vaultMod.resetRemoteState;
     } catch { /* ignore */ }
 
@@ -56,7 +56,7 @@
       try {
         const session = await getSession();
         if (!session) {
-          window.location.href = 'index.html';
+          window.location.href = '/';
         } else {
           isAuthenticated = true;
           isRemoteMode = true;
@@ -82,14 +82,14 @@
           await signOut();
           resetRemoteState();
         } catch { /* ignore */ }
-        window.location.href = 'index.html';
+        window.location.href = '/';
       });
       document.body.appendChild(btn);
     }
 
     // ── First-time org setup ──
     if (isRemoteMode) {
-      const { VaultAPI } = await import('../lib/vault-api.js');
+      const { VaultAPI } = await import('/src/lib/vault-api.js');
       const org = await VaultAPI.getOrg();
       if (!org) {
         const user = await getUser();
@@ -102,7 +102,7 @@
     // ── Load the dashboard module ──
     const script = document.createElement('script');
     script.type = 'module';
-    script.src = '../dashboard/dashboard.js';
+    script.src = '/src/dashboard/dashboard.js';
     document.body.appendChild(script);
   </script>
 

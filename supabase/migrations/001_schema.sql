@@ -218,8 +218,11 @@ ALTER TABLE collection_prompts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE standards ENABLE ROW LEVEL SECURITY;
 ALTER TABLE usage_events ENABLE ROW LEVEL SECURITY;
 
--- Profiles: users can read all profiles in their org, update their own
+-- Profiles: users can ALWAYS read their own profile + read all in their org
+-- The id = auth.uid() clause is critical for new users whose org_id is still NULL,
+-- since NULL = NULL evaluates to false and would lock them out of their own profile.
 CREATE POLICY profiles_select ON profiles FOR SELECT USING (
+  id = auth.uid() OR
   org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
 );
 CREATE POLICY profiles_update ON profiles FOR UPDATE USING (id = auth.uid());
@@ -325,11 +328,21 @@ CREATE POLICY usage_events_insert ON usage_events FOR INSERT WITH CHECK (
 CREATE OR REPLACE FUNCTION handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO profiles (id, email, name, role)
+  INSERT INTO profiles (id, email, name, avatar_url, role)
   VALUES (
     NEW.id,
-    NEW.email,
-    COALESCE(NEW.raw_user_meta_data->>'name', split_part(NEW.email, '@', 1)),
+    COALESCE(NEW.email, NEW.raw_user_meta_data->>'email', ''),
+    COALESCE(
+      NEW.raw_user_meta_data->>'name',
+      NEW.raw_user_meta_data->>'full_name',
+      NEW.raw_user_meta_data->>'preferred_username',
+      split_part(COALESCE(NEW.email, ''), '@', 1)
+    ),
+    COALESCE(
+      NEW.raw_user_meta_data->>'avatar_url',
+      NEW.raw_user_meta_data->>'picture',
+      ''
+    ),
     'admin'
   );
   RETURN NEW;

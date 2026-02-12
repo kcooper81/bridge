@@ -53,39 +53,62 @@
     let isRemoteMode = false;
 
     try {
-      // Check if this is an OAuth callback (has code param or hash tokens)
+      // Check if this is an OAuth callback (has code param, hash tokens, or /auth/callback path)
       const isOAuthCallback = new URLSearchParams(window.location.search).has('code') ||
-        window.location.hash.includes('access_token');
+        window.location.hash.includes('access_token') ||
+        window.location.pathname === '/auth/callback';
 
-      let session = await getSession();
+      const { getClient } = await import('/src/lib/supabase-client.js');
+      const client = await getClient();
 
-      // If no session yet but this is an OAuth callback, wait for token exchange
-      if (!session && isOAuthCallback) {
-        const { getClient } = await import('/src/lib/supabase-client.js');
-        const client = await getClient();
-        session = await new Promise((resolve) => {
-          const timeout = setTimeout(() => resolve(null), 5000);
+      // If this is an OAuth callback, wait for the session to be established
+      // before checking. Supabase PKCE exchanges the code asynchronously.
+      if (isOAuthCallback) {
+        // Subscribe to auth state changes FIRST, then check session.
+        // This avoids the race where the exchange completes between
+        // getSession() and onAuthStateChange subscription.
+        let session = await new Promise((resolve) => {
+          const timeout = setTimeout(() => resolve(null), 8000);
           const { data: { subscription } } = client.auth.onAuthStateChange((event, s) => {
-            if (event === 'SIGNED_IN' && s) {
+            // Handle both INITIAL_SESSION (session already exists) and
+            // SIGNED_IN (session just established from code exchange)
+            if ((event === 'INITIAL_SESSION' || event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && s) {
               clearTimeout(timeout);
               subscription.unsubscribe();
               resolve(s);
             }
           });
         });
-        // Clean OAuth params from URL
-        if (session) window.history.replaceState({}, '', '/app');
-      }
 
-      if (!session) {
-        window.location.href = '/';
+        // Fallback: try getSession in case events were missed
+        if (!session) {
+          const { data: { session: fallbackSession } } = await client.auth.getSession();
+          session = fallbackSession;
+        }
+
+        if (session) {
+          // Clean OAuth params from URL
+          window.history.replaceState({}, '', '/app');
+          isAuthenticated = true;
+          isRemoteMode = true;
+        } else {
+          window.location.href = '/';
+          return;
+        }
       } else {
+        // Normal page load — check for existing session
+        let session = await getSession();
+        if (!session) {
+          window.location.href = '/';
+          return;
+        }
         isAuthenticated = true;
         isRemoteMode = true;
       }
-    } catch {
-      // Auth check failed — redirect to login
+    } catch (err) {
+      console.error('Auth error:', err);
       window.location.href = '/';
+      return;
     }
 
     // ── Inject mode badge ──
@@ -110,14 +133,25 @@
     }
 
     // ── First-time org setup + populate user profile ──
-    const user = await getUser();
-    if (isRemoteMode) {
-      const { VaultAPI } = await import('/src/lib/vault-api.js');
-      const org = await VaultAPI.getOrg();
-      if (!org) {
-        const domain = user?.email?.split('@')[1] || '';
-        const orgName = domain ? domain.split('.')[0].charAt(0).toUpperCase() + domain.split('.')[0].slice(1) : 'My Organization';
-        await VaultAPI.saveOrg({ name: orgName, domain });
+    let user = null;
+    try {
+      user = await getUser();
+    } catch (err) {
+      console.error('Failed to get user:', err);
+    }
+
+    if (isRemoteMode && user) {
+      try {
+        const { VaultAPI } = await import('/src/lib/vault-api.js');
+        const org = await VaultAPI.getOrg();
+        if (!org) {
+          const domain = user?.email?.split('@')[1] || '';
+          const orgName = domain ? domain.split('.')[0].charAt(0).toUpperCase() + domain.split('.')[0].slice(1) : 'My Organization';
+          await VaultAPI.saveOrg({ name: orgName, domain });
+        }
+      } catch (err) {
+        console.error('Org setup error:', err);
+        // Non-fatal — dashboard can still load
       }
     }
 

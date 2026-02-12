@@ -294,6 +294,14 @@
     const formSignup = document.getElementById('form-signup');
     const tabs = document.querySelectorAll('.auth-tab');
 
+    // Check for error params from failed OAuth redirects
+    const urlParams = new URLSearchParams(window.location.search);
+    const authError = urlParams.get('error') || urlParams.get('error_description');
+    if (authError) {
+      showError(decodeURIComponent(authError));
+      window.history.replaceState({}, '', '/');
+    }
+
     // Check if Supabase is configured
     if (!isConfigured()) {
       setupNotice.classList.remove('hidden');

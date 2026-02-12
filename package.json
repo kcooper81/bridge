@@ -1,0 +1,6 @@
+{
+  "name": "contextiq-bridge",
+  "version": "0.9.0",
+  "private": true,
+  "description": "ContextIQ — AI Prompt Vault & Context Bridge"
+}

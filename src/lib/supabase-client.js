@@ -90,7 +90,7 @@ export async function signInWithOAuth(provider) {
   const client = await getClient();
   const { data, error } = await client.auth.signInWithOAuth({
     provider, // 'google', 'github', 'azure', etc.
-    options: { redirectTo: `${window.location.origin}/src/web/app.html` },
+    options: { redirectTo: `${window.location.origin}/app` },
   });
   if (error) throw error;
   return data;

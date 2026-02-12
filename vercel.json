@@ -1,0 +1,17 @@
+{
+  "buildCommand": null,
+  "outputDirectory": ".",
+  "framework": null,
+  "rewrites": [
+    { "source": "/", "destination": "/src/web/index.html" },
+    { "source": "/app", "destination": "/src/web/app.html" }
+  ],
+  "headers": [
+    {
+      "source": "/src/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=3600" }
+      ]
+    }
+  ]
+}

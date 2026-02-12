@@ -54,7 +54,30 @@
 
     if (isConfigured()) {
       try {
-        const session = await getSession();
+        // Check if this is an OAuth callback (has code param or hash tokens)
+        const isOAuthCallback = new URLSearchParams(window.location.search).has('code') ||
+          window.location.hash.includes('access_token');
+
+        let session = await getSession();
+
+        // If no session yet but this is an OAuth callback, wait for token exchange
+        if (!session && isOAuthCallback) {
+          const { getClient } = await import('/src/lib/supabase-client.js');
+          const client = await getClient();
+          session = await new Promise((resolve) => {
+            const timeout = setTimeout(() => resolve(null), 5000);
+            const { data: { subscription } } = client.auth.onAuthStateChange((event, s) => {
+              if (event === 'SIGNED_IN' && s) {
+                clearTimeout(timeout);
+                subscription.unsubscribe();
+                resolve(s);
+              }
+            });
+          });
+          // Clean OAuth params from URL
+          if (session) window.history.replaceState({}, '', '/app');
+        }
+
         if (!session) {
           window.location.href = '/';
         } else {

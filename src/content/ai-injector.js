@@ -1,5 +1,5 @@
-// ContextIQ AI Injector Content Script v0.6.0
-// Bulletproof detection: history interception, MutationObserver, real-time capture
+// ContextIQ AI Injector Content Script v1.0
+// Simplified UX: minimal FAB, clean menu, clear actions
 // Runs on all URLs — exits fast if not an AI tool
 
 (async () => {
@@ -376,7 +376,6 @@
   let activeTool = detectActiveTool();
 
   // --- Intercept History API for SPA navigation ---
-  // This catches pushState/replaceState which popstate does NOT fire for
 
   const _pushState = history.pushState;
   const _replaceState = history.replaceState;
@@ -410,20 +409,17 @@
       if (!window.__contextiq_ui_ready) {
         initUI(activeTool);
       } else {
-        // Update existing UI with new tool info
         updateToolDisplay(activeTool);
-        // Notify background of tool change
         notifyToolDetected(activeTool);
       }
     }
   }
 
   window.addEventListener('contextiq:navigation', () => {
-    // Small delay to let DOM settle after SPA navigation
     setTimeout(onNavigation, 300);
   });
 
-  // --- Notify background of detected tool (for badge + context menu) ---
+  // --- Notify background of detected tool ---
 
   function notifyToolDetected(tool) {
     try {
@@ -438,7 +434,7 @@
     }
   }
 
-  // --- Listen for messages from background (re-injection, quick-bridge) ---
+  // --- Listen for messages from background ---
 
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type === 'PING_CONTENT_SCRIPT') {
@@ -460,7 +456,6 @@
     }
 
     if (message.type === 'QUICK_BRIDGE') {
-      // Triggered by Alt+B or context menu
       if (activeTool) {
         const conversation = activeTool.getConversation();
         const artifacts = activeTool.getArtifacts();
@@ -485,25 +480,22 @@
     }
 
     if (message.type === 'INSERT_PROMPT') {
-      // Insert prompt text into the active AI tool's input
       const text = message.text || '';
       let inserted = false;
 
       if (activeTool && activeTool.getInput) {
-        // Try to find and fill the input area
         const selectors = [
-          'textarea[data-id="root"]', // ChatGPT
-          'div.ProseMirror[contenteditable="true"]', // Claude
-          'div[contenteditable="true"]', // Gemini, others
-          'textarea', // Generic
-          'div[role="textbox"]', // Some tools
+          'textarea[data-id="root"]',
+          'div.ProseMirror[contenteditable="true"]',
+          'div[contenteditable="true"]',
+          'textarea',
+          'div[role="textbox"]',
         ];
 
         for (const sel of selectors) {
           const el = document.querySelector(sel);
           if (el) {
             if (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT') {
-              // Set value and dispatch input event for React/Vue
               const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
                 window.HTMLTextAreaElement.prototype, 'value'
               )?.set || Object.getOwnPropertyDescriptor(
@@ -519,7 +511,6 @@
               el.focus();
               inserted = true;
             } else {
-              // ContentEditable div
               el.focus();
               el.textContent = text;
               el.dispatchEvent(new Event('input', { bubbles: true }));
@@ -556,19 +547,15 @@
   notifyToolDetected(activeTool);
   initUI(activeTool);
 
-  // --- SPA Navigation Watcher (for pages not yet detected) ---
+  // --- SPA Navigation Watcher ---
 
   function watchForAITool() {
-    // Use MutationObserver to detect when chat UI elements appear
     let detected = false;
     let recheckCount = 0;
-    const maxRechecks = 120; // 60 seconds
 
     const observer = new MutationObserver(() => {
       if (detected) return;
       recheckCount++;
-
-      // Check every few mutations, not every single one
       if (recheckCount % 5 !== 0) return;
 
       const tool = detectActiveTool();
@@ -588,7 +575,6 @@
       subtree: true,
     });
 
-    // Also poll as fallback (MutationObserver can miss some dynamic loading)
     const poll = setInterval(() => {
       if (detected) {
         clearInterval(poll);
@@ -607,7 +593,6 @@
       }
     }, 2000);
 
-    // Stop after 60 seconds to avoid battery drain
     setTimeout(() => {
       if (!detected) {
         observer.disconnect();
@@ -615,7 +600,6 @@
       }
     }, 60000);
 
-    // Listen for navigation events even while watching
     window.addEventListener('contextiq:navigation', () => {
       if (detected) return;
       setTimeout(() => {
@@ -653,6 +637,8 @@
   function updateToolDisplay(tool) {
     const toolNameEl = document.querySelector('#menu-tool-name');
     if (toolNameEl) toolNameEl.textContent = tool.name;
+    const fabTool = document.querySelector('#contextiq-fab-tool');
+    if (fabTool) fabTool.textContent = tool.name;
   }
 
   // --- Build and Init the UI ---
@@ -664,7 +650,7 @@
     const container = document.createElement('div');
     container.id = 'contextiq-inject-btn';
     container.innerHTML = `
-      <!-- Bridge Notification Bar -->
+      <!-- Bridge Notification Bar (appears when context is ready to inject) -->
       <div class="contextiq-bridge-bar hidden" id="contextiq-bridge-bar">
         <div class="contextiq-bridge-bar-icon">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -673,70 +659,61 @@
           </svg>
         </div>
         <div class="contextiq-bridge-bar-content">
-          <span class="contextiq-bridge-bar-label">Continue from <strong id="bridge-bar-tool"></strong></span>
+          <span class="contextiq-bridge-bar-label">Pick up where you left off in <strong id="bridge-bar-tool"></strong></span>
           <span class="contextiq-bridge-bar-topic" id="bridge-bar-topic"></span>
         </div>
-        <button class="contextiq-bridge-bar-action" id="bridge-bar-insert">Insert context</button>
+        <button class="contextiq-bridge-bar-action" id="bridge-bar-insert">Paste into chat</button>
         <button class="contextiq-bridge-bar-dismiss" id="bridge-bar-dismiss">&times;</button>
       </div>
 
-      <!-- FAB -->
-      <div class="contextiq-fab" title="ContextIQ — bridge your AI conversations">
+      <!-- FAB — compact, icon-first -->
+      <div class="contextiq-fab" title="ContextIQ — save & bridge your AI conversations">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/>
           <path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
         </svg>
-        <span class="contextiq-fab-label" id="contextiq-fab-label">Bridge</span>
         <span class="contextiq-fab-badge hidden" id="contextiq-badge"></span>
-        <span class="contextiq-fab-status" id="contextiq-fab-status">${esc(tool.name)}</span>
       </div>
 
-      <!-- Menu Panel -->
+      <!-- Menu Panel — simplified -->
       <div class="contextiq-menu hidden">
         <div class="contextiq-menu-header">
-          <span class="contextiq-menu-title">AI Bridge</span>
-          <span class="contextiq-menu-tool" id="menu-tool-name">${esc(tool.name)}</span>
+          <div class="contextiq-menu-header-left">
+            <span class="contextiq-menu-title">ContextIQ</span>
+            <span class="contextiq-menu-tool" id="menu-tool-name">${esc(tool.name)}</span>
+          </div>
           ${tool.detected === 'heuristic' ? '<span class="contextiq-menu-detected">auto-detected</span>' : ''}
         </div>
 
-        <div class="contextiq-menu-project" id="menu-project">Loading...</div>
-        <div class="contextiq-menu-stats" id="menu-stats"></div>
-
-        <!-- Live capture status -->
+        <!-- Live capture indicator (compact) -->
         <div class="contextiq-live-status" id="live-status">
           <span class="contextiq-live-dot"></span>
-          <span class="contextiq-live-text" id="live-text">Watching for conversation...</span>
+          <span class="contextiq-live-text" id="live-text">Listening for conversation...</span>
         </div>
 
-        <!-- Cross-tool conversations -->
+        <!-- Recent conversations from other tools -->
         <div class="contextiq-threads" id="menu-threads"></div>
 
-        <!-- Actions -->
-        <div class="contextiq-menu-section">
-          <div class="contextiq-menu-actions">
-            <button class="contextiq-btn contextiq-btn-bridge" id="btn-smart-bridge" title="Generate a smart continuation prompt" disabled>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/>
-                <path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
-              </svg>
-              Bridge Context
-            </button>
-            <button class="contextiq-btn contextiq-btn-copy" id="btn-copy" title="Copy to clipboard" disabled>
-              Copy
-            </button>
-          </div>
+        <!-- Actions — 2 clear buttons -->
+        <div class="contextiq-menu-actions">
+          <button class="contextiq-btn contextiq-btn-save" id="btn-save" title="Save this conversation to your library">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+              <polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>
+            </svg>
+            Save conversation
+          </button>
+          <button class="contextiq-btn contextiq-btn-copy" id="btn-copy" title="Copy conversation to clipboard" disabled>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+            </svg>
+            Copy
+          </button>
         </div>
 
-        <div class="contextiq-menu-section">
-          <div class="contextiq-menu-actions">
-            <button class="contextiq-btn contextiq-btn-save" id="btn-save" title="Save this conversation to your active project">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
-                <polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>
-              </svg>
-              Save This Chat
-            </button>
-          </div>
+        <!-- Keyboard shortcut hint -->
+        <div class="contextiq-menu-hint">
+          Press <kbd>Alt+B</kbd> to quick-bridge this conversation
         </div>
       </div>
     `;
@@ -746,19 +723,14 @@
     const fab = container.querySelector('.contextiq-fab');
     const menu = container.querySelector('.contextiq-menu');
     const badge = container.querySelector('#contextiq-badge');
-    const fabLabel = container.querySelector('#contextiq-fab-label');
-    const fabStatus = container.querySelector('#contextiq-fab-status');
     const bridgeBar = container.querySelector('#contextiq-bridge-bar');
     const bridgeBarTool = container.querySelector('#bridge-bar-tool');
     const bridgeBarTopic = container.querySelector('#bridge-bar-topic');
     const bridgeBarInsert = container.querySelector('#bridge-bar-insert');
     const bridgeBarDismiss = container.querySelector('#bridge-bar-dismiss');
-    const menuProject = container.querySelector('#menu-project');
-    const menuStats = container.querySelector('#menu-stats');
     const menuThreads = container.querySelector('#menu-threads');
     const liveStatus = container.querySelector('#live-status');
     const liveText = container.querySelector('#live-text');
-    const btnSmartBridge = container.querySelector('#btn-smart-bridge');
     const btnCopy = container.querySelector('#btn-copy');
     const btnSave = container.querySelector('#btn-save');
 
@@ -767,7 +739,7 @@
     let isMenuOpen = false;
     let bridgeBarDismissed = false;
 
-    // --- Real-time Conversation Capture via MutationObserver ---
+    // --- Real-time Conversation Capture ---
 
     let liveConversationCount = 0;
     let liveCodeBlockCount = 0;
@@ -776,7 +748,6 @@
       let debounceTimer = null;
 
       const liveObserver = new MutationObserver(() => {
-        // Debounce to avoid excessive processing during streaming
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(() => {
           const conversation = activeTool.getConversation();
@@ -789,24 +760,23 @@
             liveConversationCount = newTurnCount;
             liveCodeBlockCount = newCodeCount;
 
-            // Update live status indicator
             const parts = [];
             if (newTurnCount > 0) parts.push(`${newTurnCount} turns`);
-            if (newCodeCount > 0) parts.push(`${newCodeCount} code`);
-            if (artifacts.images.length > 0) parts.push(`${artifacts.images.length} img`);
+            if (newCodeCount > 0) parts.push(`${newCodeCount} code blocks`);
+            if (artifacts.images.length > 0) parts.push(`${artifacts.images.length} images`);
 
             if (parts.length > 0) {
-              liveText.textContent = `Capturing: ${parts.join(', ')}`;
+              liveText.textContent = `Captured: ${parts.join(', ')}`;
               liveStatus.classList.add('active');
+              btnCopy.disabled = false;
             } else {
-              liveText.textContent = 'Watching for conversation...';
+              liveText.textContent = 'Listening for conversation...';
               liveStatus.classList.remove('active');
             }
           }
         }, 1000);
       });
 
-      // Watch the main content area for changes
       liveObserver.observe(document.body, {
         childList: true,
         subtree: true,
@@ -816,7 +786,7 @@
 
     setupLiveCapture();
 
-    // --- Proactive Bridge Notification ---
+    // --- Bridge Notification ---
 
     async function checkBridgeNotification() {
       if (bridgeBarDismissed) return;
@@ -842,7 +812,7 @@
       }
     }
 
-    // --- Pending Bridge Check (from popup "Bridge to..." action) ---
+    // --- Pending Bridge Check ---
 
     async function checkPendingBridge() {
       try {
@@ -850,7 +820,7 @@
         if (resp && resp.bridge) {
           const bridge = resp.bridge;
           bridgeBarTool.textContent = bridge.sourceToolName || 'another tool';
-          bridgeBarTopic.textContent = bridge.topic ? `"${bridge.topic}"` : 'Bridged artifact ready';
+          bridgeBarTopic.textContent = bridge.topic ? `"${bridge.topic}"` : 'Context ready to paste';
           bridgeBar.classList.remove('hidden');
           bridgePrompt = bridge.text;
           badge.textContent = '!';
@@ -865,7 +835,7 @@
                 : !input.textContent.trim();
               if (isEmpty) {
                 injectIntoInput(input, bridge.text);
-                showFeedback(`Bridged from ${bridge.sourceToolName} — context injected`);
+                showFeedback(`Context from ${bridge.sourceToolName} pasted`);
                 bridgeBar.classList.add('hidden');
                 bridgeBarDismissed = true;
               }
@@ -882,7 +852,6 @@
       return false;
     }
 
-    // Check for pending bridge first, then fall back to regular notification
     setTimeout(async () => {
       const hadPending = await checkPendingBridge();
       if (!hadPending) {
@@ -904,7 +873,7 @@
         const input = activeTool.getInput();
         if (input) {
           injectIntoInput(input, bridgePrompt);
-          showFeedback('Bridge context inserted');
+          showFeedback('Context pasted into chat');
           bridgeBar.classList.add('hidden');
           bridgeBarDismissed = true;
           return;
@@ -919,17 +888,17 @@
           const input = activeTool.getInput();
           if (input) {
             injectIntoInput(input, resp.prompt);
-            showFeedback('Bridge context inserted');
+            showFeedback('Context pasted into chat');
           } else {
-            showFeedback('Could not find input field');
+            showFeedback('Could not find the chat input');
           }
           bridgeBar.classList.add('hidden');
           bridgeBarDismissed = true;
         } else {
-          showFeedback('No bridge context available');
+          showFeedback('No context available yet');
         }
       } catch {
-        showFeedback('Failed to generate bridge prompt');
+        showFeedback('Could not load context');
       }
     });
 
@@ -948,26 +917,15 @@
       }
     });
 
-    // Smart bridge
-    btnSmartBridge.addEventListener('click', async (e) => {
-      e.stopPropagation();
-      if (!bridgePrompt) return;
-      const input = activeTool.getInput();
-      if (input) {
-        injectIntoInput(input, bridgePrompt);
-        showFeedback('Bridge context injected');
-      }
-      isMenuOpen = false;
-      menu.classList.add('hidden');
-    });
-
     // Copy
     btnCopy.addEventListener('click', async (e) => {
       e.stopPropagation();
-      const text = bridgePrompt || contextText;
+      const conversation = activeTool.getConversation();
+      const artifacts = activeTool.getArtifacts();
+      const text = buildCopyText(activeTool.name, conversation, artifacts);
       if (!text) return;
       await navigator.clipboard.writeText(text);
-      showFeedback('Copied to clipboard');
+      showFeedback('Conversation copied');
     });
 
     // Save
@@ -976,7 +934,7 @@
       const conversation = activeTool.getConversation();
       const artifacts = activeTool.getArtifacts();
       if (!conversation.length && !artifacts.codeBlocks.length && !artifacts.images.length) {
-        showFeedback('No conversation to save');
+        showFeedback('No conversation to save yet');
         return;
       }
       try {
@@ -992,9 +950,9 @@
         const parts = [`${conversation.length} turns`];
         if (artifacts.codeBlocks.length) parts.push(`${artifacts.codeBlocks.length} code blocks`);
         if (artifacts.images.length) parts.push(`${artifacts.images.length} images`);
-        showFeedback(`Saved ${parts.join(', ')} from ${activeTool.name}`);
+        showFeedback(`Saved: ${parts.join(', ')}`);
       } catch {
-        showFeedback('Failed to save conversation');
+        showFeedback('Could not save — try again');
       }
     });
 
@@ -1002,41 +960,22 @@
 
     async function loadMenuData() {
       try {
-        const [ctxResp, projResp, bridgeResp, notifResp] = await Promise.all([
+        const [ctxResp, bridgeResp, notifResp] = await Promise.all([
           chrome.runtime.sendMessage({ type: 'GET_CONTEXT_FOR_AI' }),
-          chrome.runtime.sendMessage({ type: 'GET_ACTIVE_PROJECT' }),
           chrome.runtime.sendMessage({ type: 'GENERATE_BRIDGE_PROMPT', currentTool: activeTool.name }),
           chrome.runtime.sendMessage({ type: 'GET_BRIDGE_NOTIFICATION', currentTool: activeTool.name }),
         ]);
 
         contextText = ctxResp.context || '';
         bridgePrompt = bridgeResp?.prompt || '';
-        const project = projResp.project;
 
-        // Update tool name in header
         const toolNameEl = container.querySelector('#menu-tool-name');
         if (toolNameEl) toolNameEl.textContent = activeTool.name;
 
-        if (project) {
-          menuProject.textContent = project.name;
-          const itemCount = project.items?.length || 0;
-          const convCount = notifResp?.totalConversations || 0;
-          const tools = notifResp?.toolsUsed || [];
-          let statsText = `${itemCount} resources`;
-          if (convCount > 0) statsText += ` · ${convCount} conversation${convCount !== 1 ? 's' : ''} from ${tools.join(', ')}`;
-          menuStats.textContent = statsText;
-          menuStats.style.display = 'block';
-        } else {
-          menuProject.textContent = 'No active project';
-          menuStats.style.display = 'none';
-        }
-
         renderThreads(notifResp);
-        btnCopy.disabled = !contextText && !bridgePrompt;
-        btnSmartBridge.disabled = !bridgePrompt;
+        btnCopy.disabled = !contextText && !bridgePrompt && liveConversationCount === 0;
       } catch (err) {
-        menuProject.textContent = 'Error loading context';
-        menuStats.textContent = err.message;
+        // Silently handle errors
       }
     }
 
@@ -1044,15 +983,15 @@
       if (!notifResp || !notifResp.hasContext) {
         menuThreads.innerHTML = `
           <div class="contextiq-threads-empty">
-            <span>No cross-tool conversations yet</span>
-            <span class="contextiq-threads-hint">Chat on other AI tools and ContextIQ will bridge the context here</span>
+            <span>No conversations from other AI tools yet</span>
+            <span class="contextiq-threads-hint">Chat in another AI tool and it will show up here for easy bridging</span>
           </div>
         `;
         return;
       }
       chrome.runtime.sendMessage({ type: 'GET_AI_BRIDGE_SUMMARY' }).then(summary => {
         if (!summary || !summary.threads || summary.threads.length === 0) {
-          menuThreads.innerHTML = `<div class="contextiq-threads-empty"><span>No threads found</span></div>`;
+          menuThreads.innerHTML = `<div class="contextiq-threads-empty"><span>No conversations found</span></div>`;
           return;
         }
         const threadHtml = summary.threads
@@ -1074,16 +1013,16 @@
             `;
           }).join('');
         if (threadHtml) {
-          menuThreads.innerHTML = `<div class="contextiq-threads-label">From other tools</div>${threadHtml}`;
+          menuThreads.innerHTML = `<div class="contextiq-threads-label">From other AI tools</div>${threadHtml}`;
         } else {
-          menuThreads.innerHTML = `<div class="contextiq-threads-empty"><span>All conversations are on ${activeTool.name}</span></div>`;
+          menuThreads.innerHTML = `<div class="contextiq-threads-empty"><span>All recent conversations are on ${activeTool.name}</span></div>`;
         }
       }).catch(() => {
         menuThreads.innerHTML = '';
       });
     }
 
-    // --- Auto-save conversation + artifacts periodically ---
+    // --- Auto-save conversation periodically ---
     let lastSavedHash = '';
     setInterval(async () => {
       try {
@@ -1130,7 +1069,7 @@
                 });
                 if (bridgeResp?.prompt) {
                   injectIntoInput(input, bridgeResp.prompt);
-                  showFeedback('Bridge context auto-injected');
+                  showFeedback('Context auto-pasted');
                   return;
                 }
               } catch {
@@ -1140,7 +1079,7 @@
               const ctxResp = await chrome.runtime.sendMessage({ type: 'GET_CONTEXT_FOR_AI' });
               if (!ctxResp?.context) return;
               injectIntoInput(input, ctxResp.context);
-              showFeedback('Context auto-injected');
+              showFeedback('Context auto-pasted');
             };
 
             input.addEventListener('focus', autoInjectOnFocus, { once: true });
@@ -1168,7 +1107,6 @@
       input.value = prefix + existing;
       input.dispatchEvent(new Event('input', { bubbles: true }));
       input.dispatchEvent(new Event('change', { bubbles: true }));
-      // Also set selection at end to trigger auto-resize
       input.setSelectionRange(input.value.length, input.value.length);
       input.focus();
     } else {
@@ -1177,7 +1115,6 @@
       input.innerHTML = prefix.replace(/\n/g, '<br>') + existingHtml;
       input.dispatchEvent(new Event('input', { bubbles: true }));
       input.focus();
-      // Move caret to end
       const range = document.createRange();
       range.selectNodeContents(input);
       range.collapse(false);
@@ -1185,6 +1122,22 @@
       sel.removeAllRanges();
       sel.addRange(range);
     }
+  }
+
+  function buildCopyText(toolName, conversation, artifacts) {
+    const lines = [`[From ${toolName} via ContextIQ]`, ''];
+    if (artifacts.codeBlocks?.length > 0) {
+      for (const block of artifacts.codeBlocks.slice(0, 5)) {
+        lines.push('```' + (block.language || ''), block.code.slice(0, 2000), '```', '');
+      }
+    }
+    if (conversation.length > 0) {
+      for (const turn of conversation.slice(-6)) {
+        const role = turn.role === 'user' ? 'You' : toolName;
+        lines.push(`${role}: ${turn.text.length > 300 ? turn.text.slice(0, 300) + '...' : turn.text}`);
+      }
+    }
+    return lines.join('\n');
   }
 
   function showFeedback(message) {

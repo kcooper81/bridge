@@ -12,17 +12,20 @@
     <header class="header">
       <div class="header-left">
         <div class="logo">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/>
             <path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
           </svg>
-          <span class="logo-text">ContextIQ</span>
+          <div class="logo-info">
+            <span class="logo-text">ContextIQ</span>
+            <span class="logo-tagline">Prompts & AI Bridge</span>
+          </div>
         </div>
       </div>
       <div class="header-right">
-        <button id="btn-open-vault" class="vault-btn" title="Open Vault Dashboard">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          <span>Vault</span>
+        <button id="btn-open-vault" class="vault-btn" title="Open full dashboard">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          <span>Dashboard</span>
         </button>
         <button id="btn-settings" class="icon-btn" title="Settings">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -37,11 +40,12 @@
     <nav class="main-tabs">
       <button class="main-tab active" data-tab="prompts">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-        Prompts
+        <span class="main-tab-label">My Prompts</span>
       </button>
       <button class="main-tab" data-tab="bridge">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
-        Bridge
+        <span class="main-tab-label">AI Bridge</span>
+        <span class="bridge-badge hidden" id="bridge-badge"></span>
       </button>
     </nav>
 
@@ -54,9 +58,9 @@
       <div class="prompt-toolbar">
         <div class="prompt-search-wrap">
           <svg class="search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="text" id="prompt-search" class="prompt-search-input" placeholder="Search prompts...">
+          <input type="text" id="prompt-search" class="prompt-search-input" placeholder="Search your prompts...">
         </div>
-        <button class="prompt-add-btn" id="btn-new-prompt" title="Create prompt">
+        <button class="prompt-add-btn" id="btn-new-prompt" title="Create a new prompt">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </button>
       </div>
@@ -85,13 +89,27 @@
         <!-- Empty State -->
         <div class="prompt-empty" id="prompt-empty">
           <div class="prompt-empty-icon">
-            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
           </div>
-          <div class="prompt-empty-title">No prompts yet</div>
-          <div class="prompt-empty-desc">Get started with our curated starter packs or create your own prompts.</div>
+          <div class="prompt-empty-title">Your prompt library</div>
+          <div class="prompt-empty-desc">Save reusable prompts here. Use them in any AI tool with one click.</div>
+          <div class="prompt-empty-steps">
+            <div class="prompt-empty-step">
+              <span class="step-num">1</span>
+              <span>Create or install starter prompts</span>
+            </div>
+            <div class="prompt-empty-step">
+              <span class="step-num">2</span>
+              <span>Click <strong>Insert</strong> to paste into any AI chat</span>
+            </div>
+            <div class="prompt-empty-step">
+              <span class="step-num">3</span>
+              <span>Organize with folders and tags</span>
+            </div>
+          </div>
           <button class="prompt-empty-btn" id="btn-install-starters">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Install Starter Packs
+            Get Started with Starter Prompts
           </button>
         </div>
 
@@ -130,15 +148,15 @@
       <div class="active-tab-bar" id="active-tab-bar">
         <div class="active-tab-indicator" id="active-tab-indicator">
           <span class="active-tab-dot"></span>
-          <span class="active-tab-text" id="active-tab-text">No AI tool detected</span>
+          <span class="active-tab-text" id="active-tab-text">Waiting for AI tool...</span>
         </div>
-        <span class="active-tab-shortcut">Alt+B to bridge</span>
+        <span class="active-tab-shortcut">Alt+B</span>
       </div>
 
       <!-- Search Bar -->
       <div class="search-bar">
         <svg class="search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" id="search-input" class="search-input" placeholder="Search artifacts, code, conversations...">
+        <input type="text" id="search-input" class="search-input" placeholder="Search captured conversations...">
       </div>
 
       <!-- Tool Filter Tabs -->
@@ -153,7 +171,7 @@
           <span class="selection-count" id="selection-count">0 selected</span>
           <button class="selection-action" id="btn-bridge-selected">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
-            Bridge selected
+            Send to AI
           </button>
           <button class="selection-action selection-action-danger" id="btn-delete-selected">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
@@ -165,13 +183,27 @@
         <!-- Empty state -->
         <div class="gallery-empty" id="gallery-empty">
           <div class="gallery-empty-icon">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/>
               <path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
             </svg>
           </div>
-          <div class="gallery-empty-title">No artifacts yet</div>
-          <div class="gallery-empty-desc">Visit any AI tool — ContextIQ captures code, images, and conversations so you can bridge them anywhere.</div>
+          <div class="gallery-empty-title">Continue conversations across AI tools</div>
+          <div class="gallery-empty-desc">ContextIQ auto-captures your chats so you can pick up where you left off in a different AI.</div>
+          <div class="gallery-empty-steps">
+            <div class="gallery-empty-step">
+              <span class="step-num">1</span>
+              <span>Chat with any AI (ChatGPT, Claude, Gemini...)</span>
+            </div>
+            <div class="gallery-empty-step">
+              <span class="step-num">2</span>
+              <span>Your conversations appear here automatically</span>
+            </div>
+            <div class="gallery-empty-step">
+              <span class="step-num">3</span>
+              <span>Click <strong>Send to AI</strong> to continue in another tool</span>
+            </div>
+          </div>
         </div>
 
         <!-- Artifacts render here -->
@@ -182,9 +214,10 @@
     <!-- Bridge Action Sheet (slides up when bridging) -->
     <div class="bridge-sheet hidden" id="bridge-sheet">
       <div class="bridge-sheet-header">
-        <span class="bridge-sheet-title" id="bridge-sheet-title">Bridge to...</span>
+        <span class="bridge-sheet-title" id="bridge-sheet-title">Continue in...</span>
         <button class="bridge-sheet-close" id="bridge-sheet-close">&times;</button>
       </div>
+      <p class="bridge-sheet-desc">Choose where to continue this conversation. The context will be copied to your clipboard and opened in the selected tool.</p>
       <div class="bridge-sheet-targets" id="bridge-sheet-targets"></div>
     </div>
 

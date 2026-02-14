@@ -13,9 +13,19 @@ const btnOpenVault = document.getElementById('btn-open-vault');
 const bridgeBadge = document.getElementById('bridge-badge');
 let activeTab = 'prompts';
 
-// Open full dashboard in new tab
-btnOpenVault.addEventListener('click', () => {
-  chrome.tabs.create({ url: chrome.runtime.getURL('src/dashboard/dashboard.html') });
+// Open full dashboard — prefer web app URL if configured, otherwise open local dashboard
+btnOpenVault.addEventListener('click', async () => {
+  try {
+    const resp = await chrome.runtime.sendMessage({ type: 'GET_SETTINGS' });
+    const webAppUrl = resp?.settings?.webAppUrl;
+    if (webAppUrl) {
+      chrome.tabs.create({ url: webAppUrl });
+    } else {
+      chrome.tabs.create({ url: chrome.runtime.getURL('src/dashboard/dashboard.html') });
+    }
+  } catch {
+    chrome.tabs.create({ url: chrome.runtime.getURL('src/dashboard/dashboard.html') });
+  }
 });
 
 // ── Tab switching ──

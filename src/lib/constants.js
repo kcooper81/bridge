@@ -19,6 +19,8 @@ export const STORAGE_KEYS = {
   PROMPT_DEPARTMENTS: 'contextiq_prompt_departments',
   PROMPT_ANALYTICS: 'contextiq_prompt_analytics',
   PROMPT_STARTER_INSTALLED: 'contextiq_prompt_starter_installed',
+  // Web App
+  WEB_APP_URL: 'contextiq_web_app_url',
   // Team & Organization
   ORG: 'contextiq_org',
   TEAMS: 'contextiq_teams',
@@ -90,6 +92,7 @@ export const DEFAULT_SETTINGS = {
   excludedDomains: [],
   showDashboard: true,
   showTimeline: true,
+  webAppUrl: '', // Vercel-hosted web app URL (e.g. https://your-app.vercel.app)
 };
 
 export const WORKSPACE_PRESETS = {

@@ -11,6 +11,7 @@ const autoInfer = document.getElementById('auto-infer');
 const injectionMode = document.getElementById('injection-mode');
 const localOnly = document.getElementById('local-only');
 const excludedDomains = document.getElementById('excluded-domains');
+const webAppUrl = document.getElementById('web-app-url');
 const btnExport = document.getElementById('btn-export');
 const btnClear = document.getElementById('btn-clear');
 const status = document.getElementById('status');
@@ -26,6 +27,7 @@ async function loadSettings() {
   injectionMode.value = settings.aiInjectionMode;
   localOnly.checked = settings.localOnly;
   excludedDomains.value = (settings.excludedDomains || []).join('\n');
+  webAppUrl.value = settings.webAppUrl || '';
 }
 
 // Save on change
@@ -55,6 +57,9 @@ function bindSaveHandlers() {
       .filter(d => d.length > 0);
     save({ excludedDomains: domains });
   });
+
+  webAppUrl.addEventListener('change', () =>
+    save({ webAppUrl: webAppUrl.value.trim() }));
 }
 
 async function save(partial) {

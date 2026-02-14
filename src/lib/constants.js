@@ -92,7 +92,7 @@ export const DEFAULT_SETTINGS = {
   excludedDomains: [],
   showDashboard: true,
   showTimeline: true,
-  webAppUrl: '', // Vercel-hosted web app URL (e.g. https://your-app.vercel.app)
+  webAppUrl: 'https://prompt-manager-git-claude-improv-dedb41-kades-projects-fcb7307c.vercel.app', // Vercel-hosted web app URL
 };
 
 export const WORKSPACE_PRESETS = {

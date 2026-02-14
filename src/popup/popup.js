@@ -14,8 +14,9 @@ const bridgeBadge = document.getElementById('bridge-badge');
 let activeTab = 'prompts';
 let isAuthenticated = false;
 
+const DEFAULT_WEB_APP_URL = 'https://prompt-manager-git-claude-improv-dedb41-kades-projects-fcb7307c.vercel.app';
+
 // ── Auth DOM ──
-const authBarGuest = document.getElementById('auth-bar-guest');
 const authBarUser = document.getElementById('auth-bar-user');
 const authBarEmail = document.getElementById('auth-bar-email');
 const authForm = document.getElementById('auth-form');
@@ -27,18 +28,14 @@ const btnAuthSignout = document.getElementById('btn-auth-signout');
 const authEmailInput = document.getElementById('auth-email');
 const authPasswordInput = document.getElementById('auth-password');
 
-// Open full dashboard — prefer web app URL if configured, otherwise open local dashboard
+// Open full dashboard — always open web app URL
 btnOpenVault.addEventListener('click', async () => {
   try {
     const resp = await chrome.runtime.sendMessage({ type: 'GET_SETTINGS' });
-    const webAppUrl = resp?.settings?.webAppUrl;
-    if (webAppUrl) {
-      chrome.tabs.create({ url: webAppUrl });
-    } else {
-      chrome.tabs.create({ url: chrome.runtime.getURL('src/dashboard/dashboard.html') });
-    }
+    const webAppUrl = resp?.settings?.webAppUrl || DEFAULT_WEB_APP_URL;
+    chrome.tabs.create({ url: webAppUrl });
   } catch {
-    chrome.tabs.create({ url: chrome.runtime.getURL('src/dashboard/dashboard.html') });
+    chrome.tabs.create({ url: DEFAULT_WEB_APP_URL });
   }
 });
 
@@ -124,7 +121,7 @@ async function loadPrompts() {
 
 function renderCategoryTabs() {
   let html = `<button class="prompt-cat-tab ${promptFilter === 'all' ? 'active' : ''}" data-folder="all">All</button>`;
-  html += `<button class="prompt-cat-tab ${promptFilter === 'favorites' ? 'active' : ''}" data-folder="favorites"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>`;
+  html += `<button class="prompt-cat-tab ${promptFilter === 'favorites' ? 'active' : ''}" data-folder="favorites"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Favs</button>`;
 
   for (const f of allFolders) {
     const icon = FOLDER_ICONS[f.icon] || FOLDER_ICONS.folder;
@@ -682,14 +679,12 @@ function bindEvents() {
 
   // ── Auth Events ──
   btnAuthShow.addEventListener('click', () => {
-    authBarGuest.classList.add('hidden');
     authForm.classList.remove('hidden');
     authEmailInput.focus();
   });
 
   btnAuthCancel.addEventListener('click', () => {
     authForm.classList.add('hidden');
-    authBarGuest.classList.remove('hidden');
     authError.classList.add('hidden');
   });
 
@@ -947,13 +942,13 @@ function timeAgoShort(ts) {
 
 function updateAuthUI() {
   if (isAuthenticated) {
-    authBarGuest.classList.add('hidden');
+    btnAuthShow.classList.add('hidden');
     authForm.classList.add('hidden');
     authBarUser.classList.remove('hidden');
   } else {
     authBarUser.classList.add('hidden');
     authForm.classList.add('hidden');
-    authBarGuest.classList.remove('hidden');
+    btnAuthShow.classList.remove('hidden');
   }
 }
 

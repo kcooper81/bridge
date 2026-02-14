@@ -12,6 +12,20 @@ const btnSettings = document.getElementById('btn-settings');
 const btnOpenVault = document.getElementById('btn-open-vault');
 const bridgeBadge = document.getElementById('bridge-badge');
 let activeTab = 'prompts';
+let isAuthenticated = false;
+
+// ── Auth DOM ──
+const authBarGuest = document.getElementById('auth-bar-guest');
+const authBarUser = document.getElementById('auth-bar-user');
+const authBarEmail = document.getElementById('auth-bar-email');
+const authForm = document.getElementById('auth-form');
+const authError = document.getElementById('auth-error');
+const btnAuthShow = document.getElementById('btn-auth-show');
+const btnAuthSubmit = document.getElementById('btn-auth-submit');
+const btnAuthCancel = document.getElementById('btn-auth-cancel');
+const btnAuthSignout = document.getElementById('btn-auth-signout');
+const authEmailInput = document.getElementById('auth-email');
+const authPasswordInput = document.getElementById('auth-password');
 
 // Open full dashboard — prefer web app URL if configured, otherwise open local dashboard
 btnOpenVault.addEventListener('click', async () => {
@@ -666,6 +680,34 @@ async function deleteArtifacts(indices) {
 function bindEvents() {
   btnSettings.addEventListener('click', () => chrome.runtime.openOptionsPage());
 
+  // ── Auth Events ──
+  btnAuthShow.addEventListener('click', () => {
+    authBarGuest.classList.add('hidden');
+    authForm.classList.remove('hidden');
+    authEmailInput.focus();
+  });
+
+  btnAuthCancel.addEventListener('click', () => {
+    authForm.classList.add('hidden');
+    authBarGuest.classList.remove('hidden');
+    authError.classList.add('hidden');
+  });
+
+  btnAuthSubmit.addEventListener('click', handleSignIn);
+  authPasswordInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') handleSignIn();
+  });
+
+  btnAuthSignout.addEventListener('click', async () => {
+    try {
+      await chrome.runtime.sendMessage({ type: 'AUTH_SIGN_OUT' });
+      isAuthenticated = false;
+      updateAuthUI();
+      showToast('Signed out');
+      await loadPrompts();
+    } catch { showToast('Error signing out'); }
+  });
+
   // Main tab switching
   document.querySelector('.main-tabs').addEventListener('click', (e) => {
     const tab = e.target.closest('.main-tab');
@@ -900,24 +942,89 @@ function timeAgoShort(ts) {
 }
 
 // ═══════════════════════════════════════
+//  AUTH
+// ═══════════════════════════════════════
+
+function updateAuthUI() {
+  if (isAuthenticated) {
+    authBarGuest.classList.add('hidden');
+    authForm.classList.add('hidden');
+    authBarUser.classList.remove('hidden');
+  } else {
+    authBarUser.classList.add('hidden');
+    authForm.classList.add('hidden');
+    authBarGuest.classList.remove('hidden');
+  }
+}
+
+async function checkAuthStatus() {
+  try {
+    const resp = await chrome.runtime.sendMessage({ type: 'AUTH_STATUS' });
+    isAuthenticated = resp?.authenticated || false;
+    if (resp?.user?.email) authBarEmail.textContent = resp.user.email;
+    updateAuthUI();
+  } catch {
+    isAuthenticated = false;
+    updateAuthUI();
+  }
+}
+
+async function handleSignIn() {
+  const email = authEmailInput.value.trim();
+  const password = authPasswordInput.value;
+  if (!email || !password) { showAuthError('Enter email and password'); return; }
+
+  btnAuthSubmit.disabled = true;
+  btnAuthSubmit.textContent = 'Signing in...';
+  authError.classList.add('hidden');
+
+  try {
+    const resp = await chrome.runtime.sendMessage({ type: 'AUTH_SIGN_IN', email, password });
+    if (resp?.success) {
+      isAuthenticated = true;
+      authBarEmail.textContent = email;
+      authPasswordInput.value = '';
+      updateAuthUI();
+      showToast('Signed in — prompts synced from Vault');
+      await loadPrompts();
+    } else {
+      showAuthError(resp?.error || 'Sign in failed');
+    }
+  } catch (err) {
+    showAuthError(err.message || 'Connection error');
+  }
+
+  btnAuthSubmit.disabled = false;
+  btnAuthSubmit.textContent = 'Sign in';
+}
+
+function showAuthError(msg) {
+  authError.textContent = msg;
+  authError.classList.remove('hidden');
+}
+
+// ═══════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════
 
 async function init() {
   bindEvents();
+  // Check auth status first
+  await checkAuthStatus();
   // Load the active tab (prompts by default)
   await loadPrompts();
   // Also check bridge status to show badge
   loadActiveTabStatus();
-  // Check if starters need installing
-  try {
-    const resp = await chrome.runtime.sendMessage({ type: 'PROMPT_IS_STARTER_INSTALLED' });
-    if (!resp?.installed) {
-      // Auto-install starters on first popup open
-      await chrome.runtime.sendMessage({ type: 'PROMPT_INSTALL_STARTERS' });
-      await loadPrompts();
-    }
-  } catch {}
+  // Check if starters need installing (only in local mode)
+  if (!isAuthenticated) {
+    try {
+      const resp = await chrome.runtime.sendMessage({ type: 'PROMPT_IS_STARTER_INSTALLED' });
+      if (!resp?.installed) {
+        await chrome.runtime.sendMessage({ type: 'PROMPT_INSTALL_STARTERS' });
+        await loadPrompts();
+      }
+    } catch {}
+  }
 }
 
 init();

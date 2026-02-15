@@ -1,4 +1,4 @@
-// ContextIQ Background Service Worker v0.6.0
+// TeamPrompt Background Service Worker v0.6.0
 // Handles tab tracking, activity capture, time tracking, project inference,
 // AI tool detection, context menus, badge management, and messaging
 
@@ -156,15 +156,15 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   const sourceTool = detectedTools[tab.id]?.toolName || 'Web page';
 
   if (info.selectionText) {
-    bridgeText = `[Bridged from ${sourceTool} via ContextIQ]\n\nSelected text:\n${info.selectionText}\n\nPlease continue working with this context.`;
+    bridgeText = `[Bridged from ${sourceTool} via TeamPrompt]\n\nSelected text:\n${info.selectionText}\n\nPlease continue working with this context.`;
   } else if (info.srcUrl) {
-    bridgeText = `[Bridged from ${sourceTool} via ContextIQ]\n\nImage: ${info.srcUrl}\n\nPlease analyze or continue working with this image.`;
+    bridgeText = `[Bridged from ${sourceTool} via TeamPrompt]\n\nImage: ${info.srcUrl}\n\nPlease analyze or continue working with this image.`;
   } else {
     // Bridge full conversation
     try {
       const resp = await chrome.tabs.sendMessage(tab.id, { type: 'QUICK_BRIDGE' });
       if (resp && !resp.error) {
-        const lines = [`[Bridged from ${resp.toolName} via ContextIQ]`];
+        const lines = [`[Bridged from ${resp.toolName} via TeamPrompt]`];
         if (resp.codeBlocks?.length > 0) {
           lines.push('\nCode:');
           for (const block of resp.codeBlocks.slice(0, 3)) {
@@ -184,7 +184,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
         bridgeText = lines.join('\n');
       }
     } catch {
-      bridgeText = `[Bridged from ${sourceTool} via ContextIQ]\n\nPage: ${tab.title}\nURL: ${tab.url}\n\nPlease continue working with this context.`;
+      bridgeText = `[Bridged from ${sourceTool} via TeamPrompt]\n\nPage: ${tab.title}\nURL: ${tab.url}\n\nPlease continue working with this context.`;
     }
   }
 
@@ -490,7 +490,7 @@ chrome.commands.onCommand.addListener(async (command) => {
         }
 
         // Build bridge text and store as pending
-        const lines = [`[Bridged from ${resp.toolName} via ContextIQ]`];
+        const lines = [`[Bridged from ${resp.toolName} via TeamPrompt]`];
         if (resp.codeBlocks?.length > 0) {
           lines.push('\nCode:');
           for (const block of resp.codeBlocks.slice(0, 5)) {

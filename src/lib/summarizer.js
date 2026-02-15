@@ -1,4 +1,4 @@
-// ContextIQ Lightweight AI Summarizer
+// TeamPrompt Lightweight AI Summarizer
 // Generates project summaries using either a remote API or local heuristics
 
 import { getSettings, saveProject } from './storage.js';

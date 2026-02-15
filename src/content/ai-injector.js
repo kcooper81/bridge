@@ -1,4 +1,4 @@
-// ContextIQ AI Injector Content Script v1.0
+// TeamPrompt AI Injector Content Script v1.0
 // Simplified UX: minimal FAB, clean menu, clear actions
 // Runs on all URLs — exits fast if not an AI tool
 
@@ -6,6 +6,14 @@
   // Prevent double-init
   if (window.__contextiq_injected) return;
   window.__contextiq_injected = true;
+
+  // Apply theme to injected root element
+  try {
+    const themeData = await chrome.storage.local.get('teamprompt_theme');
+    const theme = themeData.teamprompt_theme || 'dark';
+    // Will be applied to #contextiq-inject-btn when it's created
+    window.__teamprompt_theme = theme;
+  } catch { /* ignore */ }
 
   // --- Shared artifact extraction helpers ---
 
@@ -649,6 +657,9 @@
 
     const container = document.createElement('div');
     container.id = 'contextiq-inject-btn';
+    if (window.__teamprompt_theme && window.__teamprompt_theme !== 'dark') {
+      container.setAttribute('data-theme', window.__teamprompt_theme);
+    }
     container.innerHTML = `
       <!-- Bridge Notification Bar (appears when context is ready to inject) -->
       <div class="contextiq-bridge-bar hidden" id="contextiq-bridge-bar">
@@ -667,7 +678,7 @@
       </div>
 
       <!-- FAB — compact, icon-first -->
-      <div class="contextiq-fab" title="ContextIQ — save & bridge your AI conversations">
+      <div class="contextiq-fab" title="TeamPrompt — save & bridge your AI conversations">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/>
           <path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
@@ -679,7 +690,7 @@
       <div class="contextiq-menu hidden">
         <div class="contextiq-menu-header">
           <div class="contextiq-menu-header-left">
-            <span class="contextiq-menu-title">ContextIQ</span>
+            <span class="contextiq-menu-title">TeamPrompt</span>
             <span class="contextiq-menu-tool" id="menu-tool-name">${esc(tool.name)}</span>
           </div>
           ${tool.detected === 'heuristic' ? '<span class="contextiq-menu-detected">auto-detected</span>' : ''}
@@ -1130,7 +1141,7 @@
   }
 
   function buildCopyText(toolName, conversation, artifacts) {
-    const lines = [`[From ${toolName} via ContextIQ]`, ''];
+    const lines = [`[From ${toolName} via TeamPrompt]`, ''];
     if (artifacts.codeBlocks?.length > 0) {
       for (const block of artifacts.codeBlocks.slice(0, 5)) {
         lines.push('```' + (block.language || ''), block.code.slice(0, 2000), '```', '');

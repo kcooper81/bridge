@@ -1,12 +1,38 @@
-/* ContextIQ AI Bridge v1.0 — Simplified, non-congested */
+/* TeamPrompt AI Bridge v1.0 — Simplified, non-congested */
 
 #contextiq-inject-btn {
+  --tp-bg: #13151f;
+  --tp-bg-elevated: #1b1e2c;
+  --tp-border: rgba(255, 255, 255, 0.08);
+  --tp-text: #e6e8f0;
+  --tp-text-secondary: rgba(255, 255, 255, 0.55);
+  --tp-text-muted: rgba(255, 255, 255, 0.30);
+  --tp-accent: #3b82f6;
+  --tp-accent-light: #60a5fa;
+  --tp-accent-bg: rgba(59, 130, 246, 0.12);
+  --tp-green: #22c55e;
+  --tp-green-bg: rgba(34, 197, 94, 0.10);
+
   position: fixed;
   bottom: 24px;
   right: 24px;
   z-index: 99999;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+}
+
+#contextiq-inject-btn[data-theme="light"] {
+  --tp-bg: #ffffff;
+  --tp-bg-elevated: #f1f5f9;
+  --tp-border: rgba(0, 0, 0, 0.10);
+  --tp-text: #0f172a;
+  --tp-text-secondary: rgba(0, 0, 0, 0.55);
+  --tp-text-muted: rgba(0, 0, 0, 0.30);
+  --tp-accent: #2563eb;
+  --tp-accent-light: #3b82f6;
+  --tp-accent-bg: rgba(37, 99, 235, 0.10);
+  --tp-green: #16a34a;
+  --tp-green-bg: rgba(22, 163, 74, 0.08);
 }
 
 /* ─── Bridge Notification Bar ─── */
@@ -20,10 +46,10 @@
   align-items: center;
   gap: 10px;
   background: linear-gradient(135deg, #111111 0%, #1a1a2e 100%);
-  border: 1px solid rgba(139, 92, 246, 0.25);
+  border: 1px solid rgba(59, 130, 246, 0.25);
   border-radius: 14px;
   padding: 10px 14px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 20px rgba(139, 92, 246, 0.08);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 20px rgba(59, 130, 246, 0.08);
   animation: contextiq-bar-in 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 100000;
   max-width: 480px;
@@ -41,9 +67,9 @@
   align-items: center;
   justify-content: center;
   width: 28px; height: 28px;
-  background: rgba(139, 92, 246, 0.15);
+  background: rgba(59, 130, 246, 0.15);
   border-radius: 8px;
-  color: #a78bfa;
+  color: #60a5fa;
   flex-shrink: 0;
 }
 
@@ -55,7 +81,7 @@
 .contextiq-bridge-bar-label {
   font-size: 11px; color: rgba(255, 255, 255, 0.6); font-weight: 500;
 }
-.contextiq-bridge-bar-label strong { color: #a78bfa; font-weight: 700; }
+.contextiq-bridge-bar-label strong { color: #60a5fa; font-weight: 700; }
 
 .contextiq-bridge-bar-topic {
   font-size: 12px; color: #f0f0f0; font-weight: 600;
@@ -63,12 +89,12 @@
 }
 
 .contextiq-bridge-bar-action {
-  background: #8b5cf6; color: white; border: none; border-radius: 999px;
+  background: #3b82f6; color: white; border: none; border-radius: 999px;
   padding: 6px 14px; font-size: 11px; font-weight: 700; font-family: inherit;
   cursor: pointer; white-space: nowrap; transition: all 0.2s ease; letter-spacing: -0.1px;
 }
 .contextiq-bridge-bar-action:hover {
-  background: #a78bfa; box-shadow: 0 4px 16px rgba(139, 92, 246, 0.3); transform: translateY(-1px);
+  background: #60a5fa; box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3); transform: translateY(-1px);
 }
 
 .contextiq-bridge-bar-dismiss {
@@ -87,23 +113,23 @@
   height: 44px;
   background: linear-gradient(135deg, #111111 0%, #1a1a2e 100%);
   color: #f0f0f0;
-  border: 1px solid rgba(139, 92, 246, 0.2);
+  border: 1px solid rgba(59, 130, 246, 0.2);
   border-radius: 50%;
   cursor: pointer;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 10px rgba(139, 92, 246, 0.06);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 10px rgba(59, 130, 246, 0.06);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
 }
 
 .contextiq-fab svg {
-  color: #a78bfa;
-  filter: drop-shadow(0 0 6px rgba(139, 92, 246, 0.3));
+  color: #60a5fa;
+  filter: drop-shadow(0 0 6px rgba(59, 130, 246, 0.3));
 }
 
 .contextiq-fab:hover {
   background: linear-gradient(135deg, #161616 0%, #222244 100%);
-  border-color: rgba(139, 92, 246, 0.35);
-  box-shadow: 0 6px 28px rgba(0, 0, 0, 0.6), 0 0 16px rgba(139, 92, 246, 0.12);
+  border-color: rgba(59, 130, 246, 0.35);
+  box-shadow: 0 6px 28px rgba(0, 0, 0, 0.6), 0 0 16px rgba(59, 130, 246, 0.12);
   transform: translateY(-2px) scale(1.05);
 }
 .contextiq-fab:active { transform: scale(0.95); }
@@ -111,17 +137,17 @@
 .contextiq-fab-auto { animation: contextiq-pulse 3s ease-in-out infinite; }
 
 @keyframes contextiq-pulse {
-  0%, 100% { box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); border-color: rgba(139, 92, 246, 0.2); }
-  50% { box-shadow: 0 4px 28px rgba(139, 92, 246, 0.25); border-color: rgba(139, 92, 246, 0.4); }
+  0%, 100% { box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); border-color: rgba(59, 130, 246, 0.2); }
+  50% { box-shadow: 0 4px 28px rgba(59, 130, 246, 0.25); border-color: rgba(59, 130, 246, 0.4); }
 }
 
 .contextiq-fab-badge {
   position: absolute; top: -4px; right: -4px;
   width: 18px; height: 18px; border-radius: 50%;
-  background: #8b5cf6; color: white;
+  background: #3b82f6; color: white;
   font-size: 9px; font-weight: 700;
   display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.4);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
   animation: contextiq-badge-in 0.3s ease;
 }
 .contextiq-fab-badge.hidden { display: none; }
@@ -166,8 +192,8 @@
 }
 
 .contextiq-menu-tool {
-  font-size: 10px; font-weight: 600; color: #a78bfa;
-  background: rgba(139, 92, 246, 0.12);
+  font-size: 10px; font-weight: 600; color: #60a5fa;
+  background: rgba(59, 130, 246, 0.12);
   padding: 3px 10px; border-radius: 999px; letter-spacing: 0.2px;
 }
 
@@ -222,7 +248,7 @@
 .contextiq-thread-icon {
   display: flex; align-items: center; justify-content: center;
   width: 26px; height: 26px; border-radius: 7px; flex-shrink: 0;
-  color: #a78bfa; background: rgba(139, 92, 246, 0.08);
+  color: #60a5fa; background: rgba(59, 130, 246, 0.08);
 }
 
 .contextiq-thread-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }

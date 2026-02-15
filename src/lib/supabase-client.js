@@ -1,4 +1,4 @@
-// ContextIQ — Supabase Client
+// TeamPrompt — Supabase Client
 // Lightweight wrapper around Supabase JS SDK.
 // Loads the SDK from CDN in web mode or uses the bundled version.
 //

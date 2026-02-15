@@ -1,4 +1,4 @@
-// ContextIQ Context Extractor Content Script
+// TeamPrompt Context Extractor Content Script
 // Runs on all pages to extract deep page context: metadata, headings, code blocks, selections
 
 (() => {

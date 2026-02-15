@@ -1,6 +1,9 @@
-// ContextIQ Onboarding Script
+// TeamPrompt Onboarding Script
 
 import { markOnboardingComplete } from '../lib/storage.js';
+import { initTheme } from '../lib/theme.js';
+
+initTheme();
 
 const steps = document.querySelectorAll('.step');
 const dots = document.querySelectorAll('.dot');

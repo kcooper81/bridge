@@ -1,4 +1,4 @@
-// ContextIQ — Supabase REST Client (no SDK required)
+// TeamPrompt — Supabase REST Client (no SDK required)
 // Works in service workers, popup, and any extension context.
 // Uses fetch() directly against Supabase's PostgREST + GoTrue auth APIs.
 

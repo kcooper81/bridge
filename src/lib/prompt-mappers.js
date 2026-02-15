@@ -1,4 +1,4 @@
-// ContextIQ — Shared DB row <-> App shape mappers
+// TeamPrompt — Shared DB row <-> App shape mappers
 // Used by vault-api.js (web mode) and supabase-rest.js (extension mode)
 
 export function dbPromptToApp(row) {

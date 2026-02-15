@@ -1,4 +1,4 @@
-/* ContextIQ Dashboard — Vault-style Dark Mode UI */
+/* TeamPrompt Dashboard — Vault-style Dark Mode UI */
 
 /* ═══════════════════════════════════════
    RESET & BASE
@@ -7,31 +7,54 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg-base: #0f1117;
-  --bg-surface: #161822;
-  --bg-elevated: #1e2030;
-  --bg-hover: #252840;
-  --bg-active: #2d3052;
-  --border: #2a2d40;
-  --border-light: #353850;
-  --text-primary: #e4e6f0;
-  --text-secondary: #9396a8;
-  --text-muted: #6b6e82;
-  --accent: #8b5cf6;
-  --accent-hover: #7c3aed;
-  --accent-surface: rgba(139, 92, 246, 0.12);
-  --green: #10b981;
-  --green-surface: rgba(16, 185, 129, 0.12);
+  --bg-base: #0c0e16;
+  --bg-surface: #13151f;
+  --bg-elevated: #1b1e2c;
+  --bg-hover: #23273a;
+  --bg-active: #2c3148;
+  --border: #262b3e;
+  --border-light: #353b54;
+  --text-primary: #e6e8f0;
+  --text-secondary: #8c91a8;
+  --text-muted: #5d627a;
+  --accent: #3b82f6;
+  --accent-hover: #2563eb;
+  --accent-surface: rgba(59, 130, 246, 0.10);
+  --green: #22c55e;
+  --green-surface: rgba(34, 197, 94, 0.10);
   --red: #ef4444;
-  --red-surface: rgba(239, 68, 68, 0.12);
-  --yellow: #f59e0b;
+  --red-surface: rgba(239, 68, 68, 0.10);
+  --yellow: #eab308;
   --blue: #3b82f6;
   --sidebar-width: 240px;
   --radius: 8px;
   --radius-sm: 6px;
   --radius-lg: 12px;
-  --shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  --shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
   --transition: 150ms ease;
+}
+
+[data-theme="light"] {
+  --bg-base: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-elevated: #f1f5f9;
+  --bg-hover: #e2e8f0;
+  --bg-active: #cbd5e1;
+  --border: #e2e8f0;
+  --border-light: #cbd5e1;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --accent-surface: rgba(37, 99, 235, 0.08);
+  --green: #16a34a;
+  --green-surface: rgba(22, 163, 74, 0.08);
+  --red: #dc2626;
+  --red-surface: rgba(220, 38, 38, 0.08);
+  --yellow: #ca8a04;
+  --blue: #2563eb;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 body {
@@ -1337,7 +1360,7 @@ input[type="checkbox"] {
 .loading-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(15, 17, 23, 0.92);
+  background: rgba(12, 14, 22, 0.92);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1347,6 +1370,10 @@ input[type="checkbox"] {
 }
 
 .loading-overlay.hidden { display: none; }
+
+[data-theme="light"] .loading-overlay {
+  background: rgba(248, 250, 252, 0.92);
+}
 
 .loading-spinner {
   width: 40px;
@@ -1537,6 +1564,9 @@ input[type="checkbox"] {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--border-light); }
+
+[data-theme="light"] ::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.08); }
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover { background: rgba(0, 0, 0, 0.14); }
 
 /* ═══════════════════════════════════════
    RESPONSIVE

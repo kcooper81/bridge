@@ -81,94 +81,121 @@
     <!-- ═══════════════════════════════════════ -->
     <div class="tab-content active" id="tab-prompts">
 
-      <!-- Prompt Search & Actions Bar -->
-      <div class="prompt-toolbar">
-        <div class="prompt-search-wrap">
-          <svg class="search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="text" id="prompt-search" class="prompt-search-input" placeholder="Search your prompts...">
+      <!-- Auth Required Screen (shown when not signed in) -->
+      <div class="auth-required" id="auth-required">
+        <div class="auth-req-icon">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
         </div>
-        <button class="prompt-add-btn" id="btn-new-prompt" title="Create a new prompt">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <div class="auth-req-title">Sign in to get started</div>
+        <div class="auth-req-desc">Your prompts are stored securely in the cloud so you can access them anywhere and share with your team.</div>
+        <div class="auth-req-features">
+          <div class="auth-req-feature">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <span>Synced across devices</span>
+          </div>
+          <div class="auth-req-feature">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <span>Share with your team</span>
+          </div>
+          <div class="auth-req-feature">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <span>Template library included</span>
+          </div>
+        </div>
+        <button class="auth-req-btn" id="btn-auth-required-signin">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Sign in
+        </button>
+        <div class="auth-req-hint">
+          New here? <a href="#" id="auth-req-signup-link">Create an account</a> on the web app
+        </div>
+      </div>
+
+      <!-- Sub-tabs: My Prompts | Templates (shown when authenticated) -->
+      <div class="prompt-sub-tabs hidden" id="prompt-sub-tabs">
+        <button class="prompt-sub-tab active" data-subtab="mine">My Prompts</button>
+        <button class="prompt-sub-tab" data-subtab="templates">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          Templates
         </button>
       </div>
 
-      <!-- Filter Bar: Categories only -->
-      <div class="prompt-filter-bar">
-        <div class="prompt-category-bar" id="prompt-category-bar">
-          <button class="prompt-cat-tab active" data-folder="all">All</button>
-          <button class="prompt-cat-tab" data-folder="favorites">
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            Favs
+      <!-- ── My Prompts View ── -->
+      <div class="prompt-mine-view hidden" id="prompt-mine-view">
+        <!-- Prompt Search & Actions Bar -->
+        <div class="prompt-toolbar">
+          <div class="prompt-search-wrap">
+            <svg class="search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="prompt-search" class="prompt-search-input" placeholder="Search your prompts...">
+          </div>
+          <button class="prompt-add-btn" id="btn-new-prompt" title="Create a new prompt">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           </button>
+        </div>
+
+        <!-- Filter Bar: Categories only -->
+        <div class="prompt-filter-bar">
+          <div class="prompt-category-bar" id="prompt-category-bar">
+            <button class="prompt-cat-tab active" data-folder="all">All</button>
+            <button class="prompt-cat-tab" data-folder="favorites">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              Favs
+            </button>
+          </div>
+        </div>
+
+        <!-- Prompt List -->
+        <div class="prompt-list" id="prompt-list">
+          <!-- Empty state (signed in, no prompts) -->
+          <div class="prompt-empty hidden" id="prompt-empty">
+            <div class="prompt-empty-icon">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </div>
+            <div class="prompt-empty-title">No prompts yet</div>
+            <div class="prompt-empty-desc">Create your own or add from the template library.</div>
+            <div class="prompt-empty-actions">
+              <button class="welcome-primary-btn" id="btn-empty-templates">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+                Browse Templates
+              </button>
+              <button class="welcome-secondary-btn" id="btn-empty-create">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Create New Prompt
+              </button>
+            </div>
+          </div>
+
+          <!-- No Results (shown when search yields nothing) -->
+          <div class="prompt-no-results hidden" id="prompt-no-results">
+            <div class="no-results-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </div>
+            <div class="no-results-title">No matches</div>
+            <div class="no-results-desc" id="no-results-desc">Try a different search term</div>
+          </div>
+
+          <!-- Prompt cards render here -->
+          <div id="prompt-cards"></div>
         </div>
       </div>
 
-      <!-- Prompt List -->
-      <div class="prompt-list" id="prompt-list">
-        <!-- Welcome Screen (shown when no prompts exist) -->
-        <div class="prompt-welcome" id="prompt-welcome">
-          <div class="welcome-icon">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-              <polyline points="14 2 14 8 20 8"/>
-              <line x1="16" y1="13" x2="8" y2="13"/>
-              <line x1="16" y1="17" x2="8" y2="17"/>
-            </svg>
-          </div>
-          <div class="welcome-title">Your AI Prompt Library</div>
-          <div class="welcome-desc">Save your best prompts and insert them into any AI tool with one click.</div>
-          <div class="welcome-steps">
-            <div class="welcome-step">
-              <span class="welcome-step-num">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-              </span>
-              <div class="welcome-step-text">
-                <strong>Save prompts you use often</strong>
-                <span>Create templates or load our starter collection</span>
-              </div>
-            </div>
-            <div class="welcome-step">
-              <span class="welcome-step-num">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
-              </span>
-              <div class="welcome-step-text">
-                <strong>Click Insert on any AI site</strong>
-                <span>Works with ChatGPT, Claude, Gemini & more</span>
-              </div>
-            </div>
-            <div class="welcome-step">
-              <span class="welcome-step-num">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-              </span>
-              <div class="welcome-step-text">
-                <strong>Stay organized</strong>
-                <span>Use folders and favorites to find prompts fast</span>
-              </div>
-            </div>
-          </div>
-          <div class="welcome-actions">
-            <button class="welcome-primary-btn" id="btn-install-starters">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              Load Starter Prompts
-            </button>
-            <button class="welcome-secondary-btn" id="btn-welcome-create">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              Create Your First Prompt
-            </button>
+      <!-- ── Templates View ── -->
+      <div class="template-view hidden" id="template-view">
+        <div class="template-toolbar">
+          <div class="prompt-search-wrap">
+            <svg class="search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="template-search" class="prompt-search-input" placeholder="Search templates...">
           </div>
         </div>
-
-        <!-- No Results (shown when search yields nothing) -->
-        <div class="prompt-no-results hidden" id="prompt-no-results">
-          <div class="no-results-icon">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          </div>
-          <div class="no-results-title">No matches</div>
-          <div class="no-results-desc" id="no-results-desc">Try a different search term</div>
+        <div class="template-filter-bar">
+          <div class="template-category-bar" id="template-category-bar"></div>
         </div>
-
-        <!-- Prompt cards render here -->
-        <div id="prompt-cards"></div>
+        <div class="template-list" id="template-list">
+          <div id="template-cards"></div>
+        </div>
       </div>
 
       <!-- Prompt Detail / Editor Panel (slides over) -->

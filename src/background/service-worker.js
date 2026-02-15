@@ -17,7 +17,7 @@ import { extractDomain, categorizeDomain, buildContextString, computeEngagementS
 import { inferProject, reclusterProjects } from '../lib/project-inference.js';
 import { summarizeAllProjects } from '../lib/summarizer.js';
 import { ALARM_NAMES } from '../lib/constants.js';
-import { installStarterPacks, isStarterInstalled } from '../lib/prompt-storage.js';
+// prompt-storage.js is no longer used for prompt CRUD (all via Supabase REST)
 import {
   getOrg, saveOrg,
   getTeams, getTeam, saveTeam, deleteTeam,
@@ -1272,13 +1272,13 @@ async function handleMessage(message, sender) {
     }
 
     case 'PROMPT_INSTALL_STARTERS': {
-      await installStarterPacks();
+      // Deprecated: starter packs replaced by template library
       return { success: true };
     }
 
     case 'PROMPT_IS_STARTER_INSTALLED': {
-      const installed = await isStarterInstalled();
-      return { installed };
+      // Deprecated: starter packs replaced by template library
+      return { installed: true };
     }
 
     case 'PROMPT_ADD_TEMPLATE': {
@@ -1306,23 +1306,37 @@ async function handleMessage(message, sender) {
       } catch { /* ignore */ }
       if (!prompt) return { error: 'Prompt not found' };
 
-      // Record usage
-      await recordPromptUsage(message.promptId);
+      // Record usage via Supabase
+      try {
+        const currentCount = prompt.usageCount || 0;
+        await sbRest.update('prompts', `id=eq.${message.promptId}`, {
+          usage_count: currentCount + 1,
+          last_used_at: new Date().toISOString(),
+        });
+      } catch { /* best-effort usage tracking */ }
 
       // Get department constraints if applicable
       let fullText = prompt.content;
       if (prompt.departmentId) {
-        const depts = await getDepartments();
-        const dept = depts.find(d => d.id === prompt.departmentId);
-        if (dept) {
-          const rules = [];
-          if (dept.toneRules.length) rules.push(`Tone: ${dept.toneRules.join(', ')}`);
-          if (dept.doList.length) rules.push(`Do: ${dept.doList.join('; ')}`);
-          if (dept.dontList.length) rules.push(`Don't: ${dept.dontList.join('; ')}`);
-          if (rules.length) {
-            fullText += `\n\n[${dept.name} Guidelines: ${rules.join(' | ')}]`;
+        try {
+          const orgId = await sbRest.getOrgId();
+          const deptRows = orgId
+            ? await sbRest.select('prompt_departments', `org_id=eq.${orgId}`)
+            : [];
+          const dept = deptRows.find(d => d.id === prompt.departmentId);
+          if (dept) {
+            const rules = [];
+            const toneRules = dept.tone_rules || [];
+            const doList = dept.do_list || [];
+            const dontList = dept.dont_list || [];
+            if (toneRules.length) rules.push(`Tone: ${toneRules.join(', ')}`);
+            if (doList.length) rules.push(`Do: ${doList.join('; ')}`);
+            if (dontList.length) rules.push(`Don't: ${dontList.join('; ')}`);
+            if (rules.length) {
+              fullText += `\n\n[${dept.name} Guidelines: ${rules.join(' | ')}]`;
+            }
           }
-        }
+        } catch { /* department lookup is best-effort */ }
       }
 
       // Try to insert into active tab

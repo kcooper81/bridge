@@ -9,7 +9,6 @@ const captureUrls = document.getElementById('capture-urls');
 const captureTitles = document.getElementById('capture-titles');
 const autoInfer = document.getElementById('auto-infer');
 const injectionMode = document.getElementById('injection-mode');
-const localOnly = document.getElementById('local-only');
 const excludedDomains = document.getElementById('excluded-domains');
 const webAppUrl = document.getElementById('web-app-url');
 const btnExport = document.getElementById('btn-export');
@@ -25,7 +24,6 @@ async function loadSettings() {
   captureTitles.checked = settings.captureTitles;
   autoInfer.checked = settings.autoInferProjects;
   injectionMode.value = settings.aiInjectionMode;
-  localOnly.checked = settings.localOnly;
   excludedDomains.value = (settings.excludedDomains || []).join('\n');
   webAppUrl.value = settings.webAppUrl || '';
 }
@@ -46,9 +44,6 @@ function bindSaveHandlers() {
 
   injectionMode.addEventListener('change', () =>
     save({ aiInjectionMode: injectionMode.value }));
-
-  localOnly.addEventListener('change', () =>
-    save({ localOnly: localOnly.checked }));
 
   excludedDomains.addEventListener('change', () => {
     const domains = excludedDomains.value
@@ -97,7 +92,7 @@ btnExport.addEventListener('click', async () => {
 
 // Clear data
 btnClear.addEventListener('click', async () => {
-  if (!confirm('This will permanently delete all ContextIQ data. Are you sure?')) return;
+  if (!confirm('This will clear local activity data and settings from this device. Your cloud prompts are not affected. Continue?')) return;
   await chrome.storage.local.clear();
   showStatus('All data cleared');
   setTimeout(() => loadSettings(), 500);

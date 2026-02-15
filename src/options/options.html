@@ -16,7 +16,7 @@
         </svg>
         <h1>ContextIQ Settings</h1>
       </div>
-      <p class="tagline">Configure how ContextIQ captures conversations and manages your prompts.</p>
+      <p class="tagline">Customize how ContextIQ works for you.</p>
     </header>
 
     <!-- Tracking Section -->
@@ -71,11 +71,11 @@
 
     <!-- Web App Section -->
     <section class="section">
-      <h2>Web App (Vault)</h2>
+      <h2>Web App</h2>
       <div class="setting-row">
         <div class="setting-info">
-          <label for="web-app-url">Web app URL</label>
-          <p class="setting-desc">Your Vercel-hosted ContextIQ web app URL. The Dashboard button in the popup will open this URL. Leave empty to use the local extension dashboard.</p>
+          <label for="web-app-url">Dashboard URL</label>
+          <p class="setting-desc">Your ContextIQ web dashboard URL. The Vault button in the extension opens this.</p>
         </div>
         <input type="url" id="web-app-url" placeholder="https://your-app.vercel.app" style="width: 300px; padding: 8px 12px; border: 1px solid #333; border-radius: 6px; background: #1a1a2e; color: #e0e0e0; font-size: 13px;">
       </div>
@@ -101,18 +101,8 @@
       <h2>Privacy</h2>
       <div class="setting-row">
         <div class="setting-info">
-          <label for="local-only">Local storage only</label>
-          <p class="setting-desc">Keep all data on your device. No cloud sync.</p>
-        </div>
-        <label class="toggle">
-          <input type="checkbox" id="local-only">
-          <span class="toggle-slider"></span>
-        </label>
-      </div>
-      <div class="setting-row">
-        <div class="setting-info">
           <label for="excluded-domains">Excluded domains</label>
-          <p class="setting-desc">Domains to exclude from tracking (one per line).</p>
+          <p class="setting-desc">Domains to exclude from activity tracking (one per line).</p>
         </div>
         <textarea id="excluded-domains" rows="4" placeholder="example.com&#10;private-site.org"></textarea>
       </div>
@@ -124,16 +114,16 @@
       <div class="setting-row">
         <div class="setting-info">
           <label>Export data</label>
-          <p class="setting-desc">Download all your prompts, conversations, and settings as a JSON file.</p>
+          <p class="setting-desc">Download your activity log and local settings as a JSON file. Prompts are stored in the cloud.</p>
         </div>
         <button id="btn-export" class="btn">Export</button>
       </div>
       <div class="setting-row">
         <div class="setting-info">
-          <label>Clear all data</label>
-          <p class="setting-desc">Permanently delete all prompts, conversations, and settings.</p>
+          <label>Clear local data</label>
+          <p class="setting-desc">Remove activity logs and local settings from this device. Your cloud prompts are not affected.</p>
         </div>
-        <button id="btn-clear" class="btn btn-danger">Clear Data</button>
+        <button id="btn-clear" class="btn btn-danger">Clear Local Data</button>
       </div>
     </section>
 

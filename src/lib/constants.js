@@ -83,7 +83,7 @@ export const DOMAIN_CATEGORIES = {
 
 export const DEFAULT_SETTINGS = {
   trackingEnabled: true,
-  localOnly: true,
+  localOnly: false,
   captureUrls: true,
   captureTitles: true,
   capturePageContent: true,

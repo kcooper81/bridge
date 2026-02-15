@@ -1,5 +1,5 @@
-// ContextIQ Popup v1.0 — Improved UX: Prompt Manager + AI Bridge
-// Tab-based navigation: My Prompts | AI Bridge
+// ContextIQ Popup — Cloud-first prompt manager + AI Bridge
+// Auth required for prompts. Templates separate from user prompts.
 
 import { truncate } from '../lib/utils.js';
 
@@ -13,6 +13,7 @@ const btnOpenVault = document.getElementById('btn-open-vault');
 const bridgeBadge = document.getElementById('bridge-badge');
 let activeTab = 'prompts';
 let isAuthenticated = false;
+let promptSubTab = 'mine'; // 'mine' | 'templates'
 
 const DEFAULT_WEB_APP_URL = 'https://bridge-updated.vercel.app';
 
@@ -27,6 +28,32 @@ const btnAuthCancel = document.getElementById('btn-auth-cancel');
 const btnAuthSignout = document.getElementById('btn-auth-signout');
 const authEmailInput = document.getElementById('auth-email');
 const authPasswordInput = document.getElementById('auth-password');
+
+// ── Auth Required DOM ──
+const authRequired = document.getElementById('auth-required');
+const promptSubTabs = document.getElementById('prompt-sub-tabs');
+
+// ── My Prompts DOM ──
+const promptMineView = document.getElementById('prompt-mine-view');
+const promptSearchInput = document.getElementById('prompt-search');
+const promptCategoryBar = document.getElementById('prompt-category-bar');
+const promptEmpty = document.getElementById('prompt-empty');
+const promptNoResults = document.getElementById('prompt-no-results');
+const noResultsDesc = document.getElementById('no-results-desc');
+const promptCardsEl = document.getElementById('prompt-cards');
+const promptDetail = document.getElementById('prompt-detail');
+const promptDetailTitle = document.getElementById('prompt-detail-title');
+const promptDetailBody = document.getElementById('prompt-detail-body');
+const btnNewPrompt = document.getElementById('btn-new-prompt');
+const btnPromptBack = document.getElementById('btn-prompt-back');
+const btnPromptDuplicate = document.getElementById('btn-prompt-duplicate');
+const btnPromptDelete = document.getElementById('btn-prompt-delete');
+
+// ── Template DOM ──
+const templateView = document.getElementById('template-view');
+const templateSearchInput = document.getElementById('template-search');
+const templateCategoryBar = document.getElementById('template-category-bar');
+const templateCardsEl = document.getElementById('template-cards');
 
 // Open full dashboard — always open web app URL
 btnOpenVault.addEventListener('click', async () => {
@@ -47,31 +74,55 @@ function switchTab(tab) {
   activeTab = tab;
   mainTabs.forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
   tabContents.forEach(c => c.classList.toggle('active', c.id === `tab-${tab}`));
-  if (tab === 'prompts') loadPrompts();
+  if (tab === 'prompts') updatePromptsView();
   if (tab === 'bridge') loadBridgeTab();
 }
 
 // ═══════════════════════════════════════
-//  PROMPTS TAB
+//  PROMPTS — AUTH & VIEW STATE
 // ═══════════════════════════════════════
 
-const promptSearchInput = document.getElementById('prompt-search');
-const promptCategoryBar = document.getElementById('prompt-category-bar');
-const promptEmpty = document.getElementById('prompt-empty');
-const promptCardsEl = document.getElementById('prompt-cards');
-const promptDetail = document.getElementById('prompt-detail');
-const promptDetailTitle = document.getElementById('prompt-detail-title');
-const promptDetailBody = document.getElementById('prompt-detail-body');
-const btnNewPrompt = document.getElementById('btn-new-prompt');
-const btnInstallStarters = document.getElementById('btn-install-starters');
-const btnPromptBack = document.getElementById('btn-prompt-back');
-const btnPromptDuplicate = document.getElementById('btn-prompt-duplicate');
-const btnPromptDelete = document.getElementById('btn-prompt-delete');
+function updatePromptsView() {
+  if (!isAuthenticated) {
+    // Show auth-required screen
+    authRequired.classList.remove('hidden');
+    promptSubTabs.classList.add('hidden');
+    promptMineView.classList.add('hidden');
+    templateView.classList.add('hidden');
+    return;
+  }
+
+  // Authenticated — show sub-tabs and active view
+  authRequired.classList.add('hidden');
+  promptSubTabs.classList.remove('hidden');
+
+  if (promptSubTab === 'mine') {
+    promptMineView.classList.remove('hidden');
+    templateView.classList.add('hidden');
+    loadPrompts();
+  } else {
+    promptMineView.classList.add('hidden');
+    templateView.classList.remove('hidden');
+    renderTemplates();
+  }
+}
+
+function switchPromptSubTab(subtab) {
+  promptSubTab = subtab;
+  document.querySelectorAll('.prompt-sub-tab').forEach(t =>
+    t.classList.toggle('active', t.dataset.subtab === subtab)
+  );
+  updatePromptsView();
+}
+
+// ═══════════════════════════════════════
+//  MY PROMPTS
+// ═══════════════════════════════════════
 
 let allPrompts = [];
 let allFolders = [];
 let allDepartments = [];
-let promptFilter = 'all'; // folder id or 'all' / 'favorites'
+let promptFilter = 'all';
 let promptQuery = '';
 let editingPromptId = null;
 
@@ -119,25 +170,33 @@ function renderCategoryTabs() {
 
 function renderPromptList() {
   const prompts = allPrompts;
+  const toolbar = promptMineView.querySelector('.prompt-toolbar');
+  const filterBar = promptMineView.querySelector('.prompt-filter-bar');
 
   if (prompts.length === 0) {
-    promptEmpty.classList.remove('hidden');
     promptCardsEl.innerHTML = '';
     if (promptQuery) {
-      promptEmpty.querySelector('.prompt-empty-title').textContent = 'No matches';
-      promptEmpty.querySelector('.prompt-empty-desc').textContent = `Nothing found for "${promptQuery}"`;
-      promptEmpty.querySelector('.prompt-empty-steps').classList.add('hidden');
-      btnInstallStarters.classList.add('hidden');
+      // Search with no results
+      toolbar.classList.remove('hidden');
+      filterBar.classList.remove('hidden');
+      promptEmpty.classList.add('hidden');
+      promptNoResults.classList.remove('hidden');
+      noResultsDesc.textContent = `Nothing found for "${promptQuery}"`;
     } else {
-      promptEmpty.querySelector('.prompt-empty-title').textContent = 'Your prompt library';
-      promptEmpty.querySelector('.prompt-empty-desc').textContent = 'Save reusable prompts here. Use them in any AI tool with one click.';
-      promptEmpty.querySelector('.prompt-empty-steps').classList.remove('hidden');
-      btnInstallStarters.classList.remove('hidden');
+      // Empty state — no prompts yet
+      toolbar.classList.add('hidden');
+      filterBar.classList.add('hidden');
+      promptEmpty.classList.remove('hidden');
+      promptNoResults.classList.add('hidden');
     }
     return;
   }
 
+  // Has prompts — show normal UI
+  toolbar.classList.remove('hidden');
+  filterBar.classList.remove('hidden');
   promptEmpty.classList.add('hidden');
+  promptNoResults.classList.add('hidden');
   promptCardsEl.innerHTML = prompts.map(p => renderPromptCard(p)).join('');
 }
 
@@ -170,7 +229,6 @@ function renderPromptCard(prompt) {
 }
 
 // ── Prompt Detail / Editor ──
-// The form now shows essential fields first and hides advanced options behind a toggle
 
 async function openPromptDetail(promptId) {
   editingPromptId = promptId;
@@ -203,7 +261,6 @@ async function openPromptDetail(promptId) {
   const tones = ['professional', 'casual', 'technical', 'persuasive', 'empathetic', 'engaging', 'creative', 'conversational', 'confident', 'clear'];
   const toneOptions = tones.map(t => `<option value="${t}" ${prompt.tone === t ? 'selected' : ''}>${t.charAt(0).toUpperCase() + t.slice(1)}</option>`).join('');
 
-  // Check if advanced fields have content (to auto-expand)
   const hasAdvanced = prompt.intendedOutcome || prompt.modelRecommendation || prompt.exampleInput || prompt.exampleOutput || prompt.departmentId;
 
   promptDetailBody.innerHTML = `
@@ -331,6 +388,193 @@ function closePromptDetail() {
 }
 
 // ═══════════════════════════════════════
+//  TEMPLATE LIBRARY
+// ═══════════════════════════════════════
+
+const TEMPLATE_FOLDERS = [
+  { id: 'folder-marketing', name: 'Marketing', icon: 'megaphone', color: '#fb923c' },
+  { id: 'folder-support', name: 'Support', icon: 'headphones', color: '#34d399' },
+  { id: 'folder-dev', name: 'Development', icon: 'code', color: '#60a5fa' },
+  { id: 'folder-hr', name: 'HR & People', icon: 'users', color: '#c084fc' },
+  { id: 'folder-sales', name: 'Sales', icon: 'trending-up', color: '#fb7185' },
+];
+
+const TEMPLATES = [
+  // Marketing
+  { id: 'tpl-mkt-email', title: 'Email Campaign Writer', description: 'Generate complete email campaigns with subject lines, body copy, and CTAs.', folderId: 'folder-marketing', tone: 'persuasive', tags: ['email', 'campaign', 'marketing'], content: 'Write a compelling email campaign for [product/service] targeting [audience]. Include:\n\n1. Subject line (under 50 chars, high open-rate optimized)\n2. Preview text\n3. Email body with:\n   - Hook opening line\n   - Problem statement\n   - Solution (our product)\n   - Social proof / stats\n   - Clear CTA button text\n4. P.S. line\n\nTone: [professional/casual/urgent]\nGoal: [awareness/conversion/retention]' },
+  { id: 'tpl-mkt-social', title: 'Social Media Content Creator', description: 'Create scroll-stopping social media posts for any platform.', folderId: 'folder-marketing', tone: 'engaging', tags: ['social', 'content', 'marketing'], content: 'Create a social media post for [platform] about [topic].\n\nBrand voice: [describe tone]\nTarget audience: [who]\nGoal: [engagement/traffic/awareness]\n\nInclude:\n- Hook (first line must stop the scroll)\n- Body (value-driven, 2-3 short paragraphs)\n- Call to action\n- 3-5 relevant hashtags\n- Emoji suggestions\n\nKeep it under [character limit] characters.' },
+  { id: 'tpl-mkt-seo', title: 'SEO Blog Outline Generator', description: 'Generate SEO-optimized blog outlines that rank.', folderId: 'folder-marketing', tone: 'professional', tags: ['seo', 'blog', 'content'], content: 'Create an SEO-optimized blog post outline for the keyword: "[target keyword]"\n\nInclude:\n1. SEO title (under 60 chars, keyword-first)\n2. Meta description (under 155 chars)\n3. H1 heading\n4. 5-8 H2 sections with:\n   - H2 heading (include keyword variations)\n   - 2-3 bullet points of what to cover\n5. FAQ section (3-5 questions for featured snippets)\n6. Suggested word count\n7. Related keywords to include naturally' },
+  { id: 'tpl-mkt-ad', title: 'Ad Copy Variations Generator', description: 'Create multiple ad copy angles for A/B testing.', folderId: 'folder-marketing', tone: 'persuasive', tags: ['ads', 'ppc', 'copywriting'], content: 'Generate 5 ad copy variations for [product/service].\n\nPlatform: [Google Ads/Facebook/LinkedIn/Twitter]\nTarget: [audience description]\nUSP: [unique selling proposition]\nCTA: [desired action]\n\nFor each variation provide:\n- Headline (under 30 chars for Google, under 40 for social)\n- Description (under 90 chars for Google, under 125 for social)\n\nMake each variation use a different angle:\n1. Pain point focused\n2. Benefit focused\n3. Social proof focused\n4. Urgency/scarcity\n5. Question-based' },
+  // Support
+  { id: 'tpl-sup-response', title: 'Customer Response Template', description: 'Generate empathetic, solution-focused customer responses.', folderId: 'folder-support', tone: 'empathetic', tags: ['support', 'customer', 'response'], content: 'Write a customer support response for this situation:\n\nIssue: [describe the problem]\nCustomer sentiment: [frustrated/confused/neutral/urgent]\n\nResponse should:\n1. Acknowledge the issue empathetically\n2. Explain what happened (if applicable)\n3. Provide a clear solution with steps\n4. Offer alternatives if the main solution doesn\'t work\n5. End with reassurance and next steps\n\nTone: Warm, professional, solution-focused\nMax length: 200 words' },
+  { id: 'tpl-sup-escalation', title: 'Escalation Summary Writer', description: 'Create clear escalation summaries for handoffs.', folderId: 'folder-support', tone: 'professional', tags: ['escalation', 'support', 'internal'], content: 'Write an internal escalation summary for a support ticket.\n\nCustomer: [name/account]\nIssue: [describe]\nSeverity: [low/medium/high/critical]\nSteps already taken: [what was tried]\n\nFormat:\n- One-line summary\n- Background (2-3 sentences)\n- Timeline of events\n- Steps taken and results\n- Recommended next action\n- Urgency justification' },
+  { id: 'tpl-sup-faq', title: 'FAQ Article Generator', description: 'Generate complete FAQ articles for your knowledge base.', folderId: 'folder-support', tone: 'clear', tags: ['faq', 'knowledge-base', 'documentation'], content: 'Create a comprehensive FAQ article for: [topic/feature]\n\nProduct: [product name]\nAudience: [technical level of users]\n\nGenerate 8-10 Q&A pairs covering:\n- What it is / does\n- How to get started\n- Common issues and fixes\n- Limitations / known issues\n- Related features\n\nFormat each answer:\n- Keep under 100 words\n- Use numbered steps for how-to answers\n- Bold key terms' },
+  // Development
+  { id: 'tpl-dev-review', title: 'Code Review Assistant', description: 'Thorough code review covering bugs, security, and best practices.', folderId: 'folder-dev', tone: 'technical', tags: ['code-review', 'development', 'security'], content: 'Review the following code and provide feedback:\n\n```[language]\n[paste code here]\n```\n\nPlease analyze for:\n1. **Bugs & Logic errors** — anything that would fail at runtime\n2. **Security** — injection, XSS, auth issues, OWASP top 10\n3. **Performance** — unnecessary loops, memory leaks, N+1 queries\n4. **Readability** — naming, structure, complexity\n5. **Best practices** — patterns, anti-patterns, framework conventions\n\nFor each issue found:\n- Severity: Critical / Warning / Suggestion\n- Line reference\n- Problem description\n- Suggested fix with code' },
+  { id: 'tpl-dev-debug', title: 'Debugging Assistant', description: 'Systematic debugging with root cause analysis.', folderId: 'folder-dev', tone: 'technical', tags: ['debugging', 'development', 'troubleshooting'], content: 'Help me debug this issue:\n\n**Error message:**\n```\n[paste error]\n```\n\n**What I expected:** [expected behavior]\n**What happened:** [actual behavior]\n**Environment:** [OS, language version, framework]\n\nPlease:\n1. Explain what the error means in plain English\n2. Identify the most likely root cause\n3. Provide a step-by-step fix\n4. Explain why the fix works\n5. Suggest how to prevent this in the future' },
+  { id: 'tpl-dev-tests', title: 'Test Case Generator', description: 'Generate thorough test suites including edge cases.', folderId: 'folder-dev', tone: 'technical', tags: ['testing', 'development', 'quality'], content: 'Generate comprehensive test cases for this function/feature:\n\n```[language]\n[paste code or describe feature]\n```\n\nGenerate tests covering:\n1. **Happy path** — normal expected usage (3-5 cases)\n2. **Edge cases** — boundary values, empty inputs, nulls\n3. **Error cases** — invalid inputs, network failures, auth errors\n4. **Integration** — how it works with other components\n\nFormat: Use [testing framework, e.g., Jest, pytest, Go testing]' },
+  { id: 'tpl-dev-api', title: 'API Documentation Writer', description: 'Generate complete API endpoint documentation.', folderId: 'folder-dev', tone: 'technical', tags: ['api', 'documentation', 'development'], content: 'Generate API documentation for this endpoint:\n\nMethod: [GET/POST/PUT/DELETE]\nPath: [/api/v1/...]\nPurpose: [what it does]\n\nGenerate:\n1. **Description** — 1-2 sentence overview\n2. **Authentication** — required auth method\n3. **Request** — Headers, parameters, body schema\n4. **Response** — Success + error examples\n5. **Code examples** — cURL, JavaScript (fetch), Python (requests)' },
+  // HR
+  { id: 'tpl-hr-job', title: 'Job Posting Creator', description: 'Create inclusive, compelling job postings.', folderId: 'folder-hr', tone: 'professional', tags: ['hiring', 'job-posting', 'hr'], content: 'Write a job posting for: [role title]\n\nCompany: [company name]\nLocation: [remote/hybrid/office + city]\nLevel: [junior/mid/senior/lead]\n\nInclude:\n1. Compelling headline\n2. About us (2-3 sentences)\n3. The role (day-to-day)\n4. Requirements (must-haves, 5-7 items)\n5. Nice-to-haves (3-4 items)\n6. What we offer\n7. How to apply\n\nUse inclusive language. Keep under 500 words.' },
+  { id: 'tpl-hr-interview', title: 'Interview Questions Generator', description: 'Structured interview questions by category.', folderId: 'folder-hr', tone: 'professional', tags: ['interview', 'hiring', 'assessment'], content: 'Generate interview questions for a [role title] candidate.\n\nLevel: [junior/mid/senior]\n\nGenerate 15 questions:\n- Technical (5) — foundational to advanced\n- Behavioral (5) — STAR format\n- Cultural fit (3) — company values: [list]\n- Role-specific scenario (2)\n\nFor each: include what a good answer looks like.' },
+  { id: 'tpl-hr-review', title: 'Performance Review Drafter', description: 'Draft thoughtful performance reviews with specific feedback.', folderId: 'folder-hr', tone: 'professional', tags: ['performance', 'review', 'feedback'], content: 'Help me draft a performance review for [employee name/role].\n\nReview period: [period]\nOverall rating: [exceeds/meets/below expectations]\n\nKey accomplishments:\n- [list 3-5 achievements]\n\nAreas for growth:\n- [list 2-3 areas]\n\nPlease draft:\n1. Summary (2-3 sentences)\n2. Strengths with examples\n3. Development areas (constructive)\n4. Goals for next period (SMART format)\n5. Overall assessment' },
+  // Sales
+  { id: 'tpl-sales-cold', title: 'Cold Outreach Email', description: 'Short, personalized cold emails that get responses.', folderId: 'folder-sales', tone: 'conversational', tags: ['cold-email', 'outreach', 'sales'], content: 'Write a cold outreach email to [prospect title] at [company type].\n\nOur product: [what we sell]\nTheir likely pain: [problem they face]\n\nRules:\n- Under 100 words\n- Personalized first line\n- Lead with their problem, not our product\n- One clear CTA\n- Subject line under 40 characters\n\nGenerate 3 variations:\n1. Problem-focused\n2. Curiosity-driven\n3. Social proof led' },
+  { id: 'tpl-sales-objection', title: 'Objection Handling Playbook', description: 'Handle sales objections with a proven framework.', folderId: 'folder-sales', tone: 'confident', tags: ['objection', 'sales', 'negotiation'], content: 'Create objection handling responses for selling [product/service].\n\nCommon objection: "[the objection]"\n\nProvide a response using this framework:\n1. Acknowledge — validate concern\n2. Reframe — shift perspective\n3. Evidence — data or customer story\n4. Bridge — connect to their goals\n5. Advance — next step\n\nAlso generate:\n- 3 probing questions\n- 1 email follow-up\n- When to walk away' },
+  { id: 'tpl-sales-discovery', title: 'Discovery Call Script', description: 'Structured discovery call framework that qualifies prospects.', folderId: 'folder-sales', tone: 'professional', tags: ['discovery', 'sales', 'qualification'], content: 'Create a discovery call script for selling [product/service] to [target buyer].\n\nCall duration: [15/30 min]\nGoal: [qualify/demo booking/needs assessment]\n\nStructure:\n1. Opening (30 sec) — rapport + agenda\n2. Situation questions (3)\n3. Problem questions (3)\n4. Impact questions (2)\n5. Vision questions (2)\n6. Solution bridge (60 sec pitch)\n7. Next steps — clear CTA' },
+];
+
+let templateFilter = 'all';
+let templateQuery = '';
+
+function getFilteredTemplates() {
+  let templates = TEMPLATES;
+  if (templateFilter !== 'all') {
+    templates = templates.filter(t => t.folderId === templateFilter);
+  }
+  if (templateQuery) {
+    const q = templateQuery.toLowerCase();
+    templates = templates.filter(t =>
+      t.title.toLowerCase().includes(q) ||
+      t.description.toLowerCase().includes(q) ||
+      (t.tags || []).some(tag => tag.toLowerCase().includes(q))
+    );
+  }
+  return templates;
+}
+
+function renderTemplateCategoryTabs() {
+  let html = `<button class="prompt-cat-tab ${templateFilter === 'all' ? 'active' : ''}" data-tfolder="all">All</button>`;
+  for (const f of TEMPLATE_FOLDERS) {
+    const icon = FOLDER_ICONS[f.icon] || FOLDER_ICONS.folder;
+    const isActive = templateFilter === f.id;
+    html += `<button class="prompt-cat-tab ${isActive ? 'active' : ''}" data-tfolder="${esc(f.id)}" style="${isActive ? `border-color: ${f.color}40; color: ${f.color};` : ''}">${icon} <span>${esc(f.name)}</span></button>`;
+  }
+  templateCategoryBar.innerHTML = html;
+}
+
+function renderTemplates() {
+  renderTemplateCategoryTabs();
+  const templates = getFilteredTemplates();
+  if (templates.length === 0) {
+    templateCardsEl.innerHTML = `
+      <div class="prompt-no-results">
+        <div class="no-results-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </div>
+        <div class="no-results-title">No matching templates</div>
+        <div class="no-results-desc">Try a different search or category</div>
+      </div>
+    `;
+    return;
+  }
+
+  templateCardsEl.innerHTML = templates.map(t => renderTemplateCard(t)).join('');
+}
+
+function renderTemplateCard(template) {
+  const folder = TEMPLATE_FOLDERS.find(f => f.id === template.folderId);
+  const folderBadge = folder
+    ? `<span class="template-card-folder" style="color:${folder.color};background:${folder.color}15">${FOLDER_ICONS[folder.icon] || ''} ${esc(folder.name)}</span>`
+    : '';
+
+  return `
+    <div class="template-card" data-tpl-id="${esc(template.id)}">
+      <div class="template-card-top">
+        <div class="template-card-info">
+          <div class="template-card-title">${esc(template.title)}</div>
+          <div class="template-card-desc">${esc(template.description)}</div>
+        </div>
+      </div>
+      ${folderBadge ? `<div class="template-card-meta">${folderBadge}</div>` : ''}
+      <div class="template-card-actions">
+        <button class="template-add-btn" data-tpl-id="${esc(template.id)}" title="Add this template to your prompt library">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+          Add to My Prompts
+        </button>
+        <button class="template-preview-btn" data-tpl-id="${esc(template.id)}" title="Preview template">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          Preview
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+async function addTemplateToPrompts(templateId) {
+  const template = TEMPLATES.find(t => t.id === templateId);
+  if (!template) return;
+
+  const fields = {
+    title: template.title,
+    content: template.content,
+    description: template.description,
+    tone: template.tone || 'professional',
+    tags: template.tags || [],
+  };
+
+  try {
+    const resp = await chrome.runtime.sendMessage({ type: 'PROMPT_ADD_TEMPLATE', fields });
+    if (resp?.success) {
+      showToast(`"${template.title}" added to your prompts`);
+      // Disable the button to show it's been added
+      const btn = document.querySelector(`.template-add-btn[data-tpl-id="${templateId}"]`);
+      if (btn) {
+        btn.textContent = 'Added';
+        btn.disabled = true;
+      }
+    } else {
+      showToast(resp?.error || 'Error adding template');
+    }
+  } catch {
+    showToast('Error adding template');
+  }
+}
+
+function previewTemplate(templateId) {
+  const template = TEMPLATES.find(t => t.id === templateId);
+  if (!template) return;
+
+  // Reuse the prompt detail panel for preview (read-only)
+  editingPromptId = null;
+  promptDetailTitle.textContent = 'Template Preview';
+  btnPromptDuplicate.classList.add('hidden');
+  btnPromptDelete.classList.add('hidden');
+
+  promptDetailBody.innerHTML = `
+    <div class="template-preview-content">
+      <div class="pf-group">
+        <label class="pf-label">Title</label>
+        <div class="pf-readonly">${esc(template.title)}</div>
+      </div>
+      <div class="pf-group">
+        <label class="pf-label">Description</label>
+        <div class="pf-readonly">${esc(template.description)}</div>
+      </div>
+      <div class="pf-group">
+        <label class="pf-label">Prompt Content</label>
+        <div class="pf-readonly pf-readonly-code">${esc(template.content)}</div>
+      </div>
+      ${template.tags?.length ? `<div class="pf-group"><label class="pf-label">Tags</label><div class="pf-readonly">${template.tags.map(t => esc(t)).join(', ')}</div></div>` : ''}
+      <div class="pf-actions">
+        <button type="button" class="pf-save-btn" id="tpl-preview-add" data-tpl-id="${esc(template.id)}">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+          Add to My Prompts
+        </button>
+      </div>
+    </div>
+  `;
+
+  promptDetail.classList.remove('hidden');
+
+  document.getElementById('tpl-preview-add').addEventListener('click', async (e) => {
+    const tplId = e.target.closest('[data-tpl-id]').dataset.tplId;
+    await addTemplateToPrompts(tplId);
+    closePromptDetail();
+  });
+}
+
+// ═══════════════════════════════════════
 //  BRIDGE TAB (AI Bridge)
 // ═══════════════════════════════════════
 
@@ -392,7 +636,6 @@ async function loadActiveTabStatus() {
       activeTabText.textContent = `Connected to ${resp.tool.toolName}`;
       activeTabIndicator.classList.add('active');
       activeTabBar.classList.add('detected');
-      // Show green dot on Bridge tab when AI tool detected
       bridgeBadge.classList.remove('hidden');
     } else {
       activeTabText.textContent = 'Open an AI tool to start capturing';
@@ -666,13 +909,7 @@ function bindEvents() {
   if (oauthLink) {
     oauthLink.addEventListener('click', async (e) => {
       e.preventDefault();
-      try {
-        const resp = await chrome.runtime.sendMessage({ type: 'GET_SETTINGS' });
-        const webAppUrl = resp?.settings?.webAppUrl || DEFAULT_WEB_APP_URL;
-        chrome.tabs.create({ url: webAppUrl });
-      } catch {
-        chrome.tabs.create({ url: DEFAULT_WEB_APP_URL });
-      }
+      chrome.tabs.create({ url: DEFAULT_WEB_APP_URL });
     });
   }
 
@@ -681,10 +918,24 @@ function bindEvents() {
       await chrome.runtime.sendMessage({ type: 'AUTH_SIGN_OUT' });
       isAuthenticated = false;
       updateAuthUI();
+      updatePromptsView();
       showToast('Signed out');
-      await loadPrompts();
     } catch { showToast('Error signing out'); }
   });
+
+  // Auth required screen sign-in button
+  document.getElementById('btn-auth-required-signin').addEventListener('click', () => {
+    btnAuthShow.click();
+  });
+
+  // Auth required signup link
+  const signupLink = document.getElementById('auth-req-signup-link');
+  if (signupLink) {
+    signupLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      chrome.tabs.create({ url: DEFAULT_WEB_APP_URL });
+    });
+  }
 
   // Main tab switching
   document.querySelector('.main-tabs').addEventListener('click', (e) => {
@@ -692,7 +943,13 @@ function bindEvents() {
     if (tab) switchTab(tab.dataset.tab);
   });
 
-  // ── Prompts Tab Events ──
+  // ── Prompt Sub-tab switching ──
+  document.getElementById('prompt-sub-tabs').addEventListener('click', (e) => {
+    const tab = e.target.closest('.prompt-sub-tab');
+    if (tab) switchPromptSubTab(tab.dataset.subtab);
+  });
+
+  // ── My Prompts Tab Events ──
 
   let promptSearchTimer;
   promptSearchInput.addEventListener('input', () => {
@@ -711,17 +968,16 @@ function bindEvents() {
   });
 
   btnNewPrompt.addEventListener('click', () => openPromptDetail('new'));
-  btnInstallStarters.addEventListener('click', async () => {
-    btnInstallStarters.textContent = 'Installing...';
-    btnInstallStarters.disabled = true;
-    try {
-      await chrome.runtime.sendMessage({ type: 'PROMPT_INSTALL_STARTERS' });
-      showToast('Starter prompts installed!');
-      await loadPrompts();
-    } catch { showToast('Error installing starters'); }
-    btnInstallStarters.textContent = 'Get Started with Starter Prompts';
-    btnInstallStarters.disabled = false;
-  });
+
+  // Empty state buttons
+  const btnEmptyTemplates = document.getElementById('btn-empty-templates');
+  if (btnEmptyTemplates) {
+    btnEmptyTemplates.addEventListener('click', () => switchPromptSubTab('templates'));
+  }
+  const btnEmptyCreate = document.getElementById('btn-empty-create');
+  if (btnEmptyCreate) {
+    btnEmptyCreate.addEventListener('click', () => openPromptDetail('new'));
+  }
 
   btnPromptBack.addEventListener('click', closePromptDetail);
 
@@ -784,6 +1040,40 @@ function bindEvents() {
     // Card click → open detail
     const card = e.target.closest('.prompt-card');
     if (card) openPromptDetail(card.dataset.id);
+  });
+
+  // ── Template Tab Events ──
+
+  let templateSearchTimer;
+  templateSearchInput.addEventListener('input', () => {
+    clearTimeout(templateSearchTimer);
+    templateSearchTimer = setTimeout(() => {
+      templateQuery = templateSearchInput.value.trim();
+      renderTemplates();
+    }, 200);
+  });
+
+  templateCategoryBar.addEventListener('click', (e) => {
+    const tab = e.target.closest('.prompt-cat-tab');
+    if (!tab) return;
+    templateFilter = tab.dataset.tfolder;
+    renderTemplates();
+  });
+
+  templateCardsEl.addEventListener('click', async (e) => {
+    const addBtn = e.target.closest('.template-add-btn');
+    if (addBtn) {
+      e.stopPropagation();
+      await addTemplateToPrompts(addBtn.dataset.tplId);
+      return;
+    }
+
+    const previewBtn = e.target.closest('.template-preview-btn');
+    if (previewBtn) {
+      e.stopPropagation();
+      previewTemplate(previewBtn.dataset.tplId);
+      return;
+    }
   });
 
   // ── Bridge Tab Events ──
@@ -932,8 +1222,8 @@ async function handleSignIn() {
       authBarEmail.textContent = email;
       authPasswordInput.value = '';
       updateAuthUI();
-      showToast('Signed in — prompts synced from Vault');
-      await loadPrompts();
+      updatePromptsView();
+      showToast('Signed in — prompts synced from cloud');
     } else {
       showAuthError(resp?.error || 'Sign in failed');
     }
@@ -956,22 +1246,9 @@ function showAuthError(msg) {
 
 async function init() {
   bindEvents();
-  // Check auth status first
   await checkAuthStatus();
-  // Load the active tab (prompts by default)
-  await loadPrompts();
-  // Also check bridge status to show badge
+  updatePromptsView();
   loadActiveTabStatus();
-  // Check if starters need installing (only in local mode)
-  if (!isAuthenticated) {
-    try {
-      const resp = await chrome.runtime.sendMessage({ type: 'PROMPT_IS_STARTER_INSTALLED' });
-      if (!resp?.installed) {
-        await chrome.runtime.sendMessage({ type: 'PROMPT_INSTALL_STARTERS' });
-        await loadPrompts();
-      }
-    } catch {}
-  }
 }
 
 init();

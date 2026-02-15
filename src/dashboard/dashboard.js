@@ -142,12 +142,7 @@ function renderVaultView() {
   document.getElementById('vault-sort').onchange = () => { vaultPage = 0; renderVaultTable(); };
 
   document.getElementById('btn-vault-new').onclick = () => openPromptModal();
-  document.getElementById('btn-vault-install-starters').onclick = async () => {
-    await VaultAPI.installStarters();
-    await loadAllData();
-    renderVaultView();
-    showToast('Starter prompts installed!');
-  };
+  document.getElementById('btn-vault-install-starters').onclick = () => openPromptModal();
 
   document.getElementById('vault-select-all').onchange = (e) => {
     document.querySelectorAll('.vault-row-check').forEach(cb => { cb.checked = e.target.checked; });

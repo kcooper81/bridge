@@ -1,7 +1,8 @@
-// ContextIQ Popup — Cloud-first prompt manager + AI Bridge
+// TeamPrompt Popup — Cloud-first prompt manager + AI Bridge
 // Auth required for prompts. Templates separate from user prompts.
 
 import { truncate } from '../lib/utils.js';
+import { initTheme, toggleTheme } from '../lib/theme.js';
 
 // ═══════════════════════════════════════
 //  SHARED STATE & DOM
@@ -9,13 +10,18 @@ import { truncate } from '../lib/utils.js';
 
 const toast = document.getElementById('toast');
 const btnSettings = document.getElementById('btn-settings');
+const btnToggleTheme = document.getElementById('btn-toggle-theme');
+
+// Init theme early
+initTheme();
+btnToggleTheme?.addEventListener('click', () => toggleTheme());
 const btnOpenVault = document.getElementById('btn-open-vault');
 const bridgeBadge = document.getElementById('bridge-badge');
 let activeTab = 'prompts';
 let isAuthenticated = false;
 let promptSubTab = 'mine'; // 'mine' | 'templates'
 
-const DEFAULT_WEB_APP_URL = 'https://bridge-updated.vercel.app';
+const DEFAULT_WEB_APP_URL = 'https://teamprompt.app';
 
 // ── Auth DOM ──
 const authBarUser = document.getElementById('auth-bar-user');
@@ -700,7 +706,7 @@ function renderArtifacts() {
       if (steps) steps.classList.add('hidden');
     } else {
       galleryEmpty.querySelector('.gallery-empty-title').textContent = 'Continue conversations across AI tools';
-      galleryEmpty.querySelector('.gallery-empty-desc').textContent = 'ContextIQ auto-captures your chats so you can pick up where you left off in a different AI.';
+      galleryEmpty.querySelector('.gallery-empty-desc').textContent = 'TeamPrompt auto-captures your chats so you can pick up where you left off in a different AI.';
       const steps = galleryEmpty.querySelector('.gallery-empty-steps');
       if (steps) steps.classList.remove('hidden');
     }
@@ -820,7 +826,7 @@ async function bridgeToTool(toolName, toolUrl) {
 }
 
 function buildBridgeText(artifact) {
-  const lines = [`[Bridged from ${artifact.toolName} via ContextIQ]`];
+  const lines = [`[Bridged from ${artifact.toolName} via TeamPrompt]`];
   if (artifact.topic) lines.push(`Topic: ${artifact.topic}`);
   lines.push('');
   if (artifact.codeBlocks?.length > 0) {

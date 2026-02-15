@@ -1,4 +1,4 @@
-// ContextIQ Team & Organization Storage Layer
+// TeamPrompt Team & Organization Storage Layer
 // Orgs, teams, members, shared collections, prompt standards, import/export
 
 import { STORAGE_KEYS } from './constants.js';

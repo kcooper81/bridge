@@ -1,7 +1,10 @@
-// ContextIQ Activity Log — Full Page
+// TeamPrompt Activity Log — Full Page
 // Shows complete work timeline with filters, search, and project assignment
 
 import { timeAgo, formatDuration, formatDateTime, truncate, extractDomain, categorizeDomain } from '../lib/utils.js';
+import { initTheme } from '../lib/theme.js';
+
+initTheme();
 import {
   getProjects, getProject, getActiveProjectId, saveProject, createProject,
   addItemToProject, getActivityLog, addManualItemToProject,

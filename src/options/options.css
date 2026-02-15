@@ -1,27 +1,25 @@
-/* ContextIQ Options — Sleek Dark Mode */
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+/* TeamPrompt Options — Sleek Dark Mode */
 
 :root {
-  --bg-base: #0b0b0b;
-  --bg-surface: #111111;
-  --bg-elevated: #161616;
-  --bg-hover: #1c1c1c;
-  --bg-active: #222222;
+  --bg-base: #0c0e16;
+  --bg-surface: #13151f;
+  --bg-elevated: #1b1e2c;
+  --bg-hover: #23273a;
+  --bg-active: #2c3148;
 
   --border-subtle: rgba(255, 255, 255, 0.06);
-  --border-default: rgba(255, 255, 255, 0.08);
+  --border-default: rgba(255, 255, 255, 0.09);
   --border-focus: rgba(255, 255, 255, 0.15);
 
-  --text-primary: #f0f0f0;
+  --text-primary: #e6e8f0;
   --text-secondary: rgba(255, 255, 255, 0.55);
-  --text-muted: rgba(255, 255, 255, 0.3);
+  --text-muted: rgba(255, 255, 255, 0.30);
 
-  --accent: #8b5cf6;
-  --accent-hover: #a78bfa;
-  --accent-glow: rgba(139, 92, 246, 0.15);
+  --accent: #3b82f6;
+  --accent-hover: #60a5fa;
+  --accent-glow: rgba(59, 130, 246, 0.15);
 
-  --success: #34d399;
+  --success: #22c55e;
   --danger: #ef4444;
   --danger-subtle: rgba(239, 68, 68, 0.08);
 
@@ -29,6 +27,34 @@
   --radius-sm: 8px;
 
   --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  --shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
+}
+
+[data-theme="light"] {
+  --bg-base: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-elevated: #f1f5f9;
+  --bg-hover: #e2e8f0;
+  --bg-active: #cbd5e1;
+
+  --border-subtle: rgba(0, 0, 0, 0.06);
+  --border-default: rgba(0, 0, 0, 0.10);
+  --border-focus: rgba(0, 0, 0, 0.18);
+
+  --text-primary: #0f172a;
+  --text-secondary: rgba(0, 0, 0, 0.55);
+  --text-muted: rgba(0, 0, 0, 0.30);
+
+  --accent: #2563eb;
+  --accent-hover: #3b82f6;
+  --accent-glow: rgba(37, 99, 235, 0.12);
+
+  --success: #16a34a;
+  --danger: #dc2626;
+  --danger-subtle: rgba(220, 38, 38, 0.08);
+
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 * {
@@ -38,7 +64,7 @@
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
   font-size: 14px;
   background: var(--bg-base);
   color: var(--text-primary);
@@ -337,4 +363,16 @@ textarea:focus {
 
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.14);
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.14);
+}
+
+[data-theme="light"] .toggle-slider::before {
+  background: rgba(0, 0, 0, 0.25);
 }

@@ -1,7 +1,10 @@
-// ContextIQ Options Page Script
+// TeamPrompt Options Page Script
 
 import { getSettings, updateSettings } from '../lib/storage.js';
 import { STORAGE_KEYS } from '../lib/constants.js';
+import { initTheme } from '../lib/theme.js';
+
+initTheme();
 
 // DOM elements
 const trackingEnabled = document.getElementById('tracking-enabled');

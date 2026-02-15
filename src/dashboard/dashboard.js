@@ -1,7 +1,10 @@
-// ContextIQ Dashboard — Vault-style Prompt Manager
+// TeamPrompt Dashboard — Vault-style Prompt Manager
 // Works both as Chrome extension page AND standalone web app via VaultAPI
 
 import { VaultAPI } from '../lib/vault-api.js';
+import { initTheme } from '../lib/theme.js';
+
+initTheme();
 
 // ── State ──
 let allPrompts = [];

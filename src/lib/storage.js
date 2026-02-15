@@ -1,4 +1,4 @@
-// ContextIQ Storage Layer
+// TeamPrompt Storage Layer
 // Abstraction over Chrome local storage with structured data access
 
 import { STORAGE_KEYS, DEFAULT_SETTINGS, MAX_PROJECT_ITEMS, MAX_PROJECTS, MAX_ACTIVITY_LOG } from './constants.js';

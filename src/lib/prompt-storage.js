@@ -1,4 +1,4 @@
-// ContextIQ Prompt Manager — Storage Layer
+// TeamPrompt Prompt Manager — Storage Layer
 // Full CRUD for prompts, folders, departments, versions, ratings, usage
 
 import { STORAGE_KEYS } from './constants.js';

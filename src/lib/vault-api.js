@@ -1,4 +1,4 @@
-// ContextIQ Vault API — Storage abstraction for extension + supabase + web
+// TeamPrompt Vault API — Storage abstraction for extension + supabase + web
 // Priority: (1) Chrome extension → (2) Supabase remote → (3) localStorage fallback
 //
 // Mode detection:

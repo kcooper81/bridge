@@ -1,4 +1,4 @@
-// ContextIQ Utility Functions
+// TeamPrompt Utility Functions
 
 import { DOMAIN_CATEGORIES } from './constants.js';
 

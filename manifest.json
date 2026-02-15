@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "ContextIQ",
-  "version": "0.9.0",
-  "description": "Save your best AI prompts and continue conversations across ChatGPT, Claude, Gemini, and more.",
+  "name": "TeamPrompt",
+  "version": "1.0.0",
+  "description": "Save, organize, and share AI prompts across your team. Continue conversations across ChatGPT, Claude, Gemini, and more.",
   "permissions": [
     "tabs",
     "activeTab",

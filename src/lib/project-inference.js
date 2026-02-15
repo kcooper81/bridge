@@ -1,4 +1,4 @@
-// ContextIQ Project Inference Engine
+// TeamPrompt Project Inference Engine
 // Groups tab activity into projects using multi-signal scoring:
 //   URL paths, domains, keywords, temporal proximity, referrer chains, page content
 

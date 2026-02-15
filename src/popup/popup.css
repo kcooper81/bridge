@@ -1,7 +1,6 @@
 /* ContextIQ v1.0 — Clean, User-Friendly Popup — Dark Mode */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
+/* System fonts only — no external font requests for privacy */
 
 :root {
   --bg-base: #0b0b0b;
@@ -254,6 +253,19 @@ body {
   white-space: nowrap;
 }
 
+.auth-oauth-hint {
+  font-size: 10px;
+  color: var(--text-muted);
+  padding: 4px 4px 0;
+  text-align: center;
+}
+.auth-oauth-hint a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+}
+.auth-oauth-hint a:hover { text-decoration: underline; }
+
 /* ═══════════════════════════════════════ */
 /*  MAIN TAB NAVIGATION                    */
 /* ═══════════════════════════════════════ */
@@ -432,36 +444,6 @@ body {
 
 .prompt-cat-tab svg { flex-shrink: 0; }
 
-/* ── Sort Options (inside filter bar) ── */
-
-.prompt-count {
-  font-size: 10.5px;
-  font-weight: 600;
-  color: var(--text-muted);
-}
-
-.prompt-sort-options {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  flex-shrink: 0;
-}
-
-.prompt-sort-btn {
-  padding: 3px 8px;
-  background: none;
-  border: none;
-  border-radius: 4px;
-  font-family: inherit;
-  font-size: 10.5px;
-  font-weight: 600;
-  color: var(--text-muted);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.prompt-sort-btn:hover { color: var(--text-secondary); background: var(--bg-hover); }
-.prompt-sort-btn.active { color: var(--accent-hover); background: var(--accent-subtle); }
 
 /* ── Prompt List (scrollable) ── */
 
@@ -634,8 +616,7 @@ body {
   display: flex;
   align-items: center;
   gap: 5px;
-  margin-bottom: 10px;
-  flex-wrap: wrap;
+  margin-bottom: 8px;
 }
 
 .prompt-card-folder {
@@ -649,42 +630,6 @@ body {
   letter-spacing: 0.1px;
 }
 
-.prompt-card-tone {
-  display: inline-flex;
-  align-items: center;
-  font-size: 10px;
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 4px;
-  letter-spacing: 0.1px;
-  text-transform: capitalize;
-}
-
-.prompt-card-tag {
-  display: inline-flex;
-  font-size: 10px;
-  font-weight: 600;
-  padding: 2px 7px;
-  border-radius: 4px;
-  background: var(--bg-elevated);
-  color: var(--text-muted);
-  border: 1px solid var(--border-subtle);
-}
-
-.prompt-card-stars {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--yellow);
-}
-
-.prompt-card-uses {
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--text-muted);
-}
 
 /* ── Prompt Card Actions ── */
 
@@ -718,30 +663,6 @@ body {
   transform: translateY(-1px);
 }
 
-.prompt-card-copy,
-.prompt-card-edit {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 6px 10px;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-xs);
-  font-size: 10.5px;
-  font-weight: 600;
-  font-family: inherit;
-  color: var(--text-muted);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  white-space: nowrap;
-}
-
-.prompt-card-copy:hover,
-.prompt-card-edit:hover {
-  background: var(--bg-hover);
-  color: var(--text-primary);
-  border-color: var(--border-focus);
-}
 
 /* ═══════════════════════════════════════ */
 /*  PROMPT DETAIL / EDITOR                 */

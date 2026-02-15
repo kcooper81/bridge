@@ -1,5 +1,8 @@
 // ContextIQ Constants
 
+export const SUPABASE_URL = 'https://vafybxyxmpehrpqbztrc.supabase.co';
+export const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZhZnlieHl4bXBlaHJwcWJ6dHJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4MzU3NjcsImV4cCI6MjA4NjQxMTc2N30.W6OiQtVpqzyueOQq6HE7_qNOTDOQgTig215zSgXYHAs';
+
 export const STORAGE_KEYS = {
   PROJECTS: 'contextiq_projects',
   ACTIVITY_LOG: 'contextiq_activity_log',
@@ -92,7 +95,7 @@ export const DEFAULT_SETTINGS = {
   excludedDomains: [],
   showDashboard: true,
   showTimeline: true,
-  webAppUrl: 'https://prompt-manager-git-claude-improv-dedb41-kades-projects-fcb7307c.vercel.app', // Vercel-hosted web app URL
+  webAppUrl: 'https://bridge-updated.vercel.app', // Vercel-hosted web app URL
 };
 
 export const WORKSPACE_PRESETS = {

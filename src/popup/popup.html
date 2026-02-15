@@ -58,6 +58,9 @@
         <button class="auth-cancel-btn" id="btn-auth-cancel">Cancel</button>
       </div>
       <div class="auth-error hidden" id="auth-error"></div>
+      <div class="auth-oauth-hint" id="auth-oauth-hint">
+        Need Google or GitHub sign-in? <a href="#" id="auth-oauth-link">Use the web app</a>
+      </div>
     </div>
 
     <!-- Main Tab Navigation -->
@@ -89,19 +92,14 @@
         </button>
       </div>
 
-      <!-- Filter Bar: Categories + Sort -->
+      <!-- Filter Bar: Categories only -->
       <div class="prompt-filter-bar">
         <div class="prompt-category-bar" id="prompt-category-bar">
           <button class="prompt-cat-tab active" data-folder="all">All</button>
           <button class="prompt-cat-tab" data-folder="favorites">
             <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            Favs
           </button>
-        </div>
-        <div class="prompt-sort-options">
-          <span class="prompt-count" id="prompt-count">0</span>
-          <button class="prompt-sort-btn active" data-sort="recent">Recent</button>
-          <button class="prompt-sort-btn" data-sort="popular">Popular</button>
-          <button class="prompt-sort-btn" data-sort="rating">Top</button>
         </div>
       </div>
 

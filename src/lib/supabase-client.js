@@ -8,11 +8,10 @@
 // 3. Set them below or via environment variables
 
 // ═══════════════════════════════════════
-//  CONFIG — Replace with your Supabase project credentials
+//  CONFIG — Centralized in constants.js
 // ═══════════════════════════════════════
 
-const SUPABASE_URL = globalThis.__CONTEXTIQ_SUPABASE_URL || 'https://vafybxyxmpehrpqbztrc.supabase.co';
-const SUPABASE_ANON_KEY = globalThis.__CONTEXTIQ_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZhZnlieHl4bXBlaHJwcWJ6dHJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4MzU3NjcsImV4cCI6MjA4NjQxMTc2N30.W6OiQtVpqzyueOQq6HE7_qNOTDOQgTig215zSgXYHAs';
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from './constants.js';
 
 // ═══════════════════════════════════════
 //  CLIENT

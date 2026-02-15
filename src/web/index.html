@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ContextIQ — AI Prompt Vault</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="icon" href="data:,">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.95.3" integrity="sha384-aRAaCbKYByQpx0fjPuC0PQ9P9moWMEsHXP9tyzP7tbyD5fPK6oTp+THsxdWiq02L" crossorigin="anonymous">
   <link rel="stylesheet" href="/src/dashboard/dashboard.css">
   <style>
     /* ═══ Auth Page Styles ═══ */
@@ -229,7 +230,7 @@
       <form class="auth-form" id="form-signin">
         <div class="auth-field">
           <label for="signin-email">Email</label>
-          <input type="email" id="signin-email" placeholder="you@company.com" required>
+          <input type="email" id="signin-email" placeholder="you@company.com" autocomplete="email" required>
         </div>
         <div class="auth-field">
           <label for="signin-password">Password</label>
@@ -254,11 +255,11 @@
       <form class="auth-form hidden" id="form-signup">
         <div class="auth-field">
           <label for="signup-name">Full Name</label>
-          <input type="text" id="signup-name" placeholder="Jane Smith" required>
+          <input type="text" id="signup-name" placeholder="Jane Smith" autocomplete="name" required>
         </div>
         <div class="auth-field">
           <label for="signup-email">Email</label>
-          <input type="email" id="signup-email" placeholder="you@company.com" required>
+          <input type="email" id="signup-email" placeholder="you@company.com" autocomplete="email" required>
         </div>
         <div class="auth-field">
           <label for="signup-password">Password</label>
@@ -296,9 +297,15 @@
 
     // Check for error params from failed OAuth redirects
     const urlParams = new URLSearchParams(window.location.search);
-    const authError = urlParams.get('error') || urlParams.get('error_description');
-    if (authError) {
-      showError(decodeURIComponent(authError));
+    const oauthError = urlParams.get('error');
+    const oauthErrorDesc = urlParams.get('error_description');
+    if (oauthError || oauthErrorDesc) {
+      const desc = oauthErrorDesc ? decodeURIComponent(oauthErrorDesc) : '';
+      if (oauthError === 'server_error' && !desc) {
+        showError('OAuth provider not configured. Enable Google/GitHub in your Supabase dashboard under Authentication > Providers.');
+      } else {
+        showError(desc || decodeURIComponent(oauthError));
+      }
       window.history.replaceState({}, '', '/');
     }
 
@@ -391,7 +398,12 @@
         try {
           await signInWithOAuth(provider);
         } catch (err) {
-          showError(err.message || `${provider} sign in failed`);
+          const msg = err.message || '';
+          if (msg.includes('server_error') || msg.includes('not enabled') || msg.includes('not supported')) {
+            showError(`${provider.charAt(0).toUpperCase() + provider.slice(1)} sign-in is not enabled. Enable it in your Supabase dashboard under Authentication > Providers.`);
+          } else {
+            showError(msg || `${provider} sign in failed`);
+          }
         }
       });
     });

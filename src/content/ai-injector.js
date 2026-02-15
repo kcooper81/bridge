@@ -1111,8 +1111,13 @@
       input.focus();
     } else {
       const prefix = text + '\n\n---\n\n';
-      const existingHtml = input.innerHTML;
-      input.innerHTML = prefix.replace(/\n/g, '<br>') + existingHtml;
+      const existingText = input.textContent;
+      input.textContent = '';
+      prefix.split('\n').forEach((line, i, arr) => {
+        input.appendChild(document.createTextNode(line));
+        if (i < arr.length - 1) input.appendChild(document.createElement('br'));
+      });
+      if (existingText) input.appendChild(document.createTextNode(existingText));
       input.dispatchEvent(new Event('input', { bubbles: true }));
       input.focus();
       const range = document.createRange();

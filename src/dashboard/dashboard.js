@@ -14,6 +14,8 @@ let allStandards = [];
 let currentOrg = null;
 let currentAnalytics = null;
 let isLoading = false;
+let vaultPage = 0;
+const VAULT_PAGE_SIZE = 25;
 
 // ═══════════════════════════════════════
 //  INIT
@@ -44,12 +46,16 @@ async function loadAllData() {
     // Update sidebar user
     const user = allMembers.find(m => m.isCurrentUser);
     if (user) {
-      document.getElementById('sidebar-user-name').textContent = user.name || user.email;
-      document.getElementById('sidebar-user-role').textContent = user.role;
-      document.getElementById('sidebar-user-avatar').textContent = (user.name || user.email || '?')[0].toUpperCase();
+      const nameEl = document.getElementById('sidebar-user-name');
+      const roleEl = document.getElementById('sidebar-user-role');
+      const avatarEl = document.getElementById('sidebar-user-avatar');
+      if (nameEl) nameEl.textContent = user.name || user.email;
+      if (roleEl) roleEl.textContent = user.role;
+      if (avatarEl) avatarEl.textContent = (user.name || user.email || '?')[0].toUpperCase();
     }
   } catch (e) {
     console.error('Failed to load data:', e);
+    showToast('Failed to load data. Please refresh.', 'error');
   }
 }
 
@@ -130,17 +136,17 @@ function renderVaultView() {
   renderVaultTable();
 
   const searchEl = document.getElementById('vault-search');
-  searchEl.oninput = debounce(() => renderVaultTable(), 200);
-  document.getElementById('vault-filter-folder').onchange = () => renderVaultTable();
-  document.getElementById('vault-filter-dept').onchange = () => renderVaultTable();
-  document.getElementById('vault-sort').onchange = () => renderVaultTable();
+  searchEl.oninput = debounce(() => { vaultPage = 0; renderVaultTable(); }, 200);
+  document.getElementById('vault-filter-folder').onchange = () => { vaultPage = 0; renderVaultTable(); };
+  document.getElementById('vault-filter-dept').onchange = () => { vaultPage = 0; renderVaultTable(); };
+  document.getElementById('vault-sort').onchange = () => { vaultPage = 0; renderVaultTable(); };
 
   document.getElementById('btn-vault-new').onclick = () => openPromptModal();
   document.getElementById('btn-vault-install-starters').onclick = async () => {
-    await VaultAPI.installDefaultStandards();
+    await VaultAPI.installStarters();
     await loadAllData();
     renderVaultView();
-    showToast('Starter packs installed!');
+    showToast('Starter prompts installed!');
   };
 
   document.getElementById('vault-select-all').onchange = (e) => {
@@ -208,15 +214,39 @@ function renderVaultTable() {
   const filtered = getFilteredPrompts();
   const tbody = document.getElementById('vault-tbody');
   const empty = document.getElementById('vault-empty');
+  const paginationEl = document.getElementById('vault-pagination');
 
   if (filtered.length === 0) {
     tbody.innerHTML = '';
     empty.classList.remove('hidden');
+    if (paginationEl) paginationEl.classList.add('hidden');
     return;
   }
   empty.classList.add('hidden');
 
-  tbody.innerHTML = filtered.map(p => {
+  // Pagination
+  const totalPages = Math.ceil(filtered.length / VAULT_PAGE_SIZE);
+  if (vaultPage >= totalPages) vaultPage = totalPages - 1;
+  if (vaultPage < 0) vaultPage = 0;
+  const start = vaultPage * VAULT_PAGE_SIZE;
+  const pageItems = filtered.slice(start, start + VAULT_PAGE_SIZE);
+
+  // Show/hide pagination controls
+  if (paginationEl) {
+    if (totalPages > 1) {
+      paginationEl.classList.remove('hidden');
+      const prevBtn = document.getElementById('vault-page-prev');
+      const nextBtn = document.getElementById('vault-page-next');
+      const pageInfo = document.getElementById('vault-page-info');
+      if (prevBtn) { prevBtn.disabled = vaultPage === 0; prevBtn.onclick = () => { vaultPage--; renderVaultTable(); }; }
+      if (nextBtn) { nextBtn.disabled = vaultPage >= totalPages - 1; nextBtn.onclick = () => { vaultPage++; renderVaultTable(); }; }
+      if (pageInfo) pageInfo.textContent = `Page ${vaultPage + 1} of ${totalPages} (${filtered.length} prompts)`;
+    } else {
+      paginationEl.classList.add('hidden');
+    }
+  }
+
+  tbody.innerHTML = pageItems.map(p => {
     const folder = allFolders.find(f => f.id === p.folderId);
     const folderName = folder ? folder.name : '—';
     const tags = (p.tags || []).slice(0, 3).map(t => `<span class="tag">${esc(t)}</span>`).join('');

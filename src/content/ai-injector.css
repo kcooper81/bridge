@@ -1,13 +1,11 @@
 /* ContextIQ AI Bridge v1.0 — Simplified, non-congested */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
 #contextiq-inject-btn {
   position: fixed;
   bottom: 24px;
   right: 24px;
   z-index: 99999;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 

@@ -14,7 +14,7 @@ const bridgeBadge = document.getElementById('bridge-badge');
 let activeTab = 'prompts';
 let isAuthenticated = false;
 
-const DEFAULT_WEB_APP_URL = 'https://prompt-manager-git-claude-improv-dedb41-kades-projects-fcb7307c.vercel.app';
+const DEFAULT_WEB_APP_URL = 'https://bridge-updated.vercel.app';
 
 // ── Auth DOM ──
 const authBarUser = document.getElementById('auth-bar-user');
@@ -57,7 +57,6 @@ function switchTab(tab) {
 
 const promptSearchInput = document.getElementById('prompt-search');
 const promptCategoryBar = document.getElementById('prompt-category-bar');
-const promptCountEl = document.getElementById('prompt-count');
 const promptEmpty = document.getElementById('prompt-empty');
 const promptCardsEl = document.getElementById('prompt-cards');
 const promptDetail = document.getElementById('prompt-detail');
@@ -73,7 +72,6 @@ let allPrompts = [];
 let allFolders = [];
 let allDepartments = [];
 let promptFilter = 'all'; // folder id or 'all' / 'favorites'
-let promptSort = 'recent';
 let promptQuery = '';
 let editingPromptId = null;
 
@@ -86,23 +84,10 @@ const FOLDER_ICONS = {
   folder: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>',
 };
 
-const TONE_COLORS = {
-  professional: '#60a5fa',
-  persuasive: '#fb923c',
-  empathetic: '#34d399',
-  engaging: '#c084fc',
-  technical: '#60a5fa',
-  clear: '#34d399',
-  conversational: '#fbbf24',
-  confident: '#fb7185',
-  creative: '#c084fc',
-  casual: '#fbbf24',
-};
-
 async function loadPrompts() {
   try {
     const [pResp, fResp, dResp] = await Promise.all([
-      chrome.runtime.sendMessage({ type: 'PROMPT_GET_ALL', query: promptQuery, filters: { sort: promptSort, folderId: promptFilter !== 'all' && promptFilter !== 'favorites' ? promptFilter : undefined, favoritesOnly: promptFilter === 'favorites' } }),
+      chrome.runtime.sendMessage({ type: 'PROMPT_GET_ALL', query: promptQuery, filters: { sort: 'recent', folderId: promptFilter !== 'all' && promptFilter !== 'favorites' ? promptFilter : undefined, favoritesOnly: promptFilter === 'favorites' } }),
       chrome.runtime.sendMessage({ type: 'PROMPT_GET_FOLDERS' }),
       chrome.runtime.sendMessage({ type: 'PROMPT_GET_DEPARTMENTS' }),
     ]);
@@ -134,7 +119,6 @@ function renderCategoryTabs() {
 
 function renderPromptList() {
   const prompts = allPrompts;
-  promptCountEl.textContent = `${prompts.length} prompt${prompts.length !== 1 ? 's' : ''}`;
 
   if (prompts.length === 0) {
     promptEmpty.classList.remove('hidden');
@@ -159,14 +143,9 @@ function renderPromptList() {
 
 function renderPromptCard(prompt) {
   const folder = allFolders.find(f => f.id === prompt.folderId);
-  const avgRating = prompt.rating?.count ? (prompt.rating.total / prompt.rating.count).toFixed(1) : null;
-  const toneColor = TONE_COLORS[prompt.tone] || '#8b5cf6';
   const folderBadge = folder
     ? `<span class="prompt-card-folder" style="color:${folder.color};background:${folder.color}15">${FOLDER_ICONS[folder.icon] || ''} ${esc(folder.name)}</span>`
     : '';
-  const tags = (prompt.tags || []).slice(0, 2).map(t => `<span class="prompt-card-tag">${esc(t)}</span>`).join('');
-  const stars = avgRating ? `<span class="prompt-card-stars"><svg width="10" height="10" viewBox="0 0 24 24" fill="#fbbf24" stroke="#fbbf24" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> ${avgRating}</span>` : '';
-  const useCount = prompt.usageCount ? `<span class="prompt-card-uses">${prompt.usageCount} use${prompt.usageCount !== 1 ? 's' : ''}</span>` : '';
 
   return `
     <div class="prompt-card" data-id="${esc(prompt.id)}">
@@ -179,23 +158,12 @@ function renderPromptCard(prompt) {
           <svg width="14" height="14" viewBox="0 0 24 24" fill="${prompt.isFavorite ? '#fbbf24' : 'none'}" stroke="${prompt.isFavorite ? '#fbbf24' : 'currentColor'}" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
         </button>
       </div>
-      <div class="prompt-card-meta">
-        ${folderBadge}
-        <span class="prompt-card-tone" style="color:${toneColor};background:${toneColor}15">${esc(prompt.tone || 'general')}</span>
-        ${tags}
-        ${stars}
-        ${useCount}
-      </div>
+      ${folderBadge ? `<div class="prompt-card-meta">${folderBadge}</div>` : ''}
       <div class="prompt-card-actions">
         <button class="prompt-card-insert" data-id="${esc(prompt.id)}" title="Paste this prompt into the active AI chat">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
           Insert
         </button>
-        <button class="prompt-card-copy" data-id="${esc(prompt.id)}" title="Copy prompt text to clipboard">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-          Copy
-        </button>
-        <button class="prompt-card-edit" data-id="${esc(prompt.id)}" title="Edit this prompt">Edit</button>
       </div>
     </div>
   `;
@@ -693,6 +661,21 @@ function bindEvents() {
     if (e.key === 'Enter') handleSignIn();
   });
 
+  // OAuth hint — open web app for Google/GitHub sign-in
+  const oauthLink = document.getElementById('auth-oauth-link');
+  if (oauthLink) {
+    oauthLink.addEventListener('click', async (e) => {
+      e.preventDefault();
+      try {
+        const resp = await chrome.runtime.sendMessage({ type: 'GET_SETTINGS' });
+        const webAppUrl = resp?.settings?.webAppUrl || DEFAULT_WEB_APP_URL;
+        chrome.tabs.create({ url: webAppUrl });
+      } catch {
+        chrome.tabs.create({ url: DEFAULT_WEB_APP_URL });
+      }
+    });
+  }
+
   btnAuthSignout.addEventListener('click', async () => {
     try {
       await chrome.runtime.sendMessage({ type: 'AUTH_SIGN_OUT' });
@@ -724,14 +707,6 @@ function bindEvents() {
     const tab = e.target.closest('.prompt-cat-tab');
     if (!tab) return;
     promptFilter = tab.dataset.folder;
-    loadPrompts();
-  });
-
-  document.querySelector('.prompt-sort-options').addEventListener('click', (e) => {
-    const btn = e.target.closest('.prompt-sort-btn');
-    if (!btn) return;
-    promptSort = btn.dataset.sort;
-    document.querySelectorAll('.prompt-sort-btn').forEach(b => b.classList.toggle('active', b === btn));
     loadPrompts();
   });
 
@@ -793,29 +768,6 @@ function bindEvents() {
           }
         }
       } catch { showToast('Error inserting prompt'); }
-      return;
-    }
-
-    const copyBtn = e.target.closest('.prompt-card-copy');
-    if (copyBtn) {
-      e.stopPropagation();
-      const id = copyBtn.dataset.id;
-      try {
-        const resp = await chrome.runtime.sendMessage({ type: 'PROMPT_GET', promptId: id });
-        if (resp?.prompt) {
-          await navigator.clipboard.writeText(resp.prompt.content);
-          await chrome.runtime.sendMessage({ type: 'PROMPT_USE', promptId: id });
-          showToast('Copied to clipboard');
-          await loadPrompts();
-        }
-      } catch { showToast('Error copying'); }
-      return;
-    }
-
-    const editBtn = e.target.closest('.prompt-card-edit');
-    if (editBtn) {
-      e.stopPropagation();
-      openPromptDetail(editBtn.dataset.id);
       return;
     }
 

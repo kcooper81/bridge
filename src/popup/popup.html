@@ -105,31 +105,66 @@
 
       <!-- Prompt List -->
       <div class="prompt-list" id="prompt-list">
-        <!-- Empty State -->
-        <div class="prompt-empty" id="prompt-empty">
-          <div class="prompt-empty-icon">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <!-- Welcome Screen (shown when no prompts exist) -->
+        <div class="prompt-welcome" id="prompt-welcome">
+          <div class="welcome-icon">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
           </div>
-          <div class="prompt-empty-title">Your prompt library</div>
-          <div class="prompt-empty-desc">Save reusable prompts here. Use them in any AI tool with one click.</div>
-          <div class="prompt-empty-steps">
-            <div class="prompt-empty-step">
-              <span class="step-num">1</span>
-              <span>Create or install starter prompts</span>
+          <div class="welcome-title">Your AI Prompt Library</div>
+          <div class="welcome-desc">Save your best prompts and insert them into any AI tool with one click.</div>
+          <div class="welcome-steps">
+            <div class="welcome-step">
+              <span class="welcome-step-num">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+              </span>
+              <div class="welcome-step-text">
+                <strong>Save prompts you use often</strong>
+                <span>Create templates or load our starter collection</span>
+              </div>
             </div>
-            <div class="prompt-empty-step">
-              <span class="step-num">2</span>
-              <span>Click <strong>Insert</strong> to paste into any AI chat</span>
+            <div class="welcome-step">
+              <span class="welcome-step-num">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+              </span>
+              <div class="welcome-step-text">
+                <strong>Click Insert on any AI site</strong>
+                <span>Works with ChatGPT, Claude, Gemini & more</span>
+              </div>
             </div>
-            <div class="prompt-empty-step">
-              <span class="step-num">3</span>
-              <span>Organize with folders and tags</span>
+            <div class="welcome-step">
+              <span class="welcome-step-num">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+              </span>
+              <div class="welcome-step-text">
+                <strong>Stay organized</strong>
+                <span>Use folders and favorites to find prompts fast</span>
+              </div>
             </div>
           </div>
-          <button class="prompt-empty-btn" id="btn-install-starters">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Get Started with Starter Prompts
-          </button>
+          <div class="welcome-actions">
+            <button class="welcome-primary-btn" id="btn-install-starters">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Load Starter Prompts
+            </button>
+            <button class="welcome-secondary-btn" id="btn-welcome-create">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Create Your First Prompt
+            </button>
+          </div>
+        </div>
+
+        <!-- No Results (shown when search yields nothing) -->
+        <div class="prompt-no-results hidden" id="prompt-no-results">
+          <div class="no-results-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </div>
+          <div class="no-results-title">No matches</div>
+          <div class="no-results-desc" id="no-results-desc">Try a different search term</div>
         </div>
 
         <!-- Prompt cards render here -->

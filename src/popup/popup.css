@@ -453,35 +453,163 @@ body {
   min-height: 0;
 }
 
-/* ── Empty State ── */
+/* ── Welcome Screen (first-time / no prompts) ── */
 
-.prompt-empty {
+.prompt-welcome {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 32px 24px;
+  padding: 24px 24px 20px;
   text-align: center;
-  gap: 8px;
+  gap: 4px;
 }
 
-.prompt-empty-icon { color: var(--accent); opacity: 0.5; margin-bottom: 4px; }
+.welcome-icon { color: var(--accent); opacity: 0.6; margin-bottom: 2px; }
 
-.prompt-empty-title {
-  font-size: 16px;
+.welcome-title {
+  font-size: 17px;
   font-weight: 700;
   color: var(--text-primary);
-  letter-spacing: -0.3px;
+  letter-spacing: -0.4px;
 }
 
-.prompt-empty-desc {
+.welcome-desc {
   font-size: 12px;
   color: var(--text-secondary);
   line-height: 1.5;
   max-width: 300px;
 }
 
-.prompt-empty-steps,
+.welcome-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 14px 0 6px;
+  width: 100%;
+  max-width: 340px;
+}
+
+.welcome-step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  text-align: left;
+}
+
+.welcome-step-num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-subtle);
+  color: var(--accent-hover);
+  flex-shrink: 0;
+  border: 1px solid rgba(139, 92, 246, 0.12);
+}
+
+.welcome-step-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.welcome-step-text strong {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.welcome-step-text span {
+  font-size: 10.5px;
+  color: var(--text-muted);
+  line-height: 1.3;
+}
+
+.welcome-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 14px;
+  width: 100%;
+  max-width: 280px;
+}
+
+.welcome-primary-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 22px;
+  background: linear-gradient(135deg, var(--accent) 0%, #7c3aed 100%);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: white;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.welcome-primary-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.3);
+}
+
+.welcome-primary-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.welcome-secondary-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 18px;
+  background: transparent;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.welcome-secondary-btn:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-focus);
+  color: var(--text-primary);
+}
+
+/* ── No Results ── */
+
+.prompt-no-results {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 24px;
+  text-align: center;
+  gap: 8px;
+}
+
+.no-results-icon { color: var(--text-muted); opacity: 0.5; }
+.no-results-title { font-size: 14px; font-weight: 700; color: var(--text-secondary); }
+.no-results-desc { font-size: 12px; color: var(--text-muted); }
+
+/* ── Gallery Empty State ── */
+
 .gallery-empty-steps {
   display: flex;
   flex-direction: column;
@@ -491,7 +619,6 @@ body {
   max-width: 320px;
 }
 
-.prompt-empty-step,
 .gallery-empty-step {
   display: flex;
   align-items: center;
@@ -506,7 +633,6 @@ body {
   line-height: 1.4;
 }
 
-.prompt-empty-step strong,
 .gallery-empty-step strong {
   color: var(--accent-hover);
   font-weight: 700;
@@ -525,28 +651,6 @@ body {
   font-weight: 700;
   flex-shrink: 0;
   border: 1px solid rgba(139, 92, 246, 0.15);
-}
-
-.prompt-empty-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 12px;
-  padding: 10px 22px;
-  background: linear-gradient(135deg, var(--accent) 0%, #7c3aed 100%);
-  border: none;
-  border-radius: var(--radius-sm);
-  font-family: inherit;
-  font-size: 12.5px;
-  font-weight: 700;
-  color: white;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.prompt-empty-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.3);
 }
 
 /* ── Prompt Card ── */

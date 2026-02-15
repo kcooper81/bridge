@@ -57,7 +57,9 @@ function switchTab(tab) {
 
 const promptSearchInput = document.getElementById('prompt-search');
 const promptCategoryBar = document.getElementById('prompt-category-bar');
-const promptEmpty = document.getElementById('prompt-empty');
+const promptWelcome = document.getElementById('prompt-welcome');
+const promptNoResults = document.getElementById('prompt-no-results');
+const noResultsDesc = document.getElementById('no-results-desc');
 const promptCardsEl = document.getElementById('prompt-cards');
 const promptDetail = document.getElementById('prompt-detail');
 const promptDetailTitle = document.getElementById('prompt-detail-title');
@@ -119,25 +121,33 @@ function renderCategoryTabs() {
 
 function renderPromptList() {
   const prompts = allPrompts;
+  const toolbar = document.querySelector('.prompt-toolbar');
+  const filterBar = document.querySelector('.prompt-filter-bar');
 
   if (prompts.length === 0) {
-    promptEmpty.classList.remove('hidden');
     promptCardsEl.innerHTML = '';
     if (promptQuery) {
-      promptEmpty.querySelector('.prompt-empty-title').textContent = 'No matches';
-      promptEmpty.querySelector('.prompt-empty-desc').textContent = `Nothing found for "${promptQuery}"`;
-      promptEmpty.querySelector('.prompt-empty-steps').classList.add('hidden');
-      btnInstallStarters.classList.add('hidden');
+      // Search with no results — show toolbar so user can clear search
+      toolbar.classList.remove('hidden');
+      filterBar.classList.remove('hidden');
+      promptWelcome.classList.add('hidden');
+      promptNoResults.classList.remove('hidden');
+      noResultsDesc.textContent = `Nothing found for "${promptQuery}"`;
     } else {
-      promptEmpty.querySelector('.prompt-empty-title').textContent = 'Your prompt library';
-      promptEmpty.querySelector('.prompt-empty-desc').textContent = 'Save reusable prompts here. Use them in any AI tool with one click.';
-      promptEmpty.querySelector('.prompt-empty-steps').classList.remove('hidden');
-      btnInstallStarters.classList.remove('hidden');
+      // Welcome state — hide search/filter chrome, show onboarding
+      toolbar.classList.add('hidden');
+      filterBar.classList.add('hidden');
+      promptWelcome.classList.remove('hidden');
+      promptNoResults.classList.add('hidden');
     }
     return;
   }
 
-  promptEmpty.classList.add('hidden');
+  // Has prompts — show normal UI
+  toolbar.classList.remove('hidden');
+  filterBar.classList.remove('hidden');
+  promptWelcome.classList.add('hidden');
+  promptNoResults.classList.add('hidden');
   promptCardsEl.innerHTML = prompts.map(p => renderPromptCard(p)).join('');
 }
 
@@ -711,6 +721,12 @@ function bindEvents() {
   });
 
   btnNewPrompt.addEventListener('click', () => openPromptDetail('new'));
+
+  // Welcome screen buttons
+  const btnWelcomeCreate = document.getElementById('btn-welcome-create');
+  if (btnWelcomeCreate) {
+    btnWelcomeCreate.addEventListener('click', () => openPromptDetail('new'));
+  }
   btnInstallStarters.addEventListener('click', async () => {
     btnInstallStarters.textContent = 'Installing...';
     btnInstallStarters.disabled = true;
@@ -719,7 +735,7 @@ function bindEvents() {
       showToast('Starter prompts installed!');
       await loadPrompts();
     } catch { showToast('Error installing starters'); }
-    btnInstallStarters.textContent = 'Get Started with Starter Prompts';
+    btnInstallStarters.textContent = 'Load Starter Prompts';
     btnInstallStarters.disabled = false;
   });
 

@@ -35,6 +35,7 @@ import {
   exportPromptPack, importPromptPack,
   installDefaultStandards,
 } from '../lib/team-storage.js';
+import * as sbRest from '../lib/supabase-rest.js';
 
 // --- State ---
 let lastActiveTabId = null;
@@ -1027,26 +1028,93 @@ async function handleMessage(message, sender) {
     }
 
     // ═══════════════════════════════════════
+    //  AUTH (Supabase SaaS connection)
+    // ═══════════════════════════════════════
+
+    case 'AUTH_SIGN_IN': {
+      try {
+        const data = await sbRest.signIn(message.email, message.password);
+        return { success: true, user: data.user };
+      } catch (err) {
+        return { success: false, error: err.message };
+      }
+    }
+
+    case 'AUTH_SIGN_OUT': {
+      await sbRest.signOut();
+      sbRest.resetCaches();
+      return { success: true };
+    }
+
+    case 'AUTH_STATUS': {
+      const authed = await sbRest.isAuthenticated();
+      const auth = await sbRest.getStoredAuth();
+      return { authenticated: authed, user: auth?.user || null };
+    }
+
+    // ═══════════════════════════════════════
     //  PROMPT MANAGER
     // ═══════════════════════════════════════
 
     case 'PROMPT_GET_ALL': {
+      // Remote mode: fetch from Supabase when authenticated
+      if (await sbRest.isAuthenticated()) {
+        try {
+          const orgId = await sbRest.getOrgId();
+          const rows = await sbRest.select('prompts', `org_id=eq.${orgId}&order=updated_at.desc`);
+          let prompts = (rows || []).map(sbRest.dbPromptToApp);
+          // Apply client-side filtering
+          const q = (message.query || '').toLowerCase();
+          const filters = message.filters || {};
+          if (q) {
+            prompts = prompts.filter(p =>
+              p.title.toLowerCase().includes(q) || p.content.toLowerCase().includes(q) ||
+              (p.description || '').toLowerCase().includes(q) || (p.tags || []).some(t => t.toLowerCase().includes(q))
+            );
+          }
+          if (filters.folderId) prompts = prompts.filter(p => p.folderId === filters.folderId);
+          if (filters.favoritesOnly) prompts = prompts.filter(p => p.isFavorite);
+          return { prompts };
+        } catch { /* fall through to local */ }
+      }
       const prompts = await searchPrompts(message.query || '', message.filters || {});
       return { prompts };
     }
 
     case 'PROMPT_GET': {
+      if (await sbRest.isAuthenticated()) {
+        try {
+          const rows = await sbRest.select('prompts', `id=eq.${message.promptId}`);
+          return { prompt: rows?.[0] ? sbRest.dbPromptToApp(rows[0]) : null };
+        } catch { /* fall through */ }
+      }
       const prompt = await getPrompt(message.promptId);
       return { prompt };
     }
 
     case 'PROMPT_CREATE': {
+      if (await sbRest.isAuthenticated()) {
+        try {
+          const orgId = await sbRest.getOrgId();
+          const auth = await sbRest.getStoredAuth();
+          const row = { ...sbRest.appPromptToDb(message.fields || {}, orgId, auth.user.id), version: 1 };
+          const data = await sbRest.insert('prompts', row);
+          return { success: true, prompt: sbRest.dbPromptToApp(Array.isArray(data) ? data[0] : data) };
+        } catch { /* fall through */ }
+      }
       const prompt = newPrompt(message.fields || {});
       await savePrompt(prompt);
       return { success: true, prompt };
     }
 
     case 'PROMPT_UPDATE': {
+      if (await sbRest.isAuthenticated()) {
+        try {
+          const row = sbRest.appPromptToDb(message.fields || {});
+          const data = await sbRest.update('prompts', `id=eq.${message.promptId}`, row);
+          return { success: true, prompt: sbRest.dbPromptToApp(Array.isArray(data) ? data[0] : data) };
+        } catch { /* fall through */ }
+      }
       const existing = await getPrompt(message.promptId);
       if (!existing) return { error: 'Prompt not found' };
       const updated = { ...existing, ...message.fields };
@@ -1055,16 +1123,44 @@ async function handleMessage(message, sender) {
     }
 
     case 'PROMPT_DELETE': {
+      if (await sbRest.isAuthenticated()) {
+        try {
+          await sbRest.del('prompts', `id=eq.${message.promptId}`);
+          return { success: true };
+        } catch { /* fall through */ }
+      }
       await deletePrompt(message.promptId);
       return { success: true };
     }
 
     case 'PROMPT_DUPLICATE': {
+      if (await sbRest.isAuthenticated()) {
+        try {
+          const rows = await sbRest.select('prompts', `id=eq.${message.promptId}`);
+          const orig = rows?.[0];
+          if (!orig) return { error: 'Not found' };
+          const { id: _id, created_at: _ca, updated_at: _ua, ...rest } = orig;
+          const data = await sbRest.insert('prompts', { ...rest, title: `${orig.title} (copy)`, version: 1, rating_total: 0, rating_count: 0, usage_count: 0 });
+          return { success: true, prompt: sbRest.dbPromptToApp(Array.isArray(data) ? data[0] : data) };
+        } catch { /* fall through */ }
+      }
       const dup = await duplicatePrompt(message.promptId);
       return { success: !!dup, prompt: dup };
     }
 
     case 'PROMPT_USE': {
+      if (await sbRest.isAuthenticated()) {
+        try {
+          const rows = await sbRest.select('prompts', `id=eq.${message.promptId}`, 'usage_count');
+          if (rows?.[0]) {
+            await sbRest.update('prompts', `id=eq.${message.promptId}`, {
+              usage_count: (rows[0].usage_count || 0) + 1,
+              last_used_at: new Date().toISOString(),
+            });
+          }
+          return { success: true };
+        } catch { /* fall through */ }
+      }
       const prompt = await recordPromptUsage(message.promptId);
       return { success: !!prompt, prompt };
     }
@@ -1075,11 +1171,27 @@ async function handleMessage(message, sender) {
     }
 
     case 'PROMPT_TOGGLE_FAVORITE': {
+      if (await sbRest.isAuthenticated()) {
+        try {
+          const rows = await sbRest.select('prompts', `id=eq.${message.promptId}`, 'is_favorite');
+          if (rows?.[0]) {
+            await sbRest.update('prompts', `id=eq.${message.promptId}`, { is_favorite: !rows[0].is_favorite });
+          }
+          return { success: true };
+        } catch { /* fall through */ }
+      }
       const prompt = await togglePromptFavorite(message.promptId);
       return { success: !!prompt, prompt };
     }
 
     case 'PROMPT_GET_FOLDERS': {
+      if (await sbRest.isAuthenticated()) {
+        try {
+          const orgId = await sbRest.getOrgId();
+          const folders = await sbRest.select('folders', `org_id=eq.${orgId}`);
+          return { folders: folders || [] };
+        } catch { /* fall through */ }
+      }
       const folders = await getFolders();
       return { folders };
     }
@@ -1095,6 +1207,13 @@ async function handleMessage(message, sender) {
     }
 
     case 'PROMPT_GET_DEPARTMENTS': {
+      if (await sbRest.isAuthenticated()) {
+        try {
+          const orgId = await sbRest.getOrgId();
+          const departments = await sbRest.select('departments', `org_id=eq.${orgId}`);
+          return { departments: departments || [] };
+        } catch { /* fall through */ }
+      }
       const departments = await getDepartments();
       return { departments };
     }
@@ -1126,7 +1245,14 @@ async function handleMessage(message, sender) {
 
     case 'PROMPT_INSERT': {
       // Insert prompt into active AI tool tab
-      const prompt = await getPrompt(message.promptId);
+      let prompt = null;
+      if (await sbRest.isAuthenticated()) {
+        try {
+          const rows = await sbRest.select('prompts', `id=eq.${message.promptId}`);
+          prompt = rows?.[0] ? sbRest.dbPromptToApp(rows[0]) : null;
+        } catch { /* fall through */ }
+      }
+      if (!prompt) prompt = await getPrompt(message.promptId);
       if (!prompt) return { error: 'Prompt not found' };
 
       // Record usage
@@ -1279,6 +1405,23 @@ async function handleMessage(message, sender) {
     // ═══════════════════════════════════════
 
     case 'VAULT_GET_ALL': {
+      if (await sbRest.isAuthenticated()) {
+        try {
+          const orgId = await sbRest.getOrgId();
+          const [prompts, folders, departments] = await Promise.all([
+            sbRest.select('prompts', `org_id=eq.${orgId}&order=updated_at.desc`),
+            sbRest.select('folders', `org_id=eq.${orgId}`),
+            sbRest.select('departments', `org_id=eq.${orgId}`),
+          ]);
+          return {
+            prompts: (prompts || []).map(sbRest.dbPromptToApp),
+            folders: folders || [],
+            departments: departments || [],
+            org: null, teams: [], members: [], collections: [], standards: [],
+            analytics: { totalPrompts: (prompts || []).length, totalUses: 0, avgRating: 0, usesThisWeek: 0, topPrompts: [], departmentUsage: {} },
+          };
+        } catch { /* fall through */ }
+      }
       const [prompts, folders, departments, org, teams, members, collections, standards] = await Promise.all([
         getPrompts(),
         getFolders(),

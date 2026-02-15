@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "ContextIQ",
   "version": "0.9.0",
-  "description": "AI Prompt Vault + Bridge. Manage, share, and standardize prompts across teams. Web app with Supabase backend + Chrome extension.",
+  "description": "Save your best AI prompts and continue conversations across ChatGPT, Claude, Gemini, and more.",
   "permissions": [
     "tabs",
     "activeTab",
@@ -20,7 +20,32 @@
   },
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
+      "matches": [
+        "*://chatgpt.com/*",
+        "*://chat.openai.com/*",
+        "*://gemini.google.com/*",
+        "*://claude.ai/*",
+        "*://perplexity.ai/*",
+        "*://www.perplexity.ai/*",
+        "*://copilot.microsoft.com/*",
+        "*://poe.com/*",
+        "*://www.poe.com/*",
+        "*://chat.deepseek.com/*",
+        "*://grok.com/*",
+        "*://www.grok.com/*",
+        "*://chat.mistral.ai/*",
+        "*://huggingface.co/chat/*",
+        "*://pi.ai/*",
+        "*://coral.cohere.com/*",
+        "*://you.com/*",
+        "*://www.you.com/*",
+        "*://meta.ai/*",
+        "*://www.meta.ai/*",
+        "*://phind.com/*",
+        "*://www.phind.com/*",
+        "*://notion.so/*",
+        "*://www.notion.so/*"
+      ],
       "js": ["src/content/ai-injector.js"],
       "css": ["src/content/ai-injector.css"],
       "run_at": "document_idle"

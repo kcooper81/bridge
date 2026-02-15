@@ -1,5 +1,8 @@
 // ContextIQ Constants
 
+export const SUPABASE_URL = 'https://vafybxyxmpehrpqbztrc.supabase.co';
+export const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZhZnlieHl4bXBlaHJwcWJ6dHJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4MzU3NjcsImV4cCI6MjA4NjQxMTc2N30.W6OiQtVpqzyueOQq6HE7_qNOTDOQgTig215zSgXYHAs';
+
 export const STORAGE_KEYS = {
   PROJECTS: 'contextiq_projects',
   ACTIVITY_LOG: 'contextiq_activity_log',
@@ -19,6 +22,8 @@ export const STORAGE_KEYS = {
   PROMPT_DEPARTMENTS: 'contextiq_prompt_departments',
   PROMPT_ANALYTICS: 'contextiq_prompt_analytics',
   PROMPT_STARTER_INSTALLED: 'contextiq_prompt_starter_installed',
+  // Web App
+  WEB_APP_URL: 'contextiq_web_app_url',
   // Team & Organization
   ORG: 'contextiq_org',
   TEAMS: 'contextiq_teams',
@@ -90,6 +95,7 @@ export const DEFAULT_SETTINGS = {
   excludedDomains: [],
   showDashboard: true,
   showTimeline: true,
+  webAppUrl: 'https://bridge-updated.vercel.app', // Vercel-hosted web app URL
 };
 
 export const WORKSPACE_PRESETS = {

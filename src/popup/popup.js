@@ -1,5 +1,5 @@
-// ContextIQ Popup v0.7.0 — Prompt Manager + Bridge
-// Tab-based navigation: Prompts | Bridge
+// ContextIQ Popup v1.0 — Improved UX: Prompt Manager + AI Bridge
+// Tab-based navigation: My Prompts | AI Bridge
 
 import { truncate } from '../lib/utils.js';
 
@@ -10,11 +10,33 @@ import { truncate } from '../lib/utils.js';
 const toast = document.getElementById('toast');
 const btnSettings = document.getElementById('btn-settings');
 const btnOpenVault = document.getElementById('btn-open-vault');
+const bridgeBadge = document.getElementById('bridge-badge');
 let activeTab = 'prompts';
+let isAuthenticated = false;
 
-// Open Vault dashboard in new tab
-btnOpenVault.addEventListener('click', () => {
-  chrome.tabs.create({ url: chrome.runtime.getURL('src/dashboard/dashboard.html') });
+const DEFAULT_WEB_APP_URL = 'https://bridge-updated.vercel.app';
+
+// ── Auth DOM ──
+const authBarUser = document.getElementById('auth-bar-user');
+const authBarEmail = document.getElementById('auth-bar-email');
+const authForm = document.getElementById('auth-form');
+const authError = document.getElementById('auth-error');
+const btnAuthShow = document.getElementById('btn-auth-show');
+const btnAuthSubmit = document.getElementById('btn-auth-submit');
+const btnAuthCancel = document.getElementById('btn-auth-cancel');
+const btnAuthSignout = document.getElementById('btn-auth-signout');
+const authEmailInput = document.getElementById('auth-email');
+const authPasswordInput = document.getElementById('auth-password');
+
+// Open full dashboard — always open web app URL
+btnOpenVault.addEventListener('click', async () => {
+  try {
+    const resp = await chrome.runtime.sendMessage({ type: 'GET_SETTINGS' });
+    const webAppUrl = resp?.settings?.webAppUrl || DEFAULT_WEB_APP_URL;
+    chrome.tabs.create({ url: webAppUrl });
+  } catch {
+    chrome.tabs.create({ url: DEFAULT_WEB_APP_URL });
+  }
 });
 
 // ── Tab switching ──
@@ -35,7 +57,6 @@ function switchTab(tab) {
 
 const promptSearchInput = document.getElementById('prompt-search');
 const promptCategoryBar = document.getElementById('prompt-category-bar');
-const promptCountEl = document.getElementById('prompt-count');
 const promptEmpty = document.getElementById('prompt-empty');
 const promptCardsEl = document.getElementById('prompt-cards');
 const promptDetail = document.getElementById('prompt-detail');
@@ -46,13 +67,11 @@ const btnInstallStarters = document.getElementById('btn-install-starters');
 const btnPromptBack = document.getElementById('btn-prompt-back');
 const btnPromptDuplicate = document.getElementById('btn-prompt-duplicate');
 const btnPromptDelete = document.getElementById('btn-prompt-delete');
-const promptSortBar = document.querySelector('.prompt-sort-bar');
 
 let allPrompts = [];
 let allFolders = [];
 let allDepartments = [];
 let promptFilter = 'all'; // folder id or 'all' / 'favorites'
-let promptSort = 'recent';
 let promptQuery = '';
 let editingPromptId = null;
 
@@ -65,23 +84,10 @@ const FOLDER_ICONS = {
   folder: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>',
 };
 
-const TONE_COLORS = {
-  professional: '#60a5fa',
-  persuasive: '#fb923c',
-  empathetic: '#34d399',
-  engaging: '#c084fc',
-  technical: '#60a5fa',
-  clear: '#34d399',
-  conversational: '#fbbf24',
-  confident: '#fb7185',
-  creative: '#c084fc',
-  casual: '#fbbf24',
-};
-
 async function loadPrompts() {
   try {
     const [pResp, fResp, dResp] = await Promise.all([
-      chrome.runtime.sendMessage({ type: 'PROMPT_GET_ALL', query: promptQuery, filters: { sort: promptSort, folderId: promptFilter !== 'all' && promptFilter !== 'favorites' ? promptFilter : undefined, favoritesOnly: promptFilter === 'favorites' } }),
+      chrome.runtime.sendMessage({ type: 'PROMPT_GET_ALL', query: promptQuery, filters: { sort: 'recent', folderId: promptFilter !== 'all' && promptFilter !== 'favorites' ? promptFilter : undefined, favoritesOnly: promptFilter === 'favorites' } }),
       chrome.runtime.sendMessage({ type: 'PROMPT_GET_FOLDERS' }),
       chrome.runtime.sendMessage({ type: 'PROMPT_GET_DEPARTMENTS' }),
     ]);
@@ -100,7 +106,7 @@ async function loadPrompts() {
 
 function renderCategoryTabs() {
   let html = `<button class="prompt-cat-tab ${promptFilter === 'all' ? 'active' : ''}" data-folder="all">All</button>`;
-  html += `<button class="prompt-cat-tab ${promptFilter === 'favorites' ? 'active' : ''}" data-folder="favorites"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>`;
+  html += `<button class="prompt-cat-tab ${promptFilter === 'favorites' ? 'active' : ''}" data-folder="favorites"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Favs</button>`;
 
   for (const f of allFolders) {
     const icon = FOLDER_ICONS[f.icon] || FOLDER_ICONS.folder;
@@ -113,7 +119,6 @@ function renderCategoryTabs() {
 
 function renderPromptList() {
   const prompts = allPrompts;
-  promptCountEl.textContent = `${prompts.length} prompt${prompts.length !== 1 ? 's' : ''}`;
 
   if (prompts.length === 0) {
     promptEmpty.classList.remove('hidden');
@@ -121,10 +126,12 @@ function renderPromptList() {
     if (promptQuery) {
       promptEmpty.querySelector('.prompt-empty-title').textContent = 'No matches';
       promptEmpty.querySelector('.prompt-empty-desc').textContent = `Nothing found for "${promptQuery}"`;
+      promptEmpty.querySelector('.prompt-empty-steps').classList.add('hidden');
       btnInstallStarters.classList.add('hidden');
     } else {
-      promptEmpty.querySelector('.prompt-empty-title').textContent = 'No prompts yet';
-      promptEmpty.querySelector('.prompt-empty-desc').textContent = 'Get started with our curated starter packs or create your own prompts.';
+      promptEmpty.querySelector('.prompt-empty-title').textContent = 'Your prompt library';
+      promptEmpty.querySelector('.prompt-empty-desc').textContent = 'Save reusable prompts here. Use them in any AI tool with one click.';
+      promptEmpty.querySelector('.prompt-empty-steps').classList.remove('hidden');
       btnInstallStarters.classList.remove('hidden');
     }
     return;
@@ -136,49 +143,34 @@ function renderPromptList() {
 
 function renderPromptCard(prompt) {
   const folder = allFolders.find(f => f.id === prompt.folderId);
-  const avgRating = prompt.rating?.count ? (prompt.rating.total / prompt.rating.count).toFixed(1) : null;
-  const toneColor = TONE_COLORS[prompt.tone] || '#8b5cf6';
   const folderBadge = folder
     ? `<span class="prompt-card-folder" style="color:${folder.color};background:${folder.color}15">${FOLDER_ICONS[folder.icon] || ''} ${esc(folder.name)}</span>`
     : '';
-  const tags = (prompt.tags || []).slice(0, 3).map(t => `<span class="prompt-card-tag">${esc(t)}</span>`).join('');
-  const stars = avgRating ? `<span class="prompt-card-stars"><svg width="10" height="10" viewBox="0 0 24 24" fill="#fbbf24" stroke="#fbbf24" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> ${avgRating}</span>` : '';
-  const useCount = prompt.usageCount ? `<span class="prompt-card-uses">${prompt.usageCount} use${prompt.usageCount !== 1 ? 's' : ''}</span>` : '';
 
   return `
     <div class="prompt-card" data-id="${esc(prompt.id)}">
       <div class="prompt-card-top">
         <div class="prompt-card-info">
           <div class="prompt-card-title">${esc(prompt.title || 'Untitled')}</div>
-          <div class="prompt-card-desc">${esc(truncate(prompt.description || prompt.content, 80))}</div>
+          <div class="prompt-card-desc">${esc(truncate(prompt.description || prompt.content, 90))}</div>
         </div>
         <button class="prompt-card-fav ${prompt.isFavorite ? 'active' : ''}" data-id="${esc(prompt.id)}" title="Favorite">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="${prompt.isFavorite ? '#fbbf24' : 'none'}" stroke="${prompt.isFavorite ? '#fbbf24' : 'currentColor'}" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
         </button>
       </div>
-      <div class="prompt-card-meta">
-        ${folderBadge}
-        <span class="prompt-card-tone" style="color:${toneColor};background:${toneColor}15">${esc(prompt.tone || 'general')}</span>
-        ${tags}
-        ${stars}
-        ${useCount}
-      </div>
+      ${folderBadge ? `<div class="prompt-card-meta">${folderBadge}</div>` : ''}
       <div class="prompt-card-actions">
-        <button class="prompt-card-insert" data-id="${esc(prompt.id)}">
+        <button class="prompt-card-insert" data-id="${esc(prompt.id)}" title="Paste this prompt into the active AI chat">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
           Insert
         </button>
-        <button class="prompt-card-copy" data-id="${esc(prompt.id)}">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-          Copy
-        </button>
-        <button class="prompt-card-edit" data-id="${esc(prompt.id)}">Edit</button>
       </div>
     </div>
   `;
 }
 
 // ── Prompt Detail / Editor ──
+// The form now shows essential fields first and hides advanced options behind a toggle
 
 async function openPromptDetail(promptId) {
   editingPromptId = promptId;
@@ -211,6 +203,9 @@ async function openPromptDetail(promptId) {
   const tones = ['professional', 'casual', 'technical', 'persuasive', 'empathetic', 'engaging', 'creative', 'conversational', 'confident', 'clear'];
   const toneOptions = tones.map(t => `<option value="${t}" ${prompt.tone === t ? 'selected' : ''}>${t.charAt(0).toUpperCase() + t.slice(1)}</option>`).join('');
 
+  // Check if advanced fields have content (to auto-expand)
+  const hasAdvanced = prompt.intendedOutcome || prompt.modelRecommendation || prompt.exampleInput || prompt.exampleOutput || prompt.departmentId;
+
   promptDetailBody.innerHTML = `
     <form class="prompt-form" id="prompt-form">
       <div class="pf-group">
@@ -222,8 +217,8 @@ async function openPromptDetail(promptId) {
         <textarea class="pf-textarea" name="content" rows="6" placeholder="Write your prompt template here. Use [brackets] for variables...">${esc(prompt.content)}</textarea>
       </div>
       <div class="pf-group">
-        <label class="pf-label">Description</label>
-        <input class="pf-input" name="description" value="${esc(prompt.description)}" placeholder="What does this prompt do?">
+        <label class="pf-label">Description <span class="pf-hint">(helps you find it later)</span></label>
+        <input class="pf-input" name="description" value="${esc(prompt.description)}" placeholder="Short summary of what this prompt does">
       </div>
       <div class="pf-row">
         <div class="pf-group pf-half">
@@ -234,39 +229,46 @@ async function openPromptDetail(promptId) {
           </select>
         </div>
         <div class="pf-group pf-half">
+          <label class="pf-label">Tone</label>
+          <select class="pf-select" name="tone">${toneOptions}</select>
+        </div>
+      </div>
+      <div class="pf-group">
+        <label class="pf-label">Tags <span class="pf-hint">(comma separated)</span></label>
+        <input class="pf-input" name="tags" value="${esc((prompt.tags || []).join(', '))}" placeholder="e.g. email, marketing, campaign">
+      </div>
+
+      <!-- Advanced Fields (collapsed by default) -->
+      <button type="button" class="pf-advanced-toggle ${hasAdvanced ? 'open' : ''}" id="pf-advanced-toggle">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        More options
+      </button>
+      <div class="pf-advanced-fields ${hasAdvanced ? 'open' : ''}" id="pf-advanced-fields">
+        <div class="pf-group">
           <label class="pf-label">Department</label>
           <select class="pf-select" name="departmentId">
             <option value="">None</option>
             ${deptOptions}
           </select>
         </div>
-      </div>
-      <div class="pf-row">
-        <div class="pf-group pf-half">
-          <label class="pf-label">Tone</label>
-          <select class="pf-select" name="tone">${toneOptions}</select>
-        </div>
-        <div class="pf-group pf-half">
+        <div class="pf-group">
           <label class="pf-label">Best Model</label>
           <input class="pf-input" name="modelRecommendation" value="${esc(prompt.modelRecommendation)}" placeholder="e.g. Claude, ChatGPT">
         </div>
+        <div class="pf-group">
+          <label class="pf-label">Intended Outcome</label>
+          <input class="pf-input" name="intendedOutcome" value="${esc(prompt.intendedOutcome)}" placeholder="What should the AI produce?">
+        </div>
+        <div class="pf-group">
+          <label class="pf-label">Example Input</label>
+          <textarea class="pf-textarea pf-textarea-sm" name="exampleInput" rows="2" placeholder="Example of how to fill in the template...">${esc(prompt.exampleInput || '')}</textarea>
+        </div>
+        <div class="pf-group">
+          <label class="pf-label">Example Output</label>
+          <textarea class="pf-textarea pf-textarea-sm" name="exampleOutput" rows="2" placeholder="What the AI should produce...">${esc(prompt.exampleOutput || '')}</textarea>
+        </div>
       </div>
-      <div class="pf-group">
-        <label class="pf-label">Intended Outcome</label>
-        <input class="pf-input" name="intendedOutcome" value="${esc(prompt.intendedOutcome)}" placeholder="What should the AI produce?">
-      </div>
-      <div class="pf-group">
-        <label class="pf-label">Tags <span class="pf-hint">(comma separated)</span></label>
-        <input class="pf-input" name="tags" value="${esc((prompt.tags || []).join(', '))}" placeholder="e.g. email, marketing, campaign">
-      </div>
-      <div class="pf-group">
-        <label class="pf-label">Example Input</label>
-        <textarea class="pf-textarea pf-textarea-sm" name="exampleInput" rows="2" placeholder="Example of how to fill in the template...">${esc(prompt.exampleInput || '')}</textarea>
-      </div>
-      <div class="pf-group">
-        <label class="pf-label">Example Output</label>
-        <textarea class="pf-textarea pf-textarea-sm" name="exampleOutput" rows="2" placeholder="What the AI should produce...">${esc(prompt.exampleOutput || '')}</textarea>
-      </div>
+
       <div class="pf-actions">
         <button type="submit" class="pf-save-btn">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
@@ -277,6 +279,14 @@ async function openPromptDetail(promptId) {
   `;
 
   promptDetail.classList.remove('hidden');
+
+  // Advanced toggle
+  document.getElementById('pf-advanced-toggle').addEventListener('click', () => {
+    const toggle = document.getElementById('pf-advanced-toggle');
+    const fields = document.getElementById('pf-advanced-fields');
+    toggle.classList.toggle('open');
+    fields.classList.toggle('open');
+  });
 
   // Form submit handler
   document.getElementById('prompt-form').addEventListener('submit', async (e) => {
@@ -321,7 +331,7 @@ function closePromptDetail() {
 }
 
 // ═══════════════════════════════════════
-//  BRIDGE TAB (Artifact Gallery)
+//  BRIDGE TAB (AI Bridge)
 // ═══════════════════════════════════════
 
 const toolTabsEl = document.getElementById('tool-tabs');
@@ -379,16 +389,20 @@ async function loadActiveTabStatus() {
   try {
     const resp = await chrome.runtime.sendMessage({ type: 'GET_ACTIVE_TAB_TOOL' });
     if (resp?.tool) {
-      activeTabText.textContent = `Monitoring ${resp.tool.toolName}`;
+      activeTabText.textContent = `Connected to ${resp.tool.toolName}`;
       activeTabIndicator.classList.add('active');
       activeTabBar.classList.add('detected');
+      // Show green dot on Bridge tab when AI tool detected
+      bridgeBadge.classList.remove('hidden');
     } else {
-      activeTabText.textContent = 'No AI tool on active tab';
+      activeTabText.textContent = 'Open an AI tool to start capturing';
       activeTabIndicator.classList.remove('active');
       activeTabBar.classList.remove('detected');
+      bridgeBadge.classList.add('hidden');
     }
   } catch {
-    activeTabText.textContent = 'No AI tool detected';
+    activeTabText.textContent = 'Open an AI tool to start capturing';
+    bridgeBadge.classList.add('hidden');
   }
 }
 
@@ -439,9 +453,13 @@ function renderArtifacts() {
     if (bridgeSearchQuery) {
       galleryEmpty.querySelector('.gallery-empty-title').textContent = 'No matches';
       galleryEmpty.querySelector('.gallery-empty-desc').textContent = `Nothing found for "${bridgeSearchQuery}"`;
+      const steps = galleryEmpty.querySelector('.gallery-empty-steps');
+      if (steps) steps.classList.add('hidden');
     } else {
-      galleryEmpty.querySelector('.gallery-empty-title').textContent = 'No artifacts yet';
-      galleryEmpty.querySelector('.gallery-empty-desc').textContent = 'Visit any AI tool — ContextIQ captures code, images, and conversations so you can bridge them anywhere.';
+      galleryEmpty.querySelector('.gallery-empty-title').textContent = 'Continue conversations across AI tools';
+      galleryEmpty.querySelector('.gallery-empty-desc').textContent = 'ContextIQ auto-captures your chats so you can pick up where you left off in a different AI.';
+      const steps = galleryEmpty.querySelector('.gallery-empty-steps');
+      if (steps) steps.classList.remove('hidden');
     }
     return;
   }
@@ -503,11 +521,11 @@ function renderArtifactCard(artifact, idx) {
       ${badgesHtml}
       ${previewHtml}
       <div class="artifact-actions">
-        <button class="artifact-bridge-btn" data-idx="${idx}">
+        <button class="artifact-bridge-btn" data-idx="${idx}" title="Continue this conversation in another AI tool">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
-          Bridge to...
+          Send to AI
         </button>
-        <button class="artifact-copy-btn" data-idx="${idx}">
+        <button class="artifact-copy-btn" data-idx="${idx}" title="Copy to clipboard">
           <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
           Copy
         </button>
@@ -524,7 +542,7 @@ function renderArtifactCard(artifact, idx) {
 function showBridgeSheet(artifacts) {
   bridgingArtifact = artifacts;
   const isMulti = Array.isArray(artifacts);
-  bridgeSheetTitle.textContent = isMulti ? `Bridge ${artifacts.length} artifacts to...` : 'Bridge to...';
+  bridgeSheetTitle.textContent = isMulti ? `Continue ${artifacts.length} conversations in...` : 'Continue in...';
   const sourceTool = isMulti ? null : artifacts.toolName;
   const targets = sourceTool ? AI_TOOLS.filter(t => t.name !== sourceTool) : AI_TOOLS;
 
@@ -533,7 +551,7 @@ function showBridgeSheet(artifacts) {
       <div class="bridge-target-icon ${tool.key}">${TOOL_ICONS[tool.name] || TOOL_ICONS.ChatGPT}</div>
       <div class="bridge-target-info">
         <div class="bridge-target-name">${tool.name}</div>
-        <div class="bridge-target-desc">Open ${tool.name} with this artifact</div>
+        <div class="bridge-target-desc">Opens ${tool.name} with your context</div>
       </div>
       <div class="bridge-target-arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg></div>
     </div>
@@ -553,7 +571,7 @@ async function bridgeToTool(toolName, toolUrl) {
   try { await chrome.runtime.sendMessage({ type: 'SET_PENDING_BRIDGE', artifact: { text, toolName, sourceToolName: isMulti ? 'Multiple' : bridgingArtifact.toolName, topic: isMulti ? `${bridgingArtifact.length} artifacts` : bridgingArtifact.topic } }); } catch {}
   try { await navigator.clipboard.writeText(text); } catch {}
   chrome.tabs.create({ url: toolUrl });
-  showToast(`Bridging to ${toolName} — context copied`);
+  showToast(`Opening ${toolName} — context copied to clipboard`);
   hideBridgeSheet();
   exitSelectMode();
 }
@@ -614,7 +632,7 @@ async function deleteArtifacts(indices) {
     } catch {}
   }
   if (deletedCount > 0) {
-    showToast(`Deleted ${deletedCount} artifact${deletedCount !== 1 ? 's' : ''}`);
+    showToast(`Deleted ${deletedCount} item${deletedCount !== 1 ? 's' : ''}`);
     await loadArtifacts();
     exitSelectMode();
   }
@@ -626,6 +644,47 @@ async function deleteArtifacts(indices) {
 
 function bindEvents() {
   btnSettings.addEventListener('click', () => chrome.runtime.openOptionsPage());
+
+  // ── Auth Events ──
+  btnAuthShow.addEventListener('click', () => {
+    authForm.classList.remove('hidden');
+    authEmailInput.focus();
+  });
+
+  btnAuthCancel.addEventListener('click', () => {
+    authForm.classList.add('hidden');
+    authError.classList.add('hidden');
+  });
+
+  btnAuthSubmit.addEventListener('click', handleSignIn);
+  authPasswordInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') handleSignIn();
+  });
+
+  // OAuth hint — open web app for Google/GitHub sign-in
+  const oauthLink = document.getElementById('auth-oauth-link');
+  if (oauthLink) {
+    oauthLink.addEventListener('click', async (e) => {
+      e.preventDefault();
+      try {
+        const resp = await chrome.runtime.sendMessage({ type: 'GET_SETTINGS' });
+        const webAppUrl = resp?.settings?.webAppUrl || DEFAULT_WEB_APP_URL;
+        chrome.tabs.create({ url: webAppUrl });
+      } catch {
+        chrome.tabs.create({ url: DEFAULT_WEB_APP_URL });
+      }
+    });
+  }
+
+  btnAuthSignout.addEventListener('click', async () => {
+    try {
+      await chrome.runtime.sendMessage({ type: 'AUTH_SIGN_OUT' });
+      isAuthenticated = false;
+      updateAuthUI();
+      showToast('Signed out');
+      await loadPrompts();
+    } catch { showToast('Error signing out'); }
+  });
 
   // Main tab switching
   document.querySelector('.main-tabs').addEventListener('click', (e) => {
@@ -651,24 +710,16 @@ function bindEvents() {
     loadPrompts();
   });
 
-  document.querySelector('.prompt-sort-options').addEventListener('click', (e) => {
-    const btn = e.target.closest('.prompt-sort-btn');
-    if (!btn) return;
-    promptSort = btn.dataset.sort;
-    document.querySelectorAll('.prompt-sort-btn').forEach(b => b.classList.toggle('active', b === btn));
-    loadPrompts();
-  });
-
   btnNewPrompt.addEventListener('click', () => openPromptDetail('new'));
   btnInstallStarters.addEventListener('click', async () => {
     btnInstallStarters.textContent = 'Installing...';
     btnInstallStarters.disabled = true;
     try {
       await chrome.runtime.sendMessage({ type: 'PROMPT_INSTALL_STARTERS' });
-      showToast('Starter packs installed!');
+      showToast('Starter prompts installed!');
       await loadPrompts();
     } catch { showToast('Error installing starters'); }
-    btnInstallStarters.textContent = 'Install Starter Packs';
+    btnInstallStarters.textContent = 'Get Started with Starter Prompts';
     btnInstallStarters.disabled = false;
   });
 
@@ -717,29 +768,6 @@ function bindEvents() {
           }
         }
       } catch { showToast('Error inserting prompt'); }
-      return;
-    }
-
-    const copyBtn = e.target.closest('.prompt-card-copy');
-    if (copyBtn) {
-      e.stopPropagation();
-      const id = copyBtn.dataset.id;
-      try {
-        const resp = await chrome.runtime.sendMessage({ type: 'PROMPT_GET', promptId: id });
-        if (resp?.prompt) {
-          await navigator.clipboard.writeText(resp.prompt.content);
-          await chrome.runtime.sendMessage({ type: 'PROMPT_USE', promptId: id });
-          showToast('Copied to clipboard');
-          await loadPrompts();
-        }
-      } catch { showToast('Error copying'); }
-      return;
-    }
-
-    const editBtn = e.target.closest('.prompt-card-edit');
-    if (editBtn) {
-      e.stopPropagation();
-      openPromptDetail(editBtn.dataset.id);
       return;
     }
 
@@ -861,22 +889,89 @@ function timeAgoShort(ts) {
 }
 
 // ═══════════════════════════════════════
+//  AUTH
+// ═══════════════════════════════════════
+
+function updateAuthUI() {
+  if (isAuthenticated) {
+    btnAuthShow.classList.add('hidden');
+    authForm.classList.add('hidden');
+    authBarUser.classList.remove('hidden');
+  } else {
+    authBarUser.classList.add('hidden');
+    authForm.classList.add('hidden');
+    btnAuthShow.classList.remove('hidden');
+  }
+}
+
+async function checkAuthStatus() {
+  try {
+    const resp = await chrome.runtime.sendMessage({ type: 'AUTH_STATUS' });
+    isAuthenticated = resp?.authenticated || false;
+    if (resp?.user?.email) authBarEmail.textContent = resp.user.email;
+    updateAuthUI();
+  } catch {
+    isAuthenticated = false;
+    updateAuthUI();
+  }
+}
+
+async function handleSignIn() {
+  const email = authEmailInput.value.trim();
+  const password = authPasswordInput.value;
+  if (!email || !password) { showAuthError('Enter email and password'); return; }
+
+  btnAuthSubmit.disabled = true;
+  btnAuthSubmit.textContent = 'Signing in...';
+  authError.classList.add('hidden');
+
+  try {
+    const resp = await chrome.runtime.sendMessage({ type: 'AUTH_SIGN_IN', email, password });
+    if (resp?.success) {
+      isAuthenticated = true;
+      authBarEmail.textContent = email;
+      authPasswordInput.value = '';
+      updateAuthUI();
+      showToast('Signed in — prompts synced from Vault');
+      await loadPrompts();
+    } else {
+      showAuthError(resp?.error || 'Sign in failed');
+    }
+  } catch (err) {
+    showAuthError(err.message || 'Connection error');
+  }
+
+  btnAuthSubmit.disabled = false;
+  btnAuthSubmit.textContent = 'Sign in';
+}
+
+function showAuthError(msg) {
+  authError.textContent = msg;
+  authError.classList.remove('hidden');
+}
+
+// ═══════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════
 
 async function init() {
   bindEvents();
+  // Check auth status first
+  await checkAuthStatus();
   // Load the active tab (prompts by default)
   await loadPrompts();
-  // Check if starters need installing
-  try {
-    const resp = await chrome.runtime.sendMessage({ type: 'PROMPT_IS_STARTER_INSTALLED' });
-    if (!resp?.installed) {
-      // Auto-install starters on first popup open
-      await chrome.runtime.sendMessage({ type: 'PROMPT_INSTALL_STARTERS' });
-      await loadPrompts();
-    }
-  } catch {}
+  // Also check bridge status to show badge
+  loadActiveTabStatus();
+  // Check if starters need installing (only in local mode)
+  if (!isAuthenticated) {
+    try {
+      const resp = await chrome.runtime.sendMessage({ type: 'PROMPT_IS_STARTER_INSTALLED' });
+      if (!resp?.installed) {
+        await chrome.runtime.sendMessage({ type: 'PROMPT_INSTALL_STARTERS' });
+        await loadPrompts();
+      }
+    } catch {}
+  }
 }
 
 init();

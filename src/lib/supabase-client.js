@@ -118,6 +118,24 @@ export async function onAuthStateChange(callback) {
   return client.auth.onAuthStateChange(callback);
 }
 
+/**
+ * Ensure a profiles row exists for the current user.
+ * Covers the case where the DB trigger failed or was not deployed.
+ */
+export async function ensureProfile(user) {
+  if (!user) return;
+  const client = await getClient();
+  const meta = user.user_metadata || {};
+  const { error } = await client.from('profiles').upsert({
+    id: user.id,
+    email: user.email || meta.email || '',
+    name: meta.name || meta.full_name || meta.preferred_username || (user.email || '').split('@')[0] || '',
+    avatar_url: meta.avatar_url || meta.picture || '',
+    role: 'admin',
+  }, { onConflict: 'id', ignoreDuplicates: false });
+  if (error) console.warn('ensureProfile upsert failed:', error.message);
+}
+
 // ═══════════════════════════════════════
 //  DB HELPERS (typed wrappers around supabase queries)
 // ═══════════════════════════════════════

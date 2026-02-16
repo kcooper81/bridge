@@ -350,6 +350,9 @@ BEGIN
     name = COALESCE(NULLIF(EXCLUDED.name, ''), profiles.name),
     avatar_url = COALESCE(NULLIF(EXCLUDED.avatar_url, ''), profiles.avatar_url);
   RETURN NEW;
+EXCEPTION WHEN OTHERS THEN
+  -- Never block auth signup; profile will be created client-side as fallback
+  RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 

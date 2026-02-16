@@ -65,10 +65,15 @@ async function save(partial) {
   showStatus('Settings saved');
 }
 
+let statusTimer = null;
 function showStatus(message) {
+  if (statusTimer) clearTimeout(statusTimer);
   status.textContent = message;
   status.classList.remove('hidden');
-  setTimeout(() => status.classList.add('hidden'), 2000);
+  statusTimer = setTimeout(() => {
+    status.classList.add('hidden');
+    statusTimer = null;
+  }, 2000);
 }
 
 // Export data

@@ -9,6 +9,7 @@
 
   --border-subtle: rgba(255, 255, 255, 0.06);
   --border-default: rgba(255, 255, 255, 0.09);
+  --border-focus: rgba(255, 255, 255, 0.15);
 
   --text-primary: #e6e8f0;
   --text-secondary: rgba(255, 255, 255, 0.55);
@@ -39,6 +40,7 @@
 
   --border-subtle: rgba(0, 0, 0, 0.06);
   --border-default: rgba(0, 0, 0, 0.10);
+  --border-focus: rgba(0, 0, 0, 0.18);
 
   --text-primary: #0f172a;
   --text-secondary: rgba(0, 0, 0, 0.55);
@@ -69,6 +71,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow-y: auto;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -228,6 +231,10 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  position: sticky;
+  bottom: 0;
+  padding: 16px 0;
+  background: var(--bg-base);
 }
 
 .dots {
@@ -301,6 +308,13 @@ body {
 .btn-next:active,
 .btn-done:active {
   transform: scale(0.97);
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 560px) {
+  .onboarding { padding: 32px 20px; }
+  .features { grid-template-columns: 1fr; }
+  .step h1 { font-size: 24px; }
 }
 
 .hidden {

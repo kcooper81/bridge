@@ -92,6 +92,7 @@ body {
   flex-direction: column;
   height: 100vh;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .sidebar-brand {
@@ -173,6 +174,7 @@ body {
 .sidebar-footer {
   border-top: 1px solid var(--border);
   padding: 12px 14px;
+  flex-shrink: 0;
 }
 
 .sidebar-user {
@@ -231,7 +233,7 @@ body {
 .view {
   display: none;
   padding: 32px 40px;
-  min-height: 100vh;
+  min-height: calc(100vh - 60px);
 }
 
 .view.active { display: block; }
@@ -425,7 +427,8 @@ body {
   background: var(--bg-surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
 .vault-table {
@@ -519,10 +522,11 @@ body {
   display: flex;
   gap: 4px;
   opacity: 0;
+  pointer-events: none;
   transition: opacity var(--transition);
 }
 
-.vault-row:hover .vault-row-actions { opacity: 1; }
+.vault-row:hover .vault-row-actions { opacity: 1; pointer-events: auto; }
 
 .vault-action-btn {
   background: transparent;
@@ -688,10 +692,11 @@ input[type="checkbox"] {
   display: flex;
   gap: 4px;
   opacity: 0;
+  pointer-events: none;
   transition: opacity var(--transition);
 }
 
-.collection-card:hover .collection-card-actions { opacity: 1; }
+.collection-card:hover .collection-card-actions { opacity: 1; pointer-events: auto; }
 
 /* ═══════════════════════════════════════
    STANDARDS VIEW
@@ -941,10 +946,11 @@ input[type="checkbox"] {
   display: flex;
   gap: 4px;
   opacity: 0;
+  pointer-events: none;
   transition: opacity var(--transition);
 }
 
-.member-row:hover .member-actions { opacity: 1; }
+.member-row:hover .member-actions { opacity: 1; pointer-events: auto; }
 
 /* ═══════════════════════════════════════
    ORG VIEW
@@ -1038,6 +1044,7 @@ input[type="checkbox"] {
 .coll-prompt-list {
   max-height: 200px;
   overflow-y: auto;
+  overscroll-behavior: contain;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   padding: 8px;
@@ -1451,6 +1458,7 @@ input[type="checkbox"] {
   gap: 8px;
   max-height: 200px;
   overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 4px 0;
 }
 
@@ -1553,7 +1561,13 @@ input[type="checkbox"] {
   font-size: 11px;
   font-weight: 400;
   color: var(--text-muted);
-  float: right;
+  margin-left: auto;
+}
+
+.form-group label:has(.char-count) {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
 }
 
 /* ═══════════════════════════════════════
@@ -1589,6 +1603,7 @@ input[type="checkbox"] {
   margin-bottom: 16px;
   max-height: 280px;
   overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .manage-row {
@@ -1650,8 +1665,10 @@ input[type="checkbox"] {
   .sidebar-brand-text, .sidebar-brand-badge, .sidebar-section-label,
   .sidebar-item span, .sidebar-user-info { display: none; }
   .sidebar-item { justify-content: center; padding: 12px; }
+  .sidebar-item[title]::after { content: none; }
   .sidebar-user { justify-content: center; }
   .view { padding: 20px; }
+  .view-header { flex-wrap: wrap; gap: 12px; }
   .vault-toolbar { flex-direction: column; }
   .vault-stats { flex-wrap: wrap; }
   .vault-stat { min-width: 120px; }

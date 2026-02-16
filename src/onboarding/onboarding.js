@@ -36,7 +36,11 @@ btnBack.addEventListener('click', () => goToStep(currentStep - 1));
 
 btnDone.addEventListener('click', async () => {
   await markOnboardingComplete();
-  window.close();
+  try {
+    window.close();
+  } catch (_) { /* no-op */ }
+  // Fallback: if window.close() doesn't work (e.g. not opened by script)
+  document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;color:var(--text-secondary);font-size:16px;">Setup complete! You can close this tab.</div>';
 });
 
 dots.forEach(dot => {
@@ -48,6 +52,9 @@ dots.forEach(dot => {
 
 // Keyboard navigation
 document.addEventListener('keydown', (e) => {
+  // Ignore Enter if a button already has focus (the button's native click handles it)
+  if (e.key === 'Enter' && e.target.tagName === 'BUTTON') return;
+
   if (e.key === 'ArrowRight' || e.key === 'Enter') {
     if (currentStep < totalSteps - 1) {
       goToStep(currentStep + 1);

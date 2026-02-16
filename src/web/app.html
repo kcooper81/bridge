@@ -42,148 +42,160 @@
   <script type="module">
     import { isConfigured, getSession, getUser, signOut } from '/src/lib/supabase-client.js';
 
-    // resetRemoteState is exported from vault-api
-    let resetRemoteState = () => {};
-    try {
-      const vaultMod = await import('/src/lib/vault-api.js');
-      if (vaultMod.resetRemoteState) resetRemoteState = vaultMod.resetRemoteState;
-    } catch { /* ignore */ }
+    (async function init() {
+      // ── Handle OAuth error params (e.g. ?error=server_error&error_description=...) ──
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.has('error')) {
+        const desc = urlParams.get('error_description') || urlParams.get('error') || 'Sign-in failed';
+        // Redirect to landing with error info so the user sees the message
+        window.location.href = '/?error=' + encodeURIComponent(urlParams.get('error')) +
+          '&error_description=' + encodeURIComponent(desc);
+        return;
+      }
 
-    // ── Auth gate: redirect to login if Supabase configured but no session ──
-    let isAuthenticated = false;
-    let isRemoteMode = false;
+      // resetRemoteState is exported from vault-api
+      let resetRemoteState = () => {};
+      try {
+        const vaultMod = await import('/src/lib/vault-api.js');
+        if (vaultMod.resetRemoteState) resetRemoteState = vaultMod.resetRemoteState;
+      } catch { /* ignore */ }
 
-    try {
-      // Check if this is an OAuth callback (has code param, hash tokens, or /auth/callback path)
-      const isOAuthCallback = new URLSearchParams(window.location.search).has('code') ||
-        window.location.hash.includes('access_token') ||
-        window.location.pathname === '/auth/callback';
+      // ── Auth gate: redirect to login if Supabase configured but no session ──
+      let isAuthenticated = false;
+      let isRemoteMode = false;
 
-      const { getClient } = await import('/src/lib/supabase-client.js');
-      const client = await getClient();
+      try {
+        // Check if this is an OAuth callback (has code param, hash tokens, or /auth/callback path)
+        const isOAuthCallback = urlParams.has('code') ||
+          window.location.hash.includes('access_token') ||
+          window.location.pathname === '/auth/callback';
 
-      // If this is an OAuth callback, wait for the session to be established
-      // before checking. Supabase PKCE exchanges the code asynchronously.
-      if (isOAuthCallback) {
-        // Subscribe to auth state changes FIRST, then check session.
-        // This avoids the race where the exchange completes between
-        // getSession() and onAuthStateChange subscription.
-        let session = await new Promise((resolve) => {
-          const timeout = setTimeout(() => resolve(null), 8000);
-          const { data: { subscription } } = client.auth.onAuthStateChange((event, s) => {
-            // Handle both INITIAL_SESSION (session already exists) and
-            // SIGNED_IN (session just established from code exchange)
-            if ((event === 'INITIAL_SESSION' || event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && s) {
-              clearTimeout(timeout);
-              subscription.unsubscribe();
-              resolve(s);
-            }
+        const { getClient } = await import('/src/lib/supabase-client.js');
+        const client = await getClient();
+
+        // If this is an OAuth callback, wait for the session to be established
+        // before checking. Supabase PKCE exchanges the code asynchronously.
+        if (isOAuthCallback) {
+          // Subscribe to auth state changes FIRST, then check session.
+          // This avoids the race where the exchange completes between
+          // getSession() and onAuthStateChange subscription.
+          let session = await new Promise((resolve) => {
+            const timeout = setTimeout(() => resolve(null), 8000);
+            const { data: { subscription } } = client.auth.onAuthStateChange((event, s) => {
+              // Handle both INITIAL_SESSION (session already exists) and
+              // SIGNED_IN (session just established from code exchange)
+              if ((event === 'INITIAL_SESSION' || event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && s) {
+                clearTimeout(timeout);
+                subscription.unsubscribe();
+                resolve(s);
+              }
+            });
           });
-        });
 
-        // Fallback: try getSession in case events were missed
-        if (!session) {
-          const { data: { session: fallbackSession } } = await client.auth.getSession();
-          session = fallbackSession;
-        }
+          // Fallback: try getSession in case events were missed
+          if (!session) {
+            const { data: { session: fallbackSession } } = await client.auth.getSession();
+            session = fallbackSession;
+          }
 
-        if (session) {
-          // Clean OAuth params from URL
-          window.history.replaceState({}, '', '/app');
+          if (session) {
+            // Clean OAuth params from URL
+            window.history.replaceState({}, '', '/app');
+            isAuthenticated = true;
+            isRemoteMode = true;
+          } else {
+            window.location.href = '/';
+            return;
+          }
+        } else {
+          // Normal page load — check for existing session
+          let session = await getSession();
+          if (!session) {
+            window.location.href = '/';
+            return;
+          }
           isAuthenticated = true;
           isRemoteMode = true;
-        } else {
-          window.location.href = '/';
-          return;
-        }
-      } else {
-        // Normal page load — check for existing session
-        let session = await getSession();
-        if (!session) {
-          window.location.href = '/';
-          return;
-        }
-        isAuthenticated = true;
-        isRemoteMode = true;
-      }
-    } catch (err) {
-      console.error('Auth error:', err);
-      window.location.href = '/';
-      return;
-    }
-
-    // ── Inject mode badge ──
-    const badge = document.createElement('span');
-    badge.className = 'app-mode-badge remote';
-    badge.textContent = 'Cloud Sync';
-    document.body.appendChild(badge);
-
-    // ── Inject sign out button ──
-    if (isAuthenticated) {
-      const btn = document.createElement('button');
-      btn.className = 'app-signout-btn';
-      btn.textContent = 'Sign Out';
-      btn.addEventListener('click', async () => {
-        try {
-          await signOut();
-          resetRemoteState();
-        } catch { /* ignore */ }
-        window.location.href = '/';
-      });
-      document.body.appendChild(btn);
-    }
-
-    // ── First-time org setup + populate user profile ──
-    let user = null;
-    try {
-      user = await getUser();
-    } catch (err) {
-      console.error('Failed to get user:', err);
-    }
-
-    if (isRemoteMode && user) {
-      try {
-        const { VaultAPI } = await import('/src/lib/vault-api.js');
-        const org = await VaultAPI.getOrg();
-        if (!org) {
-          const domain = user?.email?.split('@')[1] || '';
-          const orgName = domain ? domain.split('.')[0].charAt(0).toUpperCase() + domain.split('.')[0].slice(1) : 'My Organization';
-          await VaultAPI.saveOrg({ name: orgName, domain });
         }
       } catch (err) {
-        console.error('Org setup error:', err);
-        // Non-fatal — dashboard can still load
+        console.error('Auth error:', err);
+        window.location.href = '/';
+        return;
       }
-    }
 
-    // ── Populate sidebar user from auth ──
-    if (user) {
-      const name = user.user_metadata?.name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'User';
-      const avatarEl = document.getElementById('sidebar-user-avatar');
-      const nameEl = document.getElementById('sidebar-user-name');
-      const roleEl = document.getElementById('sidebar-user-role');
-      if (nameEl) nameEl.textContent = name;
-      if (roleEl) roleEl.textContent = user.email || '';
-      if (avatarEl) {
-        const avatarUrl = user.user_metadata?.avatar_url || user.user_metadata?.picture;
-        if (avatarUrl) {
-          const img = document.createElement('img');
-          img.src = avatarUrl;
-          img.alt = '';
-          img.style.cssText = 'width:100%;height:100%;border-radius:50%;object-fit:cover;';
-          avatarEl.innerHTML = '';
-          avatarEl.appendChild(img);
-        } else {
-          avatarEl.textContent = name.charAt(0).toUpperCase();
+      // ── Inject mode badge ──
+      const badge = document.createElement('span');
+      badge.className = 'app-mode-badge remote';
+      badge.textContent = 'Cloud Sync';
+      document.body.appendChild(badge);
+
+      // ── Inject sign out button ──
+      if (isAuthenticated) {
+        const btn = document.createElement('button');
+        btn.className = 'app-signout-btn';
+        btn.textContent = 'Sign Out';
+        btn.addEventListener('click', async () => {
+          try {
+            await signOut();
+            resetRemoteState();
+          } catch { /* ignore */ }
+          window.location.href = '/';
+        });
+        document.body.appendChild(btn);
+      }
+
+      // ── First-time org setup + populate user profile ──
+      let user = null;
+      try {
+        user = await getUser();
+      } catch (err) {
+        console.error('Failed to get user:', err);
+      }
+
+      if (isRemoteMode && user) {
+        try {
+          const { VaultAPI } = await import('/src/lib/vault-api.js');
+          const org = await VaultAPI.getOrg();
+          if (!org) {
+            const domain = user?.email?.split('@')[1] || '';
+            const orgName = domain ? domain.split('.')[0].charAt(0).toUpperCase() + domain.split('.')[0].slice(1) : 'My Organization';
+            await VaultAPI.saveOrg({ name: orgName, domain });
+          }
+        } catch (err) {
+          console.error('Org setup error:', err);
+          // Non-fatal — dashboard can still load
         }
       }
-    }
 
-    // ── Load the dashboard module ──
-    const script = document.createElement('script');
-    script.type = 'module';
-    script.src = '/src/dashboard/dashboard.js';
-    document.body.appendChild(script);
+      // ── Populate sidebar user from auth ──
+      if (user) {
+        const name = user.user_metadata?.name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'User';
+        const avatarEl = document.getElementById('sidebar-user-avatar');
+        const nameEl = document.getElementById('sidebar-user-name');
+        const roleEl = document.getElementById('sidebar-user-role');
+        if (nameEl) nameEl.textContent = name;
+        if (roleEl) roleEl.textContent = user.email || '';
+        if (avatarEl) {
+          const avatarUrl = user.user_metadata?.avatar_url || user.user_metadata?.picture;
+          if (avatarUrl) {
+            const img = document.createElement('img');
+            img.src = avatarUrl;
+            img.alt = '';
+            img.style.cssText = 'width:100%;height:100%;border-radius:50%;object-fit:cover;';
+            avatarEl.innerHTML = '';
+            avatarEl.appendChild(img);
+          } else {
+            avatarEl.textContent = name.charAt(0).toUpperCase();
+          }
+        }
+      }
+
+      // ── Load the dashboard module ──
+      const script = document.createElement('script');
+      script.type = 'module';
+      script.src = '/src/dashboard/dashboard.js';
+      document.body.appendChild(script);
+    })();
   </script>
 
   <!-- Dashboard HTML (same structure as dashboard.html) -->

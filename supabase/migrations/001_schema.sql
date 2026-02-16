@@ -344,7 +344,11 @@ BEGIN
       ''
     ),
     'admin'
-  );
+  )
+  ON CONFLICT (id) DO UPDATE SET
+    email = EXCLUDED.email,
+    name = COALESCE(NULLIF(EXCLUDED.name, ''), profiles.name),
+    avatar_url = COALESCE(NULLIF(EXCLUDED.avatar_url, ''), profiles.avatar_url);
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;

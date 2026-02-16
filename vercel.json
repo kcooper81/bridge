@@ -4,6 +4,7 @@
   "framework": null,
   "rewrites": [
     { "source": "/", "destination": "/src/web/index.html" },
+    { "source": "/login", "destination": "/src/web/login.html" },
     { "source": "/app", "destination": "/src/web/app.html" },
     { "source": "/auth/callback", "destination": "/src/web/app.html" }
   ],
@@ -12,6 +13,12 @@
       "source": "/src/(.*)",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=3600" }
+      ]
+    },
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store" }
       ]
     }
   ]

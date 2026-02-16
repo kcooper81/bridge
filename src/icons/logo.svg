@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!--
+    ContextIQ Bridge Logo
+    4 symmetrical flames flowing clockwise in a circle
+    Slack-inspired color palette: raspberry, blue, green, yellow
+  -->
+
+  <!-- Flame 1 — Top (Raspberry) -->
+  <path
+    d="M 94,88
+       C 86,64 68,32 90,14
+       C 100,2 118,10 114,28
+       C 110,52 108,76 106,88
+       C 102,92 98,92 94,88 Z"
+    fill="#E01E5A" />
+
+  <!-- Overlap: Top × Right (deeper raspberry) -->
+  <path
+    d="M 106,88
+       C 108,76 110,52 114,28
+       C 116,20 114,14 110,10
+       L 114,28
+       C 112,44 110,68 108,88
+       C 106,90 106,90 106,88 Z"
+    fill="#CF1A52" opacity="0.0" />
+
+  <!-- Flame 2 — Right (Sky Blue) -->
+  <path
+    d="M 94,88
+       C 86,64 68,32 90,14
+       C 100,2 118,10 114,28
+       C 110,52 108,76 106,88
+       C 102,92 98,92 94,88 Z"
+    fill="#36C5F0"
+    transform="rotate(90 100 100)" />
+
+  <!-- Flame 3 — Bottom (Green) -->
+  <path
+    d="M 94,88
+       C 86,64 68,32 90,14
+       C 100,2 118,10 114,28
+       C 110,52 108,76 106,88
+       C 102,92 98,92 94,88 Z"
+    fill="#2EB67D"
+    transform="rotate(180 100 100)" />
+
+  <!-- Flame 4 — Left (Golden Yellow) -->
+  <path
+    d="M 94,88
+       C 86,64 68,32 90,14
+       C 100,2 118,10 114,28
+       C 110,52 108,76 106,88
+       C 102,92 98,92 94,88 Z"
+    fill="#ECB22E"
+    transform="rotate(270 100 100)" />
+
+  <!-- Central unity dot -->
+  <circle cx="100" cy="100" r="5" fill="#fff" opacity="0.0" />
+</svg>

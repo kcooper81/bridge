@@ -1,51 +1,67 @@
 <!DOCTYPE html>
 <html>
-<head><title>Generate TeamPrompt Icons</title></head>
+<head><title>Generate ContextIQ Bridge Icons</title></head>
 <body>
-<p>Open this file in a browser and right-click to save the canvases as PNGs.</p>
-<canvas id="c16" width="16" height="16"></canvas>
-<canvas id="c48" width="48" height="48"></canvas>
-<canvas id="c128" width="128" height="128"></canvas>
+<h2>ContextIQ Bridge — Flame Logo Icon Generator</h2>
+<p>Right-click each canvas and "Save image as…" to export PNGs.</p>
+<p>
+  <label>16×16</label><br><canvas id="c16" width="16" height="16"></canvas>
+</p>
+<p>
+  <label>48×48</label><br><canvas id="c48" width="48" height="48"></canvas>
+</p>
+<p>
+  <label>128×128</label><br><canvas id="c128" width="128" height="128"></canvas>
+</p>
+<p>
+  <label>512×512 (preview)</label><br><canvas id="c512" width="512" height="512"></canvas>
+</p>
+
 <script>
-function drawIcon(canvas) {
-  const ctx = canvas.getContext('2d');
-  const s = canvas.width;
-  const cx = s / 2;
-  const cy = s / 2;
-  const r = s * 0.4;
-
-  // Background circle
+/**
+ * Draw a single flame path at the "top" position (pointing upward, curving clockwise).
+ * Coordinates are in a 200×200 unit space, scaled by (s / 200).
+ */
+function drawFlame(ctx, s) {
+  var f = s / 200;
   ctx.beginPath();
-  ctx.arc(cx, cy, s / 2, 0, Math.PI * 2);
-  ctx.fillStyle = '#8b5cf6';
+  ctx.moveTo(94 * f, 88 * f);
+  ctx.bezierCurveTo(86 * f, 64 * f, 68 * f, 32 * f, 90 * f, 14 * f);
+  ctx.bezierCurveTo(100 * f, 2 * f, 118 * f, 10 * f, 114 * f, 28 * f);
+  ctx.bezierCurveTo(110 * f, 52 * f, 108 * f, 76 * f, 106 * f, 88 * f);
+  ctx.bezierCurveTo(102 * f, 92 * f, 98 * f, 92 * f, 94 * f, 88 * f);
+  ctx.closePath();
   ctx.fill();
+}
 
-  // Clock circle
-  ctx.beginPath();
-  ctx.arc(cx, cy, r, 0, Math.PI * 2);
-  ctx.strokeStyle = 'white';
-  ctx.lineWidth = s * 0.06;
-  ctx.stroke();
+function drawIcon(canvas) {
+  var ctx = canvas.getContext('2d');
+  var s = canvas.width;
+  var cx = s / 2;
+  var cy = s / 2;
 
-  // Hour hand
-  ctx.beginPath();
-  ctx.moveTo(cx, cy);
-  ctx.lineTo(cx, cy - r * 0.6);
-  ctx.strokeStyle = 'white';
-  ctx.lineWidth = s * 0.08;
-  ctx.lineCap = 'round';
-  ctx.stroke();
+  // Transparent background (clear)
+  ctx.clearRect(0, 0, s, s);
 
-  // Minute hand
-  ctx.beginPath();
-  ctx.moveTo(cx, cy);
-  ctx.lineTo(cx + r * 0.4, cy + r * 0.2);
-  ctx.stroke();
+  // Four flame colors (Slack-inspired palette)
+  var colors = ['#E01E5A', '#36C5F0', '#2EB67D', '#ECB22E'];
+  var angles = [0, 90, 180, 270];
+
+  for (var i = 0; i < 4; i++) {
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(angles[i] * Math.PI / 180);
+    ctx.translate(-cx, -cy);
+    ctx.fillStyle = colors[i];
+    drawFlame(ctx, s);
+    ctx.restore();
+  }
 }
 
 drawIcon(document.getElementById('c16'));
 drawIcon(document.getElementById('c48'));
 drawIcon(document.getElementById('c128'));
+drawIcon(document.getElementById('c512'));
 </script>
 </body>
 </html>

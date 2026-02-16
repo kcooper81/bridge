@@ -28,7 +28,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupNavigation();
   setupModalHandlers();
   showLoadingOverlay('Loading vault...');
-  await loadAllData();
+  try {
+    await loadAllData();
+  } catch (e) {
+    console.error('Init load failed:', e);
+  }
   hideLoadingOverlay();
   renderCurrentView();
 });
@@ -1141,8 +1145,11 @@ function esc(str) {
 function showToast(message, type = 'success') {
   const toast = document.getElementById('toast');
   toast.textContent = message;
+  toast.setAttribute('role', 'status');
+  toast.setAttribute('aria-live', 'polite');
   toast.className = `toast toast-${type}`;
-  setTimeout(() => { toast.className = 'toast hidden'; }, 3000);
+  clearTimeout(showToast._timer);
+  showToast._timer = setTimeout(() => { toast.className = 'toast hidden'; }, 3000);
 }
 
 function renderStars(rating) {

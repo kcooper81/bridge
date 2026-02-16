@@ -219,7 +219,14 @@ export const VaultAPI = {
     if (await checkRemote()) {
       const orgId = await getOrgId();
       const client = await sb();
-      let q = client.from('prompts').select('*').eq('org_id', orgId).order('updated_at', { ascending: false });
+      const sort = filters?.sort || 'recent';
+      const sortCol = sort === 'popular' ? 'usage_count' : sort === 'alpha' ? 'title' : 'updated_at';
+      const ascending = sort === 'alpha';
+      let q = client.from('prompts').select('*').eq('org_id', orgId).order(sortCol, { ascending });
+      if (filters?.folderId) q = q.eq('folder_id', filters.folderId);
+      if (filters?.departmentId) q = q.eq('department_id', filters.departmentId);
+      if (filters?.favoritesOnly) q = q.eq('is_favorite', true);
+      if (query) q = q.or(`title.ilike.%${query}%,content.ilike.%${query}%,description.ilike.%${query}%`);
       const { data } = await q;
       return (data || []).map(dbPromptToApp);
     }
@@ -781,7 +788,7 @@ export const VaultAPI = {
     const folderMap = {};
     for (const f of folderDefs) {
       const res = await this.saveFolder(f);
-      folderMap[f.name] = res.folder?.id || res.folder?.id;
+      folderMap[f.name] = res.folder?.id;
     }
 
     // Create starter prompts

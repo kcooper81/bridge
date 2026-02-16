@@ -62,7 +62,7 @@ const templateCategoryBar = document.getElementById('template-category-bar');
 const templateCardsEl = document.getElementById('template-cards');
 
 // Open full dashboard — always open web app URL
-btnOpenVault.addEventListener('click', async () => {
+btnOpenVault?.addEventListener('click', async () => {
   try {
     const resp = await chrome.runtime.sendMessage({ type: 'GET_SETTINGS' });
     const webAppUrl = resp?.settings?.webAppUrl || DEFAULT_WEB_APP_URL;
@@ -151,7 +151,8 @@ async function loadPrompts() {
     allPrompts = pResp?.prompts || [];
     allFolders = fResp?.folders || [];
     allDepartments = dResp?.departments || [];
-  } catch {
+  } catch (err) {
+    console.warn('loadPrompts failed:', err);
     allPrompts = [];
     allFolders = [];
     allDepartments = [];
@@ -843,6 +844,7 @@ function buildBridgeText(artifact) {
   if (artifact.turns?.length > 0) {
     lines.push('Conversation:');
     for (const turn of artifact.turns.slice(-6)) {
+      if (!turn.text) continue;
       const role = turn.role === 'user' ? 'You' : artifact.toolName;
       lines.push(`  ${role}: ${turn.text.length > 300 ? turn.text.slice(0, 300) + '...' : turn.text}`);
     }
@@ -1155,9 +1157,12 @@ function bindEvents() {
 // ═══════════════════════════════════════
 
 function showToast(message) {
+  toast.setAttribute('role', 'status');
+  toast.setAttribute('aria-live', 'polite');
   toast.textContent = message;
   toast.classList.remove('hidden');
-  setTimeout(() => toast.classList.add('hidden'), 2500);
+  clearTimeout(showToast._timer);
+  showToast._timer = setTimeout(() => toast.classList.add('hidden'), 2500);
 }
 
 function esc(str) {

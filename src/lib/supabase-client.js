@@ -58,7 +58,11 @@ export async function getClient() {
       },
     });
     return _client;
-  })();
+  })().catch(err => {
+    // Reset so subsequent calls can retry instead of caching the rejected promise
+    _initPromise = null;
+    throw err;
+  });
 
   return _initPromise;
 }
@@ -131,8 +135,7 @@ export async function ensureProfile(user) {
     email: user.email || meta.email || '',
     name: meta.name || meta.full_name || meta.preferred_username || (user.email || '').split('@')[0] || '',
     avatar_url: meta.avatar_url || meta.picture || '',
-    role: 'admin',
-  }, { onConflict: 'id', ignoreDuplicates: false });
+  }, { onConflict: 'id', ignoreDuplicates: true });
   if (error) console.warn('ensureProfile upsert failed:', error.message);
 }
 

@@ -67,8 +67,10 @@ async function save(partial) {
 
 function showStatus(message) {
   status.textContent = message;
+  status.setAttribute('role', 'status');
   status.classList.remove('hidden');
-  setTimeout(() => status.classList.add('hidden'), 2000);
+  clearTimeout(showStatus._timer);
+  showStatus._timer = setTimeout(() => status.classList.add('hidden'), 2000);
 }
 
 // Export data
@@ -87,7 +89,7 @@ btnExport.addEventListener('click', async () => {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `contextiq-export-${new Date().toISOString().slice(0, 10)}.json`;
+  a.download = `teamprompt-export-${new Date().toISOString().slice(0, 10)}.json`;
   a.click();
   URL.revokeObjectURL(url);
   showStatus('Data exported');

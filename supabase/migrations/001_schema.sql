@@ -202,6 +202,22 @@ CREATE INDEX IF NOT EXISTS idx_usage_events_prompt ON usage_events(prompt_id);
 CREATE INDEX IF NOT EXISTS idx_usage_events_created ON usage_events(created_at DESC);
 
 -- ═══════════════════════════════════════
+--  RLS HELPER FUNCTIONS (SECURITY DEFINER)
+-- ═══════════════════════════════════════
+-- These bypass RLS to avoid infinite recursion when policies
+-- on `profiles` reference `profiles` itself.
+
+CREATE OR REPLACE FUNCTION get_my_org_id()
+RETURNS UUID AS $$
+  SELECT org_id FROM profiles WHERE id = auth.uid()
+$$ LANGUAGE sql SECURITY DEFINER STABLE;
+
+CREATE OR REPLACE FUNCTION get_my_role()
+RETURNS TEXT AS $$
+  SELECT role FROM profiles WHERE id = auth.uid()
+$$ LANGUAGE sql SECURITY DEFINER STABLE;
+
+-- ═══════════════════════════════════════
 --  ROW LEVEL SECURITY
 -- ═══════════════════════════════════════
 
@@ -218,107 +234,106 @@ ALTER TABLE collection_prompts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE standards ENABLE ROW LEVEL SECURITY;
 ALTER TABLE usage_events ENABLE ROW LEVEL SECURITY;
 
--- Profiles: users can ALWAYS read their own profile + read all in their org
--- The id = auth.uid() clause is critical for new users whose org_id is still NULL,
--- since NULL = NULL evaluates to false and would lock them out of their own profile.
+-- Profiles: users can ALWAYS read their own profile + read all in their org.
+-- Uses get_my_org_id() (SECURITY DEFINER) to avoid infinite recursion —
+-- a plain subquery on profiles would re-trigger this same SELECT policy.
 CREATE POLICY profiles_select ON profiles FOR SELECT USING (
-  id = auth.uid() OR
-  org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
+  id = auth.uid() OR org_id = get_my_org_id()
 );
 CREATE POLICY profiles_update ON profiles FOR UPDATE USING (id = auth.uid());
 CREATE POLICY profiles_insert ON profiles FOR INSERT WITH CHECK (id = auth.uid());
 
 -- Organizations: members can read their org, admins can update
 CREATE POLICY orgs_select ON organizations FOR SELECT USING (
-  id = (SELECT org_id FROM profiles WHERE id = auth.uid())
+  id = get_my_org_id()
 );
 CREATE POLICY orgs_update ON organizations FOR UPDATE USING (
-  id = (SELECT org_id FROM profiles WHERE id = auth.uid() AND role = 'admin')
+  id = get_my_org_id() AND get_my_role() = 'admin'
 );
 CREATE POLICY orgs_insert ON organizations FOR INSERT WITH CHECK (true);
 
 -- Teams: org members can read, admins/managers can modify
 CREATE POLICY teams_select ON teams FOR SELECT USING (
-  org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
+  org_id = get_my_org_id()
 );
 CREATE POLICY teams_modify ON teams FOR ALL USING (
-  org_id = (SELECT org_id FROM profiles WHERE id = auth.uid() AND role IN ('admin', 'manager'))
+  org_id = get_my_org_id() AND get_my_role() IN ('admin', 'manager')
 );
 
 -- Team members: org members can see, admins/managers can modify
 CREATE POLICY team_members_select ON team_members FOR SELECT USING (
-  team_id IN (SELECT id FROM teams WHERE org_id = (SELECT org_id FROM profiles WHERE id = auth.uid()))
+  team_id IN (SELECT id FROM teams WHERE org_id = get_my_org_id())
 );
 CREATE POLICY team_members_modify ON team_members FOR ALL USING (
-  team_id IN (SELECT id FROM teams WHERE org_id = (SELECT org_id FROM profiles WHERE id = auth.uid() AND role IN ('admin', 'manager')))
+  team_id IN (SELECT id FROM teams WHERE org_id = get_my_org_id()) AND get_my_role() IN ('admin', 'manager')
 );
 
 -- Prompts: org members can read all org prompts, owners can modify their own, admins can modify all
 CREATE POLICY prompts_select ON prompts FOR SELECT USING (
-  org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
+  org_id = get_my_org_id()
 );
 CREATE POLICY prompts_insert ON prompts FOR INSERT WITH CHECK (
-  org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
+  org_id = get_my_org_id()
 );
 CREATE POLICY prompts_update ON prompts FOR UPDATE USING (
   owner_id = auth.uid() OR
-  org_id = (SELECT org_id FROM profiles WHERE id = auth.uid() AND role = 'admin')
+  (org_id = get_my_org_id() AND get_my_role() = 'admin')
 );
 CREATE POLICY prompts_delete ON prompts FOR DELETE USING (
   owner_id = auth.uid() OR
-  org_id = (SELECT org_id FROM profiles WHERE id = auth.uid() AND role = 'admin')
+  (org_id = get_my_org_id() AND get_my_role() = 'admin')
 );
 
 -- Prompt versions: same as prompts
 CREATE POLICY prompt_versions_select ON prompt_versions FOR SELECT USING (
-  prompt_id IN (SELECT id FROM prompts WHERE org_id = (SELECT org_id FROM profiles WHERE id = auth.uid()))
+  prompt_id IN (SELECT id FROM prompts WHERE org_id = get_my_org_id())
 );
 CREATE POLICY prompt_versions_insert ON prompt_versions FOR INSERT WITH CHECK (
-  prompt_id IN (SELECT id FROM prompts WHERE org_id = (SELECT org_id FROM profiles WHERE id = auth.uid()))
+  prompt_id IN (SELECT id FROM prompts WHERE org_id = get_my_org_id())
 );
 
--- Folders, Departments: org members can read, admins can modify
+-- Folders, Departments: org members can read, admins/managers can modify
 CREATE POLICY folders_select ON folders FOR SELECT USING (
-  org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
+  org_id = get_my_org_id()
 );
 CREATE POLICY folders_modify ON folders FOR ALL USING (
-  org_id = (SELECT org_id FROM profiles WHERE id = auth.uid() AND role IN ('admin', 'manager'))
+  org_id = get_my_org_id() AND get_my_role() IN ('admin', 'manager')
 );
 CREATE POLICY depts_select ON departments FOR SELECT USING (
-  org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
+  org_id = get_my_org_id()
 );
 CREATE POLICY depts_modify ON departments FOR ALL USING (
-  org_id = (SELECT org_id FROM profiles WHERE id = auth.uid() AND role IN ('admin', 'manager'))
+  org_id = get_my_org_id() AND get_my_role() IN ('admin', 'manager')
 );
 
 -- Collections: org-scoped read, team-scoped or owner write
 CREATE POLICY collections_select ON collections FOR SELECT USING (
-  org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
+  org_id = get_my_org_id()
 );
 CREATE POLICY collections_modify ON collections FOR ALL USING (
-  org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
+  org_id = get_my_org_id()
 );
 CREATE POLICY collection_prompts_select ON collection_prompts FOR SELECT USING (
-  collection_id IN (SELECT id FROM collections WHERE org_id = (SELECT org_id FROM profiles WHERE id = auth.uid()))
+  collection_id IN (SELECT id FROM collections WHERE org_id = get_my_org_id())
 );
 CREATE POLICY collection_prompts_modify ON collection_prompts FOR ALL USING (
-  collection_id IN (SELECT id FROM collections WHERE org_id = (SELECT org_id FROM profiles WHERE id = auth.uid()))
+  collection_id IN (SELECT id FROM collections WHERE org_id = get_my_org_id())
 );
 
 -- Standards: org-scoped read, admin write
 CREATE POLICY standards_select ON standards FOR SELECT USING (
-  org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
+  org_id = get_my_org_id()
 );
 CREATE POLICY standards_modify ON standards FOR ALL USING (
-  org_id = (SELECT org_id FROM profiles WHERE id = auth.uid() AND role IN ('admin', 'manager'))
+  org_id = get_my_org_id() AND get_my_role() IN ('admin', 'manager')
 );
 
 -- Usage events: org-scoped read, any org member can insert
 CREATE POLICY usage_events_select ON usage_events FOR SELECT USING (
-  org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
+  org_id = get_my_org_id()
 );
 CREATE POLICY usage_events_insert ON usage_events FOR INSERT WITH CHECK (
-  org_id = (SELECT org_id FROM profiles WHERE id = auth.uid())
+  org_id = get_my_org_id()
 );
 
 -- ═══════════════════════════════════════

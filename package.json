@@ -1,6 +1,10 @@
 {
-  "name": "contextiq-bridge",
-  "version": "0.9.0",
+  "name": "teamprompt",
+  "version": "1.0.0",
   "private": true,
-  "description": "ContextIQ — AI Prompt Vault & Context Bridge"
+  "description": "TeamPrompt — AI Prompt Vault & Context Bridge",
+  "dependencies": {
+    "stripe": "^17.0.0",
+    "@supabase/supabase-js": "^2.45.0"
+  }
 }

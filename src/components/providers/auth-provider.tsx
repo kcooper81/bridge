@@ -8,6 +8,7 @@ interface AuthContextValue {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  isSuperAdmin: boolean;
   signOut: () => Promise<void>;
 }
 
@@ -25,6 +26,7 @@ export function AuthProvider({
   const [user, setUser] = useState<User | null>(initialUser);
   const [session, setSession] = useState<Session | null>(initialSession);
   const [loading] = useState(false);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
 
   useEffect(() => {
     const supabase = createClient();
@@ -39,6 +41,24 @@ export function AuthProvider({
     return () => subscription.unsubscribe();
   }, []);
 
+  // Fetch super admin status when user changes
+  useEffect(() => {
+    async function fetchSuperAdmin() {
+      if (!user) {
+        setIsSuperAdmin(false);
+        return;
+      }
+      const supabase = createClient();
+      const { data } = await supabase
+        .from("profiles")
+        .select("is_super_admin")
+        .eq("id", user.id)
+        .single();
+      setIsSuperAdmin(data?.is_super_admin === true);
+    }
+    fetchSuperAdmin();
+  }, [user]);
+
   async function signOut() {
     const supabase = createClient();
     await supabase.auth.signOut();
@@ -46,7 +66,7 @@ export function AuthProvider({
   }
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading, isSuperAdmin, signOut }}>
       {children}
     </AuthContext.Provider>
   );

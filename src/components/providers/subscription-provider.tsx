@@ -10,6 +10,7 @@ import {
 import { createClient } from "@/lib/supabase/client";
 import { PLAN_LIMITS } from "@/lib/constants";
 import type { PlanLimits, PlanTier, Subscription } from "@/lib/types";
+import { useAuth } from "./auth-provider";
 
 interface SubscriptionContextValue {
   subscription: Subscription | null;
@@ -17,7 +18,7 @@ interface SubscriptionContextValue {
   loading: boolean;
   refresh: () => Promise<void>;
   canAccess: (feature: keyof Pick<PlanLimits, "analytics" | "import_export" | "custom_security" | "audit_log">) => boolean;
-  checkLimit: (action: "create_prompt" | "add_member" | "add_standard", currentCount: number) => boolean;
+  checkLimit: (action: "create_prompt" | "add_member" | "add_guideline" | "add_standard", currentCount: number) => boolean;
 }
 
 const SubscriptionContext = createContext<SubscriptionContextValue | null>(null);
@@ -27,6 +28,7 @@ export function SubscriptionProvider({
 }: {
   children: React.ReactNode;
 }) {
+  const { isSuperAdmin } = useAuth();
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [planLimits, setPlanLimits] = useState<PlanLimits>(PLAN_LIMITS.free);
   const [loading, setLoading] = useState(true);
@@ -70,22 +72,25 @@ export function SubscriptionProvider({
 
   const canAccess = useCallback(
     (feature: keyof Pick<PlanLimits, "analytics" | "import_export" | "custom_security" | "audit_log">): boolean => {
+      if (isSuperAdmin) return true;
       return planLimits[feature];
     },
-    [planLimits]
+    [planLimits, isSuperAdmin]
   );
 
   const checkLimit = useCallback(
-    (action: "create_prompt" | "add_member" | "add_standard", currentCount: number): boolean => {
+    (action: "create_prompt" | "add_member" | "add_guideline" | "add_standard", currentCount: number): boolean => {
+      if (isSuperAdmin) return true;
       const limitMap = {
         create_prompt: planLimits.max_prompts,
         add_member: planLimits.max_members,
-        add_standard: planLimits.max_standards,
+        add_guideline: planLimits.max_guidelines,
+        add_standard: planLimits.max_guidelines,
       };
       const max = limitMap[action];
       return max === -1 || currentCount < max;
     },
-    [planLimits]
+    [planLimits, isSuperAdmin]
   );
 
   return (

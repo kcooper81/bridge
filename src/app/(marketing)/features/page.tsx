@@ -37,27 +37,27 @@ const features = [
   },
   {
     icon: Shield,
-    title: "AI Security Shield",
+    title: "AI Guardrails",
     badge: "NEW",
     description:
-      "Automatically detect and block sensitive data before it reaches AI tools. Protect API keys, credentials, PII, and company secrets.",
+      "Automatically detect and block sensitive data before it reaches AI tools. Protect API keys, credentials, personal info, and company secrets.",
     details: [
-      "15 built-in patterns for AWS, GitHub, Stripe, OpenAI keys",
+      "15 built-in policies for AWS, GitHub, Stripe, OpenAI keys",
       "Custom regex, exact match, and glob patterns",
-      "Block (prevent save) or warn (allow with alert) severity",
+      "Blocked (prevent save) or Warning (allow with alert) severity",
       "Full audit log of violations for compliance",
     ],
   },
   {
     icon: BookOpen,
-    title: "Quality Standards",
+    title: "Quality Guidelines",
     description:
-      "Define and enforce quality standards across your organization. 14 built-in standards covering every department from writing to legal.",
+      "Define and enforce quality guidelines across your organization. 14 built-in guidelines covering every department from writing to legal.",
     details: [
       "Do/don't lists, banned words, length constraints",
-      "Required fields and tags per standard",
+      "Required fields and tags per guideline",
       "Enforce toggle for real-time validation",
-      "Custom standards for your specific needs",
+      "Custom guidelines for your specific needs",
     ],
   },
   {
@@ -76,11 +76,11 @@ const features = [
     icon: Chrome,
     title: "Chrome Extension",
     description:
-      "One-click prompt injection into 15+ AI tools. Bridge your prompts directly into ChatGPT, Claude, Gemini, and more.",
+      "One-click prompt injection into 15+ AI tools. Send your prompts directly into ChatGPT, Claude, Gemini, and more.",
     details: [
       "ChatGPT, Claude, Gemini, Perplexity, Copilot support",
       "DeepSeek, Grok, Mistral, HuggingChat, and more",
-      "Context bridge with project awareness",
+      "Project context awareness",
       "Usage tracking synced to your vault",
     ],
   },

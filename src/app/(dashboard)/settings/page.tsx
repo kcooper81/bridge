@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useOrg } from "@/components/providers/org-provider";
 import { useAuth } from "@/components/providers/auth-provider";
+import { useSubscription } from "@/components/providers/subscription-provider";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,14 +11,38 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Settings, CreditCard, AlertTriangle } from "lucide-react";
+import { Loader2, Settings, CreditCard, AlertTriangle, BarChart3 } from "lucide-react";
 import { saveOrg } from "@/lib/vault-api";
 import { toast } from "sonner";
 import Link from "next/link";
 
+function UsageBar({ label, current, max }: { label: string; current: number; max: number }) {
+  const isUnlimited = max === -1;
+  const pct = isUnlimited ? 0 : Math.min((current / max) * 100, 100);
+  const color = isUnlimited ? "bg-tp-green" : pct >= 100 ? "bg-destructive" : pct >= 80 ? "bg-tp-yellow" : "bg-tp-green";
+
+  return (
+    <div className="space-y-1.5">
+      <div className="flex items-center justify-between text-sm">
+        <span>{label}</span>
+        <span className="text-muted-foreground">
+          {current} / {isUnlimited ? "Unlimited" : max}
+        </span>
+      </div>
+      <div className="h-2 rounded-full bg-muted overflow-hidden">
+        <div
+          className={`h-full rounded-full transition-all ${color}`}
+          style={{ width: isUnlimited ? "0%" : `${pct}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
 export default function SettingsPage() {
-  const { org, currentUserRole, refresh } = useOrg();
+  const { org, currentUserRole, prompts, members, guidelines, refresh } = useOrg();
   const { signOut } = useAuth();
+  const { planLimits } = useSubscription();
   const [name, setName] = useState(org?.name || "");
   const [domain, setDomain] = useState(org?.domain || "");
   const [saving, setSaving] = useState(false);
@@ -99,6 +124,21 @@ export default function SettingsPage() {
               {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Save Changes
             </Button>
+          </CardContent>
+        </Card>
+
+        {/* Usage */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <BarChart3 className="h-5 w-5" />
+              Usage
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <UsageBar label="Prompts" current={prompts.length} max={planLimits.max_prompts} />
+            <UsageBar label="Members" current={members.length} max={planLimits.max_members} />
+            <UsageBar label="Guidelines" current={guidelines.length} max={planLimits.max_guidelines} />
           </CardContent>
         </Card>
 

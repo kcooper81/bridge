@@ -1,4 +1,4 @@
-import type { PlanLimits, PlanTier, StandardRules } from "./types";
+import type { PlanLimits, PlanTier, GuidelineRules } from "./types";
 
 export const SITE_NAME = "TeamPrompt";
 export const SITE_URL =
@@ -27,7 +27,7 @@ export const PLAN_LIMITS: Record<PlanTier, PlanLimits> = {
     max_prompts: 25,
     max_members: 3,
     max_ai_tools: 3,
-    max_standards: 5,
+    max_guidelines: 5,
     analytics: false,
     import_export: false,
     basic_security: true,
@@ -39,7 +39,7 @@ export const PLAN_LIMITS: Record<PlanTier, PlanLimits> = {
     max_prompts: -1,
     max_members: 1,
     max_ai_tools: -1,
-    max_standards: 14,
+    max_guidelines: 14,
     analytics: true,
     import_export: true,
     basic_security: true,
@@ -51,7 +51,7 @@ export const PLAN_LIMITS: Record<PlanTier, PlanLimits> = {
     max_prompts: -1,
     max_members: 50,
     max_ai_tools: -1,
-    max_standards: 14,
+    max_guidelines: 14,
     analytics: true,
     import_export: true,
     basic_security: true,
@@ -63,7 +63,7 @@ export const PLAN_LIMITS: Record<PlanTier, PlanLimits> = {
     max_prompts: -1,
     max_members: 500,
     max_ai_tools: -1,
-    max_standards: -1,
+    max_guidelines: -1,
     analytics: true,
     import_export: true,
     basic_security: true,
@@ -98,15 +98,15 @@ export const PLAN_DISPLAY: Record<
   },
 };
 
-export interface DefaultStandard {
+export interface DefaultGuideline {
   id: string;
   name: string;
   description: string;
   category: string;
-  rules: StandardRules;
+  rules: GuidelineRules;
 }
 
-export const DEFAULT_STANDARDS: DefaultStandard[] = [
+export const DEFAULT_GUIDELINES: DefaultGuideline[] = [
   {
     id: "std-writing",
     name: "Writing",

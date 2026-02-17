@@ -19,18 +19,18 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { BookOpen, Download, Pencil, Plus, Trash2 } from "lucide-react";
 import {
-  saveStandardApi,
-  deleteStandardApi,
-  installDefaultStandards,
+  saveGuidelineApi,
+  deleteGuidelineApi,
+  installDefaultGuidelines,
 } from "@/lib/vault-api";
 import { toast } from "sonner";
-import type { Standard, StandardRules } from "@/lib/types";
+import type { Guideline, GuidelineRules } from "@/lib/types";
 
-export default function StandardsPage() {
-  const { standards, refresh } = useOrg();
+export default function GuidelinesPage() {
+  const { guidelines, refresh } = useOrg();
   const { checkLimit } = useSubscription();
   const [modalOpen, setModalOpen] = useState(false);
-  const [editStandard, setEditStandard] = useState<Standard | null>(null);
+  const [editGuideline, setEditGuideline] = useState<Guideline | null>(null);
   const [installing, setInstalling] = useState(false);
 
   const [name, setName] = useState("");
@@ -42,23 +42,23 @@ export default function StandardsPage() {
   const [minLength, setMinLength] = useState("");
   const [maxLength, setMaxLength] = useState("");
 
-  function openModal(std: Standard | null) {
-    if (!std && !checkLimit("add_standard", standards.length)) {
-      toast.error("Standard limit reached. Upgrade your plan for more.");
+  function openModal(g: Guideline | null) {
+    if (!g && !checkLimit("add_guideline", guidelines.length)) {
+      toast.error("Guideline limit reached. Upgrade your plan for more.");
       return;
     }
-    if (std) {
-      setEditStandard(std);
-      setName(std.name);
-      setDescription(std.description || "");
-      setCategory(std.category || "");
-      setDoList((std.rules.doList || []).join("\n"));
-      setDontList((std.rules.dontList || []).join("\n"));
-      setBannedWords((std.rules.bannedWords || []).join(", "));
-      setMinLength(std.rules.minLength?.toString() || "");
-      setMaxLength(std.rules.maxLength?.toString() || "");
+    if (g) {
+      setEditGuideline(g);
+      setName(g.name);
+      setDescription(g.description || "");
+      setCategory(g.category || "");
+      setDoList((g.rules.doList || []).join("\n"));
+      setDontList((g.rules.dontList || []).join("\n"));
+      setBannedWords((g.rules.bannedWords || []).join(", "));
+      setMinLength(g.rules.minLength?.toString() || "");
+      setMaxLength(g.rules.maxLength?.toString() || "");
     } else {
-      setEditStandard(null);
+      setEditGuideline(null);
       setName("");
       setDescription("");
       setCategory("");
@@ -77,54 +77,54 @@ export default function StandardsPage() {
       return;
     }
     try {
-      const rules: StandardRules = {
+      const rules: GuidelineRules = {
         doList: doList.split("\n").map((s) => s.trim()).filter(Boolean),
         dontList: dontList.split("\n").map((s) => s.trim()).filter(Boolean),
         bannedWords: bannedWords.split(",").map((s) => s.trim()).filter(Boolean),
         ...(minLength && { minLength: parseInt(minLength) }),
         ...(maxLength && { maxLength: parseInt(maxLength) }),
       };
-      await saveStandardApi({
-        id: editStandard?.id,
+      await saveGuidelineApi({
+        id: editGuideline?.id,
         name: name.trim(),
         description: description.trim() || null,
         category: category.trim() || "general",
         rules,
-        enforced: editStandard?.enforced ?? false,
+        enforced: editGuideline?.enforced ?? false,
       });
-      toast.success(editStandard ? "Standard updated" : "Standard created");
+      toast.success(editGuideline ? "Guideline updated" : "Guideline created");
       setModalOpen(false);
       refresh();
     } catch {
-      toast.error("Failed to save standard");
+      toast.error("Failed to save guideline");
     }
   }
 
-  async function handleToggleEnforced(std: Standard) {
+  async function handleToggleEnforced(g: Guideline) {
     try {
-      await saveStandardApi({ id: std.id, enforced: !std.enforced, name: std.name, rules: std.rules });
+      await saveGuidelineApi({ id: g.id, enforced: !g.enforced, name: g.name, rules: g.rules });
       refresh();
     } catch {
-      toast.error("Failed to update standard");
+      toast.error("Failed to update guideline");
     }
   }
 
   async function handleDelete(id: string) {
-    if (!confirm("Delete this standard?")) return;
+    if (!confirm("Delete this guideline?")) return;
     try {
-      await deleteStandardApi(id);
-      toast.success("Standard deleted");
+      await deleteGuidelineApi(id);
+      toast.success("Guideline deleted");
       refresh();
     } catch {
-      toast.error("Failed to delete standard");
+      toast.error("Failed to delete guideline");
     }
   }
 
   async function handleInstallDefaults() {
     setInstalling(true);
     try {
-      await installDefaultStandards();
-      toast.success("Default standards installed");
+      await installDefaultGuidelines();
+      toast.success("Default guidelines installed");
       await refresh();
     } catch {
       toast.error("Failed to install defaults");
@@ -136,11 +136,11 @@ export default function StandardsPage() {
   return (
     <>
       <PageHeader
-        title="Standards"
-        description="Define quality standards for your team's prompts"
+        title="Guidelines"
+        description="Define quality guidelines for your team's prompts"
         actions={
           <div className="flex gap-2">
-            {standards.length === 0 && (
+            {guidelines.length === 0 && (
               <Button variant="outline" onClick={handleInstallDefaults} disabled={installing}>
                 <Download className="mr-2 h-4 w-4" />
                 Install Defaults
@@ -148,49 +148,49 @@ export default function StandardsPage() {
             )}
             <Button onClick={() => openModal(null)}>
               <Plus className="mr-2 h-4 w-4" />
-              New Standard
+              New Guideline
             </Button>
           </div>
         }
       />
 
-      {standards.length === 0 ? (
+      {guidelines.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <BookOpen className="h-12 w-12 text-muted-foreground mb-4" />
-          <h3 className="text-lg font-medium">No standards yet</h3>
+          <h3 className="text-lg font-medium">No guidelines yet</h3>
           <p className="text-sm text-muted-foreground mt-1">
             Install the 14 built-in defaults or create your own.
           </p>
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {standards.map((std) => (
-            <Card key={std.id} className="group">
+          {guidelines.map((g) => (
+            <Card key={g.id} className="group">
               <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
                 <div className="flex-1 min-w-0">
-                  <CardTitle className="text-base">{std.name}</CardTitle>
-                  {std.category && (
+                  <CardTitle className="text-base">{g.name}</CardTitle>
+                  {g.category && (
                     <Badge variant="outline" className="mt-1 text-xs">
-                      {std.category}
+                      {g.category}
                     </Badge>
                   )}
                 </div>
                 <div className="flex items-center gap-2">
-                  <Switch checked={std.enforced} onCheckedChange={() => handleToggleEnforced(std)} />
+                  <Switch checked={g.enforced} onCheckedChange={() => handleToggleEnforced(g)} />
                   <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openModal(std)}>
+                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openModal(g)}>
                       <Pencil className="h-3.5 w-3.5" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => handleDelete(std.id)}>
+                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => handleDelete(g.id)}>
                       <Trash2 className="h-3.5 w-3.5" />
                     </Button>
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
-                {std.description && (
+                {g.description && (
                   <p className="text-sm text-muted-foreground line-clamp-2">
-                    {std.description}
+                    {g.description}
                   </p>
                 )}
               </CardContent>
@@ -202,7 +202,7 @@ export default function StandardsPage() {
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
         <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editStandard ? "Edit Standard" : "New Standard"}</DialogTitle>
+            <DialogTitle>{editGuideline ? "Edit Guideline" : "New Guideline"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
@@ -242,7 +242,7 @@ export default function StandardsPage() {
           </div>
           <div className="mt-4 flex justify-end gap-2">
             <Button variant="outline" onClick={() => setModalOpen(false)}>Cancel</Button>
-            <Button onClick={handleSave}>{editStandard ? "Save" : "Create"}</Button>
+            <Button onClick={handleSave}>{editGuideline ? "Save" : "Create"}</Button>
           </div>
         </DialogContent>
       </Dialog>

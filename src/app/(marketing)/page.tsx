@@ -24,15 +24,15 @@ const features = [
   },
   {
     icon: Shield,
-    title: "AI Security Shield",
+    title: "AI Guardrails",
     description:
-      "Block API keys, credentials, PII, and sensitive data from leaking into AI tools automatically.",
+      "Block API keys, credentials, personal info, and sensitive data from leaking into AI tools automatically.",
   },
   {
     icon: BookOpen,
-    title: "Quality Standards",
+    title: "Quality Guidelines",
     description:
-      "14 built-in standards covering writing, coding, marketing, legal, and more. Create custom ones too.",
+      "14 built-in guidelines covering writing, coding, marketing, legal, and more. Create custom ones too.",
   },
   {
     icon: Users,
@@ -56,7 +56,7 @@ const features = [
 
 const stats = [
   { value: "15+", label: "AI Tools Supported" },
-  { value: "14", label: "Built-in Standards" },
+  { value: "14", label: "Built-in Guidelines" },
   { value: "100%", label: "Free to Start" },
 ];
 
@@ -87,16 +87,16 @@ export default function LandingPage() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-20 pb-16 sm:pt-28 sm:pb-24 text-center">
           <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-sm mb-6">
             <Shield className="h-4 w-4 text-primary" />
-            <span>Now with AI Security Shield</span>
+            <span>Now with AI Guardrails</span>
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight max-w-4xl mx-auto">
             Stop losing your best{" "}
             <span className="text-primary">AI prompts</span>
           </h1>
           <p className="mt-6 text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
-            TeamPrompt is the AI Prompt Vault & Context Bridge for teams. Manage,
-            share, and secure your prompts across 15+ AI tools with built-in quality
-            standards and enterprise-grade security.
+            TeamPrompt helps teams manage, share, and secure their AI prompts
+            across 15+ AI tools with built-in quality guidelines and
+            enterprise-grade guardrails.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/signup">
@@ -176,10 +176,10 @@ export default function LandingPage() {
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 max-w-5xl mx-auto">
             {[
-              { name: "Free", price: "$0", desc: "For individuals", features: ["25 prompts", "3 members", "5 standards", "Basic security"] },
-              { name: "Pro", price: "$9/mo", desc: "For power users", features: ["Unlimited prompts", "All 14 standards", "Custom security", "Analytics", "14-day trial"] },
-              { name: "Team", price: "$7/user/mo", desc: "For growing teams", features: ["Up to 50 members", "Custom security", "Audit log", "Import/export", "14-day trial"], popular: true },
-              { name: "Business", price: "$12/user/mo", desc: "For enterprises", features: ["Up to 500 members", "Custom standards", "Full audit log", "Priority support"] },
+              { name: "Free", price: "$0", desc: "For individuals", features: ["25 prompts", "3 members", "5 guidelines", "Basic guardrails"] },
+              { name: "Pro", price: "$9/mo", desc: "For power users", features: ["Unlimited prompts", "All 14 guidelines", "Custom guardrails", "Analytics", "14-day trial"] },
+              { name: "Team", price: "$7/user/mo", desc: "For growing teams", features: ["Up to 50 members", "Custom guardrails", "Audit log", "Import/export", "14-day trial"], popular: true },
+              { name: "Business", price: "$12/user/mo", desc: "For enterprises", features: ["Up to 500 members", "Custom guidelines", "Full audit log", "Priority support"] },
             ].map((plan) => (
               <div
                 key={plan.name}

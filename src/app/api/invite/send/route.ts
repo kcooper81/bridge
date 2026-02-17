@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const { email, role = "member" } = await request.json();
+    const { email, role = "member", team_id = null } = await request.json();
 
     // Validate role
     const validRoles = ["admin", "manager", "member"];
@@ -111,6 +111,7 @@ export async function POST(request: NextRequest) {
         email,
         role,
         invited_by: user.id,
+        ...(team_id && { team_id }),
       })
       .select()
       .single();
@@ -131,7 +132,16 @@ export async function POST(request: NextRequest) {
       .single();
 
     // Send invite email
-    if (process.env.RESEND_API_KEY) {
+    if (!process.env.RESEND_API_KEY) {
+      // Delete the invite row since we can't send the email
+      await db.from("invites").delete().eq("id", invite.id);
+      return NextResponse.json(
+        { error: "Email service is not configured. Please set RESEND_API_KEY." },
+        { status: 503 }
+      );
+    }
+
+    try {
       const resend = new Resend(process.env.RESEND_API_KEY);
       const siteUrl =
         process.env.NEXT_PUBLIC_SITE_URL || "https://teamprompt.app";
@@ -153,6 +163,14 @@ export async function POST(request: NextRequest) {
           </div>
         `,
       });
+    } catch (emailError) {
+      console.error("Failed to send invite email:", emailError);
+      // Delete the invite row to prevent stuck invites
+      await db.from("invites").delete().eq("id", invite.id);
+      return NextResponse.json(
+        { error: "Failed to send invite email. Please try again." },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json({ success: true, inviteId: invite.id });

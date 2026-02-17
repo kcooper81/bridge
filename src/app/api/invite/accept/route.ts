@@ -62,13 +62,37 @@ export async function POST(request: NextRequest) {
     }
 
     // Update user's profile with org and role
-    await db
+    const { error: profileUpdateError } = await db
       .from("profiles")
       .update({
         org_id: invite.org_id,
         role: invite.role,
       })
       .eq("id", user.id);
+
+    if (profileUpdateError) {
+      console.error("Failed to update profile:", profileUpdateError);
+      return NextResponse.json(
+        { error: "Failed to join organization. Please try again." },
+        { status: 500 }
+      );
+    }
+
+    // If invite has a team_id, add user to that team
+    if (invite.team_id) {
+      const { error: teamMemberError } = await db
+        .from("team_members")
+        .insert({
+          team_id: invite.team_id,
+          user_id: user.id,
+          role: "member",
+        });
+
+      if (teamMemberError) {
+        console.error("Failed to add to team:", teamMemberError);
+        // Non-fatal — user joined org successfully, team join failed
+      }
+    }
 
     // Mark invite as accepted
     await db

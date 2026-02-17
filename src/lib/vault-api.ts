@@ -1,12 +1,12 @@
 import { createClient } from "@/lib/supabase/client";
-import { DEFAULT_STANDARDS } from "@/lib/constants";
+import { DEFAULT_GUIDELINES } from "@/lib/constants";
 import type {
   Prompt,
   Folder,
   Department,
   Team,
   Collection,
-  Standard,
+  Guideline,
   Organization,
   PromptTone,
   ValidationResult,
@@ -396,9 +396,9 @@ export async function deleteCollectionApi(id: string): Promise<boolean> {
   return !error;
 }
 
-// ─── Standards ───
+// ─── Guidelines (formerly Standards) ───
 
-export async function saveStandardApi(std: Partial<Standard>): Promise<Standard | null> {
+export async function saveGuidelineApi(std: Partial<Guideline>): Promise<Guideline | null> {
   const orgId = await getOrgId();
   const userId = await getUserId();
   if (!orgId) return null;
@@ -436,17 +436,17 @@ export async function saveStandardApi(std: Partial<Standard>): Promise<Standard 
   return data;
 }
 
-export async function deleteStandardApi(id: string): Promise<boolean> {
+export async function deleteGuidelineApi(id: string): Promise<boolean> {
   const { error } = await supabase().from("standards").delete().eq("id", id);
   return !error;
 }
 
-export async function installDefaultStandards(): Promise<Standard[]> {
+export async function installDefaultGuidelines(): Promise<Guideline[]> {
   const orgId = await getOrgId();
   const userId = await getUserId();
   if (!orgId || !userId) return [];
 
-  const inserts = DEFAULT_STANDARDS.map((s) => ({
+  const inserts = DEFAULT_GUIDELINES.map((s) => ({
     org_id: orgId,
     name: s.name,
     description: s.description,
@@ -464,21 +464,26 @@ export async function installDefaultStandards(): Promise<Standard[]> {
   return data || [];
 }
 
+// Keep backward-compatible aliases
+export const saveStandardApi = saveGuidelineApi;
+export const deleteStandardApi = deleteGuidelineApi;
+export const installDefaultStandards = installDefaultGuidelines;
+
 // ─── Validation ───
 
 export function validatePrompt(
   prompt: Partial<Prompt>,
-  standards: Standard[]
+  guidelines: Guideline[]
 ): ValidationResult {
   const violations: ValidationResult["violations"] = [];
-  const enforced = standards.filter((s) => s.enforced);
+  const enforced = guidelines.filter((s) => s.enforced);
 
-  for (const std of enforced) {
-    const rules = std.rules || {};
+  for (const g of enforced) {
+    const rules = g.rules || {};
 
     if (rules.minLength && (prompt.content?.length || 0) < rules.minLength) {
       violations.push({
-        standard: std.name,
+        guideline: g.name,
         rule: "minLength",
         message: `Content must be at least ${rules.minLength} characters`,
       });
@@ -486,7 +491,7 @@ export function validatePrompt(
 
     if (rules.maxLength && (prompt.content?.length || 0) > rules.maxLength) {
       violations.push({
-        standard: std.name,
+        guideline: g.name,
         rule: "maxLength",
         message: `Content must not exceed ${rules.maxLength} characters`,
       });
@@ -496,7 +501,7 @@ export function validatePrompt(
       for (const field of rules.requiredFields) {
         if (!prompt[field as keyof Prompt]) {
           violations.push({
-            standard: std.name,
+            guideline: g.name,
             rule: "requiredFields",
             message: `Field "${field}" is required`,
           });
@@ -509,7 +514,7 @@ export function validatePrompt(
       for (const tag of rules.requiredTags) {
         if (!tags.includes(tag)) {
           violations.push({
-            standard: std.name,
+            guideline: g.name,
             rule: "requiredTags",
             message: `Tag "${tag}" is required`,
           });
@@ -522,7 +527,7 @@ export function validatePrompt(
       for (const word of rules.bannedWords) {
         if (lower.includes(word.toLowerCase())) {
           violations.push({
-            standard: std.name,
+            guideline: g.name,
             rule: "bannedWords",
             message: `Content contains banned word: "${word}"`,
           });
@@ -598,7 +603,7 @@ export async function revokeInvite(id: string): Promise<boolean> {
   return !error;
 }
 
-export async function sendInvite(email: string, role: string): Promise<{ success: boolean; error?: string }> {
+export async function sendInvite(email: string, role: string, teamId?: string): Promise<{ success: boolean; error?: string }> {
   const db = supabase();
   const {
     data: { session },
@@ -612,12 +617,39 @@ export async function sendInvite(email: string, role: string): Promise<{ success
       "Content-Type": "application/json",
       Authorization: `Bearer ${session.access_token}`,
     },
-    body: JSON.stringify({ email, role }),
+    body: JSON.stringify({ email, role, team_id: teamId || null }),
   });
 
   const data = await res.json();
   if (!res.ok) return { success: false, error: data.error };
   return { success: true };
+}
+
+// ─── Team Members ───
+
+export async function addTeamMember(teamId: string, userId: string, role: string = "member"): Promise<boolean> {
+  const { error } = await supabase()
+    .from("team_members")
+    .insert({ team_id: teamId, user_id: userId, role });
+  return !error;
+}
+
+export async function removeTeamMember(teamId: string, userId: string): Promise<boolean> {
+  const { error } = await supabase()
+    .from("team_members")
+    .delete()
+    .eq("team_id", teamId)
+    .eq("user_id", userId);
+  return !error;
+}
+
+export async function updateTeamMemberRole(teamId: string, userId: string, role: string): Promise<boolean> {
+  const { error } = await supabase()
+    .from("team_members")
+    .update({ role })
+    .eq("team_id", teamId)
+    .eq("user_id", userId);
+  return !error;
 }
 
 // ─── Analytics ───

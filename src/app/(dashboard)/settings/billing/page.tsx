@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useOrg } from "@/components/providers/org-provider";
 import { useSubscription } from "@/components/providers/subscription-provider";
 import { PageHeader } from "@/components/dashboard/page-header";
@@ -17,8 +18,19 @@ import type { PlanTier } from "@/lib/types";
 export default function BillingPage() {
   const { org, members } = useOrg();
   const { subscription } = useSubscription();
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const [loadingPortal, setLoadingPortal] = useState(false);
   const [loadingCheckout, setLoadingCheckout] = useState<string | null>(null);
+
+  // Handle checkout success redirect
+  useEffect(() => {
+    if (searchParams.get("checkout") === "success") {
+      const plan = searchParams.get("plan") || "your new plan";
+      toast.success(`Welcome to ${plan}! Your upgrade is active.`);
+      router.replace("/settings/billing");
+    }
+  }, [searchParams, router]);
 
   async function openPortal() {
     if (!org) return;
@@ -83,7 +95,14 @@ export default function BillingPage() {
 
   return (
     <>
-      <PageHeader title="Billing" description="Manage your subscription and billing" />
+      <PageHeader
+        title="Billing"
+        description="Manage your subscription and billing"
+        breadcrumbs={[
+          { label: "Settings", href: "/settings" },
+          { label: "Billing" },
+        ]}
+      />
 
       <div className="max-w-4xl space-y-6">
         {/* Current Plan */}
@@ -103,6 +122,31 @@ export default function BillingPage() {
                 </Badge>
               )}
             </div>
+            {currentPlan === "free" && !subscription?.stripe_customer_id && (
+              <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 space-y-3">
+                <p className="text-sm font-medium">You&apos;re on the Free plan</p>
+                <p className="text-sm text-muted-foreground">
+                  Upgrade to unlock unlimited prompts, custom security rules, analytics, and more.
+                </p>
+                <div className="space-y-1.5">
+                  {[
+                    { label: "Prompts", free: "25", paid: "Unlimited" },
+                    { label: "Guidelines", free: "5", paid: "14+" },
+                    { label: "Members", free: "3", paid: "Up to 500" },
+                    { label: "Analytics", free: "No", paid: "Yes" },
+                    { label: "Custom Security", free: "No", paid: "Yes" },
+                  ].map((row) => (
+                    <div key={row.label} className="flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground">{row.label}</span>
+                      <div className="flex items-center gap-3">
+                        <span className="text-muted-foreground w-16 text-right">{row.free}</span>
+                        <span className="text-tp-green w-16 text-right">{row.paid}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
             {subscription?.current_period_end && (
               <p className="text-sm text-muted-foreground">
                 {subscription.cancel_at_period_end ? "Cancels" : "Renews"} on{" "}

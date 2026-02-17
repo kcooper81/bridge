@@ -16,7 +16,7 @@ import type {
   Team,
   Member,
   Collection,
-  Standard,
+  Guideline,
   UserRole,
 } from "@/lib/types";
 
@@ -28,7 +28,9 @@ interface OrgContextValue {
   teams: Team[];
   members: Member[];
   collections: Collection[];
-  standards: Standard[];
+  guidelines: Guideline[];
+  /** @deprecated Use guidelines instead */
+  standards: Guideline[];
   currentUserRole: UserRole;
   loading: boolean;
   refresh: () => Promise<void>;
@@ -38,7 +40,7 @@ interface OrgContextValue {
   setTeams: React.Dispatch<React.SetStateAction<Team[]>>;
   setMembers: React.Dispatch<React.SetStateAction<Member[]>>;
   setCollections: React.Dispatch<React.SetStateAction<Collection[]>>;
-  setStandards: React.Dispatch<React.SetStateAction<Standard[]>>;
+  setGuidelines: React.Dispatch<React.SetStateAction<Guideline[]>>;
 }
 
 const OrgContext = createContext<OrgContextValue | null>(null);
@@ -51,7 +53,7 @@ export function OrgProvider({ children }: { children: React.ReactNode }) {
   const [teams, setTeams] = useState<Team[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
   const [collections, setCollections] = useState<Collection[]>([]);
-  const [standards, setStandards] = useState<Standard[]>([]);
+  const [guidelines, setGuidelines] = useState<Guideline[]>([]);
   const [currentUserRole, setCurrentUserRole] = useState<UserRole>("member");
   const [loading, setLoading] = useState(true);
 
@@ -65,13 +67,16 @@ export function OrgProvider({ children }: { children: React.ReactNode }) {
 
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
-      .select("org_id, role")
+      .select("org_id, role, is_super_admin")
       .eq("id", user.id)
       .single();
 
     if (profileError || !profile?.org_id) return;
 
-    setCurrentUserRole((profile.role as UserRole) || "member");
+    // Super admins act as admin in any org
+    setCurrentUserRole(
+      profile.is_super_admin ? "admin" : (profile.role as UserRole) || "member"
+    );
 
     // Parallel fetch all org data
     const [
@@ -114,15 +119,21 @@ export function OrgProvider({ children }: { children: React.ReactNode }) {
     // Filter team_members to only include org's teams
     const orgTeamIds = new Set(orgTeams.map((t: Team) => t.id));
     const teamMemberMap = new Map<string, string[]>();
-    (teamMembersRes.data || []).filter((tm: { team_id: string }) => orgTeamIds.has(tm.team_id)).forEach((tm: { team_id: string; user_id: string }) => {
+    const teamRolesMap = new Map<string, Record<string, string>>();
+    (teamMembersRes.data || []).filter((tm: { team_id: string }) => orgTeamIds.has(tm.team_id)).forEach((tm: { team_id: string; user_id: string; role?: string }) => {
       const existing = teamMemberMap.get(tm.user_id) || [];
       existing.push(tm.team_id);
       teamMemberMap.set(tm.user_id, existing);
+
+      const roles = teamRolesMap.get(tm.user_id) || {};
+      roles[tm.team_id] = tm.role || "member";
+      teamRolesMap.set(tm.user_id, roles);
     });
     setMembers(
       (profilesRes.data || []).map((p: Member) => ({
         ...p,
         teamIds: teamMemberMap.get(p.id) || [],
+        teamRoles: teamRolesMap.get(p.id) || {},
         isCurrentUser: p.id === user.id,
       }))
     );
@@ -143,8 +154,8 @@ export function OrgProvider({ children }: { children: React.ReactNode }) {
       }))
     );
 
-    setStandards(
-      (standardsRes.data || []).map((s: Standard) => ({
+    setGuidelines(
+      (standardsRes.data || []).map((s: Guideline) => ({
         ...s,
         rules: s.rules || {},
       }))
@@ -165,7 +176,8 @@ export function OrgProvider({ children }: { children: React.ReactNode }) {
         teams,
         members,
         collections,
-        standards,
+        guidelines,
+        standards: guidelines,
         currentUserRole,
         loading,
         refresh,
@@ -175,7 +187,7 @@ export function OrgProvider({ children }: { children: React.ReactNode }) {
         setTeams,
         setMembers,
         setCollections,
-        setStandards,
+        setGuidelines,
       }}
     >
       {children}

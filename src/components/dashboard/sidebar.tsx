@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { useOrg } from "@/components/providers/org-provider";
 import { useAuth } from "@/components/providers/auth-provider";
@@ -9,6 +10,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { useTheme } from "@/components/providers/theme-provider";
 import {
   Archive,
   BarChart3,
@@ -18,7 +20,9 @@ import {
   Import,
   LogOut,
   Menu,
+  Moon,
   Shield,
+  Sun,
   Users,
 } from "lucide-react";
 
@@ -31,23 +35,23 @@ interface NavItem {
 
 const navSections: { title: string; items: NavItem[] }[] = [
   {
-    title: "Prompt Manager",
+    title: "Workspace",
     items: [
-      { label: "Vault", href: "/vault", icon: Archive },
+      { label: "Prompts", href: "/vault", icon: Archive },
       { label: "Collections", href: "/collections", icon: FolderOpen },
-      { label: "Standards", href: "/standards", icon: BookOpen, roles: ["admin", "manager"] },
+      { label: "Guidelines", href: "/guidelines", icon: BookOpen, roles: ["admin", "manager"] },
     ],
   },
   {
-    title: "Organization",
+    title: "Administration",
     items: [
       { label: "Team", href: "/team", icon: Users, roles: ["admin", "manager"] },
-      { label: "Security", href: "/security-shield", icon: Shield, roles: ["admin", "manager"] },
+      { label: "Guardrails", href: "/guardrails", icon: Shield, roles: ["admin", "manager"] },
       { label: "Settings", href: "/settings", icon: Building2, roles: ["admin"] },
     ],
   },
   {
-    title: "Insights",
+    title: "Intelligence",
     items: [
       { label: "Analytics", href: "/analytics", icon: BarChart3 },
       { label: "Import/Export", href: "/import-export", icon: Import },
@@ -59,6 +63,7 @@ function NavContent({ onItemClick }: { onItemClick?: () => void }) {
   const pathname = usePathname();
   const { currentUserRole, members } = useOrg();
   const { user, signOut } = useAuth();
+  const { theme, setTheme } = useTheme();
 
   const currentMember = members.find((m) => m.isCurrentUser);
   const initials =
@@ -73,9 +78,7 @@ function NavContent({ onItemClick }: { onItemClick?: () => void }) {
     <div className="flex h-full flex-col">
       {/* Brand */}
       <div className="flex items-center gap-2 px-4 py-4 border-b border-border">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-sm font-bold text-primary-foreground">
-          T
-        </div>
+        <Image src="/logo.svg" alt="TeamPrompt" width={32} height={32} className="rounded-lg" />
         <span className="text-lg font-bold">TeamPrompt</span>
       </div>
 
@@ -102,12 +105,15 @@ function NavContent({ onItemClick }: { onItemClick?: () => void }) {
                       href={item.href}
                       onClick={onItemClick}
                       className={cn(
-                        "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                        "relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150",
                         isActive
-                          ? "bg-primary text-primary-foreground shadow-sm"
+                          ? "bg-primary/10 text-primary"
                           : "text-muted-foreground hover:bg-muted hover:text-foreground"
                       )}
                     >
+                      {isActive && (
+                        <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-r-full bg-primary" />
+                      )}
                       <item.icon className="h-4 w-4" />
                       {item.label}
                     </Link>
@@ -135,6 +141,14 @@ function NavContent({ onItemClick }: { onItemClick?: () => void }) {
               {currentUserRole}
             </Badge>
           </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+          >
+            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </Button>
           <Button
             variant="ghost"
             size="icon"

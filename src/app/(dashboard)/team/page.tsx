@@ -23,7 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, Mail, Pencil, Plus, Trash2, UserPlus, Users, X } from "lucide-react";
+import { ArrowLeft, Loader2, Mail, Pencil, Plus, Trash2, UserPlus, Users, X } from "lucide-react";
 import {
   saveTeamApi,
   deleteTeamApi,
@@ -32,6 +32,9 @@ import {
   sendInvite,
   getInvites,
   revokeInvite,
+  addTeamMember,
+  removeTeamMember,
+  updateTeamMemberRole,
 } from "@/lib/vault-api";
 import { toast } from "sonner";
 import type { Invite, Team, UserRole } from "@/lib/types";
@@ -48,8 +51,14 @@ export default function TeamPage() {
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState<UserRole>("member");
+  const [inviteTeamId, setInviteTeamId] = useState<string>("");
   const [inviting, setInviting] = useState(false);
   const [invites, setInvites] = useState<Invite[]>([]);
+
+  // Team detail view
+  const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
+  const [addMemberToTeamOpen, setAddMemberToTeamOpen] = useState(false);
+  const [selectedMemberToAdd, setSelectedMemberToAdd] = useState<string>("");
 
   useEffect(() => {
     getInvites().then(setInvites).catch(() => {});
@@ -81,6 +90,7 @@ export default function TeamPage() {
     try {
       await deleteTeamApi(id);
       toast.success("Team deleted");
+      if (selectedTeam?.id === id) setSelectedTeam(null);
       refresh();
     } catch {
       toast.error("Failed to delete team");
@@ -115,10 +125,11 @@ export default function TeamPage() {
       return;
     }
     setInviting(true);
-    const result = await sendInvite(inviteEmail.trim(), inviteRole);
+    const result = await sendInvite(inviteEmail.trim(), inviteRole, inviteTeamId || undefined);
     if (result.success) {
       toast.success("Invite sent");
       setInviteEmail("");
+      setInviteTeamId("");
       const newInvites = await getInvites();
       setInvites(newInvites);
     } else {
@@ -132,6 +143,136 @@ export default function TeamPage() {
     toast.success("Invite revoked");
     const newInvites = await getInvites();
     setInvites(newInvites);
+  }
+
+  async function handleAddMemberToTeam() {
+    if (!selectedTeam || !selectedMemberToAdd) return;
+    const success = await addTeamMember(selectedTeam.id, selectedMemberToAdd);
+    if (success) {
+      toast.success("Member added to team");
+      setAddMemberToTeamOpen(false);
+      setSelectedMemberToAdd("");
+      refresh();
+    } else {
+      toast.error("Failed to add member to team");
+    }
+  }
+
+  async function handleRemoveFromTeam(teamId: string, userId: string) {
+    const success = await removeTeamMember(teamId, userId);
+    if (success) {
+      toast.success("Removed from team");
+      refresh();
+    } else {
+      toast.error("Failed to remove from team");
+    }
+  }
+
+  async function handleChangeTeamRole(teamId: string, userId: string, role: string) {
+    const success = await updateTeamMemberRole(teamId, userId, role);
+    if (success) {
+      toast.success("Team role updated");
+      refresh();
+    } else {
+      toast.error("Failed to update team role");
+    }
+  }
+
+  // Team detail view
+  if (selectedTeam) {
+    const teamMembers = members.filter((m) => m.teamIds.includes(selectedTeam.id));
+    const nonTeamMembers = members.filter((m) => !m.teamIds.includes(selectedTeam.id));
+
+    return (
+      <>
+        <div className="mb-6">
+          <Button variant="ghost" size="sm" onClick={() => setSelectedTeam(null)} className="mb-2">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Teams
+          </Button>
+          <PageHeader
+            title={selectedTeam.name}
+            description={selectedTeam.description || `${teamMembers.length} members`}
+            actions={
+              <Button variant="outline" onClick={() => setAddMemberToTeamOpen(true)}>
+                <UserPlus className="mr-2 h-4 w-4" />
+                Add Member
+              </Button>
+            }
+          />
+        </div>
+
+        <div className="space-y-2">
+          {teamMembers.length === 0 ? (
+            <Card>
+              <CardContent className="flex flex-col items-center py-8">
+                <Users className="h-8 w-8 text-muted-foreground mb-2" />
+                <p className="text-sm text-muted-foreground">No members in this team yet</p>
+              </CardContent>
+            </Card>
+          ) : (
+            teamMembers.map((member) => {
+              const initials = member.name?.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2) || "U";
+              const teamRole = member.teamRoles[selectedTeam.id] || "member";
+              return (
+                <div key={member.id} className="flex items-center gap-3 rounded-lg border border-border p-3 group">
+                  <Avatar className="h-9 w-9">
+                    <AvatarFallback className="bg-primary/20 text-primary text-xs">{initials}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{member.name}</p>
+                    <p className="text-xs text-muted-foreground truncate">{member.email}</p>
+                  </div>
+                  <Badge variant={teamRole === "admin" ? "default" : "outline"} className="text-xs capitalize">
+                    {teamRole}
+                  </Badge>
+                  {currentUserRole === "admin" && (
+                    <div className="flex items-center gap-2">
+                      <Select value={teamRole} onValueChange={(v) => handleChangeTeamRole(selectedTeam.id, member.id, v)}>
+                        <SelectTrigger className="h-7 w-24 text-xs"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="admin">Admin</SelectItem>
+                          <SelectItem value="member">Member</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive opacity-0 group-hover:opacity-100" onClick={() => handleRemoveFromTeam(selectedTeam.id, member.id)}>
+                        <X className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        {/* Add member to team modal */}
+        <Dialog open={addMemberToTeamOpen} onOpenChange={setAddMemberToTeamOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Add Member to {selectedTeam.name}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Select Member</Label>
+                <Select value={selectedMemberToAdd} onValueChange={setSelectedMemberToAdd}>
+                  <SelectTrigger><SelectValue placeholder="Choose a member..." /></SelectTrigger>
+                  <SelectContent>
+                    {nonTeamMembers.map((m) => (
+                      <SelectItem key={m.id} value={m.id}>{m.name} ({m.email})</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="mt-4 flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setAddMemberToTeamOpen(false)}>Cancel</Button>
+              <Button onClick={handleAddMemberToTeam} disabled={!selectedMemberToAdd}>Add to Team</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </>
+    );
   }
 
   return (
@@ -169,14 +310,18 @@ export default function TeamPage() {
               {teams.map((team) => {
                 const teamMembers = members.filter((m) => m.teamIds.includes(team.id));
                 return (
-                  <Card key={team.id} className="group">
+                  <Card
+                    key={team.id}
+                    className="group cursor-pointer hover:border-primary/30 transition-colors"
+                    onClick={() => setSelectedTeam(team)}
+                  >
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                       <CardTitle className="text-base">{team.name}</CardTitle>
                       <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openTeamModal(team)}>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={(e) => { e.stopPropagation(); openTeamModal(team); }}>
                           <Pencil className="h-3.5 w-3.5" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => handleDeleteTeam(team.id)}>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={(e) => { e.stopPropagation(); handleDeleteTeam(team.id); }}>
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
                       </div>
@@ -296,6 +441,18 @@ export default function TeamPage() {
                   <SelectItem value="member">Member</SelectItem>
                   <SelectItem value="manager">Manager</SelectItem>
                   <SelectItem value="admin">Admin</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Add to Team (optional)</Label>
+              <Select value={inviteTeamId || "__none__"} onValueChange={(v) => setInviteTeamId(v === "__none__" ? "" : v)}>
+                <SelectTrigger><SelectValue placeholder="No team" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">No team</SelectItem>
+                  {teams.map((t) => (
+                    <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

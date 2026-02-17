@@ -15,9 +15,9 @@ import {
 import { generatePageMetadata } from "@/lib/seo/metadata";
 
 export const metadata: Metadata = generatePageMetadata({
-  title: "AI Security Shield",
+  title: "AI Guardrails",
   description:
-    "Protect your organization from data leaks in AI prompts. Detect API keys, credentials, PII, and sensitive information automatically.",
+    "Protect your organization from data leaks in AI prompts. Detect API keys, credentials, personal info, and sensitive information automatically.",
   path: "/security",
 });
 
@@ -38,7 +38,7 @@ const categories = [
   },
   {
     icon: UserX,
-    title: "PII Protection",
+    title: "Personal Info (PII) Protection",
     description:
       "Optionally detect and block personally identifiable information like SSNs, credit cards, and email addresses.",
     patterns: ["XXX-XX-XXXX (SSN)", "4XXX-XXXX-XXXX (CC)", "user@email.com"],
@@ -57,10 +57,10 @@ const benefits = [
   "Block or warn severity levels",
   "Pattern tester built into rule editor",
   "Full audit trail of all violations",
-  "15 pre-built rules covering common secrets",
-  "Custom rules with regex, exact, and glob matching",
-  "Role-based access: Admins and Managers manage rules",
-  "Per-plan controls: basic security for all, custom for Pro+",
+  "15 pre-built policies covering common secrets",
+  "Custom policies with regex, exact, and glob matching",
+  "Role-based access: Admins and Managers manage policies",
+  "Per-plan controls: basic guardrails for all, custom for Pro+",
 ];
 
 export default function SecurityPage() {
@@ -71,14 +71,14 @@ export default function SecurityPage() {
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-sm text-primary mb-6">
             <Shield className="h-4 w-4" />
-            AI Security Shield
+            AI Guardrails
           </div>
           <h1 className="text-4xl sm:text-5xl font-bold max-w-3xl mx-auto">
             Protect your data from AI prompt leaks
           </h1>
           <p className="mt-6 text-lg text-muted-foreground max-w-2xl mx-auto">
-            TeamPrompt&apos;s AI Security Shield automatically detects and blocks
-            sensitive information — API keys, credentials, PII, and company secrets
+            TeamPrompt&apos;s AI Guardrails automatically detect and block
+            sensitive information — API keys, credentials, personal info, and company secrets
             — before they&apos;re pasted into AI tools.
           </p>
           <div className="mt-8 flex gap-4 justify-center">
@@ -130,14 +130,14 @@ export default function SecurityPage() {
             {
               step: "1",
               icon: ShieldCheck,
-              title: "Install Rules",
-              desc: "Start with 15 built-in patterns or create your own custom rules using regex, exact match, or glob patterns.",
+              title: "Install Policies",
+              desc: "Start with 15 built-in patterns or create your own custom policies using regex, exact match, or glob patterns.",
             },
             {
               step: "2",
               icon: ShieldAlert,
               title: "Auto-Scan",
-              desc: "Every prompt is automatically scanned against active rules before saving. Violations are caught in real-time.",
+              desc: "Every prompt is automatically scanned against active policies before saving. Violations are caught in real-time.",
             },
             {
               step: "3",

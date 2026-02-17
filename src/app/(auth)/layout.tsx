@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function AuthLayout({
   children,
@@ -22,9 +23,7 @@ export default function AuthLayout({
         href="/"
         className="relative z-10 flex items-center gap-2 mb-8 text-2xl font-bold text-foreground"
       >
-        <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground text-sm font-bold">
-          T
-        </div>
+        <Image src="/logo.svg" alt="TeamPrompt" width={32} height={32} className="rounded-lg" />
         TeamPrompt
       </Link>
 

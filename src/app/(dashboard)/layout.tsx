@@ -30,7 +30,7 @@ export default async function DashboardLayout({
         <SubscriptionProvider>
           <div className="flex h-screen bg-background">
             <Sidebar />
-            <main className="flex-1 overflow-y-auto scrollbar-thin p-4 md:p-6">
+            <main className="flex-1 overflow-y-auto scrollbar-thin p-4 pt-16 md:p-6 md:pt-6">
               {children}
             </main>
           </div>

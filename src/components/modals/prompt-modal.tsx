@@ -43,7 +43,7 @@ export function PromptModal({
   prompt,
   onSaved,
 }: PromptModalProps) {
-  const { folders, departments, standards } = useOrg();
+  const { folders, departments, guidelines } = useOrg();
   const [saving, setSaving] = useState(false);
   const [validation, setValidation] = useState<ValidationResult | null>(null);
   const [versions, setVersions] = useState<PromptVersion[]>([]);
@@ -108,7 +108,7 @@ export function PromptModal({
       folder_id: folderId || null,
       department_id: departmentId || null,
     };
-    const result = validatePrompt(fields, standards);
+    const result = validatePrompt(fields, guidelines);
     setValidation(result);
   }
 
@@ -320,7 +320,7 @@ export function PromptModal({
               {validation.passed ? (
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4" />
-                  All standards passed
+                  All guidelines passed
                 </div>
               ) : (
                 <div className="space-y-1">
@@ -330,7 +330,7 @@ export function PromptModal({
                   </div>
                   {validation.violations.map((v, i) => (
                     <p key={i} className="ml-6">
-                      {v.standard}: {v.message}
+                      {v.guideline}: {v.message}
                     </p>
                   ))}
                 </div>

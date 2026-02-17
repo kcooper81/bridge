@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useOrg } from "@/components/providers/org-provider";
 import { useSubscription } from "@/components/providers/subscription-provider";
 import { PageHeader } from "@/components/dashboard/page-header";
@@ -54,11 +55,23 @@ import {
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import type { Prompt } from "@/lib/types";
+import { PageSkeleton } from "@/components/dashboard/skeleton-loader";
 
 export default function VaultPage() {
-  const { prompts, folders, departments, standards, refresh } = useOrg();
+  const { prompts, folders, departments, guidelines, loading, refresh } = useOrg();
   const { checkLimit } = useSubscription();
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const [search, setSearch] = useState("");
+
+  // Show checkout success toast
+  useEffect(() => {
+    if (searchParams.get("checkout") === "success") {
+      const plan = searchParams.get("plan") || "your new plan";
+      toast.success(`Welcome to ${plan}! Your upgrade is active.`);
+      router.replace("/vault");
+    }
+  }, [searchParams, router]);
   const [filterFolder, setFilterFolder] = useState("");
   const [filterDept, setFilterDept] = useState("");
   const [sort, setSort] = useState("recent");
@@ -114,7 +127,7 @@ export default function VaultPage() {
 
   const totalUses = prompts.reduce((sum, p) => sum + (p.usage_count || 0), 0);
   const sharedCount = prompts.filter((p) => p.status === "approved").length;
-  const enforcedStandards = standards.filter((s) => s.enforced).length;
+  const enforcedGuidelines = guidelines.filter((s) => s.enforced).length;
 
   function openNewPrompt() {
     if (!checkLimit("create_prompt", prompts.length)) {
@@ -175,10 +188,12 @@ export default function VaultPage() {
     recordUsage(id).catch(() => {});
   }
 
+  if (loading) return <PageSkeleton />;
+
   return (
     <>
       <PageHeader
-        title="Prompt Vault"
+        title="Prompts"
         description="Manage and organize your team's AI prompts"
         actions={
           <Button onClick={openNewPrompt}>
@@ -206,14 +221,14 @@ export default function VaultPage() {
           icon={<Share2 className="h-5 w-5" />}
         />
         <StatCard
-          label="Active Standards"
-          value={enforcedStandards}
+          label="Active Guidelines"
+          value={enforcedGuidelines}
           icon={<BookOpen className="h-5 w-5" />}
         />
       </div>
 
       {/* Toolbar */}
-      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:flex-wrap">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -283,10 +298,10 @@ export default function VaultPage() {
           <TableHeader>
             <TableRow>
               <TableHead className="w-[40%]">Prompt</TableHead>
-              <TableHead>Tags</TableHead>
+              <TableHead className="hidden md:table-cell">Tags</TableHead>
               <TableHead className="text-right">Uses</TableHead>
-              <TableHead className="text-right">Rating</TableHead>
-              <TableHead>Updated</TableHead>
+              <TableHead className="text-right hidden sm:table-cell">Rating</TableHead>
+              <TableHead className="hidden lg:table-cell">Updated</TableHead>
               <TableHead className="w-[60px]" />
             </TableRow>
           </TableHeader>
@@ -336,7 +351,7 @@ export default function VaultPage() {
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden md:table-cell">
                       <div className="flex flex-wrap gap-1">
                         {(p.tags || []).slice(0, 3).map((t) => (
                           <Badge key={t} variant="secondary" className="text-xs">
@@ -348,13 +363,13 @@ export default function VaultPage() {
                     <TableCell className="text-right tabular-nums">
                       {p.usage_count || 0}
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-right hidden sm:table-cell">
                       <span className="inline-flex items-center gap-1">
                         <Star className="h-3 w-3 text-tp-yellow" />
                         {avgRating}
                       </span>
                     </TableCell>
-                    <TableCell className="text-muted-foreground text-sm">
+                    <TableCell className="text-muted-foreground text-sm hidden lg:table-cell">
                       {formatDistanceToNow(new Date(p.updated_at), {
                         addSuffix: true,
                       })}

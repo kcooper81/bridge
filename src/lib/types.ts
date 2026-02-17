@@ -58,6 +58,7 @@ export interface Profile {
   email: string;
   role: UserRole;
   avatar_url: string | null;
+  is_super_admin: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -129,6 +130,7 @@ export interface Team {
 
 export interface Member extends Profile {
   teamIds: string[];
+  teamRoles: Record<string, string>;
   isCurrentUser?: boolean;
 }
 
@@ -147,21 +149,24 @@ export interface Collection {
   updated_at: string;
 }
 
-export interface Standard {
+export interface Guideline {
   id: string;
   org_id: string;
   name: string;
   description: string | null;
   category: string;
   scope: "personal" | "team" | "org";
-  rules: StandardRules;
+  rules: GuidelineRules;
   enforced: boolean;
   created_by: string;
   created_at: string;
   updated_at: string;
 }
 
-export interface StandardRules {
+/** @deprecated Use Guideline instead */
+export type Standard = Guideline;
+
+export interface GuidelineRules {
   toneRules?: string[];
   doList?: string[];
   dontList?: string[];
@@ -173,6 +178,9 @@ export interface StandardRules {
   maxLength?: number;
   minLength?: number;
 }
+
+/** @deprecated Use GuidelineRules instead */
+export type StandardRules = GuidelineRules;
 
 export interface Subscription {
   id: string;
@@ -197,7 +205,7 @@ export interface PlanLimits {
   max_prompts: number;
   max_members: number;
   max_ai_tools: number;
-  max_standards: number;
+  max_guidelines: number;
   analytics: boolean;
   import_export: boolean;
   basic_security: boolean;
@@ -242,6 +250,7 @@ export interface Invite {
   role: UserRole;
   token: string;
   invited_by: string | null;
+  team_id?: string | null;
   status: "pending" | "accepted" | "expired" | "revoked";
   expires_at: string;
   accepted_at: string | null;
@@ -258,7 +267,7 @@ export interface OrgData {
   teams: Team[];
   members: Member[];
   collections: Collection[];
-  standards: Standard[];
+  guidelines: Guideline[];
   subscription: Subscription | null;
   planLimits: PlanLimits | null;
 }
@@ -266,7 +275,7 @@ export interface OrgData {
 export interface ValidationResult {
   passed: boolean;
   violations: {
-    standard: string;
+    guideline: string;
     rule: string;
     message: string;
   }[];

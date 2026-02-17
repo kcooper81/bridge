@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -44,9 +45,7 @@ export function MarketingHeader() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-sm font-bold text-primary-foreground">
-            T
-          </div>
+          <Image src="/logo.svg" alt="TeamPrompt" width={32} height={32} className="rounded-lg" />
           <span className="text-lg font-bold">TeamPrompt</span>
         </Link>
 

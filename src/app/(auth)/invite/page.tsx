@@ -117,7 +117,7 @@ export default function InvitePage() {
       )}
 
       <div className="mt-6 flex gap-3 justify-center">
-        <Button variant="outline" onClick={() => router.push("/vault")}>
+        <Button variant="outline" onClick={() => router.push("/login")}>
           Decline
         </Button>
         <Button onClick={handleAccept} disabled={loading}>

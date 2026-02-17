@@ -1,0 +1,93 @@
+import type { SecurityRule } from "@/lib/types";
+import type { ScanResult, ScanViolation } from "./types";
+
+function globToRegex(glob: string): RegExp {
+  const escaped = glob
+    .replace(/[.+^${}()|[\]\\]/g, "\\$&")
+    .replace(/\*/g, ".*")
+    .replace(/\?/g, ".");
+  return new RegExp(escaped, "gi");
+}
+
+function matchPattern(
+  content: string,
+  pattern: string,
+  patternType: string
+): string | null {
+  switch (patternType) {
+    case "exact": {
+      const idx = content.toLowerCase().indexOf(pattern.toLowerCase());
+      if (idx !== -1) {
+        const matched = content.slice(idx, idx + pattern.length);
+        return redactMatch(matched);
+      }
+      return null;
+    }
+    case "regex": {
+      try {
+        const regex = new RegExp(pattern, "gi");
+        const match = regex.exec(content);
+        if (match) {
+          return redactMatch(match[0]);
+        }
+      } catch {
+        // Invalid regex — skip
+      }
+      return null;
+    }
+    case "glob": {
+      const regex = globToRegex(pattern);
+      const match = regex.exec(content);
+      if (match) {
+        return redactMatch(match[0]);
+      }
+      return null;
+    }
+    default:
+      return null;
+  }
+}
+
+function redactMatch(text: string): string {
+  if (text.length <= 4) return "****";
+  return text.slice(0, 2) + "*".repeat(Math.min(text.length - 4, 20)) + text.slice(-2);
+}
+
+export function scanContent(
+  content: string,
+  rules: SecurityRule[]
+): ScanResult {
+  const violations: ScanViolation[] = [];
+
+  const activeRules = rules.filter((r) => r.is_active);
+
+  for (const rule of activeRules) {
+    const matched = matchPattern(content, rule.pattern, rule.pattern_type);
+    if (matched) {
+      violations.push({
+        rule,
+        matchedText: matched,
+        severity: rule.severity,
+      });
+    }
+  }
+
+  // Sort: blocks first, then warns
+  violations.sort((a, b) => {
+    if (a.severity === "block" && b.severity !== "block") return -1;
+    if (a.severity !== "block" && b.severity === "block") return 1;
+    return 0;
+  });
+
+  const hasBlock = violations.some((v) => v.severity === "block");
+  return { passed: !hasBlock, violations };
+}
+
+export function testPattern(
+  testContent: string,
+  pattern: string,
+  patternType: string
+): { matched: boolean; matchedText: string | null } {
+  const result = matchPattern(testContent, pattern, patternType);
+  return { matched: result !== null, matchedText: result };
+}

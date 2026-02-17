@@ -1,0 +1,314 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useOrg } from "@/components/providers/org-provider";
+import { useSubscription } from "@/components/providers/subscription-provider";
+import { PageHeader } from "@/components/dashboard/page-header";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Loader2, Mail, Pencil, Plus, Trash2, UserPlus, Users, X } from "lucide-react";
+import {
+  saveTeamApi,
+  deleteTeamApi,
+  updateMemberRole,
+  removeMember,
+  sendInvite,
+  getInvites,
+  revokeInvite,
+} from "@/lib/vault-api";
+import { toast } from "sonner";
+import type { Invite, Team, UserRole } from "@/lib/types";
+
+export default function TeamPage() {
+  const { teams, members, currentUserRole, refresh } = useOrg();
+  const { checkLimit } = useSubscription();
+
+  const [teamModalOpen, setTeamModalOpen] = useState(false);
+  const [editTeam, setEditTeam] = useState<Team | null>(null);
+  const [teamName, setTeamName] = useState("");
+  const [teamDesc, setTeamDesc] = useState("");
+
+  const [inviteModalOpen, setInviteModalOpen] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteRole, setInviteRole] = useState<UserRole>("member");
+  const [inviting, setInviting] = useState(false);
+  const [invites, setInvites] = useState<Invite[]>([]);
+
+  useEffect(() => {
+    getInvites().then(setInvites).catch(() => {});
+  }, []);
+
+  const pendingInvites = invites.filter((i) => i.status === "pending");
+
+  function openTeamModal(team: Team | null) {
+    setEditTeam(team);
+    setTeamName(team?.name || "");
+    setTeamDesc(team?.description || "");
+    setTeamModalOpen(true);
+  }
+
+  async function handleSaveTeam() {
+    if (!teamName.trim()) return;
+    try {
+      await saveTeamApi({ id: editTeam?.id, name: teamName.trim(), description: teamDesc.trim() || null });
+      toast.success(editTeam ? "Team updated" : "Team created");
+      setTeamModalOpen(false);
+      refresh();
+    } catch {
+      toast.error("Failed to save team");
+    }
+  }
+
+  async function handleDeleteTeam(id: string) {
+    if (!confirm("Delete this team?")) return;
+    try {
+      await deleteTeamApi(id);
+      toast.success("Team deleted");
+      refresh();
+    } catch {
+      toast.error("Failed to delete team");
+    }
+  }
+
+  async function handleChangeRole(memberId: string, role: string) {
+    try {
+      await updateMemberRole(memberId, role);
+      toast.success("Role updated");
+      refresh();
+    } catch {
+      toast.error("Failed to update role");
+    }
+  }
+
+  async function handleRemoveMember(memberId: string) {
+    if (!confirm("Remove this member from the organization?")) return;
+    try {
+      await removeMember(memberId);
+      toast.success("Member removed");
+      refresh();
+    } catch {
+      toast.error("Failed to remove member");
+    }
+  }
+
+  async function handleSendInvite() {
+    if (!inviteEmail.trim()) return;
+    if (!checkLimit("add_member", members.length)) {
+      toast.error("Member limit reached. Upgrade your plan.");
+      return;
+    }
+    setInviting(true);
+    const result = await sendInvite(inviteEmail.trim(), inviteRole);
+    if (result.success) {
+      toast.success("Invite sent");
+      setInviteEmail("");
+      const newInvites = await getInvites();
+      setInvites(newInvites);
+    } else {
+      toast.error(result.error || "Failed to send invite");
+    }
+    setInviting(false);
+  }
+
+  async function handleRevokeInvite(id: string) {
+    await revokeInvite(id);
+    toast.success("Invite revoked");
+    const newInvites = await getInvites();
+    setInvites(newInvites);
+  }
+
+  return (
+    <>
+      <PageHeader
+        title="Team"
+        description="Manage your teams and members"
+        actions={
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setInviteModalOpen(true)}>
+              <UserPlus className="mr-2 h-4 w-4" />
+              Invite Member
+            </Button>
+            <Button onClick={() => openTeamModal(null)}>
+              <Plus className="mr-2 h-4 w-4" />
+              New Team
+            </Button>
+          </div>
+        }
+      />
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        {/* Teams */}
+        <div>
+          <h2 className="text-lg font-semibold mb-3">Teams</h2>
+          {teams.length === 0 ? (
+            <Card>
+              <CardContent className="flex flex-col items-center py-8">
+                <Users className="h-8 w-8 text-muted-foreground mb-2" />
+                <p className="text-sm text-muted-foreground">No teams yet</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-3">
+              {teams.map((team) => {
+                const teamMembers = members.filter((m) => m.teamIds.includes(team.id));
+                return (
+                  <Card key={team.id} className="group">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-base">{team.name}</CardTitle>
+                      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openTeamModal(team)}>
+                          <Pencil className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => handleDeleteTeam(team.id)}>
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      {team.description && <p className="text-sm text-muted-foreground mb-2">{team.description}</p>}
+                      <span className="text-xs text-muted-foreground">{teamMembers.length} members</span>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Members */}
+        <div>
+          <h2 className="text-lg font-semibold mb-3">
+            Members ({members.length})
+          </h2>
+          <div className="space-y-2">
+            {members.map((member) => {
+              const initials = member.name?.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2) || "U";
+              return (
+                <div key={member.id} className="flex items-center gap-3 rounded-lg border border-border p-3 group">
+                  <Avatar className="h-9 w-9">
+                    <AvatarFallback className="bg-primary/20 text-primary text-xs">{initials}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{member.name}</p>
+                    <p className="text-xs text-muted-foreground truncate">{member.email}</p>
+                  </div>
+                  {currentUserRole === "admin" && !member.isCurrentUser ? (
+                    <div className="flex items-center gap-2">
+                      <Select value={member.role} onValueChange={(v) => handleChangeRole(member.id, v)}>
+                        <SelectTrigger className="h-7 w-24 text-xs"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="admin">Admin</SelectItem>
+                          <SelectItem value="manager">Manager</SelectItem>
+                          <SelectItem value="member">Member</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive opacity-0 group-hover:opacity-100" onClick={() => handleRemoveMember(member.id)}>
+                        <X className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <Badge variant="outline" className="text-xs">{member.role}</Badge>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Pending Invites */}
+          {pendingInvites.length > 0 && (
+            <div className="mt-6">
+              <h3 className="text-sm font-semibold mb-2">Pending Invites</h3>
+              <div className="space-y-2">
+                {pendingInvites.map((inv) => (
+                  <div key={inv.id} className="flex items-center gap-3 rounded-lg border border-border/50 bg-muted/30 p-3">
+                    <Mail className="h-4 w-4 text-muted-foreground" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm truncate">{inv.email}</p>
+                      <Badge variant="outline" className="text-xs mt-0.5">{inv.role}</Badge>
+                    </div>
+                    <Button variant="ghost" size="sm" className="text-destructive h-7" onClick={() => handleRevokeInvite(inv.id)}>
+                      Revoke
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Team Modal */}
+      <Dialog open={teamModalOpen} onOpenChange={setTeamModalOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{editTeam ? "Edit Team" : "New Team"}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Name</Label>
+              <Input value={teamName} onChange={(e) => setTeamName(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Description</Label>
+              <Input value={teamDesc} onChange={(e) => setTeamDesc(e.target.value)} />
+            </div>
+          </div>
+          <div className="mt-4 flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setTeamModalOpen(false)}>Cancel</Button>
+            <Button onClick={handleSaveTeam}>{editTeam ? "Save" : "Create"}</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Invite Modal */}
+      <Dialog open={inviteModalOpen} onOpenChange={setInviteModalOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Invite Member</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Email</Label>
+              <Input type="email" value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} placeholder="colleague@company.com" />
+            </div>
+            <div className="space-y-2">
+              <Label>Role</Label>
+              <Select value={inviteRole} onValueChange={(v) => setInviteRole(v as UserRole)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="member">Member</SelectItem>
+                  <SelectItem value="manager">Manager</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="mt-4 flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setInviteModalOpen(false)}>Cancel</Button>
+            <Button onClick={handleSendInvite} disabled={inviting}>
+              {inviting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Send Invite
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}

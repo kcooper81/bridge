@@ -1,0 +1,174 @@
+"use client";
+
+import { useState } from "react";
+import { useOrg } from "@/components/providers/org-provider";
+import { useSubscription } from "@/components/providers/subscription-provider";
+import { PageHeader } from "@/components/dashboard/page-header";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Loader2, CreditCard, ArrowUpRight } from "lucide-react";
+import { PLAN_DISPLAY } from "@/lib/constants";
+import { createClient } from "@/lib/supabase/client";
+import { toast } from "sonner";
+import { format } from "date-fns";
+import type { PlanTier } from "@/lib/types";
+
+export default function BillingPage() {
+  const { org, members } = useOrg();
+  const { subscription } = useSubscription();
+  const [loadingPortal, setLoadingPortal] = useState(false);
+  const [loadingCheckout, setLoadingCheckout] = useState<string | null>(null);
+
+  async function openPortal() {
+    if (!org) return;
+    setLoadingPortal(true);
+    try {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const res = await fetch("/api/stripe/portal", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ orgId: org.id }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        toast.error(data.error || "Failed to open billing portal");
+      }
+    } finally {
+      setLoadingPortal(false);
+    }
+  }
+
+  async function startCheckout(plan: PlanTier) {
+    if (!org) return;
+    setLoadingCheckout(plan);
+    try {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const res = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          plan,
+          orgId: org.id,
+          seats: members.length || 1,
+        }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        toast.error(data.error || "Failed to start checkout");
+      }
+    } finally {
+      setLoadingCheckout(null);
+    }
+  }
+
+  const currentPlan = org?.plan || "free";
+  const plans: PlanTier[] = ["free", "pro", "team", "business"];
+
+  return (
+    <>
+      <PageHeader title="Billing" description="Manage your subscription and billing" />
+
+      <div className="max-w-4xl space-y-6">
+        {/* Current Plan */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <CreditCard className="h-5 w-5" />
+              Current Plan
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex items-center gap-3">
+              <Badge className="text-base px-3 py-1 capitalize">{currentPlan}</Badge>
+              {subscription?.status && (
+                <Badge variant={subscription.status === "active" ? "default" : "destructive"}>
+                  {subscription.status}
+                </Badge>
+              )}
+            </div>
+            {subscription?.current_period_end && (
+              <p className="text-sm text-muted-foreground">
+                {subscription.cancel_at_period_end ? "Cancels" : "Renews"} on{" "}
+                {format(new Date(subscription.current_period_end), "MMMM d, yyyy")}
+              </p>
+            )}
+            {subscription?.trial_ends_at && subscription.status === "trialing" && (
+              <p className="text-sm text-tp-yellow">
+                Trial ends {format(new Date(subscription.trial_ends_at), "MMMM d, yyyy")}
+              </p>
+            )}
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">Seats: {subscription?.seats || 1}</span>
+              <span className="text-sm text-muted-foreground">Members: {members.length}</span>
+            </div>
+            {subscription?.stripe_customer_id && (
+              <Button variant="outline" onClick={openPortal} disabled={loadingPortal}>
+                {loadingPortal && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Manage Billing
+                <ArrowUpRight className="ml-2 h-4 w-4" />
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Plan Grid */}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {plans.map((plan) => {
+            const info = PLAN_DISPLAY[plan];
+            const isCurrent = currentPlan === plan;
+            return (
+              <Card key={plan} className={isCurrent ? "border-primary" : ""}>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base">{info.name}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-2xl font-bold">{info.price}</p>
+                  <p className="text-sm text-muted-foreground mt-1">{info.description}</p>
+                  <div className="mt-4">
+                    {isCurrent ? (
+                      <Button variant="outline" className="w-full" disabled>
+                        Current Plan
+                      </Button>
+                    ) : plan === "free" ? (
+                      <Button variant="outline" className="w-full" disabled>
+                        Free
+                      </Button>
+                    ) : (
+                      <Button
+                        className="w-full"
+                        onClick={() => startCheckout(plan)}
+                        disabled={!!loadingCheckout}
+                      >
+                        {loadingCheckout === plan && (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        )}
+                        {currentPlan !== "free" ? "Switch" : "Upgrade"}
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      </div>
+    </>
+  );
+}

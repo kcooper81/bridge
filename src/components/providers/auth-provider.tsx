@@ -1,0 +1,61 @@
+"use client";
+
+import { createContext, useContext, useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+import type { User, Session } from "@supabase/supabase-js";
+
+interface AuthContextValue {
+  user: User | null;
+  session: Session | null;
+  loading: boolean;
+  signOut: () => Promise<void>;
+}
+
+const AuthContext = createContext<AuthContextValue | null>(null);
+
+export function AuthProvider({
+  children,
+  initialUser,
+  initialSession,
+}: {
+  children: React.ReactNode;
+  initialUser: User | null;
+  initialSession: Session | null;
+}) {
+  const [user, setUser] = useState<User | null>(initialUser);
+  const [session, setSession] = useState<Session | null>(initialSession);
+  const [loading] = useState(false);
+
+  useEffect(() => {
+    const supabase = createClient();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      setSession(newSession);
+      setUser(newSession?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  async function signOut() {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    window.location.href = "/login";
+  }
+
+  return (
+    <AuthContext.Provider value={{ user, session, loading, signOut }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
+}

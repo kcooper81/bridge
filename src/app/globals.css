@@ -2,26 +2,123 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
+  /* TeamPrompt Dark Theme (default) */
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: 228 45% 6%;       /* #0a0c14 */
+    --foreground: 230 33% 94%;      /* #eaedf5 */
+    --card: 230 30% 10%;            /* #111320 */
+    --card-foreground: 230 33% 94%;
+    --popover: 232 28% 13%;         /* #181b2a */
+    --popover-foreground: 230 33% 94%;
+    --primary: 239 84% 67%;         /* #6366f1 — indigo */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 232 28% 13%;       /* #181b2a */
+    --secondary-foreground: 230 33% 94%;
+    --muted: 230 20% 17%;           /* #1f2338 */
+    --muted-foreground: 231 12% 55%; /* #7f849c */
+    --accent: 239 84% 67%;          /* #6366f1 */
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 86% 68%;       /* #f87171 */
+    --destructive-foreground: 0 0% 100%;
+    --border: 232 28% 20%;          /* #232842 */
+    --input: 234 30% 27%;           /* #2e345a */
+    --ring: 239 84% 67%;            /* #6366f1 */
+    --radius: 0.625rem;             /* 10px */
+
+    /* Extended TeamPrompt palette */
+    --surface: 230 30% 10%;         /* #111320 */
+    --elevated: 232 28% 13%;        /* #181b2a */
+    --hover: 230 20% 17%;           /* #1f2338 */
+    --active: 230 18% 21%;          /* #282d44 */
+    --border-light: 234 30% 27%;    /* #2e345a */
+    --text-secondary: 231 14% 69%;  /* #a0a5bd */
+    --green: 160 67% 52%;           /* #34d399 */
+    --green-surface: 160 67% 52% / 0.10;
+    --yellow: 43 96% 56%;           /* #fbbf24 */
+    --yellow-surface: 43 96% 56% / 0.10;
+    --blue: 217 91% 68%;            /* #60a5fa */
+    --accent-surface: 239 84% 67% / 0.10;
+    --accent-glow: 239 84% 67% / 0.25;
+    --red-surface: 0 86% 68% / 0.08;
+
+    --sidebar-width: 260px;
+    --chart-1: 239 84% 67%;
+    --chart-2: 160 67% 52%;
+    --chart-3: 217 91% 68%;
+    --chart-4: 43 96% 56%;
+    --chart-5: 0 86% 68%;
+  }
+
+  /* TeamPrompt Light Theme */
+  [data-theme="light"] {
+    --background: 228 30% 97%;      /* #f5f7fb */
+    --foreground: 222 47% 11%;      /* #0f172a */
+    --card: 0 0% 100%;              /* #ffffff */
+    --card-foreground: 222 47% 11%;
+    --popover: 225 20% 97%;         /* #f8f9fc */
+    --popover-foreground: 222 47% 11%;
+    --primary: 239 84% 67%;         /* #6366f1 */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 225 20% 97%;       /* #f8f9fc */
+    --secondary-foreground: 222 47% 11%;
+    --muted: 224 18% 94%;           /* #eef0f6 */
+    --muted-foreground: 215 16% 47%; /* #94a3b8 */
+    --accent: 239 84% 67%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 72% 51%;       /* #dc2626 */
+    --destructive-foreground: 0 0% 100%;
+    --border: 224 20% 90%;          /* #e0e4ef */
+    --input: 222 18% 83%;           /* #c9cfdf */
+    --ring: 239 84% 67%;
+
+    --surface: 0 0% 100%;
+    --elevated: 225 20% 97%;
+    --hover: 224 18% 94%;
+    --active: 222 15% 87%;
+    --border-light: 222 18% 83%;
+    --text-secondary: 215 20% 40%;
+    --green: 142 72% 29%;
+    --green-surface: 142 72% 29% / 0.08;
+    --yellow: 46 97% 35%;
+    --yellow-surface: 46 97% 35% / 0.10;
+    --blue: 217 91% 60%;
+    --accent-surface: 239 84% 67% / 0.08;
+    --accent-glow: 239 84% 67% / 0.15;
+    --red-surface: 0 72% 51% / 0.08;
   }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+/* Scrollbar utilities */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Custom scrollbar for dashboard */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--border)) transparent;
+}
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--border));
+  border-radius: 3px;
 }

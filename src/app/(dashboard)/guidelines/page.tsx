@@ -27,7 +27,7 @@ import { toast } from "sonner";
 import type { Guideline, GuidelineRules } from "@/lib/types";
 
 export default function GuidelinesPage() {
-  const { guidelines, refresh } = useOrg();
+  const { guidelines, loading, refresh } = useOrg();
   const { checkLimit } = useSubscription();
   const [modalOpen, setModalOpen] = useState(false);
   const [editGuideline, setEditGuideline] = useState<Guideline | null>(null);
@@ -131,6 +131,19 @@ export default function GuidelinesPage() {
     } finally {
       setInstalling(false);
     }
+  }
+
+  if (loading) {
+    return (
+      <>
+        <PageHeader title="Guidelines" description="Define quality guidelines for your team's prompts" />
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-32 rounded-lg bg-muted animate-pulse" />
+          ))}
+        </div>
+      </>
+    );
   }
 
   return (

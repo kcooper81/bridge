@@ -12,6 +12,7 @@ import type {
   ValidationResult,
   Analytics,
   ExportPack,
+  ConversationLog,
 } from "@/lib/types";
 
 function supabase() {
@@ -116,6 +117,8 @@ export async function createPrompt(
       department_id: fields.department_id || null,
       status: fields.status || "approved",
       version: 1,
+      is_template: fields.is_template || false,
+      template_variables: fields.template_variables || [],
     })
     .select()
     .single();
@@ -166,6 +169,8 @@ export async function updatePrompt(
   if (fields.department_id !== undefined) updateData.department_id = fields.department_id;
   if (fields.status !== undefined) updateData.status = fields.status;
   if (fields.is_favorite !== undefined) updateData.is_favorite = fields.is_favorite;
+  if (fields.is_template !== undefined) updateData.is_template = fields.is_template;
+  if (fields.template_variables !== undefined) updateData.template_variables = fields.template_variables;
 
   const { data, error } = await db
     .from("prompts")
@@ -361,6 +366,7 @@ export async function saveCollectionApi(
         name: coll.name || "",
         description: coll.description,
         visibility: coll.visibility || "org",
+        team_id: coll.team_id || null,
         created_by: userId!,
       })
       .select()
@@ -574,7 +580,12 @@ export async function updateMemberRole(
 }
 
 export async function removeMember(memberId: string): Promise<boolean> {
-  const { error } = await supabase()
+  const db = supabase();
+
+  // Remove from all teams first (I-05 fix)
+  await db.from("team_members").delete().eq("user_id", memberId);
+
+  const { error } = await db
     .from("profiles")
     .update({ org_id: null })
     .eq("id", memberId);
@@ -660,6 +671,8 @@ export async function getAnalytics(): Promise<Analytics | null> {
 
   const db = supabase();
 
+  let violationsRes: { data: { id: string }[] | null; error: unknown } = { data: [], error: null };
+
   const [promptsRes, eventsRes] = await Promise.all([
     db.from("prompts").select("*").eq("org_id", orgId),
     db
@@ -667,15 +680,32 @@ export async function getAnalytics(): Promise<Analytics | null> {
       .select("*")
       .eq("org_id", orgId)
       .order("created_at", { ascending: false })
-      .limit(500),
+      .limit(2000),
   ]);
+
+  // Fetch violations separately to handle missing table gracefully
+  try {
+    violationsRes = await db
+      .from("security_violations")
+      .select("id")
+      .eq("org_id", orgId);
+  } catch {
+    // Table may not exist yet
+  }
 
   const prompts = promptsRes.data || [];
   const events = eventsRes.data || [];
 
   const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  const twoWeeksAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);
   const weekEvents = events.filter(
     (e) => new Date(e.created_at) > oneWeekAgo
+  );
+  const lastWeekEvents = events.filter(
+    (e) => {
+      const d = new Date(e.created_at);
+      return d > twoWeeksAgo && d <= oneWeekAgo;
+    }
   );
 
   const totalRating = prompts.reduce((sum, p) => sum + (p.rating_total || 0), 0);
@@ -693,14 +723,111 @@ export async function getAnalytics(): Promise<Analytics | null> {
     .sort((a, b) => (b.usage_count || 0) - (a.usage_count || 0))
     .slice(0, 10);
 
+  // Daily usage for last 30 days
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  const recentEvents = events.filter((e) => new Date(e.created_at) > thirtyDaysAgo);
+  const dailyMap: Record<string, number> = {};
+  for (let i = 0; i < 30; i++) {
+    const d = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
+    dailyMap[d.toISOString().split("T")[0]] = 0;
+  }
+  for (const e of recentEvents) {
+    const day = new Date(e.created_at).toISOString().split("T")[0];
+    if (dailyMap[day] !== undefined) dailyMap[day]++;
+  }
+  const dailyUsage = Object.entries(dailyMap)
+    .map(([date, count]) => ({ date, count }))
+    .sort((a, b) => a.date.localeCompare(b.date));
+
+  // Per-user usage
+  const userMap: Record<string, number> = {};
+  for (const e of events) {
+    userMap[e.user_id] = (userMap[e.user_id] || 0) + 1;
+  }
+
+  // Resolve user names
+  const userIds = Object.keys(userMap);
+  let userUsage: { userId: string; name: string; count: number }[] = [];
+  if (userIds.length > 0) {
+    const { data: profiles } = await db
+      .from("profiles")
+      .select("id, name, email")
+      .in("id", userIds);
+    const nameMap = new Map((profiles || []).map((p) => [p.id, p.name || p.email]));
+    userUsage = Object.entries(userMap)
+      .map(([userId, count]) => ({
+        userId,
+        name: nameMap.get(userId) || "Unknown",
+        count,
+      }))
+      .sort((a, b) => b.count - a.count);
+  }
+
+  const templateCount = prompts.filter((p) => p.is_template).length;
+  const guardrailBlocks = (violationsRes.data || []).length;
+
   return {
     totalPrompts: prompts.length,
     totalUses: prompts.reduce((sum, p) => sum + (p.usage_count || 0), 0),
     avgRating: ratingCount > 0 ? totalRating / ratingCount : 0,
     usesThisWeek: weekEvents.length,
+    usesLastWeek: lastWeekEvents.length,
     topPrompts,
     departmentUsage,
+    dailyUsage,
+    userUsage,
+    templateCount,
+    guardrailBlocks,
   };
+}
+
+// ─── Conversation Logs ───
+
+export async function getConversationLogs(
+  options?: { limit?: number; offset?: number; aiTool?: string }
+): Promise<{ logs: ConversationLog[]; total: number }> {
+  const orgId = await getOrgId();
+  if (!orgId) return { logs: [], total: 0 };
+
+  const db = supabase();
+  const limit = options?.limit || 50;
+  const offset = options?.offset || 0;
+
+  let q = db
+    .from("conversation_logs")
+    .select("*", { count: "exact" })
+    .eq("org_id", orgId)
+    .order("created_at", { ascending: false })
+    .range(offset, offset + limit - 1);
+
+  if (options?.aiTool) {
+    q = q.eq("ai_tool", options.aiTool);
+  }
+
+  const { data, count, error } = await q;
+  if (error) console.error("Conversation logs error:", error);
+
+  return { logs: data || [], total: count || 0 };
+}
+
+export async function getAiToolBreakdown(): Promise<{ tool: string; count: number }[]> {
+  const orgId = await getOrgId();
+  if (!orgId) return [];
+
+  const db = supabase();
+  const { data } = await db
+    .from("conversation_logs")
+    .select("ai_tool")
+    .eq("org_id", orgId);
+
+  const toolMap: Record<string, number> = {};
+  for (const row of data || []) {
+    toolMap[row.ai_tool] = (toolMap[row.ai_tool] || 0) + 1;
+  }
+
+  return Object.entries(toolMap)
+    .map(([tool, count]) => ({ tool, count }))
+    .sort((a, b) => b.count - a.count);
 }
 
 // ─── Import / Export ───
@@ -728,7 +855,7 @@ export async function exportPack(
     .eq("org_id", orgId!);
 
   return {
-    format: "contextiq-prompt-pack",
+    format: "teamprompt-pack",
     version: "1.0",
     name: packName,
     exported_at: new Date().toISOString(),
@@ -741,7 +868,7 @@ export async function exportPack(
 export async function importPack(
   pack: ExportPack
 ): Promise<{ imported: number; errors: string[] }> {
-  if (pack.format !== "contextiq-prompt-pack" || pack.version !== "1.0") {
+  if (pack.format !== "teamprompt-pack" || pack.version !== "1.0") {
     return { imported: 0, errors: ["Invalid pack format"] };
   }
 
@@ -768,6 +895,8 @@ export async function importPack(
       tags: prompt.tags || [],
       status: "approved",
       version: 1,
+      is_template: prompt.is_template || false,
+      template_variables: prompt.template_variables || [],
     });
 
     if (error) {

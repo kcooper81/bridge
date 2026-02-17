@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -12,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useTheme } from "@/components/providers/theme-provider";
 import {
+  Activity,
   Archive,
   BarChart3,
   BookOpen,
@@ -54,6 +56,7 @@ const navSections: { title: string; items: NavItem[] }[] = [
     title: "Intelligence",
     items: [
       { label: "Analytics", href: "/analytics", icon: BarChart3 },
+      { label: "Activity Log", href: "/activity", icon: Activity, roles: ["admin", "manager"] },
       { label: "Import/Export", href: "/import-export", icon: Import },
     ],
   },
@@ -172,19 +175,26 @@ export function Sidebar() {
       </aside>
 
       {/* Mobile sidebar */}
-      <div className="md:hidden fixed top-4 left-4 z-50">
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button variant="outline" size="icon" className="h-10 w-10 bg-card">
-              <Menu className="h-5 w-5" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="w-[var(--sidebar-width)] p-0">
-            <SheetTitle className="sr-only">Navigation</SheetTitle>
-            <NavContent />
-          </SheetContent>
-        </Sheet>
-      </div>
+      <MobileSidebar />
     </>
+  );
+}
+
+function MobileSidebar() {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="md:hidden fixed top-4 left-4 z-50">
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetTrigger asChild>
+          <Button variant="outline" size="icon" className="h-10 w-10 bg-card">
+            <Menu className="h-5 w-5" />
+          </Button>
+        </SheetTrigger>
+        <SheetContent side="left" className="w-[var(--sidebar-width)] p-0">
+          <SheetTitle className="sr-only">Navigation</SheetTitle>
+          <NavContent onItemClick={() => setOpen(false)} />
+        </SheetContent>
+      </Sheet>
+    </div>
   );
 }

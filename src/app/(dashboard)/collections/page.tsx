@@ -29,7 +29,7 @@ import { toast } from "sonner";
 import type { Collection, CollectionVisibility } from "@/lib/types";
 
 export default function CollectionsPage() {
-  const { collections, prompts, refresh } = useOrg();
+  const { collections, prompts, loading, refresh } = useOrg();
   const [modalOpen, setModalOpen] = useState(false);
   const [editCollection, setEditCollection] = useState<Collection | null>(null);
 
@@ -85,6 +85,19 @@ export default function CollectionsPage() {
     } catch {
       toast.error("Failed to delete collection");
     }
+  }
+
+  if (loading) {
+    return (
+      <>
+        <PageHeader title="Collections" description="Group related prompts into collections" />
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-32 rounded-lg bg-muted animate-pulse" />
+          ))}
+        </div>
+      </>
+    );
   }
 
   return (

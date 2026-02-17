@@ -77,20 +77,24 @@ export default function GuardrailsPage() {
 
   const fetchData = useCallback(async () => {
     if (!org) return;
-    const supabase = createClient();
+    try {
+      const supabase = createClient();
 
-    const [rulesRes, violationsRes] = await Promise.all([
-      supabase.from("security_rules").select("*").eq("org_id", org.id).order("name"),
-      supabase
-        .from("security_violations")
-        .select("*, rule:security_rules(name, category, severity)")
-        .eq("org_id", org.id)
-        .order("created_at", { ascending: false })
-        .limit(100),
-    ]);
+      const [rulesRes, violationsRes] = await Promise.all([
+        supabase.from("security_rules").select("*").eq("org_id", org.id).order("name"),
+        supabase
+          .from("security_violations")
+          .select("*, rule:security_rules(name, category, severity)")
+          .eq("org_id", org.id)
+          .order("created_at", { ascending: false })
+          .limit(100),
+      ]);
 
-    setRules(rulesRes.data || []);
-    setViolations(violationsRes.data || []);
+      setRules(rulesRes.data || []);
+      setViolations(violationsRes.data || []);
+    } catch (err) {
+      console.error("Failed to load guardrails data:", err);
+    }
   }, [org]);
 
   useEffect(() => {
@@ -180,6 +184,10 @@ export default function GuardrailsPage() {
 
   async function handleInstallDefaults() {
     if (!org) return;
+    if (!canAccess("custom_security")) {
+      toast.error("Custom security rules require a paid plan.");
+      return;
+    }
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
 

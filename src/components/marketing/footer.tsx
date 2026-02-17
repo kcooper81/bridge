@@ -16,30 +16,33 @@ const footerLinks = {
 
 export function MarketingFooter() {
   return (
-    <footer className="border-t border-border bg-card">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-8 mb-8">
+    <footer className="border-t border-border bg-zinc-950 text-zinc-400">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
           {/* Brand */}
-          <div className="col-span-2 md:col-span-1">
-            <div className="flex items-center gap-2 mb-3">
+          <div className="col-span-2">
+            <div className="flex items-center gap-2.5 mb-4">
               <Image src="/logo.svg" alt="TeamPrompt" width={28} height={28} className="rounded-lg" />
-              <span className="font-bold">TeamPrompt</span>
+              <span className="font-bold text-white">TeamPrompt</span>
             </div>
-            <p className="text-sm text-muted-foreground">
-              Prompt management for teams that use AI.
+            <p className="text-sm leading-relaxed max-w-xs">
+              Prompt management for teams that use AI. Shared libraries,
+              quality guidelines, and security guardrails.
             </p>
           </div>
 
           {/* Link columns */}
           {Object.entries(footerLinks).map(([title, links]) => (
             <div key={title}>
-              <h4 className="text-sm font-semibold mb-3">{title}</h4>
-              <ul className="space-y-2">
+              <h4 className="text-sm font-semibold text-zinc-200 mb-4 uppercase tracking-wider">
+                {title}
+              </h4>
+              <ul className="space-y-3">
                 {links.map((link) => (
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                      className="text-sm hover:text-white transition-colors"
                     >
                       {link.label}
                     </Link>
@@ -50,10 +53,15 @@ export function MarketingFooter() {
           ))}
         </div>
 
-        <div className="border-t border-border pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-muted-foreground">
+        <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-sm text-zinc-500">
             &copy; {new Date().getFullYear()} TeamPrompt. All rights reserved.
           </p>
+          <div className="flex items-center gap-6">
+            <Link href="mailto:support@teamprompt.app" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">
+              support@teamprompt.app
+            </Link>
+          </div>
         </div>
       </div>
     </footer>

@@ -1,0 +1,151 @@
+/* TeamPrompt Extension — Content Script Styles */
+
+.tp-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #18181b;
+  color: #e4e4e7;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  z-index: 999999;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  border: 1px solid #27272a;
+  animation: tp-slide-in 0.2s ease-out;
+}
+
+.tp-toast-error {
+  border-color: #ef4444;
+  color: #fca5a5;
+}
+
+@keyframes tp-slide-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Block overlay */
+.tp-block-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: tp-fade-in 0.15s ease-out;
+}
+
+@keyframes tp-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.tp-block-card {
+  background: #18181b;
+  color: #e4e4e7;
+  border: 1px solid #ef4444;
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 420px;
+  width: 90%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.tp-block-icon {
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+
+.tp-block-card h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #fca5a5;
+}
+
+.tp-block-card p {
+  font-size: 13px;
+  color: #a1a1aa;
+  margin-bottom: 8px;
+}
+
+.tp-block-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0;
+}
+
+.tp-block-card li {
+  padding: 6px 10px;
+  background: #27272a;
+  border-radius: 6px;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+.tp-block-card li strong {
+  color: #ef4444;
+}
+
+.tp-block-hint {
+  font-size: 12px;
+  color: #71717a;
+}
+
+.tp-block-btn {
+  margin-top: 12px;
+  padding: 8px 20px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.tp-block-btn:hover {
+  background: #1d4ed8;
+}
+
+/* Warning banner */
+.tp-warning-banner {
+  position: fixed;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #422006;
+  color: #fbbf24;
+  border: 1px solid #854d0e;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  animation: tp-slide-down 0.2s ease-out;
+}
+
+@keyframes tp-slide-down {
+  from { opacity: 0; transform: translate(-50%, -8px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+.tp-warning-banner button {
+  background: none;
+  border: 1px solid #854d0e;
+  color: #fbbf24;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.tp-warning-banner button:hover {
+  background: #854d0e;
+}

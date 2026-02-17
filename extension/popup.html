@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TeamPrompt</title>
+  <link rel="stylesheet" href="src/popup.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- Login view -->
+    <div id="login-view" class="view">
+      <div class="header">
+        <div class="logo">T</div>
+        <h1>TeamPrompt</h1>
+      </div>
+      <p class="subtitle">Sign in to access your team's prompts</p>
+      <input type="url" id="server-url" placeholder="https://your-app.vercel.app" />
+      <input type="email" id="login-email" placeholder="Email" />
+      <input type="password" id="login-password" placeholder="Password" />
+      <button id="login-btn" class="btn-primary">Sign In</button>
+      <p id="login-error" class="error"></p>
+    </div>
+
+    <!-- Main view -->
+    <div id="main-view" class="view hidden">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <div class="logo-sm">T</div>
+          <span class="toolbar-title">TeamPrompt</span>
+        </div>
+        <button id="logout-btn" class="btn-icon" title="Sign out">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Search -->
+      <div class="search-wrap">
+        <input type="text" id="search-input" placeholder="Search prompts..." />
+      </div>
+
+      <!-- Filter tabs -->
+      <div class="tabs">
+        <button class="tab active" data-filter="all">All</button>
+        <button class="tab" data-filter="templates">Templates</button>
+        <button class="tab" data-filter="favorites">Recent</button>
+      </div>
+
+      <!-- Prompt list -->
+      <div id="prompt-list" class="prompt-list">
+        <div class="loading">Loading prompts...</div>
+      </div>
+
+      <!-- Status bar -->
+      <div id="status-bar" class="status-bar">
+        <span id="status-text">Ready</span>
+      </div>
+    </div>
+
+    <!-- Prompt detail view -->
+    <div id="detail-view" class="view hidden">
+      <div class="detail-toolbar">
+        <button id="back-btn" class="btn-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+        </button>
+        <span id="detail-title" class="detail-title"></span>
+      </div>
+      <div id="detail-content" class="detail-content"></div>
+      <div id="template-fields" class="template-fields hidden"></div>
+      <div class="detail-actions">
+        <button id="copy-btn" class="btn-primary">Copy to Clipboard</button>
+        <button id="insert-btn" class="btn-secondary">Insert into AI Tool</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="src/popup.js"></script>
+</body>
+</html>

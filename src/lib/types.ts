@@ -85,6 +85,8 @@ export interface Prompt {
   rating_count: number;
   usage_count: number;
   last_used_at: string | null;
+  is_template: boolean;
+  template_variables: string[];
   created_at: string;
   updated_at: string;
 }
@@ -286,12 +288,33 @@ export interface Analytics {
   totalUses: number;
   avgRating: number;
   usesThisWeek: number;
+  usesLastWeek: number;
   topPrompts: Prompt[];
   departmentUsage: Record<string, number>;
+  dailyUsage: { date: string; count: number }[];
+  userUsage: { userId: string; name: string; count: number }[];
+  templateCount: number;
+  guardrailBlocks: number;
+}
+
+export interface ConversationLog {
+  id: string;
+  org_id: string;
+  user_id: string;
+  ai_tool: string;
+  prompt_text: string;
+  prompt_id: string | null;
+  response_text: string | null;
+  guardrail_flags: unknown[];
+  action: "sent" | "blocked" | "warned";
+  metadata: Record<string, unknown>;
+  created_at: string;
+  // Joined
+  user?: Pick<Profile, "name" | "email">;
 }
 
 export interface ExportPack {
-  format: "contextiq-prompt-pack";
+  format: "teamprompt-pack";
   version: "1.0";
   name: string;
   exported_at: string;

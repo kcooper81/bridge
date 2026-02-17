@@ -35,7 +35,9 @@ import {
   Archive,
   BarChart3,
   BookOpen,
+  Braces,
   Copy,
+  Files,
   Heart,
   MoreHorizontal,
   Pencil,
@@ -183,9 +185,13 @@ export default function VaultPage() {
   );
 
   async function handleCopy(id: string, content: string) {
-    await navigator.clipboard.writeText(content);
-    toast.success("Copied to clipboard");
-    recordUsage(id).catch(() => {});
+    try {
+      await navigator.clipboard.writeText(content);
+      toast.success("Copied to clipboard");
+      recordUsage(id).catch(() => {});
+    } catch {
+      toast.error("Failed to copy to clipboard");
+    }
   }
 
   if (loading) return <PageSkeleton />;
@@ -343,7 +349,15 @@ export default function VaultPage() {
                           />
                         </button>
                         <div className="min-w-0">
-                          <p className="font-medium truncate">{p.title}</p>
+                          <div className="flex items-center gap-1.5">
+                            <p className="font-medium truncate">{p.title}</p>
+                            {p.is_template && (
+                              <Badge variant="outline" className="text-[10px] gap-0.5 px-1.5 py-0 shrink-0">
+                                <Braces className="h-2.5 w-2.5" />
+                                Template
+                              </Badge>
+                            )}
+                          </div>
                           <p className="text-xs text-muted-foreground truncate max-w-xs">
                             {p.content.slice(0, 80)}
                             {p.content.length > 80 ? "..." : ""}
@@ -411,7 +425,7 @@ export default function VaultPage() {
                               handleDuplicate(p.id);
                             }}
                           >
-                            <Copy className="mr-2 h-4 w-4" />
+                            <Files className="mr-2 h-4 w-4" />
                             Duplicate
                           </DropdownMenuItem>
                           <DropdownMenuItem

@@ -1,0 +1,75 @@
+import { NextRequest, NextResponse } from "next/server";
+import { createServiceClient } from "@/lib/supabase/server";
+import { handleOptions, withCors } from "../cors";
+
+export async function OPTIONS() { return handleOptions(); }
+
+// GET /api/extension/prompts — Chrome extension fetches user's prompts
+export async function GET(request: NextRequest) {
+  try {
+    const authHeader = request.headers.get("authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return withCors(NextResponse.json({ error: "Unauthorized" }, { status: 401 }));
+    }
+
+    const token = authHeader.replace("Bearer ", "");
+    const db = createServiceClient();
+    const {
+      data: { user },
+      error: authError,
+    } = await db.auth.getUser(token);
+    if (authError || !user) {
+      return withCors(NextResponse.json({ error: "Unauthorized" }, { status: 401 }));
+    }
+
+    const { data: profile } = await db
+      .from("profiles")
+      .select("org_id")
+      .eq("id", user.id)
+      .single();
+
+    if (!profile?.org_id) {
+      return withCors(NextResponse.json({ error: "No organization" }, { status: 403 }));
+    }
+
+    const { searchParams } = new URL(request.url);
+    const query = searchParams.get("q") || "";
+    const templatesOnly = searchParams.get("templates") === "true";
+
+    let q = db
+      .from("prompts")
+      .select("id, title, content, description, tags, tone, is_template, template_variables, usage_count, folder_id, department_id")
+      .eq("org_id", profile.org_id)
+      .eq("status", "approved")
+      .order("usage_count", { ascending: false });
+
+    if (templatesOnly) {
+      q = q.eq("is_template", true);
+    }
+
+    const { data: prompts, error } = await q;
+
+    if (error) {
+      console.error("Extension prompts error:", error);
+      return withCors(NextResponse.json({ error: "Failed to fetch prompts" }, { status: 500 }));
+    }
+
+    let results = prompts || [];
+
+    // Client-side search filtering
+    if (query) {
+      const lower = query.toLowerCase();
+      results = results.filter(
+        (p) =>
+          p.title.toLowerCase().includes(lower) ||
+          p.content.toLowerCase().includes(lower) ||
+          (p.tags || []).some((t: string) => t.toLowerCase().includes(lower))
+      );
+    }
+
+    return withCors(NextResponse.json({ prompts: results }));
+  } catch (error) {
+    console.error("Extension prompts error:", error);
+    return withCors(NextResponse.json({ error: "Internal server error" }, { status: 500 }));
+  }
+}

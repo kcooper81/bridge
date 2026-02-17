@@ -18,7 +18,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, CheckCircle2, XCircle } from "lucide-react";
+import { Loader2, CheckCircle2, XCircle, Braces, ShieldAlert } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { TONE_OPTIONS } from "@/lib/constants";
 import { useOrg } from "@/components/providers/org-provider";
 import {
@@ -27,8 +28,18 @@ import {
   validatePrompt,
   getPromptVersions,
 } from "@/lib/vault-api";
-import type { Prompt, PromptVersion, ValidationResult } from "@/lib/types";
+import { createClient } from "@/lib/supabase/client";
+import { scanContent } from "@/lib/security/scanner";
+import type { Prompt, PromptVersion, SecurityRule, ValidationResult } from "@/lib/types";
+import type { ScanResult } from "@/lib/security/types";
 import { toast } from "sonner";
+
+function extractTemplateVariables(content: string): string[] {
+  const matches = content.match(/\{\{([^}]+)\}\}/g);
+  if (!matches) return [];
+  const vars = matches.map((m) => m.replace(/^\{\{|\}\}$/g, "").trim());
+  return Array.from(new Set(vars));
+}
 
 interface PromptModalProps {
   open: boolean;
@@ -43,9 +54,10 @@ export function PromptModal({
   prompt,
   onSaved,
 }: PromptModalProps) {
-  const { folders, departments, guidelines } = useOrg();
+  const { folders, departments, guidelines, org } = useOrg();
   const [saving, setSaving] = useState(false);
   const [validation, setValidation] = useState<ValidationResult | null>(null);
+  const [scanResult, setScanResult] = useState<ScanResult | null>(null);
   const [versions, setVersions] = useState<PromptVersion[]>([]);
 
   const [title, setTitle] = useState("");
@@ -59,6 +71,7 @@ export function PromptModal({
   const [tagsInput, setTagsInput] = useState("");
   const [folderId, setFolderId] = useState<string>("");
   const [departmentId, setDepartmentId] = useState<string>("");
+  const [isTemplate, setIsTemplate] = useState(false);
 
   useEffect(() => {
     if (prompt) {
@@ -73,6 +86,7 @@ export function PromptModal({
       setTagsInput((prompt.tags || []).join(", "));
       setFolderId(prompt.folder_id || "");
       setDepartmentId(prompt.department_id || "");
+      setIsTemplate(prompt.is_template || false);
       getPromptVersions(prompt.id).then(setVersions);
     } else {
       setTitle("");
@@ -86,9 +100,11 @@ export function PromptModal({
       setTagsInput("");
       setFolderId("");
       setDepartmentId("");
+      setIsTemplate(false);
       setVersions([]);
     }
     setValidation(null);
+    setScanResult(null);
   }, [prompt, open]);
 
   function handleValidate() {
@@ -120,6 +136,25 @@ export function PromptModal({
 
     setSaving(true);
     try {
+      // Run DLP scan on content before saving
+      if (org) {
+        const db = createClient();
+        const { data: rules } = await db
+          .from("security_rules")
+          .select("*")
+          .eq("org_id", org.id)
+          .eq("is_active", true);
+
+        if (rules && rules.length > 0) {
+          const scan = scanContent(content, rules as SecurityRule[]);
+          setScanResult(scan);
+          if (!scan.passed) {
+            toast.error("Content blocked by security guardrails. Remove sensitive data before saving.");
+            setSaving(false);
+            return;
+          }
+        }
+      }
       const fields = {
         title: title.trim(),
         content: content.trim(),
@@ -135,10 +170,12 @@ export function PromptModal({
           .filter(Boolean),
         folder_id: folderId || null,
         department_id: departmentId || null,
+        is_template: isTemplate,
+        template_variables: extractTemplateVariables(content),
       };
 
       if (prompt) {
-        await updatePrompt(prompt.id, fields);
+        await updatePrompt(prompt.id, fields as Partial<Prompt>);
         toast.success("Prompt updated");
       } else {
         await createPrompt(fields);
@@ -276,6 +313,44 @@ export function PromptModal({
             />
           </div>
 
+          {/* Template toggle */}
+          <div className="flex items-center justify-between rounded-lg border border-border p-3">
+            <div className="flex items-center gap-3">
+              <Braces className="h-4 w-4 text-muted-foreground" />
+              <div>
+                <Label htmlFor="isTemplate" className="text-sm font-medium cursor-pointer">
+                  Prompt template
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  {"Use {{variable_name}} in content for fill-in fields"}
+                </p>
+              </div>
+            </div>
+            <Switch
+              id="isTemplate"
+              checked={isTemplate}
+              onCheckedChange={setIsTemplate}
+            />
+          </div>
+
+          {/* Detected template variables */}
+          {isTemplate && extractTemplateVariables(content).length > 0 && (
+            <div className="rounded-lg bg-muted/50 p-3">
+              <p className="text-xs font-medium text-muted-foreground mb-2">Detected variables:</p>
+              <div className="flex flex-wrap gap-1.5">
+                {extractTemplateVariables(content).map((v) => (
+                  <span
+                    key={v}
+                    className="inline-flex items-center gap-1 rounded-md bg-primary/10 text-primary px-2 py-0.5 text-xs font-mono"
+                  >
+                    <Braces className="h-3 w-3" />
+                    {v}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="space-y-2">
             <Label htmlFor="intendedOutcome">Intended Outcome</Label>
             <Textarea
@@ -335,6 +410,21 @@ export function PromptModal({
                   ))}
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Security Scan Result */}
+          {scanResult && !scanResult.passed && (
+            <div className="rounded-lg bg-destructive/10 p-3 text-sm">
+              <div className="flex items-center gap-2 font-medium text-destructive mb-1">
+                <ShieldAlert className="h-4 w-4" />
+                Security scan blocked — {scanResult.violations.length} issue(s)
+              </div>
+              {scanResult.violations.map((v, i) => (
+                <p key={i} className="ml-6 text-destructive">
+                  {v.rule.name}: matched &quot;{v.matchedText}&quot;
+                </p>
+              ))}
             </div>
           )}
 

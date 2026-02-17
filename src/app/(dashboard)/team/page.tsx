@@ -40,7 +40,7 @@ import { toast } from "sonner";
 import type { Invite, Team, UserRole } from "@/lib/types";
 
 export default function TeamPage() {
-  const { teams, members, currentUserRole, refresh } = useOrg();
+  const { teams, members, currentUserRole, loading, refresh } = useOrg();
   const { checkLimit } = useSubscription();
 
   const [teamModalOpen, setTeamModalOpen] = useState(false);
@@ -65,6 +65,23 @@ export default function TeamPage() {
   }, []);
 
   const pendingInvites = invites.filter((i) => i.status === "pending");
+
+  if (loading) {
+    return (
+      <>
+        <PageHeader title="Team" description="Manage your teams and members" />
+        <div className="grid gap-6 lg:grid-cols-2">
+          {[1, 2].map((i) => (
+            <div key={i} className="space-y-3">
+              {[1, 2, 3].map((j) => (
+                <div key={j} className="h-20 rounded-lg bg-muted animate-pulse" />
+              ))}
+            </div>
+          ))}
+        </div>
+      </>
+    );
+  }
 
   function openTeamModal(team: Team | null) {
     setEditTeam(team);
@@ -98,6 +115,15 @@ export default function TeamPage() {
   }
 
   async function handleChangeRole(memberId: string, role: string) {
+    // Prevent removing the last admin
+    if (role !== "admin") {
+      const admins = members.filter((m) => m.role === "admin");
+      const changingMember = members.find((m) => m.id === memberId);
+      if (changingMember?.role === "admin" && admins.length <= 1) {
+        toast.error("Cannot remove the last admin. Promote another member first.");
+        return;
+      }
+    }
     try {
       await updateMemberRole(memberId, role);
       toast.success("Role updated");
@@ -108,6 +134,15 @@ export default function TeamPage() {
   }
 
   async function handleRemoveMember(memberId: string) {
+    // Prevent removing the last admin
+    const member = members.find((m) => m.id === memberId);
+    if (member?.role === "admin") {
+      const admins = members.filter((m) => m.role === "admin");
+      if (admins.length <= 1) {
+        toast.error("Cannot remove the last admin.");
+        return;
+      }
+    }
     if (!confirm("Remove this member from the organization?")) return;
     try {
       await removeMember(memberId);

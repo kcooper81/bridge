@@ -12,7 +12,7 @@ import { Menu } from "lucide-react";
 const navLinks = [
   { label: "Features", href: "/features" },
   { label: "Pricing", href: "/pricing" },
-  { label: "Security", href: "/security" },
+  { label: "Guardrails", href: "/security" },
 ];
 
 export function MarketingHeader() {

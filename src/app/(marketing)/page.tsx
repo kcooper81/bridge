@@ -20,44 +20,44 @@ const features = [
     icon: Archive,
     title: "Shared Prompt Vault",
     description:
-      "Centralized repository for all your team's AI prompts with folders, departments, and tagging.",
+      "Your team writes the same prompts over and over — in docs, Slack threads, personal notes. The vault gives everyone one place to find what already works.",
   },
   {
     icon: Shield,
     title: "AI Guardrails",
     description:
-      "Block API keys, credentials, personal info, and sensitive data from leaking into AI tools automatically.",
+      "People paste API keys, credentials, and internal data into AI tools every day. Guardrails catch sensitive content before it leaves your org.",
   },
   {
     icon: BookOpen,
     title: "Quality Guidelines",
     description:
-      "14 built-in guidelines covering writing, coding, marketing, legal, and more. Create custom ones too.",
+      "Bad prompts waste tokens and produce bad output. Guidelines enforce structure, tone, and completeness — so your team writes prompts that actually perform.",
   },
   {
     icon: Users,
     title: "Teams & Roles",
     description:
-      "Role-based access control with Admin, Manager, and Member roles. Invite teammates via email.",
+      "Not everyone needs the same access. Assign Admin, Manager, or Member roles and organize people into teams so the right prompts reach the right people.",
   },
   {
     icon: Chrome,
     title: "Chrome Extension",
     description:
-      "One-click prompt injection into 15+ AI tools including ChatGPT, Claude, Gemini, and more.",
+      "Your prompts live in TeamPrompt, but your team works in ChatGPT, Claude, and Gemini. The extension bridges the gap with one-click injection into 15+ tools.",
   },
   {
     icon: BarChart3,
     title: "Usage Analytics",
     description:
-      "Track prompt usage, top performers, department trends, and team productivity metrics.",
+      "You can't improve what you can't measure. See which prompts get reused, which teams are most active, and where your library has gaps.",
   },
 ];
 
 const stats = [
-  { value: "15+", label: "AI Tools Supported" },
-  { value: "14", label: "Built-in Guidelines" },
-  { value: "100%", label: "Free to Start" },
+  { value: "15+", label: "AI tools connected" },
+  { value: "14", label: "quality guidelines built in" },
+  { value: "2 min", label: "to set up your workspace" },
 ];
 
 export default function LandingPage() {
@@ -76,38 +76,51 @@ export default function LandingPage() {
 
       {/* Hero */}
       <section className="relative overflow-hidden pt-16">
-        {/* Gradient background */}
+        {/* Dot-grid background pattern */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle, hsl(var(--primary) / 0.12) 1px, transparent 1px)",
+            backgroundSize: "24px 24px",
+            maskImage:
+              "radial-gradient(ellipse at 50% 0%, black 0%, transparent 70%)",
+            WebkitMaskImage:
+              "radial-gradient(ellipse at 50% 0%, black 0%, transparent 70%)",
+          }}
+        />
+        {/* Gradient overlay */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              "radial-gradient(ellipse at 50% -20%, hsl(239 84% 67% / 0.2) 0%, transparent 60%)",
+              "radial-gradient(ellipse at 50% -20%, hsl(var(--primary) / 0.2) 0%, transparent 60%)",
           }}
         />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-20 pb-16 sm:pt-28 sm:pb-24 text-center">
           <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-sm mb-6">
             <Shield className="h-4 w-4 text-primary" />
-            <span>Now with AI Guardrails</span>
+            <span>AI Guardrails — now built in</span>
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight max-w-4xl mx-auto">
-            Stop losing your best{" "}
-            <span className="text-primary">AI prompts</span>
+            Your team&apos;s prompts deserve{" "}
+            <span className="text-primary">a system</span>
           </h1>
           <p className="mt-6 text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
-            TeamPrompt helps teams manage, share, and secure their AI prompts
-            across 15+ AI tools with built-in quality guidelines and
-            enterprise-grade guardrails.
+            TeamPrompt gives your team a shared library, quality guidelines, and
+            security guardrails — so the best prompts get reused, not
+            reinvented.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/signup">
               <Button size="lg" className="text-base px-8">
-                Start Free
+                Start for free
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
             <Link href="/features">
               <Button variant="outline" size="lg" className="text-base px-8">
-                See How It Works
+                See features
               </Button>
             </Link>
           </div>
@@ -117,15 +130,18 @@ export default function LandingPage() {
       {/* Stats */}
       <section className="border-y border-border bg-card/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-          <div className="grid grid-cols-3 gap-8 text-center">
+          <div className="grid grid-cols-3 gap-8">
             {stats.map((stat) => (
-              <div key={stat.label}>
-                <p className="text-3xl sm:text-4xl font-bold text-primary">
-                  {stat.value}
-                </p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {stat.label}
-                </p>
+              <div key={stat.label} className="flex items-center gap-4">
+                <div className="hidden sm:block w-1 h-10 rounded-full bg-primary/30" />
+                <div>
+                  <p className="text-3xl sm:text-4xl font-bold text-primary">
+                    {stat.value}
+                  </p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {stat.label}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
@@ -137,24 +153,24 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl font-bold">
-              Everything your team needs
+              Built for how teams actually use AI
             </h2>
             <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-              From prompt management to enterprise security, TeamPrompt has you
-              covered.
+              Not another bookmark folder. TeamPrompt is purpose-built for
+              prompt management.
             </p>
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {features.map((feature) => (
               <div
                 key={feature.title}
-                className="rounded-xl border border-border bg-card p-6 hover:border-primary/30 transition-colors"
+                className="rounded-xl border border-border bg-card p-8 hover:border-primary/30 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
               >
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary mb-4">
                   <feature.icon className="h-5 w-5" />
                 </div>
                 <h3 className="text-lg font-semibold">{feature.title}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">
+                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
                   {feature.description}
                 </p>
               </div>
@@ -168,18 +184,18 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl font-bold">
-              Simple, transparent pricing
+              One price per user. No surprises.
             </h2>
             <p className="mt-4 text-lg text-muted-foreground">
-              Start free. Upgrade when you&apos;re ready.
+              Start free, upgrade when your team grows.
             </p>
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 max-w-5xl mx-auto">
             {[
-              { name: "Free", price: "$0", desc: "For individuals", features: ["25 prompts", "3 members", "5 guidelines", "Basic guardrails"] },
-              { name: "Pro", price: "$9/mo", desc: "For power users", features: ["Unlimited prompts", "All 14 guidelines", "Custom guardrails", "Analytics", "14-day trial"] },
-              { name: "Team", price: "$7/user/mo", desc: "For growing teams", features: ["Up to 50 members", "Custom guardrails", "Audit log", "Import/export", "14-day trial"], popular: true },
-              { name: "Business", price: "$12/user/mo", desc: "For enterprises", features: ["Up to 500 members", "Custom guidelines", "Full audit log", "Priority support"] },
+              { name: "Free", price: "$0", desc: "For trying it out", features: ["25 prompts", "3 members", "5 guidelines", "Basic guardrails"] },
+              { name: "Pro", price: "$9/mo", desc: "For solo power users", features: ["Unlimited prompts", "All 14 guidelines", "Custom guardrails", "Analytics", "14-day trial"] },
+              { name: "Team", price: "$7/user/mo", desc: "For teams up to 50", features: ["Up to 50 members", "Custom guardrails", "Audit log", "Import/export", "14-day trial"], popular: true },
+              { name: "Business", price: "$12/user/mo", desc: "For larger organizations", features: ["Up to 500 members", "Custom guidelines", "Full audit log", "Priority support"] },
             ].map((plan) => (
               <div
                 key={plan.name}
@@ -223,16 +239,15 @@ export default function LandingPage() {
       <section className="py-16 sm:py-24">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
           <h2 className="text-3xl sm:text-4xl font-bold">
-            Ready to secure your team&apos;s AI workflow?
+            Your team is already using AI. Now give them a system.
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            Join teams who trust TeamPrompt to manage, share, and protect their
-            AI prompts.
+            Set up your workspace in under two minutes. No credit card needed.
           </p>
           <div className="mt-8 flex gap-4 justify-center">
             <Link href="/signup">
               <Button size="lg" className="text-base px-8">
-                Get Started Free
+                Create your workspace
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>

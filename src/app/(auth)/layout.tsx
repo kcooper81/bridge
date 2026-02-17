@@ -14,7 +14,7 @@ export default function AuthLayout({
         className="fixed inset-0 pointer-events-none"
         style={{
           background:
-            "radial-gradient(ellipse at 50% 0%, hsl(239 84% 67% / 0.15) 0%, transparent 60%)",
+            "radial-gradient(ellipse at 50% 0%, hsl(var(--primary) / 0.15) 0%, transparent 60%)",
         }}
       />
 

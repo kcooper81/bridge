@@ -155,10 +155,10 @@ export async function POST(request: NextRequest) {
         subject: `You're invited to join ${org?.name || "a team"} on TeamPrompt`,
         html: `
           <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 560px; margin: 0 auto; padding: 40px 20px;">
-            <h2 style="color: #6366f1;">You've been invited!</h2>
+            <h2 style="color: #2563EB;">You've been invited!</h2>
             <p>${profile.name || "A team member"} has invited you to join <strong>${org?.name || "their team"}</strong> on TeamPrompt as a <strong>${role}</strong>.</p>
             <p>TeamPrompt helps teams manage, share, and secure their AI prompts across 15+ AI tools.</p>
-            <a href="${siteUrl}/invite?token=${invite.token}" style="display: inline-block; background: #6366f1; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; margin: 16px 0;">Accept Invite</a>
+            <a href="${siteUrl}/invite?token=${invite.token}" style="display: inline-block; background: #2563EB; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; margin: 16px 0;">Accept Invite</a>
             <p style="color: #7f849c; font-size: 14px;">This invite expires in 7 days.</p>
           </div>
         `,

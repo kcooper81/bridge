@@ -9,7 +9,7 @@ export function generateSoftwareApplicationSchema() {
     applicationCategory: "BusinessApplication",
     operatingSystem: "Web, Chrome Extension",
     description:
-      "AI Prompt Vault & Context Bridge for teams. Manage, share, and secure your team's AI prompts.",
+      "Prompt management for teams that use AI. Manage, share, and secure your team's AI prompts.",
     url: SITE_URL,
     offers: [
       {
@@ -68,7 +68,7 @@ export function generateOrganizationSchema() {
     "@type": "Organization",
     name: "TeamPrompt",
     url: SITE_URL,
-    description: "AI Prompt Vault & Context Bridge for teams",
+    description: "Prompt management for teams that use AI",
   };
 }
 

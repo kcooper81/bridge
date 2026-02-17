@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     template: "%s | TeamPrompt",
   },
   description:
-    "Manage, share, and secure your team's AI prompts. Built-in quality guidelines, AI guardrails, and seamless Chrome extension for 15+ AI tools.",
+    "TeamPrompt gives your team a shared prompt library, quality guidelines, and security guardrails — so the best prompts get reused, not reinvented.",
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL || "https://teamprompt.app"
   ),
@@ -23,13 +23,13 @@ export const metadata: Metadata = {
     siteName: "TeamPrompt",
     title: "TeamPrompt - AI Prompt Management for Teams",
     description:
-      "Manage, share, and secure your team's AI prompts. Built-in quality guidelines, AI guardrails, and seamless Chrome extension for 15+ AI tools.",
+      "TeamPrompt gives your team a shared prompt library, quality guidelines, and security guardrails — so the best prompts get reused, not reinvented.",
   },
   twitter: {
     card: "summary_large_image",
     title: "TeamPrompt - AI Prompt Management for Teams",
     description:
-      "Manage, share, and secure your team's AI prompts with built-in quality guidelines and guardrails.",
+      "TeamPrompt gives your team a shared prompt library, quality guidelines, and security guardrails.",
   },
   robots: {
     index: true,

@@ -74,7 +74,7 @@ export default function SecurityPage() {
             AI Guardrails
           </div>
           <h1 className="text-4xl sm:text-5xl font-bold max-w-3xl mx-auto">
-            Protect your data from AI prompt leaks
+            Stop sensitive data from leaking into AI tools
           </h1>
           <p className="mt-6 text-lg text-muted-foreground max-w-2xl mx-auto">
             TeamPrompt&apos;s AI Guardrails automatically detect and block
@@ -174,11 +174,11 @@ export default function SecurityPage() {
         {/* CTA */}
         <div className="text-center">
           <h2 className="text-3xl font-bold">
-            Don&apos;t wait for a data leak
+            Your team is already pasting secrets into AI. Fix that today.
           </h2>
           <p className="mt-4 text-muted-foreground">
-            Start protecting your team&apos;s AI prompts today. Free tier
-            includes basic security patterns.
+            Free tier includes basic security patterns. Upgrade for custom rules
+            and full audit logging.
           </p>
           <Link href="/signup" className="mt-6 inline-block">
             <Button size="lg" className="text-base px-8">

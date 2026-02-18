@@ -22,6 +22,10 @@ const TeamPromptUI = (function () {
     return null;
   }
 
+  function handleOAuthLogin() {
+    chrome.tabs.create({ url: CONFIG.SITE_URL + "/login" });
+  }
+
   async function handleLogin() {
     const email = elements.emailInput.value.trim();
     const password = elements.passwordInput.value;
@@ -283,9 +287,22 @@ const TeamPromptUI = (function () {
     // Auth handlers
     elements.loginBtn.addEventListener("click", handleLogin);
     elements.logoutBtn.addEventListener("click", handleLogout);
-    elements.webLoginLink.addEventListener("click", (e) => {
+    elements.googleBtn.addEventListener("click", handleOAuthLogin);
+    elements.githubBtn.addEventListener("click", handleOAuthLogin);
+    elements.webLoginBtn.addEventListener("click", () => {
+      chrome.tabs.create({ url: CONFIG.SITE_URL + "/login" });
+    });
+    elements.signupLink.addEventListener("click", (e) => {
       e.preventDefault();
-      chrome.tabs.create({ url: CONFIG.SITE_URL });
+      chrome.tabs.create({ url: CONFIG.SITE_URL + "/signup" });
+    });
+
+    // Listen for auth-bridge session sync (OAuth or web login)
+    chrome.storage.onChanged.addListener((changes, area) => {
+      if (area === "local" && changes.accessToken && changes.accessToken.newValue) {
+        showMainView();
+        loadPrompts();
+      }
     });
 
     // Search

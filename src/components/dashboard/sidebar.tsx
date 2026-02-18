@@ -64,10 +64,11 @@ const navSections: { title: string; items: NavItem[] }[] = [
 
 function NavContent({ onItemClick }: { onItemClick?: () => void }) {
   const pathname = usePathname();
-  const { currentUserRole, members } = useOrg();
+  const { currentUserRole, members, prompts } = useOrg();
   const { user, signOut } = useAuth();
   const { theme, setTheme } = useTheme();
 
+  const pendingCount = prompts.filter((p) => p.status === "pending").length;
   const currentMember = members.find((m) => m.isCurrentUser);
   const initials =
     currentMember?.name
@@ -119,6 +120,11 @@ function NavContent({ onItemClick }: { onItemClick?: () => void }) {
                       )}
                       <item.icon className="h-4 w-4" />
                       {item.label}
+                      {item.href === "/vault" && pendingCount > 0 && (
+                        <Badge variant="destructive" className="ml-auto h-5 min-w-5 px-1.5 text-[10px]">
+                          {pendingCount}
+                        </Badge>
+                      )}
                     </Link>
                   );
                 })}

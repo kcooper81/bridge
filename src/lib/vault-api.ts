@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/client";
 import { DEFAULT_GUIDELINES } from "@/lib/constants";
 import type {
   Prompt,
+  PromptStatus,
   Folder,
   Department,
   Team,
@@ -9,6 +10,7 @@ import type {
   Guideline,
   Organization,
   PromptTone,
+  UserRole,
   ValidationResult,
   Analytics,
   ExportPack,
@@ -40,6 +42,26 @@ async function getUserId(): Promise<string | null> {
     data: { user },
   } = await db.auth.getUser();
   return user?.id || null;
+}
+
+// ─── Status Helpers ───
+
+export function getDefaultStatus(
+  role: UserRole,
+  requestedStatus?: PromptStatus
+): PromptStatus {
+  const canApprove = role === "admin" || role === "manager";
+
+  if (!requestedStatus) {
+    return canApprove ? "approved" : "draft";
+  }
+
+  // Members cannot directly set "approved" or "archived"
+  if (!canApprove && (requestedStatus === "approved" || requestedStatus === "archived")) {
+    return "pending";
+  }
+
+  return requestedStatus;
 }
 
 // ─── Prompts ───
@@ -828,6 +850,66 @@ export async function getAiToolBreakdown(): Promise<{ tool: string; count: numbe
   return Object.entries(toolMap)
     .map(([tool, count]) => ({ tool, count }))
     .sort((a, b) => b.count - a.count);
+}
+
+// ─── Ratings ───
+
+export async function ratePrompt(
+  promptId: string,
+  rating: number
+): Promise<boolean> {
+  const userId = await getUserId();
+  if (!userId) return false;
+
+  const db = supabase();
+
+  // Upsert user's rating
+  const { error: upsertError } = await db
+    .from("prompt_ratings")
+    .upsert(
+      { prompt_id: promptId, user_id: userId, rating },
+      { onConflict: "prompt_id,user_id" }
+    );
+
+  if (upsertError) {
+    console.error("Rate prompt error:", upsertError);
+    return false;
+  }
+
+  // Recalculate aggregate on prompts row
+  const { data: agg } = await db
+    .from("prompt_ratings")
+    .select("rating")
+    .eq("prompt_id", promptId);
+
+  if (agg) {
+    const total = agg.reduce((sum, r) => sum + r.rating, 0);
+    const count = agg.length;
+    await db
+      .from("prompts")
+      .update({ rating_total: total, rating_count: count })
+      .eq("id", promptId);
+  }
+
+  return true;
+}
+
+export async function getUserRatingsForOrg(): Promise<Record<string, number>> {
+  const userId = await getUserId();
+  const orgId = await getOrgId();
+  if (!userId || !orgId) return {};
+
+  const db = supabase();
+  const { data } = await db
+    .from("prompt_ratings")
+    .select("prompt_id, rating")
+    .eq("user_id", userId);
+
+  const map: Record<string, number> = {};
+  for (const row of data || []) {
+    map[row.prompt_id] = row.rating;
+  }
+  return map;
 }
 
 // ─── Import / Export ───

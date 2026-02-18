@@ -91,6 +91,14 @@ export interface Prompt {
   updated_at: string;
 }
 
+export interface PromptRating {
+  id: string;
+  prompt_id: string;
+  user_id: string;
+  rating: number;
+  created_at: string;
+}
+
 export interface PromptVersion {
   id: string;
   prompt_id: string;

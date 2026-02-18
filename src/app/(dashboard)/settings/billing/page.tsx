@@ -7,6 +7,8 @@ import { useSubscription } from "@/components/providers/subscription-provider";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, CreditCard, ArrowUpRight } from "lucide-react";
 import { PLAN_DISPLAY } from "@/lib/constants";
@@ -14,6 +16,7 @@ import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import type { PlanTier } from "@/lib/types";
+import type { BillingInterval } from "@/lib/billing/plans";
 
 export default function BillingPage() {
   const { org, members } = useOrg();
@@ -22,6 +25,7 @@ export default function BillingPage() {
   const router = useRouter();
   const [loadingPortal, setLoadingPortal] = useState(false);
   const [loadingCheckout, setLoadingCheckout] = useState<string | null>(null);
+  const [interval, setInterval] = useState<BillingInterval>("monthly");
 
   // Handle checkout success redirect
   useEffect(() => {
@@ -77,6 +81,7 @@ export default function BillingPage() {
           plan,
           orgId: org.id,
           seats: members.length || 1,
+          interval,
         }),
       });
       const data = await res.json();
@@ -172,18 +177,44 @@ export default function BillingPage() {
           </CardContent>
         </Card>
 
+        {/* Billing Interval Toggle */}
+        <div className="flex items-center justify-center gap-3">
+          <Label htmlFor="billing-toggle" className={interval === "monthly" ? "font-semibold" : "text-muted-foreground"}>
+            Monthly
+          </Label>
+          <Switch
+            id="billing-toggle"
+            checked={interval === "annual"}
+            onCheckedChange={(checked) => setInterval(checked ? "annual" : "monthly")}
+          />
+          <Label htmlFor="billing-toggle" className={interval === "annual" ? "font-semibold" : "text-muted-foreground"}>
+            Annual
+          </Label>
+          {interval === "annual" && (
+            <Badge variant="secondary" className="text-xs text-tp-green">
+              Save 20%
+            </Badge>
+          )}
+        </div>
+
         {/* Plan Grid */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {plans.map((plan) => {
             const info = PLAN_DISPLAY[plan];
             const isCurrent = currentPlan === plan;
+            const displayPrice = interval === "annual" ? info.annualMonthly : info.price;
             return (
               <Card key={plan} className={isCurrent ? "border-primary" : ""}>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-base">{info.name}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-2xl font-bold">{info.price}</p>
+                  <p className="text-2xl font-bold">{displayPrice}</p>
+                  {interval === "annual" && plan !== "free" && (
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      billed as {info.annualPrice}
+                    </p>
+                  )}
                   <p className="text-sm text-muted-foreground mt-1">{info.description}</p>
                   <div className="mt-4">
                     {isCurrent ? (

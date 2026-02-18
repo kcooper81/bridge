@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { plan, orgId, seats } = await request.json();
+    const { plan, orgId, seats, interval = "monthly" } = await request.json();
 
     const planConfig =
       STRIPE_PLAN_CONFIG[plan as keyof typeof STRIPE_PLAN_CONFIG];
@@ -45,7 +45,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const priceId = process.env[planConfig.priceEnv];
+    const priceEnvKey = interval === "annual"
+      ? planConfig.priceEnv.annual
+      : planConfig.priceEnv.monthly;
+    const priceId = process.env[priceEnvKey];
     if (!priceId) {
       return NextResponse.json(
         { error: "Plan not configured" },

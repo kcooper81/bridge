@@ -1,4 +1,4 @@
-// TeamPrompt Extension — Popup Script (thin wrapper around shared-ui.js)
+// TeamPrompt Extension — Side Panel Script (thin wrapper around shared-ui.js)
 
 document.addEventListener("DOMContentLoaded", () => {
   TeamPromptUI.init({
@@ -21,14 +21,4 @@ document.addEventListener("DOMContentLoaded", () => {
     copyBtn: document.getElementById("copy-btn"),
     insertBtn: document.getElementById("insert-btn"),
   });
-
-  // "Open in side panel" button
-  const sidePanelBtn = document.getElementById("open-sidepanel-btn");
-  if (sidePanelBtn && chrome.sidePanel) {
-    sidePanelBtn.classList.remove("hidden");
-    sidePanelBtn.addEventListener("click", () => {
-      chrome.runtime.sendMessage({ type: "OPEN_SIDE_PANEL" });
-      window.close();
-    });
-  }
 });

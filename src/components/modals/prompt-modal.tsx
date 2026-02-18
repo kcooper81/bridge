@@ -27,10 +27,11 @@ import {
   updatePrompt,
   validatePrompt,
   getPromptVersions,
+  getDefaultStatus,
 } from "@/lib/vault-api";
 import { createClient } from "@/lib/supabase/client";
 import { scanContent } from "@/lib/security/scanner";
-import type { Prompt, PromptVersion, SecurityRule, ValidationResult } from "@/lib/types";
+import type { Prompt, PromptStatus, PromptVersion, SecurityRule, ValidationResult } from "@/lib/types";
 import type { ScanResult } from "@/lib/security/types";
 import { toast } from "sonner";
 
@@ -54,7 +55,7 @@ export function PromptModal({
   prompt,
   onSaved,
 }: PromptModalProps) {
-  const { folders, departments, guidelines, org } = useOrg();
+  const { folders, departments, guidelines, org, currentUserRole } = useOrg();
   const [saving, setSaving] = useState(false);
   const [validation, setValidation] = useState<ValidationResult | null>(null);
   const [scanResult, setScanResult] = useState<ScanResult | null>(null);
@@ -72,6 +73,11 @@ export function PromptModal({
   const [folderId, setFolderId] = useState<string>("");
   const [departmentId, setDepartmentId] = useState<string>("");
   const [isTemplate, setIsTemplate] = useState(false);
+  const [status, setStatus] = useState<PromptStatus>(() =>
+    getDefaultStatus(currentUserRole)
+  );
+
+  const canApprove = currentUserRole === "admin" || currentUserRole === "manager";
 
   useEffect(() => {
     if (prompt) {
@@ -87,6 +93,7 @@ export function PromptModal({
       setFolderId(prompt.folder_id || "");
       setDepartmentId(prompt.department_id || "");
       setIsTemplate(prompt.is_template || false);
+      setStatus(prompt.status || "approved");
       getPromptVersions(prompt.id).then(setVersions);
     } else {
       setTitle("");
@@ -101,6 +108,7 @@ export function PromptModal({
       setFolderId("");
       setDepartmentId("");
       setIsTemplate(false);
+      setStatus(getDefaultStatus(currentUserRole));
       setVersions([]);
     }
     setValidation(null);
@@ -172,6 +180,7 @@ export function PromptModal({
         department_id: departmentId || null,
         is_template: isTemplate,
         template_variables: extractTemplateVariables(content),
+        status: getDefaultStatus(currentUserRole, status),
       };
 
       if (prompt) {
@@ -275,7 +284,29 @@ export function PromptModal({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label>Status</Label>
+              <Select
+                value={status}
+                onValueChange={(v) => setStatus(v as PromptStatus)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="pending">Pending Review</SelectItem>
+                  {canApprove && (
+                    <SelectItem value="approved">Approved</SelectItem>
+                  )}
+                  {canApprove && (
+                    <SelectItem value="archived">Archived</SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+
             <div className="space-y-2">
               <Label>Tone</Label>
               <Select value={tone} onValueChange={setTone}>

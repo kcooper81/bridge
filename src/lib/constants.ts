@@ -74,26 +74,40 @@ export const PLAN_LIMITS: Record<PlanTier, PlanLimits> = {
 
 export const PLAN_DISPLAY: Record<
   PlanTier,
-  { name: string; price: string; description: string }
+  {
+    name: string;
+    price: string;
+    annualPrice: string;
+    annualMonthly: string;
+    description: string;
+  }
 > = {
   free: {
     name: "Free",
     price: "$0",
+    annualPrice: "$0",
+    annualMonthly: "$0",
     description: "For individuals getting started",
   },
   pro: {
     name: "Pro",
     price: "$9/mo",
+    annualPrice: "$86/yr",
+    annualMonthly: "$7/mo",
     description: "For power users and solopreneurs",
   },
   team: {
     name: "Team",
     price: "$7/user/mo",
+    annualPrice: "$67/user/yr",
+    annualMonthly: "$5.60/user/mo",
     description: "For growing teams",
   },
   business: {
     name: "Business",
     price: "$12/user/mo",
+    annualPrice: "$115/user/yr",
+    annualMonthly: "$9.60/user/mo",
     description: "For large organizations",
   },
 };

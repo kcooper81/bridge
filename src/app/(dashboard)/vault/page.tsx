@@ -7,9 +7,11 @@ import { useSubscription } from "@/components/providers/subscription-provider";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { PromptModal } from "@/components/modals/prompt-modal";
+import { StarRating } from "@/components/ui/star-rating";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -36,6 +38,7 @@ import {
   BarChart3,
   BookOpen,
   Braces,
+  CheckCircle2,
   Copy,
   Files,
   Heart,
@@ -44,8 +47,8 @@ import {
   Plus,
   Search,
   Share2,
-  Star,
   Trash2,
+  X,
 } from "lucide-react";
 import { VAULT_PAGE_SIZE } from "@/lib/constants";
 import {
@@ -53,18 +56,42 @@ import {
   duplicatePrompt,
   toggleFavorite,
   recordUsage,
+  updatePrompt,
+  ratePrompt,
+  getUserRatingsForOrg,
 } from "@/lib/vault-api";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
-import type { Prompt } from "@/lib/types";
+import type { Prompt, PromptStatus } from "@/lib/types";
 import { PageSkeleton } from "@/components/dashboard/skeleton-loader";
 
+const STATUS_TABS: { label: string; value: PromptStatus | "all" }[] = [
+  { label: "All", value: "all" },
+  { label: "Draft", value: "draft" },
+  { label: "Pending", value: "pending" },
+  { label: "Approved", value: "approved" },
+  { label: "Archived", value: "archived" },
+];
+
+const STATUS_BADGE_VARIANT: Record<PromptStatus, "default" | "secondary" | "destructive" | "outline"> = {
+  draft: "secondary",
+  pending: "outline",
+  approved: "default",
+  archived: "destructive",
+};
+
 export default function VaultPage() {
-  const { prompts, folders, departments, guidelines, loading, refresh } = useOrg();
+  const { prompts, folders, departments, guidelines, loading, refresh, currentUserRole } = useOrg();
   const { checkLimit } = useSubscription();
   const searchParams = useSearchParams();
   const router = useRouter();
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<PromptStatus | "all">("all");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [userRatings, setUserRatings] = useState<Record<string, number>>({});
+  const [bulkLoading, setBulkLoading] = useState(false);
+
+  const canApprove = currentUserRole === "admin" || currentUserRole === "manager";
 
   // Show checkout success toast
   useEffect(() => {
@@ -74,6 +101,12 @@ export default function VaultPage() {
       router.replace("/vault");
     }
   }, [searchParams, router]);
+
+  // Load user ratings
+  useEffect(() => {
+    getUserRatingsForOrg().then(setUserRatings);
+  }, []);
+
   const [filterFolder, setFilterFolder] = useState("");
   const [filterDept, setFilterDept] = useState("");
   const [sort, setSort] = useState("recent");
@@ -81,8 +114,18 @@ export default function VaultPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editPrompt, setEditPrompt] = useState<Prompt | null>(null);
 
+  const pendingCount = useMemo(
+    () => prompts.filter((p) => p.status === "pending").length,
+    [prompts]
+  );
+
   const filtered = useMemo(() => {
     let result = [...prompts];
+
+    // Status filter
+    if (statusFilter !== "all") {
+      result = result.filter((p) => p.status === statusFilter);
+    }
 
     if (search) {
       const lower = search.toLowerCase();
@@ -119,7 +162,7 @@ export default function VaultPage() {
     }
 
     return result;
-  }, [prompts, search, filterFolder, filterDept, sort]);
+  }, [prompts, search, filterFolder, filterDept, sort, statusFilter]);
 
   const pageCount = Math.ceil(filtered.length / VAULT_PAGE_SIZE);
   const pageItems = filtered.slice(
@@ -194,6 +237,51 @@ export default function VaultPage() {
     }
   }
 
+  async function handleRate(promptId: string, rating: number) {
+    const ok = await ratePrompt(promptId, rating);
+    if (ok) {
+      setUserRatings((prev) => ({ ...prev, [promptId]: rating }));
+      refresh();
+    } else {
+      toast.error("Failed to rate prompt");
+    }
+  }
+
+  // ─── Bulk Actions ───
+  function toggleSelect(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function toggleSelectAll() {
+    if (selectedIds.size === pageItems.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(pageItems.map((p) => p.id)));
+    }
+  }
+
+  async function bulkUpdateStatus(newStatus: PromptStatus) {
+    if (selectedIds.size === 0) return;
+    setBulkLoading(true);
+    try {
+      for (const id of Array.from(selectedIds)) {
+        await updatePrompt(id, { status: newStatus });
+      }
+      toast.success(`${selectedIds.size} prompt(s) updated to ${newStatus}`);
+      setSelectedIds(new Set());
+      refresh();
+    } catch {
+      toast.error("Failed to update prompts");
+    } finally {
+      setBulkLoading(false);
+    }
+  }
+
   if (loading) return <PageSkeleton />;
 
   return (
@@ -231,6 +319,35 @@ export default function VaultPage() {
           value={enforcedGuidelines}
           icon={<BookOpen className="h-5 w-5" />}
         />
+      </div>
+
+      {/* Status Tabs */}
+      <div className="mb-4 flex gap-1 border-b border-border">
+        {STATUS_TABS.map((tab) => (
+          <button
+            key={tab.value}
+            onClick={() => {
+              setStatusFilter(tab.value);
+              setPage(0);
+              setSelectedIds(new Set());
+            }}
+            className={`relative px-3 py-2 text-sm font-medium transition-colors ${
+              statusFilter === tab.value
+                ? "text-primary"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {tab.label}
+            {tab.value === "pending" && pendingCount > 0 && (
+              <Badge variant="destructive" className="ml-1.5 h-5 min-w-5 px-1.5 text-[10px]">
+                {pendingCount}
+              </Badge>
+            )}
+            {statusFilter === tab.value && (
+              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+            )}
+          </button>
+        ))}
       </div>
 
       {/* Toolbar */}
@@ -298,11 +415,52 @@ export default function VaultPage() {
         </Select>
       </div>
 
+      {/* Bulk Action Bar */}
+      {canApprove && selectedIds.size > 0 && (
+        <div className="mb-4 flex items-center gap-3 rounded-lg border border-primary/20 bg-primary/5 px-4 py-2.5">
+          <span className="text-sm font-medium">{selectedIds.size} selected</span>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={bulkLoading}
+            onClick={() => bulkUpdateStatus("approved")}
+          >
+            <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" />
+            Approve
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={bulkLoading}
+            onClick={() => bulkUpdateStatus("archived")}
+          >
+            <Archive className="mr-1.5 h-3.5 w-3.5" />
+            Archive
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => setSelectedIds(new Set())}
+          >
+            <X className="mr-1.5 h-3.5 w-3.5" />
+            Clear
+          </Button>
+        </div>
+      )}
+
       {/* Table */}
       <div className="rounded-lg border border-border">
         <Table>
           <TableHeader>
             <TableRow>
+              {canApprove && (
+                <TableHead className="w-[40px]">
+                  <Checkbox
+                    checked={pageItems.length > 0 && selectedIds.size === pageItems.length}
+                    onCheckedChange={toggleSelectAll}
+                  />
+                </TableHead>
+              )}
               <TableHead className="w-[40%]">Prompt</TableHead>
               <TableHead className="hidden md:table-cell">Tags</TableHead>
               <TableHead className="text-right">Uses</TableHead>
@@ -314,7 +472,7 @@ export default function VaultPage() {
           <TableBody>
             {pageItems.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
+                <TableCell colSpan={canApprove ? 7 : 6} className="h-32 text-center text-muted-foreground">
                   {prompts.length === 0
                     ? "No prompts yet. Create your first one!"
                     : "No prompts match your filters."}
@@ -323,14 +481,22 @@ export default function VaultPage() {
             ) : (
               pageItems.map((p) => {
                 const avgRating = p.rating_count
-                  ? (p.rating_total / p.rating_count).toFixed(1)
-                  : "—";
+                  ? p.rating_total / p.rating_count
+                  : 0;
                 return (
                   <TableRow
                     key={p.id}
                     className="cursor-pointer hover:bg-muted/50"
                     onClick={() => openEditPrompt(p)}
                   >
+                    {canApprove && (
+                      <TableCell onClick={(e) => e.stopPropagation()}>
+                        <Checkbox
+                          checked={selectedIds.has(p.id)}
+                          onCheckedChange={() => toggleSelect(p.id)}
+                        />
+                      </TableCell>
+                    )}
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <button
@@ -357,6 +523,14 @@ export default function VaultPage() {
                                 Template
                               </Badge>
                             )}
+                            {p.status !== "approved" && (
+                              <Badge
+                                variant={STATUS_BADGE_VARIANT[p.status]}
+                                className="text-[10px] px-1.5 py-0 shrink-0 capitalize"
+                              >
+                                {p.status}
+                              </Badge>
+                            )}
                           </div>
                           <p className="text-xs text-muted-foreground truncate max-w-xs">
                             {p.content.slice(0, 80)}
@@ -378,10 +552,11 @@ export default function VaultPage() {
                       {p.usage_count || 0}
                     </TableCell>
                     <TableCell className="text-right hidden sm:table-cell">
-                      <span className="inline-flex items-center gap-1">
-                        <Star className="h-3 w-3 text-tp-yellow" />
-                        {avgRating}
-                      </span>
+                      <StarRating
+                        value={avgRating}
+                        userRating={userRatings[p.id]}
+                        onChange={(rating) => handleRate(p.id, rating)}
+                      />
                     </TableCell>
                     <TableCell className="text-muted-foreground text-sm hidden lg:table-cell">
                       {formatDistanceToNow(new Date(p.updated_at), {

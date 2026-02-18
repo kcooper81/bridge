@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { handleOptions, withCors } from "../cors";
+import { limiters, checkRateLimit } from "@/lib/rate-limit";
 
 export async function OPTIONS() { return handleOptions(); }
 
@@ -21,6 +22,9 @@ export async function POST(request: NextRequest) {
     if (authError || !user) {
       return withCors(NextResponse.json({ error: "Unauthorized" }, { status: 401 }));
     }
+
+    const rl = await checkRateLimit(limiters.log, user.id);
+    if (!rl.success) return withCors(rl.response);
 
     const { data: profile } = await db
       .from("profiles")

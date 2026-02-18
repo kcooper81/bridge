@@ -32,6 +32,15 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     chrome.storage.local.remove(["accessToken", "refreshToken", "user"]);
     console.log("TeamPrompt: Session cleared (logged out from web app)");
     sendResponse({ success: true });
+  } else if (message.type === "OPEN_SIDE_PANEL") {
+    if (chrome.sidePanel) {
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        if (tabs[0]?.id) {
+          chrome.sidePanel.open({ tabId: tabs[0].id });
+        }
+      });
+    }
+    sendResponse({ success: true });
   }
 });
 

@@ -1,6 +1,8 @@
 import { PLAN_LIMITS } from "@/lib/constants";
 import type { PlanLimits, PlanTier } from "@/lib/types";
 
+export type BillingInterval = "monthly" | "annual";
+
 export function getPlanLimits(plan: PlanTier): PlanLimits {
   return PLAN_LIMITS[plan] ?? PLAN_LIMITS.free;
 }
@@ -21,19 +23,19 @@ export function canAccessFeature(
 
 export const STRIPE_PLAN_CONFIG = {
   pro: {
-    priceEnv: "STRIPE_PRICE_PRO",
+    priceEnv: { monthly: "STRIPE_PRICE_PRO", annual: "STRIPE_PRICE_PRO_ANNUAL" },
     minSeats: 1,
     maxSeats: 1,
     trial: true,
   },
   team: {
-    priceEnv: "STRIPE_PRICE_TEAM",
+    priceEnv: { monthly: "STRIPE_PRICE_TEAM", annual: "STRIPE_PRICE_TEAM_ANNUAL" },
     minSeats: 2,
     maxSeats: 50,
     trial: true,
   },
   business: {
-    priceEnv: "STRIPE_PRICE_BUSINESS",
+    priceEnv: { monthly: "STRIPE_PRICE_BUSINESS", annual: "STRIPE_PRICE_BUSINESS_ANNUAL" },
     minSeats: 5,
     maxSeats: 500,
     trial: false,

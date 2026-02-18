@@ -9,9 +9,9 @@ function getStripe() {
 }
 
 function getPlanFromPriceId(priceId: string): string {
-  if (priceId === process.env.STRIPE_PRICE_PRO) return "pro";
-  if (priceId === process.env.STRIPE_PRICE_TEAM) return "team";
-  if (priceId === process.env.STRIPE_PRICE_BUSINESS) return "business";
+  if (priceId === process.env.STRIPE_PRICE_PRO || priceId === process.env.STRIPE_PRICE_PRO_ANNUAL) return "pro";
+  if (priceId === process.env.STRIPE_PRICE_TEAM || priceId === process.env.STRIPE_PRICE_TEAM_ANNUAL) return "team";
+  if (priceId === process.env.STRIPE_PRICE_BUSINESS || priceId === process.env.STRIPE_PRICE_BUSINESS_ANNUAL) return "business";
   return "free";
 }
 

@@ -13,11 +13,11 @@ let selectedPrompt = null;
 const loginView = document.getElementById("login-view");
 const mainView = document.getElementById("main-view");
 const detailView = document.getElementById("detail-view");
-const serverUrlInput = document.getElementById("server-url");
 const emailInput = document.getElementById("login-email");
 const passwordInput = document.getElementById("login-password");
 const loginBtn = document.getElementById("login-btn");
 const loginError = document.getElementById("login-error");
+const webLoginLink = document.getElementById("web-login-link");
 const logoutBtn = document.getElementById("logout-btn");
 const searchInput = document.getElementById("search-input");
 const promptList = document.getElementById("prompt-list");
@@ -38,23 +38,22 @@ document.addEventListener("DOMContentLoaded", async () => {
   } else {
     showLoginView();
   }
-
-  // Restore server URL
-  const stored = await chrome.storage.local.get(["serverUrl"]);
-  if (stored.serverUrl) serverUrlInput.value = stored.serverUrl;
 });
 
 // ─── Auth ───
 loginBtn.addEventListener("click", handleLogin);
 logoutBtn.addEventListener("click", handleLogout);
+webLoginLink.addEventListener("click", (e) => {
+  e.preventDefault();
+  chrome.tabs.create({ url: CONFIG.SITE_URL });
+});
 
 async function handleLogin() {
-  const serverUrl = serverUrlInput.value.trim().replace(/\/$/, "");
   const email = emailInput.value.trim();
   const password = passwordInput.value;
 
-  if (!serverUrl || !email || !password) {
-    loginError.textContent = "All fields are required";
+  if (!email || !password) {
+    loginError.textContent = "Email and password are required";
     return;
   }
 
@@ -63,17 +62,11 @@ async function handleLogin() {
   loginError.textContent = "";
 
   try {
-    // Use Supabase REST auth endpoint
-    const supabaseUrl = await fetchSupabaseConfig(serverUrl);
-    if (!supabaseUrl) {
-      throw new Error("Could not connect to server");
-    }
-
-    const res = await fetch(`${supabaseUrl.url}/auth/v1/token?grant_type=password`, {
+    const res = await fetch(`${CONFIG.SUPABASE_URL}/auth/v1/token?grant_type=password`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        apikey: supabaseUrl.anonKey,
+        apikey: CONFIG.SUPABASE_ANON_KEY,
       },
       body: JSON.stringify({ email, password }),
     });
@@ -85,9 +78,6 @@ async function handleLogin() {
 
     const data = await res.json();
     await chrome.storage.local.set({
-      serverUrl,
-      supabaseUrl: supabaseUrl.url,
-      supabaseAnonKey: supabaseUrl.anonKey,
       accessToken: data.access_token,
       refreshToken: data.refresh_token,
       user: { id: data.user.id, email: data.user.email },
@@ -103,47 +93,18 @@ async function handleLogin() {
   }
 }
 
-async function fetchSupabaseConfig(serverUrl) {
-  // Try to get Supabase URL from the app's environment
-  // The app exposes NEXT_PUBLIC vars in the HTML
-  try {
-    const res = await fetch(serverUrl);
-    const html = await res.text();
-
-    // Look for env vars in the page source
-    const urlMatch = html.match(/NEXT_PUBLIC_SUPABASE_URL['":\s]*['"]([^'"]+)['"]/);
-    const keyMatch = html.match(/NEXT_PUBLIC_SUPABASE_ANON_KEY['":\s]*['"]([^'"]+)['"]/);
-
-    if (urlMatch && keyMatch) {
-      return { url: urlMatch[1], anonKey: keyMatch[1] };
-    }
-
-    // Fallback: try well-known Supabase URL patterns from the page
-    const supabaseMatch = html.match(/https:\/\/[a-z]+\.supabase\.co/);
-    if (supabaseMatch) {
-      // We still need the anon key — prompt user
-      return null;
-    }
-  } catch {
-    // Fallback: ask user for direct Supabase credentials
-  }
-  return null;
-}
-
 async function handleLogout() {
   await chrome.storage.local.remove([
     "accessToken",
     "refreshToken",
     "user",
-    "supabaseUrl",
-    "supabaseAnonKey",
   ]);
   showLoginView();
 }
 
 async function getSession() {
-  const data = await chrome.storage.local.get(["accessToken", "serverUrl"]);
-  if (data.accessToken && data.serverUrl) return data;
+  const data = await chrome.storage.local.get(["accessToken"]);
+  if (data.accessToken) return data;
   return null;
 }
 
@@ -221,7 +182,7 @@ async function loadPrompts(query = "") {
     if (activeFilter === "templates") params.set("templates", "true");
 
     const res = await fetch(
-      `${session.serverUrl}${API_ENDPOINTS.prompts}?${params}`,
+      `${CONFIG.SITE_URL}${API_ENDPOINTS.prompts}?${params}`,
       {
         headers: { Authorization: `Bearer ${session.accessToken}` },
       }
@@ -342,7 +303,7 @@ async function logConversation(promptText, method) {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     const aiTool = detectAiTool(tab?.url || "");
 
-    await fetch(`${session.serverUrl}${API_ENDPOINTS.log}`, {
+    await fetch(`${CONFIG.SITE_URL}${API_ENDPOINTS.log}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

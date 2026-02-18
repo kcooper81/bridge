@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, CheckCircle2, X } from "lucide-react";
+import { CheckCircle2, X } from "lucide-react";
 import { generatePageMetadata } from "@/lib/seo/metadata";
-import { generateFAQSchema } from "@/lib/seo/schemas";
+import { FAQSection } from "@/components/marketing/faq-section";
+import { CTASection } from "@/components/marketing/cta-section";
+import { SectionLabel } from "@/components/marketing/section-label";
 
 export const metadata: Metadata = generatePageMetadata({
   title: "Pricing",
@@ -129,19 +131,9 @@ export default function PricingPage() {
   return (
     <div className="py-20 sm:py-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        {/* Structured Data */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify(generateFAQSchema(faqs)),
-          }}
-        />
-
         {/* Hero */}
         <div className="text-center mb-16 sm:mb-20">
-          <p className="text-sm font-semibold text-primary uppercase tracking-widest mb-4">
-            Pricing
-          </p>
+          <SectionLabel className="text-center">Pricing</SectionLabel>
           <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">
             Pick the plan that fits your team
           </h1>
@@ -235,56 +227,18 @@ export default function PricingPage() {
           </p>
         </div>
 
-        {/* FAQ — dark section */}
-        <div className="mt-24 rounded-3xl bg-zinc-950 text-white p-8 sm:p-12 relative overflow-hidden">
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              background:
-                "radial-gradient(ellipse 60% 60% at 30% 50%, hsl(221 83% 53% / 0.08) 0%, transparent 60%)",
-            }}
-          />
-          <div className="relative max-w-3xl mx-auto">
-            <p className="text-sm font-semibold text-blue-400 uppercase tracking-widest mb-3 text-center">
-              FAQ
-            </p>
-            <h2 className="text-2xl sm:text-3xl font-bold text-center mb-10">
-              Frequently asked questions
-            </h2>
-            <div className="space-y-0 divide-y divide-white/10">
-              {faqs.map((faq) => (
-                <div key={faq.question} className="py-6 first:pt-0 last:pb-0">
-                  <h3 className="font-semibold text-zinc-100">
-                    {faq.question}
-                  </h3>
-                  <p className="mt-2 text-sm text-zinc-400 leading-relaxed">
-                    {faq.answer}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
+        {/* FAQ */}
+        <div className="mt-24">
+          <FAQSection faqs={faqs} />
         </div>
 
         {/* CTA */}
-        <div className="mt-24 text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-            Ready to give your team
-            <br />
-            <span className="text-primary">a proper prompt system?</span>
-          </h2>
-          <p className="mt-6 text-lg text-muted-foreground max-w-lg mx-auto">
-            Set up your workspace in under two minutes. No credit card needed.
-          </p>
-          <Link href="/signup" className="mt-8 inline-block">
-            <Button
-              size="lg"
-              className="text-base px-8 h-12 rounded-full font-semibold"
-            >
-              Create your workspace
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </Link>
+        <div className="mt-24">
+          <CTASection
+            headline="Ready to give your team"
+            gradientText="a proper prompt system?"
+            subtitle="Set up your workspace in under two minutes. No credit card needed."
+          />
         </div>
       </div>
     </div>

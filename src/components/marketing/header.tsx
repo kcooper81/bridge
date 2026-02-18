@@ -8,12 +8,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
-
-const navLinks = [
-  { label: "Features", href: "/features" },
-  { label: "Pricing", href: "/pricing" },
-  { label: "Guardrails", href: "/security" },
-];
+import { SolutionsDropdown, MobileSolutionsMenu } from "./mega-menu";
 
 export function MarketingHeader() {
   const pathname = usePathname();
@@ -29,15 +24,12 @@ export function MarketingHeader() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // On homepage: transparent when at top, frosted glass on scroll
-  // On other pages: always show background
   const headerBg = scrolled
     ? "bg-background/80 backdrop-blur-xl border-b border-border/50 shadow-sm"
     : isHomepage
       ? "bg-transparent"
       : "bg-background border-b border-border";
 
-  // Text color adapts to hero background on homepage
   const textClass = isHomepage && !scrolled
     ? "text-zinc-300 hover:text-white"
     : "text-muted-foreground hover:text-foreground";
@@ -68,18 +60,40 @@ export function MarketingHeader() {
 
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-8">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={cn(
-                "text-sm font-medium transition-colors",
-                pathname === link.href ? activeTextClass : textClass
-              )}
-            >
-              {link.label}
-            </Link>
-          ))}
+          <Link
+            href="/features"
+            className={cn(
+              "text-sm font-medium transition-colors",
+              pathname === "/features" ? activeTextClass : textClass
+            )}
+          >
+            Features
+          </Link>
+
+          <SolutionsDropdown
+            textClass={textClass}
+            activeTextClass={activeTextClass}
+          />
+
+          <Link
+            href="/pricing"
+            className={cn(
+              "text-sm font-medium transition-colors",
+              pathname === "/pricing" ? activeTextClass : textClass
+            )}
+          >
+            Pricing
+          </Link>
+
+          <Link
+            href="/security"
+            className={cn(
+              "text-sm font-medium transition-colors",
+              pathname === "/security" ? activeTextClass : textClass
+            )}
+          >
+            Guardrails
+          </Link>
         </nav>
 
         {/* CTA buttons */}
@@ -123,16 +137,30 @@ export function MarketingHeader() {
             <SheetContent side="right" className="w-72">
               <SheetTitle className="sr-only">Navigation</SheetTitle>
               <nav className="flex flex-col gap-4 mt-8">
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => setMobileOpen(false)}
-                    className="text-lg font-medium hover:text-primary transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                ))}
+                <Link
+                  href="/features"
+                  onClick={() => setMobileOpen(false)}
+                  className="text-lg font-medium hover:text-primary transition-colors"
+                >
+                  Features
+                </Link>
+
+                <MobileSolutionsMenu onNavigate={() => setMobileOpen(false)} />
+
+                <Link
+                  href="/pricing"
+                  onClick={() => setMobileOpen(false)}
+                  className="text-lg font-medium hover:text-primary transition-colors"
+                >
+                  Pricing
+                </Link>
+                <Link
+                  href="/security"
+                  onClick={() => setMobileOpen(false)}
+                  className="text-lg font-medium hover:text-primary transition-colors"
+                >
+                  Guardrails
+                </Link>
                 <div className="border-t border-border pt-4 mt-4 space-y-3">
                   <Link href="/login" onClick={() => setMobileOpen(false)}>
                     <Button variant="outline" className="w-full rounded-full">

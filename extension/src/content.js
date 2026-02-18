@@ -67,7 +67,7 @@
     if (!session) return null;
 
     try {
-      const res = await fetch(`${session.serverUrl}${API_ENDPOINTS.scan}`, {
+      const res = await fetch(`${CONFIG.SITE_URL}${API_ENDPOINTS.scan}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -132,7 +132,7 @@
     const aiTool = detectAiTool(url);
 
     try {
-      await fetch(`${session.serverUrl}${API_ENDPOINTS.log}`, {
+      await fetch(`${CONFIG.SITE_URL}${API_ENDPOINTS.log}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -218,8 +218,8 @@
   // ─── Session ───
   async function getSession() {
     return new Promise((resolve) => {
-      chrome.storage.local.get(["accessToken", "serverUrl"], (data) => {
-        if (data.accessToken && data.serverUrl) resolve(data);
+      chrome.storage.local.get(["accessToken"], (data) => {
+        if (data.accessToken) resolve(data);
         else resolve(null);
       });
     });

@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import {
   Archive,
-  ArrowRight,
   BarChart3,
   BookOpen,
   Chrome,
@@ -14,6 +11,8 @@ import {
   Zap,
 } from "lucide-react";
 import { generatePageMetadata } from "@/lib/seo/metadata";
+import { SectionLabel } from "@/components/marketing/section-label";
+import { CTASection } from "@/components/marketing/cta-section";
 
 export const metadata: Metadata = generatePageMetadata({
   title: "Features",
@@ -358,9 +357,7 @@ export default function FeaturesPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         {/* Hero */}
         <div className="max-w-3xl mb-20">
-          <p className="text-sm font-semibold text-primary uppercase tracking-widest mb-4">
-            Features
-          </p>
+          <SectionLabel>Features</SectionLabel>
           <h1 className="text-4xl sm:text-5xl font-bold tracking-tight leading-tight">
             Everything your team needs to manage prompts
           </h1>
@@ -419,20 +416,13 @@ export default function FeaturesPage() {
         </div>
 
         {/* CTA */}
-        <div className="mt-28 text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-            See it for yourself
-          </h2>
-          <p className="mt-4 text-lg text-muted-foreground max-w-lg mx-auto">
-            Create a free workspace in under two minutes. No credit card
-            required.
-          </p>
-          <Link href="/signup" className="mt-8 inline-block">
-            <Button size="lg" className="text-base px-8 h-12 rounded-full font-semibold">
-              Start for free
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </Link>
+        <div className="mt-28">
+          <CTASection
+            headline="See it for yourself."
+            gradientText="Start for free."
+            subtitle="Create a free workspace in under two minutes. No credit card required."
+            buttonText="Start for free"
+          />
         </div>
       </div>
     </div>

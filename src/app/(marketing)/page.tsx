@@ -1,9 +1,16 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { generatePageMetadata } from "@/lib/seo/metadata";
 import {
   generateSoftwareApplicationSchema,
   generateOrganizationSchema,
 } from "@/lib/seo/schemas";
+import { SectionLabel } from "@/components/marketing/section-label";
+import { StatsRow } from "@/components/marketing/stats-row";
+import { FeatureCard } from "@/components/marketing/feature-card";
+import { CTASection } from "@/components/marketing/cta-section";
+import { AppMockup, FloatingCard } from "@/components/marketing/app-mockup";
 import {
   Archive,
   ArrowRight,
@@ -16,6 +23,13 @@ import {
   Users,
   Zap,
 } from "lucide-react";
+
+export const metadata: Metadata = generatePageMetadata({
+  title: "AI Prompt Management for Teams",
+  description:
+    "TeamPrompt gives your team a shared prompt library, quality guidelines, and security guardrails — so the best prompts get reused, not reinvented.",
+  path: "/",
+});
 
 const logos = [
   "Acme Corp",
@@ -66,63 +80,90 @@ export default function LandingPage() {
         />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-32 pb-20 sm:pt-40 sm:pb-28">
-          <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-zinc-300 mb-8 backdrop-blur-sm">
-              <Shield className="h-3.5 w-3.5 text-blue-400" />
-              <span>AI Guardrails — now built in</span>
-              <ArrowRight className="h-3 w-3 text-zinc-500" />
-            </div>
-
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.05]">
-              Your team&apos;s prompts
-              <br />
-              deserve{" "}
-              <span className="bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
-                a system
-              </span>
-            </h1>
-
-            <p className="mt-6 text-lg sm:text-xl text-zinc-400 max-w-xl leading-relaxed">
-              A shared library, quality guidelines, and security guardrails
-              — so the best prompts get reused, not reinvented.
-            </p>
-
-            <div className="mt-10 flex flex-col sm:flex-row gap-4">
-              <Link href="/signup">
-                <Button
-                  size="lg"
-                  className="text-base px-8 h-12 rounded-full bg-white text-zinc-900 hover:bg-zinc-200 font-semibold"
-                >
-                  Start for free
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
-              <Link href="/features">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="text-base px-8 h-12 rounded-full border-white/20 text-white hover:bg-white/10 hover:text-white font-semibold bg-transparent"
-                >
-                  See how it works
-                </Button>
-              </Link>
-            </div>
-          </div>
-
-          {/* Stats row */}
-          <div className="mt-16 sm:mt-20 grid grid-cols-3 gap-8 sm:gap-12 max-w-2xl">
-            {[
-              { value: "15+", label: "AI tools connected" },
-              { value: "14", label: "Built-in guidelines" },
-              { value: "<2m", label: "Setup time" },
-            ].map((stat) => (
-              <div key={stat.label}>
-                <p className="text-3xl sm:text-4xl font-bold text-white tabular-nums">
-                  {stat.value}
-                </p>
-                <p className="mt-1 text-sm text-zinc-500">{stat.label}</p>
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-zinc-300 mb-8 backdrop-blur-sm">
+                <Shield className="h-3.5 w-3.5 text-blue-400" />
+                <span>AI Guardrails — now built in</span>
+                <ArrowRight className="h-3 w-3 text-zinc-500" />
               </div>
-            ))}
+
+              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.05]">
+                Your team&apos;s prompts
+                <br />
+                deserve{" "}
+                <span className="bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
+                  a system
+                </span>
+              </h1>
+
+              <p className="mt-6 text-lg sm:text-xl text-zinc-400 max-w-xl leading-relaxed">
+                A shared library, quality guidelines, and security guardrails
+                — so the best prompts get reused, not reinvented.
+              </p>
+
+              <div className="mt-10 flex flex-col sm:flex-row gap-4">
+                <Link href="/signup">
+                  <Button
+                    size="lg"
+                    className="text-base px-8 h-12 rounded-full bg-white text-zinc-900 hover:bg-zinc-200 font-semibold"
+                  >
+                    Start for free
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+                <Link href="/features">
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="text-base px-8 h-12 rounded-full border-white/20 text-white hover:bg-white/10 hover:text-white font-semibold bg-transparent"
+                  >
+                    See how it works
+                  </Button>
+                </Link>
+              </div>
+
+              <div className="mt-16 sm:mt-20">
+                <StatsRow
+                  dark
+                  stats={[
+                    { value: "15+", label: "AI tools connected" },
+                    { value: "14", label: "Built-in guidelines" },
+                    { value: "<2m", label: "Setup time" },
+                  ]}
+                  className="max-w-md"
+                />
+              </div>
+            </div>
+
+            {/* Hero mockup */}
+            <div className="relative hidden lg:block">
+              <AppMockup
+                variant="vault"
+                items={[
+                  { title: "Customer Onboarding Prompt", stat: "142 uses" },
+                  { title: "Weekly Report Summary", stat: "89 uses" },
+                  { title: "Bug Report Template", stat: "67 uses" },
+                  { title: "Sales Outreach Drafter", stat: "34 uses" },
+                ]}
+                sidebarUser={{ name: "Alex J.", initials: "AJ" }}
+              />
+              <FloatingCard
+                label="Marketing Team"
+                color="blue"
+                position="top-right"
+              />
+              <FloatingCard
+                label="3 violations blocked"
+                color="red"
+                position="bottom-left"
+              />
+              <FloatingCard
+                label="47 prompts shared"
+                color="green"
+                position="bottom-right"
+              />
+            </div>
           </div>
         </div>
       </section>
@@ -150,9 +191,7 @@ export default function LandingPage() {
       <section className="py-20 sm:py-28">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="max-w-2xl mb-14">
-            <p className="text-sm font-semibold text-primary uppercase tracking-widest mb-3">
-              Platform
-            </p>
+            <SectionLabel>Platform</SectionLabel>
             <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
               Built for how teams actually use AI
             </h2>
@@ -164,20 +203,12 @@ export default function LandingPage() {
 
           {/* Bento grid */}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {/* Large card — Vault */}
-            <div className="sm:col-span-2 group rounded-2xl border border-border bg-card p-8 hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5">
-              <div className="flex items-start justify-between">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                  <Archive className="h-5 w-5" />
-                </div>
-                <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
-              </div>
-              <h3 className="mt-5 text-xl font-semibold">Shared Prompt Vault</h3>
-              <p className="mt-2 text-muted-foreground leading-relaxed max-w-lg">
-                Your team writes the same prompts over and over — in docs, Slack
-                threads, personal notes. The vault gives everyone one searchable
-                place to find what already works.
-              </p>
+            <FeatureCard
+              icon={Archive}
+              title="Shared Prompt Vault"
+              description="Your team writes the same prompts over and over — in docs, Slack threads, personal notes. The vault gives everyone one searchable place to find what already works."
+              large
+            >
               {/* Mini mockup */}
               <div className="mt-6 rounded-xl border border-border bg-background/50 p-4">
                 <div className="flex items-center gap-2 mb-3">
@@ -196,23 +227,14 @@ export default function LandingPage() {
                   </div>
                 ))}
               </div>
-            </div>
+            </FeatureCard>
 
-            {/* Guardrails card */}
-            <div className="group rounded-2xl border border-border bg-card p-8 hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5">
-              <div className="flex items-start justify-between">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-destructive/10 text-destructive">
-                  <Shield className="h-5 w-5" />
-                </div>
-                <span className="text-[10px] font-bold uppercase tracking-wider bg-primary text-primary-foreground px-2 py-0.5 rounded-full">
-                  New
-                </span>
-              </div>
-              <h3 className="mt-5 text-xl font-semibold">AI Guardrails</h3>
-              <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                Catch API keys, credentials, and internal data before they leak
-                into AI tools. Block or warn in real-time.
-              </p>
+            <FeatureCard
+              icon={Shield}
+              title="AI Guardrails"
+              description="Catch API keys, credentials, and internal data before they leak into AI tools. Block or warn in real-time."
+              badge="New"
+            >
               <div className="mt-5 space-y-2">
                 {["AWS Key detected", "GitHub token blocked", "PII warning"].map((item, i) => (
                   <div key={item} className="flex items-center gap-2 rounded-lg bg-destructive/5 border border-destructive/10 px-3 py-1.5">
@@ -221,42 +243,25 @@ export default function LandingPage() {
                   </div>
                 ))}
               </div>
-            </div>
+            </FeatureCard>
 
-            {/* Guidelines card */}
-            <div className="group rounded-2xl border border-border bg-card p-8 hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                <BookOpen className="h-5 w-5" />
-              </div>
-              <h3 className="mt-5 text-xl font-semibold">Quality Guidelines</h3>
-              <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                Enforce structure, tone, and completeness so every prompt
-                meets a quality bar before it ships.
-              </p>
-            </div>
+            <FeatureCard
+              icon={BookOpen}
+              title="Quality Guidelines"
+              description="Enforce structure, tone, and completeness so every prompt meets a quality bar before it ships."
+            />
 
-            {/* Templates card */}
-            <div className="group rounded-2xl border border-border bg-card p-8 hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                <Braces className="h-5 w-5" />
-              </div>
-              <h3 className="mt-5 text-xl font-semibold">Prompt Templates</h3>
-              <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                Create reusable templates with {"{{variables}}"} that your
-                team fills in each time. Consistent output, every time.
-              </p>
-            </div>
+            <FeatureCard
+              icon={Braces}
+              title="Prompt Templates"
+              description='Create reusable templates with {{variables}} that your team fills in each time. Consistent output, every time.'
+            />
 
-            {/* Large card — Chrome Extension + Analytics */}
-            <div className="sm:col-span-2 lg:col-span-1 group rounded-2xl border border-border bg-card p-8 hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                <Chrome className="h-5 w-5" />
-              </div>
-              <h3 className="mt-5 text-xl font-semibold">Chrome Extension</h3>
-              <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                Inject prompts directly into ChatGPT, Claude, Gemini,
-                Copilot, and more — without leaving the AI tool.
-              </p>
+            <FeatureCard
+              icon={Chrome}
+              title="Chrome Extension"
+              description="Inject prompts directly into ChatGPT, Claude, Gemini, Copilot, and more — without leaving the AI tool."
+            >
               <div className="mt-5 flex flex-wrap gap-2">
                 {["ChatGPT", "Claude", "Gemini", "Copilot", "Perplexity"].map((tool) => (
                   <span key={tool} className="text-[11px] font-medium bg-muted px-2.5 py-1 rounded-full text-muted-foreground">
@@ -264,7 +269,7 @@ export default function LandingPage() {
                   </span>
                 ))}
               </div>
-            </div>
+            </FeatureCard>
           </div>
 
           {/* Secondary features row */}
@@ -301,9 +306,9 @@ export default function LandingPage() {
         />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-16">
-            <p className="text-sm font-semibold text-blue-400 uppercase tracking-widest mb-3">
+            <SectionLabel dark className="text-center">
               How it works
-            </p>
+            </SectionLabel>
             <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
               From scattered prompts to a managed system
             </h2>
@@ -348,9 +353,7 @@ export default function LandingPage() {
       <section className="py-20 sm:py-28">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-14">
-            <p className="text-sm font-semibold text-primary uppercase tracking-widest mb-3">
-              Pricing
-            </p>
+            <SectionLabel>Pricing</SectionLabel>
             <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
               One price per user. No surprises.
             </h2>
@@ -428,7 +431,7 @@ export default function LandingPage() {
                 >
                   <Button
                     variant={plan.popular ? "default" : "outline"}
-                    className={`w-full rounded-full ${plan.popular ? "" : ""}`}
+                    className={`w-full rounded-full`}
                   >
                     {plan.name === "Free" ? "Start Free" : "Start Trial"}
                   </Button>
@@ -441,24 +444,12 @@ export default function LandingPage() {
 
       {/* ━━━ BOTTOM CTA ━━━ */}
       <section className="py-20 sm:py-28 border-t border-border">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-            Your team is already using AI.
-            <br />
-            <span className="text-primary">Now give them a system.</span>
-          </h2>
-          <p className="mt-6 text-lg text-muted-foreground max-w-xl mx-auto">
-            Set up your workspace in under two minutes.
-            No credit card needed.
-          </p>
-          <div className="mt-10 flex gap-4 justify-center">
-            <Link href="/signup">
-              <Button size="lg" className="text-base px-8 h-12 rounded-full font-semibold">
-                Create your workspace
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
-          </div>
+        <div className="max-w-3xl mx-auto px-4 sm:px-6">
+          <CTASection
+            headline="Your team is already using AI."
+            gradientText="Now give them a system."
+            subtitle="Set up your workspace in under two minutes. No credit card needed."
+          />
         </div>
       </section>
     </>

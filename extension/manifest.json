@@ -3,7 +3,7 @@
   "name": "TeamPrompt",
   "version": "1.0.0",
   "description": "Access your team's prompt library, scan for sensitive data, and log AI conversations.",
-  "permissions": ["storage", "activeTab"],
+  "permissions": ["storage", "activeTab", "alarms"],
   "host_permissions": [
     "https://chat.openai.com/*",
     "https://chatgpt.com/*",
@@ -11,7 +11,8 @@
     "https://gemini.google.com/*",
     "https://github.com/copilot/*",
     "https://copilot.microsoft.com/*",
-    "https://www.perplexity.ai/*"
+    "https://www.perplexity.ai/*",
+    "https://teamprompt.app/*"
   ],
   "action": {
     "default_popup": "popup.html",
@@ -31,8 +32,13 @@
         "https://copilot.microsoft.com/*",
         "https://www.perplexity.ai/*"
       ],
-      "js": ["src/content.js"],
+      "js": ["src/config.js", "src/content.js"],
       "css": ["src/content.css"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://teamprompt.app/*"],
+      "js": ["src/config.js", "src/auth-bridge.js"],
       "run_at": "document_idle"
     }
   ],

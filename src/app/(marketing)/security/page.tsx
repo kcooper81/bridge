@@ -3,7 +3,6 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
   ArrowRight,
-  CheckCircle2,
   Eye,
   Key,
   Lock,
@@ -13,6 +12,10 @@ import {
   UserX,
 } from "lucide-react";
 import { generatePageMetadata } from "@/lib/seo/metadata";
+import { DarkSection } from "@/components/marketing/dark-section";
+import { SectionLabel } from "@/components/marketing/section-label";
+import { BenefitsGrid } from "@/components/marketing/benefits-grid";
+import { CTASection } from "@/components/marketing/cta-section";
 
 export const metadata: Metadata = generatePageMetadata({
   title: "AI Guardrails",
@@ -122,90 +125,61 @@ export default function SecurityPage() {
         </div>
 
         {/* How it works — dark section */}
-        <div className="rounded-3xl bg-zinc-950 text-white p-8 sm:p-12 mb-24 relative overflow-hidden">
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              background:
-                "radial-gradient(ellipse 60% 60% at 70% 30%, hsl(221 83% 53% / 0.12) 0%, transparent 60%)",
-            }}
-          />
-          <div className="relative">
-            <p className="text-sm font-semibold text-blue-400 uppercase tracking-widest mb-3">
-              How it works
-            </p>
-            <h2 className="text-2xl sm:text-3xl font-bold mb-10">
-              Three steps to secure your AI workflow
-            </h2>
-            <div className="grid gap-8 sm:grid-cols-3">
-              {[
-                {
-                  step: "01",
-                  icon: ShieldCheck,
-                  title: "Install Policies",
-                  desc: "Start with 15 built-in patterns or create your own custom policies using regex, exact match, or glob patterns.",
-                },
-                {
-                  step: "02",
-                  icon: ShieldAlert,
-                  title: "Auto-Scan",
-                  desc: "Every prompt is automatically scanned against active policies before saving. Violations are caught in real-time.",
-                },
-                {
-                  step: "03",
-                  icon: Eye,
-                  title: "Audit & Review",
-                  desc: "Review all violations in the audit log. See who triggered what rule, when, and what action was taken.",
-                },
-              ].map((item) => (
-                <div key={item.step}>
-                  <span className="text-4xl font-black text-white/5">
-                    {item.step}
-                  </span>
-                  <div className="flex items-center gap-2 mt-2 mb-3">
-                    <item.icon className="h-5 w-5 text-blue-400" />
-                    <h3 className="text-lg font-semibold">{item.title}</h3>
-                  </div>
-                  <p className="text-sm text-zinc-400 leading-relaxed">{item.desc}</p>
+        <DarkSection gradient="right" className="mb-24">
+          <SectionLabel dark>How it works</SectionLabel>
+          <h2 className="text-2xl sm:text-3xl font-bold mb-10">
+            Three steps to secure your AI workflow
+          </h2>
+          <div className="grid gap-8 sm:grid-cols-3">
+            {[
+              {
+                step: "01",
+                icon: ShieldCheck,
+                title: "Install Policies",
+                desc: "Start with 15 built-in patterns or create your own custom policies using regex, exact match, or glob patterns.",
+              },
+              {
+                step: "02",
+                icon: ShieldAlert,
+                title: "Auto-Scan",
+                desc: "Every prompt is automatically scanned against active policies before saving. Violations are caught in real-time.",
+              },
+              {
+                step: "03",
+                icon: Eye,
+                title: "Audit & Review",
+                desc: "Review all violations in the audit log. See who triggered what rule, when, and what action was taken.",
+              },
+            ].map((item) => (
+              <div key={item.step}>
+                <span className="text-4xl font-black text-white/5">
+                  {item.step}
+                </span>
+                <div className="flex items-center gap-2 mt-2 mb-3">
+                  <item.icon className="h-5 w-5 text-blue-400" />
+                  <h3 className="text-lg font-semibold">{item.title}</h3>
                 </div>
-              ))}
-            </div>
+                <p className="text-sm text-zinc-400 leading-relaxed">{item.desc}</p>
+              </div>
+            ))}
           </div>
-        </div>
+        </DarkSection>
 
         {/* Benefits */}
         <div className="max-w-3xl mx-auto mb-24">
           <h2 className="text-2xl sm:text-3xl font-bold mb-8 text-center">
             Security features included
           </h2>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {benefits.map((b) => (
-              <div key={b} className="flex items-start gap-3 rounded-xl border border-border bg-card p-4">
-                <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                <span className="text-sm leading-relaxed">{b}</span>
-              </div>
-            ))}
-          </div>
+          <BenefitsGrid benefits={benefits} />
         </div>
 
         {/* CTA */}
-        <div className="text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-            Your team is already pasting secrets into AI.
-            <br />
-            <span className="text-primary">Fix that today.</span>
-          </h2>
-          <p className="mt-6 text-lg text-muted-foreground max-w-lg mx-auto">
-            Free tier includes basic security patterns. Upgrade for custom rules
-            and full audit logging.
-          </p>
-          <Link href="/signup" className="mt-8 inline-block">
-            <Button size="lg" className="text-base px-8 h-12 rounded-full font-semibold">
-              Start Free
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </Link>
-        </div>
+        <CTASection
+          headline="Your team is already pasting secrets into AI."
+          gradientText="Fix that today."
+          subtitle="Free tier includes basic security patterns. Upgrade for custom rules and full audit logging."
+          buttonText="Start Free"
+        />
       </div>
     </div>
   );

@@ -5,8 +5,8 @@ export const industryData: IndustryPageData = {
   industry: "Finance",
   headline: "Compliant AI usage for financial teams",
   subtitle:
-    "Protect customer financial data and trading strategies with guardrails built for SOX, PCI DSS, and SEC compliance.",
-  compliance: ["SOX", "PCI DSS", "SEC"],
+    "Protect customer financial data and trading strategies with guardrails that detect sensitive financial information before it reaches AI tools.",
+  compliance: ["Financial Data Detection", "Audit Logging", "Access Control"],
   painPoints: [
     {
       title: "Analysts paste proprietary strategies into AI tools",
@@ -29,13 +29,13 @@ export const industryData: IndustryPageData = {
       icon: "ShieldCheck",
       title: "Financial Data & PII Guardrails",
       description:
-        "Detect account numbers, credit card numbers, SSNs, routing numbers, and proprietary financial data before prompts reach any AI model. Enforce PCI DSS and SOX controls automatically.",
+        "Detect account numbers, credit card numbers, SSNs, routing numbers, and proprietary financial data before prompts reach any AI model. Helps support your compliance posture for PCI DSS and SOX.",
     },
     {
       icon: "ClipboardList",
       title: "Regulatory Audit Log",
       description:
-        "Every prompt, user, and action logged with immutable timestamps. Generate SEC-ready and SOX-compliant audit reports filtered by team, date range, or policy violation type.",
+        "Every prompt, user, and action logged with timestamps. Generate audit reports filtered by team, date range, or policy violation type to support your compliance reviews.",
     },
     {
       icon: "Users",
@@ -75,15 +75,15 @@ export const industryData: IndustryPageData = {
   ],
   mockupUser: { name: "M. Chen", initials: "MC" },
   stats: [
-    { value: "95%", label: "Financial PII detection rate" },
-    { value: "100%", label: "Regulatory audit coverage" },
+    { value: "15+", label: "Built-in detection patterns" },
+    { value: "100%", label: "Interaction audit coverage" },
     { value: "2.4x", label: "Faster report generation" },
   ],
   faqs: [
     {
-      question: "How does TeamPrompt help with SOX compliance?",
+      question: "How does TeamPrompt help financial teams manage AI risk?",
       answer:
-        "TeamPrompt provides the internal controls SOX requires for AI-assisted financial processes. Every AI interaction is logged with user identity, timestamp, and content classification. Admins set approval workflows for sensitive prompt templates, and the audit log generates SOX-ready reports showing who used AI, when, and what safeguards were in place.",
+        "TeamPrompt provides guardrails that detect financial data, credentials, and proprietary information before it reaches AI tools. Every AI interaction is logged with user identity, timestamp, and action taken. These controls help support your compliance posture for SOX, PCI DSS, and internal audit requirements.",
     },
     {
       question: "Can TeamPrompt detect credit card numbers and account data?",

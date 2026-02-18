@@ -5,8 +5,8 @@ export const industryData: IndustryPageData = {
   industry: "Healthcare",
   headline: "Secure AI adoption for healthcare teams",
   subtitle:
-    "Give clinicians a managed prompt library with HIPAA-grade guardrails — so your team can use AI without risking patient data.",
-  compliance: ["HIPAA", "HITECH", "SOC 2"],
+    "Give clinicians a managed prompt library with guardrails that detect patient data — so your team can use AI with confidence.",
+  compliance: ["PHI Detection", "Audit Logging", "Access Control"],
   painPoints: [
     {
       title: "Clinicians paste patient data into ChatGPT",
@@ -29,19 +29,19 @@ export const industryData: IndustryPageData = {
       icon: "ShieldCheck",
       title: "PHI Detection Guardrails",
       description:
-        "Automatically scan every prompt for protected health information — patient names, MRNs, diagnoses, and 16 other PHI identifiers — before it ever reaches an AI model.",
+        "Scan every prompt for protected health information patterns — patient names, medical record numbers, diagnoses, and other PHI indicators — before it reaches an AI model.",
     },
     {
       icon: "FileText",
       title: "Clinical Prompt Templates",
       description:
-        "Pre-built, compliance-reviewed prompt templates for intake summaries, discharge notes, referral letters, and more. Standardize quality across every department.",
+        "Pre-built prompt templates for intake summaries, discharge notes, referral letters, and more. Standardize quality across every department.",
     },
     {
       icon: "ClipboardList",
       title: "Full Audit Log",
       description:
-        "Every prompt, every user, every timestamp. Give your compliance team a complete record of AI usage that satisfies HIPAA audit requirements.",
+        "Every prompt, every user, every timestamp. Give your compliance team a complete record of AI usage to support internal audit and review processes.",
     },
     {
       icon: "Users",
@@ -59,15 +59,15 @@ export const industryData: IndustryPageData = {
   ],
   mockupUser: { name: "Dr. Smith", initials: "DS" },
   stats: [
-    { value: "92%", label: "PHI detection rate" },
+    { value: "15+", label: "Built-in detection patterns" },
     { value: "3x", label: "Faster prompt reuse" },
-    { value: "100%", label: "Audit coverage" },
+    { value: "100%", label: "Interaction audit coverage" },
   ],
   faqs: [
     {
-      question: "Is TeamPrompt HIPAA compliant?",
+      question: "Can TeamPrompt help with HIPAA compliance?",
       answer:
-        "Yes. TeamPrompt is designed for HIPAA-covered entities. We sign Business Associate Agreements (BAAs), encrypt all data at rest and in transit, and never store prompt content on third-party AI servers. Our guardrails scan for PHI before prompts leave your organization.",
+        "TeamPrompt's guardrails can detect protected health information (PHI) and block it before it reaches AI tools. All data is encrypted at rest and in transit. While we are working toward formal HIPAA compliance and BAA availability, our DLP features provide a strong technical safeguard for healthcare teams using AI.",
     },
     {
       question: "How does TeamPrompt detect protected health information?",

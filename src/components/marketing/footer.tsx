@@ -6,6 +6,7 @@ const footerLinks = {
     { label: "Features", href: "/features" },
     { label: "Pricing", href: "/pricing" },
     { label: "Guardrails", href: "/security" },
+    { label: "Enterprise", href: "/enterprise" },
     { label: "Chrome Extension", href: "/features#extension" },
   ],
   Industries: [

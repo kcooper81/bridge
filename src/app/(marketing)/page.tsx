@@ -31,15 +31,12 @@ export const metadata: Metadata = generatePageMetadata({
   path: "/",
 });
 
-const logos = [
-  "Acme Corp",
-  "Globex",
-  "Umbrella",
-  "Aperture",
-  "Cyberdyne",
-  "Soylent",
-  "Initech",
-  "Massive Dynamic",
+const supportedTools = [
+  "ChatGPT",
+  "Claude",
+  "Gemini",
+  "Copilot",
+  "Perplexity",
 ];
 
 export default function LandingPage() {
@@ -127,7 +124,7 @@ export default function LandingPage() {
                 <StatsRow
                   dark
                   stats={[
-                    { value: "15+", label: "AI tools connected" },
+                    { value: "5", label: "AI tools supported" },
                     { value: "14", label: "Built-in guidelines" },
                     { value: "<2m", label: "Setup time" },
                   ]}
@@ -168,14 +165,14 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ━━━ TRUST STRIP ━━━ */}
+      {/* ━━━ WORKS WITH STRIP ━━━ */}
       <section className="border-b border-border bg-card/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
           <p className="text-center text-xs font-medium uppercase tracking-widest text-muted-foreground mb-6">
-            Trusted by forward-thinking teams
+            Works with your favorite AI tools
           </p>
-          <div className="flex items-center justify-center gap-8 sm:gap-12 flex-wrap opacity-40">
-            {logos.map((name) => (
+          <div className="flex items-center justify-center gap-8 sm:gap-12 flex-wrap">
+            {supportedTools.map((name) => (
               <span
                 key={name}
                 className="text-sm sm:text-base font-semibold text-muted-foreground tracking-wide"

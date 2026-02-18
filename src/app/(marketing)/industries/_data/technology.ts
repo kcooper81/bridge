@@ -6,7 +6,7 @@ export const industryData: IndustryPageData = {
   headline: "Stop developers from leaking secrets into AI",
   subtitle:
     "Your engineers paste code, API keys, and config files into AI tools every day. TeamPrompt catches the sensitive parts.",
-  compliance: ["SOC 2", "ISO 27001"],
+  compliance: ["Secret Detection", "Audit Logging", "Access Control"],
   painPoints: [
     {
       title: "Developers paste API keys and secrets into AI tools",
@@ -29,7 +29,7 @@ export const industryData: IndustryPageData = {
       icon: "ShieldAlert",
       title: "Secret & API Key Detection",
       description:
-        "Automatically detect AWS keys, GitHub tokens, database connection strings, private keys, and 40+ secret patterns before they reach any AI model. Block or warn in real time.",
+        "Automatically detect AWS keys, GitHub tokens, database connection strings, private keys, and other secret patterns before they reach any AI model. Block or warn in real time.",
     },
     {
       icon: "Chrome",
@@ -63,20 +63,20 @@ export const industryData: IndustryPageData = {
   },
   mockupUser: { name: "Alex Dev", initials: "AD" },
   stats: [
-    { value: "99.2%", label: "Secret detection accuracy" },
-    { value: "47K+", label: "Secrets blocked this month" },
+    { value: "15+", label: "Built-in secret patterns" },
+    { value: "5", label: "AI tools monitored" },
     { value: "< 200ms", label: "Scan latency per prompt" },
   ],
   faqs: [
     {
       question: "What types of secrets does TeamPrompt detect?",
       answer:
-        "TeamPrompt detects over 40 secret patterns including AWS access keys, GitHub personal access tokens, GitLab tokens, Slack webhooks, database connection strings, private SSH keys, JWT tokens, Stripe API keys, and generic high-entropy strings that look like passwords or tokens. We continuously update detection patterns as new secret formats emerge.",
+        "TeamPrompt ships with 15 built-in detection patterns covering AWS access keys, GitHub tokens, Slack tokens, database connection strings, private keys, JWT tokens, Stripe API keys, and more. You can also create custom patterns using regex, exact match, or glob syntax to catch organization-specific secrets.",
     },
     {
       question: "Does TeamPrompt work with Copilot and other code-focused AI tools?",
       answer:
-        "Yes. TeamPrompt's Chrome extension works alongside ChatGPT, Claude, Gemini, and any browser-based AI tool. For IDE-integrated tools like Copilot, TeamPrompt provides a pre-commit scanning layer and a dedicated prompt interface that engineers can use for longer, more complex prompts before pasting results into their editor.",
+        "TeamPrompt's Chrome extension works with browser-based AI tools including ChatGPT, Claude, Gemini, Microsoft Copilot, and Perplexity. It scans prompts and inserts from your team's library directly in these interfaces.",
     },
     {
       question: "Can we set different guardrail policies for different engineering teams?",
@@ -86,7 +86,7 @@ export const industryData: IndustryPageData = {
     {
       question: "How does TeamPrompt integrate with our existing security stack?",
       answer:
-        "TeamPrompt exports audit logs via webhook, Slack, or direct API integration to your SIEM (Splunk, Datadog, etc.). Blocked secret events can trigger alerts in PagerDuty or Opsgenie. We also support SSO via SAML 2.0 and SCIM provisioning for automated user management from your identity provider.",
+        "TeamPrompt provides a full audit log of all AI interactions that can be exported for review. Integrations with SIEM tools, webhooks, and SSO/SCIM provisioning are on our roadmap. Contact our team to discuss your specific security stack requirements.",
     },
   ],
   cta: {

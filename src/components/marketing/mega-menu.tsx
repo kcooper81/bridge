@@ -27,6 +27,7 @@ const useCases = [
   { label: "Prompt Management", href: "/features", icon: Zap },
   { label: "Security & Compliance", href: "/security", icon: Shield },
   { label: "Team Collaboration", href: "/features#teams", icon: Users },
+  { label: "Enterprise", href: "/enterprise", icon: Landmark },
 ];
 
 export function SolutionsDropdown({

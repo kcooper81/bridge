@@ -6,7 +6,7 @@ export const industryData: IndustryPageData = {
   headline: "Secure AI prompt management for government agencies",
   subtitle:
     "Give your teams a managed AI workflow with guardrails that protect citizen data, classified information, and internal policy.",
-  compliance: ["FedRAMP", "FISMA", "CJIS"],
+  compliance: ["PII Detection", "Audit Logging", "Access Control"],
   painPoints: [
     {
       title: "Staff paste citizen PII into AI tools",
@@ -41,7 +41,7 @@ export const industryData: IndustryPageData = {
       icon: "ClipboardList",
       title: "Immutable Audit Log",
       description:
-        "Tamper-proof logging of every AI interaction — user, agency, timestamp, and action taken. Generate FISMA-compliant reports and respond to oversight inquiries with complete records.",
+        "Comprehensive logging of every AI interaction — user, agency, timestamp, and action taken. Generate reports and respond to oversight inquiries with complete records of AI usage.",
     },
     {
       icon: "Building2",
@@ -75,15 +75,15 @@ export const industryData: IndustryPageData = {
   ],
   mockupUser: { name: "S. Rivera", initials: "SR" },
   stats: [
-    { value: "98%", label: "PII detection accuracy" },
-    { value: "100%", label: "FISMA audit compliance" },
-    { value: "5x", label: "Faster constituent responses" },
+    { value: "15+", label: "Built-in detection patterns" },
+    { value: "100%", label: "Interaction audit coverage" },
+    { value: "5", label: "AI tools monitored" },
   ],
   faqs: [
     {
-      question: "Does TeamPrompt meet FedRAMP requirements?",
+      question: "Is TeamPrompt suitable for government agencies?",
       answer:
-        "TeamPrompt is built on FedRAMP-authorized infrastructure and follows NIST SP 800-53 controls. Our architecture supports the security requirements for FedRAMP Moderate, including encryption at rest (AES-256) and in transit (TLS 1.3), continuous monitoring, and incident response procedures aligned with federal standards.",
+        "TeamPrompt provides guardrails that detect PII, sensitive terminology, and classification markings before they reach AI tools. All data is encrypted at rest and in transit. We are working toward FedRAMP authorization and other federal compliance certifications. Contact our team to discuss your agency's specific requirements.",
     },
     {
       question:
@@ -94,12 +94,12 @@ export const industryData: IndustryPageData = {
     {
       question: "Can we deploy TeamPrompt within our agency's existing IT environment?",
       answer:
-        "Yes. TeamPrompt supports deployment models that align with government IT requirements, including SSO via agency identity providers (SAML 2.0, PIV/CAC card authentication), SCIM-based user provisioning, and audit log export to agency SIEM systems. Our team works directly with your ISSO to complete the Authority to Operate (ATO) process.",
+        "TeamPrompt's Chrome extension can be force-installed via Google Admin Console, Microsoft Intune, or GPO — ensuring every managed browser has guardrails from day one. SSO and SCIM provisioning are on our roadmap. Contact our team to discuss your deployment requirements.",
     },
     {
-      question: "How does TeamPrompt handle FOIA and records retention requirements?",
+      question: "Can we export audit logs for records retention?",
       answer:
-        "TeamPrompt's audit logs are designed with federal records retention in mind. All AI interaction records are stored with immutable timestamps, can be exported in standard formats, and support configurable retention periods that align with NARA records schedules. For FOIA requests, admins can search and export relevant records by user, date, or keyword.",
+        "TeamPrompt's audit logs record all AI interactions with timestamps, user identity, and actions taken. Logs can be filtered by user, date, or AI tool and exported for your agency's records retention processes.",
     },
   ],
   cta: {

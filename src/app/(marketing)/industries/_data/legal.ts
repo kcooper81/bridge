@@ -6,7 +6,7 @@ export const industryData: IndustryPageData = {
   headline: "AI prompt management for law firms",
   subtitle:
     "Protect attorney-client privilege while giving your lawyers the best AI prompts for legal research, drafting, and review.",
-  compliance: ["ABA Ethics", "Attorney-Client Privilege", "SOC 2"],
+  compliance: ["Privilege Detection", "Audit Logging", "Access Control"],
   painPoints: [
     {
       title: "Associates paste case details into AI tools",
@@ -59,9 +59,9 @@ export const industryData: IndustryPageData = {
   ],
   mockupUser: { name: "J. Parker", initials: "JP" },
   stats: [
-    { value: "87%", label: "Privileged info detection rate" },
+    { value: "15+", label: "Built-in detection patterns" },
     { value: "4x", label: "Faster legal research" },
-    { value: "100%", label: "Matter-level audit trail" },
+    { value: "100%", label: "Interaction audit coverage" },
   ],
   faqs: [
     {

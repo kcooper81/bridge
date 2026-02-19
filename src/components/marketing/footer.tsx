@@ -5,9 +5,9 @@ const footerLinks = {
   Product: [
     { label: "Features", href: "/features" },
     { label: "Pricing", href: "/pricing" },
+    { label: "Integrations", href: "/integrations" },
     { label: "Guardrails", href: "/security" },
     { label: "Enterprise", href: "/enterprise" },
-    { label: "Chrome Extension", href: "/features#extension" },
   ],
   Industries: [
     { label: "Healthcare", href: "/industries/healthcare" },
@@ -17,10 +17,11 @@ const footerLinks = {
     { label: "Government", href: "/industries/government" },
   ],
   Resources: [
-    { label: "Getting Started", href: "/features" },
     { label: "Help & Support", href: "/help" },
     { label: "Security", href: "/security" },
     { label: "Media Kit", href: "/media" },
+    { label: "Privacy Policy", href: "/privacy" },
+    { label: "Terms of Use", href: "/terms" },
   ],
 };
 
@@ -68,6 +69,12 @@ export function MarketingFooter() {
             &copy; {new Date().getFullYear()} TeamPrompt. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
+            <Link href="/privacy" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">
+              Privacy
+            </Link>
+            <Link href="/terms" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">
+              Terms
+            </Link>
             <Link href="mailto:support@teamprompt.app" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">
               support@teamprompt.app
             </Link>

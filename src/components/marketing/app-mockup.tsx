@@ -231,39 +231,49 @@ export function FloatingCard({
   className,
 }: {
   label: string;
-  color?: "blue" | "red" | "green";
-  position: "top-right" | "bottom-left" | "bottom-right";
+  color?: "blue" | "red" | "green" | "purple" | "amber" | "cyan";
+  position: "top-right" | "top-left" | "bottom-left" | "bottom-right" | "mid-left" | "mid-right";
   className?: string;
 }) {
   const colorMap = {
     blue: "bg-blue-500/10 border-blue-500/20 text-blue-400",
     red: "bg-red-500/10 border-red-500/20 text-red-400",
     green: "bg-green-500/10 border-green-500/20 text-green-400",
+    purple: "bg-purple-500/10 border-purple-500/20 text-purple-400",
+    amber: "bg-amber-500/10 border-amber-500/20 text-amber-400",
+    cyan: "bg-cyan-500/10 border-cyan-500/20 text-cyan-400",
   };
 
-  const positionMap = {
-    "top-right": "top-4 right-0 translate-x-1/4 -translate-y-1/4",
-    "bottom-left": "bottom-8 left-0 -translate-x-1/4",
-    "bottom-right": "bottom-4 right-0 translate-x-1/4",
+  // Use inset positioning only (no translate classes) so the float
+  // animation can own the transform property without conflicts.
+  const positionStyles: Record<string, React.CSSProperties> = {
+    "top-right": { top: "1rem", right: "-1.5rem" },
+    "top-left": { top: "1.5rem", left: "-2rem" },
+    "mid-left": { top: "45%", left: "-2.5rem" },
+    "mid-right": { top: "30%", right: "-1.5rem" },
+    "bottom-left": { bottom: "2rem", left: "-1.5rem" },
+    "bottom-right": { bottom: "1rem", right: "-1.5rem" },
   };
 
-  const animDuration =
-    position === "top-right"
-      ? "3s"
-      : position === "bottom-left"
-        ? "4s"
-        : "3.5s";
+  const animDurations: Record<string, string> = {
+    "top-right": "3s",
+    "top-left": "3.5s",
+    "mid-left": "4.5s",
+    "mid-right": "3.8s",
+    "bottom-left": "4s",
+    "bottom-right": "3.5s",
+  };
 
   return (
     <div
       className={cn(
         "absolute rounded-lg border px-3 py-1.5 backdrop-blur-sm text-xs font-medium shadow-lg",
         colorMap[color],
-        positionMap[position],
         className
       )}
       style={{
-        animation: `float ${animDuration} ease-in-out infinite`,
+        ...positionStyles[position],
+        animation: `float ${animDurations[position] || "3.5s"} ease-in-out infinite`,
       }}
     >
       {label}

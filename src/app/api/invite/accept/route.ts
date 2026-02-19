@@ -69,10 +69,39 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (existingProfile?.org_id && existingProfile.org_id !== invite.org_id) {
-      return NextResponse.json(
-        { error: "You already belong to an organization. Please leave your current organization before accepting this invite." },
-        { status: 409 }
-      );
+      // Check if user is the sole member of their current org (auto-created personal org)
+      const { count } = await db
+        .from("profiles")
+        .select("id", { count: "exact", head: true })
+        .eq("org_id", existingProfile.org_id);
+
+      if (count && count > 1) {
+        // Other members exist — can't silently abandon this org
+        return NextResponse.json(
+          {
+            error:
+              "You already belong to an organization with other members. Please leave your current organization before accepting this invite.",
+          },
+          { status: 409 }
+        );
+      }
+
+      // Solo personal org — clean it up so user can join the invited org
+      const oldOrgId = existingProfile.org_id;
+
+      // Remove any teams, folders, departments, prompts, etc. tied to the old org
+      await Promise.all([
+        db.from("prompts").delete().eq("org_id", oldOrgId),
+        db.from("folders").delete().eq("org_id", oldOrgId),
+        db.from("departments").delete().eq("org_id", oldOrgId),
+        db.from("teams").delete().eq("org_id", oldOrgId),
+        db.from("collections").delete().eq("org_id", oldOrgId),
+        db.from("standards").delete().eq("org_id", oldOrgId),
+        db.from("invites").delete().eq("org_id", oldOrgId),
+      ]);
+
+      // Delete the orphaned org
+      await db.from("organizations").delete().eq("id", oldOrgId);
     }
 
     // Update user's profile with org and role

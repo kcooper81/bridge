@@ -6,13 +6,18 @@ import { getExtensionVersion } from "../lib/config";
 
 export default defineBackground(() => {
   // ─── Install Handler ───
-  browser.runtime.onInstalled.addListener(() => {
+  browser.runtime.onInstalled.addListener((details) => {
     console.log("TeamPrompt extension installed");
     browser.storage.local.set({
       siteUrl: CONFIG.SITE_URL,
       supabaseUrl: CONFIG.SUPABASE_URL,
       supabaseAnonKey: CONFIG.SUPABASE_ANON_KEY,
     });
+
+    // Open welcome page on first install (not on updates)
+    if (details.reason === "install") {
+      browser.tabs.create({ url: CONFIG.SITE_URL + "/signup?ref=extension" });
+    }
   });
 
   // ─── Internal Message Handler ───

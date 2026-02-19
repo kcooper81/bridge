@@ -86,6 +86,16 @@ export function MarketingHeader() {
           </Link>
 
           <Link
+            href="/integrations"
+            className={cn(
+              "text-sm font-medium transition-colors",
+              pathname === "/integrations" ? activeTextClass : textClass
+            )}
+          >
+            Integrations
+          </Link>
+
+          <Link
             href="/security"
             className={cn(
               "text-sm font-medium transition-colors",
@@ -108,6 +118,12 @@ export function MarketingHeader() {
 
         {/* CTA buttons */}
         <div className="hidden md:flex items-center gap-3">
+          <Link
+            href="/login"
+            className={cn("text-sm font-medium transition-colors", textClass)}
+          >
+            Log in
+          </Link>
           <Link href="/signup">
             <Button
               size="default"
@@ -151,6 +167,13 @@ export function MarketingHeader() {
                   Pricing
                 </Link>
                 <Link
+                  href="/integrations"
+                  onClick={() => setMobileOpen(false)}
+                  className="text-lg font-medium hover:text-primary transition-colors"
+                >
+                  Integrations
+                </Link>
+                <Link
                   href="/security"
                   onClick={() => setMobileOpen(false)}
                   className="text-lg font-medium hover:text-primary transition-colors"
@@ -164,9 +187,16 @@ export function MarketingHeader() {
                 >
                   Help
                 </Link>
-                <div className="border-t border-border pt-4 mt-4">
+                <div className="border-t border-border pt-4 mt-4 flex flex-col gap-3">
                   <Link href="/signup" onClick={() => setMobileOpen(false)}>
                     <Button className="w-full rounded-full">Get Started</Button>
+                  </Link>
+                  <Link
+                    href="/login"
+                    onClick={() => setMobileOpen(false)}
+                    className="text-center text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    Log in
                   </Link>
                 </div>
               </nav>

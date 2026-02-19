@@ -14,10 +14,8 @@ export interface UIElements {
   passwordInput: HTMLInputElement;
   loginBtn: HTMLButtonElement;
   loginError: HTMLElement;
-  googleBtn: HTMLButtonElement;
-  githubBtn: HTMLButtonElement;
-  webLoginBtn: HTMLButtonElement;
-  signupLink: HTMLAnchorElement;
+  signupBtn: HTMLButtonElement;
+  webLoginBtn: HTMLAnchorElement;
   logoutBtn: HTMLButtonElement;
   searchInput: HTMLInputElement;
   promptList: HTMLElement;
@@ -247,12 +245,10 @@ export function initSharedUI(elements: UIElements) {
     showLoginView();
   });
 
-  els.googleBtn.addEventListener("click", openLogin);
-  els.githubBtn.addEventListener("click", openLogin);
-  els.webLoginBtn.addEventListener("click", openLogin);
-  els.signupLink.addEventListener("click", (e) => {
+  els.signupBtn.addEventListener("click", openSignup);
+  els.webLoginBtn.addEventListener("click", (e) => {
     e.preventDefault();
-    openSignup();
+    openLogin();
   });
 
   // Listen for auth-bridge session sync

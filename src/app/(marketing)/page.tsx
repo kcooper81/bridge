@@ -153,9 +153,24 @@ export default function LandingPage() {
                 position="top-right"
               />
               <FloatingCard
+                label="Engineering"
+                color="purple"
+                position="top-left"
+              />
+              <FloatingCard
+                label="Legal & Compliance"
+                color="amber"
+                position="mid-left"
+              />
+              <FloatingCard
                 label="3 violations blocked"
                 color="red"
                 position="bottom-left"
+              />
+              <FloatingCard
+                label="Sales Team"
+                color="cyan"
+                position="mid-right"
               />
               <FloatingCard
                 label="47 prompts shared"

@@ -68,15 +68,54 @@ export function OrgProvider({ children }: { children: React.ReactNode }) {
     } = await supabase.auth.getUser();
     if (authError || !user) return;
 
-    const { data: profile, error: profileError } = await supabase
+    let { data: profile, error: profileError } = await supabase
       .from("profiles")
       .select("org_id, role, is_super_admin")
       .eq("id", user.id)
       .single();
 
     if (profileError || !profile?.org_id) {
-      setNoOrg(true);
-      return;
+      // Trigger may have failed silently — try the fallback API
+      const session = await supabase.auth.getSession();
+      const accessToken = session.data.session?.access_token;
+      if (accessToken) {
+        try {
+          const res = await fetch("/api/org/ensure", {
+            method: "POST",
+            headers: { Authorization: `Bearer ${accessToken}` },
+          });
+          if (res.ok) {
+            const result = await res.json();
+            if (result.orgId) {
+              // Org was created or already existed — re-fetch profile and continue
+              const { data: retryProfile } = await supabase
+                .from("profiles")
+                .select("org_id, role, is_super_admin")
+                .eq("id", user.id)
+                .single();
+              if (retryProfile?.org_id) {
+                // Fall through to normal data loading with the retry profile
+                profile = retryProfile;
+              } else {
+                setNoOrg(true);
+                return;
+              }
+            } else {
+              setNoOrg(true);
+              return;
+            }
+          } else {
+            setNoOrg(true);
+            return;
+          }
+        } catch {
+          setNoOrg(true);
+          return;
+        }
+      } else {
+        setNoOrg(true);
+        return;
+      }
     }
     setNoOrg(false);
 

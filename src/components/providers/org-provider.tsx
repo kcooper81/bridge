@@ -68,7 +68,7 @@ export function OrgProvider({ children }: { children: React.ReactNode }) {
     } = await supabase.auth.getUser();
     if (authError || !user) return;
 
-    let { data: profile, error: profileError } = await supabase
+    let { data: profile, error: profileError } = await supabase // eslint-disable-line prefer-const
       .from("profiles")
       .select("org_id, role, is_super_admin")
       .eq("id", user.id)

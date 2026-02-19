@@ -65,7 +65,7 @@ const navSections: { title: string; items: NavItem[] }[] = [
 function NavContent({ onItemClick }: { onItemClick?: () => void }) {
   const pathname = usePathname();
   const { currentUserRole, members, prompts } = useOrg();
-  const { user, signOut } = useAuth();
+  const { user, signOut, isSuperAdmin } = useAuth();
   const { theme, setTheme } = useTheme();
 
   const pendingCount = prompts.filter((p) => p.status === "pending").length;
@@ -133,6 +133,20 @@ function NavContent({ onItemClick }: { onItemClick?: () => void }) {
           );
         })}
       </nav>
+
+      {/* Super Admin link */}
+      {isSuperAdmin && (
+        <div className="px-3 pb-2">
+          <Link
+            href="/admin"
+            onClick={onItemClick}
+            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 transition-colors"
+          >
+            <Shield className="h-4 w-4" />
+            Admin Panel
+          </Link>
+        </div>
+      )}
 
       {/* User footer */}
       <div className="border-t border-border px-3 py-3">

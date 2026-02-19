@@ -3,6 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import { AuthProvider } from "@/components/providers/auth-provider";
 import { OrgProvider } from "@/components/providers/org-provider";
 import { SubscriptionProvider } from "@/components/providers/subscription-provider";
+import { ImpersonationProvider } from "@/hooks/use-impersonation";
+import { ImpersonationBanner } from "@/components/admin/impersonation-banner";
 import { Sidebar } from "@/components/dashboard/sidebar";
 
 export default async function DashboardLayout({
@@ -28,12 +30,15 @@ export default async function DashboardLayout({
     <AuthProvider initialUser={user} initialSession={session}>
       <OrgProvider>
         <SubscriptionProvider>
-          <div className="flex h-screen bg-background">
-            <Sidebar />
-            <main className="flex-1 overflow-y-auto scrollbar-thin p-4 pt-16 md:p-6 md:pt-6">
-              {children}
-            </main>
-          </div>
+          <ImpersonationProvider>
+            <ImpersonationBanner />
+            <div className="flex h-screen bg-background">
+              <Sidebar />
+              <main className="flex-1 overflow-y-auto scrollbar-thin p-4 pt-16 md:p-6 md:pt-6">
+                {children}
+              </main>
+            </div>
+          </ImpersonationProvider>
         </SubscriptionProvider>
       </OrgProvider>
     </AuthProvider>

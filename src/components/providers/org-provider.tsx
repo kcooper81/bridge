@@ -8,6 +8,7 @@ import {
   useState,
 } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { getImpersonatedOrgId } from "@/hooks/use-impersonation";
 import type {
   Organization,
   Prompt,
@@ -78,6 +79,10 @@ export function OrgProvider({ children }: { children: React.ReactNode }) {
       profile.is_super_admin ? "admin" : (profile.role as UserRole) || "member"
     );
 
+    // If super admin is impersonating, use that org instead
+    const impersonatedOrgId = profile.is_super_admin ? getImpersonatedOrgId() : null;
+    const targetOrgId = impersonatedOrgId || profile.org_id;
+
     // Parallel fetch all org data
     const [
       orgRes,
@@ -91,16 +96,16 @@ export function OrgProvider({ children }: { children: React.ReactNode }) {
       collectionPromptsRes,
       standardsRes,
     ] = await Promise.all([
-      supabase.from("organizations").select("*").eq("id", profile.org_id).single(),
-      supabase.from("prompts").select("*").eq("org_id", profile.org_id).order("updated_at", { ascending: false }),
-      supabase.from("folders").select("*").eq("org_id", profile.org_id).order("name"),
-      supabase.from("departments").select("*").eq("org_id", profile.org_id).order("name"),
-      supabase.from("teams").select("*").eq("org_id", profile.org_id).order("name"),
-      supabase.from("profiles").select("*").eq("org_id", profile.org_id).order("name"),
+      supabase.from("organizations").select("*").eq("id", targetOrgId).single(),
+      supabase.from("prompts").select("*").eq("org_id", targetOrgId).order("updated_at", { ascending: false }),
+      supabase.from("folders").select("*").eq("org_id", targetOrgId).order("name"),
+      supabase.from("departments").select("*").eq("org_id", targetOrgId).order("name"),
+      supabase.from("teams").select("*").eq("org_id", targetOrgId).order("name"),
+      supabase.from("profiles").select("*").eq("org_id", targetOrgId).order("name"),
       supabase.from("team_members").select("*"),
-      supabase.from("collections").select("*").eq("org_id", profile.org_id).order("name"),
+      supabase.from("collections").select("*").eq("org_id", targetOrgId).order("name"),
       supabase.from("collection_prompts").select("*"),
-      supabase.from("standards").select("*").eq("org_id", profile.org_id).order("name"),
+      supabase.from("standards").select("*").eq("org_id", targetOrgId).order("name"),
     ]);
 
     if (orgRes.error) {

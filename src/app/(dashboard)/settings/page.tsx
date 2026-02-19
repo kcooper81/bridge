@@ -1,72 +1,21 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useOrg } from "@/components/providers/org-provider";
+import { useState } from "react";
 import { useAuth } from "@/components/providers/auth-provider";
-import { useSubscription } from "@/components/providers/subscription-provider";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
-import { Loader2, Settings, CreditCard, AlertTriangle, BarChart3 } from "lucide-react";
-import { saveOrg } from "@/lib/vault-api";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Loader2, User, Building, CreditCard, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
-import Link from "next/link";
-
-function UsageBar({ label, current, max }: { label: string; current: number; max: number }) {
-  const isUnlimited = max === -1;
-  const pct = isUnlimited ? 0 : Math.min((current / max) * 100, 100);
-  const color = isUnlimited ? "bg-tp-green" : pct >= 100 ? "bg-destructive" : pct >= 80 ? "bg-tp-yellow" : "bg-tp-green";
-
-  return (
-    <div className="space-y-1.5">
-      <div className="flex items-center justify-between text-sm">
-        <span>{label}</span>
-        <span className="text-muted-foreground">
-          {current} / {isUnlimited ? "Unlimited" : max}
-        </span>
-      </div>
-      <div className="h-2 rounded-full bg-muted overflow-hidden">
-        <div
-          className={`h-full rounded-full transition-all ${color}`}
-          style={{ width: isUnlimited ? "0%" : `${pct}%` }}
-        />
-      </div>
-    </div>
-  );
-}
+import { ProfileTab } from "./_components/profile-tab";
+import { OrganizationTab } from "./_components/organization-tab";
+import { PlanUsageTab } from "./_components/plan-usage-tab";
 
 export default function SettingsPage() {
-  const { org, currentUserRole, prompts, members, guidelines, refresh } = useOrg();
   const { signOut } = useAuth();
-  const { planLimits } = useSubscription();
-  const [name, setName] = useState(org?.name || "");
-  const [domain, setDomain] = useState(org?.domain || "");
-  const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
-
-  useEffect(() => {
-    if (org) {
-      setName(org.name || "");
-      setDomain(org.domain || "");
-    }
-  }, [org]);
-
-  async function handleSaveOrg() {
-    setSaving(true);
-    try {
-      await saveOrg({ name: name.trim(), domain: domain.trim() || null });
-      toast.success("Organization updated");
-      refresh();
-    } catch {
-      toast.error("Failed to update organization");
-    } finally {
-      setSaving(false);
-    }
-  }
 
   async function handleDeleteAccount() {
     if (!confirm("Are you sure you want to delete your account? This cannot be undone.")) return;
@@ -96,71 +45,39 @@ export default function SettingsPage() {
 
   return (
     <>
-      <PageHeader title="Settings" description="Manage your organization" />
+      <PageHeader title="Settings" description="Manage your account and organization" />
 
       <div className="max-w-2xl space-y-6">
-        {/* Organization Settings */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Settings className="h-5 w-5" />
+        <Tabs defaultValue="profile">
+          <TabsList>
+            <TabsTrigger value="profile" className="gap-1.5">
+              <User className="h-4 w-4" />
+              Profile
+            </TabsTrigger>
+            <TabsTrigger value="organization" className="gap-1.5">
+              <Building className="h-4 w-4" />
               Organization
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label>Organization Name</Label>
-              <Input value={name} onChange={(e) => setName(e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label>Domain</Label>
-              <Input value={domain} onChange={(e) => setDomain(e.target.value)} placeholder="company.com" />
-            </div>
-            <div className="flex items-center gap-2">
-              <Label>Plan</Label>
-              <Badge className="capitalize">{org?.plan || "free"}</Badge>
-            </div>
-            <Button onClick={handleSaveOrg} disabled={saving || currentUserRole !== "admin"}>
-              {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save Changes
-            </Button>
-          </CardContent>
-        </Card>
+            </TabsTrigger>
+            <TabsTrigger value="plan-usage" className="gap-1.5">
+              <CreditCard className="h-4 w-4" />
+              Plan & Usage
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Usage */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <BarChart3 className="h-5 w-5" />
-              Usage
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <UsageBar label="Prompts" current={prompts.length} max={planLimits.max_prompts} />
-            <UsageBar label="Members" current={members.length} max={planLimits.max_members} />
-            <UsageBar label="Guidelines" current={guidelines.length} max={planLimits.max_guidelines} />
-          </CardContent>
-        </Card>
+          <TabsContent value="profile">
+            <ProfileTab />
+          </TabsContent>
 
-        {/* Billing */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CreditCard className="h-5 w-5" />
-              Billing
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
-              Manage your subscription, update payment methods, and view invoices.
-            </p>
-            <Link href="/settings/billing">
-              <Button variant="outline">Manage Billing</Button>
-            </Link>
-          </CardContent>
-        </Card>
+          <TabsContent value="organization">
+            <OrganizationTab />
+          </TabsContent>
 
-        {/* Danger Zone */}
+          <TabsContent value="plan-usage">
+            <PlanUsageTab />
+          </TabsContent>
+        </Tabs>
+
+        {/* Danger Zone — always visible below tabs */}
         <Card className="border-destructive/30">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-destructive">

@@ -588,6 +588,18 @@ export async function saveOrg(
   return data;
 }
 
+// ─── Profile ───
+
+export async function updateProfile(fields: { name?: string }): Promise<boolean> {
+  const userId = await getUserId();
+  if (!userId) return false;
+  const { error } = await supabase()
+    .from("profiles")
+    .update({ name: fields.name, updated_at: new Date().toISOString() })
+    .eq("id", userId);
+  return !error;
+}
+
 // ─── Members ───
 
 export async function updateMemberRole(

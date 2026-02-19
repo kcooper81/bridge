@@ -20,38 +20,38 @@ import { CTASection } from "@/components/marketing/cta-section";
 export const metadata: Metadata = generatePageMetadata({
   title: "AI Guardrails",
   description:
-    "Protect your organization from data leaks in AI prompts. Detect API keys, credentials, personal info, and sensitive information automatically.",
+    "Protect your organization from data leaks in AI prompts. Detect patient records, financial data, credentials, and confidential information automatically.",
   path: "/security",
 });
 
 const categories = [
   {
-    icon: Key,
-    title: "API Keys & Tokens",
+    icon: UserX,
+    title: "Personal & Protected Info",
     description:
-      "Detect AWS, GitHub, Stripe, OpenAI, Slack, and other API keys before they leak into AI conversations.",
-    patterns: ["AKIA... (AWS)", "ghp_... (GitHub)", "sk_... (Stripe/OpenAI)", "xoxb-... (Slack)"],
+      "Detect and block personally identifiable information — Social Security numbers, credit cards, patient names, dates of birth, and email addresses.",
+    patterns: ["XXX-XX-XXXX (SSN)", "4XXX-XXXX-XXXX (CC)", "Patient DOB", "user@email.com"],
   },
   {
     icon: Lock,
-    title: "Credentials & Secrets",
+    title: "Confidential Data",
     description:
-      "Block passwords, connection strings, private keys, bearer tokens, and JWT tokens from being shared.",
-    patterns: ["password=...", "mongodb://...", "-----BEGIN PRIVATE KEY-----", "Bearer eyJ..."],
+      "Block financial records, client names, case numbers, internal documents, account numbers, and other sensitive business information from being shared.",
+    patterns: ["Account #...", "Client: ...", "Case No. ...", "CONFIDENTIAL"],
   },
   {
-    icon: UserX,
-    title: "Personal Info (PII)",
+    icon: Key,
+    title: "Credentials & Secrets",
     description:
-      "Detect and block personally identifiable information like SSNs, credit cards, and email addresses.",
-    patterns: ["XXX-XX-XXXX (SSN)", "4XXX-XXXX-XXXX (CC)", "user@email.com"],
+      "Catch passwords, API keys, access tokens, and connection strings before they reach AI tools.",
+    patterns: ["password=...", "AKIA... (AWS)", "sk_... (API key)", "Bearer eyJ..."],
   },
   {
     icon: Eye,
     title: "Custom Rules",
     description:
-      "Create organization-specific rules for internal terms, project codenames, competitive intelligence, and more.",
-    patterns: ["Exact match", "Regex patterns", "Glob wildcards"],
+      "Create organization-specific rules for internal terms, project names, proprietary processes, and industry-specific data patterns.",
+    patterns: ["Exact match", "Pattern matching", "Custom keywords"],
   },
 ];
 
@@ -60,8 +60,8 @@ const benefits = [
   "Block or warn severity levels",
   "Pattern tester built into rule editor",
   "Full audit trail of all violations",
-  "15 pre-built policies covering common secrets",
-  "Custom policies with regex, exact, and glob matching",
+  "15 pre-built policies covering common data types",
+  "Custom policies for your industry's requirements",
   "Role-based access for policy management",
   "Chrome extension scans outbound text in real-time",
 ];
@@ -81,8 +81,8 @@ export default function SecurityPage() {
           </h1>
           <p className="mt-6 text-lg text-muted-foreground leading-relaxed max-w-2xl">
             TeamPrompt&apos;s AI Guardrails automatically detect and block
-            sensitive information — API keys, credentials, personal info, and
-            company secrets — before they reach AI tools.
+            sensitive information — patient records, financial data, client
+            details, credentials, and more — before they reach AI tools.
           </p>
           <div className="mt-8">
             <Link href="/signup">
@@ -136,7 +136,7 @@ export default function SecurityPage() {
                 step: "01",
                 icon: ShieldCheck,
                 title: "Install Policies",
-                desc: "Start with 15 built-in patterns or create your own custom policies using regex, exact match, or glob patterns.",
+                desc: "Start with 15 built-in patterns or create your own custom policies using keyword matching, pattern rules, or exact match.",
               },
               {
                 step: "02",
@@ -175,7 +175,7 @@ export default function SecurityPage() {
 
         {/* CTA */}
         <CTASection
-          headline="Your team is already pasting secrets into AI."
+          headline="Your team is already pasting sensitive data into AI."
           gradientText="Fix that today."
           subtitle="Free tier includes basic security patterns. Upgrade for custom rules and full audit logging."
           buttonText="Start Free"

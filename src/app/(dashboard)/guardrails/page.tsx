@@ -48,6 +48,7 @@ import { DEFAULT_SECURITY_RULES } from "@/lib/security/default-rules";
 import { testPattern } from "@/lib/security/scanner";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
+import { trackGuardrailCreated } from "@/lib/analytics";
 import type {
   SecurityCategory,
   SecurityPatternType,
@@ -153,6 +154,7 @@ export default function GuardrailsPage() {
         toast.error("Failed to create policy");
         return;
       }
+      trackGuardrailCreated();
       toast.success("Policy created");
     }
 

@@ -1,10 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
+function sanitizeRedirect(next: string | null): string {
+  if (!next) return "/vault";
+  // Only allow relative paths — block protocol-relative URLs and external redirects
+  if (next.startsWith("/") && !next.startsWith("//")) return next;
+  return "/vault";
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/vault";
+  const next = sanitizeRedirect(searchParams.get("next"));
 
   if (code) {
     const supabaseResponse = NextResponse.redirect(`${origin}${next}`);

@@ -33,7 +33,7 @@ export default function SettingsPage() {
 
       if (res.ok) {
         toast.success("Account deleted");
-        signOut();
+        await signOut();
       } else {
         const data = await res.json();
         toast.error(data.error || "Failed to delete account");

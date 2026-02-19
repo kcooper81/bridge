@@ -6,11 +6,19 @@ import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { trackInviteAccepted } from "@/lib/analytics";
+
+interface InviteDetails {
+  orgName: string;
+  role: string;
+  invitedBy: string;
+}
 
 export default function InvitePage() {
   const [loading, setLoading] = useState(false);
   const [checking, setChecking] = useState(true);
   const [error, setError] = useState("");
+  const [inviteDetails, setInviteDetails] = useState<InviteDetails | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
@@ -29,9 +37,27 @@ export default function InvitePage() {
       } = await supabase.auth.getUser();
 
       if (!user) {
-        // Redirect to login, then come back
         router.push(`/login?redirect=${encodeURIComponent(`/invite?token=${token}`)}`);
         return;
+      }
+
+      // Fetch invite details to show before accepting
+      const { data: invite } = await supabase
+        .from("invites")
+        .select("role, org_id, invited_by, organizations(name), profiles!invites_invited_by_fkey(name)")
+        .eq("token", token)
+        .eq("status", "pending")
+        .single();
+
+      if (invite) {
+        // Supabase joins return single objects for FK relations
+        const orgData = invite.organizations as unknown as { name: string } | null;
+        const inviterData = invite.profiles as unknown as { name: string } | null;
+        setInviteDetails({
+          orgName: orgData?.name || "a team",
+          role: invite.role || "member",
+          invitedBy: inviterData?.name || "A team member",
+        });
       }
 
       setChecking(false);
@@ -70,6 +96,7 @@ export default function InvitePage() {
         return;
       }
 
+      trackInviteAccepted();
       toast.success("Invite accepted! Welcome to the team.");
       router.push("/vault");
     } catch {
@@ -106,9 +133,17 @@ export default function InvitePage() {
         </svg>
       </div>
       <h2 className="text-xl font-bold">Team Invite</h2>
-      <p className="mt-2 text-sm text-muted-foreground">
-        You&apos;ve been invited to join a team on TeamPrompt.
-      </p>
+      {inviteDetails ? (
+        <p className="mt-2 text-sm text-muted-foreground">
+          <strong>{inviteDetails.invitedBy}</strong> has invited you to join{" "}
+          <strong>{inviteDetails.orgName}</strong> as a{" "}
+          <strong>{inviteDetails.role}</strong>.
+        </p>
+      ) : (
+        <p className="mt-2 text-sm text-muted-foreground">
+          You&apos;ve been invited to join a team on TeamPrompt.
+        </p>
+      )}
 
       {error && (
         <div className="mt-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">

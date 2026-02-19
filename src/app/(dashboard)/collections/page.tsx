@@ -26,6 +26,7 @@ import {
 import { FolderOpen, Pencil, Plus, Trash2 } from "lucide-react";
 import { saveCollectionApi, deleteCollectionApi } from "@/lib/vault-api";
 import { toast } from "sonner";
+import { trackCollectionCreated } from "@/lib/analytics";
 import type { Collection, CollectionVisibility } from "@/lib/types";
 
 export default function CollectionsPage() {
@@ -68,6 +69,7 @@ export default function CollectionsPage() {
         visibility,
         promptIds: selectedPromptIds,
       });
+      if (!editCollection) trackCollectionCreated();
       toast.success(editCollection ? "Collection updated" : "Collection created");
       setModalOpen(false);
       refresh();

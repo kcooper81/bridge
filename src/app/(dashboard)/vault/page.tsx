@@ -62,6 +62,7 @@ import {
 } from "@/lib/vault-api";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
+import { trackPurchase, trackPromptUsed } from "@/lib/analytics";
 import type { Prompt, PromptStatus } from "@/lib/types";
 import { PageSkeleton } from "@/components/dashboard/skeleton-loader";
 
@@ -97,6 +98,7 @@ export default function VaultPage() {
   useEffect(() => {
     if (searchParams.get("checkout") === "success") {
       const plan = searchParams.get("plan") || "your new plan";
+      trackPurchase(plan);
       toast.success(`Welcome to ${plan}! Your upgrade is active.`);
       router.replace("/vault");
     }
@@ -231,6 +233,7 @@ export default function VaultPage() {
     try {
       await navigator.clipboard.writeText(content);
       toast.success("Copied to clipboard");
+      trackPromptUsed("copy");
       recordUsage(id).catch(() => {});
     } catch {
       toast.error("Failed to copy to clipboard");

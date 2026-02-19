@@ -52,9 +52,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!email) {
+    if (!email || typeof email !== "string") {
       return NextResponse.json(
         { error: "Email is required" },
+        { status: 400 }
+      );
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return NextResponse.json(
+        { error: "Invalid email address" },
         { status: 400 }
       );
     }

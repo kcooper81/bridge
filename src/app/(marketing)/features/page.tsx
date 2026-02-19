@@ -78,9 +78,9 @@ function GuardrailsMockup() {
       </div>
       <div className="space-y-2">
         {[
-          { label: "AWS Access Key", status: "Blocked", color: "destructive" },
-          { label: "GitHub Token", status: "Blocked", color: "destructive" },
-          { label: "Internal Project Name", status: "Warning", color: "yellow-500" },
+          { label: "Social Security Number", status: "Blocked", color: "destructive" },
+          { label: "Patient Name (PHI)", status: "Blocked", color: "destructive" },
+          { label: "Internal Account Number", status: "Warning", color: "yellow-500" },
         ].map((item) => (
           <div key={item.label} className="flex items-center justify-between py-2 px-3 rounded-lg bg-muted/30">
             <div className="flex items-center gap-2">
@@ -256,7 +256,7 @@ const features = [
     icon: Archive,
     title: "Prompt Vault",
     description:
-      "Stop digging through docs, Slack threads, and bookmarks. Your vault is a single searchable home for every prompt your org writes.",
+      "Stop digging through documents, shared drives, and bookmarks. Your vault is a single searchable home for every prompt your org writes.",
     details: [
       "Full-text search across titles, content, and tags",
       "Filter by folder, department, or favorites",
@@ -269,10 +269,10 @@ const features = [
     title: "AI Guardrails",
     badge: "NEW",
     description:
-      "Your team copies code, config files, and internal context into AI tools every day. Guardrails catch sensitive data before it leaves.",
+      "Your team pastes confidential data, client details, and internal context into AI tools every day. Guardrails catch sensitive information before it leaves.",
     details: [
-      "15 built-in policies for AWS, GitHub, Stripe, OpenAI keys",
-      "Custom regex, exact match, and glob patterns",
+      "15 built-in policies for PII, financial data, credentials, and more",
+      "Custom rules with keyword, pattern, and exact matching",
       "Block or warn severity levels",
       "Full audit log of violations for compliance",
     ],
@@ -310,7 +310,7 @@ const features = [
       "ChatGPT, Claude, Gemini, Perplexity, Copilot support",
       "One-click prompt injection into AI tools",
       "Template variable fill-in before sending",
-      "DLP scanning on outbound text",
+      "Real-time sensitive data scanning on outbound text",
     ],
   },
   {
@@ -329,7 +329,7 @@ const features = [
     icon: FolderOpen,
     title: "Collections",
     description:
-      "Group related prompts into themed collections — by project, campaign, or workflow. Share them or keep them personal.",
+      "Group related prompts into themed collections — by department, workflow, or use case. Share them or keep them personal.",
     details: [
       "Personal, team, org, or public visibility",
       "Add/remove prompts with checklist UI",
@@ -363,7 +363,7 @@ export default function FeaturesPage() {
           </h1>
           <p className="mt-6 text-lg text-muted-foreground leading-relaxed max-w-2xl">
             From shared libraries to security guardrails, TeamPrompt replaces
-            scattered docs and Slack threads with a proper system.
+            scattered documents and shared drives with a proper system.
           </p>
         </div>
 

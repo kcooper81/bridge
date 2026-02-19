@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
+import { trackSignUp } from "@/lib/analytics";
 
 export default function SignupPage() {
   const [name, setName] = useState("");
@@ -26,7 +27,7 @@ export default function SignupPage() {
 
     try {
       const supabase = createClient();
-      const { error: signUpError } = await supabase.auth.signUp({
+      const { data, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -40,10 +41,19 @@ export default function SignupPage() {
         return;
       }
 
+      // Supabase returns empty identities when the email already exists
+      if (data.user && data.user.identities?.length === 0) {
+        setError(
+          "An account with this email already exists. Please sign in instead."
+        );
+        return;
+      }
+
       if (plan) {
         sessionStorage.setItem("pending_plan", plan);
       }
 
+      trackSignUp("email");
       setSuccess(true);
     } catch {
       setError("An unexpected error occurred");
@@ -53,6 +63,10 @@ export default function SignupPage() {
   }
 
   async function handleOAuth(provider: "google" | "github") {
+    if (plan) {
+      sessionStorage.setItem("pending_plan", plan);
+    }
+    trackSignUp(provider);
     const supabase = createClient();
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider,

@@ -34,6 +34,7 @@ interface OrgContextValue {
   standards: Guideline[];
   currentUserRole: UserRole;
   loading: boolean;
+  noOrg: boolean;
   refresh: () => Promise<void>;
   setPrompts: React.Dispatch<React.SetStateAction<Prompt[]>>;
   setFolders: React.Dispatch<React.SetStateAction<Folder[]>>;
@@ -57,6 +58,7 @@ export function OrgProvider({ children }: { children: React.ReactNode }) {
   const [guidelines, setGuidelines] = useState<Guideline[]>([]);
   const [currentUserRole, setCurrentUserRole] = useState<UserRole>("member");
   const [loading, setLoading] = useState(true);
+  const [noOrg, setNoOrg] = useState(false);
 
   const refresh = useCallback(async () => {
     const supabase = createClient();
@@ -72,7 +74,11 @@ export function OrgProvider({ children }: { children: React.ReactNode }) {
       .eq("id", user.id)
       .single();
 
-    if (profileError || !profile?.org_id) return;
+    if (profileError || !profile?.org_id) {
+      setNoOrg(true);
+      return;
+    }
+    setNoOrg(false);
 
     // Super admins act as admin in any org
     setCurrentUserRole(
@@ -83,7 +89,7 @@ export function OrgProvider({ children }: { children: React.ReactNode }) {
     const impersonatedOrgId = profile.is_super_admin ? getImpersonatedOrgId() : null;
     const targetOrgId = impersonatedOrgId || profile.org_id;
 
-    // Parallel fetch all org data
+    // Batch 1: Fetch all org-scoped data in parallel
     const [
       orgRes,
       promptsRes,
@@ -91,9 +97,7 @@ export function OrgProvider({ children }: { children: React.ReactNode }) {
       deptsRes,
       teamsRes,
       profilesRes,
-      teamMembersRes,
       collectionsRes,
-      collectionPromptsRes,
       standardsRes,
     ] = await Promise.all([
       supabase.from("organizations").select("*").eq("id", targetOrgId).single(),
@@ -102,9 +106,7 @@ export function OrgProvider({ children }: { children: React.ReactNode }) {
       supabase.from("departments").select("*").eq("org_id", targetOrgId).order("name"),
       supabase.from("teams").select("*").eq("org_id", targetOrgId).order("name"),
       supabase.from("profiles").select("*").eq("org_id", targetOrgId).order("name"),
-      supabase.from("team_members").select("*"),
       supabase.from("collections").select("*").eq("org_id", targetOrgId).order("name"),
-      supabase.from("collection_prompts").select("*"),
       supabase.from("standards").select("*").eq("org_id", targetOrgId).order("name"),
     ]);
 
@@ -121,11 +123,24 @@ export function OrgProvider({ children }: { children: React.ReactNode }) {
     const orgTeams = teamsRes.data || [];
     setTeams(orgTeams);
 
-    // Filter team_members to only include org's teams
-    const orgTeamIds = new Set(orgTeams.map((t: Team) => t.id));
+    // Batch 2: Fetch junction tables scoped to org's teams/collections
+    const orgTeamIds = orgTeams.map((t: Team) => t.id);
+    const orgCollections = collectionsRes.data || [];
+    const orgCollectionIds = orgCollections.map((c: Collection) => c.id);
+
+    const [teamMembersRes, collectionPromptsRes] = await Promise.all([
+      orgTeamIds.length > 0
+        ? supabase.from("team_members").select("*").in("team_id", orgTeamIds)
+        : Promise.resolve({ data: [], error: null }),
+      orgCollectionIds.length > 0
+        ? supabase.from("collection_prompts").select("*").in("collection_id", orgCollectionIds)
+        : Promise.resolve({ data: [], error: null }),
+    ]);
+
+    // Map team memberships
     const teamMemberMap = new Map<string, string[]>();
     const teamRolesMap = new Map<string, Record<string, string>>();
-    (teamMembersRes.data || []).filter((tm: { team_id: string }) => orgTeamIds.has(tm.team_id)).forEach((tm: { team_id: string; user_id: string; role?: string }) => {
+    (teamMembersRes.data || []).forEach((tm: { team_id: string; user_id: string; role?: string }) => {
       const existing = teamMemberMap.get(tm.user_id) || [];
       existing.push(tm.team_id);
       teamMemberMap.set(tm.user_id, existing);
@@ -143,17 +158,15 @@ export function OrgProvider({ children }: { children: React.ReactNode }) {
       }))
     );
 
-    // Filter collection_prompts to only include org's collections
-    const orgCollections = collectionsRes.data || [];
-    const orgCollectionIds = new Set(orgCollections.map((c: Collection) => c.id));
+    // Map collection prompts
     const collPromptMap = new Map<string, string[]>();
-    (collectionPromptsRes.data || []).filter((cp: { collection_id: string }) => orgCollectionIds.has(cp.collection_id)).forEach((cp: { collection_id: string; prompt_id: string }) => {
+    (collectionPromptsRes.data || []).forEach((cp: { collection_id: string; prompt_id: string }) => {
       const existing = collPromptMap.get(cp.collection_id) || [];
       existing.push(cp.prompt_id);
       collPromptMap.set(cp.collection_id, existing);
     });
     setCollections(
-      (collectionsRes.data || []).map((c: Collection) => ({
+      orgCollections.map((c: Collection) => ({
         ...c,
         promptIds: collPromptMap.get(c.id) || [],
       }))
@@ -185,6 +198,7 @@ export function OrgProvider({ children }: { children: React.ReactNode }) {
         standards: guidelines,
         currentUserRole,
         loading,
+        noOrg,
         refresh,
         setPrompts,
         setFolders,

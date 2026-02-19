@@ -95,7 +95,7 @@ export default function AdminDashboardPage() {
       supabase.from("organizations").select("*", { count: "exact", head: true }),
       supabase.from("profiles").select("*", { count: "exact", head: true }),
       supabase.from("prompts").select("*", { count: "exact", head: true }),
-      supabase.from("subscriptions").select("plan, status, org_id"),
+      supabase.from("subscriptions").select("plan, status, org_id, seats"),
       supabase.from("organizations").select("*", { count: "exact", head: true }).gte("created_at", startOfWeek.toISOString()),
       supabase.from("organizations").select("*", { count: "exact", head: true }).gte("created_at", startOfLastWeek.toISOString()).lt("created_at", startOfWeek.toISOString()),
       supabase.from("organizations").select("*", { count: "exact", head: true }).gte("created_at", startOfMonth.toISOString()),
@@ -110,14 +110,15 @@ export default function AdminDashboardPage() {
 
     const planPrices: Record<string, number> = { free: 0, pro: 9, team: 7, business: 12 };
 
-    (subsResult.data || []).forEach((sub: { plan: string; status: string }) => {
+    (subsResult.data || []).forEach((sub: { plan: string; status: string; seats?: number }) => {
       const plan = sub.plan || "free";
       if (plan in planDistribution) {
         planDistribution[plan as keyof typeof planDistribution]++;
       }
       if (sub.status === "past_due") pastDueCount++;
       if (sub.status === "active" || sub.status === "trialing") {
-        totalMrr += planPrices[plan] || 0;
+        const seats = sub.seats || 1;
+        totalMrr += (planPrices[plan] || 0) * seats;
       }
     });
 

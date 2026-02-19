@@ -19,6 +19,7 @@ const footerLinks = {
   Resources: [
     { label: "Getting Started", href: "/features" },
     { label: "Security", href: "/security" },
+    { label: "Media Kit", href: "/media" },
   ],
 };
 

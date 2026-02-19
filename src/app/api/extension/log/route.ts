@@ -4,14 +4,14 @@ import { handleOptions, withCors } from "../cors";
 import { limiters, checkRateLimit } from "@/lib/rate-limit";
 import { trackExtensionActivity } from "../track-activity";
 
-export async function OPTIONS() { return handleOptions(); }
+export async function OPTIONS(request: NextRequest) { return handleOptions(request); }
 
 // POST /api/extension/log — Log a conversation from the Chrome extension
 export async function POST(request: NextRequest) {
   try {
     const authHeader = request.headers.get("authorization");
     if (!authHeader?.startsWith("Bearer ")) {
-      return withCors(NextResponse.json({ error: "Unauthorized" }, { status: 401 }));
+      return withCors(NextResponse.json({ error: "Unauthorized" }, { status: 401 }), request);
     }
 
     const token = authHeader.replace("Bearer ", "");
@@ -21,14 +21,14 @@ export async function POST(request: NextRequest) {
       error: authError,
     } = await db.auth.getUser(token);
     if (authError || !user) {
-      return withCors(NextResponse.json({ error: "Unauthorized" }, { status: 401 }));
+      return withCors(NextResponse.json({ error: "Unauthorized" }, { status: 401 }), request);
     }
 
     const extVersion = request.headers.get("x-extension-version");
     trackExtensionActivity(db, user.id, extVersion);
 
     const rl = await checkRateLimit(limiters.log, user.id);
-    if (!rl.success) return withCors(rl.response);
+    if (!rl.success) return withCors(rl.response, request);
 
     const { data: profile } = await db
       .from("profiles")
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (!profile?.org_id) {
-      return withCors(NextResponse.json({ error: "No organization" }, { status: 403 }));
+      return withCors(NextResponse.json({ error: "No organization" }, { status: 403 }), request);
     }
 
     const body = await request.json();
@@ -47,12 +47,12 @@ export async function POST(request: NextRequest) {
       return withCors(NextResponse.json(
         { error: "ai_tool and prompt_text are required" },
         { status: 400 }
-      ));
+      ), request);
     }
 
     const validActions = ["sent", "blocked", "warned"];
     if (action && !validActions.includes(action)) {
-      return withCors(NextResponse.json({ error: "Invalid action" }, { status: 400 }));
+      return withCors(NextResponse.json({ error: "Invalid action" }, { status: 400 }), request);
     }
 
     const { data: log, error: insertError } = await db
@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
       return withCors(NextResponse.json(
         { error: "Failed to log conversation" },
         { status: 500 }
-      ));
+      ), request);
     }
 
     // Also increment usage if a prompt_id was provided
@@ -84,9 +84,9 @@ export async function POST(request: NextRequest) {
       await db.rpc("increment_usage_count", { prompt_id });
     }
 
-    return withCors(NextResponse.json({ success: true, logId: log.id, created_at: log.created_at }));
+    return withCors(NextResponse.json({ success: true, logId: log.id, created_at: log.created_at }), request);
   } catch (error) {
     console.error("Extension log error:", error);
-    return withCors(NextResponse.json({ error: "Internal server error" }, { status: 500 }));
+    return withCors(NextResponse.json({ error: "Internal server error" }, { status: 500 }), request);
   }
 }

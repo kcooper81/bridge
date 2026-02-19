@@ -20,9 +20,27 @@ export default function ResetPasswordPage() {
 
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setSessionValid(!!user);
-    });
+
+    // Only accept PASSWORD_RECOVERY events — NOT regular SIGNED_IN.
+    // A logged-in user navigating here must not be able to reset their
+    // password without the recovery token from their email link.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event) => {
+        if (event === "PASSWORD_RECOVERY") {
+          setSessionValid(true);
+        }
+      }
+    );
+
+    // Give the hash-based auth state change time to process
+    const timeout = setTimeout(() => {
+      setSessionValid((prev) => (prev === null ? false : prev));
+    }, 3000);
+
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(timeout);
+    };
   }, []);
 
   async function handleSubmit(e: React.FormEvent) {

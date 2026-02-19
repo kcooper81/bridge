@@ -1,12 +1,15 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
 
-const AUTH_ROUTES = ["/login", "/signup", "/forgot-password"];
+const AUTH_ROUTES = ["/login", "/signup", "/forgot-password", "/reset-password"];
 const PUBLIC_ROUTES = [
   "/",
   "/pricing",
   "/features",
   "/security",
+  "/enterprise",
+  "/industries",
+  "/media",
   "/blog",
   "/use-cases",
   "/comparisons",

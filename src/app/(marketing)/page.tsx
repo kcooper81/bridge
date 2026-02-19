@@ -140,7 +140,7 @@ export default function LandingPage() {
                 items={[
                   { title: "Customer Onboarding Prompt", stat: "142 uses" },
                   { title: "Weekly Report Summary", stat: "89 uses" },
-                  { title: "Bug Report Template", stat: "67 uses" },
+                  { title: "Compliance Review Template", stat: "67 uses" },
                   { title: "Sales Outreach Drafter", stat: "34 uses" },
                 ]}
                 sidebarUser={{ name: "Alex J.", initials: "AJ" }}
@@ -193,8 +193,8 @@ export default function LandingPage() {
               Built for how teams actually use AI
             </h2>
             <p className="mt-4 text-lg text-muted-foreground">
-              Not another bookmark folder. Purpose-built infrastructure for
-              prompt management, security, and collaboration.
+              Purpose-built infrastructure for prompt management, security,
+              and collaboration — across every department.
             </p>
           </div>
 
@@ -203,7 +203,7 @@ export default function LandingPage() {
             <FeatureCard
               icon={Archive}
               title="Shared Prompt Vault"
-              description="Your team writes the same prompts over and over — in docs, Slack threads, personal notes. The vault gives everyone one searchable place to find what already works."
+              description="Your team writes the same prompts over and over — in documents, shared drives, and personal notes. The vault gives everyone one searchable place to find what already works."
               large
             >
               {/* Mini mockup */}
@@ -229,11 +229,11 @@ export default function LandingPage() {
             <FeatureCard
               icon={Shield}
               title="AI Guardrails"
-              description="Catch API keys, credentials, and internal data before they leak into AI tools. Block or warn in real-time."
+              description="Catch patient records, financial data, credentials, and confidential info before they leak into AI tools. Block or warn in real-time."
               badge="New"
             >
               <div className="mt-5 space-y-2">
-                {["AWS Key detected", "GitHub token blocked", "PII warning"].map((item, i) => (
+                {["SSN detected", "Patient name blocked", "Credit card warning"].map((item, i) => (
                   <div key={item} className="flex items-center gap-2 rounded-lg bg-destructive/5 border border-destructive/10 px-3 py-1.5">
                     <div className={`w-1.5 h-1.5 rounded-full ${i < 2 ? "bg-destructive" : "bg-yellow-500"}`} />
                     <span className="text-xs text-muted-foreground">{item}</span>
@@ -245,13 +245,13 @@ export default function LandingPage() {
             <FeatureCard
               icon={BookOpen}
               title="Quality Guidelines"
-              description="Enforce structure, tone, and completeness so every prompt meets a quality bar before it ships."
+              description="Enforce structure, tone, and completeness so every prompt meets a quality bar before it goes out."
             />
 
             <FeatureCard
               icon={Braces}
               title="Prompt Templates"
-              description='Create reusable templates with {{variables}} that your team fills in each time. Consistent output, every time.'
+              description="Create reusable templates with fill-in-the-blank variables that your team completes each time. Consistent output, every time."
             />
 
             <FeatureCard

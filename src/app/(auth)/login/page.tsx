@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
+import { trackLogin } from "@/lib/analytics";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -16,7 +17,11 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectTo = searchParams.get("redirect") || "/vault";
+  const rawRedirect = searchParams.get("redirect") || "/vault";
+  // Only allow relative paths — prevent open redirects
+  const redirectTo = rawRedirect.startsWith("/") && !rawRedirect.startsWith("//")
+    ? rawRedirect
+    : "/vault";
   const plan = searchParams.get("plan");
 
   async function handleLogin(e: React.FormEvent) {
@@ -40,6 +45,7 @@ export default function LoginPage() {
         sessionStorage.setItem("pending_plan", plan);
       }
 
+      trackLogin("email");
       router.push(redirectTo);
       router.refresh();
     } catch {

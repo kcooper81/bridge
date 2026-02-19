@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useExtensionDetection } from "@/hooks/use-extension-detection";
 import { Chrome, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { trackExtensionInstallClick } from "@/lib/analytics";
 
 const DISMISS_KEY = "teamprompt-extension-banner-dismissed";
 
@@ -36,6 +37,7 @@ export function ExtensionInstallBanner() {
           href="https://chromewebstore.google.com/detail/teamprompt"
           target="_blank"
           rel="noopener noreferrer"
+          onClick={() => trackExtensionInstallClick()}
         >
           Install
         </a>

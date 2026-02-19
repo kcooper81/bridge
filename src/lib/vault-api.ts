@@ -137,7 +137,7 @@ export async function createPrompt(
       tags: fields.tags || [],
       folder_id: fields.folder_id || null,
       department_id: fields.department_id || null,
-      status: fields.status || "approved",
+      status: fields.status || "draft",
       version: 1,
       is_template: fields.is_template || false,
       template_variables: fields.template_variables || [],
@@ -222,6 +222,7 @@ export async function duplicatePrompt(id: string): Promise<Prompt | null> {
   return createPrompt({
     ...original,
     title: `${original.title} (copy)`,
+    status: "draft",
     usage_count: 0,
     rating_total: 0,
     rating_count: 0,
@@ -593,11 +594,17 @@ export async function saveOrg(
 export async function updateProfile(fields: { name?: string }): Promise<boolean> {
   const userId = await getUserId();
   if (!userId) return false;
-  const { error } = await supabase()
+  const db = supabase();
+  const { error } = await db
     .from("profiles")
     .update({ name: fields.name, updated_at: new Date().toISOString() })
     .eq("id", userId);
-  return !error;
+  if (error) return false;
+  // Keep Supabase Auth metadata in sync with profiles table
+  if (fields.name !== undefined) {
+    await db.auth.updateUser({ data: { name: fields.name } });
+  }
+  return true;
 }
 
 // ─── Members ───
@@ -938,15 +945,17 @@ export async function exportPack(
     .select("*")
     .in("id", promptIds);
 
+  if (!orgId) return { format: "teamprompt-pack", version: "1.0", name: packName, exported_at: new Date().toISOString(), prompts: [], folders: [], departments: [] };
+
   const { data: folders } = await db
     .from("folders")
     .select("*")
-    .eq("org_id", orgId!);
+    .eq("org_id", orgId);
 
   const { data: departments } = await db
     .from("departments")
     .select("*")
-    .eq("org_id", orgId!);
+    .eq("org_id", orgId);
 
   return {
     format: "teamprompt-pack",
@@ -987,7 +996,7 @@ export async function importPack(
       example_input: prompt.example_input,
       example_output: prompt.example_output,
       tags: prompt.tags || [],
-      status: "approved",
+      status: "draft",
       version: 1,
       is_template: prompt.is_template || false,
       template_variables: prompt.template_variables || [],

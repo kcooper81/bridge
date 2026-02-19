@@ -210,7 +210,7 @@ export function AppMockup({
           {/* Tags row */}
           {variant === "vault" && items.length > 0 && (
             <div className="mt-3 pt-3 border-t border-border/50 flex gap-1.5">
-              {["clinical", "intake", "team"].map((tag) => (
+              {["onboarding", "reports", "team"].map((tag) => (
                 <span
                   key={tag}
                   className="text-[9px] bg-muted px-2 py-0.5 rounded-full text-muted-foreground"

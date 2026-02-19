@@ -15,6 +15,7 @@ import { PLAN_DISPLAY } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { trackBeginCheckout, trackPurchase } from "@/lib/analytics";
 import type { PlanTier } from "@/lib/types";
 import type { BillingInterval } from "@/lib/billing/plans";
 
@@ -31,6 +32,7 @@ export default function BillingPage() {
   useEffect(() => {
     if (searchParams.get("checkout") === "success") {
       const plan = searchParams.get("plan") || "your new plan";
+      trackPurchase(plan);
       toast.success(`Welcome to ${plan}! Your upgrade is active.`);
       router.replace("/settings/billing");
     }
@@ -42,7 +44,10 @@ export default function BillingPage() {
     try {
       const supabase = createClient();
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
+      if (!session) {
+        toast.error("Session expired. Please sign in again.");
+        return;
+      }
 
       const res = await fetch("/api/stripe/portal", {
         method: "POST",
@@ -66,10 +71,21 @@ export default function BillingPage() {
   async function startCheckout(plan: PlanTier) {
     if (!org) return;
     setLoadingCheckout(plan);
+    const info = PLAN_DISPLAY[plan];
+    const priceNum = parseFloat(info.price.replace(/[^0-9.]/g, "")) || 0;
+    trackBeginCheckout({
+      plan,
+      price: priceNum,
+      interval,
+      seats: members.length || 1,
+    });
     try {
       const supabase = createClient();
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
+      if (!session) {
+        toast.error("Session expired. Please sign in again.");
+        return;
+      }
 
       const res = await fetch("/api/stripe/checkout", {
         method: "POST",

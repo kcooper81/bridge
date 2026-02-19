@@ -34,6 +34,7 @@ import { scanContent } from "@/lib/security/scanner";
 import type { Prompt, PromptStatus, PromptVersion, SecurityRule, ValidationResult } from "@/lib/types";
 import type { ScanResult } from "@/lib/security/types";
 import { toast } from "sonner";
+import { trackPromptCreated, trackGuardrailViolation } from "@/lib/analytics";
 
 function extractTemplateVariables(content: string): string[] {
   const matches = content.match(/\{\{([^}]+)\}\}/g);
@@ -157,6 +158,7 @@ export function PromptModal({
           const scan = scanContent(content, rules as SecurityRule[]);
           setScanResult(scan);
           if (!scan.passed) {
+            trackGuardrailViolation("block");
             toast.error("Content blocked by security guardrails. Remove sensitive data before saving.");
             setSaving(false);
             return;
@@ -188,6 +190,7 @@ export function PromptModal({
         toast.success("Prompt updated");
       } else {
         await createPrompt(fields);
+        trackPromptCreated();
         toast.success("Prompt created");
       }
 

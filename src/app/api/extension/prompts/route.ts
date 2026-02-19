@@ -4,14 +4,14 @@ import { handleOptions, withCors } from "../cors";
 import { limiters, checkRateLimit } from "@/lib/rate-limit";
 import { trackExtensionActivity } from "../track-activity";
 
-export async function OPTIONS() { return handleOptions(); }
+export async function OPTIONS(request: NextRequest) { return handleOptions(request); }
 
 // GET /api/extension/prompts — Chrome extension fetches user's prompts
 export async function GET(request: NextRequest) {
   try {
     const authHeader = request.headers.get("authorization");
     if (!authHeader?.startsWith("Bearer ")) {
-      return withCors(NextResponse.json({ error: "Unauthorized" }, { status: 401 }));
+      return withCors(NextResponse.json({ error: "Unauthorized" }, { status: 401 }), request);
     }
 
     const token = authHeader.replace("Bearer ", "");
@@ -21,14 +21,14 @@ export async function GET(request: NextRequest) {
       error: authError,
     } = await db.auth.getUser(token);
     if (authError || !user) {
-      return withCors(NextResponse.json({ error: "Unauthorized" }, { status: 401 }));
+      return withCors(NextResponse.json({ error: "Unauthorized" }, { status: 401 }), request);
     }
 
     const extVersion = request.headers.get("x-extension-version");
     trackExtensionActivity(db, user.id, extVersion);
 
     const rl = await checkRateLimit(limiters.prompts, user.id);
-    if (!rl.success) return withCors(rl.response);
+    if (!rl.success) return withCors(rl.response, request);
 
     const { data: profile } = await db
       .from("profiles")
@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
       .single();
 
     if (!profile?.org_id) {
-      return withCors(NextResponse.json({ error: "No organization" }, { status: 403 }));
+      return withCors(NextResponse.json({ error: "No organization" }, { status: 403 }), request);
     }
 
     const { searchParams } = new URL(request.url);
@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error("Extension prompts error:", error);
-      return withCors(NextResponse.json({ error: "Failed to fetch prompts" }, { status: 500 }));
+      return withCors(NextResponse.json({ error: "Failed to fetch prompts" }, { status: 500 }), request);
     }
 
     let results = prompts || [];
@@ -75,9 +75,9 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    return withCors(NextResponse.json({ prompts: results }));
+    return withCors(NextResponse.json({ prompts: results }), request);
   } catch (error) {
     console.error("Extension prompts error:", error);
-    return withCors(NextResponse.json({ error: "Internal server error" }, { status: 500 }));
+    return withCors(NextResponse.json({ error: "Internal server error" }, { status: 500 }), request);
   }
 }

@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Download, Import, Loader2, Upload } from "lucide-react";
 import { exportPack, importPack } from "@/lib/vault-api";
 import { toast } from "sonner";
+import { trackExport, trackImport } from "@/lib/analytics";
 
 export default function ImportExportPage() {
   const { prompts, refresh } = useOrg();
@@ -49,6 +50,7 @@ export default function ImportExportPage() {
     a.download = `${packName.trim().replace(/\s+/g, "-").toLowerCase() || "prompts"}.json`;
     a.click();
     URL.revokeObjectURL(url);
+    trackExport(selectedIds.length);
     toast.success(`Exported ${selectedIds.length} prompts`);
   }
 
@@ -61,6 +63,7 @@ export default function ImportExportPage() {
       const data = JSON.parse(text);
       const result = await importPack(data);
       if (result.imported > 0) {
+        trackImport(result.imported);
         toast.success(`Imported ${result.imported} prompts`);
         refresh();
       }

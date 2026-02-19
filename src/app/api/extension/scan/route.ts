@@ -4,14 +4,14 @@ import { handleOptions, withCors } from "../cors";
 import { limiters, checkRateLimit } from "@/lib/rate-limit";
 import { trackExtensionActivity } from "../track-activity";
 
-export async function OPTIONS() { return handleOptions(); }
+export async function OPTIONS(request: NextRequest) { return handleOptions(request); }
 
 // POST /api/extension/scan — DLP scan before text is sent to AI tool
 export async function POST(request: NextRequest) {
   try {
     const authHeader = request.headers.get("authorization");
     if (!authHeader?.startsWith("Bearer ")) {
-      return withCors(NextResponse.json({ error: "Unauthorized" }, { status: 401 }));
+      return withCors(NextResponse.json({ error: "Unauthorized" }, { status: 401 }), request);
     }
 
     const token = authHeader.replace("Bearer ", "");
@@ -21,14 +21,14 @@ export async function POST(request: NextRequest) {
       error: authError,
     } = await db.auth.getUser(token);
     if (authError || !user) {
-      return withCors(NextResponse.json({ error: "Unauthorized" }, { status: 401 }));
+      return withCors(NextResponse.json({ error: "Unauthorized" }, { status: 401 }), request);
     }
 
     const extVersion = request.headers.get("x-extension-version");
     trackExtensionActivity(db, user.id, extVersion);
 
     const rl = await checkRateLimit(limiters.scan, user.id);
-    if (!rl.success) return withCors(rl.response);
+    if (!rl.success) return withCors(rl.response, request);
 
     const { data: profile } = await db
       .from("profiles")
@@ -37,12 +37,12 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (!profile?.org_id) {
-      return withCors(NextResponse.json({ error: "No organization" }, { status: 403 }));
+      return withCors(NextResponse.json({ error: "No organization" }, { status: 403 }), request);
     }
 
     const { content } = await request.json();
     if (!content || typeof content !== "string") {
-      return withCors(NextResponse.json({ error: "Content is required" }, { status: 400 }));
+      return withCors(NextResponse.json({ error: "Content is required" }, { status: 400 }), request);
     }
 
     // Fetch active security rules for the org
@@ -89,10 +89,10 @@ export async function POST(request: NextRequest) {
       passed: !hasBlock,
       violations,
       action: hasBlock ? "block" : violations.length > 0 ? "warn" : "allow",
-    }));
+    }), request);
   } catch (error) {
     console.error("Extension scan error:", error);
-    return withCors(NextResponse.json({ error: "Internal server error" }, { status: 500 }));
+    return withCors(NextResponse.json({ error: "Internal server error" }, { status: 500 }), request);
   }
 }
 

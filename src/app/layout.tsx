@@ -1,8 +1,13 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Inter } from "next/font/google";
+import { Suspense } from "react";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/providers/theme-provider";
+import { GA4RouteTracker } from "@/components/analytics/ga4";
 import "./globals.css";
+
+const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || "G-83VRNN79X8";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -62,6 +67,22 @@ export default function RootLayout({
         />
       </head>
       <body className={inter.className}>
+        {/* Google Analytics 4 */}
+        <Script
+          src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
+          strategy="afterInteractive"
+        />
+        <Script id="ga4-init" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${GA_ID}', { send_page_view: false });
+          `}
+        </Script>
+        <Suspense fallback={null}>
+          <GA4RouteTracker />
+        </Suspense>
         <ThemeProvider>
           {children}
         </ThemeProvider>

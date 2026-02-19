@@ -61,6 +61,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check if user already belongs to an organization
+    const { data: existingProfile } = await db
+      .from("profiles")
+      .select("org_id")
+      .eq("id", user.id)
+      .single();
+
+    if (existingProfile?.org_id && existingProfile.org_id !== invite.org_id) {
+      return NextResponse.json(
+        { error: "You already belong to an organization. Please leave your current organization before accepting this invite." },
+        { status: 409 }
+      );
+    }
+
     // Update user's profile with org and role
     const { error: profileUpdateError } = await db
       .from("profiles")

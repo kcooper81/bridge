@@ -93,8 +93,6 @@ export default function OrganizationsPage() {
       rows = rows.filter((r) => r.plan === planFilter);
     }
 
-    setTotalCount(rows.length);
-
     // Apply search (client-side for simplicity)
     if (search.trim()) {
       const q = search.toLowerCase();
@@ -104,6 +102,8 @@ export default function OrganizationsPage() {
           (r.domain && r.domain.toLowerCase().includes(q))
       );
     }
+
+    setTotalCount(rows.length);
 
     // Paginate
     setOrgs(rows.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE));

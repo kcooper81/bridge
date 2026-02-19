@@ -38,6 +38,7 @@ import {
   updateTeamMemberRole,
 } from "@/lib/vault-api";
 import { toast } from "sonner";
+import { trackInviteSent } from "@/lib/analytics";
 import type { Invite, Team, UserRole } from "@/lib/types";
 
 export default function TeamPage() {
@@ -163,6 +164,7 @@ export default function TeamPage() {
     setInviting(true);
     const result = await sendInvite(inviteEmail.trim(), inviteRole, inviteTeamId || undefined);
     if (result.success) {
+      trackInviteSent();
       toast.success("Invite sent");
       setInviteEmail("");
       setInviteTeamId("");
@@ -175,8 +177,12 @@ export default function TeamPage() {
   }
 
   async function handleRevokeInvite(id: string) {
-    await revokeInvite(id);
-    toast.success("Invite revoked");
+    const success = await revokeInvite(id);
+    if (success) {
+      toast.success("Invite revoked");
+    } else {
+      toast.error("Failed to revoke invite");
+    }
     const newInvites = await getInvites();
     setInvites(newInvites);
   }

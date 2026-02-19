@@ -98,26 +98,12 @@ export function MarketingHeader() {
 
         {/* CTA buttons */}
         <div className="hidden md:flex items-center gap-3">
-          <Link href="/login">
-            <Button
-              variant="ghost"
-              size="sm"
-              className={cn(
-                "font-medium",
-                isHomepage && !scrolled
-                  ? "text-zinc-300 hover:text-white hover:bg-white/10"
-                  : ""
-              )}
-            >
-              Sign In
-            </Button>
-          </Link>
           <Link href="/signup">
             <Button
-              size="sm"
-              className="rounded-full px-5 font-semibold"
+              size="default"
+              className="rounded-full px-6 font-semibold"
             >
-              Start Free
+              Get Started
             </Button>
           </Link>
         </div>
@@ -161,14 +147,9 @@ export function MarketingHeader() {
                 >
                   Guardrails
                 </Link>
-                <div className="border-t border-border pt-4 mt-4 space-y-3">
-                  <Link href="/login" onClick={() => setMobileOpen(false)}>
-                    <Button variant="outline" className="w-full rounded-full">
-                      Sign In
-                    </Button>
-                  </Link>
+                <div className="border-t border-border pt-4 mt-4">
                   <Link href="/signup" onClick={() => setMobileOpen(false)}>
-                    <Button className="w-full rounded-full">Start Free</Button>
+                    <Button className="w-full rounded-full">Get Started</Button>
                   </Link>
                 </div>
               </nav>

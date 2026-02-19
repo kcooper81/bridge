@@ -22,6 +22,7 @@ TeamPrompt is a SaaS platform that helps organizations manage, share, and secure
 - Pricing: https://teamprompt.app/pricing
 - Security: https://teamprompt.app/security
 - Enterprise: https://teamprompt.app/enterprise
+- Help & Support: https://teamprompt.app/help
 
 ## Industry Solutions
 

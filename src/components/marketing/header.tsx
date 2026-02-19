@@ -94,6 +94,16 @@ export function MarketingHeader() {
           >
             Guardrails
           </Link>
+
+          <Link
+            href="/help"
+            className={cn(
+              "text-sm font-medium transition-colors",
+              pathname === "/help" ? activeTextClass : textClass
+            )}
+          >
+            Help
+          </Link>
         </nav>
 
         {/* CTA buttons */}
@@ -146,6 +156,13 @@ export function MarketingHeader() {
                   className="text-lg font-medium hover:text-primary transition-colors"
                 >
                   Guardrails
+                </Link>
+                <Link
+                  href="/help"
+                  onClick={() => setMobileOpen(false)}
+                  className="text-lg font-medium hover:text-primary transition-colors"
+                >
+                  Help
                 </Link>
                 <div className="border-t border-border pt-4 mt-4">
                   <Link href="/signup" onClick={() => setMobileOpen(false)}>

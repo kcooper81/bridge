@@ -18,6 +18,7 @@ const footerLinks = {
   ],
   Resources: [
     { label: "Getting Started", href: "/features" },
+    { label: "Help & Support", href: "/help" },
     { label: "Security", href: "/security" },
     { label: "Media Kit", href: "/media" },
   ],

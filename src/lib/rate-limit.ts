@@ -33,6 +33,7 @@ export const limiters = {
   log: createLimiter(120, "1 m", "log"),
   prompts: createLimiter(30, "1 m", "prompts"),
   invite: createLimiter(10, "1 m", "invite"),
+  support: createLimiter(5, "10 m", "support"),
 };
 
 export async function checkRateLimit(

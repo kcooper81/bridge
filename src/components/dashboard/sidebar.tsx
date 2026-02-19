@@ -81,13 +81,13 @@ function NavContent({ onItemClick }: { onItemClick?: () => void }) {
   return (
     <div className="flex h-full flex-col">
       {/* Brand */}
-      <div className="flex items-center gap-2 px-4 py-4 border-b border-border">
-        <Image src="/logo.svg" alt="TeamPrompt" width={32} height={32} className="rounded-lg" />
-        <span className="text-lg font-bold">TeamPrompt</span>
+      <div className="flex items-center gap-3 px-5 py-5 border-b border-border/50">
+        <Image src="/logo.svg" alt="TeamPrompt" width={36} height={36} className="rounded-xl shadow-md" />
+        <span className="text-xl font-bold tracking-tight">TeamPrompt</span>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto scrollbar-thin px-3 py-4 space-y-6">
+      <nav className="flex-1 overflow-y-auto scrollbar-thin px-3 py-5 space-y-6">
         {navSections.map((section) => {
           const visibleItems = section.items.filter(
             (item) =>
@@ -97,7 +97,7 @@ function NavContent({ onItemClick }: { onItemClick?: () => void }) {
 
           return (
             <div key={section.title}>
-              <p className="mb-2 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <p className="mb-3 px-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/70">
                 {section.title}
               </p>
               <div className="space-y-1">
@@ -109,19 +109,20 @@ function NavContent({ onItemClick }: { onItemClick?: () => void }) {
                       href={item.href}
                       onClick={onItemClick}
                       className={cn(
-                        "relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150",
+                        "relative flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium",
+                        "transition-all duration-200 ease-spring",
                         isActive
-                          ? "bg-primary/10 text-primary"
-                          : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                          ? "bg-primary/10 text-primary shadow-sm"
+                          : "text-muted-foreground hover:bg-muted/50 hover:text-foreground hover:scale-[1.02]"
                       )}
                     >
                       {isActive && (
-                        <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-r-full bg-primary" />
+                        <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 rounded-r-full bg-primary shadow-glow-sm" />
                       )}
-                      <item.icon className="h-4 w-4" />
+                      <item.icon className={cn("h-[18px] w-[18px]", isActive && "drop-shadow-sm")} />
                       {item.label}
                       {item.href === "/vault" && pendingCount > 0 && (
-                        <Badge variant="destructive" className="ml-auto h-5 min-w-5 px-1.5 text-[10px]">
+                        <Badge variant="destructive" className="ml-auto h-5 min-w-5 px-1.5 text-[10px] shadow-sm">
                           {pendingCount}
                         </Badge>
                       )}
@@ -149,25 +150,25 @@ function NavContent({ onItemClick }: { onItemClick?: () => void }) {
       )}
 
       {/* User footer */}
-      <div className="border-t border-border px-3 py-3">
+      <div className="border-t border-border/50 px-4 py-4">
         <div className="flex items-center gap-3">
-          <Avatar className="h-8 w-8">
-            <AvatarFallback className="bg-primary/20 text-primary text-xs">
+          <Avatar className="h-10 w-10 shadow-md">
+            <AvatarFallback className="bg-gradient-to-br from-primary/30 to-primary/10 text-primary text-sm font-semibold">
               {initials}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate">
+            <p className="text-sm font-semibold truncate">
               {currentMember?.name || user?.email}
             </p>
-            <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+            <Badge variant="outline" className="text-[10px] px-1.5 py-0 mt-0.5 border-border/50">
               {currentUserRole}
             </Badge>
           </div>
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+            className="h-9 w-9 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/50 hover:scale-110 transition-all duration-200"
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
           >
             {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
@@ -175,7 +176,7 @@ function NavContent({ onItemClick }: { onItemClick?: () => void }) {
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+            className="h-9 w-9 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/50 hover:scale-110 transition-all duration-200"
             onClick={signOut}
           >
             <LogOut className="h-4 w-4" />
@@ -190,7 +191,7 @@ export function Sidebar() {
   return (
     <>
       {/* Desktop sidebar */}
-      <aside className="hidden md:flex h-full w-[var(--sidebar-width)] flex-col border-r border-border bg-card">
+      <aside className="hidden md:flex h-full w-[var(--sidebar-width)] flex-col border-r border-border/50 bg-card/80 backdrop-blur-xl">
         <NavContent />
       </aside>
 

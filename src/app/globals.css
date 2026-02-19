@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 @layer base {
-  /* TeamPrompt Light Theme (default) */
+  /* TeamPrompt Light Theme (default) - Apple TV Style */
   :root {
     --background: 228 30% 97%;      /* #f5f7fb */
     --foreground: 222 47% 11%;      /* #0f172a */
@@ -24,7 +24,22 @@
     --border: 224 20% 90%;          /* #e0e4ef */
     --input: 222 18% 83%;           /* #c9cfdf */
     --ring: 221 83% 53%;            /* #2563EB */
-    --radius: 0.625rem;             /* 10px */
+    
+    /* Apple TV Style - Larger radius */
+    --radius: 1rem;                 /* 16px - rounder corners */
+    --radius-lg: 1.5rem;            /* 24px for cards */
+    --radius-xl: 2rem;              /* 32px for modals */
+
+    /* Apple TV Style - Layered shadows */
+    --shadow-sm: 0 2px 8px -2px rgba(0,0,0,0.06);
+    --shadow-md: 0 8px 24px -4px rgba(0,0,0,0.1);
+    --shadow-lg: 0 16px 48px -8px rgba(0,0,0,0.15);
+    --shadow-glow: 0 0 40px -8px hsl(221 83% 53% / 0.2);
+
+    /* Apple TV Style - Spring transitions */
+    --transition-fast: 150ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    --transition-base: 250ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    --transition-slow: 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
 
     /* Extended TeamPrompt palette */
     --surface: 0 0% 100%;
@@ -42,7 +57,7 @@
     --accent-glow: 221 83% 53% / 0.15;
     --red-surface: 0 72% 51% / 0.08;
 
-    --sidebar-width: 260px;
+    --sidebar-width: 280px;
     --chart-1: 221 83% 53%;
     --chart-2: 142 72% 29%;
     --chart-3: 217 91% 60%;
@@ -50,42 +65,48 @@
     --chart-5: 0 72% 51%;
   }
 
-  /* TeamPrompt Dark Theme */
+  /* TeamPrompt Dark Theme - Apple TV Cinematic Style */
   [data-theme="dark"] {
-    --background: 228 45% 6%;       /* #0a0c14 */
+    --background: 230 25% 4%;       /* Near black - cinematic */
     --foreground: 230 33% 94%;      /* #eaedf5 */
-    --card: 230 30% 10%;            /* #111320 */
+    --card: 230 22% 8%;             /* Slightly elevated */
     --card-foreground: 230 33% 94%;
-    --popover: 232 28% 13%;         /* #181b2a */
+    --popover: 232 22% 10%;         /* Floating elements */
     --popover-foreground: 230 33% 94%;
     --primary: 217 91% 60%;         /* #3B82F6 — brighter for dark contrast */
     --primary-foreground: 0 0% 100%;
-    --secondary: 232 28% 13%;       /* #181b2a */
+    --secondary: 232 22% 12%;       /* Subtle surface */
     --secondary-foreground: 230 33% 94%;
-    --muted: 230 20% 17%;           /* #1f2338 */
+    --muted: 230 18% 14%;           /* Muted surface */
     --muted-foreground: 231 12% 55%; /* #7f849c */
-    --accent: 220 25% 18%;          /* dark subtle surface */
+    --accent: 220 22% 14%;          /* dark subtle surface */
     --accent-foreground: 230 33% 94%;
     --destructive: 0 86% 68%;       /* #f87171 */
     --destructive-foreground: 0 0% 100%;
-    --border: 232 28% 20%;          /* #232842 */
-    --input: 234 30% 27%;           /* #2e345a */
+    --border: 230 15% 15%;          /* Subtle borders */
+    --input: 232 20% 18%;           /* Input background */
     --ring: 217 91% 60%;
 
-    --surface: 230 30% 10%;         /* #111320 */
-    --elevated: 232 28% 13%;        /* #181b2a */
-    --hover: 230 20% 17%;           /* #1f2338 */
-    --active: 230 18% 21%;          /* #282d44 */
-    --border-light: 234 30% 27%;    /* #2e345a */
+    /* Apple TV Dark - Deeper shadows with glow */
+    --shadow-sm: 0 2px 8px -2px rgba(0,0,0,0.3);
+    --shadow-md: 0 8px 24px -4px rgba(0,0,0,0.4);
+    --shadow-lg: 0 16px 48px -8px rgba(0,0,0,0.5);
+    --shadow-glow: 0 0 60px -12px hsl(217 91% 60% / 0.3);
+
+    --surface: 230 22% 8%;          /* Card surface */
+    --elevated: 232 22% 10%;        /* Elevated surface */
+    --hover: 230 18% 14%;           /* Hover state */
+    --active: 230 16% 18%;          /* Active state */
+    --border-light: 232 18% 20%;    /* Light border */
     --text-secondary: 231 14% 69%;  /* #a0a5bd */
     --green: 160 67% 52%;           /* #34d399 */
-    --green-surface: 160 67% 52% / 0.10;
+    --green-surface: 160 67% 52% / 0.12;
     --yellow: 43 96% 56%;           /* #fbbf24 */
-    --yellow-surface: 43 96% 56% / 0.10;
+    --yellow-surface: 43 96% 56% / 0.12;
     --blue: 217 91% 68%;            /* #60a5fa */
-    --accent-surface: 217 91% 60% / 0.10;
-    --accent-glow: 217 91% 60% / 0.25;
-    --red-surface: 0 86% 68% / 0.08;
+    --accent-surface: 217 91% 60% / 0.12;
+    --accent-glow: 217 91% 60% / 0.3;
+    --red-surface: 0 86% 68% / 0.1;
 
     --chart-1: 217 91% 60%;
     --chart-2: 160 67% 52%;
@@ -100,7 +121,29 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "cv11", "ss01";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Apple TV Style - Global interactive states */
+@layer utilities {
+  .glass {
+    @apply bg-card/80 backdrop-blur-xl border-white/5;
+  }
+  .glass-strong {
+    @apply bg-card/95 backdrop-blur-2xl border-white/10;
+  }
+  .hover-lift {
+    @apply transition-all duration-200 ease-out hover:scale-[1.02] hover:-translate-y-0.5;
+  }
+  .hover-glow {
+    @apply transition-shadow duration-300 hover:shadow-[var(--shadow-glow)];
+  }
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background;
   }
 }
 

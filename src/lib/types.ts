@@ -59,6 +59,8 @@ export interface Profile {
   role: UserRole;
   avatar_url: string | null;
   is_super_admin: boolean;
+  extension_version: string | null;
+  last_extension_active: string | null;
   created_at: string;
   updated_at: string;
 }

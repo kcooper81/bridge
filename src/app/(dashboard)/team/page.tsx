@@ -24,6 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ArrowLeft, Loader2, Mail, Pencil, Plus, Trash2, UserPlus, Users, X } from "lucide-react";
+import { ExtensionStatusBadge } from "@/components/dashboard/extension-status-badge";
 import {
   saveTeamApi,
   deleteTeamApi,
@@ -389,6 +390,10 @@ export default function TeamPage() {
                     <p className="text-sm font-medium truncate">{member.name}</p>
                     <p className="text-xs text-muted-foreground truncate">{member.email}</p>
                   </div>
+                  <ExtensionStatusBadge
+                    lastActive={member.last_extension_active}
+                    version={member.extension_version}
+                  />
                   {currentUserRole === "admin" && !member.isCurrentUser ? (
                     <div className="flex items-center gap-2">
                       <Select value={member.role} onValueChange={(v) => handleChangeRole(member.id, v)}>

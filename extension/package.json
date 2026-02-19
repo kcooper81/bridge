@@ -1,0 +1,22 @@
+{
+  "name": "teamprompt-extension",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wxt",
+    "dev:firefox": "wxt --browser firefox",
+    "build": "wxt build",
+    "build:firefox": "wxt build --browser firefox",
+    "build:edge": "wxt build --browser edge",
+    "zip": "wxt zip",
+    "zip:firefox": "wxt zip --browser firefox",
+    "zip:edge": "wxt zip --browser edge",
+    "check": "tsc --noEmit"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "wxt": "^0.20.0",
+    "typescript": "^5.7.0"
+  }
+}

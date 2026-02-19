@@ -15,7 +15,6 @@ import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
 import {
   ArrowLeft,
-  Building2,
   Users,
   Archive,
   CreditCard,

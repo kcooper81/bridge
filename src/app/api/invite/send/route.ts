@@ -3,6 +3,7 @@ import { Resend } from "resend";
 import { createServiceClient } from "@/lib/supabase/server";
 import { PLAN_LIMITS } from "@/lib/constants";
 import { limiters, checkRateLimit } from "@/lib/rate-limit";
+import { buildEmail } from "@/lib/email-template";
 
 export async function POST(request: NextRequest) {
   try {
@@ -153,19 +154,24 @@ export async function POST(request: NextRequest) {
         process.env.RESEND_FROM_EMAIL ||
         "TeamPrompt <noreply@teamprompt.app>";
 
+      const inviteUrl = `${siteUrl}/invite?token=${invite.token}`;
+      const senderName = profile.name || "A team member";
+      const orgName = org?.name || "their team";
+
       await resend.emails.send({
         from: fromEmail,
         to: email,
-        subject: `You're invited to join ${org?.name || "a team"} on TeamPrompt`,
-        html: `
-          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 560px; margin: 0 auto; padding: 40px 20px;">
-            <h2 style="color: #2563EB;">You've been invited!</h2>
-            <p>${profile.name || "A team member"} has invited you to join <strong>${org?.name || "their team"}</strong> on TeamPrompt as a <strong>${role}</strong>.</p>
-            <p>TeamPrompt helps teams manage, share, and secure their AI prompts across 15+ AI tools.</p>
-            <a href="${siteUrl}/invite?token=${invite.token}" style="display: inline-block; background: #2563EB; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; margin: 16px 0;">Accept Invite</a>
-            <p style="color: #7f849c; font-size: 14px;">This invite expires in 7 days.</p>
-          </div>
-        `,
+        subject: `You're invited to join ${orgName} on TeamPrompt`,
+        html: buildEmail({
+          heading: "You've been invited!",
+          body: `
+            <p><strong>${senderName}</strong> has invited you to join <strong>${orgName}</strong> on TeamPrompt as a <strong>${role}</strong>.</p>
+            <p>TeamPrompt helps teams manage, share, and secure their AI prompts across ChatGPT, Claude, Gemini, and more.</p>
+          `,
+          ctaText: "Accept Invite",
+          ctaUrl: inviteUrl,
+          footerNote: "This invite expires in 7 days.",
+        }),
       });
     } catch (emailError) {
       console.error("Failed to send invite email:", emailError);

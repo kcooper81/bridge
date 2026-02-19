@@ -5,8 +5,6 @@ import { createClient } from "@/lib/supabase/client";
 import {
   Card,
   CardContent,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -64,7 +62,6 @@ export default function OrganizationsPage() {
     }
 
     // Get subscriptions, member counts, prompt counts
-    const orgIds = allOrgs.map((o) => o.id);
     const [subsResult, membersResult, promptsResult] = await Promise.all([
       supabase.from("subscriptions").select("org_id, plan"),
       supabase.from("profiles").select("org_id"),

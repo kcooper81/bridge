@@ -82,7 +82,7 @@ function NavContent({ onItemClick }: { onItemClick?: () => void }) {
     <div className="flex h-full flex-col">
       {/* Brand */}
       <div className="flex items-center gap-3 px-5 py-5 border-b border-border/50">
-        <Image src="/logo.svg" alt="TeamPrompt" width={36} height={36} className="rounded-xl shadow-md" />
+        <Image src={theme === "dark" ? "/logo-dark.svg" : "/logo.svg"} alt="TeamPrompt" width={36} height={36} className="rounded-xl shadow-md" />
         <span className="text-xl font-bold tracking-tight">TeamPrompt</span>
       </div>
 

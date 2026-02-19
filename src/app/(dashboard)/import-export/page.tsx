@@ -13,14 +13,24 @@ import { Download, Import, Loader2, Upload } from "lucide-react";
 import { exportPack, importPack } from "@/lib/vault-api";
 import { toast } from "sonner";
 import { trackExport, trackImport } from "@/lib/analytics";
+import { NoOrgBanner } from "@/components/dashboard/no-org-banner";
 
 export default function ImportExportPage() {
-  const { prompts, refresh } = useOrg();
+  const { prompts, refresh, noOrg } = useOrg();
   const { canAccess } = useSubscription();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [packName, setPackName] = useState("My Prompt Pack");
   const [importing, setImporting] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  if (noOrg) {
+    return (
+      <>
+        <PageHeader title="Import / Export" />
+        <NoOrgBanner />
+      </>
+    );
+  }
 
   if (!canAccess("import_export")) {
     return (

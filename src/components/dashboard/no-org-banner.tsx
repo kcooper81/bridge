@@ -1,13 +1,8 @@
 "use client";
 
-import { useOrg } from "@/components/providers/org-provider";
 import { Building, Mail } from "lucide-react";
 
 export function NoOrgBanner() {
-  const { noOrg, loading } = useOrg();
-
-  if (loading || !noOrg) return null;
-
   return (
     <div className="flex flex-col items-center justify-center py-20 text-center">
       <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 mb-6">

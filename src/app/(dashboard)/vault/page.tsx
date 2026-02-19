@@ -65,6 +65,7 @@ import { formatDistanceToNow } from "date-fns";
 import { trackPurchase, trackPromptUsed } from "@/lib/analytics";
 import type { Prompt, PromptStatus } from "@/lib/types";
 import { PageSkeleton } from "@/components/dashboard/skeleton-loader";
+import { NoOrgBanner } from "@/components/dashboard/no-org-banner";
 
 const STATUS_TABS: { label: string; value: PromptStatus | "all" }[] = [
   { label: "All", value: "all" },
@@ -82,7 +83,7 @@ const STATUS_BADGE_VARIANT: Record<PromptStatus, "default" | "secondary" | "dest
 };
 
 export default function VaultPage() {
-  const { prompts, folders, departments, guidelines, loading, refresh, currentUserRole } = useOrg();
+  const { prompts, folders, departments, guidelines, loading, refresh, currentUserRole, noOrg } = useOrg();
   const { checkLimit } = useSubscription();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -286,6 +287,15 @@ export default function VaultPage() {
   }
 
   if (loading) return <PageSkeleton />;
+
+  if (noOrg) {
+    return (
+      <>
+        <PageHeader title="Prompts" description="Manage and organize your team's AI prompts" />
+        <NoOrgBanner />
+      </>
+    );
+  }
 
   return (
     <>

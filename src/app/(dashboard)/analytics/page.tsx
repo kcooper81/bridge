@@ -19,9 +19,10 @@ import {
 } from "lucide-react";
 import { getAnalytics } from "@/lib/vault-api";
 import type { Analytics } from "@/lib/types";
+import { NoOrgBanner } from "@/components/dashboard/no-org-banner";
 
 export default function AnalyticsPage() {
-  const { departments, members } = useOrg();
+  const { departments, members, noOrg } = useOrg();
   const { canAccess } = useSubscription();
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [loading, setLoading] = useState(true);
@@ -34,6 +35,15 @@ export default function AnalyticsPage() {
       })
       .finally(() => setLoading(false));
   }, []);
+
+  if (noOrg) {
+    return (
+      <>
+        <PageHeader title="Analytics" />
+        <NoOrgBanner />
+      </>
+    );
+  }
 
   if (!canAccess("analytics")) {
     return (

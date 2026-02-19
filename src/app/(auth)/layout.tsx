@@ -28,7 +28,8 @@ export default function AuthLayout({
         href="/"
         className="relative z-10 flex items-center gap-2 mb-8 text-2xl font-bold text-foreground"
       >
-        <Image src="/logo.svg" alt="TeamPrompt" width={32} height={32} className="rounded-lg" />
+        <Image src="/logo.svg" alt="TeamPrompt" width={32} height={32} className="rounded-lg dark:hidden" />
+        <Image src="/logo-dark.svg" alt="TeamPrompt" width={32} height={32} className="rounded-lg hidden dark:block" />
         TeamPrompt
       </Link>
 

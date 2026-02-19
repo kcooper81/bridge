@@ -7,7 +7,6 @@ import { ImpersonationProvider } from "@/hooks/use-impersonation";
 import { ImpersonationBanner } from "@/components/admin/impersonation-banner";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { ExtensionInstallBanner } from "@/components/dashboard/extension-install-banner";
-import { NoOrgBanner } from "@/components/dashboard/no-org-banner";
 
 export default async function DashboardLayout({
   children,
@@ -38,7 +37,6 @@ export default async function DashboardLayout({
               <Sidebar />
               <main className="flex-1 overflow-y-auto scrollbar-thin p-4 pt-16 md:p-6 md:pt-6">
                 <ExtensionInstallBanner />
-                <NoOrgBanner />
                 {children}
               </main>
             </div>

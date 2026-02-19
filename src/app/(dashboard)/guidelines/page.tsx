@@ -21,6 +21,7 @@ import { Separator } from "@/components/ui/separator";
 import { TagInput } from "@/components/ui/tag-input";
 import { CategoryCombobox } from "@/components/ui/category-combobox";
 import { BookOpen, Download, Pencil, Plus, Trash2 } from "lucide-react";
+import { NoOrgBanner } from "@/components/dashboard/no-org-banner";
 import {
   saveGuidelineApi,
   deleteGuidelineApi,
@@ -30,7 +31,7 @@ import { toast } from "sonner";
 import type { Guideline, GuidelineRules } from "@/lib/types";
 
 export default function GuidelinesPage() {
-  const { guidelines, loading, refresh } = useOrg();
+  const { guidelines, loading, refresh, noOrg } = useOrg();
   const { checkLimit } = useSubscription();
   const [modalOpen, setModalOpen] = useState(false);
   const [editGuideline, setEditGuideline] = useState<Guideline | null>(null);
@@ -153,6 +154,15 @@ export default function GuidelinesPage() {
             <div key={i} className="h-32 rounded-lg bg-muted animate-pulse" />
           ))}
         </div>
+      </>
+    );
+  }
+
+  if (noOrg) {
+    return (
+      <>
+        <PageHeader title="Guidelines" description="Define quality guidelines for your team's prompts" />
+        <NoOrgBanner />
       </>
     );
   }

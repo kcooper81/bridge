@@ -24,13 +24,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { FolderOpen, Pencil, Plus, Trash2 } from "lucide-react";
+import { NoOrgBanner } from "@/components/dashboard/no-org-banner";
 import { saveCollectionApi, deleteCollectionApi } from "@/lib/vault-api";
 import { toast } from "sonner";
 import { trackCollectionCreated } from "@/lib/analytics";
 import type { Collection, CollectionVisibility } from "@/lib/types";
 
 export default function CollectionsPage() {
-  const { collections, prompts, loading, refresh } = useOrg();
+  const { collections, prompts, loading, refresh, noOrg } = useOrg();
   const [modalOpen, setModalOpen] = useState(false);
   const [editCollection, setEditCollection] = useState<Collection | null>(null);
 
@@ -98,6 +99,15 @@ export default function CollectionsPage() {
             <div key={i} className="h-32 rounded-lg bg-muted animate-pulse" />
           ))}
         </div>
+      </>
+    );
+  }
+
+  if (noOrg) {
+    return (
+      <>
+        <PageHeader title="Collections" description="Group related prompts into collections" />
+        <NoOrgBanner />
       </>
     );
   }

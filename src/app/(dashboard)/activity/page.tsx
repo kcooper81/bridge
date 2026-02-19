@@ -25,6 +25,7 @@ import { useSubscription } from "@/components/providers/subscription-provider";
 import { getConversationLogs } from "@/lib/vault-api";
 import { formatDistanceToNow } from "date-fns";
 import type { ConversationLog } from "@/lib/types";
+import { NoOrgBanner } from "@/components/dashboard/no-org-banner";
 
 const AI_TOOLS = [
   { value: "__all__", label: "All AI Tools" },
@@ -82,7 +83,7 @@ function ToolIcon({ tool }: { tool: string }) {
 }
 
 export default function ActivityPage() {
-  const { currentUserRole } = useOrg();
+  const { currentUserRole, noOrg } = useOrg();
   const { canAccess } = useSubscription();
   const [logs, setLogs] = useState<ConversationLog[]>([]);
   const [total, setTotal] = useState(0);
@@ -112,6 +113,15 @@ export default function ActivityPage() {
   }, [fetchLogs]);
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
+
+  if (noOrg) {
+    return (
+      <>
+        <PageHeader title="Activity Log" />
+        <NoOrgBanner />
+      </>
+    );
+  }
 
   if (!["admin", "manager"].includes(currentUserRole)) {
     return (

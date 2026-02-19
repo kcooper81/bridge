@@ -49,6 +49,7 @@ import { testPattern } from "@/lib/security/scanner";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { trackGuardrailCreated } from "@/lib/analytics";
+import { NoOrgBanner } from "@/components/dashboard/no-org-banner";
 import type {
   SecurityCategory,
   SecurityPatternType,
@@ -58,7 +59,7 @@ import type {
 } from "@/lib/types";
 
 export default function GuardrailsPage() {
-  const { org, currentUserRole } = useOrg();
+  const { org, currentUserRole, noOrg } = useOrg();
   const { canAccess } = useSubscription();
   const canEdit = currentUserRole === "admin" || currentUserRole === "manager";
   const [rules, setRules] = useState<SecurityRule[]>([]);
@@ -233,6 +234,15 @@ export default function GuardrailsPage() {
             100
         )
       : 0;
+
+  if (noOrg) {
+    return (
+      <>
+        <PageHeader title="AI Guardrails" description="Protect sensitive data from leaking into AI prompts" />
+        <NoOrgBanner />
+      </>
+    );
+  }
 
   return (
     <>

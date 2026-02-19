@@ -52,7 +52,7 @@ export function MarketingHeader() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2.5">
-          <Image src="/logo.svg" alt="TeamPrompt" width={28} height={28} className="rounded-lg" />
+          <Image src={isHomepage && !scrolled ? "/logo-dark.svg" : "/logo.svg"} alt="TeamPrompt" width={28} height={28} className="rounded-lg" />
           <span className={cn("text-lg font-bold transition-colors", logoTextClass)}>
             TeamPrompt
           </span>

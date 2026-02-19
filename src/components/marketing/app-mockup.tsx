@@ -72,7 +72,7 @@ export function AppMockup({
           {/* Logo */}
           <div className="flex items-center gap-2 mb-4 px-1">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.svg" alt="" className="w-6 h-6" />
+            <img src="/brand/logo-icon-blue.svg" alt="" className="w-6 h-6 rounded" />
             <span className="text-xs font-semibold text-foreground">
               TeamPrompt
             </span>

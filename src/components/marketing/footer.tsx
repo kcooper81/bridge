@@ -31,7 +31,7 @@ export function MarketingFooter() {
           {/* Brand */}
           <div className="col-span-2">
             <div className="flex items-center gap-2.5 mb-4">
-              <Image src="/logo.svg" alt="TeamPrompt" width={28} height={28} className="rounded-lg" />
+              <Image src="/logo-dark.svg" alt="TeamPrompt" width={28} height={28} className="rounded-lg" />
               <span className="font-bold text-white">TeamPrompt</span>
             </div>
             <p className="text-sm leading-relaxed max-w-xs">

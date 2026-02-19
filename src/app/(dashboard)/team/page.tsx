@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/select";
 import { ArrowLeft, Loader2, Mail, Pencil, Plus, Trash2, UserPlus, Users, X } from "lucide-react";
 import { ExtensionStatusBadge } from "@/components/dashboard/extension-status-badge";
+import { NoOrgBanner } from "@/components/dashboard/no-org-banner";
 import {
   saveTeamApi,
   deleteTeamApi,
@@ -42,7 +43,7 @@ import { trackInviteSent } from "@/lib/analytics";
 import type { Invite, Team, UserRole } from "@/lib/types";
 
 export default function TeamPage() {
-  const { teams, members, currentUserRole, loading, refresh } = useOrg();
+  const { teams, members, currentUserRole, loading, refresh, noOrg } = useOrg();
   const { checkLimit } = useSubscription();
 
   const [teamModalOpen, setTeamModalOpen] = useState(false);
@@ -81,6 +82,15 @@ export default function TeamPage() {
             </div>
           ))}
         </div>
+      </>
+    );
+  }
+
+  if (noOrg) {
+    return (
+      <>
+        <PageHeader title="Team" description="Manage your teams and members" />
+        <NoOrgBanner />
       </>
     );
   }

@@ -13,7 +13,8 @@ export default function NotFound() {
       />
       <div className="relative z-10 text-center max-w-md">
         <Link href="/" className="inline-flex items-center gap-2 mb-8">
-          <Image src="/logo.svg" alt="TeamPrompt" width={32} height={32} />
+          <Image src="/logo.svg" alt="TeamPrompt" width={32} height={32} className="dark:hidden" />
+          <Image src="/logo-dark.svg" alt="TeamPrompt" width={32} height={32} className="hidden dark:block" />
         </Link>
         <h1 className="text-6xl font-bold text-foreground mb-4">404</h1>
         <p className="text-lg text-muted-foreground mb-8">

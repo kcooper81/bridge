@@ -27,7 +27,14 @@ import {
   ShieldCheck,
   UserX,
 } from "lucide-react";
+import {
+  generateFAQSchema,
+  generateBreadcrumbSchema,
+} from "@/lib/seo/schemas";
 import type { IndustryPageData } from "../_data/types";
+
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL || "https://teamprompt.app";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Shield,
@@ -54,6 +61,24 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 export function IndustryPage({ data }: { data: IndustryPageData }) {
   return (
     <>
+      {/* Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify([
+            generateFAQSchema(data.faqs),
+            generateBreadcrumbSchema([
+              { name: "Home", url: SITE_URL },
+              { name: "Industries", url: `${SITE_URL}/industries` },
+              {
+                name: data.industry,
+                url: `${SITE_URL}/industries/${data.slug}`,
+              },
+            ]),
+          ]),
+        }}
+      />
+
       {/* ━━━ HERO ━━━ */}
       <section className="relative overflow-hidden bg-zinc-950 text-white">
         <div

@@ -4,6 +4,7 @@ import { FAQSection } from "@/components/marketing/faq-section";
 import { CTASection } from "@/components/marketing/cta-section";
 import { SectionLabel } from "@/components/marketing/section-label";
 import { PricingGrid } from "./_components/pricing-grid";
+import { generateFAQSchema } from "@/lib/seo/schemas";
 
 export const metadata: Metadata = generatePageMetadata({
   title: "Pricing",
@@ -47,6 +48,13 @@ const faqs = [
 
 export default function PricingPage() {
   return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(generateFAQSchema(faqs)),
+        }}
+      />
     <div className="py-20 sm:py-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         {/* Hero */}
@@ -96,5 +104,6 @@ export default function PricingPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }

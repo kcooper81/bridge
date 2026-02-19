@@ -5,6 +5,7 @@ import { generatePageMetadata } from "@/lib/seo/metadata";
 import {
   generateSoftwareApplicationSchema,
   generateOrganizationSchema,
+  generateWebSiteSchema,
 } from "@/lib/seo/schemas";
 import { SectionLabel } from "@/components/marketing/section-label";
 import { StatsRow } from "@/components/marketing/stats-row";
@@ -49,6 +50,7 @@ export default function LandingPage() {
           __html: JSON.stringify([
             generateSoftwareApplicationSchema(),
             generateOrganizationSchema(),
+            generateWebSiteSchema(),
           ]),
         }}
       />

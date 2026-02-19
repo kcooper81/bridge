@@ -17,13 +17,19 @@ const logos = [
     label: "Icon — Light",
     file: "/brand/logo-icon.svg",
     bg: "bg-white",
-    desc: "For light backgrounds",
+    desc: "Dark logo for light backgrounds",
   },
   {
     label: "Icon — Dark",
     file: "/brand/logo-icon-dark.svg",
     bg: "bg-zinc-900",
-    desc: "For dark backgrounds",
+    desc: "White logo for dark backgrounds",
+  },
+  {
+    label: "Icon — Blue",
+    file: "/brand/logo-icon-blue.svg",
+    bg: "bg-zinc-100",
+    desc: "White on blue — social media, extensions",
   },
   {
     label: "Wordmark — Light",

@@ -1,0 +1,37 @@
+# TeamPrompt
+
+> AI Prompt Management for Teams
+
+TeamPrompt is a SaaS platform that helps organizations manage, share, and secure their AI prompts across tools like ChatGPT, Claude, Gemini, Microsoft Copilot, and Perplexity.
+
+## Core Features
+
+- **Shared Prompt Library**: Create, organize, and share approved prompts across your team with folders, tags, and departments.
+- **Template System**: Prompts with fill-in variables that adapt to any context.
+- **Quality Standards**: Set writing guidelines and tone controls to ensure consistent AI outputs.
+- **DLP Security Scanning**: Real-time data loss prevention catches sensitive content before it reaches AI tools.
+- **Conversation Logging**: Full audit trail of every AI interaction across your organization.
+- **Browser Extension**: Insert prompts directly into ChatGPT, Claude, Gemini, Copilot, and Perplexity.
+- **Collections**: Curate prompt collections for specific workflows, teams, or use cases.
+- **Analytics**: Track prompt usage, team adoption, and AI interaction patterns.
+
+## Key Pages
+
+- Homepage: https://teamprompt.app
+- Features: https://teamprompt.app/features
+- Pricing: https://teamprompt.app/pricing
+- Security: https://teamprompt.app/security
+- Enterprise: https://teamprompt.app/enterprise
+
+## Industry Solutions
+
+- Healthcare: https://teamprompt.app/industries/healthcare
+- Legal: https://teamprompt.app/industries/legal
+- Technology: https://teamprompt.app/industries/technology
+- Finance: https://teamprompt.app/industries/finance
+- Government: https://teamprompt.app/industries/government
+
+## Contact
+
+- Website: https://teamprompt.app
+- Support: support@teamprompt.app

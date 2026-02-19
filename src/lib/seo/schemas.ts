@@ -68,7 +68,42 @@ export function generateOrganizationSchema() {
     "@type": "Organization",
     name: "TeamPrompt",
     url: SITE_URL,
-    description: "Prompt management for teams that use AI",
+    logo: `${SITE_URL}/brand/logo-icon-blue.svg`,
+    description:
+      "AI prompt management platform for teams. Shared libraries, quality standards, DLP security, and usage analytics.",
+    email: "support@teamprompt.app",
+    sameAs: [],
+  };
+}
+
+export function generateWebSiteSchema() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "TeamPrompt",
+    url: SITE_URL,
+    description:
+      "AI Prompt Management for Teams — shared libraries, quality guidelines, and security guardrails.",
+    publisher: {
+      "@type": "Organization",
+      name: "TeamPrompt",
+      logo: `${SITE_URL}/brand/logo-icon-blue.svg`,
+    },
+  };
+}
+
+export function generateBreadcrumbSchema(
+  items: { name: string; url: string }[]
+) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((item, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: item.name,
+      item: item.url,
+    })),
   };
 }
 

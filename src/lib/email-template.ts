@@ -43,8 +43,8 @@ export function buildEmail(options: EmailOptions): string {
             <td style="background-color: ${DARK_BG}; padding: 24px 32px; border-radius: 12px 12px 0 0;">
               <table role="presentation" cellpadding="0" cellspacing="0">
                 <tr>
-                  <td style="width: 32px; height: 32px; background-color: ${BRAND_COLOR}; border-radius: 8px; text-align: center; vertical-align: middle;">
-                    <span style="color: white; font-weight: 700; font-size: 16px; line-height: 32px;">T</span>
+                  <td style="width: 32px; height: 32px; vertical-align: middle;">
+                    <img src="https://teamprompt.app/brand/logo-icon-blue.svg" alt="TeamPrompt" width="32" height="32" style="display: block; border-radius: 8px;" />
                   </td>
                   <td style="padding-left: 12px;">
                     <span style="color: ${LIGHT_TEXT}; font-size: 18px; font-weight: 700;">TeamPrompt</span>

@@ -17,6 +17,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Separator } from "@/components/ui/separator";
+import { TagInput } from "@/components/ui/tag-input";
+import { CategoryCombobox } from "@/components/ui/category-combobox";
 import { BookOpen, Download, Pencil, Plus, Trash2 } from "lucide-react";
 import {
   saveGuidelineApi,
@@ -36,9 +39,11 @@ export default function GuidelinesPage() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
-  const [doList, setDoList] = useState("");
-  const [dontList, setDontList] = useState("");
-  const [bannedWords, setBannedWords] = useState("");
+  const [doList, setDoList] = useState<string[]>([]);
+  const [dontList, setDontList] = useState<string[]>([]);
+  const [bannedWords, setBannedWords] = useState<string[]>([]);
+  const [toneRules, setToneRules] = useState<string[]>([]);
+  const [requiredTags, setRequiredTags] = useState<string[]>([]);
   const [minLength, setMinLength] = useState("");
   const [maxLength, setMaxLength] = useState("");
 
@@ -52,9 +57,11 @@ export default function GuidelinesPage() {
       setName(g.name);
       setDescription(g.description || "");
       setCategory(g.category || "");
-      setDoList((g.rules.doList || []).join("\n"));
-      setDontList((g.rules.dontList || []).join("\n"));
-      setBannedWords((g.rules.bannedWords || []).join(", "));
+      setDoList(g.rules.doList || []);
+      setDontList(g.rules.dontList || []);
+      setBannedWords(g.rules.bannedWords || []);
+      setToneRules(g.rules.toneRules || []);
+      setRequiredTags(g.rules.requiredTags || []);
       setMinLength(g.rules.minLength?.toString() || "");
       setMaxLength(g.rules.maxLength?.toString() || "");
     } else {
@@ -62,9 +69,11 @@ export default function GuidelinesPage() {
       setName("");
       setDescription("");
       setCategory("");
-      setDoList("");
-      setDontList("");
-      setBannedWords("");
+      setDoList([]);
+      setDontList([]);
+      setBannedWords([]);
+      setToneRules([]);
+      setRequiredTags([]);
       setMinLength("");
       setMaxLength("");
     }
@@ -78,9 +87,11 @@ export default function GuidelinesPage() {
     }
     try {
       const rules: GuidelineRules = {
-        doList: doList.split("\n").map((s) => s.trim()).filter(Boolean),
-        dontList: dontList.split("\n").map((s) => s.trim()).filter(Boolean),
-        bannedWords: bannedWords.split(",").map((s) => s.trim()).filter(Boolean),
+        ...(doList.length > 0 && { doList }),
+        ...(dontList.length > 0 && { dontList }),
+        ...(bannedWords.length > 0 && { bannedWords }),
+        ...(toneRules.length > 0 && { toneRules }),
+        ...(requiredTags.length > 0 && { requiredTags }),
         ...(minLength && { minLength: parseInt(minLength) }),
         ...(maxLength && { maxLength: parseInt(maxLength) }),
       };
@@ -213,13 +224,16 @@ export default function GuidelinesPage() {
       )}
 
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-        <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editGuideline ? "Edit Guideline" : "New Guideline"}</DialogTitle>
           </DialogHeader>
+
+          {/* Section 1: Basic Info */}
           <div className="space-y-4">
+            <h4 className="text-sm font-medium text-muted-foreground">Basic Info</h4>
             <div className="space-y-2">
-              <Label>Name</Label>
+              <Label>Name *</Label>
               <Input value={name} onChange={(e) => setName(e.target.value)} />
             </div>
             <div className="space-y-2">
@@ -228,20 +242,38 @@ export default function GuidelinesPage() {
             </div>
             <div className="space-y-2">
               <Label>Category</Label>
-              <Input value={category} onChange={(e) => setCategory(e.target.value)} placeholder="e.g., writing, development" />
+              <CategoryCombobox value={category} onChange={setCategory} />
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Section 2: Content Rules */}
+          <div className="space-y-4">
+            <h4 className="text-sm font-medium text-muted-foreground">Content Rules</h4>
+            <div className="space-y-2">
+              <Label>Tone Rules</Label>
+              <TagInput value={toneRules} onChange={setToneRules} placeholder="e.g., Use active voice" />
             </div>
             <div className="space-y-2">
-              <Label>Do&apos;s (one per line)</Label>
-              <Textarea value={doList} onChange={(e) => setDoList(e.target.value)} rows={3} />
+              <Label>Do&apos;s</Label>
+              <TagInput value={doList} onChange={setDoList} placeholder="e.g., Include clear objectives" />
             </div>
             <div className="space-y-2">
-              <Label>Don&apos;ts (one per line)</Label>
-              <Textarea value={dontList} onChange={(e) => setDontList(e.target.value)} rows={3} />
+              <Label>Don&apos;ts</Label>
+              <TagInput value={dontList} onChange={setDontList} placeholder="e.g., Avoid jargon without explanation" />
             </div>
             <div className="space-y-2">
-              <Label>Banned Words (comma-separated)</Label>
-              <Input value={bannedWords} onChange={(e) => setBannedWords(e.target.value)} />
+              <Label>Banned Words</Label>
+              <TagInput value={bannedWords} onChange={setBannedWords} placeholder="e.g., synergy" />
             </div>
+          </div>
+
+          <Separator />
+
+          {/* Section 3: Validation Rules */}
+          <div className="space-y-4">
+            <h4 className="text-sm font-medium text-muted-foreground">Validation Rules</h4>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Min Length</Label>
@@ -252,7 +284,12 @@ export default function GuidelinesPage() {
                 <Input type="number" value={maxLength} onChange={(e) => setMaxLength(e.target.value)} />
               </div>
             </div>
+            <div className="space-y-2">
+              <Label>Required Tags</Label>
+              <TagInput value={requiredTags} onChange={setRequiredTags} placeholder="e.g., support" />
+            </div>
           </div>
+
           <div className="mt-4 flex justify-end gap-2">
             <Button variant="outline" onClick={() => setModalOpen(false)}>Cancel</Button>
             <Button onClick={handleSave}>{editGuideline ? "Save" : "Create"}</Button>

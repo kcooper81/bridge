@@ -112,6 +112,23 @@ export const PLAN_DISPLAY: Record<
   },
 };
 
+export const GUIDELINE_CATEGORIES = [
+  { value: "writing",     label: "Writing" },
+  { value: "development", label: "Development" },
+  { value: "design",      label: "Design & Creative" },
+  { value: "support",     label: "Customer Support" },
+  { value: "marketing",   label: "Marketing" },
+  { value: "sales",       label: "Sales" },
+  { value: "hr",          label: "HR & People" },
+  { value: "legal",       label: "Legal & Compliance" },
+  { value: "executive",   label: "Executive" },
+  { value: "analytics",   label: "Data & Analytics" },
+  { value: "product",     label: "Product Management" },
+  { value: "research",    label: "Research & Strategy" },
+  { value: "education",   label: "Education & Training" },
+  { value: "internal",    label: "Internal Comms" },
+] as const;
+
 export interface DefaultGuideline {
   id: string;
   name: string;

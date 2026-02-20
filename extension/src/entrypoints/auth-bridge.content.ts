@@ -51,15 +51,24 @@ export default defineContentScript({
     } | null {
       const cookies = document.cookie.split(";").map((c) => c.trim());
 
-      // Find a cookie name that matches the Supabase auth token pattern
-      const matchingName = cookies
-        .map((c) => c.split("=")[0])
-        .find((name) => name.startsWith("sb-") && name.includes("-auth-token"));
+      // Use the known cookie name if already resolved, otherwise find it
+      let baseName = supabaseCookieName;
 
-      if (!matchingName) return null;
+      if (!baseName) {
+        // Find a cookie name matching the auth token pattern,
+        // but exclude PKCE code-verifier cookies (sb-xxx-auth-token-code-verifier)
+        const matchingName = cookies
+          .map((c) => c.split("=")[0])
+          .find((name) => {
+            if (!name.startsWith("sb-") || !name.includes("-auth-token"))
+              return false;
+            const stripped = name.replace(/\.\d+$/, "");
+            return !stripped.endsWith("-code-verifier");
+          });
 
-      // Get the base name (strip any chunk suffix like .0, .1)
-      const baseName = matchingName.replace(/\.\d+$/, "");
+        if (!matchingName) return null;
+        baseName = matchingName.replace(/\.\d+$/, "");
+      }
 
       // Helper to find a specific cookie value by exact name match
       function getCookieValue(cookieName: string): string | null {
@@ -126,8 +135,8 @@ export default defineContentScript({
 
     let webSessionCleared = false;
     let emptyReadCount = 0;
-    const CLEAR_THRESHOLD = 3;
-    // Cooldown: don't fire SESSION_CLEAR within 60s of a postMessage sync
+    const CLEAR_THRESHOLD = 5;
+    // Cooldown: don't fire SESSION_CLEAR within 120s of a postMessage sync
     let lastDirectSyncAt = 0;
 
     function syncWebToExtension() {
@@ -147,8 +156,8 @@ export default defineContentScript({
       } else if (token) {
         emptyReadCount = 0;
       } else if (!token && lastSyncedToken) {
-        // Don't clear within 60s of a direct session push (postMessage)
-        if (Date.now() - lastDirectSyncAt < 60000) return;
+        // Don't clear within 120s of a direct session push (postMessage)
+        if (Date.now() - lastDirectSyncAt < 120000) return;
         emptyReadCount++;
         if (emptyReadCount >= CLEAR_THRESHOLD) {
           lastSyncedToken = "";
@@ -237,6 +246,9 @@ export default defineContentScript({
     // Check if extension was explicitly logged out — if so, clear web cookies
     // instead of re-syncing them back to the extension.
     async function initSync() {
+      // Pre-resolve the cookie name so getSupabaseSession() can use it
+      await getCookieName();
+
       const { loggedOut } = await browser.storage.local.get(["loggedOut"]);
       if (loggedOut) {
         await clearWebSession();
@@ -270,13 +282,16 @@ export default defineContentScript({
       if (changes.accessToken.newValue && !changes.accessToken.oldValue) {
         syncExtensionToWeb();
       } else if (!changes.accessToken.newValue && changes.accessToken.oldValue) {
-        const webSession = getSupabaseSession();
-        if (webSession) {
+        // Only clear web cookies on EXPLICIT logout (loggedOut flag).
+        // Don't clear on SESSION_CLEAR from cookie polling — it may be a
+        // false positive if cookies are temporarily unreadable.
+        browser.storage.local.get(["loggedOut"]).then(({ loggedOut }) => {
+          if (!loggedOut) return;
           clearWebSession().then(() => {
             sessionStorage.setItem("tp-ext-sync", "1");
             window.location.reload();
           });
-        }
+        });
       }
     });
   },

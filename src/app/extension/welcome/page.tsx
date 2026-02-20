@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useRef, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
@@ -31,6 +31,7 @@ function notifyExtension(session: {
 
 function ExtensionWelcomeContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [mode, setMode] = useState<AuthMode>(
     searchParams.get("mode") === "signin" ? "signin" : "signup"
   );
@@ -42,6 +43,12 @@ function ExtensionWelcomeContent() {
   const [emailSent, setEmailSent] = useState(false);
   const [authSuccess, setAuthSuccess] = useState(false);
   const oauthTriggered = useRef(false);
+  const notified = useRef(false);
+
+  // Show a loading spinner while waiting for session after OAuth redirect
+  const isReturningFromAuth =
+    searchParams.get("auth") === "success" || !!searchParams.get("provider");
+  const [checking, setChecking] = useState(isReturningFromAuth);
 
   const redirectAfterAuth = "/extension/welcome?auth=success";
 
@@ -56,8 +63,21 @@ function ExtensionWelcomeContent() {
     });
   }
 
-  // On mount: check for existing session OR ?auth=success from OAuth redirect
-  // Also handle ?provider= auto-trigger from extension popup OAuth buttons
+  /** Notify extension and transition to success state (idempotent) */
+  function handleAuthSuccess(session: {
+    access_token: string;
+    refresh_token: string;
+    user: unknown;
+  }) {
+    if (notified.current) return;
+    notified.current = true;
+    notifyExtension(session);
+    setAuthSuccess(true);
+    setChecking(false);
+  }
+
+  // On mount: check for existing session OR listen for auth state changes.
+  // Also handle ?provider= auto-trigger from extension popup OAuth buttons.
   useEffect(() => {
     // Auto-trigger OAuth if ?provider= is present (extension popup routed here)
     const provider = searchParams.get("provider") as
@@ -74,21 +94,36 @@ function ExtensionWelcomeContent() {
       return;
     }
 
-    // Check if already authenticated (from ?auth=success or existing session)
-    const hasAuthParam = searchParams.get("auth") === "success";
-
     const supabase = createClient();
+
+    // Listen for auth state changes — catches delayed session establishment
+    // after OAuth redirect (e.g. when getSession() hasn't resolved yet).
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) handleAuthSuccess(session);
+    });
+
+    // Also check immediately
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        setAuthSuccess(true);
-        notifyExtension(session);
-      } else if (hasAuthParam) {
-        // URL says success but no session yet — might still be loading
-        setAuthSuccess(true);
+        handleAuthSuccess(session);
+      } else {
+        // If no session found after 3s, stop the loading spinner
+        setTimeout(() => setChecking(false), 3000);
       }
     });
+
+    return () => subscription.unsubscribe();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Auto-redirect to vault after successful auth
+  useEffect(() => {
+    if (!authSuccess) return;
+    const timer = setTimeout(() => router.push("/vault"), 2500);
+    return () => clearTimeout(timer);
+  }, [authSuccess, router]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -126,15 +161,35 @@ function ExtensionWelcomeContent() {
           return;
         }
         if (data.session) {
-          notifyExtension(data.session);
+          handleAuthSuccess(data.session);
         }
-        setAuthSuccess(true);
       }
     } catch {
       setError("An unexpected error occurred");
     } finally {
       setLoading(false);
     }
+  }
+
+  // Loading state while checking auth after OAuth redirect
+  if (checking) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <div
+          className="fixed inset-0 pointer-events-none"
+          style={{
+            background:
+              "radial-gradient(ellipse at 50% 0%, hsl(var(--primary) / 0.15) 0%, transparent 60%)",
+          }}
+        />
+        <div className="relative z-10 flex flex-col items-center gap-3">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">
+            Connecting your account&hellip;
+          </p>
+        </div>
+      </div>
+    );
   }
 
   // Success state
@@ -155,18 +210,18 @@ function ExtensionWelcomeContent() {
             </div>
             <h1 className="text-2xl font-bold">You&apos;re all set!</h1>
             <p className="mt-2 text-muted-foreground">
-              Your TeamPrompt extension is now connected. Click the extension
-              icon in your browser toolbar to access your prompts.
+              Your TeamPrompt extension is now connected. Redirecting to your
+              dashboard&hellip;
             </p>
-            <div className="mt-6 space-y-3">
-              <Button asChild className="w-full">
-                <Link href="/vault">Go to Dashboard</Link>
-              </Button>
-              <p className="text-xs text-muted-foreground">
-                You can close this tab and start using the extension on any AI
-                tool.
-              </p>
+            <div className="mt-4 flex items-center justify-center gap-2 text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Taking you to your dashboard
             </div>
+            <p className="mt-4 text-xs text-muted-foreground">
+              Or <Link href="/vault" className="underline">click here</Link> if
+              you&apos;re not redirected, or close this tab and use the extension
+              directly.
+            </p>
           </div>
         </div>
       </div>

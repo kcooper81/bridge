@@ -93,12 +93,16 @@ export default defineContentScript({
 
     // ─── Web → Extension Sync ───
 
+    // Track when web just cleared its session so we don't re-push extension tokens
+    let webSessionCleared = false;
+
     function syncWebToExtension() {
       const session = getSupabaseSession();
       const token = session?.access_token || "";
 
       if (token && token !== lastSyncedToken) {
         lastSyncedToken = token;
+        webSessionCleared = false;
         browser.runtime.sendMessage({
           type: "SESSION_SYNC",
           accessToken: session!.access_token,
@@ -107,11 +111,15 @@ export default defineContentScript({
         });
       } else if (!token && lastSyncedToken) {
         lastSyncedToken = "";
+        webSessionCleared = true;
         browser.runtime.sendMessage({ type: "SESSION_CLEAR" });
       }
     }
 
     // ─── Extension → Web Sync ───
+
+    // Auth pages where the user may have intentionally signed out
+    const AUTH_PATHS = /^\/(login|signup|forgot-password|reset-password|logout)(\/|$)/;
 
     async function syncExtensionToWeb() {
       // Guard against reload loops: if we just reloaded for sync, skip once
@@ -119,6 +127,12 @@ export default defineContentScript({
         sessionStorage.removeItem("tp-ext-sync");
         return;
       }
+
+      // Don't push extension session on auth pages — user may have just signed out
+      if (AUTH_PATHS.test(location.pathname)) return;
+
+      // Don't re-push if the web just cleared its session (sign-out detected)
+      if (webSessionCleared) return;
 
       // If web already has a session, nothing to do
       const webSession = getSupabaseSession();
@@ -190,11 +204,14 @@ export default defineContentScript({
         // Extension just logged in — push session to web
         syncExtensionToWeb();
       } else if (!changes.accessToken.newValue && changes.accessToken.oldValue) {
-        // Extension just logged out — clear web cookie and reload
-        clearWebSession().then(() => {
-          sessionStorage.setItem("tp-ext-sync", "1");
-          window.location.reload();
-        });
+        // Extension just logged out — clear web cookie only if web still has one
+        const webSession = getSupabaseSession();
+        if (webSession) {
+          clearWebSession().then(() => {
+            sessionStorage.setItem("tp-ext-sync", "1");
+            window.location.reload();
+          });
+        }
       }
     });
   },

@@ -2,12 +2,12 @@ const puppeteer = require("puppeteer");
 const path = require("path");
 const fs = require("fs");
 
-// The TeamPrompt logo shape (from logo-dark.svg) rendered in blue on transparent bg
+// The TeamPrompt logo shape (from logo.svg) rendered in dark/black on transparent bg
 // This is the "no background square" version for the extension icon
 const LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 432 320.9" fill="none">
-  <circle cx="157.7" cy="167.7" r="23.2" fill="#3B82F6"/>
-  <circle cx="279.7" cy="167.7" r="23.2" fill="#3B82F6"/>
-  <path fill="#3B82F6" d="M351.4,68.2c-21.3-10.5-52.4-13.8-77.1-23.6-33-13-46.9-25.1-55.8-25.1s-16.8,8.2-49.1,21.6c-25.9,10.8-49.8,16.2-68,21.1C51.1,72.3,13.2,116.6,13.2,169.8v17.8c0,60.6,49.1,109.7,109.7,109.7h221.8s-12.9-51.6-56.3-51.6h-150c-38.5,0-69.8-31.8-69.8-71.1v-.5c0-39.3,31.2-71.1,69.8-71.1h150.2c38.5,0,69.8,31.8,69.8,71.1v.5c0,1.5,0,2.9-.1,4.3-.9,16-1.4,84.7-1.5,107.8,37.2-17.6,62.9-55.3,62.9-99.1v-17.8c0-46-28.3-85.4-68.5-101.7Z"/>
+  <circle cx="157.7" cy="167.7" r="23.2" fill="#0f1d2d"/>
+  <circle cx="279.7" cy="167.7" r="23.2" fill="#0f1d2d"/>
+  <path fill="#0f1d2d" d="M351.4,68.2c-21.3-10.5-52.4-13.8-77.1-23.6-33-13-46.9-25.1-55.8-25.1s-16.8,8.2-49.1,21.6c-25.9,10.8-49.8,16.2-68,21.1C51.1,72.3,13.2,116.6,13.2,169.8v17.8c0,60.6,49.1,109.7,109.7,109.7h221.8s-12.9-51.6-56.3-51.6h-150c-38.5,0-69.8-31.8-69.8-71.1v-.5c0-39.3,31.2-71.1,69.8-71.1h150.2c38.5,0,69.8,31.8,69.8,71.1v.5c0,1.5,0,2.9-.1,4.3-.9,16-1.4,84.7-1.5,107.8,37.2-17.6,62.9-55.3,62.9-99.1v-17.8c0-46-28.3-85.4-68.5-101.7Z"/>
 </svg>`;
 
 function iconHTML(size) {

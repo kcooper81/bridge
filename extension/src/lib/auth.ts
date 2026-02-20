@@ -51,11 +51,30 @@ export async function logout(): Promise<void> {
 }
 
 export function openLogin(): void {
-  browser.tabs.create({ url: CONFIG.SITE_URL + "/login" });
+  browser.tabs.create({ url: CONFIG.SITE_URL + "/extension/welcome" });
 }
 
 export function openSignup(): void {
-  browser.tabs.create({ url: CONFIG.SITE_URL + "/signup" });
+  browser.tabs.create({ url: CONFIG.SITE_URL + "/extension/welcome" });
+}
+
+export function openGoogleAuth(): void {
+  // Opens Supabase Google OAuth flow, redirecting back to the extension welcome page
+  const redirectTo = encodeURIComponent(
+    `${CONFIG.SITE_URL}/auth/callback?next=${encodeURIComponent("/extension/welcome?auth=success")}`
+  );
+  browser.tabs.create({
+    url: `${CONFIG.SUPABASE_URL}/auth/v1/authorize?provider=google&redirect_to=${redirectTo}`,
+  });
+}
+
+export function openGithubAuth(): void {
+  const redirectTo = encodeURIComponent(
+    `${CONFIG.SITE_URL}/auth/callback?next=${encodeURIComponent("/extension/welcome?auth=success")}`
+  );
+  browser.tabs.create({
+    url: `${CONFIG.SUPABASE_URL}/auth/v1/authorize?provider=github&redirect_to=${redirectTo}`,
+  });
 }
 
 export async function refreshSession(): Promise<void> {

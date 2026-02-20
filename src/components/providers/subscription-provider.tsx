@@ -45,7 +45,7 @@ export function SubscriptionProvider({
       .from("profiles")
       .select("org_id")
       .eq("id", user.id)
-      .single();
+      .maybeSingle();
 
     if (profileError || !profile?.org_id) return;
 
@@ -53,7 +53,7 @@ export function SubscriptionProvider({
       .from("subscriptions")
       .select("*")
       .eq("org_id", profile.org_id)
-      .single();
+      .maybeSingle();
 
     if (subError) {
       console.error("Failed to fetch subscription:", subError);

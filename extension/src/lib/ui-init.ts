@@ -1,7 +1,7 @@
 // TeamPrompt Extension — Shared UI Init
 // Used by both popup and sidepanel entrypoints
 
-import { getSession, login, logout, openLogin, openSignup } from "./auth";
+import { getSession, login, logout, openLogin, openSignup, openGoogleAuth, openGithubAuth } from "./auth";
 import { fetchPrompts, fillTemplate, type Prompt } from "./prompts";
 import { CONFIG, API_ENDPOINTS, apiHeaders } from "./config";
 import { detectAiTool } from "./ai-tools";
@@ -16,6 +16,8 @@ export interface UIElements {
   loginError: HTMLElement;
   signupBtn: HTMLButtonElement;
   webLoginBtn: HTMLAnchorElement;
+  googleAuthBtn: HTMLButtonElement;
+  githubAuthBtn: HTMLButtonElement;
   logoutBtn: HTMLButtonElement;
   searchInput: HTMLInputElement;
   promptList: HTMLElement;
@@ -246,6 +248,8 @@ export function initSharedUI(elements: UIElements) {
   });
 
   els.signupBtn.addEventListener("click", openSignup);
+  els.googleAuthBtn.addEventListener("click", openGoogleAuth);
+  els.githubAuthBtn.addEventListener("click", openGithubAuth);
   els.webLoginBtn.addEventListener("click", (e) => {
     e.preventDefault();
     openLogin();

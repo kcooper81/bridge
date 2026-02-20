@@ -72,7 +72,7 @@ export function OrgProvider({ children }: { children: React.ReactNode }) {
       .from("profiles")
       .select("org_id, role, is_super_admin")
       .eq("id", user.id)
-      .single();
+      .maybeSingle();
 
     if (profileError || !profile?.org_id) {
       // Trigger may have failed silently — try the fallback API
@@ -92,7 +92,7 @@ export function OrgProvider({ children }: { children: React.ReactNode }) {
                 .from("profiles")
                 .select("org_id, role, is_super_admin")
                 .eq("id", user.id)
-                .single();
+                .maybeSingle();
               if (retryProfile?.org_id) {
                 // Fall through to normal data loading with the retry profile
                 profile = retryProfile;

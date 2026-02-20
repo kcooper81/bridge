@@ -53,7 +53,7 @@ export function AuthProvider({
         .from("profiles")
         .select("is_super_admin")
         .eq("id", user.id)
-        .single();
+        .maybeSingle();
       setIsSuperAdmin(data?.is_super_admin === true);
     }
     fetchSuperAdmin();

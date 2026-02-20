@@ -13,6 +13,8 @@ document.addEventListener("DOMContentLoaded", () => {
     loginError: document.getElementById("login-error")!,
     signupBtn: document.getElementById("signup-btn") as HTMLButtonElement,
     webLoginBtn: document.getElementById("web-login-btn") as HTMLAnchorElement,
+    googleAuthBtn: document.getElementById("google-auth-btn") as HTMLButtonElement,
+    githubAuthBtn: document.getElementById("github-auth-btn") as HTMLButtonElement,
     logoutBtn: document.getElementById("logout-btn") as HTMLButtonElement,
     searchInput: document.getElementById("search-input") as HTMLInputElement,
     promptList: document.getElementById("prompt-list")!,

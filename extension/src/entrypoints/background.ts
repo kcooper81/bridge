@@ -16,7 +16,7 @@ export default defineBackground(() => {
 
     // Open welcome page on first install (not on updates)
     if (details.reason === "install") {
-      browser.tabs.create({ url: CONFIG.SITE_URL + "/signup?ref=extension" });
+      browser.tabs.create({ url: CONFIG.SITE_URL + "/extension/welcome" });
     }
   });
 

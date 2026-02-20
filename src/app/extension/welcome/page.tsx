@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -12,7 +12,7 @@ import { Loader2, Check, Puzzle, Shield, Zap, MessageSquare } from "lucide-react
 
 type AuthMode = "signin" | "signup";
 
-export default function ExtensionWelcomePage() {
+function ExtensionWelcomeContent() {
   const [mode, setMode] = useState<AuthMode>("signup");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -270,5 +270,17 @@ export default function ExtensionWelcomePage() {
         &copy; {new Date().getFullYear()} TeamPrompt. All rights reserved.
       </p>
     </div>
+  );
+}
+
+export default function ExtensionWelcomePage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    }>
+      <ExtensionWelcomeContent />
+    </Suspense>
   );
 }

@@ -9,9 +9,9 @@ const LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 432 320.9
 </svg>`;
 
 function iconHTML(size) {
-  // Dark rounded box fills the full icon, logo inside with padding
-  const radius = Math.round(size * 0.22); // ~22% corner radius
-  const padding = Math.round(size * 0.15);
+  // Dark rounded box fills the full icon, logo inside with minimal padding
+  const radius = Math.round(size * 0.22);
+  const padding = Math.round(size * 0.10); // tighter padding = bigger logo
   const logoSize = size - padding * 2;
   return `<!DOCTYPE html>
 <html>
@@ -28,7 +28,7 @@ function iconHTML(size) {
   .icon-bg {
     width: ${size}px;
     height: ${size}px;
-    background: #1a1d2e;
+    background: #0f1219;
     border-radius: ${radius}px;
     display: flex;
     align-items: center;

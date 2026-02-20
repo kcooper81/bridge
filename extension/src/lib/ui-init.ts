@@ -210,6 +210,31 @@ function escapeHtml(str: string): string {
   return div.innerHTML;
 }
 
+// ─── Theme ───
+
+function applyTheme(theme: "light" | "dark") {
+  document.documentElement.setAttribute("data-theme", theme);
+  const sunIcon = document.getElementById("theme-icon-sun");
+  const moonIcon = document.getElementById("theme-icon-moon");
+  if (sunIcon && moonIcon) {
+    // Show sun in dark mode (click to switch to light), moon in light mode
+    sunIcon.classList.toggle("hidden", theme !== "dark");
+    moonIcon.classList.toggle("hidden", theme !== "light");
+  }
+}
+
+async function initTheme() {
+  const { theme } = await browser.storage.local.get(["theme"]);
+  applyTheme(theme || "dark");
+}
+
+async function toggleTheme() {
+  const { theme } = await browser.storage.local.get(["theme"]);
+  const next = (theme || "dark") === "dark" ? "light" : "dark";
+  await browser.storage.local.set({ theme: next });
+  applyTheme(next);
+}
+
 // ─── Init ───
 
 export function initSharedUI(elements: UIElements) {
@@ -318,7 +343,15 @@ export function initSharedUI(elements: UIElements) {
     }
   });
 
-  // Check session and load
+  // Theme toggle
+  const themeToggleBtn = document.getElementById("theme-toggle-btn");
+  if (themeToggleBtn) {
+    themeToggleBtn.addEventListener("click", toggleTheme);
+  }
+
+  // Init theme and check session
+  initTheme();
+
   getSession().then((session) => {
     if (session) {
       showMainView();

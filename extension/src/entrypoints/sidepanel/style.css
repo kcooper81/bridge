@@ -1,4 +1,4 @@
-/* ─── TeamPrompt Extension Side Panel — Matches web app dark theme ─── */
+/* ─── TeamPrompt Extension Side Panel — Matches web app theme ─── */
 
 * {
   margin: 0;
@@ -7,31 +7,53 @@
 }
 
 :root {
-  /* Web app dark theme tokens (HSL → hex) */
-  --bg: #080a10;           /* 230 25% 4% */
-  --card: #101219;         /* 230 22% 8% */
-  --surface: #141722;      /* elevated */
-  --border: #1e2132;       /* 230 15% 15% */
-  --border-light: #2a2e44; /* 232 18% 20% */
-  --input-bg: #1a1d2e;     /* 232 20% 14% */
-  --muted: #1a1d2e;        /* 230 18% 14% */
-  --hover: #1e2132;
-  --active: #252840;
-
-  --text: #eaedf5;         /* 230 33% 94% */
-  --text-secondary: #a0a5bd; /* 231 14% 69% */
-  --text-muted: #7f849c;   /* 231 12% 55% */
-  --text-dim: #5c6078;
-
-  --primary: #3B82F6;      /* 217 91% 60% */
-  --primary-hover: #2563eb;
-  --primary-glow: rgba(59, 130, 246, 0.15);
-  --primary-surface: rgba(59, 130, 246, 0.08);
-
-  --destructive: #f87171;
   --radius: 12px;
   --radius-lg: 16px;
   --transition: 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ─── Dark Theme (default) ─── */
+:root, [data-theme="dark"] {
+  --bg: #080a10;
+  --card: #101219;
+  --surface: #141722;
+  --border: #1e2132;
+  --border-light: #2a2e44;
+  --input-bg: #1a1d2e;
+  --muted: #1a1d2e;
+  --hover: #1e2132;
+  --active: #252840;
+  --text: #eaedf5;
+  --text-secondary: #a0a5bd;
+  --text-muted: #7f849c;
+  --text-dim: #5c6078;
+  --primary: #3B82F6;
+  --primary-hover: #2563eb;
+  --primary-glow: rgba(59, 130, 246, 0.15);
+  --primary-surface: rgba(59, 130, 246, 0.08);
+  --destructive: #f87171;
+}
+
+/* ─── Light Theme ─── */
+[data-theme="light"] {
+  --bg: #f8f9fb;
+  --card: #ffffff;
+  --surface: #f1f3f7;
+  --border: #e2e5eb;
+  --border-light: #d0d4dc;
+  --input-bg: #f1f3f7;
+  --muted: #eef0f4;
+  --hover: #eef0f4;
+  --active: #e2e5eb;
+  --text: #0f1729;
+  --text-secondary: #4b5563;
+  --text-muted: #6b7280;
+  --text-dim: #9ca3af;
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --primary-glow: rgba(37, 99, 235, 0.15);
+  --primary-surface: rgba(37, 99, 235, 0.06);
+  --destructive: #dc2626;
 }
 
 html, body {

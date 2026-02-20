@@ -73,9 +73,9 @@ export function useExtensionDetection(): ExtensionDetectionResult {
     ).chrome;
 
     if (chrome?.runtime?.sendMessage && (chromeId || edgeId)) {
-      function tryPing(
+      const tryPing = (
         extensionId: string
-      ): Promise<{ type?: string; version?: string } | undefined> {
+      ): Promise<{ type?: string; version?: string } | undefined> => {
         return new Promise((res) => {
           try {
             chrome!.runtime!.sendMessage(
@@ -95,7 +95,7 @@ export function useExtensionDetection(): ExtensionDetectionResult {
             res(undefined);
           }
         });
-      }
+      };
 
       (async () => {
         for (const id of [chromeId, edgeId].filter(Boolean) as string[]) {

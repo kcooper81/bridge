@@ -32,7 +32,7 @@ export function MarketingHeader() {
 
   const textClass = isHomepage && !scrolled
     ? "text-zinc-300 hover:text-white"
-    : "text-muted-foreground hover:text-foreground";
+    : "text-foreground/70 hover:text-foreground";
 
   const activeTextClass = isHomepage && !scrolled
     ? "text-white"

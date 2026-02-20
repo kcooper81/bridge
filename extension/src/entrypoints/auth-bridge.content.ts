@@ -1,5 +1,6 @@
 // TeamPrompt Extension — Auth Bridge
 // Content script that runs on teamprompt.app to sync Supabase session
+// Bidirectional: web app ↔ extension
 
 export default defineContentScript({
   matches: ["https://teamprompt.app/*", "http://localhost:3000/*"],
@@ -7,6 +8,21 @@ export default defineContentScript({
 
   main() {
     let lastSyncedToken = "";
+    let supabaseCookieName = "";
+
+    // ─── Cookie Name ───
+
+    async function getCookieName(): Promise<string> {
+      if (supabaseCookieName) return supabaseCookieName;
+      const { supabaseUrl } = await browser.storage.local.get(["supabaseUrl"]);
+      if (supabaseUrl) {
+        const ref = new URL(supabaseUrl).hostname.split(".")[0];
+        supabaseCookieName = `sb-${ref}-auth-token`;
+      }
+      return supabaseCookieName;
+    }
+
+    // ─── Read Web Session (cookies + localStorage) ───
 
     function getSupabaseSession(): {
       access_token: string;
@@ -26,23 +42,18 @@ export default defineContentScript({
 
       // Try cookies (@supabase/ssr stores session in cookies)
       const cookies = document.cookie.split(";").map((c) => c.trim());
-      // Supabase SSR may chunk the cookie: sb-<ref>-auth-token.0, .1, etc.
       const prefix = cookies
         .map((c) => c.split("=")[0])
         .find((name) => name.startsWith("sb-") && name.includes("-auth-token"));
 
       if (prefix) {
-        // Find the base name (remove chunk suffix like .0, .1)
         const baseName = prefix.replace(/\.\d+$/, "");
-
-        // Collect all chunks in order
         const chunks: string[] = [];
         let i = 0;
         while (true) {
           const chunkName = i === 0 ? baseName : `${baseName}.${i}`;
           const match = cookies.find((c) => c.startsWith(chunkName + "="));
           if (!match) {
-            // If i=0, try the unchunked version; if i>0, we're done
             if (i === 0) {
               i++;
               continue;
@@ -53,7 +64,6 @@ export default defineContentScript({
           i++;
         }
 
-        // Also check the non-chunked cookie directly
         if (chunks.length === 0) {
           const direct = cookies.find((c) => c.startsWith(baseName + "="));
           if (direct) {
@@ -64,14 +74,12 @@ export default defineContentScript({
         if (chunks.length > 0) {
           try {
             const raw = chunks.join("");
-            // Cookie might be base64-encoded or raw JSON
             let parsed;
             try {
               parsed = JSON.parse(raw);
             } catch {
               parsed = JSON.parse(atob(raw));
             }
-            // Handle different session shapes
             if (parsed?.access_token) return parsed;
             if (parsed?.[0]?.access_token) return parsed[0];
           } catch {
@@ -83,7 +91,9 @@ export default defineContentScript({
       return null;
     }
 
-    function syncSession() {
+    // ─── Web → Extension Sync ───
+
+    function syncWebToExtension() {
       const session = getSupabaseSession();
       const token = session?.access_token || "";
 
@@ -101,18 +111,91 @@ export default defineContentScript({
       }
     }
 
-    // Sync on page load
-    syncSession();
+    // ─── Extension → Web Sync ───
 
-    // Listen for storage changes from OTHER tabs
+    async function syncExtensionToWeb() {
+      // Guard against reload loops: if we just reloaded for sync, skip once
+      if (sessionStorage.getItem("tp-ext-sync")) {
+        sessionStorage.removeItem("tp-ext-sync");
+        return;
+      }
+
+      // If web already has a session, nothing to do
+      const webSession = getSupabaseSession();
+      if (webSession) return;
+
+      // Check if extension has a session
+      const data = await browser.storage.local.get([
+        "accessToken",
+        "refreshToken",
+        "user",
+      ]);
+      if (!data.accessToken) return;
+
+      const name = await getCookieName();
+      if (!name) return;
+
+      // Build session data matching @supabase/ssr cookie format
+      const sessionData = JSON.stringify({
+        access_token: data.accessToken,
+        refresh_token: data.refreshToken,
+        token_type: "bearer",
+        user: data.user,
+      });
+
+      // Write cookie on this domain (teamprompt.app or localhost)
+      const isSecure = location.protocol === "https:";
+      document.cookie = `${name}=${encodeURIComponent(sessionData)}; path=/; max-age=${60 * 60 * 24 * 365}${isSecure ? "; Secure" : ""}; SameSite=Lax`;
+
+      // Reload so the web app's server-side picks up the cookie
+      sessionStorage.setItem("tp-ext-sync", "1");
+      window.location.reload();
+    }
+
+    async function clearWebSession() {
+      const name = await getCookieName();
+      if (!name) return;
+
+      // Clear main cookie and any chunks (.0, .1, etc.)
+      const expiry = "path=/; max-age=0";
+      document.cookie = `${name}=; ${expiry}`;
+      for (let i = 0; i < 5; i++) {
+        document.cookie = `${name}.${i}=; ${expiry}`;
+      }
+    }
+
+    // ─── Init: Web → Extension ───
+
+    syncWebToExtension();
+
+    // Listen for localStorage changes from other tabs
     window.addEventListener("storage", (e) => {
       if (e.key?.startsWith("sb-") && e.key?.endsWith("-auth-token")) {
-        syncSession();
+        syncWebToExtension();
       }
     });
 
-    // Poll for same-tab changes (storage event doesn't fire for same-tab writes)
-    // This catches signup/login that happens in this tab
-    setInterval(syncSession, 2000);
+    // Poll for same-tab cookie/localStorage changes
+    setInterval(syncWebToExtension, 2000);
+
+    // ─── Init: Extension → Web ───
+
+    syncExtensionToWeb();
+
+    // React to extension login/logout (e.g. user signs in via popup)
+    browser.storage.onChanged.addListener((changes, area) => {
+      if (area !== "local" || !changes.accessToken) return;
+
+      if (changes.accessToken.newValue && !changes.accessToken.oldValue) {
+        // Extension just logged in — push session to web
+        syncExtensionToWeb();
+      } else if (!changes.accessToken.newValue && changes.accessToken.oldValue) {
+        // Extension just logged out — clear web cookie and reload
+        clearWebSession().then(() => {
+          sessionStorage.setItem("tp-ext-sync", "1");
+          window.location.reload();
+        });
+      }
+    });
   },
 });

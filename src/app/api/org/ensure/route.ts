@@ -106,6 +106,27 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Seed a sample prompt so the vault isn't empty
+    await db.from("prompts").insert({
+      org_id: org.id,
+      owner_id: user.id,
+      title: "Weekly Status Update",
+      content:
+        "Summarize my progress this week in a clear, professional format.\n\n" +
+        "**What I accomplished:**\n{{accomplishments}}\n\n" +
+        "**Blockers or challenges:**\n{{blockers}}\n\n" +
+        "**Plan for next week:**\n{{next_week_plan}}\n\n" +
+        "Keep the tone concise and action-oriented. Use bullet points where appropriate.",
+      description:
+        "A template for writing weekly status updates. Fill in the variables and paste into any AI tool.",
+      tags: ["productivity", "template", "weekly-update"],
+      status: "approved",
+      tone: "professional",
+      version: 1,
+      is_template: true,
+      template_variables: ["accomplishments", "blockers", "next_week_plan"],
+    });
+
     return NextResponse.json({ orgId: org.id, created: true });
   } catch (error) {
     console.error("Ensure org error:", error);

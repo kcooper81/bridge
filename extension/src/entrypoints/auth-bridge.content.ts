@@ -119,6 +119,9 @@ export default defineContentScript({
 
     // Track when web just cleared its session so we don't re-push extension tokens
     let webSessionCleared = false;
+    // Debounce SESSION_CLEAR: require consecutive empty reads before clearing
+    let emptyReadCount = 0;
+    const CLEAR_THRESHOLD = 3;
 
     function syncWebToExtension() {
       const session = getSupabaseSession();
@@ -126,6 +129,7 @@ export default defineContentScript({
 
       if (token && token !== lastSyncedToken) {
         lastSyncedToken = token;
+        emptyReadCount = 0;
         webSessionCleared = false;
         browser.runtime.sendMessage({
           type: "SESSION_SYNC",
@@ -133,10 +137,18 @@ export default defineContentScript({
           refreshToken: session!.refresh_token,
           user: session!.user,
         });
+      } else if (token) {
+        // Session still present, reset counter
+        emptyReadCount = 0;
       } else if (!token && lastSyncedToken) {
-        lastSyncedToken = "";
-        webSessionCleared = true;
-        browser.runtime.sendMessage({ type: "SESSION_CLEAR" });
+        // Cookie read returned empty — could be transient (format change, etc.)
+        emptyReadCount++;
+        if (emptyReadCount >= CLEAR_THRESHOLD) {
+          lastSyncedToken = "";
+          emptyReadCount = 0;
+          webSessionCleared = true;
+          browser.runtime.sendMessage({ type: "SESSION_CLEAR" });
+        }
       }
     }
 
@@ -208,9 +220,12 @@ export default defineContentScript({
     window.addEventListener("message", (e) => {
       if (e.origin !== location.origin) return;
       if (e.data?.type === "TP_SESSION_READY" && e.data.accessToken) {
-        // The web app is explicitly sending the session — sync immediately
-        lastSyncedToken = e.data.accessToken;
+        // The web app is explicitly sending the session — sync immediately.
+        // Do NOT set lastSyncedToken here — let the cookie poll manage its own
+        // state independently. This prevents a false SESSION_CLEAR if the poll
+        // can't read cookies (e.g., different encoding after middleware refresh).
         webSessionCleared = false;
+        emptyReadCount = 0;
         browser.runtime.sendMessage({
           type: "SESSION_SYNC",
           accessToken: e.data.accessToken,

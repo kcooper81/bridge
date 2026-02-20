@@ -42,6 +42,7 @@ import {
   Copy,
   Files,
   Heart,
+  Lightbulb,
   MoreHorizontal,
   Pencil,
   Plus,
@@ -333,6 +334,36 @@ export default function VaultPage() {
           icon={<BookOpen className="h-5 w-5" />}
         />
       </div>
+
+      {/* Onboarding card — shows until the user creates their own prompt */}
+      {prompts.length <= 1 && (
+        <div className="mb-4 rounded-lg border border-primary/20 bg-primary/5 p-4">
+          <div className="flex items-start gap-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+              <Lightbulb className="h-5 w-5 text-primary" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold">Welcome to your Prompt Vault</h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {prompts.length === 1
+                  ? "We added a sample template to get you started. Click it to see how prompts work, then create your own."
+                  : "Your vault is where you store, organize, and share AI prompts with your team."}
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2 text-sm text-muted-foreground">
+                <span className="inline-flex items-center gap-1"><Plus className="h-3.5 w-3.5" /> Click <strong className="text-foreground">New Prompt</strong> to create one</span>
+                <span className="hidden sm:inline text-border">|</span>
+                <span className="inline-flex items-center gap-1"><Braces className="h-3.5 w-3.5" /> Use <code className="rounded bg-muted px-1 text-xs">{"{{variables}}"}</code> to make templates</span>
+                <span className="hidden sm:inline text-border">|</span>
+                <span className="inline-flex items-center gap-1"><BookOpen className="h-3.5 w-3.5" /> Add guidelines to enforce quality</span>
+              </div>
+            </div>
+            <Button size="sm" onClick={openNewPrompt} className="shrink-0">
+              <Plus className="mr-1.5 h-3.5 w-3.5" />
+              New Prompt
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Status Tabs */}
       <div className="mb-4 flex gap-1 border-b border-border">

@@ -137,7 +137,8 @@ function renderPrompts() {
     return;
   }
 
-  els.promptList.innerHTML = currentPrompts
+  // Build prompt cards
+  const cardsHtml = currentPrompts
     .map(
       (p) => `
       <div class="prompt-card" data-id="${p.id}">
@@ -158,6 +159,17 @@ function renderPrompts() {
     `
     )
     .join("");
+
+  // Show onboarding tip when user has only the sample prompt
+  const onboardingHtml =
+    currentPrompts.length <= 1 && activeFilter === "all"
+      ? `<div class="onboarding-tip">
+          <strong>Get started:</strong> This is a sample template. Click it to see how it works, then create your own prompts at
+          <a href="${CONFIG.SITE_URL}/vault" target="_blank" rel="noopener">teamprompt.app/vault</a>.
+        </div>`
+      : "";
+
+  els.promptList.innerHTML = cardsHtml + onboardingHtml;
 
   els.promptList.querySelectorAll<HTMLElement>(".prompt-card").forEach((card) => {
     card.addEventListener("click", () => {

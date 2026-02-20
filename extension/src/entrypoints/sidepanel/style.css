@@ -430,6 +430,23 @@ input:focus {
 }
 .empty-state p { font-size: 13px; }
 
+.onboarding-tip {
+  margin: 8px 0 4px;
+  padding: 10px 12px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.onboarding-tip strong { color: var(--text); }
+.onboarding-tip a {
+  color: var(--primary);
+  text-decoration: none;
+}
+.onboarding-tip a:hover { text-decoration: underline; }
+
 /* ─── Detail View ─── */
 .detail-toolbar {
   display: flex;

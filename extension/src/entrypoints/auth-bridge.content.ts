@@ -6,6 +6,8 @@ export default defineContentScript({
   runAt: "document_idle",
 
   main() {
+    let lastSyncedToken = "";
+
     function getSupabaseSession(): {
       access_token: string;
       refresh_token: string;
@@ -23,28 +25,36 @@ export default defineContentScript({
       return null;
     }
 
-    // Send session to extension on page load
-    const session = getSupabaseSession();
-    if (session?.access_token) {
-      browser.runtime.sendMessage({
-        type: "SESSION_SYNC",
-        accessToken: session.access_token,
-        refreshToken: session.refresh_token,
-        user: session.user,
-      });
+    function syncSession() {
+      const session = getSupabaseSession();
+      const token = session?.access_token || "";
+
+      if (token && token !== lastSyncedToken) {
+        lastSyncedToken = token;
+        browser.runtime.sendMessage({
+          type: "SESSION_SYNC",
+          accessToken: session!.access_token,
+          refreshToken: session!.refresh_token,
+          user: session!.user,
+        });
+      } else if (!token && lastSyncedToken) {
+        lastSyncedToken = "";
+        browser.runtime.sendMessage({ type: "SESSION_CLEAR" });
+      }
     }
 
-    // Listen for storage changes (login/logout in web app)
+    // Sync on page load
+    syncSession();
+
+    // Listen for storage changes from OTHER tabs
     window.addEventListener("storage", (e) => {
       if (e.key?.startsWith("sb-") && e.key?.endsWith("-auth-token")) {
-        const newSession = e.newValue ? JSON.parse(e.newValue) : null;
-        browser.runtime.sendMessage({
-          type: newSession ? "SESSION_SYNC" : "SESSION_CLEAR",
-          accessToken: newSession?.access_token,
-          refreshToken: newSession?.refresh_token,
-          user: newSession?.user,
-        });
+        syncSession();
       }
     });
+
+    // Poll for same-tab changes (storage event doesn't fire for same-tab writes)
+    // This catches signup/login that happens in this tab
+    setInterval(syncSession, 2000);
   },
 });

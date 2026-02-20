@@ -1,7 +1,7 @@
 "use client";
 
-import { Suspense, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
@@ -12,6 +12,19 @@ import { Loader2, Check, Puzzle, Shield, Zap, MessageSquare } from "lucide-react
 
 type AuthMode = "signin" | "signup";
 
+/** Push session data to the auth-bridge content script via postMessage */
+function notifyExtension(session: { access_token: string; refresh_token: string; user: unknown }) {
+  window.postMessage(
+    {
+      type: "TP_SESSION_READY",
+      accessToken: session.access_token,
+      refreshToken: session.refresh_token,
+      user: session.user,
+    },
+    window.location.origin
+  );
+}
+
 function ExtensionWelcomeContent() {
   const [mode, setMode] = useState<AuthMode>("signup");
   const [name, setName] = useState("");
@@ -20,9 +33,35 @@ function ExtensionWelcomeContent() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
-  const router = useRouter();
+  const [authSuccess, setAuthSuccess] = useState(false);
   const searchParams = useSearchParams();
-  const authSuccess = searchParams.get("auth") === "success";
+
+  // Check for auth on mount: either ?auth=success param (from OAuth redirect)
+  // or an existing Supabase session (user already authenticated)
+  useEffect(() => {
+    if (searchParams.get("auth") === "success") {
+      setAuthSuccess(true);
+    }
+
+    const supabase = createClient();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        setAuthSuccess(true);
+        notifyExtension(session);
+      }
+    });
+  }, [searchParams]);
+
+  // When auth succeeds, push session to extension
+  useEffect(() => {
+    if (!authSuccess) return;
+    const supabase = createClient();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        notifyExtension(session);
+      }
+    });
+  }, [authSuccess]);
 
   const redirectAfterAuth = "/extension/welcome?auth=success";
 
@@ -53,7 +92,7 @@ function ExtensionWelcomeContent() {
         }
         setEmailSent(true);
       } else {
-        const { error: signInError } = await supabase.auth.signInWithPassword({
+        const { data, error: signInError } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
@@ -61,8 +100,11 @@ function ExtensionWelcomeContent() {
           setError(signInError.message);
           return;
         }
-        router.push(redirectAfterAuth);
-        router.refresh();
+        // Sign-in succeeded — show success and push session to extension
+        if (data.session) {
+          notifyExtension(data.session);
+        }
+        setAuthSuccess(true);
       }
     } catch {
       setError("An unexpected error occurred");

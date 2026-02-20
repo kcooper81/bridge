@@ -32,6 +32,7 @@ export default defineConfig({
         "https://copilot.microsoft.com/*",
         "https://www.perplexity.ai/*",
         "https://teamprompt.app/*",
+        "https://www.teamprompt.app/*",
       ],
       // Firefox doesn't support externally_connectable
       ...(isFirefox
@@ -40,6 +41,7 @@ export default defineConfig({
             externally_connectable: {
               matches: [
                 "https://teamprompt.app/*",
+                "https://www.teamprompt.app/*",
                 "http://localhost:3000/*",
               ],
             },

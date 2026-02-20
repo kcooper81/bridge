@@ -1,16 +1,20 @@
 // TeamPrompt Extension — Auth Bridge
 // Content script that runs on teamprompt.app to sync Supabase session
-// Bidirectional: web app ↔ extension
+// Bidirectional: web app <-> extension
 
 export default defineContentScript({
-  matches: ["https://teamprompt.app/*", "http://localhost:3000/*"],
+  matches: [
+    "https://teamprompt.app/*",
+    "https://www.teamprompt.app/*",
+    "http://localhost:3000/*",
+  ],
   runAt: "document_idle",
 
   main() {
     let lastSyncedToken = "";
     let supabaseCookieName = "";
 
-    // ─── Cookie Name ───
+    // --- Cookie Name ---
 
     async function getCookieName(): Promise<string> {
       if (supabaseCookieName) return supabaseCookieName;
@@ -22,76 +26,96 @@ export default defineContentScript({
       return supabaseCookieName;
     }
 
-    // ─── Read Web Session (cookies + localStorage) ───
+    // --- Base64url decode (Supabase SSR v0.5+ uses base64url for cookies) ---
+
+    function base64urlDecode(str: string): string {
+      let b64 = str.replace(/-/g, "+").replace(/_/g, "/");
+      while (b64.length % 4 !== 0) b64 += "=";
+      return atob(b64);
+    }
+
+    // --- Read Web Session (cookies) ---
 
     function getSupabaseSession(): {
       access_token: string;
       refresh_token: string;
       user: unknown;
     } | null {
-      // Try localStorage first (classic Supabase JS)
-      for (const key of Object.keys(localStorage)) {
-        if (key.startsWith("sb-") && key.endsWith("-auth-token")) {
-          try {
-            return JSON.parse(localStorage.getItem(key)!);
-          } catch {
-            /* skip */
-          }
-        }
-      }
-
-      // Try cookies (@supabase/ssr stores session in cookies)
       const cookies = document.cookie.split(";").map((c) => c.trim());
-      const prefix = cookies
+
+      // Find a cookie name that matches the Supabase auth token pattern
+      const matchingName = cookies
         .map((c) => c.split("=")[0])
         .find((name) => name.startsWith("sb-") && name.includes("-auth-token"));
 
-      if (prefix) {
-        const baseName = prefix.replace(/\.\d+$/, "");
-        const chunks: string[] = [];
-        let i = 0;
-        while (true) {
-          const chunkName = i === 0 ? baseName : `${baseName}.${i}`;
-          const match = cookies.find((c) => c.startsWith(chunkName + "="));
-          if (!match) {
-            if (i === 0) {
-              i++;
-              continue;
-            }
-            break;
-          }
-          chunks.push(decodeURIComponent(match.split("=").slice(1).join("=")));
-          i++;
-        }
+      if (!matchingName) return null;
 
-        if (chunks.length === 0) {
-          const direct = cookies.find((c) => c.startsWith(baseName + "="));
-          if (direct) {
-            chunks.push(decodeURIComponent(direct.split("=").slice(1).join("=")));
-          }
-        }
+      // Get the base name (strip any chunk suffix like .0, .1)
+      const baseName = matchingName.replace(/\.\d+$/, "");
 
-        if (chunks.length > 0) {
-          try {
-            const raw = chunks.join("");
-            let parsed;
-            try {
-              parsed = JSON.parse(raw);
-            } catch {
-              parsed = JSON.parse(atob(raw));
-            }
-            if (parsed?.access_token) return parsed;
-            if (parsed?.[0]?.access_token) return parsed[0];
-          } catch {
-            /* skip */
-          }
-        }
+      // Helper to find a specific cookie value
+      function getCookieValue(name: string): string | null {
+        // Use exact match to avoid "sb-xxx-auth-token" matching "sb-xxx-auth-token.0"
+        const cookie = cookies.find((c) => {
+          const eqIdx = c.indexOf("=");
+          return eqIdx > 0 && c.substring(0, eqIdx) === name;
+        });
+        if (!cookie) return null;
+        return decodeURIComponent(cookie.split("=").slice(1).join("="));
+      }
+
+      // Try unchunked cookie first (small sessions fit in one cookie)
+      const directValue = getCookieValue(baseName);
+      if (directValue) {
+        const parsed = tryParseSession(directValue);
+        if (parsed) return parsed;
+      }
+
+      // Try chunked cookies: .0, .1, .2, ...
+      const chunks: string[] = [];
+      for (let i = 0; i < 20; i++) {
+        const val = getCookieValue(`${baseName}.${i}`);
+        if (!val) break;
+        chunks.push(val);
+      }
+
+      if (chunks.length > 0) {
+        const raw = chunks.join("");
+        const parsed = tryParseSession(raw);
+        if (parsed) return parsed;
       }
 
       return null;
     }
 
-    // ─── Web → Extension Sync ───
+    function tryParseSession(raw: string): {
+      access_token: string;
+      refresh_token: string;
+      user: unknown;
+    } | null {
+      // Try direct JSON parse
+      try {
+        const obj = JSON.parse(raw);
+        if (obj?.access_token) return obj;
+        if (Array.isArray(obj) && obj[0]?.access_token) return obj[0];
+      } catch {
+        // Not raw JSON
+      }
+
+      // Try base64url decode (Supabase SSR v0.5+ format)
+      try {
+        const decoded = base64urlDecode(raw);
+        const obj = JSON.parse(decoded);
+        if (obj?.access_token) return obj;
+        if (Array.isArray(obj) && obj[0]?.access_token) return obj[0];
+      } catch {
+        // Not base64url JSON
+      }
+
+      return null;
+    }
+
+    // --- Web -> Extension Sync ---
 
     // Track when web just cleared its session so we don't re-push extension tokens
     let webSessionCleared = false;
@@ -116,10 +140,11 @@ export default defineContentScript({
       }
     }
 
-    // ─── Extension → Web Sync ───
+    // --- Extension -> Web Sync ---
 
     // Auth pages where the user may have intentionally signed out
-    const AUTH_PATHS = /^\/(login|signup|forgot-password|reset-password|logout)(\/|$)/;
+    const AUTH_PATHS =
+      /^\/(login|signup|forgot-password|reset-password|logout)(\/|$)/;
 
     async function syncExtensionToWeb() {
       // Guard against reload loops: if we just reloaded for sync, skip once
@@ -173,12 +198,29 @@ export default defineContentScript({
       // Clear main cookie and any chunks (.0, .1, etc.)
       const expiry = "path=/; max-age=0";
       document.cookie = `${name}=; ${expiry}`;
-      for (let i = 0; i < 5; i++) {
+      for (let i = 0; i < 10; i++) {
         document.cookie = `${name}.${i}=; ${expiry}`;
       }
     }
 
-    // ─── Init: Web → Extension ───
+    // --- Listen for direct session push from the web app (e.g. welcome page) ---
+
+    window.addEventListener("message", (e) => {
+      if (e.origin !== location.origin) return;
+      if (e.data?.type === "TP_SESSION_READY" && e.data.accessToken) {
+        // The web app is explicitly sending the session — sync immediately
+        lastSyncedToken = e.data.accessToken;
+        webSessionCleared = false;
+        browser.runtime.sendMessage({
+          type: "SESSION_SYNC",
+          accessToken: e.data.accessToken,
+          refreshToken: e.data.refreshToken,
+          user: e.data.user,
+        });
+      }
+    });
+
+    // --- Init: Web -> Extension ---
 
     syncWebToExtension();
 
@@ -192,7 +234,7 @@ export default defineContentScript({
     // Poll for same-tab cookie/localStorage changes
     setInterval(syncWebToExtension, 2000);
 
-    // ─── Init: Extension → Web ───
+    // --- Init: Extension -> Web ---
 
     syncExtensionToWeb();
 

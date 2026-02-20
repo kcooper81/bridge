@@ -4,6 +4,35 @@ const fs = require("fs");
 
 const ASSETS_DIR = __dirname;
 
+// ─── Load actual SVG logos ───
+const LOGO_DARK_SVG = fs.readFileSync(
+  path.join(__dirname, "..", "..", "public", "logo-dark.svg"),
+  "utf-8"
+);
+const LOGO_ICON_BLUE_SVG = fs.readFileSync(
+  path.join(__dirname, "..", "..", "public", "brand", "logo-icon-blue.svg"),
+  "utf-8"
+);
+
+// Inline SVG for use in HTML (white logo on dark bg, sized to fit)
+function logoInline(size = 44) {
+  return `<div style="width:${size}px;height:${size}px;display:inline-flex;align-items:center;justify-content:center;">
+    ${LOGO_DARK_SVG.replace('<svg ', `<svg width="${size}" height="${size}" `)}
+  </div>`;
+}
+
+// Icon version: blue rounded rect with white logo inside
+function logoIcon(size = 44) {
+  return `<div style="width:${size}px;height:${size}px;display:inline-flex;align-items:center;justify-content:center;">
+    ${LOGO_ICON_BLUE_SVG.replace('<svg ', `<svg width="${size}" height="${size}" `)}
+  </div>`;
+}
+
+// Small icon for toolbar
+function logoIconSmall(size = 24) {
+  return logoIcon(size);
+}
+
 // ─── Store Icon 128x128 ───
 // Just copy the existing icon
 function copyStoreIcon() {
@@ -20,20 +49,28 @@ function copyStoreIcon() {
 // ─── HTML Templates ───
 
 const COLORS = {
-  bg: "#0f1117",
-  surface: "#18181b",
-  border: "#27272a",
-  blue: "#2563eb",
+  bg: "#080a10",
+  card: "#101219",
+  surface: "#141722",
+  border: "#1e2132",
+  borderLight: "#2a2e44",
+  inputBg: "#1a1d2e",
+  muted: "#1a1d2e",
+  blue: "#3B82F6",
   blueLight: "#60a5fa",
-  text: "#e4e4e7",
-  textMuted: "#a1a1aa",
-  textDim: "#71717a",
+  blueDark: "#2563eb",
+  text: "#eaedf5",
+  textSecondary: "#a0a5bd",
+  textMuted: "#7f849c",
+  textDim: "#5c6078",
   white: "#ffffff",
-  green: "#22c55e",
-  red: "#ef4444",
+  green: "#34d399",
+  red: "#f87171",
   purple: "#a855f7",
-  amber: "#f59e0b",
+  amber: "#fbbf24",
   cyan: "#06b6d4",
+  primarySurface: "rgba(59, 130, 246, 0.08)",
+  primaryGlow: "rgba(59, 130, 246, 0.15)",
 };
 
 function baseHTML(width, height, body) {
@@ -54,7 +91,7 @@ function baseHTML(width, height, body) {
   .popup {
     width: 380px;
     background: ${COLORS.bg};
-    border-radius: 12px;
+    border-radius: 16px;
     border: 1px solid ${COLORS.border};
     box-shadow: 0 25px 60px rgba(0,0,0,0.5);
     overflow: hidden;
@@ -65,17 +102,14 @@ function baseHTML(width, height, body) {
   }
   .popup-login .logo {
     width: 44px; height: 44px;
-    background: ${COLORS.blue};
-    border-radius: 12px;
     margin: 0 auto 12px;
     display: flex; align-items: center; justify-content: center;
-    color: white; font-weight: 700; font-size: 20px;
   }
-  .popup-login h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
-  .popup-login .tagline { color: ${COLORS.textMuted}; font-size: 14px; margin-bottom: 8px; }
-  .popup-login .subtitle { color: ${COLORS.textDim}; font-size: 12px; line-height: 1.5; margin-bottom: 28px; }
+  .popup-login h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; letter-spacing: -0.02em; }
+  .popup-login .tagline { color: ${COLORS.textSecondary}; font-size: 14px; margin-bottom: 8px; }
+  .popup-login .subtitle { color: ${COLORS.textMuted}; font-size: 12px; line-height: 1.5; margin-bottom: 28px; }
   .btn-create {
-    width: 100%; padding: 12px; border: none; border-radius: 8px;
+    width: 100%; padding: 12px; border: none; border-radius: 16px;
     background: ${COLORS.blue}; color: white; font-weight: 600; font-size: 14px;
     margin-bottom: 4px;
   }
@@ -86,80 +120,80 @@ function baseHTML(width, height, body) {
     content: ""; flex: 1; height: 1px; background: ${COLORS.border};
   }
   .divider span {
-    color: #52525b; font-size: 11px; font-weight: 500;
+    color: ${COLORS.textDim}; font-size: 11px; font-weight: 500;
     text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;
   }
   .input {
     width: 100%; padding: 10px 12px; border: 1px solid ${COLORS.border};
-    border-radius: 8px; background: ${COLORS.surface}; color: ${COLORS.textMuted};
+    border-radius: 12px; background: ${COLORS.inputBg}; color: ${COLORS.textSecondary};
     font-size: 13px; margin-bottom: 10px;
   }
   .btn-signin {
     width: 100%; padding: 10px; border: 1px solid ${COLORS.border};
-    border-radius: 8px; background: transparent; color: ${COLORS.text};
+    border-radius: 12px; background: transparent; color: ${COLORS.text};
     font-weight: 500; font-size: 13px;
   }
   .web-link {
-    color: #52525b; font-size: 12px; margin-top: 16px; text-align: center;
+    color: ${COLORS.textDim}; font-size: 12px; margin-top: 16px; text-align: center;
   }
-  .web-link a { color: ${COLORS.blueLight}; text-decoration: none; font-weight: 500; }
+  .web-link a { color: ${COLORS.blue}; text-decoration: none; font-weight: 500; }
 
   /* Main view */
   .toolbar {
     display: flex; align-items: center; justify-content: space-between;
     padding: 10px 14px; border-bottom: 1px solid ${COLORS.border};
+    background: ${COLORS.card};
   }
   .toolbar-left { display: flex; align-items: center; gap: 8px; }
   .logo-sm {
-    width: 24px; height: 24px; border-radius: 6px; background: ${COLORS.blue};
+    width: 20px; height: 20px;
     display: flex; align-items: center; justify-content: center;
-    color: white; font-weight: 700; font-size: 12px;
   }
-  .toolbar-title { font-weight: 600; font-size: 14px; }
+  .toolbar-title { font-weight: 600; font-size: 14px; letter-spacing: -0.01em; }
   .search-wrap { padding: 10px 14px 0; }
   .search-input {
     width: 100%; padding: 8px 12px; border: 1px solid ${COLORS.border};
-    border-radius: 8px; background: ${COLORS.surface}; color: ${COLORS.textMuted}; font-size: 13px;
+    border-radius: 12px; background: ${COLORS.inputBg}; color: ${COLORS.textSecondary}; font-size: 13px;
   }
   .tabs { display: flex; gap: 2px; padding: 10px 14px; }
   .tab {
-    flex: 1; padding: 6px 10px; border: none; border-radius: 6px;
-    background: transparent; color: ${COLORS.textDim}; font-size: 12px; font-weight: 500;
+    flex: 1; padding: 6px 10px; border: none; border-radius: 8px;
+    background: transparent; color: ${COLORS.textMuted}; font-size: 12px; font-weight: 500;
     text-align: center;
   }
-  .tab.active { background: ${COLORS.border}; color: ${COLORS.text}; }
+  .tab.active { background: ${COLORS.muted}; color: ${COLORS.text}; }
   .prompt-list { padding: 0 14px 14px; }
   .prompt-card {
-    padding: 10px 12px; border: 1px solid ${COLORS.border}; border-radius: 8px;
-    margin-bottom: 6px;
+    padding: 10px 12px; border: 1px solid ${COLORS.border}; border-radius: 12px;
+    margin-bottom: 6px; background: ${COLORS.card};
   }
   .prompt-card-title { font-weight: 600; font-size: 13px; margin-bottom: 2px; display: flex; align-items: center; gap: 6px; }
-  .prompt-card-desc { color: ${COLORS.textDim}; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .badge { font-size: 10px; padding: 1px 6px; border-radius: 4px; background: rgba(37,99,235,0.12); color: ${COLORS.blueLight}; font-weight: 500; }
-  .tag { display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 4px; background: ${COLORS.border}; color: ${COLORS.textMuted}; margin-right: 4px; margin-top: 4px; }
-  .status-bar { padding: 8px 14px; border-top: 1px solid ${COLORS.border}; font-size: 11px; color: ${COLORS.textDim}; }
+  .prompt-card-desc { color: ${COLORS.textMuted}; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .badge { font-size: 10px; padding: 1px 6px; border-radius: 6px; background: ${COLORS.primarySurface}; color: ${COLORS.blue}; font-weight: 500; }
+  .tag { display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 6px; background: ${COLORS.muted}; color: ${COLORS.textSecondary}; margin-right: 4px; margin-top: 4px; }
+  .status-bar { padding: 8px 14px; border-top: 1px solid ${COLORS.border}; font-size: 11px; color: ${COLORS.textMuted}; background: ${COLORS.card}; }
 
   /* Detail view */
   .detail-toolbar {
     display: flex; align-items: center; gap: 8px; padding: 10px 14px;
-    border-bottom: 1px solid ${COLORS.border};
+    border-bottom: 1px solid ${COLORS.border}; background: ${COLORS.card};
   }
-  .back-icon { color: ${COLORS.textDim}; font-size: 14px; }
-  .detail-title { font-weight: 600; font-size: 14px; }
+  .back-icon { color: ${COLORS.textMuted}; font-size: 14px; }
+  .detail-title { font-weight: 600; font-size: 14px; letter-spacing: -0.01em; }
   .detail-content {
     padding: 14px; font-size: 13px; line-height: 1.6; white-space: pre-wrap;
-    background: ${COLORS.surface}; margin: 10px 14px; border-radius: 8px;
-    border: 1px solid ${COLORS.border}; color: ${COLORS.textMuted};
+    background: ${COLORS.inputBg}; margin: 10px 14px; border-radius: 12px;
+    border: 1px solid ${COLORS.border}; color: ${COLORS.textSecondary};
   }
   .template-fields { padding: 0 14px; margin-bottom: 10px; }
-  .template-fields label { display: block; font-size: 12px; font-weight: 500; color: ${COLORS.textMuted}; margin-bottom: 4px; margin-top: 8px; }
+  .template-fields label { display: block; font-size: 12px; font-weight: 500; color: ${COLORS.textSecondary}; margin-bottom: 4px; margin-top: 8px; }
   .template-fields input {
     width: 100%; padding: 8px 12px; border: 1px solid ${COLORS.border};
-    border-radius: 8px; background: ${COLORS.surface}; color: ${COLORS.text}; font-size: 13px;
+    border-radius: 12px; background: ${COLORS.inputBg}; color: ${COLORS.text}; font-size: 13px;
   }
   .detail-actions { display: flex; gap: 8px; padding: 14px; }
-  .detail-actions .btn-primary { flex: 1; padding: 10px; border: none; border-radius: 8px; background: ${COLORS.blue}; color: white; font-weight: 600; font-size: 13px; }
-  .detail-actions .btn-secondary { flex: 1; padding: 10px; border: 1px solid ${COLORS.border}; border-radius: 8px; background: transparent; color: ${COLORS.text}; font-weight: 500; font-size: 13px; }
+  .detail-actions .btn-primary { flex: 1; padding: 10px; border: none; border-radius: 12px; background: ${COLORS.blue}; color: white; font-weight: 600; font-size: 13px; }
+  .detail-actions .btn-secondary { flex: 1; padding: 10px; border: 1px solid ${COLORS.border}; border-radius: 12px; background: transparent; color: ${COLORS.text}; font-weight: 500; font-size: 13px; }
 
   /* AI tool background mockup */
   .ai-bg {
@@ -201,7 +235,7 @@ function baseHTML(width, height, body) {
 function popupLoginHTML() {
   return `
 <div class="popup-login">
-  <div class="logo">T</div>
+  <div class="logo">${logoIcon(44)}</div>
   <h1>TeamPrompt</h1>
   <p class="tagline">Your team's AI prompt library — everywhere.</p>
   <p class="subtitle">Search and insert shared prompts directly into ChatGPT, Claude, Gemini, and more.</p>
@@ -219,7 +253,7 @@ function popupMainHTML() {
   return `
 <div class="toolbar">
   <div class="toolbar-left">
-    <div class="logo-sm">T</div>
+    <div class="logo-sm">${logoIconSmall(24)}</div>
     <span class="toolbar-title">TeamPrompt</span>
   </div>
   <div style="display:flex;gap:4px;">
@@ -390,7 +424,7 @@ function promoSmall() {
 <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;background:linear-gradient(135deg,${COLORS.bg} 0%,#0d1025 50%,#111827 100%);position:relative;overflow:hidden;">
   <div style="position:absolute;top:-40px;right:-40px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(37,99,235,0.15),transparent 70%);"></div>
   <div style="position:absolute;bottom:-30px;left:-30px;width:150px;height:150px;border-radius:50%;background:radial-gradient(circle,rgba(37,99,235,0.1),transparent 70%);"></div>
-  <div style="width:56px;height:56px;background:${COLORS.blue};border-radius:14px;display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:26px;margin-bottom:16px;box-shadow:0 8px 32px rgba(37,99,235,0.3);">T</div>
+  <div style="margin-bottom:16px;filter:drop-shadow(0 8px 32px rgba(37,99,235,0.3));">${logoIcon(56)}</div>
   <div style="font-size:22px;font-weight:800;color:white;margin-bottom:6px;">TeamPrompt</div>
   <div style="font-size:13px;color:${COLORS.textMuted};text-align:center;max-width:320px;line-height:1.4;">Your team's AI prompt library — everywhere.</div>
   <div style="display:flex;gap:8px;margin-top:18px;">
@@ -414,7 +448,7 @@ function promoMarquee() {
     <!-- Left: text -->
     <div style="flex:1;">
       <div style="display:flex;align-items:center;gap:14px;margin-bottom:24px;">
-        <div style="width:48px;height:48px;background:${COLORS.blue};border-radius:14px;display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:24px;box-shadow:0 8px 32px rgba(37,99,235,0.3);">T</div>
+        <div style="filter:drop-shadow(0 8px 32px rgba(37,99,235,0.3));">${logoIcon(48)}</div>
         <span style="font-size:24px;font-weight:800;color:white;">TeamPrompt</span>
       </div>
       <div style="font-size:40px;font-weight:800;color:white;line-height:1.15;margin-bottom:16px;">

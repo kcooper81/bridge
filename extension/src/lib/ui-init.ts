@@ -292,15 +292,17 @@ export function initSharedUI(elements: UIElements) {
     openLogin();
   });
 
-  // Listen for auth-bridge session sync
+  // Listen for auth-bridge session sync (login AND logout)
   browser.storage.onChanged.addListener((changes, area) => {
-    if (
-      area === "local" &&
-      changes.accessToken &&
-      changes.accessToken.newValue
-    ) {
-      showMainView();
-      loadPrompts();
+    if (area === "local" && changes.accessToken) {
+      if (changes.accessToken.newValue) {
+        // Logged in — show main view
+        showMainView();
+        loadPrompts();
+      } else if (!changes.accessToken.newValue && changes.accessToken.oldValue) {
+        // Logged out — show login view
+        showLoginView();
+      }
     }
   });
 

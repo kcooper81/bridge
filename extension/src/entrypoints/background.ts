@@ -24,6 +24,8 @@ export default defineBackground(() => {
   browser.runtime.onMessage.addListener(
     (message: { type: string; accessToken?: string; refreshToken?: string; user?: unknown }, _sender, sendResponse) => {
       if (message.type === "SESSION_SYNC") {
+        // Clear any loggedOut flag — user is actively logging in
+        browser.storage.local.remove(["loggedOut"]);
         browser.storage.local.set({
           accessToken: message.accessToken,
           refreshToken: message.refreshToken,

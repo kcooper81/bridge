@@ -9,11 +9,18 @@ interface ExtensionDetectionResult {
 }
 
 /**
- * Detects whether the TeamPrompt browser extension is installed by sending
- * a PING message via chrome.runtime.sendMessage (externally_connectable).
- * Tries Chrome ID first, then Edge ID. Returns {detected, version, loading}.
- * 2-second timeout. Firefox doesn't support externally_connectable so detection
- * won't work there (acceptable — Firefox is a minority use case).
+ * Detects the TeamPrompt browser extension using two methods:
+ *
+ * 1. DOM marker: The auth-bridge content script sets
+ *    `document.documentElement.dataset.tpExtension` and dispatches
+ *    a `tp-extension-detected` CustomEvent. Works without knowing
+ *    the extension ID (dev and production).
+ *
+ * 2. chrome.runtime.sendMessage PING/PONG (requires extension ID in
+ *    NEXT_PUBLIC_CHROME_EXTENSION_ID or NEXT_PUBLIC_EDGE_EXTENSION_ID).
+ *
+ * 2-second timeout. Firefox doesn't support externally_connectable so
+ * only the DOM marker method works there.
  */
 export function useExtensionDetection(): ExtensionDetectionResult {
   const [detected, setDetected] = useState(false);
@@ -21,23 +28,88 @@ export function useExtensionDetection(): ExtensionDetectionResult {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let resolved = false;
+
+    function resolve(v: string | null) {
+      if (resolved) return;
+      resolved = true;
+      setDetected(true);
+      setVersion(v);
+      setLoading(false);
+    }
+
+    // --- Method 1: DOM marker (set by auth-bridge content script) ---
+
+    const marker = document.documentElement.dataset.tpExtension;
+    if (marker) {
+      resolve(marker);
+      return;
+    }
+
+    // Content script may not have run yet — listen for the event
+    function onExtensionDetected(e: Event) {
+      const detail = (e as CustomEvent).detail;
+      resolve(detail?.version || null);
+    }
+    window.addEventListener("tp-extension-detected", onExtensionDetected);
+
+    // --- Method 2: PING/PONG via externally_connectable ---
+
     const chromeId = process.env.NEXT_PUBLIC_CHROME_EXTENSION_ID;
     const edgeId = process.env.NEXT_PUBLIC_EDGE_EXTENSION_ID;
 
-    // No extension IDs configured — skip detection
-    if (!chromeId && !edgeId) {
-      setLoading(false);
-      return;
+    const chrome = (
+      window as unknown as {
+        chrome?: {
+          runtime?: {
+            sendMessage: (
+              id: string,
+              msg: unknown,
+              cb: (response?: { type?: string; version?: string }) => void
+            ) => void;
+          };
+        };
+      }
+    ).chrome;
+
+    if (chrome?.runtime?.sendMessage && (chromeId || edgeId)) {
+      function tryPing(
+        extensionId: string
+      ): Promise<{ type?: string; version?: string } | undefined> {
+        return new Promise((res) => {
+          try {
+            chrome!.runtime!.sendMessage(
+              extensionId,
+              { type: "PING" },
+              (response) => {
+                const _ = (
+                  globalThis as unknown as {
+                    chrome?: { runtime?: { lastError?: unknown } };
+                  }
+                ).chrome?.runtime?.lastError;
+                void _;
+                res(response);
+              }
+            );
+          } catch {
+            res(undefined);
+          }
+        });
+      }
+
+      (async () => {
+        for (const id of [chromeId, edgeId].filter(Boolean) as string[]) {
+          if (resolved) return;
+          const response = await tryPing(id);
+          if (response?.type === "PONG") {
+            resolve(response.version || null);
+            return;
+          }
+        }
+      })();
     }
 
-    // chrome.runtime.sendMessage is only available in Chromium browsers
-    const chrome = (window as unknown as { chrome?: { runtime?: { sendMessage: (id: string, msg: unknown, cb: (response?: { type?: string; version?: string }) => void) => void } } }).chrome;
-    if (!chrome?.runtime?.sendMessage) {
-      setLoading(false);
-      return;
-    }
-
-    let resolved = false;
+    // --- Timeout fallback ---
 
     const timeout = setTimeout(() => {
       if (!resolved) {
@@ -46,48 +118,9 @@ export function useExtensionDetection(): ExtensionDetectionResult {
       }
     }, 2000);
 
-    function tryPing(extensionId: string): Promise<{ type?: string; version?: string } | undefined> {
-      return new Promise((resolve) => {
-        try {
-          chrome!.runtime!.sendMessage(extensionId, { type: "PING" }, (response) => {
-            // Clear lastError to prevent console noise
-            const _ = (globalThis as unknown as { chrome?: { runtime?: { lastError?: unknown } } }).chrome?.runtime?.lastError;
-            void _;
-            resolve(response);
-          });
-        } catch {
-          resolve(undefined);
-        }
-      });
-    }
-
-    async function detect() {
-      const idsToTry = [chromeId, edgeId].filter(Boolean) as string[];
-
-      for (const id of idsToTry) {
-        if (resolved) return;
-        const response = await tryPing(id);
-        if (response?.type === "PONG") {
-          resolved = true;
-          clearTimeout(timeout);
-          setDetected(true);
-          setVersion(response.version || null);
-          setLoading(false);
-          return;
-        }
-      }
-
-      if (!resolved) {
-        resolved = true;
-        clearTimeout(timeout);
-        setLoading(false);
-      }
-    }
-
-    detect();
-
     return () => {
       clearTimeout(timeout);
+      window.removeEventListener("tp-extension-detected", onExtensionDetected);
       resolved = true;
     };
   }, []);

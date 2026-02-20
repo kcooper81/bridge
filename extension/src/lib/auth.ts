@@ -9,7 +9,11 @@ export interface SessionData {
 }
 
 export async function getSession(): Promise<SessionData | null> {
-  const data = await browser.storage.local.get(["accessToken"]);
+  const data = await browser.storage.local.get([
+    "accessToken",
+    "refreshToken",
+    "user",
+  ]);
   if (data.accessToken) return data as SessionData;
   return null;
 }
@@ -47,33 +51,33 @@ export async function login(
 }
 
 export async function logout(): Promise<void> {
+  // Set loggedOut flag BEFORE removing tokens so the auth-bridge knows
+  // not to re-sync web cookies back to the extension on the next page load.
+  await browser.storage.local.set({ loggedOut: true });
   await browser.storage.local.remove(["accessToken", "refreshToken", "user"]);
 }
 
 export function openLogin(): void {
-  browser.tabs.create({ url: CONFIG.SITE_URL + "/extension/welcome" });
+  browser.tabs.create({
+    url: CONFIG.SITE_URL + "/extension/welcome?mode=signin",
+  });
 }
 
 export function openSignup(): void {
   browser.tabs.create({ url: CONFIG.SITE_URL + "/extension/welcome" });
 }
 
+// Route OAuth through the welcome page which uses the Supabase JS client
+// with proper PKCE flow, instead of constructing manual URLs.
 export function openGoogleAuth(): void {
-  // Opens Supabase Google OAuth flow, redirecting back to the extension welcome page
-  const redirectTo = encodeURIComponent(
-    `${CONFIG.SITE_URL}/auth/callback?next=${encodeURIComponent("/extension/welcome?auth=success")}`
-  );
   browser.tabs.create({
-    url: `${CONFIG.SUPABASE_URL}/auth/v1/authorize?provider=google&redirect_to=${redirectTo}`,
+    url: CONFIG.SITE_URL + "/extension/welcome?provider=google",
   });
 }
 
 export function openGithubAuth(): void {
-  const redirectTo = encodeURIComponent(
-    `${CONFIG.SITE_URL}/auth/callback?next=${encodeURIComponent("/extension/welcome?auth=success")}`
-  );
   browser.tabs.create({
-    url: `${CONFIG.SUPABASE_URL}/auth/v1/authorize?provider=github&redirect_to=${redirectTo}`,
+    url: CONFIG.SITE_URL + "/extension/welcome?provider=github",
   });
 }
 

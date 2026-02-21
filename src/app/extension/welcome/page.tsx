@@ -119,11 +119,15 @@ function ExtensionWelcomeContent() {
   }, []);
 
   // Auto-redirect to vault after successful auth
+  // Use hard navigation (window.location) instead of router.push to avoid
+  // Next.js RSC prefetch failures when the middleware auth check runs.
   useEffect(() => {
     if (!authSuccess) return;
-    const timer = setTimeout(() => router.push("/vault"), 2500);
+    const timer = setTimeout(() => {
+      window.location.href = "/vault";
+    }, 2500);
     return () => clearTimeout(timer);
-  }, [authSuccess, router]);
+  }, [authSuccess]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

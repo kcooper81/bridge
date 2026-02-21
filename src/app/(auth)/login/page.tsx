@@ -46,8 +46,9 @@ export default function LoginPage() {
       }
 
       trackLogin("email");
-      router.push(redirectTo);
-      router.refresh();
+      // Use hard navigation to avoid Next.js RSC prefetch failures
+      // when the middleware auth check runs on the target route.
+      window.location.href = redirectTo;
     } catch {
       setError("An unexpected error occurred");
     } finally {

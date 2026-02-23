@@ -4,7 +4,7 @@
 import { getSession, login, logout, openLogin, openSignup, openGoogleAuth, openGithubAuth } from "./auth";
 import { extAuthDebug } from "./auth-debug"; // AUTH-DEBUG
 import { fetchPrompts, fillTemplate, type Prompt } from "./prompts";
-import { fetchSecurityStatus, type SecurityStatus } from "./security-status";
+import { fetchSecurityStatus, enableDefaultRules, type SecurityStatus } from "./security-status";
 import { CONFIG, API_ENDPOINTS, apiHeaders } from "./config";
 import { detectAiTool } from "./ai-tools";
 
@@ -145,9 +145,14 @@ function renderPrompts() {
     .map(
       (p) => `
       <div class="prompt-card" data-id="${p.id}">
-        <div class="prompt-card-title">
-          ${escapeHtml(p.title)}
-          ${p.is_template ? '<span class="badge-template">Template</span>' : ""}
+        <div class="prompt-card-header">
+          <div class="prompt-card-title">
+            ${escapeHtml(p.title)}
+            ${p.is_template ? '<span class="badge-template">Package</span>' : ""}
+          </div>
+          <svg class="prompt-card-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="9 18 15 12 9 6" />
+          </svg>
         </div>
         <div class="prompt-card-desc">${escapeHtml(p.description || p.content.slice(0, 80))}</div>
         ${
@@ -219,7 +224,7 @@ function renderShieldView(container: HTMLElement, status: SecurityStatus) {
   const statusLabel = status.protected ? "Protected" : "Not Configured";
   const statusDetail = status.protected
     ? `${status.activeRuleCount} active rule${status.activeRuleCount !== 1 ? "s" : ""} monitoring your prompts`
-    : "No security rules are active. Set up guardrails in your dashboard.";
+    : "Shield scans prompts before they reach AI tools.";
 
   const statsHtml = status.protected
     ? `<div class="shield-stats">
@@ -235,6 +240,36 @@ function renderShieldView(container: HTMLElement, status: SecurityStatus) {
           <div class="shield-stat-value total">${status.weeklyStats.total}</div>
           <div class="shield-stat-label">This Week</div>
         </div>
+      </div>`
+    : "";
+
+  const onboardingHtml = !status.protected
+    ? `<div class="shield-onboarding">
+        <div class="shield-onboarding-intro">
+          Catches API keys, passwords, connection strings, tokens, and other secrets before they leave your clipboard. Default policies cover AWS, GitHub, Stripe, OpenAI, Slack, and more.
+        </div>
+        <div class="shield-onboarding-features">
+          <div class="shield-feature">
+            <span class="shield-feature-icon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </span>
+            <span>Blocks secrets &amp; credentials</span>
+          </div>
+          <div class="shield-feature">
+            <span class="shield-feature-icon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </span>
+            <span>Warns on suspicious patterns</span>
+          </div>
+          <div class="shield-feature">
+            <span class="shield-feature-icon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            </span>
+            <span>Logs every scan for audit</span>
+          </div>
+        </div>
+        <button id="enable-shield-btn" class="btn-primary shield-enable-btn">Enable Default Rules</button>
+        <div class="shield-onboarding-hint">Installs 11 rules covering API keys, credentials, and tokens. You can customize or add more on the dashboard.</div>
       </div>`
     : "";
 
@@ -272,12 +307,35 @@ function renderShieldView(container: HTMLElement, status: SecurityStatus) {
         <div class="shield-status-detail">${statusDetail}</div>
       </div>
     </div>
+    ${onboardingHtml}
     ${statsHtml}
     ${violationsHtml}
     <a href="${manageUrl}" target="_blank" rel="noopener" class="shield-manage-link">
-      Manage guardrails on teamprompt.app
+      ${status.protected ? "Manage guardrails on teamprompt.app" : "Customize rules on teamprompt.app"}
     </a>
   `;
+
+  // Bind enable button if present
+  const enableBtn = container.querySelector<HTMLButtonElement>("#enable-shield-btn");
+  if (enableBtn) {
+    enableBtn.addEventListener("click", async () => {
+      enableBtn.disabled = true;
+      enableBtn.textContent = "Installing rules...";
+      const result = await enableDefaultRules();
+      if (result?.installed) {
+        // Reload the shield view to show the new "Protected" state
+        loadShieldView();
+      } else if (result && !result.installed) {
+        // Already configured — just reload
+        loadShieldView();
+      } else {
+        enableBtn.disabled = false;
+        enableBtn.textContent = "Enable Default Rules";
+        const hint = container.querySelector(".shield-onboarding-hint");
+        if (hint) hint.textContent = "Something went wrong. Try again or set up on the dashboard.";
+      }
+    });
+  }
 }
 
 function updateShieldIndicator(status: SecurityStatus | null) {

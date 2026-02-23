@@ -43,3 +43,23 @@ export async function fetchSecurityStatus(): Promise<SecurityStatus | null> {
     return null;
   }
 }
+
+export async function enableDefaultRules(): Promise<{ installed: boolean; ruleCount: number } | null> {
+  const session = await getSession();
+  if (!session) return null;
+
+  try {
+    const res = await fetch(
+      `${CONFIG.SITE_URL}${API_ENDPOINTS.enableShield}`,
+      {
+        method: "POST",
+        headers: apiHeaders(session.accessToken),
+      }
+    );
+
+    if (!res.ok) return null;
+    return (await res.json()) as { installed: boolean; ruleCount: number };
+  } catch {
+    return null;
+  }
+}

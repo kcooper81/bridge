@@ -20,6 +20,7 @@ import {
   Building2,
   FolderOpen,
   Import,
+  Library,
   LogOut,
   Menu,
   Moon,
@@ -27,6 +28,7 @@ import {
   Sun,
   Users,
 } from "lucide-react";
+import { NotificationBell } from "@/components/dashboard/notification-bell";
 
 interface NavItem {
   label: string;
@@ -41,6 +43,7 @@ const navSections: { title: string; items: NavItem[] }[] = [
     items: [
       { label: "Prompts", href: "/vault", icon: Archive },
       { label: "Collections", href: "/collections", icon: FolderOpen },
+      { label: "Library", href: "/library", icon: Library },
       { label: "Guidelines", href: "/guidelines", icon: BookOpen, roles: ["admin", "manager"] },
     ],
   },
@@ -165,6 +168,7 @@ function NavContent({ onItemClick }: { onItemClick?: () => void }) {
               {currentUserRole}
             </Badge>
           </div>
+          <NotificationBell />
           <Button
             variant="ghost"
             size="icon"

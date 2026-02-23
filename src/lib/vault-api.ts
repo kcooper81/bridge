@@ -1,5 +1,7 @@
 import { createClient } from "@/lib/supabase/client";
-import { DEFAULT_GUIDELINES } from "@/lib/constants";
+import { DEFAULT_GUIDELINES, PLAN_LIMITS } from "@/lib/constants";
+import { getLibraryPack } from "@/lib/library/packs";
+import { DEFAULT_SECURITY_RULES } from "@/lib/security/default-rules";
 import type {
   Prompt,
   PromptStatus,
@@ -1010,4 +1012,176 @@ export async function importPack(
   }
 
   return { imported, errors };
+}
+
+// ─── Library Pack Install ───
+
+export interface InstallPackResult {
+  promptsCreated: number;
+  guidelinesCreated: number;
+  rulesCreated: number;
+  error?: string;
+}
+
+export async function installLibraryPack(
+  packId: string
+): Promise<InstallPackResult> {
+  const pack = getLibraryPack(packId);
+  if (!pack) return { promptsCreated: 0, guidelinesCreated: 0, rulesCreated: 0, error: "Pack not found" };
+
+  const orgId = await getOrgId();
+  const userId = await getUserId();
+  if (!orgId || !userId) return { promptsCreated: 0, guidelinesCreated: 0, rulesCreated: 0, error: "Not authenticated" };
+
+  const db = supabase();
+
+  // Check current counts for plan limits
+  const [{ count: promptCount }, { count: guidelineCount }] = await Promise.all([
+    db.from("prompts").select("*", { count: "exact", head: true }).eq("org_id", orgId),
+    db.from("standards").select("*", { count: "exact", head: true }).eq("org_id", orgId),
+  ]);
+
+  // Get org plan limits
+  const { data: orgData } = await db
+    .from("organizations")
+    .select("plan")
+    .eq("id", orgId)
+    .single();
+
+  const plan = orgData?.plan || "free";
+  const limits = PLAN_LIMITS[plan as keyof typeof PLAN_LIMITS];
+
+  // Check prompt limits
+  const currentPrompts = promptCount || 0;
+  if (limits.max_prompts !== -1 && currentPrompts + pack.prompts.length > limits.max_prompts) {
+    return {
+      promptsCreated: 0,
+      guidelinesCreated: 0,
+      rulesCreated: 0,
+      error: `Adding ${pack.prompts.length} prompts would exceed your plan limit of ${limits.max_prompts}. You currently have ${currentPrompts}.`,
+    };
+  }
+
+  // Check guideline limits
+  const currentGuidelines = guidelineCount || 0;
+  if (limits.max_guidelines !== -1 && currentGuidelines + pack.guidelines.length > limits.max_guidelines) {
+    return {
+      promptsCreated: 0,
+      guidelinesCreated: 0,
+      rulesCreated: 0,
+      error: `Adding ${pack.guidelines.length} guidelines would exceed your plan limit of ${limits.max_guidelines}. You currently have ${currentGuidelines}.`,
+    };
+  }
+
+  let promptsCreated = 0;
+  let guidelinesCreated = 0;
+  let rulesCreated = 0;
+
+  // 1. Insert prompts
+  const promptInserts = pack.prompts.map((p) => ({
+    org_id: orgId,
+    owner_id: userId,
+    title: p.title,
+    content: p.content,
+    description: p.description,
+    tags: p.tags,
+    tone: p.tone,
+    status: "approved" as const,
+    version: 1,
+    is_template: p.is_template,
+    template_variables: p.template_variables,
+  }));
+
+  const { data: insertedPrompts } = await db
+    .from("prompts")
+    .insert(promptInserts)
+    .select("id");
+
+  promptsCreated = insertedPrompts?.length || 0;
+
+  // 2. Create a collection named after the pack
+  if (insertedPrompts && insertedPrompts.length > 0) {
+    const { data: collection } = await db
+      .from("collections")
+      .insert({
+        org_id: orgId,
+        name: pack.name,
+        description: pack.description,
+        visibility: "org",
+        created_by: userId,
+      })
+      .select("id")
+      .single();
+
+    if (collection) {
+      await db.from("collection_prompts").insert(
+        insertedPrompts.map((p) => ({
+          collection_id: collection.id,
+          prompt_id: p.id,
+        }))
+      );
+    }
+  }
+
+  // 3. Insert guidelines
+  for (const g of pack.guidelines) {
+    const defaultGuideline = DEFAULT_GUIDELINES.find((dg) => dg.id === g.id);
+    if (!defaultGuideline) continue;
+
+    const { error } = await db.from("standards").insert({
+      org_id: orgId,
+      name: defaultGuideline.name,
+      description: defaultGuideline.description,
+      category: defaultGuideline.category,
+      scope: "org",
+      rules: defaultGuideline.rules,
+      enforced: false,
+      created_by: userId,
+    });
+
+    if (!error) guidelinesCreated++;
+  }
+
+  // 4. Insert guardrail rules (if pack has categories and org has custom_security access)
+  if (pack.guardrailCategories && pack.guardrailCategories.length > 0) {
+    const hasAccess = limits.basic_security || limits.custom_security;
+    if (hasAccess) {
+      const rulesToInstall = DEFAULT_SECURITY_RULES.filter(
+        (r) => pack.guardrailCategories!.includes(r.category) && r.is_active
+      );
+
+      // Check which rules already exist to avoid duplicates
+      const { data: existingRules } = await db
+        .from("security_rules")
+        .select("name")
+        .eq("org_id", orgId);
+
+      const existingNames = new Set((existingRules || []).map((r) => r.name));
+      const newRules = rulesToInstall.filter((r) => !existingNames.has(r.name));
+
+      if (newRules.length > 0) {
+        const { data: insertedRules } = await db
+          .from("security_rules")
+          .insert(
+            newRules.map((r) => ({
+              org_id: orgId,
+              name: r.name,
+              description: r.description,
+              pattern: r.pattern,
+              pattern_type: r.pattern_type,
+              category: r.category,
+              severity: r.severity,
+              is_active: true,
+              is_built_in: true,
+              created_by: userId,
+            }))
+          )
+          .select("id");
+
+        rulesCreated = insertedRules?.length || 0;
+      }
+    }
+  }
+
+  return { promptsCreated, guidelinesCreated, rulesCreated };
 }

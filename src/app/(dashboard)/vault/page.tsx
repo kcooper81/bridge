@@ -42,6 +42,7 @@ import {
   Copy,
   Files,
   Heart,
+  Import,
   Lightbulb,
   MoreHorizontal,
   Pencil,
@@ -69,6 +70,7 @@ import { PageSkeleton } from "@/components/dashboard/skeleton-loader";
 import { NoOrgBanner } from "@/components/dashboard/no-org-banner";
 import { GettingStarted } from "@/components/dashboard/getting-started";
 import { UpgradePrompt, LimitNudge } from "@/components/upgrade";
+import { ImportExportModal } from "@/components/dashboard/import-export-modal";
 
 const STATUS_TABS: { label: string; value: PromptStatus | "all" }[] = [
   { label: "All", value: "all" },
@@ -87,7 +89,7 @@ const STATUS_BADGE_VARIANT: Record<PromptStatus, "default" | "secondary" | "dest
 
 export default function VaultPage() {
   const { prompts, folders, departments, guidelines, loading, refresh, currentUserRole, noOrg } = useOrg();
-  const { checkLimit, planLimits } = useSubscription();
+  const { checkLimit, planLimits, canAccess } = useSubscription();
   const searchParams = useSearchParams();
   const router = useRouter();
   const [search, setSearch] = useState("");
@@ -118,6 +120,7 @@ export default function VaultPage() {
   const [sort, setSort] = useState("recent");
   const [page, setPage] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
+  const [importExportOpen, setImportExportOpen] = useState(false);
   const [editPrompt, setEditPrompt] = useState<Prompt | null>(null);
 
   const pendingCount = useMemo(
@@ -303,10 +306,18 @@ export default function VaultPage() {
         title="Prompts"
         description="Manage and organize your team's AI prompts"
         actions={
-          <Button onClick={openNewPrompt}>
-            <Plus className="mr-2 h-4 w-4" />
-            New Prompt
-          </Button>
+          <div className="flex items-center gap-2">
+            {canAccess("import_export") && (
+              <Button variant="outline" size="sm" onClick={() => setImportExportOpen(true)}>
+                <Import className="mr-2 h-4 w-4" />
+                Import / Export
+              </Button>
+            )}
+            <Button onClick={openNewPrompt}>
+              <Plus className="mr-2 h-4 w-4" />
+              New Prompt
+            </Button>
+          </div>
         }
       />
 
@@ -708,6 +719,13 @@ export default function VaultPage() {
         onOpenChange={setModalOpen}
         prompt={editPrompt}
         onSaved={refresh}
+      />
+
+      <ImportExportModal
+        open={importExportOpen}
+        onOpenChange={setImportExportOpen}
+        prompts={prompts}
+        onImported={refresh}
       />
     </>
   );

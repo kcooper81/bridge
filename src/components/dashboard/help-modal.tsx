@@ -60,8 +60,8 @@ export function HelpModal({ open, onOpenChange }: HelpModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col gap-0 p-0 overflow-hidden">
-        <DialogHeader className="px-6 pt-6 pb-4 border-b space-y-4">
-          <div className="flex items-center gap-3">
+        <DialogHeader className="px-6 pt-6 pb-4 border-b space-y-3">
+          <div className="flex items-center gap-3 pr-8">
             {view.type !== "home" && !isSearching && (
               <button
                 onClick={handleBack}
@@ -70,22 +70,13 @@ export function HelpModal({ open, onOpenChange }: HelpModalProps) {
                 <ArrowLeft className="h-4 w-4" />
               </button>
             )}
-            <DialogTitle className="flex-1">
+            <DialogTitle className="flex-1 text-lg">
               {view.type === "home" || isSearching
-                ? "Help & Documentation"
+                ? "Help & Docs"
                 : view.type === "category"
                   ? view.category.title
                   : view.category.title}
             </DialogTitle>
-            <a
-              href="/help"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Full docs
-              <ExternalLink className="h-3 w-3" />
-            </a>
           </div>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -124,6 +115,22 @@ export function HelpModal({ open, onOpenChange }: HelpModalProps) {
             )}
           </div>
         </ScrollArea>
+
+        {/* Footer */}
+        <div className="border-t px-6 py-3 flex items-center justify-between">
+          <a
+            href="/help"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            View full documentation
+            <ExternalLink className="h-3 w-3" />
+          </a>
+          <p className="text-[10px] text-muted-foreground">
+            {HELP_CATEGORIES.reduce((sum, c) => sum + c.articles.length, 0)} articles
+          </p>
+        </div>
       </DialogContent>
     </Dialog>
   );

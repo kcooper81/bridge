@@ -31,7 +31,6 @@ import {
   CreditCard,
   FolderOpen,
   HelpCircle,
-  Import,
   Library,
   LogOut,
   Menu,
@@ -74,7 +73,6 @@ const navSections: { title: string; items: NavItem[] }[] = [
       { label: "Analytics", href: "/analytics", icon: BarChart3 },
       { label: "Activity Log", href: "/activity", icon: Activity, roles: ["admin", "manager"] },
       { label: "Guardrails", href: "/guardrails", icon: Shield, roles: ["admin", "manager"] },
-      { label: "Import/Export", href: "/import-export", icon: Import },
     ],
   },
 ];
@@ -168,16 +166,6 @@ function NavContent({ onItemClick }: { onItemClick?: () => void }) {
         </div>
       )}
 
-      {/* Help button */}
-      <div className="px-3 pb-2">
-        <button
-          onClick={() => setHelpOpen(true)}
-          className="flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-all duration-200"
-        >
-          <HelpCircle className="h-[18px] w-[18px]" />
-          Help & Docs
-        </button>
-      </div>
       <HelpModal open={helpOpen} onOpenChange={setHelpOpen} />
 
       {/* User footer */}
@@ -272,6 +260,13 @@ function NavContent({ onItemClick }: { onItemClick?: () => void }) {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          <button
+            onClick={() => setHelpOpen(true)}
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
+            title="Help & Docs"
+          >
+            <HelpCircle className="h-[18px] w-[18px]" />
+          </button>
           <NotificationBell />
         </div>
       </div>

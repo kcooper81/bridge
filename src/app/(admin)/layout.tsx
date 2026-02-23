@@ -3,6 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import { AdminNav } from "@/components/admin/nav";
 import { AdminHeader } from "@/components/admin/header";
 
+const SUPER_ADMIN_EMAILS = ["admin@teamprompt.app"];
+
 export default async function AdminLayout({
   children,
 }: {
@@ -23,7 +25,11 @@ export default async function AdminLayout({
     .eq("id", user.id)
     .single();
 
-  if (!profile?.is_super_admin) {
+  const isSuperAdmin =
+    profile?.is_super_admin === true ||
+    SUPER_ADMIN_EMAILS.includes(user.email || "");
+
+  if (!isSuperAdmin) {
     redirect("/vault");
   }
 

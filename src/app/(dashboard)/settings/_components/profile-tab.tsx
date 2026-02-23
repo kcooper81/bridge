@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { cn } from "@/lib/utils";
 import { useAuth } from "@/components/providers/auth-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Loader2, User, Mail, Github } from "lucide-react";
+import { Loader2, User, Mail, Github, Sun, Moon } from "lucide-react";
+import { useTheme } from "@/components/providers/theme-provider";
 import { updateProfile } from "@/lib/vault-api";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -50,6 +52,7 @@ function getProviderLabel(provider: string) {
 
 export function ProfileTab() {
   const { user } = useAuth();
+  const { theme, setTheme } = useTheme();
   const [displayName, setDisplayName] = useState(user?.user_metadata?.name || user?.user_metadata?.full_name || "");
   const [saving, setSaving] = useState(false);
 
@@ -151,6 +154,47 @@ export function ProfileTab() {
           </CardContent>
         </Card>
       )}
+
+      {/* Preferences */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Preferences</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium">Theme</p>
+              <p className="text-xs text-muted-foreground">Choose your preferred appearance</p>
+            </div>
+            <div className="flex items-center rounded-lg border border-border p-1 gap-1">
+              <button
+                onClick={() => setTheme("light")}
+                className={cn(
+                  "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
+                  theme === "light"
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <Sun className="h-3.5 w-3.5" />
+                Light
+              </button>
+              <button
+                onClick={() => setTheme("dark")}
+                className={cn(
+                  "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
+                  theme === "dark"
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <Moon className="h-3.5 w-3.5" />
+                Dark
+              </button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

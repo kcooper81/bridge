@@ -5,6 +5,8 @@ import { createClient } from "@/lib/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
 import { authDebug } from "@/lib/auth-debug"; // AUTH-DEBUG
 
+const SUPER_ADMIN_EMAILS = ["admin@teamprompt.app"];
+
 interface AuthContextValue {
   user: User | null;
   session: Session | null;
@@ -56,7 +58,10 @@ export function AuthProvider({
         .select("is_super_admin")
         .eq("id", user.id)
         .maybeSingle();
-      setIsSuperAdmin(data?.is_super_admin === true);
+      setIsSuperAdmin(
+        data?.is_super_admin === true ||
+          SUPER_ADMIN_EMAILS.includes(user.email || "")
+      );
     }
     fetchSuperAdmin();
   }, [user]);

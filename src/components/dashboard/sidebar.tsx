@@ -10,20 +10,32 @@ import { useAuth } from "@/components/providers/auth-provider";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useTheme } from "@/components/providers/theme-provider";
+import { useSubscription } from "@/components/providers/subscription-provider";
 import {
   Activity,
   Archive,
   BarChart3,
   BookOpen,
   Building2,
+  ChevronUp,
+  CreditCard,
   FolderOpen,
   Import,
   Library,
   LogOut,
   Menu,
   Moon,
+  Settings,
   Shield,
   Sun,
   Users,
@@ -70,6 +82,7 @@ function NavContent({ onItemClick }: { onItemClick?: () => void }) {
   const { currentUserRole, members, prompts } = useOrg();
   const { user, signOut, isSuperAdmin } = useAuth();
   const { theme, setTheme } = useTheme();
+  const { subscription } = useSubscription();
 
   const pendingCount = prompts.filter((p) => p.status === "pending").length;
   const currentMember = members.find((m) => m.isCurrentUser);
@@ -154,37 +167,97 @@ function NavContent({ onItemClick }: { onItemClick?: () => void }) {
 
       {/* User footer */}
       <div className="border-t border-border/50 px-4 py-4">
-        <div className="flex items-center gap-3">
-          <Avatar className="h-10 w-10 shadow-md">
-            <AvatarFallback className="bg-gradient-to-br from-primary/30 to-primary/10 text-primary text-sm font-semibold">
-              {initials}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold truncate">
-              {currentMember?.name || user?.email}
-            </p>
-            <Badge variant="outline" className="text-[10px] px-1.5 py-0 mt-0.5 border-border/50">
-              {currentUserRole}
-            </Badge>
-          </div>
+        <div className="flex items-center gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex flex-1 min-w-0 items-center gap-3 rounded-xl px-2 py-1.5 hover:bg-muted/50 transition-colors">
+                <Avatar className="h-10 w-10 shadow-md shrink-0">
+                  <AvatarFallback className="bg-gradient-to-br from-primary/30 to-primary/10 text-primary text-sm font-semibold">
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0 text-left">
+                  <p className="text-sm font-semibold truncate">
+                    {currentMember?.name || user?.email}
+                  </p>
+                  <Badge variant="outline" className="text-[10px] px-1.5 py-0 mt-0.5 border-border/50">
+                    {currentUserRole}
+                  </Badge>
+                </div>
+                <ChevronUp className="h-4 w-4 text-muted-foreground shrink-0" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent side="top" align="start" className="w-64 mb-1">
+              {/* Header */}
+              <DropdownMenuLabel className="font-normal">
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-10 w-10 shrink-0">
+                    <AvatarFallback className="bg-gradient-to-br from-primary/30 to-primary/10 text-primary text-sm font-semibold">
+                      {initials}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold truncate">
+                      {currentMember?.name || user?.email}
+                    </p>
+                    <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+                    <div className="flex items-center gap-1.5 mt-1">
+                      <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-border/50">
+                        {currentUserRole}
+                      </Badge>
+                      <Badge variant="secondary" className="text-[10px] px-1.5 py-0 capitalize">
+                        {subscription?.plan || "free"}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+              </DropdownMenuLabel>
+
+              <DropdownMenuSeparator />
+
+              {/* Theme toggle */}
+              <DropdownMenuItem
+                onSelect={(e) => {
+                  e.preventDefault();
+                  setTheme(theme === "dark" ? "light" : "dark");
+                }}
+              >
+                {theme === "dark" ? <Sun className="mr-2 h-4 w-4" /> : <Moon className="mr-2 h-4 w-4" />}
+                Dark mode
+                <span className="ml-auto text-xs text-muted-foreground">
+                  {theme === "dark" ? "On" : "Off"}
+                </span>
+              </DropdownMenuItem>
+
+              <DropdownMenuSeparator />
+
+              {/* Nav items */}
+              <DropdownMenuItem asChild>
+                <Link href="/settings" onClick={onItemClick}>
+                  <Settings className="mr-2 h-4 w-4" />
+                  Profile & Settings
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/settings/billing" onClick={onItemClick}>
+                  <CreditCard className="mr-2 h-4 w-4" />
+                  Billing
+                </Link>
+              </DropdownMenuItem>
+
+              <DropdownMenuSeparator />
+
+              {/* Sign out */}
+              <DropdownMenuItem
+                className="text-destructive focus:text-destructive"
+                onSelect={() => signOut()}
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                Sign out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <NotificationBell />
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-9 w-9 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/50 hover:scale-110 transition-all duration-200"
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-          >
-            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-9 w-9 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/50 hover:scale-110 transition-all duration-200"
-            onClick={signOut}
-          >
-            <LogOut className="h-4 w-4" />
-          </Button>
         </div>
       </div>
     </div>

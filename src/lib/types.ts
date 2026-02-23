@@ -49,6 +49,7 @@ export interface Organization {
   settings: {
     allow_personal_prompts?: boolean;
     default_visibility?: CollectionVisibility;
+    setup_complete?: boolean;
   } | null;
   created_at: string;
   updated_at: string;

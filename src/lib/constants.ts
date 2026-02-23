@@ -80,6 +80,8 @@ export const PLAN_DISPLAY: Record<
     annualPrice: string;
     annualMonthly: string;
     description: string;
+    popular?: boolean;
+    features: Record<string, string | boolean>;
   }
 > = {
   free: {
@@ -88,6 +90,17 @@ export const PLAN_DISPLAY: Record<
     annualPrice: "$0",
     annualMonthly: "$0",
     description: "For individuals getting started",
+    features: {
+      Prompts: "25",
+      Members: "3",
+      Guidelines: "5",
+      "Basic Security Patterns": true,
+      "Custom Security Rules": false,
+      "Security Audit Log": false,
+      Analytics: false,
+      "Import/Export": false,
+      "Chrome Extension": true,
+    },
   },
   pro: {
     name: "Pro",
@@ -95,6 +108,17 @@ export const PLAN_DISPLAY: Record<
     annualPrice: "$86/yr",
     annualMonthly: "$7/mo",
     description: "For power users and solopreneurs",
+    features: {
+      Prompts: "Unlimited",
+      Members: "1",
+      Guidelines: "All 14",
+      "Basic Security Patterns": true,
+      "Custom Security Rules": true,
+      "Security Audit Log": false,
+      Analytics: true,
+      "Import/Export": true,
+      "Chrome Extension": true,
+    },
   },
   team: {
     name: "Team",
@@ -102,6 +126,18 @@ export const PLAN_DISPLAY: Record<
     annualPrice: "$67/user/yr",
     annualMonthly: "$5.60/user/mo",
     description: "For growing teams",
+    popular: true,
+    features: {
+      Prompts: "Unlimited",
+      Members: "Up to 50",
+      Guidelines: "All 14",
+      "Basic Security Patterns": true,
+      "Custom Security Rules": true,
+      "Security Audit Log": true,
+      Analytics: true,
+      "Import/Export": true,
+      "Chrome Extension": true,
+    },
   },
   business: {
     name: "Business",
@@ -109,6 +145,17 @@ export const PLAN_DISPLAY: Record<
     annualPrice: "$115/user/yr",
     annualMonthly: "$9.60/user/mo",
     description: "For large organizations",
+    features: {
+      Prompts: "Unlimited",
+      Members: "Up to 500",
+      Guidelines: "All 14 + custom",
+      "Basic Security Patterns": true,
+      "Custom Security Rules": true,
+      "Security Audit Log": true,
+      Analytics: true,
+      "Import/Export": true,
+      "Chrome Extension": true,
+    },
   },
 };
 

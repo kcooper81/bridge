@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, CreditCard, ArrowUpRight } from "lucide-react";
+import { Loader2, CreditCard, ArrowUpRight, CheckCircle2, X } from "lucide-react";
 import { PLAN_DISPLAY } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
@@ -125,7 +125,7 @@ export default function BillingPage() {
         ]}
       />
 
-      <div className="max-w-4xl space-y-6">
+      <div className="max-w-5xl space-y-6">
         {/* Current Plan */}
         <Card>
           <CardHeader>
@@ -222,11 +222,25 @@ export default function BillingPage() {
             const isCurrent = currentPlan === plan;
             const displayPrice = interval === "annual" ? info.annualMonthly : info.price;
             return (
-              <Card key={plan} className={isCurrent ? "border-primary" : ""}>
+              <Card
+                key={plan}
+                className={`relative flex flex-col ${
+                  isCurrent
+                    ? "ring-2 ring-primary/50 bg-primary/5"
+                    : info.popular
+                      ? "border-primary"
+                      : ""
+                }`}
+              >
+                {info.popular && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-[10px] font-semibold px-3 py-0.5 rounded-full uppercase tracking-wider">
+                    Most Popular
+                  </div>
+                )}
                 <CardHeader className="pb-2">
                   <CardTitle className="text-base">{info.name}</CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="flex flex-col flex-1">
                   <p className="text-2xl font-bold">{displayPrice}</p>
                   {interval === "annual" && plan !== "free" && (
                     <p className="text-xs text-muted-foreground mt-0.5">
@@ -234,6 +248,23 @@ export default function BillingPage() {
                     </p>
                   )}
                   <p className="text-sm text-muted-foreground mt-1">{info.description}</p>
+
+                  {/* Feature list */}
+                  <ul className="mt-4 space-y-2 flex-1">
+                    {Object.entries(info.features).map(([feature, value]) => (
+                      <li key={feature} className="flex items-center gap-2 text-sm">
+                        {value === false ? (
+                          <X className="h-3.5 w-3.5 text-muted-foreground/30 shrink-0" />
+                        ) : (
+                          <CheckCircle2 className="h-3.5 w-3.5 text-primary shrink-0" />
+                        )}
+                        <span className={value === false ? "text-muted-foreground/50" : ""}>
+                          {typeof value === "string" ? `${feature}: ${value}` : feature}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+
                   <div className="mt-4">
                     {isCurrent ? (
                       <Button variant="outline" className="w-full" disabled>

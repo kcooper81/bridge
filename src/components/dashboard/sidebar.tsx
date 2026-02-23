@@ -38,7 +38,6 @@ import {
   Settings,
   Shield,
   Sun,
-  Users,
 } from "lucide-react";
 import { NotificationBell } from "@/components/dashboard/notification-bell";
 
@@ -62,9 +61,8 @@ const navSections: { title: string; items: NavItem[] }[] = [
   {
     title: "Administration",
     items: [
-      { label: "Team", href: "/team", icon: Users, roles: ["admin", "manager"] },
       { label: "Guardrails", href: "/guardrails", icon: Shield, roles: ["admin", "manager"] },
-      { label: "Settings", href: "/settings", icon: Building2, roles: ["admin"] },
+      { label: "Settings", href: "/settings", icon: Building2, roles: ["admin", "manager"] },
     ],
   },
   {

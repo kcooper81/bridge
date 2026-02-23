@@ -1,21 +1,44 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useAuth } from "@/components/providers/auth-provider";
+import { useOrg } from "@/components/providers/org-provider";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, User, Building, CreditCard, AlertTriangle } from "lucide-react";
+import { Loader2, User, Building, CreditCard, AlertTriangle, Users } from "lucide-react";
 import { toast } from "sonner";
 import { ProfileTab } from "./_components/profile-tab";
 import { OrganizationTab } from "./_components/organization-tab";
 import { PlanUsageTab } from "./_components/plan-usage-tab";
+import { TeamTab } from "./_components/team-tab";
 
 export default function SettingsPage() {
   const { signOut } = useAuth();
+  const { currentUserRole } = useOrg();
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const [deleting, setDeleting] = useState(false);
+
+  const showTeamTab = currentUserRole === "admin" || currentUserRole === "manager";
+  const initialTab = searchParams.get("tab") || "profile";
+  const activeTab = ["profile", "organization", "plan-usage", "team"].includes(initialTab)
+    ? (initialTab === "team" && !showTeamTab ? "profile" : initialTab)
+    : "profile";
+
+  const setTab = useCallback((value: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (value === "profile") {
+      params.delete("tab");
+    } else {
+      params.set("tab", value);
+    }
+    const qs = params.toString();
+    router.replace(`/settings${qs ? `?${qs}` : ""}`, { scroll: false });
+  }, [searchParams, router]);
 
   async function handleDeleteAccount() {
     if (!confirm("Are you sure you want to delete your account? This cannot be undone.")) return;
@@ -47,8 +70,8 @@ export default function SettingsPage() {
     <>
       <PageHeader title="Settings" description="Manage your account and organization" />
 
-      <div className="max-w-2xl space-y-6">
-        <Tabs defaultValue="profile">
+      <div className="max-w-4xl space-y-6">
+        <Tabs value={activeTab} onValueChange={setTab}>
           <TabsList>
             <TabsTrigger value="profile" className="gap-1.5">
               <User className="h-4 w-4" />
@@ -62,6 +85,12 @@ export default function SettingsPage() {
               <CreditCard className="h-4 w-4" />
               Plan & Usage
             </TabsTrigger>
+            {showTeamTab && (
+              <TabsTrigger value="team" className="gap-1.5">
+                <Users className="h-4 w-4" />
+                Team
+              </TabsTrigger>
+            )}
           </TabsList>
 
           <TabsContent value="profile">
@@ -75,6 +104,12 @@ export default function SettingsPage() {
           <TabsContent value="plan-usage">
             <PlanUsageTab />
           </TabsContent>
+
+          {showTeamTab && (
+            <TabsContent value="team">
+              <TeamTab />
+            </TabsContent>
+          )}
         </Tabs>
 
         {/* Danger Zone — always visible below tabs */}

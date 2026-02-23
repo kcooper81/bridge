@@ -67,6 +67,7 @@ import { trackPurchase, trackPromptUsed } from "@/lib/analytics";
 import type { Prompt, PromptStatus } from "@/lib/types";
 import { PageSkeleton } from "@/components/dashboard/skeleton-loader";
 import { NoOrgBanner } from "@/components/dashboard/no-org-banner";
+import { GettingStarted } from "@/components/dashboard/getting-started";
 import { UpgradePrompt, LimitNudge } from "@/components/upgrade";
 
 const STATUS_TABS: { label: string; value: PromptStatus | "all" }[] = [
@@ -308,6 +309,8 @@ export default function VaultPage() {
           </Button>
         }
       />
+
+      <GettingStarted />
 
       {!checkLimit("create_prompt", prompts.length) && (
         <UpgradePrompt feature="create_prompt" current={prompts.length} max={planLimits.max_prompts} className="mb-6" />

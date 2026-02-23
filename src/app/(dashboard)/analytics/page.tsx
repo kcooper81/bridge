@@ -17,6 +17,7 @@ import {
   Shield,
   Braces,
 } from "lucide-react";
+import { UpgradeGate } from "@/components/upgrade";
 import { getAnalytics } from "@/lib/vault-api";
 import type { Analytics } from "@/lib/types";
 import { NoOrgBanner } from "@/components/dashboard/no-org-banner";
@@ -49,13 +50,7 @@ export default function AnalyticsPage() {
     return (
       <>
         <PageHeader title="Analytics" />
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <BarChart3 className="h-12 w-12 text-muted-foreground mb-4" />
-          <h3 className="text-lg font-medium">Analytics requires Pro or higher</h3>
-          <p className="text-sm text-muted-foreground mt-1">
-            Upgrade your plan to access usage analytics and insights.
-          </p>
-        </div>
+        <UpgradeGate feature="analytics" />
       </>
     );
   }

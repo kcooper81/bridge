@@ -22,6 +22,7 @@ import { TagInput } from "@/components/ui/tag-input";
 import { CategoryCombobox } from "@/components/ui/category-combobox";
 import { BookOpen, Download, Pencil, Plus, Trash2 } from "lucide-react";
 import { NoOrgBanner } from "@/components/dashboard/no-org-banner";
+import { UpgradePrompt, LimitNudge } from "@/components/upgrade";
 import {
   saveGuidelineApi,
   deleteGuidelineApi,
@@ -32,7 +33,7 @@ import type { Guideline, GuidelineRules } from "@/lib/types";
 
 export default function GuidelinesPage() {
   const { guidelines, loading, refresh, noOrg } = useOrg();
-  const { checkLimit } = useSubscription();
+  const { checkLimit, planLimits } = useSubscription();
   const [modalOpen, setModalOpen] = useState(false);
   const [editGuideline, setEditGuideline] = useState<Guideline | null>(null);
   const [installing, setInstalling] = useState(false);
@@ -49,10 +50,7 @@ export default function GuidelinesPage() {
   const [maxLength, setMaxLength] = useState("");
 
   function openModal(g: Guideline | null) {
-    if (!g && !checkLimit("add_guideline", guidelines.length)) {
-      toast.error("Guideline limit reached. Upgrade your plan for more.");
-      return;
-    }
+    if (!g && !checkLimit("add_guideline", guidelines.length)) return;
     if (g) {
       setEditGuideline(g);
       setName(g.name);
@@ -187,6 +185,11 @@ export default function GuidelinesPage() {
           </div>
         }
       />
+
+      {!checkLimit("add_guideline", guidelines.length) && (
+        <UpgradePrompt feature="add_guideline" current={guidelines.length} max={planLimits.max_guidelines} className="mb-6" />
+      )}
+      <LimitNudge feature="add_guideline" current={guidelines.length} max={planLimits.max_guidelines} className="mb-4" />
 
       {guidelines.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center">

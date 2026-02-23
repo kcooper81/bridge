@@ -34,7 +34,6 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  AlertTriangle,
   Download,
   Pencil,
   Plus,
@@ -53,6 +52,7 @@ import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { trackGuardrailCreated } from "@/lib/analytics";
 import { NoOrgBanner } from "@/components/dashboard/no-org-banner";
+import { UpgradeGate } from "@/components/upgrade";
 import { DetectionSettings } from "./_components/detection-settings";
 import { SensitiveTermsManager } from "./_components/sensitive-terms-manager";
 import { SuggestedRules } from "./_components/suggested-rules";
@@ -193,10 +193,7 @@ export default function GuardrailsPage() {
 
   async function handleInstallDefaults() {
     if (!org) return;
-    if (!canAccess("custom_security")) {
-      toast.error("Custom security rules require a paid plan.");
-      return;
-    }
+    if (!canAccess("custom_security")) return;
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -305,6 +302,9 @@ export default function GuardrailsPage() {
         </TabsList>
 
         <TabsContent value="policies" className="mt-4">
+          {!canAccess("custom_security") && (
+            <UpgradeGate feature="custom_security" title="Custom Security Policies" className="mb-6 py-10" />
+          )}
           <div className="rounded-lg border border-border">
             <Table>
               <TableHeader>
@@ -375,13 +375,7 @@ export default function GuardrailsPage() {
 
         <TabsContent value="violations" className="mt-4">
           {!canAccess("audit_log") ? (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <AlertTriangle className="h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium">Audit log requires Team or higher</h3>
-              <p className="text-sm text-muted-foreground mt-1">
-                Upgrade to view the security violation audit log.
-              </p>
-            </div>
+            <UpgradeGate feature="audit_log" title="Security Violation Log" />
           ) : (
             <div className="rounded-lg border border-border">
               <Table>

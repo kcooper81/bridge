@@ -154,8 +154,10 @@ export default function BillingPage() {
                     { label: "Prompts", free: "25", paid: "Unlimited" },
                     { label: "Guidelines", free: "5", paid: "14+" },
                     { label: "Members", free: "3", paid: "Up to 500" },
-                    { label: "Analytics", free: "No", paid: "Yes" },
-                    { label: "Custom Security", free: "No", paid: "Yes" },
+                    { label: "Analytics", free: "No", paid: "Pro+" },
+                    { label: "Import / Export", free: "No", paid: "Pro+" },
+                    { label: "Custom Security", free: "No", paid: "Pro+" },
+                    { label: "Activity Log", free: "No", paid: "Team+" },
                   ].map((row) => (
                     <div key={row.label} className="flex items-center justify-between text-xs">
                       <span className="text-muted-foreground">{row.label}</span>

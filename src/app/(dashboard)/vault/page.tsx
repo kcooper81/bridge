@@ -67,6 +67,7 @@ import { trackPurchase, trackPromptUsed } from "@/lib/analytics";
 import type { Prompt, PromptStatus } from "@/lib/types";
 import { PageSkeleton } from "@/components/dashboard/skeleton-loader";
 import { NoOrgBanner } from "@/components/dashboard/no-org-banner";
+import { UpgradePrompt, LimitNudge } from "@/components/upgrade";
 
 const STATUS_TABS: { label: string; value: PromptStatus | "all" }[] = [
   { label: "All", value: "all" },
@@ -85,7 +86,7 @@ const STATUS_BADGE_VARIANT: Record<PromptStatus, "default" | "secondary" | "dest
 
 export default function VaultPage() {
   const { prompts, folders, departments, guidelines, loading, refresh, currentUserRole, noOrg } = useOrg();
-  const { checkLimit } = useSubscription();
+  const { checkLimit, planLimits } = useSubscription();
   const searchParams = useSearchParams();
   const router = useRouter();
   const [search, setSearch] = useState("");
@@ -179,10 +180,7 @@ export default function VaultPage() {
   const enforcedGuidelines = guidelines.filter((s) => s.enforced).length;
 
   function openNewPrompt() {
-    if (!checkLimit("create_prompt", prompts.length)) {
-      toast.error("Prompt limit reached. Upgrade your plan.");
-      return;
-    }
+    if (!checkLimit("create_prompt", prompts.length)) return;
     setEditPrompt(null);
     setModalOpen(true);
   }
@@ -310,6 +308,11 @@ export default function VaultPage() {
           </Button>
         }
       />
+
+      {!checkLimit("create_prompt", prompts.length) && (
+        <UpgradePrompt feature="create_prompt" current={prompts.length} max={planLimits.max_prompts} className="mb-6" />
+      )}
+      <LimitNudge feature="create_prompt" current={prompts.length} max={planLimits.max_prompts} className="mb-4" />
 
       {/* Stats */}
       <div className="mb-6 grid grid-cols-2 lg:grid-cols-4 gap-4">

@@ -41,10 +41,11 @@ import {
 import { toast } from "sonner";
 import { trackInviteSent } from "@/lib/analytics";
 import type { Invite, Team, UserRole } from "@/lib/types";
+import { UpgradePrompt, LimitNudge } from "@/components/upgrade";
 
 export default function TeamPage() {
   const { teams, members, currentUserRole, loading, refresh, noOrg } = useOrg();
-  const { checkLimit } = useSubscription();
+  const { checkLimit, planLimits } = useSubscription();
 
   const [teamModalOpen, setTeamModalOpen] = useState(false);
   const [editTeam, setEditTeam] = useState<Team | null>(null);
@@ -167,10 +168,7 @@ export default function TeamPage() {
 
   async function handleSendInvite() {
     if (!inviteEmail.trim()) return;
-    if (!checkLimit("add_member", members.length)) {
-      toast.error("Member limit reached. Upgrade your plan.");
-      return;
-    }
+    if (!checkLimit("add_member", members.length)) return;
     setInviting(true);
     const result = await sendInvite(inviteEmail.trim(), inviteRole, inviteTeamId || undefined);
     if (result.success) {
@@ -345,6 +343,11 @@ export default function TeamPage() {
           </div>
         }
       />
+
+      {!checkLimit("add_member", members.length) && (
+        <UpgradePrompt feature="add_member" current={members.length} max={planLimits.max_members} className="mb-6" />
+      )}
+      <LimitNudge feature="add_member" current={members.length} max={planLimits.max_members} className="mb-4" />
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Teams */}

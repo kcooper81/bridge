@@ -21,6 +21,7 @@ import {
   ChevronRight,
   Activity,
 } from "lucide-react";
+import { UpgradeGate } from "@/components/upgrade";
 import { useSubscription } from "@/components/providers/subscription-provider";
 import { getConversationLogs } from "@/lib/vault-api";
 import { formatDistanceToNow } from "date-fns";
@@ -142,13 +143,7 @@ export default function ActivityPage() {
     return (
       <>
         <PageHeader title="Activity Log" />
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <Activity className="h-12 w-12 text-muted-foreground mb-4" />
-          <h3 className="text-lg font-medium">Activity log requires Team or higher</h3>
-          <p className="text-sm text-muted-foreground mt-1">
-            Upgrade your plan to access the conversation audit log.
-          </p>
-        </div>
+        <UpgradeGate feature="audit_log" title="Activity Log" />
       </>
     );
   }

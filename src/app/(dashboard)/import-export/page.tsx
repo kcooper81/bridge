@@ -9,7 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Download, Import, Loader2, Upload } from "lucide-react";
+import { Download, Loader2, Upload } from "lucide-react";
+import { UpgradeGate } from "@/components/upgrade";
 import { exportPack, importPack } from "@/lib/vault-api";
 import { toast } from "sonner";
 import { trackExport, trackImport } from "@/lib/analytics";
@@ -36,13 +37,7 @@ export default function ImportExportPage() {
     return (
       <>
         <PageHeader title="Import / Export" />
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <Import className="h-12 w-12 text-muted-foreground mb-4" />
-          <h3 className="text-lg font-medium">Import/Export requires Pro or higher</h3>
-          <p className="text-sm text-muted-foreground mt-1">
-            Upgrade your plan to import and export prompt packs.
-          </p>
-        </div>
+        <UpgradeGate feature="import_export" title="Import / Export" />
       </>
     );
   }

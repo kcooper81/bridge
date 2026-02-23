@@ -7,6 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import {
   Select,
   SelectContent,
@@ -172,7 +173,7 @@ export function DetectionSettings({ orgId, canEdit, hasPremiumAccess }: Detectio
             ) : (
               <Badge variant="outline" className="gap-1">
                 <Lock className="h-3 w-3" />
-                Business Plan
+                Pro Plan
               </Badge>
             )}
           </div>
@@ -207,8 +208,8 @@ export function DetectionSettings({ orgId, canEdit, hasPremiumAccess }: Detectio
             </div>
           )}
           {!hasPremiumAccess && (
-            <Button variant="outline" size="sm" className="mt-2">
-              Upgrade to Business
+            <Button variant="outline" size="sm" className="mt-2" asChild>
+              <Link href="/settings/billing">Upgrade to Pro</Link>
             </Button>
           )}
         </CardContent>

@@ -2,16 +2,48 @@ import { NextRequest, NextResponse } from "next/server";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://teamprompt.app";
 
+// Extension IDs allowed to call the API.
+// Set EXTENSION_ALLOWED_IDS in env as comma-separated list, or leave empty to allow
+// any extension origin (for development). In production, pin to your published IDs.
+const ALLOWED_EXTENSION_IDS = (process.env.EXTENSION_ALLOWED_IDS || "")
+  .split(",")
+  .map((id) => id.trim())
+  .filter(Boolean);
+
+const DEV_ORIGINS = [
+  "http://localhost:3000",
+  "http://localhost:3001",
+  "http://localhost:3002",
+  "http://localhost:3003",
+];
+
 function getAllowedOrigin(request?: NextRequest | Request): string {
   const origin = request?.headers.get("origin") || "";
-  // Allow browser extension origins
+
+  // Allow browser extension origins — validate ID if configured
   if (origin.startsWith("chrome-extension://") || origin.startsWith("moz-extension://")) {
-    return origin;
+    if (ALLOWED_EXTENSION_IDS.length === 0) {
+      // No IDs configured — allow all (dev mode)
+      return origin;
+    }
+    const id = origin.replace(/^(chrome|moz)-extension:\/\//, "").replace(/\/$/, "");
+    if (ALLOWED_EXTENSION_IDS.includes(id)) {
+      return origin;
+    }
+    // Unknown extension — reject by returning site URL (CORS mismatch = blocked)
+    return SITE_URL;
   }
+
   // Allow our own site
-  if (origin === SITE_URL || origin === "http://localhost:3000") {
+  if (origin === SITE_URL) {
     return origin;
   }
+
+  // Allow dev origins in non-production
+  if (process.env.NODE_ENV !== "production" && DEV_ORIGINS.includes(origin)) {
+    return origin;
+  }
+
   return SITE_URL;
 }
 

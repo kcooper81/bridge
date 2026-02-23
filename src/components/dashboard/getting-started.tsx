@@ -31,19 +31,17 @@ export function GettingStarted() {
 
   if (dismissed) return null;
   if (currentUserRole !== "admin") return null;
-  if (!org?.settings?.setup_complete) return null;
-
   const items = [
     {
       label: "Name your organization",
-      done: !!org.name && org.name !== "My Organization" && org.name.length > 0,
-      href: "/settings?tab=organization",
+      done: !!org?.name && org.name !== "My Organization" && org.name.length > 0,
+      href: "/settings",
       icon: Building,
     },
     {
       label: "Invite team members",
       done: members.length > 1,
-      href: "/settings?tab=team",
+      href: "/team",
       icon: UserPlus,
     },
     {

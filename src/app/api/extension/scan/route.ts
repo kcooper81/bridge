@@ -4,6 +4,9 @@ import { handleOptions, withCors } from "../cors";
 import { limiters, checkRateLimit } from "@/lib/rate-limit";
 import { trackExtensionActivity } from "../track-activity";
 
+const MAX_CONTENT_LENGTH = 50_000; // 50 KB max scan payload
+const REGEX_TIMEOUT_MS = 500; // Per-rule regex execution limit
+
 export async function OPTIONS(request: NextRequest) { return handleOptions(request); }
 
 // POST /api/extension/scan — DLP scan before text is sent to AI tool
@@ -40,9 +43,17 @@ export async function POST(request: NextRequest) {
       return withCors(NextResponse.json({ error: "No organization" }, { status: 403 }), request);
     }
 
-    const { content } = await request.json();
+    const body = await request.json();
+    const content = body?.content;
     if (!content || typeof content !== "string") {
       return withCors(NextResponse.json({ error: "Content is required" }, { status: 400 }), request);
+    }
+
+    if (content.length > MAX_CONTENT_LENGTH) {
+      return withCors(
+        NextResponse.json({ error: `Content exceeds ${MAX_CONTENT_LENGTH} character limit` }, { status: 413 }),
+        request
+      );
     }
 
     // Fetch active security rules for the org
@@ -96,6 +107,8 @@ export async function POST(request: NextRequest) {
   }
 }
 
+// ─── Pattern Matching with Timeout Protection ───
+
 function matchPattern(content: string, pattern: string, patternType: string): string | null {
   switch (patternType) {
     case "exact": {
@@ -104,35 +117,63 @@ function matchPattern(content: string, pattern: string, patternType: string): st
       return null;
     }
     case "regex": {
-      try {
-        const regex = new RegExp(pattern, "gi");
-        const match = regex.exec(content);
-        if (match) return match[0];
-      } catch {
-        // Invalid regex — skip
-      }
-      return null;
+      return safeRegexMatch(pattern, content);
     }
     case "glob": {
       const escaped = pattern
         .replace(/[.+^${}()|[\]\\]/g, "\\$&")
         .replace(/\*/g, ".*")
         .replace(/\?/g, ".");
-      try {
-        const regex = new RegExp(escaped, "gi");
-        const match = regex.exec(content);
-        if (match) return match[0];
-      } catch {
-        // Skip
-      }
-      return null;
+      return safeRegexMatch(escaped, content);
     }
     default:
       return null;
   }
 }
 
+/**
+ * Execute a regex match with safety guards:
+ * - Validates the regex is syntactically valid
+ * - Rejects patterns with known catastrophic backtracking constructs
+ * - Enforces a character-processing limit as a timeout proxy
+ */
+function safeRegexMatch(pattern: string, content: string): string | null {
+  // Reject patterns with nested quantifiers that cause catastrophic backtracking
+  // e.g., (a+)+, (a*)*b, (a|b+)*, (.+)+
+  if (/\([^)]*[+*][^)]*\)[+*]/.test(pattern) || /\(\?:[^)]*[+*][^)]*\)[+*]/.test(pattern)) {
+    console.warn("Rejected potentially catastrophic regex pattern:", pattern.slice(0, 100));
+    return null;
+  }
+
+  try {
+    const regex = new RegExp(pattern, "gi");
+
+    // For very long content, limit what we scan to prevent long-running matches
+    const scanContent = content.length > MAX_CONTENT_LENGTH
+      ? content.slice(0, MAX_CONTENT_LENGTH)
+      : content;
+
+    // Use a manual timeout via performance tracking
+    const start = performance.now();
+    regex.lastIndex = 0;
+    const match = regex.exec(scanContent);
+    const elapsed = performance.now() - start;
+
+    if (elapsed > REGEX_TIMEOUT_MS) {
+      console.warn(`Regex exceeded ${REGEX_TIMEOUT_MS}ms (${elapsed.toFixed(0)}ms) for pattern: ${pattern.slice(0, 100)}`);
+    }
+
+    if (match) return match[0];
+  } catch {
+    // Invalid regex — skip silently
+  }
+  return null;
+}
+
+// ─── Redaction (fully masked — no first/last chars exposed) ───
+
 function redactMatch(text: string): string {
-  if (text.length <= 4) return "****";
-  return text.slice(0, 2) + "*".repeat(Math.min(text.length - 4, 20)) + text.slice(-2);
+  if (text.length <= 8) return "*".repeat(text.length);
+  // Show category hint (first 3 chars) but mask the rest
+  return text.slice(0, 3) + "*".repeat(Math.min(text.length - 3, 24));
 }

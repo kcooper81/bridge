@@ -1,10 +1,25 @@
 // TeamPrompt Extension — Content Script
-// Runs on AI tool pages. Handles: DLP scanning, prompt insertion, interaction logging.
+// Runs on AI tool pages. Handles: DLP scanning, prompt insertion, interaction logging, shield indicator.
 
-import { insertIntoAiTool } from "../lib/ai-tools";
+import { detectAiTool, insertIntoAiTool } from "../lib/ai-tools";
 import { scanOutbound, type ScanResult } from "../lib/scanner";
+import { fetchSecurityStatus } from "../lib/security-status";
 import { logInteraction } from "../lib/logging";
+import { getSession } from "../lib/auth";
 import "../styles/content.css";
+
+// Flag to allow re-dispatched Enter key to pass through without re-scanning
+let _tpAllowNext = false;
+
+// Track shield indicator state
+let _shieldEl: HTMLElement | null = null;
+let _shieldStatusEl: HTMLElement | null = null;
+let _shieldDotEl: HTMLElement | null = null;
+let _shieldLabelEl: HTMLElement | null = null;
+let _shieldCollapsed = false;
+let _ruleCount = 0;
+let _isProtected = false;
+let _isAuthenticated = false;
 
 export default defineContentScript({
   matches: [
@@ -18,6 +33,9 @@ export default defineContentScript({
   runAt: "document_idle",
 
   main() {
+    // ─── Initialize Shield Indicator ───
+    initShieldIndicator();
+
     // ─── Message Handler ───
     browser.runtime.onMessage.addListener(
       (message: { type: string; content?: string }, _sender, sendResponse) => {
@@ -29,10 +47,16 @@ export default defineContentScript({
       }
     );
 
-    // ─── DLP Monitoring ───
+    // ─── DLP Monitoring (Fixed: synchronous block, async scan, re-dispatch) ───
     document.addEventListener(
       "keydown",
-      async (e) => {
+      (e) => {
+        // If this is our re-dispatched event, let it through
+        if (_tpAllowNext) {
+          _tpAllowNext = false;
+          return;
+        }
+
         if (e.key === "Enter" && !e.shiftKey) {
           const target = e.target as HTMLElement;
           if (
@@ -47,28 +71,255 @@ export default defineContentScript({
               "";
             if (text.trim().length < 10) return;
 
-            const result = await scanOutbound(text);
-            if (result?.action === "block") {
-              e.preventDefault();
-              e.stopPropagation();
-              showBlockOverlay(result.violations);
-              logInteraction(text, "blocked", result.violations);
-              return;
-            }
+            // ALWAYS block synchronously, then scan async
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
 
-            if (result?.action === "warn") {
-              showWarningBanner(result.violations);
-              logInteraction(text, "warned", result.violations);
-            } else if (result?.action === "allow") {
-              logInteraction(text, "sent", []);
-            }
+            updateShieldScanning(true);
+
+            scanOutbound(text).then((result) => {
+              updateShieldScanning(false);
+
+              if (result?.action === "block") {
+                showBlockOverlay(result.violations);
+                logInteraction(text, "blocked", result.violations);
+                pulseShield("block");
+                return;
+              }
+
+              if (result?.action === "warn") {
+                showWarningBanner(result.violations);
+                logInteraction(text, "warned", result.violations);
+                pulseShield("warn");
+              } else {
+                logInteraction(text, "sent", []);
+              }
+
+              // Re-dispatch the Enter key to actually send the message
+              reDispatchEnter(target);
+            }).catch(() => {
+              // Scan failed (network error) — allow the message through
+              updateShieldScanning(false);
+              reDispatchEnter(target);
+            });
           }
         }
       },
-      true
+      true // capture phase — fires before AI client handlers
     );
   },
 });
+
+// ─── Re-dispatch Enter key after scan ───
+
+function reDispatchEnter(target: HTMLElement) {
+  _tpAllowNext = true;
+  const syntheticDown = new KeyboardEvent("keydown", {
+    key: "Enter",
+    code: "Enter",
+    keyCode: 13,
+    which: 13,
+    bubbles: true,
+    cancelable: true,
+  });
+  target.dispatchEvent(syntheticDown);
+
+  // Some AI clients also need keyup
+  const syntheticUp = new KeyboardEvent("keyup", {
+    key: "Enter",
+    code: "Enter",
+    keyCode: 13,
+    which: 13,
+    bubbles: true,
+    cancelable: true,
+  });
+  target.dispatchEvent(syntheticUp);
+
+  // Fallback: if synthetic events don't trigger submit, try clicking send button
+  setTimeout(() => {
+    // If the text is still in the input after 200ms, try the send button
+    const text =
+      (target as HTMLInputElement).value ||
+      target.textContent ||
+      target.innerText ||
+      "";
+    if (text.trim().length > 0) {
+      clickSendButton();
+    }
+  }, 200);
+}
+
+function clickSendButton() {
+  const tool = detectAiTool(window.location.href);
+
+  const selectors: string[] = [];
+  switch (tool) {
+    case "chatgpt":
+      selectors.push(
+        'button[data-testid="send-button"]',
+        'button[aria-label="Send prompt"]',
+        'form button[type="submit"]'
+      );
+      break;
+    case "claude":
+      selectors.push(
+        'button[aria-label="Send Message"]',
+        'button[aria-label="Send message"]',
+        'fieldset button:last-of-type'
+      );
+      break;
+    case "gemini":
+      selectors.push(
+        'button[aria-label="Send message"]',
+        'button.send-button',
+        'mat-icon-button[aria-label="Send message"]'
+      );
+      break;
+    case "copilot":
+      selectors.push(
+        'button[aria-label="Submit"]',
+        'button.submit-button'
+      );
+      break;
+    case "perplexity":
+      selectors.push(
+        'button[aria-label="Submit"]',
+        'button[type="submit"]'
+      );
+      break;
+  }
+
+  // Generic fallbacks
+  selectors.push(
+    'button[type="submit"]',
+    'button[data-testid*="send"]',
+    'button[aria-label*="send" i]',
+    'button[aria-label*="submit" i]'
+  );
+
+  for (const sel of selectors) {
+    const btn = document.querySelector<HTMLButtonElement>(sel);
+    if (btn && !btn.disabled) {
+      btn.click();
+      return;
+    }
+  }
+}
+
+// ─── Shield Indicator ───
+
+async function initShieldIndicator() {
+  // Check auth status
+  const session = await getSession();
+  _isAuthenticated = !!session;
+
+  if (_isAuthenticated) {
+    const status = await fetchSecurityStatus();
+    if (status) {
+      _isProtected = status.protected;
+      _ruleCount = status.activeRuleCount;
+    }
+  }
+
+  createShieldElement();
+}
+
+function createShieldElement() {
+  document.getElementById("tp-shield-indicator")?.remove();
+
+  const tool = detectAiTool(window.location.href);
+  const toolLabel = tool === "other" ? "AI Tool" : tool.charAt(0).toUpperCase() + tool.slice(1);
+
+  const shield = document.createElement("div");
+  shield.id = "tp-shield-indicator";
+  shield.className = "tp-shield";
+
+  if (!_isAuthenticated) {
+    shield.classList.add("tp-shield-inactive");
+  } else if (_isProtected) {
+    shield.classList.add("tp-shield-protected");
+  } else {
+    shield.classList.add("tp-shield-unprotected");
+  }
+
+  // Shield icon (SVG)
+  const shieldSvg = `<svg class="tp-shield-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`;
+
+  // Status dot
+  const dotClass = !_isAuthenticated
+    ? "tp-dot-gray"
+    : _isProtected
+      ? "tp-dot-green"
+      : "tp-dot-amber";
+
+  // Status text
+  let statusText = "";
+  if (!_isAuthenticated) {
+    statusText = "Not signed in";
+  } else if (_isProtected) {
+    statusText = `${_ruleCount} rule${_ruleCount !== 1 ? "s" : ""} active`;
+  } else {
+    statusText = "No rules configured";
+  }
+
+  shield.innerHTML = `
+    ${shieldSvg}
+    <span class="tp-shield-dot ${dotClass}" id="tp-shield-dot"></span>
+    <span class="tp-shield-status" id="tp-shield-status">
+      <span class="tp-shield-label" id="tp-shield-label">${statusText}</span>
+      <span class="tp-shield-tool">on ${toolLabel}</span>
+    </span>
+    <button class="tp-shield-toggle" id="tp-shield-toggle" title="Minimize">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+  `;
+
+  document.body.appendChild(shield);
+  _shieldEl = shield;
+  _shieldStatusEl = document.getElementById("tp-shield-status");
+  _shieldDotEl = document.getElementById("tp-shield-dot");
+  _shieldLabelEl = document.getElementById("tp-shield-label");
+
+  // Toggle collapse
+  document.getElementById("tp-shield-toggle")!.addEventListener("click", (e) => {
+    e.stopPropagation();
+    _shieldCollapsed = !_shieldCollapsed;
+    shield.classList.toggle("tp-shield-collapsed", _shieldCollapsed);
+  });
+
+  // Click to expand if collapsed
+  shield.addEventListener("click", () => {
+    if (_shieldCollapsed) {
+      _shieldCollapsed = false;
+      shield.classList.remove("tp-shield-collapsed");
+    }
+  });
+}
+
+function updateShieldScanning(scanning: boolean) {
+  if (!_shieldEl || !_shieldLabelEl || !_shieldDotEl) return;
+
+  if (scanning) {
+    _shieldEl.classList.add("tp-shield-scanning");
+    _shieldDotEl.className = "tp-shield-dot tp-dot-blue tp-dot-pulse";
+    _shieldLabelEl.textContent = "Scanning...";
+  } else {
+    _shieldEl.classList.remove("tp-shield-scanning");
+    const dotClass = _isProtected ? "tp-dot-green" : "tp-dot-amber";
+    _shieldDotEl.className = `tp-shield-dot ${dotClass}`;
+    _shieldLabelEl.textContent = _isProtected
+      ? `${_ruleCount} rule${_ruleCount !== 1 ? "s" : ""} active`
+      : "No rules configured";
+  }
+}
+
+function pulseShield(type: "block" | "warn") {
+  if (!_shieldEl) return;
+  const cls = type === "block" ? "tp-shield-pulse-red" : "tp-shield-pulse-amber";
+  _shieldEl.classList.add(cls);
+  setTimeout(() => _shieldEl?.classList.remove(cls), 1500);
+}
 
 // ─── UI Helpers ───
 

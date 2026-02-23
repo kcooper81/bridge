@@ -7,7 +7,6 @@ import { ImpersonationProvider } from "@/hooks/use-impersonation";
 import { ImpersonationBanner } from "@/components/admin/impersonation-banner";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { ExtensionInstallBanner } from "@/components/dashboard/extension-install-banner";
-import { SetupRedirectGuard } from "@/components/dashboard/setup-redirect-guard";
 import { NotificationsProvider } from "@/hooks/use-notifications";
 
 export default async function DashboardLayout({
@@ -36,15 +35,13 @@ export default async function DashboardLayout({
           <ImpersonationProvider>
             <NotificationsProvider>
               <ImpersonationBanner />
-              <SetupRedirectGuard>
-                <div className="flex h-screen bg-background">
-                  <Sidebar />
-                  <main className="flex-1 overflow-y-auto scrollbar-thin p-4 pt-16 md:p-6 md:pt-6">
-                    <ExtensionInstallBanner />
-                    {children}
-                  </main>
-                </div>
-              </SetupRedirectGuard>
+              <div className="flex h-screen bg-background">
+                <Sidebar />
+                <main className="flex-1 overflow-y-auto scrollbar-thin p-4 pt-16 md:p-6 md:pt-6">
+                  <ExtensionInstallBanner />
+                  {children}
+                </main>
+              </div>
             </NotificationsProvider>
           </ImpersonationProvider>
         </SubscriptionProvider>

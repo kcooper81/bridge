@@ -30,6 +30,7 @@ import {
   ChevronUp,
   CreditCard,
   FolderOpen,
+  HelpCircle,
   Import,
   Library,
   LogOut,
@@ -38,8 +39,10 @@ import {
   Settings,
   Shield,
   Sun,
+  Users,
 } from "lucide-react";
 import { NotificationBell } from "@/components/dashboard/notification-bell";
+import { HelpModal } from "@/components/dashboard/help-modal";
 
 interface NavItem {
   label: string;
@@ -61,7 +64,7 @@ const navSections: { title: string; items: NavItem[] }[] = [
   {
     title: "Administration",
     items: [
-      { label: "Guardrails", href: "/guardrails", icon: Shield, roles: ["admin", "manager"] },
+      { label: "Team", href: "/team", icon: Users, roles: ["admin", "manager"] },
       { label: "Settings", href: "/settings", icon: Building2, roles: ["admin", "manager"] },
     ],
   },
@@ -70,6 +73,7 @@ const navSections: { title: string; items: NavItem[] }[] = [
     items: [
       { label: "Analytics", href: "/analytics", icon: BarChart3 },
       { label: "Activity Log", href: "/activity", icon: Activity, roles: ["admin", "manager"] },
+      { label: "Guardrails", href: "/guardrails", icon: Shield, roles: ["admin", "manager"] },
       { label: "Import/Export", href: "/import-export", icon: Import },
     ],
   },
@@ -81,6 +85,7 @@ function NavContent({ onItemClick }: { onItemClick?: () => void }) {
   const { user, signOut, isSuperAdmin } = useAuth();
   const { theme, setTheme } = useTheme();
   const { subscription } = useSubscription();
+  const [helpOpen, setHelpOpen] = useState(false);
 
   const pendingCount = prompts.filter((p) => p.status === "pending").length;
   const currentMember = members.find((m) => m.isCurrentUser);
@@ -162,6 +167,18 @@ function NavContent({ onItemClick }: { onItemClick?: () => void }) {
           </Link>
         </div>
       )}
+
+      {/* Help button */}
+      <div className="px-3 pb-2">
+        <button
+          onClick={() => setHelpOpen(true)}
+          className="flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-all duration-200"
+        >
+          <HelpCircle className="h-[18px] w-[18px]" />
+          Help & Docs
+        </button>
+      </div>
+      <HelpModal open={helpOpen} onOpenChange={setHelpOpen} />
 
       {/* User footer */}
       <div className="border-t border-border/50 px-4 py-4">

@@ -73,7 +73,7 @@ export async function GET(request: NextRequest) {
 
     const weeklyViolations = weeklyResult.data || [];
     const blockedCount = weeklyViolations.filter((v) => v.action_taken === "blocked").length;
-    const warnedCount = weeklyViolations.filter((v) => v.action_taken === "overridden").length;
+    const warnedCount = weeklyViolations.filter((v) => v.action_taken !== "blocked").length;
 
     const recentViolations = (recentResult.data || []).map((v) => {
       // Supabase returns the joined row as an object (single FK), but TS may infer array

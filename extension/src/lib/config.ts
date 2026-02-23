@@ -11,6 +11,7 @@ export const API_ENDPOINTS = {
   prompts: "/api/extension/prompts",
   scan: "/api/extension/scan",
   log: "/api/extension/log",
+  securityStatus: "/api/extension/security-status",
 } as const;
 
 export function getExtensionVersion(): string {

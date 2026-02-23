@@ -4,6 +4,7 @@
 import { getSession, login, logout, openLogin, openSignup, openGoogleAuth, openGithubAuth } from "./auth";
 import { extAuthDebug } from "./auth-debug"; // AUTH-DEBUG
 import { fetchPrompts, fillTemplate, type Prompt } from "./prompts";
+import { fetchSecurityStatus, type SecurityStatus } from "./security-status";
 import { CONFIG, API_ENDPOINTS, apiHeaders } from "./config";
 import { detectAiTool } from "./ai-tools";
 
@@ -33,8 +34,9 @@ export interface UIElements {
 
 let currentPrompts: Prompt[] = [];
 let selectedPrompt: Prompt | null = null;
-let activeFilter: "all" | "templates" | "favorites" = "all";
+let activeFilter: "all" | "templates" | "favorites" | "shield" = "all";
 let searchTimeout: ReturnType<typeof setTimeout> | undefined;
+let cachedShieldStatus: SecurityStatus | null = null;
 let els: UIElements;
 
 // ─── Views ───
@@ -180,6 +182,127 @@ function renderPrompts() {
   });
 }
 
+// ─── Shield ───
+
+async function loadShieldView() {
+  const shieldView = document.getElementById("shield-view");
+  if (!shieldView) return;
+
+  shieldView.innerHTML = '<div class="loading">Loading security status...</div>';
+
+  const status = await fetchSecurityStatus();
+  cachedShieldStatus = status;
+  updateShieldIndicator(status);
+
+  if (!status) {
+    shieldView.innerHTML = '<div class="shield-empty">Unable to load security status</div>';
+    return;
+  }
+
+  renderShieldView(shieldView, status);
+}
+
+function renderShieldView(container: HTMLElement, status: SecurityStatus) {
+  const statusIcon = status.protected
+    ? `<div class="shield-icon-wrap protected">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          <polyline points="9 12 11 14 15 10" stroke-width="2.5"/>
+        </svg>
+      </div>`
+    : `<div class="shield-icon-wrap unprotected">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+      </div>`;
+
+  const statusLabel = status.protected ? "Protected" : "Not Configured";
+  const statusDetail = status.protected
+    ? `${status.activeRuleCount} active rule${status.activeRuleCount !== 1 ? "s" : ""} monitoring your prompts`
+    : "No security rules are active. Set up guardrails in your dashboard.";
+
+  const statsHtml = status.protected
+    ? `<div class="shield-stats">
+        <div class="shield-stat">
+          <div class="shield-stat-value blocked">${status.weeklyStats.blocked}</div>
+          <div class="shield-stat-label">Blocked</div>
+        </div>
+        <div class="shield-stat">
+          <div class="shield-stat-value warned">${status.weeklyStats.warned}</div>
+          <div class="shield-stat-label">Warned</div>
+        </div>
+        <div class="shield-stat">
+          <div class="shield-stat-value total">${status.weeklyStats.total}</div>
+          <div class="shield-stat-label">This Week</div>
+        </div>
+      </div>`
+    : "";
+
+  let violationsHtml = "";
+  if (status.recentViolations.length > 0) {
+    const items = status.recentViolations.map((v) => {
+      const badgeClass = v.actionTaken === "blocked" ? "blocked" : "warned";
+      const badgeText = v.actionTaken === "blocked" ? "Blocked" : "Warned";
+      const timeAgo = formatTimeAgo(v.createdAt);
+      return `<div class="shield-violation">
+        <div class="shield-violation-header">
+          <span class="shield-violation-rule">${escapeHtml(v.ruleName)}</span>
+          <span class="shield-violation-badge ${badgeClass}">${badgeText}</span>
+        </div>
+        <div class="shield-violation-meta">
+          <span class="shield-violation-match">${escapeHtml(v.matchedText)}</span>
+          <span>${timeAgo}</span>
+        </div>
+      </div>`;
+    }).join("");
+
+    violationsHtml = `
+      <div class="shield-section-title">Recent Activity</div>
+      <div class="shield-violations">${items}</div>`;
+  } else if (status.protected) {
+    violationsHtml = '<div class="shield-empty">No violations detected this week</div>';
+  }
+
+  const manageUrl = `${CONFIG.SITE_URL}/guardrails`;
+  container.innerHTML = `
+    <div class="shield-status-card">
+      ${statusIcon}
+      <div class="shield-status-info">
+        <div class="shield-status-label">${statusLabel}</div>
+        <div class="shield-status-detail">${statusDetail}</div>
+      </div>
+    </div>
+    ${statsHtml}
+    ${violationsHtml}
+    <a href="${manageUrl}" target="_blank" rel="noopener" class="shield-manage-link">
+      Manage guardrails on teamprompt.app
+    </a>
+  `;
+}
+
+function updateShieldIndicator(status: SecurityStatus | null) {
+  const indicator = document.getElementById("shield-indicator");
+  if (!indicator) return;
+  if (status?.protected) {
+    indicator.classList.add("active");
+    indicator.title = `Protected — ${status.activeRuleCount} active rules`;
+  } else {
+    indicator.classList.remove("active");
+    indicator.title = "Security not configured";
+  }
+}
+
+function formatTimeAgo(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const minutes = Math.floor(diff / 60000);
+  if (minutes < 1) return "just now";
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
+}
+
 // ─── Logging ───
 
 async function logConversation(promptText: string, method: string) {
@@ -318,6 +441,8 @@ export function initSharedUI(elements: UIElements) {
   });
 
   // Tabs
+  const shieldView = document.getElementById("shield-view");
+
   els.mainView.querySelectorAll<HTMLElement>(".tab").forEach((tab) => {
     tab.addEventListener("click", () => {
       els.mainView
@@ -325,7 +450,18 @@ export function initSharedUI(elements: UIElements) {
         .forEach((t) => t.classList.remove("active"));
       tab.classList.add("active");
       activeFilter = (tab.dataset.filter || "all") as typeof activeFilter;
-      loadPrompts(els.searchInput.value.trim());
+
+      if (activeFilter === "shield") {
+        els.promptList.classList.add("hidden");
+        els.searchInput.closest(".search-wrap")?.classList.add("hidden");
+        shieldView?.classList.remove("hidden");
+        loadShieldView();
+      } else {
+        shieldView?.classList.add("hidden");
+        els.promptList.classList.remove("hidden");
+        els.searchInput.closest(".search-wrap")?.classList.remove("hidden");
+        loadPrompts(els.searchInput.value.trim());
+      }
     });
   });
 
@@ -374,6 +510,11 @@ export function initSharedUI(elements: UIElements) {
     if (session) {
       showMainView();
       loadPrompts();
+      // Load shield indicator in status bar (non-blocking)
+      fetchSecurityStatus().then((status) => {
+        cachedShieldStatus = status;
+        updateShieldIndicator(status);
+      });
     } else {
       showLoginView();
     }

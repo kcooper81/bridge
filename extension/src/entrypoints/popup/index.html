@@ -82,13 +82,30 @@
         <button class="tab active" data-filter="all">All</button>
         <button class="tab" data-filter="templates">Templates</button>
         <button class="tab" data-filter="favorites">Recent</button>
+        <button class="tab" data-filter="shield">
+          <svg class="tab-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+          Shield
+        </button>
       </div>
 
       <div id="prompt-list" class="prompt-list">
         <div class="loading">Loading prompts...</div>
       </div>
 
+      <div id="shield-view" class="shield-view hidden">
+        <div class="shield-loading">
+          <div class="loading">Loading security status...</div>
+        </div>
+      </div>
+
       <div id="status-bar" class="status-bar">
+        <span id="shield-indicator" class="shield-indicator" title="Security status">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+        </span>
         <span id="status-text">Ready</span>
       </div>
     </div>

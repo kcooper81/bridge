@@ -3,6 +3,7 @@
 import { CONFIG } from "../lib/config";
 import { refreshSession } from "../lib/auth";
 import { getExtensionVersion } from "../lib/config";
+import { extAuthDebug } from "../lib/auth-debug"; // AUTH-DEBUG
 
 export default defineBackground(() => {
   // ─── Install Handler ───
@@ -13,6 +14,9 @@ export default defineBackground(() => {
       supabaseUrl: CONFIG.SUPABASE_URL,
       supabaseAnonKey: CONFIG.SUPABASE_ANON_KEY,
     });
+    // Clear stale loggedOut flag on install/update so it doesn't
+    // interfere with the next web login.
+    browser.storage.local.remove(["loggedOut"]);
 
     // Open welcome page on first install (not on updates)
     if (details.reason === "install") {
@@ -24,16 +28,19 @@ export default defineBackground(() => {
   browser.runtime.onMessage.addListener(
     (message: { type: string; accessToken?: string; refreshToken?: string; user?: unknown }, _sender, sendResponse) => {
       if (message.type === "SESSION_SYNC") {
-        // Clear any loggedOut flag — user is actively logging in
-        browser.storage.local.remove(["loggedOut"]);
+        extAuthDebug.log("bridge", "bg: SESSION_SYNC received", { hasToken: !!message.accessToken }); // AUTH-DEBUG
+        // Clear loggedOut flag AND set tokens in a single atomic operation
+        // to prevent race conditions where the flag persists momentarily.
         browser.storage.local.set({
           accessToken: message.accessToken,
           refreshToken: message.refreshToken,
           user: message.user,
+          loggedOut: false,
         });
         console.log("TeamPrompt: Session synced from web app");
         sendResponse({ success: true });
       } else if (message.type === "SESSION_CLEAR") {
+        extAuthDebug.log("bridge", "bg: SESSION_CLEAR received"); // AUTH-DEBUG
         browser.storage.local.remove(["accessToken", "refreshToken", "user"]);
         console.log("TeamPrompt: Session cleared");
         sendResponse({ success: true });
@@ -71,6 +78,7 @@ export default defineBackground(() => {
 
   browser.alarms.onAlarm.addListener(async (alarm) => {
     if (alarm.name === "refresh-token") {
+      extAuthDebug.log("refresh", "bg: refresh alarm fired"); // AUTH-DEBUG
       await refreshSession();
     }
   });

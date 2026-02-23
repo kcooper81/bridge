@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
+import { authDebug } from "@/lib/auth-debug"; // AUTH-DEBUG
 
 const AUTH_ROUTES = ["/login", "/signup", "/forgot-password", "/reset-password"];
 const PUBLIC_ROUTES = [
@@ -28,15 +29,24 @@ function isAuthRoute(pathname: string) {
 }
 
 export async function middleware(request: NextRequest) {
+  // AUTH-DEBUG: init server-side logging
+  authDebug.initServer(request);
+  authDebug.log("middleware", `processing ${request.method} ${request.nextUrl.pathname}`);
+
   const { supabaseResponse, user } = await updateSession(request);
   const { pathname } = request.nextUrl;
 
+  authDebug.log("middleware", "user resolved", user ? { id: user.id, email: user.email } : null);
+
   // Authenticated users on auth pages → redirect to vault
   if (user && isAuthRoute(pathname)) {
+    authDebug.log("middleware", "redirect: auth page → /vault (user is authenticated)");
     const url = request.nextUrl.clone();
     url.pathname = "/vault";
     url.search = "";
-    return NextResponse.redirect(url);
+    const resp = NextResponse.redirect(url);
+    authDebug.attachToResponse(resp); // AUTH-DEBUG
+    return resp;
   }
 
   // Unauthenticated users on protected pages → redirect to login
@@ -49,13 +59,18 @@ export async function middleware(request: NextRequest) {
     !pathname.startsWith("/invite") &&
     !pathname.startsWith("/extension/")
   ) {
+    const fullPath = pathname + request.nextUrl.search;
+    authDebug.log("middleware", `redirect: protected → /login (no user)`, { redirect: fullPath });
     const url = request.nextUrl.clone();
     url.pathname = "/login";
-    const fullPath = pathname + request.nextUrl.search;
     url.searchParams.set("redirect", fullPath);
-    return NextResponse.redirect(url);
+    const resp = NextResponse.redirect(url);
+    authDebug.attachToResponse(resp); // AUTH-DEBUG
+    return resp;
   }
 
+  authDebug.log("middleware", "passthrough", { pathname });
+  authDebug.attachToResponse(supabaseResponse); // AUTH-DEBUG
   return supabaseResponse;
 }
 

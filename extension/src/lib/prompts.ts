@@ -1,7 +1,7 @@
 // TeamPrompt Extension — Prompts Module
 
 import { CONFIG, API_ENDPOINTS, apiHeaders } from "./config";
-import { getSession, logout } from "./auth";
+import { getSession } from "./auth";
 
 export interface Prompt {
   id: string;
@@ -34,7 +34,10 @@ export async function fetchPrompts(opts?: {
   );
 
   if (res.status === 401) {
-    await logout();
+    // Don't auto-logout on 401 — it may be a transient error, CORS issue,
+    // or token/origin mismatch.  Just return empty; the user can manually
+    // sign out if needed.
+    console.warn("[TP] fetchPrompts: 401 from API, returning empty");
     return [];
   }
 

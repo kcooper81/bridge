@@ -29,8 +29,11 @@ export type SecurityCategory =
   | "api_keys"
   | "credentials"
   | "internal_terms"
+  | "internal"
   | "pii"
   | "secrets"
+  | "financial"
+  | "health"
   | "custom";
 export type SecuritySeverity = "block" | "warn";
 export type SecurityAction = "blocked" | "overridden" | "auto_redacted";
@@ -180,8 +183,12 @@ export type Standard = Guideline;
 
 export interface GuidelineRules {
   toneRules?: string[];
+  /** @deprecated Use bestPractices instead */
   doList?: string[];
+  /** @deprecated Use restrictions instead */
   dontList?: string[];
+  bestPractices?: string[];
+  restrictions?: string[];
   constraints?: string[];
   requiredFields?: string[];
   templateStructure?: string;
@@ -331,4 +338,107 @@ export interface ExportPack {
   prompts: Prompt[];
   folders: Folder[];
   departments: Department[];
+}
+
+// ─── Notifications ───
+
+export type NotificationType =
+  | "security_violation"
+  | "prompt_submitted"
+  | "prompt_approved"
+  | "prompt_rejected"
+  | "member_joined"
+  | "member_left"
+  | "system";
+
+export interface Notification {
+  id: string;
+  user_id: string;
+  org_id: string | null;
+  type: NotificationType;
+  title: string;
+  message: string | null;
+  metadata: Record<string, unknown>;
+  read: boolean;
+  read_at: string | null;
+  created_at: string;
+}
+
+// ─── Security Settings ───
+
+export interface SecuritySettings {
+  entropy_detection_enabled: boolean;
+  entropy_threshold: number;
+  ai_detection_enabled: boolean;
+  ai_detection_provider: "presidio" | "aws_comprehend" | "openai" | null;
+  smart_patterns_enabled: boolean;
+}
+
+export type SensitiveTermCategory =
+  | "customer_data"
+  | "employee_data"
+  | "project_names"
+  | "product_names"
+  | "internal_codes"
+  | "partner_data"
+  | "financial_data"
+  | "legal_data"
+  | "custom";
+
+export type SensitiveTermSource = "manual" | "import" | "sync" | "ai_suggested";
+
+export interface SensitiveTerm {
+  id: string;
+  org_id: string;
+  term: string;
+  term_type: "exact" | "pattern" | "keyword";
+  category: SensitiveTermCategory;
+  description: string | null;
+  severity: SecuritySeverity;
+  is_active: boolean;
+  source: SensitiveTermSource;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type SuggestedRuleStatus = "pending" | "approved" | "dismissed" | "converted";
+
+export interface SuggestedRule {
+  id: string;
+  org_id: string;
+  name: string;
+  description: string | null;
+  pattern: string;
+  pattern_type: SecurityPatternType;
+  category: SecurityCategory;
+  severity: SecuritySeverity;
+  sample_matches: string[];
+  detection_count: number;
+  confidence: number;
+  status: SuggestedRuleStatus;
+  reviewed_by: string | null;
+  reviewed_at: string | null;
+  converted_rule_id: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type DataImportType = "csv_terms" | "json_terms" | "crm_sync" | "hr_sync" | "custom_api";
+export type DataImportStatus = "pending" | "processing" | "completed" | "failed";
+
+export interface DataImport {
+  id: string;
+  org_id: string;
+  import_type: DataImportType;
+  source_name: string | null;
+  status: DataImportStatus;
+  total_records: number;
+  imported_records: number;
+  failed_records: number;
+  error_message: string | null;
+  metadata: Record<string, unknown>;
+  created_by: string | null;
+  created_at: string;
+  completed_at: string | null;
 }

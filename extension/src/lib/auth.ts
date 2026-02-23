@@ -1,6 +1,7 @@
 // TeamPrompt Extension — Auth Module
 
 import { CONFIG } from "./config";
+import { extAuthDebug } from "./auth-debug"; // AUTH-DEBUG
 
 export interface SessionData {
   accessToken: string;
@@ -14,6 +15,7 @@ export async function getSession(): Promise<SessionData | null> {
     "refreshToken",
     "user",
   ]);
+  extAuthDebug.log("session", "getSession()", { hasToken: !!data.accessToken }); // AUTH-DEBUG
   if (data.accessToken) return data as SessionData;
   return null;
 }
@@ -22,6 +24,7 @@ export async function login(
   email: string,
   password: string
 ): Promise<SessionData> {
+  extAuthDebug.log("login", "ext login attempt", { email }); // AUTH-DEBUG
   const res = await fetch(
     `${CONFIG.SUPABASE_URL}/auth/v1/token?grant_type=password`,
     {
@@ -36,6 +39,7 @@ export async function login(
 
   if (!res.ok) {
     const data = await res.json();
+    extAuthDebug.error("login", "ext login failed", { status: res.status, error: data.error_description || data.msg }); // AUTH-DEBUG
     throw new Error(data.error_description || data.msg || "Login failed");
   }
 
@@ -46,11 +50,13 @@ export async function login(
     user: { id: data.user.id, email: data.user.email },
   };
 
+  extAuthDebug.log("login", "ext login success", { userId: data.user.id }); // AUTH-DEBUG
   await browser.storage.local.set(session);
   return session;
 }
 
 export async function logout(): Promise<void> {
+  extAuthDebug.log("login", "ext logout initiated"); // AUTH-DEBUG
   // Set loggedOut flag BEFORE removing tokens so the auth-bridge knows
   // not to re-sync web cookies back to the extension on the next page load.
   await browser.storage.local.set({ loggedOut: true });
@@ -83,8 +89,12 @@ export function openGithubAuth(): void {
 
 export async function refreshSession(): Promise<void> {
   const data = await browser.storage.local.get(["refreshToken"]);
-  if (!data.refreshToken) return;
+  if (!data.refreshToken) {
+    extAuthDebug.log("refresh", "refreshSession: no refresh token"); // AUTH-DEBUG
+    return;
+  }
 
+  extAuthDebug.log("refresh", "refreshSession: attempting refresh"); // AUTH-DEBUG
   try {
     const res = await fetch(
       `${CONFIG.SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`,
@@ -100,11 +110,13 @@ export async function refreshSession(): Promise<void> {
 
     if (res.ok) {
       const tokens = await res.json();
+      extAuthDebug.log("refresh", "refreshSession: success"); // AUTH-DEBUG
       await browser.storage.local.set({
         accessToken: tokens.access_token,
         refreshToken: tokens.refresh_token,
       });
     } else {
+      extAuthDebug.error("refresh", "refreshSession: failed, clearing tokens", { status: res.status }); // AUTH-DEBUG
       await browser.storage.local.remove([
         "accessToken",
         "refreshToken",
@@ -112,6 +124,7 @@ export async function refreshSession(): Promise<void> {
       ]);
     }
   } catch {
+    extAuthDebug.error("refresh", "refreshSession: network error"); // AUTH-DEBUG
     // Network error — will retry on next alarm
   }
 }

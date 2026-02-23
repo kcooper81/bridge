@@ -145,8 +145,8 @@ export const DEFAULT_GUIDELINES: DefaultGuideline[] = [
     category: "writing",
     rules: {
       toneRules: ["Use active voice", "Be concise"],
-      doList: ["Include clear objectives", "Define target audience"],
-      dontList: ["Avoid jargon without explanation", "No run-on sentences"],
+      bestPractices: ["Include clear objectives", "Define target audience"],
+      restrictions: ["Avoid jargon without explanation", "No run-on sentences"],
       constraints: ["Keep prompts focused on a single task"],
       minLength: 20,
       maxLength: 5000,
@@ -159,11 +159,11 @@ export const DEFAULT_GUIDELINES: DefaultGuideline[] = [
     category: "development",
     rules: {
       toneRules: ["Be precise and technical"],
-      doList: [
+      bestPractices: [
         "Specify programming language",
         "Include expected input/output",
       ],
-      dontList: ["Avoid ambiguous requirements"],
+      restrictions: ["Avoid ambiguous requirements"],
       requiredFields: ["title", "content"],
       minLength: 30,
     },
@@ -175,8 +175,8 @@ export const DEFAULT_GUIDELINES: DefaultGuideline[] = [
     category: "design",
     rules: {
       toneRules: ["Be descriptive and visual"],
-      doList: ["Specify style references", "Include dimensions or format"],
-      dontList: ["Avoid vague descriptions"],
+      bestPractices: ["Specify style references", "Include dimensions or format"],
+      restrictions: ["Avoid vague descriptions"],
     },
   },
   {
@@ -186,8 +186,8 @@ export const DEFAULT_GUIDELINES: DefaultGuideline[] = [
     category: "support",
     rules: {
       toneRules: ["Be empathetic", "Use friendly tone"],
-      doList: ["Address the customer's concern", "Offer solutions"],
-      dontList: ["Never blame the customer", "Avoid technical jargon"],
+      bestPractices: ["Address the customer's concern", "Offer solutions"],
+      restrictions: ["Never blame the customer", "Avoid technical jargon"],
       requiredTags: ["support"],
     },
   },
@@ -198,8 +198,8 @@ export const DEFAULT_GUIDELINES: DefaultGuideline[] = [
     category: "marketing",
     rules: {
       toneRules: ["Be persuasive but authentic"],
-      doList: ["Include call-to-action", "Define target audience"],
-      dontList: ["Avoid misleading claims"],
+      bestPractices: ["Include call-to-action", "Define target audience"],
+      restrictions: ["Avoid misleading claims"],
     },
   },
   {
@@ -209,8 +209,8 @@ export const DEFAULT_GUIDELINES: DefaultGuideline[] = [
     category: "sales",
     rules: {
       toneRules: ["Be professional and personable"],
-      doList: ["Highlight value propositions", "Include follow-up steps"],
-      dontList: ["Avoid high-pressure tactics"],
+      bestPractices: ["Highlight value propositions", "Include follow-up steps"],
+      restrictions: ["Avoid high-pressure tactics"],
     },
   },
   {
@@ -220,8 +220,8 @@ export const DEFAULT_GUIDELINES: DefaultGuideline[] = [
     category: "hr",
     rules: {
       toneRules: ["Be inclusive and respectful"],
-      doList: ["Follow company policy", "Use neutral language"],
-      dontList: ["Avoid discriminatory language"],
+      bestPractices: ["Follow company policy", "Use neutral language"],
+      restrictions: ["Avoid discriminatory language"],
     },
   },
   {
@@ -231,8 +231,8 @@ export const DEFAULT_GUIDELINES: DefaultGuideline[] = [
     category: "legal",
     rules: {
       toneRules: ["Be precise and formal"],
-      doList: ["Reference applicable regulations", "Use standard legal terms"],
-      dontList: ["Avoid informal language", "No ambiguous terms"],
+      bestPractices: ["Reference applicable regulations", "Use standard legal terms"],
+      restrictions: ["Avoid informal language", "No ambiguous terms"],
       requiredFields: ["title", "content", "description"],
     },
   },
@@ -243,8 +243,8 @@ export const DEFAULT_GUIDELINES: DefaultGuideline[] = [
     category: "executive",
     rules: {
       toneRules: ["Be authoritative and concise"],
-      doList: ["Lead with key insights", "Include actionable recommendations"],
-      dontList: ["Avoid unnecessary details"],
+      bestPractices: ["Lead with key insights", "Include actionable recommendations"],
+      restrictions: ["Avoid unnecessary details"],
       maxLength: 3000,
     },
   },
@@ -255,8 +255,8 @@ export const DEFAULT_GUIDELINES: DefaultGuideline[] = [
     category: "analytics",
     rules: {
       toneRules: ["Be analytical and objective"],
-      doList: ["Specify data sources", "Define metrics"],
-      dontList: ["Avoid assumptions without data"],
+      bestPractices: ["Specify data sources", "Define metrics"],
+      restrictions: ["Avoid assumptions without data"],
     },
   },
   {
@@ -266,8 +266,8 @@ export const DEFAULT_GUIDELINES: DefaultGuideline[] = [
     category: "product",
     rules: {
       toneRules: ["Be clear and user-focused"],
-      doList: ["Include user stories", "Define acceptance criteria"],
-      dontList: ["Avoid scope creep"],
+      bestPractices: ["Include user stories", "Define acceptance criteria"],
+      restrictions: ["Avoid scope creep"],
     },
   },
   {
@@ -277,8 +277,8 @@ export const DEFAULT_GUIDELINES: DefaultGuideline[] = [
     category: "research",
     rules: {
       toneRules: ["Be thorough and evidence-based"],
-      doList: ["Cite sources", "Include methodology"],
-      dontList: ["Avoid unsupported conclusions"],
+      bestPractices: ["Cite sources", "Include methodology"],
+      restrictions: ["Avoid unsupported conclusions"],
     },
   },
   {
@@ -288,8 +288,8 @@ export const DEFAULT_GUIDELINES: DefaultGuideline[] = [
     category: "education",
     rules: {
       toneRules: ["Be instructional and encouraging"],
-      doList: ["Include learning objectives", "Use examples"],
-      dontList: ["Avoid condescending tone"],
+      bestPractices: ["Include learning objectives", "Use examples"],
+      restrictions: ["Avoid condescending tone"],
     },
   },
   {
@@ -299,8 +299,8 @@ export const DEFAULT_GUIDELINES: DefaultGuideline[] = [
     category: "internal",
     rules: {
       toneRules: ["Be transparent and direct"],
-      doList: ["State purpose clearly", "Include next steps"],
-      dontList: ["Avoid corporate buzzwords"],
+      bestPractices: ["State purpose clearly", "Include next steps"],
+      restrictions: ["Avoid corporate buzzwords"],
     },
   },
 ];

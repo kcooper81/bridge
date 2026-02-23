@@ -42,6 +42,9 @@ import {
   ShieldAlert,
   ShieldCheck,
   Trash2,
+  Settings2,
+  FileText,
+  Lightbulb,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { DEFAULT_SECURITY_RULES } from "@/lib/security/default-rules";
@@ -50,6 +53,9 @@ import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { trackGuardrailCreated } from "@/lib/analytics";
 import { NoOrgBanner } from "@/components/dashboard/no-org-banner";
+import { DetectionSettings } from "./_components/detection-settings";
+import { SensitiveTermsManager } from "./_components/sensitive-terms-manager";
+import { SuggestedRules } from "./_components/suggested-rules";
 import type {
   SecurityCategory,
   SecurityPatternType,
@@ -275,9 +281,27 @@ export default function GuardrailsPage() {
       </div>
 
       <Tabs defaultValue="policies">
-        <TabsList>
-          <TabsTrigger value="policies">Policies ({rules.length})</TabsTrigger>
-          <TabsTrigger value="violations">Violations ({violations.length})</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:inline-flex">
+          <TabsTrigger value="policies" className="gap-1.5">
+            <Shield className="h-4 w-4 hidden sm:inline" />
+            Policies ({rules.length})
+          </TabsTrigger>
+          <TabsTrigger value="terms" className="gap-1.5">
+            <FileText className="h-4 w-4 hidden sm:inline" />
+            Sensitive Terms
+          </TabsTrigger>
+          <TabsTrigger value="detection" className="gap-1.5">
+            <Settings2 className="h-4 w-4 hidden sm:inline" />
+            Detection
+          </TabsTrigger>
+          <TabsTrigger value="suggestions" className="gap-1.5">
+            <Lightbulb className="h-4 w-4 hidden sm:inline" />
+            Suggestions
+          </TabsTrigger>
+          <TabsTrigger value="violations" className="gap-1.5">
+            <ShieldAlert className="h-4 w-4 hidden sm:inline" />
+            Violations ({violations.length})
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="policies" className="mt-4">
@@ -405,6 +429,27 @@ export default function GuardrailsPage() {
               </Table>
             </div>
           )}
+        </TabsContent>
+
+        {/* Sensitive Terms Tab */}
+        <TabsContent value="terms" className="mt-4">
+          <SensitiveTermsManager canEdit={canEdit} />
+        </TabsContent>
+
+        {/* Detection Settings Tab */}
+        <TabsContent value="detection" className="mt-4">
+          {org && (
+            <DetectionSettings
+              orgId={org.id}
+              canEdit={canEdit}
+              hasPremiumAccess={canAccess("custom_security")}
+            />
+          )}
+        </TabsContent>
+
+        {/* Suggested Rules Tab */}
+        <TabsContent value="suggestions" className="mt-4">
+          <SuggestedRules canEdit={canEdit} />
         </TabsContent>
       </Tabs>
 

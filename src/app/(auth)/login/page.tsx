@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -9,13 +9,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { trackLogin } from "@/lib/analytics";
+import { authDebug } from "@/lib/auth-debug"; // AUTH-DEBUG
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
   const searchParams = useSearchParams();
   const rawRedirect = searchParams.get("redirect") || "/vault";
   // Only allow relative paths — prevent open redirects
@@ -28,6 +28,7 @@ export default function LoginPage() {
     e.preventDefault();
     setError("");
     setLoading(true);
+    authDebug.log("login", "login attempt", { email }); // AUTH-DEBUG
 
     try {
       const supabase = createClient();
@@ -37,6 +38,7 @@ export default function LoginPage() {
       });
 
       if (signInError) {
+        authDebug.error("login", "login failed", { message: signInError.message }); // AUTH-DEBUG
         setError(signInError.message);
         return;
       }
@@ -46,10 +48,12 @@ export default function LoginPage() {
       }
 
       trackLogin("email");
+      authDebug.log("login", "login success, navigating to", redirectTo); // AUTH-DEBUG
       // Use hard navigation to avoid Next.js RSC prefetch failures
       // when the middleware auth check runs on the target route.
       window.location.href = redirectTo;
     } catch {
+      authDebug.error("login", "unexpected error during login"); // AUTH-DEBUG
       setError("An unexpected error occurred");
     } finally {
       setLoading(false);
@@ -57,14 +61,18 @@ export default function LoginPage() {
   }
 
   async function handleOAuth(provider: "google" | "github") {
+    const callbackUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`;
+    authDebug.log("provider", `OAuth start: ${provider}`, { redirectTo, callbackUrl, origin: window.location.origin }); // AUTH-DEBUG
     const supabase = createClient();
-    const { error: oauthError } = await supabase.auth.signInWithOAuth({
+    const { data, error: oauthError } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`,
+        redirectTo: callbackUrl,
       },
     });
+    authDebug.log("provider", `OAuth response`, { url: data?.url?.slice(0, 200), error: oauthError?.message }); // AUTH-DEBUG
     if (oauthError) {
+      authDebug.error("provider", `OAuth error: ${provider}`, { message: oauthError.message }); // AUTH-DEBUG
       setError(oauthError.message);
     }
   }

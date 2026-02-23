@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useRef, useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, Check, Puzzle, Shield, Zap, MessageSquare } from "lucide-react";
+import { authDebug } from "@/lib/auth-debug"; // AUTH-DEBUG
 
 type AuthMode = "signin" | "signup";
 
@@ -18,6 +19,7 @@ function notifyExtension(session: {
   refresh_token: string;
   user: unknown;
 }) {
+  authDebug.log("session", "notifyExtension() → postMessage TP_SESSION_READY"); // AUTH-DEBUG
   window.postMessage(
     {
       type: "TP_SESSION_READY",
@@ -31,7 +33,6 @@ function notifyExtension(session: {
 
 function ExtensionWelcomeContent() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const [mode, setMode] = useState<AuthMode>(
     searchParams.get("mode") === "signin" ? "signin" : "signup"
   );
@@ -54,6 +55,7 @@ function ExtensionWelcomeContent() {
 
   // Helper: start OAuth flow using the Supabase JS client (proper PKCE)
   function startOAuth(provider: "google" | "github") {
+    authDebug.log("provider", `welcome page OAuth start: ${provider}`); // AUTH-DEBUG
     const supabase = createClient();
     supabase.auth.signInWithOAuth({
       provider,
@@ -89,6 +91,7 @@ function ExtensionWelcomeContent() {
       (provider === "google" || provider === "github") &&
       !oauthTriggered.current
     ) {
+      authDebug.log("provider", `auto-trigger OAuth from ?provider=${provider}`); // AUTH-DEBUG
       oauthTriggered.current = true;
       startOAuth(provider);
       return;
@@ -101,11 +104,13 @@ function ExtensionWelcomeContent() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
+      authDebug.log("state", `onAuthStateChange: ${_event}`, { hasSession: !!session }); // AUTH-DEBUG
       if (session) handleAuthSuccess(session);
     });
 
     // Also check immediately
     supabase.auth.getSession().then(({ data: { session } }) => {
+      authDebug.log("session", "getSession() result", { hasSession: !!session }); // AUTH-DEBUG
       if (session) {
         handleAuthSuccess(session);
       } else {
@@ -123,6 +128,7 @@ function ExtensionWelcomeContent() {
   // Next.js RSC prefetch failures when the middleware auth check runs.
   useEffect(() => {
     if (!authSuccess) return;
+    authDebug.log("session", "auth success, will redirect to /vault in 2.5s"); // AUTH-DEBUG
     const timer = setTimeout(() => {
       window.location.href = "/vault";
     }, 2500);

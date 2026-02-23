@@ -40,8 +40,8 @@ export default function GuidelinesPage() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
-  const [doList, setDoList] = useState<string[]>([]);
-  const [dontList, setDontList] = useState<string[]>([]);
+  const [bestPractices, setBestPractices] = useState<string[]>([]);
+  const [restrictions, setRestrictions] = useState<string[]>([]);
   const [bannedWords, setBannedWords] = useState<string[]>([]);
   const [toneRules, setToneRules] = useState<string[]>([]);
   const [requiredTags, setRequiredTags] = useState<string[]>([]);
@@ -58,8 +58,8 @@ export default function GuidelinesPage() {
       setName(g.name);
       setDescription(g.description || "");
       setCategory(g.category || "");
-      setDoList(g.rules.doList || []);
-      setDontList(g.rules.dontList || []);
+      setBestPractices(g.rules.bestPractices || g.rules.doList || []);
+      setRestrictions(g.rules.restrictions || g.rules.dontList || []);
       setBannedWords(g.rules.bannedWords || []);
       setToneRules(g.rules.toneRules || []);
       setRequiredTags(g.rules.requiredTags || []);
@@ -70,8 +70,8 @@ export default function GuidelinesPage() {
       setName("");
       setDescription("");
       setCategory("");
-      setDoList([]);
-      setDontList([]);
+      setBestPractices([]);
+      setRestrictions([]);
       setBannedWords([]);
       setToneRules([]);
       setRequiredTags([]);
@@ -88,8 +88,8 @@ export default function GuidelinesPage() {
     }
     try {
       const rules: GuidelineRules = {
-        ...(doList.length > 0 && { doList }),
-        ...(dontList.length > 0 && { dontList }),
+        ...(bestPractices.length > 0 && { bestPractices }),
+        ...(restrictions.length > 0 && { restrictions }),
         ...(bannedWords.length > 0 && { bannedWords }),
         ...(toneRules.length > 0 && { toneRules }),
         ...(requiredTags.length > 0 && { requiredTags }),
@@ -266,12 +266,12 @@ export default function GuidelinesPage() {
               <TagInput value={toneRules} onChange={setToneRules} placeholder="e.g., Use active voice" />
             </div>
             <div className="space-y-2">
-              <Label>Do&apos;s</Label>
-              <TagInput value={doList} onChange={setDoList} placeholder="e.g., Include clear objectives" />
+              <Label>Best Practices</Label>
+              <TagInput value={bestPractices} onChange={setBestPractices} placeholder="e.g., Include clear objectives" />
             </div>
             <div className="space-y-2">
-              <Label>Don&apos;ts</Label>
-              <TagInput value={dontList} onChange={setDontList} placeholder="e.g., Avoid jargon without explanation" />
+              <Label>Restrictions</Label>
+              <TagInput value={restrictions} onChange={setRestrictions} placeholder="e.g., Avoid jargon without explanation" />
             </div>
             <div className="space-y-2">
               <Label>Banned Words</Label>

@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { trackSignUp } from "@/lib/analytics";
+import { authDebug } from "@/lib/auth-debug"; // AUTH-DEBUG
 
 export default function SignupPage() {
   const [name, setName] = useState("");
@@ -24,6 +25,7 @@ export default function SignupPage() {
     e.preventDefault();
     setError("");
     setLoading(true);
+    authDebug.log("signup", "signup attempt", { email }); // AUTH-DEBUG
 
     try {
       const supabase = createClient();
@@ -37,12 +39,14 @@ export default function SignupPage() {
       });
 
       if (signUpError) {
+        authDebug.error("signup", "signup failed", { message: signUpError.message }); // AUTH-DEBUG
         setError(signUpError.message);
         return;
       }
 
       // Supabase returns empty identities when the email already exists
       if (data.user && data.user.identities?.length === 0) {
+        authDebug.warn("signup", "duplicate email detected", { email }); // AUTH-DEBUG
         setError(
           "An account with this email already exists. Please sign in instead."
         );
@@ -54,8 +58,10 @@ export default function SignupPage() {
       }
 
       trackSignUp("email");
+      authDebug.log("signup", "signup success, confirmation email sent"); // AUTH-DEBUG
       setSuccess(true);
     } catch {
+      authDebug.error("signup", "unexpected error during signup"); // AUTH-DEBUG
       setError("An unexpected error occurred");
     } finally {
       setLoading(false);
@@ -63,6 +69,7 @@ export default function SignupPage() {
   }
 
   async function handleOAuth(provider: "google" | "github") {
+    authDebug.log("provider", `OAuth start from signup: ${provider}`); // AUTH-DEBUG
     if (plan) {
       sessionStorage.setItem("pending_plan", plan);
     }
@@ -75,6 +82,7 @@ export default function SignupPage() {
       },
     });
     if (oauthError) {
+      authDebug.error("provider", `OAuth error from signup: ${provider}`, { message: oauthError.message }); // AUTH-DEBUG
       setError(oauthError.message);
     }
   }

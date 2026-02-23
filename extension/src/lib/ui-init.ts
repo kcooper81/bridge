@@ -2,6 +2,7 @@
 // Used by both popup and sidepanel entrypoints
 
 import { getSession, login, logout, openLogin, openSignup, openGoogleAuth, openGithubAuth } from "./auth";
+import { extAuthDebug } from "./auth-debug"; // AUTH-DEBUG
 import { fetchPrompts, fillTemplate, type Prompt } from "./prompts";
 import { CONFIG, API_ENDPOINTS, apiHeaders } from "./config";
 import { detectAiTool } from "./ai-tools";
@@ -296,10 +297,12 @@ export function initSharedUI(elements: UIElements) {
   browser.storage.onChanged.addListener((changes, area) => {
     if (area === "local" && changes.accessToken) {
       if (changes.accessToken.newValue) {
+        extAuthDebug.log("state", "ui-init: accessToken storage change → login detected"); // AUTH-DEBUG
         // Logged in — show main view
         showMainView();
         loadPrompts();
       } else if (!changes.accessToken.newValue && changes.accessToken.oldValue) {
+        extAuthDebug.log("state", "ui-init: accessToken storage change → logout detected"); // AUTH-DEBUG
         // Logged out — show login view
         showLoginView();
       }
@@ -367,6 +370,7 @@ export function initSharedUI(elements: UIElements) {
   initTheme();
 
   getSession().then((session) => {
+    extAuthDebug.log("state", "ui-init: session check on init", { hasSession: !!session }); // AUTH-DEBUG
     if (session) {
       showMainView();
       loadPrompts();

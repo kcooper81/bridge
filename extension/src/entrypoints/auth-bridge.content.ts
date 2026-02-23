@@ -2,11 +2,16 @@
 // Content script that runs on teamprompt.app to sync Supabase session
 // Bidirectional: web app <-> extension
 
+import { extAuthDebug } from "../lib/auth-debug"; // AUTH-DEBUG
+
 export default defineContentScript({
   matches: [
     "https://teamprompt.app/*",
     "https://www.teamprompt.app/*",
     "http://localhost:3000/*",
+    "http://localhost:3001/*",
+    "http://localhost:3002/*",
+    "http://localhost:3003/*",
   ],
   runAt: "document_idle",
 
@@ -66,8 +71,12 @@ export default defineContentScript({
             return !stripped.endsWith("-code-verifier");
           });
 
-        if (!matchingName) return null;
+        if (!matchingName) {
+          extAuthDebug.log("bridge", "getSupabaseSession(): no auth cookie found"); // AUTH-DEBUG
+          return null;
+        }
         baseName = matchingName.replace(/\.\d+$/, "");
+        extAuthDebug.log("bridge", "getSupabaseSession(): found cookie", { baseName }); // AUTH-DEBUG
       }
 
       // Helper to find a specific cookie value by exact name match
@@ -109,9 +118,12 @@ export default defineContentScript({
       refresh_token: string;
       user: unknown;
     } | null {
+      // Strip "base64-" prefix (Supabase SSR v0.6+ chunked cookie format)
+      const stripped = raw.startsWith("base64-") ? raw.slice(7) : raw;
+
       // Try direct JSON parse
       try {
-        const obj = JSON.parse(raw);
+        const obj = JSON.parse(stripped);
         if (obj?.access_token) return obj;
         if (Array.isArray(obj) && obj[0]?.access_token) return obj[0];
       } catch {
@@ -120,7 +132,7 @@ export default defineContentScript({
 
       // Try base64url decode (Supabase SSR v0.5+ format)
       try {
-        const decoded = base64urlDecode(raw);
+        const decoded = base64urlDecode(stripped);
         const obj = JSON.parse(decoded);
         if (obj?.access_token) return obj;
         if (Array.isArray(obj) && obj[0]?.access_token) return obj[0];
@@ -144,6 +156,7 @@ export default defineContentScript({
       const token = session?.access_token || "";
 
       if (token && token !== lastSyncedToken) {
+        extAuthDebug.log("bridge", "syncWebToExtension: token changed → SESSION_SYNC"); // AUTH-DEBUG
         lastSyncedToken = token;
         emptyReadCount = 0;
         webSessionCleared = false;
@@ -159,7 +172,9 @@ export default defineContentScript({
         // Don't clear within 120s of a direct session push (postMessage)
         if (Date.now() - lastDirectSyncAt < 120000) return;
         emptyReadCount++;
+        extAuthDebug.log("bridge", `syncWebToExtension: empty read ${emptyReadCount}/${CLEAR_THRESHOLD}`); // AUTH-DEBUG
         if (emptyReadCount >= CLEAR_THRESHOLD) {
+          extAuthDebug.warn("bridge", "syncWebToExtension: threshold reached → SESSION_CLEAR"); // AUTH-DEBUG
           lastSyncedToken = "";
           emptyReadCount = 0;
           webSessionCleared = true;
@@ -175,22 +190,46 @@ export default defineContentScript({
 
     async function syncExtensionToWeb() {
       if (sessionStorage.getItem("tp-ext-sync")) {
+        extAuthDebug.log("bridge", "syncExtensionToWeb: skip (tp-ext-sync flag)"); // AUTH-DEBUG
         sessionStorage.removeItem("tp-ext-sync");
         return;
       }
 
-      if (AUTH_PATHS.test(location.pathname)) return;
-      if (webSessionCleared) return;
+      if (AUTH_PATHS.test(location.pathname)) {
+        extAuthDebug.log("bridge", "syncExtensionToWeb: skip (auth path)"); // AUTH-DEBUG
+        return;
+      }
+      if (webSessionCleared) {
+        extAuthDebug.log("bridge", "syncExtensionToWeb: skip (webSessionCleared)"); // AUTH-DEBUG
+        return;
+      }
+
+      // Quick guard: if any auth cookie exists on the page, never overwrite it.
+      // This prevents races where we can't parse the cookie format but it's valid.
+      const hasAuthCookie = document.cookie.split(";").some((c) => {
+        const name = c.trim().split("=")[0];
+        return name.startsWith("sb-") && name.includes("-auth-token") && !name.includes("code-verifier");
+      });
+      if (hasAuthCookie) {
+        extAuthDebug.log("bridge", "syncExtensionToWeb: skip (auth cookie exists on page)"); // AUTH-DEBUG
+        return;
+      }
 
       const webSession = getSupabaseSession();
-      if (webSession) return;
+      if (webSession) {
+        extAuthDebug.log("bridge", "syncExtensionToWeb: skip (web already has session)"); // AUTH-DEBUG
+        return;
+      }
 
       const data = await browser.storage.local.get([
         "accessToken",
         "refreshToken",
         "user",
       ]);
-      if (!data.accessToken) return;
+      if (!data.accessToken) {
+        extAuthDebug.log("bridge", "syncExtensionToWeb: skip (no ext accessToken)"); // AUTH-DEBUG
+        return;
+      }
 
       const name = await getCookieName();
       if (!name) return;
@@ -201,6 +240,8 @@ export default defineContentScript({
         token_type: "bearer",
         user: data.user,
       });
+
+      extAuthDebug.log("bridge", "syncExtensionToWeb: writing cookie + reload", { cookieName: name }); // AUTH-DEBUG
 
       const isSecure = location.protocol === "https:";
       const secureFlag = isSecure ? "; Secure" : "";
@@ -228,6 +269,7 @@ export default defineContentScript({
     window.addEventListener("message", (e) => {
       if (e.origin !== location.origin) return;
       if (e.data?.type === "TP_SESSION_READY" && e.data.accessToken) {
+        extAuthDebug.log("bridge", "received TP_SESSION_READY postMessage → SESSION_SYNC"); // AUTH-DEBUG
         lastSyncedToken = e.data.accessToken;
         lastDirectSyncAt = Date.now();
         emptyReadCount = 0;
@@ -244,22 +286,31 @@ export default defineContentScript({
     // --- Init ---
 
     // Check if extension was explicitly logged out — if so, clear web cookies
-    // instead of re-syncing them back to the extension.
+    // UNLESS the user has since logged in again via the web (cookies present).
     async function initSync() {
       // Pre-resolve the cookie name so getSupabaseSession() can use it
       await getCookieName();
+      extAuthDebug.log("bridge", "initSync() start"); // AUTH-DEBUG
 
       const { loggedOut } = await browser.storage.local.get(["loggedOut"]);
-      if (loggedOut) {
-        await clearWebSession();
-        await browser.storage.local.remove(["loggedOut"]);
-        webSessionCleared = true;
-        // Reload so the web app recognizes the sign-out
-        if (getSupabaseSession()) {
-          sessionStorage.setItem("tp-ext-sync", "1");
-          window.location.reload();
+      extAuthDebug.log("bridge", "initSync() loggedOut flag", { loggedOut }); // AUTH-DEBUG
+
+      if (loggedOut === true) {
+        // Check if the web app has a valid session — if so, the user logged
+        // in again via the web after the extension logout.  Honour the new
+        // web session instead of clearing it.
+        const webSession = getSupabaseSession();
+        if (webSession) {
+          extAuthDebug.log("bridge", "initSync() loggedOut stale, web has session → syncing"); // AUTH-DEBUG
+          await browser.storage.local.remove(["loggedOut"]);
+          // Fall through to normal sync
+        } else {
+          await clearWebSession();
+          await browser.storage.local.remove(["loggedOut"]);
+          webSessionCleared = true;
+          extAuthDebug.log("bridge", "initSync() cleared web session"); // AUTH-DEBUG
+          return;
         }
-        return;
       }
 
       syncWebToExtension();
@@ -286,7 +337,7 @@ export default defineContentScript({
         // Don't clear on SESSION_CLEAR from cookie polling — it may be a
         // false positive if cookies are temporarily unreadable.
         browser.storage.local.get(["loggedOut"]).then(({ loggedOut }) => {
-          if (!loggedOut) return;
+          if (loggedOut !== true) return;
           clearWebSession().then(() => {
             sessionStorage.setItem("tp-ext-sync", "1");
             window.location.reload();

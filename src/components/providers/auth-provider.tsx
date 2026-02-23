@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
+import { authDebug } from "@/lib/auth-debug"; // AUTH-DEBUG
 
 interface AuthContextValue {
   user: User | null;
@@ -34,6 +35,7 @@ export function AuthProvider({
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      authDebug.log("state", `onAuthStateChange: ${_event}`, { hasSession: !!newSession, userId: newSession?.user?.id }); // AUTH-DEBUG
       setSession(newSession);
       setUser(newSession?.user ?? null);
     });
@@ -60,6 +62,7 @@ export function AuthProvider({
   }, [user]);
 
   async function signOut() {
+    authDebug.log("state", "signOut initiated"); // AUTH-DEBUG
     const supabase = createClient();
     await supabase.auth.signOut();
     window.location.href = "/login";

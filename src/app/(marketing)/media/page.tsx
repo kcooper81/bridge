@@ -2,13 +2,15 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { generatePageMetadata } from "@/lib/seo/metadata";
 import { SectionLabel } from "@/components/marketing/section-label";
-import { Download } from "lucide-react";
+import { Download, Chrome, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { DarkSection } from "@/components/marketing/dark-section";
+import { CopyButton } from "./_components/copy-button";
 
 export const metadata: Metadata = generatePageMetadata({
   title: "Media Kit & Brand Assets",
   description:
-    "Download TeamPrompt logos, brand colors, and media assets for press, partnerships, and integrations.",
+    "Download TeamPrompt logos, brand colors, extension marketplace assets, and media resources for press, partnerships, and store submissions.",
   path: "/media",
 });
 
@@ -106,6 +108,66 @@ const typography = [
   },
 ];
 
+const storeScreenshots = [
+  { file: "/store-assets/screenshot-1-login.png", label: "Sign-in screen", dims: "1280 x 800" },
+  { file: "/store-assets/screenshot-2-prompt-list.png", label: "Prompt library", dims: "1280 x 800" },
+  { file: "/store-assets/screenshot-3-insert.png", label: "Insert into AI tool", dims: "1280 x 800" },
+  { file: "/store-assets/screenshot-4-template.png", label: "Template variables", dims: "1280 x 800" },
+  { file: "/store-assets/screenshot-5-sidepanel.png", label: "Side panel view", dims: "1280 x 800" },
+];
+
+const storePromos = [
+  { file: "/store-assets/promo-small.png", label: "Small promo tile", dims: "440 x 280" },
+  { file: "/store-assets/promo-marquee.png", label: "Marquee promo banner", dims: "1400 x 560" },
+];
+
+const stores = [
+  {
+    name: "Chrome Web Store",
+    icon: Chrome,
+    category: "Productivity",
+    screenshots: { count: 5, dims: "1280 x 800 px", format: "PNG" },
+    promo: "Small tile 440 x 280, Marquee 1400 x 560",
+    icon128: "128 x 128 px PNG",
+  },
+  {
+    name: "Firefox Add-ons",
+    icon: Globe,
+    category: "Productivity > Workflow & Planning",
+    screenshots: { count: 5, dims: "1280 x 800 px", format: "PNG" },
+    promo: "Not required (optional header image)",
+    icon128: "128 x 128 px PNG",
+  },
+  {
+    name: "Edge Add-ons",
+    icon: Globe,
+    category: "Productivity",
+    screenshots: { count: 5, dims: "1280 x 800 px", format: "PNG" },
+    promo: "Small tile 440 x 280, Marquee 1400 x 560 (same as Chrome)",
+    icon128: "128 x 128 px PNG (same as Chrome)",
+  },
+];
+
+const storeListing = {
+  name: "TeamPrompt — AI Prompt Manager & DLP Shield",
+  shortDescription:
+    "Access your team's approved AI prompt library, scan for sensitive data, and log conversations — right inside ChatGPT, Claude & more.",
+  permissions: [
+    { perm: "storage", reason: "Store authentication tokens and user preferences locally" },
+    { perm: "activeTab", reason: "Read the current tab URL to detect which AI tool is active" },
+    { perm: "alarms", reason: "Periodically refresh authentication tokens in the background" },
+    { perm: "sidePanel", reason: "Provide a persistent side panel UI for browsing prompts (Chrome/Edge)" },
+  ],
+  hostPermissions: [
+    { host: "chatgpt.com, chat.openai.com", reason: "Inject prompts and DLP scan outbound text" },
+    { host: "claude.ai", reason: "Inject prompts and DLP scan outbound text" },
+    { host: "gemini.google.com", reason: "Inject prompts and DLP scan outbound text" },
+    { host: "copilot.microsoft.com", reason: "Inject prompts and DLP scan outbound text" },
+    { host: "perplexity.ai", reason: "Inject prompts and DLP scan outbound text" },
+    { host: "teamprompt.app", reason: "Sync authentication session from web app" },
+  ],
+};
+
 export default function MediaPage() {
   return (
     <div className="py-20 sm:py-28">
@@ -118,8 +180,8 @@ export default function MediaPage() {
           </h1>
           <p className="mt-6 text-lg text-muted-foreground leading-relaxed max-w-2xl">
             Everything you need to reference TeamPrompt in press, partnerships,
-            and integrations. Download logos, get brand colors, and follow our
-            usage guidelines.
+            and integrations. Download logos, get brand colors, and access
+            extension marketplace assets for store submissions.
           </p>
         </div>
 
@@ -267,7 +329,7 @@ export default function MediaPage() {
           </div>
         </section>
 
-        {/* ── Product Screenshots ──────────────────────────── */}
+        {/* ── Product Name & Description ──────────────────────────── */}
         <section className="mb-24">
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3">
             Product Name & Description
@@ -315,6 +377,193 @@ export default function MediaPage() {
           </div>
         </section>
 
+        {/* ── Extension Marketplace Assets (NEW) ──────────────────────────── */}
+        <DarkSection gradient="right" className="mb-24">
+          <SectionLabel dark>Extension</SectionLabel>
+          <h2 className="text-2xl sm:text-3xl font-bold mb-4">
+            Extension Marketplace Media
+          </h2>
+          <p className="text-zinc-400 mb-10 max-w-2xl">
+            Store-ready assets, screenshots, and listing copy for Chrome Web Store,
+            Firefox Add-ons, and Edge Add-ons submissions.
+          </p>
+
+          {/* Store requirements grid */}
+          <div className="grid gap-4 sm:grid-cols-3 mb-12">
+            {stores.map((store) => (
+              <div
+                key={store.name}
+                className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-5"
+              >
+                <div className="flex items-center gap-2 mb-3">
+                  <store.icon className="h-4 w-4 text-blue-400" />
+                  <h3 className="text-sm font-semibold">{store.name}</h3>
+                </div>
+                <dl className="space-y-2 text-xs">
+                  <div>
+                    <dt className="text-zinc-500 font-medium">Category</dt>
+                    <dd className="text-zinc-300">{store.category}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-zinc-500 font-medium">Screenshots</dt>
+                    <dd className="text-zinc-300">{store.screenshots.count} &times; {store.screenshots.dims} {store.screenshots.format}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-zinc-500 font-medium">Promo images</dt>
+                    <dd className="text-zinc-300">{store.promo}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-zinc-500 font-medium">Icon</dt>
+                    <dd className="text-zinc-300">{store.icon128}</dd>
+                  </div>
+                </dl>
+              </div>
+            ))}
+          </div>
+
+          {/* Store icon */}
+          <div className="mb-12">
+            <h3 className="text-lg font-semibold mb-4">Store Icon</h3>
+            <div className="inline-flex items-center gap-4 rounded-xl border border-zinc-800 bg-zinc-900/60 p-4">
+              <Image
+                src="/store-assets/store-icon-128.png"
+                alt="Store icon 128x128"
+                width={64}
+                height={64}
+                className="rounded-lg"
+              />
+              <div>
+                <p className="text-sm font-medium">128 &times; 128 px</p>
+                <p className="text-xs text-zinc-500">PNG, transparent background</p>
+                <a href="/store-assets/store-icon-128.png" download className="inline-flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300 mt-1">
+                  <Download className="h-3 w-3" />
+                  Download
+                </a>
+              </div>
+            </div>
+          </div>
+
+          {/* Promo images */}
+          <div className="mb-12">
+            <h3 className="text-lg font-semibold mb-4">Promotional Images</h3>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {storePromos.map((promo) => (
+                <div key={promo.file} className="rounded-xl border border-zinc-800 overflow-hidden">
+                  <Image
+                    src={promo.file}
+                    alt={promo.label}
+                    width={700}
+                    height={280}
+                    className="w-full h-auto"
+                  />
+                  <div className="p-3 bg-zinc-900/80 flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-medium">{promo.label}</p>
+                      <p className="text-xs text-zinc-500">{promo.dims} px</p>
+                    </div>
+                    <a href={promo.file} download>
+                      <Button variant="ghost" size="sm" className="h-7 text-xs gap-1 text-zinc-300 hover:text-white">
+                        <Download className="h-3 w-3" />
+                        PNG
+                      </Button>
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Screenshots */}
+          <div className="mb-12">
+            <h3 className="text-lg font-semibold mb-4">Store Screenshots</h3>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {storeScreenshots.map((ss, i) => (
+                <div key={ss.file} className="rounded-xl border border-zinc-800 overflow-hidden">
+                  <Image
+                    src={ss.file}
+                    alt={ss.label}
+                    width={640}
+                    height={400}
+                    className="w-full h-auto"
+                  />
+                  <div className="p-3 bg-zinc-900/80 flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-medium">{i + 1}. {ss.label}</p>
+                      <p className="text-xs text-zinc-500">{ss.dims} px</p>
+                    </div>
+                    <a href={ss.file} download>
+                      <Button variant="ghost" size="sm" className="h-7 text-xs gap-1 text-zinc-300 hover:text-white">
+                        <Download className="h-3 w-3" />
+                        PNG
+                      </Button>
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </DarkSection>
+
+        {/* ── Store Listing Copy ──────────────────────────── */}
+        <section className="mb-24">
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3">
+            Store Listing Copy
+          </h2>
+          <p className="text-muted-foreground mb-8 max-w-2xl">
+            Copy-ready text for Chrome Web Store, Firefox Add-ons, and Edge Add-ons submissions.
+          </p>
+
+          <div className="space-y-4">
+            <CopyableField label="Extension Name" value={storeListing.name} />
+            <CopyableField label="Short Description (132 chars)" value={storeListing.shortDescription} />
+          </div>
+
+          {/* Permission justifications */}
+          <div className="mt-8">
+            <h3 className="text-lg font-semibold mb-4">Permission Justifications</h3>
+            <div className="rounded-2xl border border-border overflow-hidden">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border bg-muted/50">
+                    <th className="text-left p-3 font-medium text-muted-foreground">Permission</th>
+                    <th className="text-left p-3 font-medium text-muted-foreground">Justification</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {storeListing.permissions.map((p) => (
+                    <tr key={p.perm} className="border-b border-border last:border-0">
+                      <td className="p-3 font-mono text-xs">{p.perm}</td>
+                      <td className="p-3 text-muted-foreground">{p.reason}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div className="mt-6">
+            <h3 className="text-lg font-semibold mb-4">Host Permission Justifications</h3>
+            <div className="rounded-2xl border border-border overflow-hidden">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border bg-muted/50">
+                    <th className="text-left p-3 font-medium text-muted-foreground">Host</th>
+                    <th className="text-left p-3 font-medium text-muted-foreground">Justification</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {storeListing.hostPermissions.map((h) => (
+                    <tr key={h.host} className="border-b border-border last:border-0">
+                      <td className="p-3 font-mono text-xs whitespace-nowrap">{h.host}</td>
+                      <td className="p-3 text-muted-foreground">{h.reason}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
         {/* ── Contact ──────────────────────────── */}
         <section>
           <div className="rounded-2xl border border-border bg-muted/30 p-8 text-center max-w-2xl mx-auto">
@@ -334,3 +583,18 @@ export default function MediaPage() {
     </div>
   );
 }
+
+function CopyableField({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl border border-border bg-card p-5">
+      <div className="flex items-center justify-between mb-2">
+        <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
+          {label}
+        </p>
+        <CopyButton text={value} />
+      </div>
+      <p className="text-sm leading-relaxed">{value}</p>
+    </div>
+  );
+}
+

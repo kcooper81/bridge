@@ -41,9 +41,25 @@
   border-color: rgba(245, 158, 11, 0.3);
 }
 
-/* Inactive (not signed in) */
+/* Inactive (not signed in) — Fix 3: clickable */
 .tp-shield-inactive {
   opacity: 0.6;
+  cursor: pointer;
+}
+.tp-shield-inactive:hover {
+  opacity: 0.85;
+  border-color: #3f3f46;
+}
+
+/* Offline state (Fix 5) */
+.tp-shield-offline {
+  opacity: 0.6;
+  border-color: #3f3f46;
+}
+
+/* Context invalidated state (Fix 4) */
+.tp-shield-invalidated {
+  border-color: rgba(99, 102, 241, 0.4);
 }
 
 /* Shield icon */
@@ -349,4 +365,100 @@
 }
 .tp-warning-banner button:hover {
   background: #854d0e;
+}
+
+/* ─── Scan Failure Banner (Fix 1) ─── */
+
+.tp-scan-fail-banner {
+  position: fixed;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1c1c1e;
+  color: #e4e4e7;
+  border: 1px solid #3f3f46;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  animation: tp-slide-down 0.2s ease-out;
+}
+
+.tp-scan-fail-text {
+  flex: 1;
+}
+
+.tp-scan-fail-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.tp-scan-fail-btn {
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+}
+
+.tp-scan-fail-send {
+  background: #f59e0b;
+  color: #18181b;
+}
+.tp-scan-fail-send:hover {
+  background: #eab308;
+}
+
+.tp-scan-fail-cancel {
+  background: none;
+  border: 1px solid #3f3f46;
+  color: #a1a1aa;
+}
+.tp-scan-fail-cancel:hover {
+  background: #27272a;
+  color: #e4e4e7;
+}
+
+/* ─── Reload Banner (Fix 4) ─── */
+
+.tp-reload-banner {
+  position: fixed;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1e1b4b;
+  color: #c7d2fe;
+  border: 1px solid #4338ca;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  animation: tp-slide-down 0.2s ease-out;
+}
+
+.tp-reload-btn-action {
+  padding: 5px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  background: #6366f1;
+  color: white;
+  flex-shrink: 0;
+}
+.tp-reload-btn-action:hover {
+  background: #4f46e5;
 }

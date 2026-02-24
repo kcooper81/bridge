@@ -6,6 +6,7 @@ import { scanOutbound, type ScanResult } from "../lib/scanner";
 import { fetchSecurityStatus } from "../lib/security-status";
 import { logInteraction } from "../lib/logging";
 import { getSession } from "../lib/auth";
+import { isContextInvalidated } from "../lib/api";
 import "../styles/content.css";
 
 // Flag to allow re-dispatched Enter key to pass through without re-scanning
@@ -20,6 +21,13 @@ let _shieldCollapsed = false;
 let _ruleCount = 0;
 let _isProtected = false;
 let _isAuthenticated = false;
+let _isOnline = navigator.onLine;
+
+// Track current URL for SPA navigation detection
+let _currentUrl = location.href;
+
+// Debounce timer for shield refresh
+let _refreshTimer: ReturnType<typeof setTimeout> | null = null;
 
 export default defineContentScript({
   matches: [
@@ -35,6 +43,58 @@ export default defineContentScript({
   main() {
     // ─── Initialize Shield Indicator ───
     initShieldIndicator();
+
+    // ─── Auth Change Listener (Fix 2) ───
+    browser.storage.onChanged.addListener((changes, area) => {
+      if (area !== "local" || !changes.accessToken) return;
+      if (changes.accessToken.newValue) {
+        _isAuthenticated = true;
+        refreshShieldStatus();
+      } else if (!changes.accessToken.newValue && changes.accessToken.oldValue) {
+        _isAuthenticated = false;
+        _isProtected = false;
+        _ruleCount = 0;
+        updateShieldState();
+      }
+    });
+
+    // ─── Offline Detection (Fix 5) ───
+    window.addEventListener("online", () => {
+      _isOnline = true;
+      if (_isAuthenticated) {
+        refreshShieldStatus();
+      } else {
+        updateShieldState();
+      }
+    });
+
+    window.addEventListener("offline", () => {
+      _isOnline = false;
+      updateShieldState();
+    });
+
+    // ─── SPA Navigation Detection (Fix 7) ───
+    const origPushState = history.pushState.bind(history);
+    const origReplaceState = history.replaceState.bind(history);
+
+    history.pushState = function (...args: Parameters<typeof history.pushState>) {
+      origPushState(...args);
+      onUrlChange();
+    };
+
+    history.replaceState = function (...args: Parameters<typeof history.replaceState>) {
+      origReplaceState(...args);
+      onUrlChange();
+    };
+
+    window.addEventListener("popstate", () => onUrlChange());
+
+    // Periodic refresh every 5 minutes
+    setInterval(() => {
+      if (_isAuthenticated && _isOnline) {
+        refreshShieldStatus();
+      }
+    }, 5 * 60 * 1000);
 
     // ─── Message Handler ───
     browser.runtime.onMessage.addListener(
@@ -59,6 +119,7 @@ export default defineContentScript({
 
         if (e.key === "Enter" && !e.shiftKey) {
           const target = e.target as HTMLElement;
+          console.log("[TP-DLP] Enter on:", target.tagName, target.id, "contentEditable:", target.contentEditable, "isTextarea:", target instanceof HTMLTextAreaElement);
           if (
             target instanceof HTMLTextAreaElement ||
             target instanceof HTMLInputElement ||
@@ -69,17 +130,29 @@ export default defineContentScript({
               target.textContent ||
               target.innerText ||
               "";
-            if (text.trim().length < 10) return;
+            console.log("[TP-DLP] Text captured:", text.length, "chars, first 80:", text.slice(0, 80));
+            if (text.trim().length < 1) {
+              console.log("[TP-DLP] Text empty, skipping scan");
+              return;
+            }
 
             // ALWAYS block synchronously, then scan async
             e.preventDefault();
             e.stopPropagation();
             e.stopImmediatePropagation();
+            console.log("[TP-DLP] Intercepted Enter, scanning...");
+
+            // Fix 5: If offline, skip scan and show failure banner immediately
+            if (!_isOnline) {
+              showScanFailureBanner(target);
+              return;
+            }
 
             updateShieldScanning(true);
 
             scanOutbound(text).then((result) => {
               updateShieldScanning(false);
+              console.log("[TP-DLP] Scan result:", JSON.stringify(result));
 
               if (result?.action === "block") {
                 showBlockOverlay(result.violations);
@@ -92,6 +165,10 @@ export default defineContentScript({
                 showWarningBanner(result.violations);
                 logInteraction(text, "warned", result.violations);
                 pulseShield("warn");
+              } else if (result === null) {
+                // Fix 1: Scan returned null (no auth, API error) — show failure banner
+                showScanFailureBanner(target);
+                return;
               } else {
                 logInteraction(text, "sent", []);
               }
@@ -99,9 +176,9 @@ export default defineContentScript({
               // Re-dispatch the Enter key to actually send the message
               reDispatchEnter(target);
             }).catch(() => {
-              // Scan failed (network error) — allow the message through
+              // Fix 1: Scan failed (network error) — show failure banner, don't auto-send
               updateShieldScanning(false);
-              reDispatchEnter(target);
+              showScanFailureBanner(target);
             });
           }
         }
@@ -110,6 +187,84 @@ export default defineContentScript({
     );
   },
 });
+
+// ─── SPA Navigation Handler (Fix 7) ───
+
+function onUrlChange() {
+  const newUrl = location.href;
+  if (newUrl === _currentUrl) return;
+  _currentUrl = newUrl;
+
+  if (_isAuthenticated && _isOnline) {
+    debouncedRefreshShieldStatus();
+  }
+}
+
+function debouncedRefreshShieldStatus() {
+  if (_refreshTimer) clearTimeout(_refreshTimer);
+  _refreshTimer = setTimeout(() => {
+    refreshShieldStatus();
+  }, 500);
+}
+
+// ─── Shield State Management (Fix 2) ───
+
+async function refreshShieldStatus() {
+  const status = await fetchSecurityStatus();
+  if (status) {
+    _isProtected = status.protected;
+    _ruleCount = status.activeRuleCount;
+  }
+  updateShieldState();
+}
+
+function updateShieldState() {
+  if (!_shieldEl || !_shieldDotEl || !_shieldLabelEl) return;
+
+  // Remove all state classes
+  _shieldEl.classList.remove(
+    "tp-shield-inactive",
+    "tp-shield-protected",
+    "tp-shield-unprotected",
+    "tp-shield-offline",
+    "tp-shield-invalidated"
+  );
+
+  // Fix 4: Context invalidated — show reload banner
+  if (isContextInvalidated()) {
+    _shieldEl.classList.add("tp-shield-invalidated");
+    _shieldDotEl.className = "tp-shield-dot tp-dot-gray";
+    _shieldLabelEl.textContent = "Reload page required";
+    return;
+  }
+
+  // Fix 5: Offline
+  if (!_isOnline) {
+    _shieldEl.classList.add("tp-shield-offline");
+    _shieldDotEl.className = "tp-shield-dot tp-dot-gray";
+    _shieldLabelEl.textContent = "Offline \u2014 scans paused";
+    return;
+  }
+
+  // Not authenticated
+  if (!_isAuthenticated) {
+    _shieldEl.classList.add("tp-shield-inactive");
+    _shieldDotEl.className = "tp-shield-dot tp-dot-gray";
+    _shieldLabelEl.textContent = "Not signed in \u2014 Click to sign in";
+    return;
+  }
+
+  // Protected
+  if (_isProtected) {
+    _shieldEl.classList.add("tp-shield-protected");
+    _shieldDotEl.className = "tp-shield-dot tp-dot-green";
+    _shieldLabelEl.textContent = `${_ruleCount} rule${_ruleCount !== 1 ? "s" : ""} active`;
+  } else {
+    _shieldEl.classList.add("tp-shield-unprotected");
+    _shieldDotEl.className = "tp-shield-dot tp-dot-amber";
+    _shieldLabelEl.textContent = "No rules configured";
+  }
+}
 
 // ─── Re-dispatch Enter key after scan ───
 
@@ -247,16 +402,22 @@ function createShieldElement() {
   const shieldSvg = `<svg class="tp-shield-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`;
 
   // Status dot
-  const dotClass = !_isAuthenticated
+  const dotClass = !_isOnline || isContextInvalidated()
     ? "tp-dot-gray"
-    : _isProtected
-      ? "tp-dot-green"
-      : "tp-dot-amber";
+    : !_isAuthenticated
+      ? "tp-dot-gray"
+      : _isProtected
+        ? "tp-dot-green"
+        : "tp-dot-amber";
 
   // Status text
   let statusText = "";
-  if (!_isAuthenticated) {
-    statusText = "Not signed in";
+  if (isContextInvalidated()) {
+    statusText = "Reload page required";
+  } else if (!_isOnline) {
+    statusText = "Offline \u2014 scans paused";
+  } else if (!_isAuthenticated) {
+    statusText = "Not signed in \u2014 Click to sign in";
   } else if (_isProtected) {
     statusText = `${_ruleCount} rule${_ruleCount !== 1 ? "s" : ""} active`;
   } else {
@@ -288,11 +449,18 @@ function createShieldElement() {
     shield.classList.toggle("tp-shield-collapsed", _shieldCollapsed);
   });
 
-  // Click to expand if collapsed
+  // Fix 3: Click to sign in if not authenticated, or expand if collapsed
   shield.addEventListener("click", () => {
     if (_shieldCollapsed) {
       _shieldCollapsed = false;
       shield.classList.remove("tp-shield-collapsed");
+      return;
+    }
+    if (!_isAuthenticated) {
+      // Content scripts can't use browser.tabs.create, so ask background
+      browser.runtime.sendMessage({ type: "OPEN_LOGIN" }).catch(() => {
+        // Context may be invalidated
+      });
     }
   });
 }
@@ -306,11 +474,7 @@ function updateShieldScanning(scanning: boolean) {
     _shieldLabelEl.textContent = "Scanning...";
   } else {
     _shieldEl.classList.remove("tp-shield-scanning");
-    const dotClass = _isProtected ? "tp-dot-green" : "tp-dot-amber";
-    _shieldDotEl.className = `tp-shield-dot ${dotClass}`;
-    _shieldLabelEl.textContent = _isProtected
-      ? `${_ruleCount} rule${_ruleCount !== 1 ? "s" : ""} active`
-      : "No rules configured";
+    updateShieldState();
   }
 }
 
@@ -374,6 +538,59 @@ function showWarningBanner(violations: ScanResult["violations"]) {
     .getElementById("tp-warning-dismiss")!
     .addEventListener("click", () => banner.remove());
   setTimeout(() => banner.remove(), 8000);
+}
+
+// Fix 1: Scan failure banner with Send Anyway / Cancel buttons
+function showScanFailureBanner(target: HTMLElement) {
+  // Fix 4: If context invalidated, show reload banner instead
+  if (isContextInvalidated()) {
+    showReloadBanner();
+    return;
+  }
+
+  document.getElementById("tp-scan-fail-banner")?.remove();
+
+  const banner = document.createElement("div");
+  banner.id = "tp-scan-fail-banner";
+  banner.className = "tp-scan-fail-banner";
+  banner.innerHTML = `
+    <span class="tp-scan-fail-text">TeamPrompt could not scan this message${!_isOnline ? " (offline)" : ""}. Send unscanned?</span>
+    <div class="tp-scan-fail-actions">
+      <button id="tp-scan-fail-send" class="tp-scan-fail-btn tp-scan-fail-send">Send Anyway</button>
+      <button id="tp-scan-fail-cancel" class="tp-scan-fail-btn tp-scan-fail-cancel">Cancel</button>
+    </div>
+  `;
+  document.body.appendChild(banner);
+
+  document.getElementById("tp-scan-fail-send")!.addEventListener("click", () => {
+    banner.remove();
+    reDispatchEnter(target);
+  });
+
+  document.getElementById("tp-scan-fail-cancel")!.addEventListener("click", () => {
+    banner.remove();
+  });
+
+  // Auto-dismiss after 15 seconds (treated as cancel)
+  setTimeout(() => banner.remove(), 15000);
+}
+
+// Fix 4: Reload banner for context-invalidated state
+function showReloadBanner() {
+  document.getElementById("tp-reload-banner")?.remove();
+
+  const banner = document.createElement("div");
+  banner.id = "tp-reload-banner";
+  banner.className = "tp-reload-banner";
+  banner.innerHTML = `
+    <span>TeamPrompt was updated. Reload this page to restore protection.</span>
+    <button id="tp-reload-btn" class="tp-reload-btn-action">Reload Page</button>
+  `;
+  document.body.appendChild(banner);
+
+  document.getElementById("tp-reload-btn")!.addEventListener("click", () => {
+    location.reload();
+  });
 }
 
 function escapeHtml(str: string): string {

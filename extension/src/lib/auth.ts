@@ -116,12 +116,11 @@ export async function refreshSession(): Promise<void> {
         refreshToken: tokens.refresh_token,
       });
     } else {
-      extAuthDebug.error("refresh", "refreshSession: failed, clearing tokens", { status: res.status }); // AUTH-DEBUG
-      await browser.storage.local.remove([
-        "accessToken",
-        "refreshToken",
-        "user",
-      ]);
+      // Don't clear tokens on transient failures — an expired access token
+      // is better than no token (user stays "signed in" and the next refresh
+      // or auth-bridge sync can recover). Only a deliberate logout should
+      // clear tokens.
+      extAuthDebug.error("refresh", "refreshSession: failed (keeping tokens)", { status: res.status }); // AUTH-DEBUG
     }
   } catch {
     extAuthDebug.error("refresh", "refreshSession: network error"); // AUTH-DEBUG

@@ -6,6 +6,16 @@ import { getExtensionVersion } from "../lib/config";
 import { extAuthDebug } from "../lib/auth-debug"; // AUTH-DEBUG
 
 export default defineBackground(() => {
+  // ─── Token Refresh Lock ───
+  // Prevents multiple concurrent 401-retries from racing to refresh the token.
+  let refreshPromise: Promise<void> | null = null;
+  function safeRefresh(): Promise<void> {
+    if (!refreshPromise) {
+      refreshPromise = refreshSession().finally(() => { refreshPromise = null; });
+    }
+    return refreshPromise;
+  }
+
   // ─── Install Handler ───
   browser.runtime.onInstalled.addListener((details) => {
     console.log("TeamPrompt extension installed");
@@ -58,6 +68,10 @@ export default defineBackground(() => {
             });
         }
         sendResponse({ success: true });
+      } else if (message.type === "OPEN_LOGIN") {
+        // Fix 3: Content scripts can't use browser.tabs.create, so handle here
+        browser.tabs.create({ url: CONFIG.SITE_URL + "/extension/welcome?mode=signin" });
+        sendResponse({ success: true });
       } else if (message.type === "API_FETCH") {
         // Proxy API calls from content scripts through the background service
         // worker so they use the extension origin instead of the page origin.
@@ -78,7 +92,7 @@ export default defineBackground(() => {
           .then(async (res) => {
             if (res.status === 401) {
               // Token may be expired — refresh and retry once
-              await refreshSession();
+              await safeRefresh();
               const { accessToken } = await browser.storage.local.get(["accessToken"]);
               if (accessToken) {
                 const retryHeaders = { ...msg.headers, Authorization: `Bearer ${accessToken}` };

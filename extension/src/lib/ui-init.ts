@@ -393,6 +393,15 @@ async function logConversation(promptText: string, method: string) {
 
 // ─── Helpers ───
 
+function setInsertError(message: string) {
+  els.insertBtn.textContent = message;
+  els.insertBtn.classList.add("btn-error");
+  setTimeout(() => {
+    els.insertBtn.textContent = "Insert into AI Tool";
+    els.insertBtn.classList.remove("btn-error");
+  }, 3000);
+}
+
 function setStatus(text: string) {
   if (els.statusText) {
     els.statusText.textContent = text;
@@ -545,13 +554,23 @@ export function initSharedUI(elements: UIElements) {
       currentWindow: true,
     });
     if (tab?.id) {
-      browser.tabs.sendMessage(tab.id, { type: "INSERT_PROMPT", content });
-      els.insertBtn.textContent = "Inserted!";
-      setTimeout(
-        () => (els.insertBtn.textContent = "Insert into AI Tool"),
-        1500
-      );
-      logConversation(content, "insert");
+      try {
+        const response = await browser.tabs.sendMessage(tab.id, { type: "INSERT_PROMPT", content });
+        if (response?.success) {
+          els.insertBtn.textContent = "Inserted!";
+          setTimeout(
+            () => (els.insertBtn.textContent = "Insert into AI Tool"),
+            1500
+          );
+          logConversation(content, "insert");
+        } else {
+          setInsertError("Could not find input field");
+        }
+      } catch {
+        setInsertError("Open an AI tool page first");
+      }
+    } else {
+      setInsertError("Open an AI tool page first");
     }
   });
 

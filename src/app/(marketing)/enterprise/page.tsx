@@ -26,6 +26,7 @@ export const metadata = generatePageMetadata({
   description:
     "Deploy TeamPrompt across your organization with Google Admin Console, Microsoft Intune, or any MDM. Force-install the Chrome extension, enforce guardrails, and maintain full audit trails.",
   path: "/enterprise",
+  keywords: ["enterprise AI", "managed chrome extension", "MDM deployment", "AI compliance"],
 });
 
 const deploymentMethods = [

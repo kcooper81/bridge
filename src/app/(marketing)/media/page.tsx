@@ -12,6 +12,7 @@ export const metadata: Metadata = generatePageMetadata({
   description:
     "Download TeamPrompt logos, brand colors, extension marketplace assets, and media resources for press, partnerships, and store submissions.",
   path: "/media",
+  keywords: ["brand assets", "press kit", "media resources"],
 });
 
 const logos = [
@@ -150,8 +151,41 @@ const stores = [
 
 const storeListing = {
   name: "TeamPrompt — AI Prompt Manager & DLP Shield",
+  firefoxName: "TeamPrompt — AI Prompt Manager & DLP Shield",
   shortDescription:
     "Access your team's approved AI prompt library, scan for sensitive data, and log conversations — right inside ChatGPT, Claude & more.",
+  fullDescription: `TeamPrompt is the prompt management platform for teams that use AI every day.
+
+Instead of sharing prompts in Slack threads, Google Docs, or spreadsheets, your team gets a centralized library that works everywhere — right inside ChatGPT, Claude, Gemini, Copilot, and Perplexity.
+
+Key features:
+• Shared Prompt Library — Browse, search, and insert team prompts in one click
+• Template Variables — Fill in dynamic fields like {{client_name}} before inserting
+• DLP Guardrails — Automatically scan outbound text for sensitive data (SSNs, API keys, patient records, financial data)
+• Quality Guidelines — Set organization-wide standards for prompt quality and consistency
+• Usage Analytics — See which prompts get used, by whom, and where
+• Side Panel & Popup — Access prompts from a persistent side panel or quick popup overlay
+• Works Everywhere — ChatGPT, Claude, Gemini, Microsoft Copilot, and Perplexity
+
+Built for healthcare, legal, finance, government, and technology teams that need guardrails around AI usage.
+
+Free plan available. No credit card required.`,
+  singlePurpose:
+    "Access a shared team prompt library and scan outbound AI messages for sensitive data.",
+  privacyPolicyUrl: "https://teamprompt.app/privacy",
+  homepageUrl: "https://teamprompt.app",
+  supportUrl: "https://teamprompt.app/help",
+  supportEmail: "support@teamprompt.app",
+  firefoxTags: ["productivity", "privacy-and-security", "search-tools"],
+  license: "Proprietary",
+  reviewerTestInstructions: `1. Install the extension and click the TeamPrompt icon in the toolbar
+2. Click "Create Free Account" and sign up with any email
+3. After signing in, you'll see the prompt library with sample prompts
+4. Navigate to chatgpt.com — the extension detects the AI tool automatically
+5. Click any prompt to preview it, then click "Insert" to paste it into the chat input
+6. Try a template prompt — fill in the variable fields, then insert
+7. Open the side panel (right-click extension icon → "Open side panel") for persistent access
+8. To test DLP: type a fake SSN (e.g., 123-45-6789) into the AI chat — the extension will flag it`,
   permissions: [
     { perm: "storage", reason: "Store authentication tokens and user preferences locally" },
     { perm: "activeTab", reason: "Read the current tab URL to detect which AI tool is active" },
@@ -514,8 +548,14 @@ export default function MediaPage() {
           </p>
 
           <div className="space-y-4">
-            <CopyableField label="Extension Name" value={storeListing.name} />
+            <CopyableField label="Extension Name (Chrome/Edge)" value={storeListing.name} />
+            <CopyableField label="Extension Name (Firefox, 47 chars)" value={storeListing.firefoxName} />
             <CopyableField label="Short Description (132 chars)" value={storeListing.shortDescription} />
+            <CopyableField label="Full Description" value={storeListing.fullDescription} />
+            <CopyableField label="Single Purpose Statement (Chrome review)" value={storeListing.singlePurpose} />
+            <CopyableField label="Reviewer Test Instructions" value={storeListing.reviewerTestInstructions} />
+            <CopyableField label="Firefox Tags" value={storeListing.firefoxTags.join(", ")} />
+            <CopyableField label="License" value={storeListing.license} />
           </div>
 
           {/* Permission justifications */}
@@ -562,6 +602,32 @@ export default function MediaPage() {
               </table>
             </div>
           </div>
+
+          {/* Store URLs & Links */}
+          <div className="mt-8">
+            <h3 className="text-lg font-semibold mb-4">Store URLs & Links</h3>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {[
+                { label: "Homepage URL", value: storeListing.homepageUrl },
+                { label: "Privacy Policy URL", value: storeListing.privacyPolicyUrl },
+                { label: "Support URL", value: storeListing.supportUrl },
+                { label: "Support Email", value: storeListing.supportEmail },
+              ].map((link) => (
+                <div
+                  key={link.label}
+                  className="rounded-2xl border border-border bg-card p-5"
+                >
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium mb-2">
+                    {link.label}
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-mono truncate mr-3">{link.value}</p>
+                    <CopyButton text={link.value} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </section>
 
         {/* ── Contact ──────────────────────────── */}
@@ -593,7 +659,7 @@ function CopyableField({ label, value }: { label: string; value: string }) {
         </p>
         <CopyButton text={value} />
       </div>
-      <p className="text-sm leading-relaxed">{value}</p>
+      <p className="text-sm leading-relaxed whitespace-pre-line">{value}</p>
     </div>
   );
 }

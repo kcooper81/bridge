@@ -19,6 +19,7 @@ export const metadata: Metadata = generatePageMetadata({
   description:
     "Explore TeamPrompt's features: prompt vault, AI guardrails, quality guidelines, team management, browser extension, and analytics.",
   path: "/features",
+  keywords: ["prompt vault", "AI guardrails", "browser extension", "prompt templates"],
 });
 
 /* ── CSS-only app preview mockups ────────────────────────── */

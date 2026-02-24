@@ -20,6 +20,7 @@ export const metadata: Metadata = generatePageMetadata({
   description:
     "TeamPrompt's browser extension works with ChatGPT, Claude, Gemini, Microsoft Copilot, and Perplexity. Insert prompts, scan for sensitive data, and log usage — across all your AI tools.",
   path: "/integrations",
+  keywords: ["ChatGPT extension", "Claude extension", "Gemini extension", "AI tool integration"],
 });
 
 const aiTools = [

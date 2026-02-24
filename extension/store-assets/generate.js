@@ -9,10 +9,8 @@ const LOGO_DARK_SVG = fs.readFileSync(
   path.join(__dirname, "..", "..", "public", "logo-dark.svg"),
   "utf-8"
 );
-const LOGO_ICON_BLUE_SVG = fs.readFileSync(
-  path.join(__dirname, "..", "..", "public", "brand", "logo-icon-blue.svg"),
-  "utf-8"
-);
+// Dark logo mark (recolor white fills to dark) on white rounded box
+const LOGO_DARK_MARK_SVG = LOGO_DARK_SVG.replace(/fill="white"/g, 'fill="#0f1219"');
 
 // Inline SVG for use in HTML (white logo on dark bg, sized to fit)
 function logoInline(size = 44) {
@@ -21,10 +19,15 @@ function logoInline(size = 44) {
   </div>`;
 }
 
-// Icon version: blue rounded rect with white logo inside
+// Icon version: dark logo on white rounded box (matches generate-icons.js style)
 function logoIcon(size = 44) {
+  const radius = Math.round(size * 0.22);
+  const padding = Math.round(size * 0.10);
+  const logoSize = size - padding * 2;
   return `<div style="width:${size}px;height:${size}px;display:inline-flex;align-items:center;justify-content:center;">
-    ${LOGO_ICON_BLUE_SVG.replace('<svg ', `<svg width="${size}" height="${size}" `)}
+    <div style="width:${size}px;height:${size}px;background:#ffffff;border-radius:${radius}px;box-shadow:inset 0 0 0 ${Math.max(1, Math.round(size * 0.02))}px rgba(0,0,0,0.08);display:flex;align-items:center;justify-content:center;">
+      ${LOGO_DARK_MARK_SVG.replace('<svg ', `<svg width="${logoSize}" height="auto" style="width:${logoSize}px;height:auto;" `)}
+    </div>
   </div>`;
 }
 

@@ -7,6 +7,7 @@ export const metadata: Metadata = generatePageMetadata({
   title: `TeamPrompt for ${industryData.industry}`,
   description: industryData.subtitle,
   path: `/industries/${industryData.slug}`,
+  keywords: ["tech team AI", "developer prompt library", "engineering AI governance"],
 });
 
 export default function Page() {

@@ -7,6 +7,7 @@ export const metadata: Metadata = generatePageMetadata({
   description:
     "Learn how TeamPrompt collects, uses, and protects your data across our web app and Chrome extension.",
   path: "/privacy",
+  keywords: ["privacy policy", "data protection", "GDPR"],
 });
 
 export default function PrivacyPage() {

@@ -13,6 +13,7 @@ export const metadata: Metadata = generatePageMetadata({
   description:
     "Complete documentation for TeamPrompt — setup guides, prompt management, guardrails, team administration, billing, and more.",
   path: "/help",
+  keywords: ["TeamPrompt documentation", "help center", "getting started guide"],
 });
 
 export default function HelpPage() {

@@ -11,6 +11,7 @@ export const metadata: Metadata = generatePageMetadata({
   description:
     "Pick the plan that fits your team. Start free, no credit card required. All paid plans include a 14-day trial.",
   path: "/pricing",
+  keywords: ["TeamPrompt pricing", "AI tool pricing", "prompt management plans"],
 });
 
 const faqs = [

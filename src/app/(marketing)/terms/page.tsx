@@ -7,6 +7,7 @@ export const metadata: Metadata = generatePageMetadata({
   description:
     "Terms of Use for TeamPrompt, the AI prompt management platform for teams. Read about your rights, responsibilities, and how we operate.",
   path: "/terms",
+  keywords: ["terms of service", "terms of use"],
 });
 
 export default function TermsPage() {

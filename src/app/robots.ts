@@ -29,6 +29,11 @@ export default function robots(): MetadataRoute.Robots {
           "/auth/",
         ],
       },
+      { userAgent: "GPTBot", allow: "/" },
+      { userAgent: "ChatGPT-User", allow: "/" },
+      { userAgent: "Google-Extended", allow: "/" },
+      { userAgent: "anthropic-ai", allow: "/" },
+      { userAgent: "Claude-Web", allow: "/" },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,
   };

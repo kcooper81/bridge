@@ -30,6 +30,7 @@ export const metadata: Metadata = generatePageMetadata({
   description:
     "TeamPrompt gives your team a shared prompt library, quality guidelines, and security guardrails — so the best prompts get reused, not reinvented.",
   path: "/",
+  keywords: ["AI prompt management", "team prompts", "prompt library", "AI governance"],
 });
 
 const supportedTools = [

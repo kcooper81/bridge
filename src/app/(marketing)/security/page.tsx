@@ -22,6 +22,7 @@ export const metadata: Metadata = generatePageMetadata({
   description:
     "Protect your organization from data leaks in AI prompts. Detect patient records, financial data, credentials, and confidential information automatically.",
   path: "/security",
+  keywords: ["AI guardrails", "DLP scanning", "data loss prevention", "AI security"],
 });
 
 const categories = [

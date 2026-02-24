@@ -17,21 +17,35 @@ const DEV_ORIGINS = [
   "http://localhost:3003",
 ];
 
+// AI tool origins where the extension content script runs and makes fetch() calls.
+// Content scripts inherit the page's origin, so these need CORS access.
+const AI_TOOL_ORIGINS = [
+  "https://chat.openai.com",
+  "https://chatgpt.com",
+  "https://claude.ai",
+  "https://gemini.google.com",
+  "https://copilot.microsoft.com",
+  "https://www.perplexity.ai",
+];
+
 function getAllowedOrigin(request?: NextRequest | Request): string {
   const origin = request?.headers.get("origin") || "";
 
   // Allow browser extension origins — validate ID if configured
   if (origin.startsWith("chrome-extension://") || origin.startsWith("moz-extension://")) {
     if (ALLOWED_EXTENSION_IDS.length === 0) {
-      // No IDs configured — allow all (dev mode)
       return origin;
     }
     const id = origin.replace(/^(chrome|moz)-extension:\/\//, "").replace(/\/$/, "");
     if (ALLOWED_EXTENSION_IDS.includes(id)) {
       return origin;
     }
-    // Unknown extension — reject by returning site URL (CORS mismatch = blocked)
     return SITE_URL;
+  }
+
+  // Allow AI tool origins (content script fetch runs under page origin)
+  if (AI_TOOL_ORIGINS.includes(origin)) {
+    return origin;
   }
 
   // Allow our own site

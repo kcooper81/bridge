@@ -32,8 +32,8 @@ export const industryData: IndustryPageData = {
         "Automatically detect AWS keys, GitHub tokens, database connection strings, private keys, and other secret patterns before they reach any AI model. Block or warn in real time.",
     },
     {
-      icon: "Chrome",
-      title: "Chrome Extension with Inline Scanning",
+      icon: "Globe",
+      title: "Browser Extension with Inline Scanning",
       description:
         "TeamPrompt's browser extension scans prompts directly in ChatGPT, Claude, and other AI interfaces. Developers get instant feedback without leaving their workflow.",
     },

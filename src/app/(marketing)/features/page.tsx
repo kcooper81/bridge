@@ -3,7 +3,7 @@ import {
   Archive,
   BarChart3,
   BookOpen,
-  Chrome,
+  Globe,
   FolderOpen,
   Import,
   Shield,
@@ -17,7 +17,7 @@ import { CTASection } from "@/components/marketing/cta-section";
 export const metadata: Metadata = generatePageMetadata({
   title: "Features",
   description:
-    "Explore TeamPrompt's features: prompt vault, AI guardrails, quality guidelines, team management, Chrome extension, and analytics.",
+    "Explore TeamPrompt's features: prompt vault, AI guardrails, quality guidelines, team management, browser extension, and analytics.",
   path: "/features",
 });
 
@@ -243,7 +243,7 @@ const mockups: Record<string, () => React.JSX.Element> = {
   "AI Guardrails": GuardrailsMockup,
   "Quality Guidelines": GuidelinesMockup,
   "Team Management": TeamsMockup,
-  "Chrome Extension": ExtensionMockup,
+  "Browser Extension": ExtensionMockup,
   "Analytics & Insights": AnalyticsMockup,
   "Collections": CollectionsMockup,
   "Import / Export": ImportMockup,
@@ -302,8 +302,8 @@ const features = [
     ],
   },
   {
-    icon: Chrome,
-    title: "Chrome Extension",
+    icon: Globe,
+    title: "Browser Extension",
     description:
       "Your prompts live in TeamPrompt. Your team works in ChatGPT, Claude, Gemini, and a dozen other tools. The extension bridges the gap.",
     details: [
@@ -374,7 +374,7 @@ export default function FeaturesPage() {
             return (
               <div
                 key={feature.title}
-                id={feature.title === "Chrome Extension" ? "extension" : undefined}
+                id={feature.title === "Browser Extension" ? "extension" : undefined}
                 className={`flex flex-col gap-10 lg:gap-16 ${
                   i % 2 === 1 ? "lg:flex-row-reverse" : "lg:flex-row"
                 } items-center`}

@@ -35,7 +35,7 @@ export default function PrivacyPage() {
             >
               teamprompt.app
             </a>{" "}
-            and the TeamPrompt Chrome Extension (collectively, the
+            and the TeamPrompt Browser Extension (collectively, the
             &quot;Service&quot;). This Privacy Policy explains what data we
             collect, how we use it, and your rights regarding that data. We
             believe in being straightforward — no legalese, no surprises.

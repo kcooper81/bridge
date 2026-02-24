@@ -19,7 +19,7 @@ import {
   BookOpen,
   Braces,
   CheckCircle2,
-  Chrome,
+  Globe,
   Shield,
   Users,
   Zap,
@@ -272,8 +272,8 @@ export default function LandingPage() {
             />
 
             <FeatureCard
-              icon={Chrome}
-              title="Chrome Extension"
+              icon={Globe}
+              title="Browser Extension"
               description="Inject prompts directly into ChatGPT, Claude, Gemini, Copilot, and more — without leaving the AI tool."
             >
               <div className="mt-5 flex flex-wrap gap-2">
@@ -346,7 +346,7 @@ export default function LandingPage() {
               {
                 step: "03",
                 title: "Your team starts reusing",
-                desc: "Members search the vault, use the Chrome extension, and your best prompts get adopted across the org.",
+                desc: "Members search the vault, use the browser extension, and your best prompts get adopted across the org.",
               },
             ].map((item) => (
               <div key={item.step} className="relative">

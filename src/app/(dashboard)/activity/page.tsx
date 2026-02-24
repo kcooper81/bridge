@@ -152,7 +152,7 @@ export default function ActivityPage() {
     <>
       <PageHeader
         title="Activity Log"
-        description="AI conversations logged by the Chrome extension"
+        description="AI conversations logged by the browser extension"
       />
 
       {/* Filters */}
@@ -187,7 +187,7 @@ export default function ActivityPage() {
             <Activity className="h-10 w-10 text-muted-foreground mb-3" />
             <h3 className="text-sm font-medium">No activity yet</h3>
             <p className="text-xs text-muted-foreground mt-1">
-              Conversations will appear here once team members use the Chrome extension.
+              Conversations will appear here once team members use the browser extension.
             </p>
           </CardContent>
         </Card>

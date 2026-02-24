@@ -37,7 +37,7 @@ export default function TermsPage() {
               >
                 teamprompt.app
               </a>
-              , our Chrome extension, or any related services (collectively, the
+              , our browser extension, or any related services (collectively, the
               &ldquo;Service&rdquo;), you agree to be bound by these Terms of
               Use (&ldquo;Terms&rdquo;). If you do not agree to these Terms,
               please do not use the Service.
@@ -71,7 +71,7 @@ export default function TermsPage() {
                 workspaces
               </li>
               <li>
-                A Chrome browser extension for quick access to your prompt
+                A browser extension for quick access to your prompt
                 library and inserting prompts directly into AI tool interfaces
               </li>
               <li>
@@ -231,13 +231,13 @@ export default function TermsPage() {
             </p>
           </section>
 
-          {/* 6. Chrome Extension Terms */}
+          {/* 6. Browser Extension Terms */}
           <section>
             <h2 className="text-xl font-semibold mb-4">
-              6. Chrome Extension Terms
+              6. Browser Extension Terms
             </h2>
             <p className="text-muted-foreground leading-relaxed mb-3">
-              The TeamPrompt Chrome Extension is an optional component of the
+              The TeamPrompt Browser Extension is an optional component of the
               Service that allows you to access your prompt library directly
               within supported AI tool websites. By installing and using the
               extension, you acknowledge and agree to the following:

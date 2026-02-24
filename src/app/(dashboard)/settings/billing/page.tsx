@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useOrg } from "@/components/providers/org-provider";
 import { useSubscription } from "@/components/providers/subscription-provider";
-import { PageHeader } from "@/components/dashboard/page-header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
@@ -115,17 +114,7 @@ export default function BillingPage() {
   const plans: PlanTier[] = ["free", "pro", "team", "business"];
 
   return (
-    <>
-      <PageHeader
-        title="Billing"
-        description="Manage your subscription and billing"
-        breadcrumbs={[
-          { label: "Settings", href: "/settings" },
-          { label: "Billing" },
-        ]}
-      />
-
-      <div className="max-w-5xl space-y-6">
+    <div className="max-w-5xl space-y-6">
         {/* Current Plan */}
         <Card>
           <CardHeader>
@@ -292,7 +281,6 @@ export default function BillingPage() {
             );
           })}
         </div>
-      </div>
-    </>
+    </div>
   );
 }

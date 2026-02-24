@@ -63,7 +63,7 @@ const benefits = [
   "15 pre-built policies covering common data types",
   "Custom policies for your industry's requirements",
   "Role-based access for policy management",
-  "Chrome extension scans outbound text in real-time",
+  "Browser extension scans outbound text in real-time",
 ];
 
 export default function SecurityPage() {

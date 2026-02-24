@@ -37,3 +37,12 @@ next-env.d.ts
 
 .vercel
 .env*.local
+
+# wxt (extension build tooling)
+.wxt/
+
+# supabase cli temp
+supabase/.temp/
+
+# debug scripts
+scripts/

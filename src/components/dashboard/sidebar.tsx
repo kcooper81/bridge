@@ -26,7 +26,6 @@ import {
   Archive,
   BarChart3,
   BookOpen,
-  Building2,
   ChevronUp,
   CreditCard,
   FolderOpen,
@@ -58,13 +57,6 @@ const navSections: { title: string; items: NavItem[] }[] = [
       { label: "Collections", href: "/collections", icon: FolderOpen },
       { label: "Library", href: "/library", icon: Library },
       { label: "Guidelines", href: "/guidelines", icon: BookOpen, roles: ["admin", "manager"] },
-    ],
-  },
-  {
-    title: "Administration",
-    items: [
-      { label: "Team", href: "/team", icon: Users, roles: ["admin", "manager"] },
-      { label: "Settings", href: "/settings", icon: Building2, roles: ["admin", "manager"] },
     ],
   },
   {
@@ -168,107 +160,130 @@ function NavContent({ onItemClick }: { onItemClick?: () => void }) {
 
       <HelpModal open={helpOpen} onOpenChange={setHelpOpen} />
 
+      {/* Utility icons */}
+      <div className="flex items-center justify-center gap-1 px-4 pb-2">
+        <Link
+          href="/settings"
+          onClick={onItemClick}
+          className={cn(
+            "flex h-9 w-9 items-center justify-center rounded-lg transition-colors",
+            pathname.startsWith("/settings")
+              ? "bg-primary/10 text-primary"
+              : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+          )}
+          title="Settings"
+        >
+          <Settings className="h-[18px] w-[18px]" />
+        </Link>
+        {(currentUserRole === "admin" || currentUserRole === "manager") && (
+          <Link
+            href="/team"
+            onClick={onItemClick}
+            className={cn(
+              "flex h-9 w-9 items-center justify-center rounded-lg transition-colors",
+              pathname.startsWith("/team")
+                ? "bg-primary/10 text-primary"
+                : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+            )}
+            title="Team"
+          >
+            <Users className="h-[18px] w-[18px]" />
+          </Link>
+        )}
+        <NotificationBell />
+        <button
+          onClick={() => setHelpOpen(true)}
+          className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
+          title="Help & Docs"
+        >
+          <HelpCircle className="h-[18px] w-[18px]" />
+        </button>
+      </div>
+
       {/* User footer */}
       <div className="border-t border-border/50 px-4 py-4">
-        <div className="flex items-center gap-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="flex flex-1 min-w-0 items-center gap-3 rounded-xl px-2 py-1.5 hover:bg-muted/50 transition-colors">
-                <Avatar className="h-10 w-10 shadow-md shrink-0">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="flex w-full min-w-0 items-center gap-3 rounded-xl px-2 py-1.5 hover:bg-muted/50 transition-colors">
+              <Avatar className="h-10 w-10 shadow-md shrink-0">
+                <AvatarFallback className="bg-gradient-to-br from-primary/30 to-primary/10 text-primary text-sm font-semibold">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0 text-left">
+                <p className="text-sm font-semibold truncate">
+                  {currentMember?.name || user?.email}
+                </p>
+                <Badge variant="outline" className="text-[10px] px-1.5 py-0 mt-0.5 border-border/50">
+                  {currentUserRole}
+                </Badge>
+              </div>
+              <ChevronUp className="h-4 w-4 text-muted-foreground shrink-0" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent side="top" align="start" className="w-64 mb-1">
+            {/* Header */}
+            <DropdownMenuLabel className="font-normal">
+              <div className="flex items-center gap-3">
+                <Avatar className="h-10 w-10 shrink-0">
                   <AvatarFallback className="bg-gradient-to-br from-primary/30 to-primary/10 text-primary text-sm font-semibold">
                     {initials}
                   </AvatarFallback>
                 </Avatar>
-                <div className="flex-1 min-w-0 text-left">
+                <div className="min-w-0">
                   <p className="text-sm font-semibold truncate">
                     {currentMember?.name || user?.email}
                   </p>
-                  <Badge variant="outline" className="text-[10px] px-1.5 py-0 mt-0.5 border-border/50">
-                    {currentUserRole}
-                  </Badge>
-                </div>
-                <ChevronUp className="h-4 w-4 text-muted-foreground shrink-0" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent side="top" align="start" className="w-64 mb-1">
-              {/* Header */}
-              <DropdownMenuLabel className="font-normal">
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-10 w-10 shrink-0">
-                    <AvatarFallback className="bg-gradient-to-br from-primary/30 to-primary/10 text-primary text-sm font-semibold">
-                      {initials}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold truncate">
-                      {currentMember?.name || user?.email}
-                    </p>
-                    <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
-                    <div className="flex items-center gap-1.5 mt-1">
-                      <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-border/50">
-                        {currentUserRole}
-                      </Badge>
-                      <Badge variant="secondary" className="text-[10px] px-1.5 py-0 capitalize">
-                        {subscription?.plan || "free"}
-                      </Badge>
-                    </div>
+                  <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+                  <div className="flex items-center gap-1.5 mt-1">
+                    <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-border/50">
+                      {currentUserRole}
+                    </Badge>
+                    <Badge variant="secondary" className="text-[10px] px-1.5 py-0 capitalize">
+                      {subscription?.plan || "free"}
+                    </Badge>
                   </div>
                 </div>
-              </DropdownMenuLabel>
+              </div>
+            </DropdownMenuLabel>
 
-              <DropdownMenuSeparator />
+            <DropdownMenuSeparator />
 
-              {/* Theme toggle */}
-              <DropdownMenuItem
-                onSelect={(e) => {
-                  e.preventDefault();
-                  setTheme(theme === "dark" ? "light" : "dark");
-                }}
-              >
-                {theme === "dark" ? <Sun className="mr-2 h-4 w-4" /> : <Moon className="mr-2 h-4 w-4" />}
-                Dark mode
-                <span className="ml-auto text-xs text-muted-foreground">
-                  {theme === "dark" ? "On" : "Off"}
-                </span>
-              </DropdownMenuItem>
+            {/* Theme toggle */}
+            <DropdownMenuItem
+              onSelect={(e) => {
+                e.preventDefault();
+                setTheme(theme === "dark" ? "light" : "dark");
+              }}
+            >
+              {theme === "dark" ? <Sun className="mr-2 h-4 w-4" /> : <Moon className="mr-2 h-4 w-4" />}
+              Dark mode
+              <span className="ml-auto text-xs text-muted-foreground">
+                {theme === "dark" ? "On" : "Off"}
+              </span>
+            </DropdownMenuItem>
 
-              <DropdownMenuSeparator />
+            <DropdownMenuSeparator />
 
-              {/* Nav items */}
-              <DropdownMenuItem asChild>
-                <Link href="/settings" onClick={onItemClick}>
-                  <Settings className="mr-2 h-4 w-4" />
-                  Profile & Settings
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/settings/billing" onClick={onItemClick}>
-                  <CreditCard className="mr-2 h-4 w-4" />
-                  Billing
-                </Link>
-              </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/settings/billing" onClick={onItemClick}>
+                <CreditCard className="mr-2 h-4 w-4" />
+                Billing
+              </Link>
+            </DropdownMenuItem>
 
-              <DropdownMenuSeparator />
+            <DropdownMenuSeparator />
 
-              {/* Sign out */}
-              <DropdownMenuItem
-                className="text-destructive focus:text-destructive"
-                onSelect={() => signOut()}
-              >
-                <LogOut className="mr-2 h-4 w-4" />
-                Sign out
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <button
-            onClick={() => setHelpOpen(true)}
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
-            title="Help & Docs"
-          >
-            <HelpCircle className="h-[18px] w-[18px]" />
-          </button>
-          <NotificationBell />
-        </div>
+            {/* Sign out */}
+            <DropdownMenuItem
+              className="text-destructive focus:text-destructive"
+              onSelect={() => signOut()}
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              Sign out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );

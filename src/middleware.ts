@@ -38,11 +38,22 @@ export async function middleware(request: NextRequest) {
 
   authDebug.log("middleware", "user resolved", user ? { id: user.id, email: user.email } : null);
 
-  // Authenticated users on auth pages → redirect to vault
+  // Authenticated users on auth pages → redirect to home
   if (user && isAuthRoute(pathname)) {
-    authDebug.log("middleware", "redirect: auth page → /vault (user is authenticated)");
+    authDebug.log("middleware", "redirect: auth page → /home (user is authenticated)");
     const url = request.nextUrl.clone();
-    url.pathname = "/vault";
+    url.pathname = "/home";
+    url.search = "";
+    const resp = NextResponse.redirect(url);
+    authDebug.attachToResponse(resp); // AUTH-DEBUG
+    return resp;
+  }
+
+  // Authenticated users on marketing landing page → redirect to home
+  if (user && pathname === "/") {
+    authDebug.log("middleware", "redirect: / → /home (user is authenticated)");
+    const url = request.nextUrl.clone();
+    url.pathname = "/home";
     url.search = "";
     const resp = NextResponse.redirect(url);
     authDebug.attachToResponse(resp); // AUTH-DEBUG

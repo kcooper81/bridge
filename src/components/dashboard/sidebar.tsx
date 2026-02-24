@@ -111,20 +111,20 @@ function NavContent({ onItemClick }: { onItemClick?: () => void }) {
         {/* Home link */}
         <div className="mb-4">
           <Link
-            href="/"
+            href="/home"
             onClick={onItemClick}
             className={cn(
               "relative flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium",
               "transition-all duration-200 ease-spring",
-              pathname === "/"
+              pathname === "/home"
                 ? "bg-primary/10 text-primary shadow-sm"
                 : "text-muted-foreground hover:bg-muted/50 hover:text-foreground hover:scale-[1.02]"
             )}
           >
-            {pathname === "/" && (
+            {pathname === "/home" && (
               <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 rounded-r-full bg-primary shadow-glow-sm" />
             )}
-            <Home className={cn("h-[18px] w-[18px]", pathname === "/" && "drop-shadow-sm")} />
+            <Home className={cn("h-[18px] w-[18px]", pathname === "/home" && "drop-shadow-sm")} />
             Home
           </Link>
         </div>

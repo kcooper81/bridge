@@ -49,11 +49,13 @@ export default defineContentScript({
       if (area !== "local" || !changes.accessToken) return;
       if (changes.accessToken.newValue) {
         _isAuthenticated = true;
+        hideSessionLossBanner();
         refreshShieldStatus();
       } else if (!changes.accessToken.newValue && changes.accessToken.oldValue) {
         _isAuthenticated = false;
         _isProtected = false;
         _ruleCount = 0;
+        showSessionLossBanner();
         updateShieldState();
       }
     });
@@ -89,12 +91,20 @@ export default defineContentScript({
 
     window.addEventListener("popstate", () => onUrlChange());
 
-    // Periodic refresh every 5 minutes
+    // Periodic refresh every 60 seconds (fast enough to catch rule changes)
     setInterval(() => {
       if (_isAuthenticated && _isOnline) {
         refreshShieldStatus();
       }
-    }, 5 * 60 * 1000);
+    }, 60 * 1000);
+
+    // ─── Proactive Context Invalidation Check ───
+    setInterval(() => {
+      browser.runtime.sendMessage({ type: "PING" }).catch(() => {
+        // "Extension context invalidated" — show reload banner immediately
+        showReloadBanner();
+      });
+    }, 30 * 1000);
 
     // ─── Message Handler ───
     browser.runtime.onMessage.addListener(
@@ -142,9 +152,16 @@ export default defineContentScript({
             e.stopImmediatePropagation();
             console.log("[TP-DLP] Intercepted Enter, scanning...");
 
-            // Fix 5: If offline, skip scan and show failure banner immediately
+            // Fail-closed: if not authenticated, block immediately
+            if (!_isAuthenticated) {
+              showSessionLossBanner();
+              showScanBlockOverlay("no-auth");
+              return;
+            }
+
+            // Fail-closed: if offline, block immediately
             if (!_isOnline) {
-              showScanFailureBanner(target);
+              showScanBlockOverlay("offline");
               return;
             }
 
@@ -166,8 +183,10 @@ export default defineContentScript({
                 logInteraction(text, "warned", result.violations);
                 pulseShield("warn");
               } else if (result === null) {
-                // Fix 1: Scan returned null (no auth, API error) — show failure banner
-                showScanFailureBanner(target);
+                // Fail-closed: scan returned null — determine reason and block
+                const reason = _isAuthenticated ? "api-error" : "no-auth";
+                showScanBlockOverlay(reason);
+                logInteraction(text, "blocked", [{ ruleName: "Scan failure", category: "system", matchedText: "", action: "block" as const }]);
                 return;
               } else {
                 logInteraction(text, "sent", []);
@@ -176,9 +195,10 @@ export default defineContentScript({
               // Re-dispatch the Enter key to actually send the message
               reDispatchEnter(target);
             }).catch(() => {
-              // Fix 1: Scan failed (network error) — show failure banner, don't auto-send
+              // Fail-closed: scan failed (network error) — block, don't auto-send
               updateShieldScanning(false);
-              showScanFailureBanner(target);
+              showScanBlockOverlay("api-error");
+              logInteraction(text, "blocked", [{ ruleName: "Scan failure", category: "system", matchedText: "", action: "block" as const }]);
             });
           }
         }
@@ -540,39 +560,102 @@ function showWarningBanner(violations: ScanResult["violations"]) {
   setTimeout(() => banner.remove(), 8000);
 }
 
-// Fix 1: Scan failure banner with Send Anyway / Cancel buttons
-function showScanFailureBanner(target: HTMLElement) {
-  // Fix 4: If context invalidated, show reload banner instead
-  if (isContextInvalidated()) {
+// Fail-closed: scan block overlay — no bypass path
+type ScanBlockReason = "no-auth" | "api-error" | "offline" | "context-invalidated";
+
+function showScanBlockOverlay(reason: ScanBlockReason) {
+  // Context invalidated delegates to the existing reload banner
+  if (reason === "context-invalidated" || isContextInvalidated()) {
     showReloadBanner();
     return;
   }
 
-  document.getElementById("tp-scan-fail-banner")?.remove();
+  document.getElementById("tp-scan-block-overlay")?.remove();
+
+  const config: Record<Exclude<ScanBlockReason, "context-invalidated">, { icon: string; heading: string; detail: string; btnLabel: string; btnAction: "sign-in" | "dismiss" }> = {
+    "no-auth": {
+      icon: "&#x1f512;",
+      heading: "Sign in required to send messages",
+      detail: "TeamPrompt must verify your message before sending. Sign in to restore protection.",
+      btnLabel: "Sign In",
+      btnAction: "sign-in",
+    },
+    "api-error": {
+      icon: "&#x1f6d1;",
+      heading: "Message blocked \u2014 scan failed",
+      detail: "TeamPrompt could not verify this message is safe to send. Press Enter to retry.",
+      btnLabel: "Retry Scan",
+      btnAction: "dismiss",
+    },
+    "offline": {
+      icon: "&#x1f4e1;",
+      heading: "Message blocked \u2014 you are offline",
+      detail: "TeamPrompt requires a network connection to scan messages. Reconnect and try again.",
+      btnLabel: "Got it",
+      btnAction: "dismiss",
+    },
+  };
+
+  const c = config[reason];
+
+  const overlay = document.createElement("div");
+  overlay.id = "tp-scan-block-overlay";
+  overlay.className = "tp-block-overlay";
+  overlay.innerHTML = `
+    <div class="tp-block-card tp-scan-block-card">
+      <div class="tp-block-icon">${c.icon}</div>
+      <h3>${c.heading}</h3>
+      <p>${c.detail}</p>
+      <div class="tp-scan-block-actions">
+        <button id="tp-scan-block-primary" class="tp-block-btn">${c.btnLabel}</button>
+        <button id="tp-scan-block-close" class="tp-block-btn tp-block-btn-secondary">Close</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  document.getElementById("tp-scan-block-primary")!.addEventListener("click", () => {
+    overlay.remove();
+    if (c.btnAction === "sign-in") {
+      browser.runtime.sendMessage({ type: "OPEN_LOGIN" }).catch(() => {});
+    }
+    // "dismiss" just closes — user presses Enter again for a fresh scan
+  });
+
+  document.getElementById("tp-scan-block-close")!.addEventListener("click", () => {
+    overlay.remove();
+  });
+}
+
+// ─── Session Loss Banner ───
+
+function showSessionLossBanner() {
+  if (document.getElementById("tp-session-banner")) return;
 
   const banner = document.createElement("div");
-  banner.id = "tp-scan-fail-banner";
-  banner.className = "tp-scan-fail-banner";
+  banner.id = "tp-session-banner";
+  banner.className = "tp-session-banner";
   banner.innerHTML = `
-    <span class="tp-scan-fail-text">TeamPrompt could not scan this message${!_isOnline ? " (offline)" : ""}. Send unscanned?</span>
-    <div class="tp-scan-fail-actions">
-      <button id="tp-scan-fail-send" class="tp-scan-fail-btn tp-scan-fail-send">Send Anyway</button>
-      <button id="tp-scan-fail-cancel" class="tp-scan-fail-btn tp-scan-fail-cancel">Cancel</button>
+    <span class="tp-session-banner-text">TeamPrompt protection paused \u2014 Sign in to restore guardrails</span>
+    <div class="tp-session-banner-actions">
+      <button id="tp-session-banner-signin" class="tp-session-banner-btn">Sign In</button>
+      <button id="tp-session-banner-dismiss" class="tp-session-banner-btn tp-session-banner-btn-dismiss">Dismiss</button>
     </div>
   `;
   document.body.appendChild(banner);
 
-  document.getElementById("tp-scan-fail-send")!.addEventListener("click", () => {
+  document.getElementById("tp-session-banner-signin")!.addEventListener("click", () => {
     banner.remove();
-    reDispatchEnter(target);
+    browser.runtime.sendMessage({ type: "OPEN_LOGIN" }).catch(() => {});
   });
 
-  document.getElementById("tp-scan-fail-cancel")!.addEventListener("click", () => {
+  document.getElementById("tp-session-banner-dismiss")!.addEventListener("click", () => {
     banner.remove();
   });
+}
 
-  // Auto-dismiss after 15 seconds (treated as cancel)
-  setTimeout(() => banner.remove(), 15000);
+function hideSessionLossBanner() {
+  document.getElementById("tp-session-banner")?.remove();
 }
 
 // Fix 4: Reload banner for context-invalidated state

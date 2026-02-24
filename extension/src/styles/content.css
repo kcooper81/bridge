@@ -367,63 +367,94 @@
   background: #854d0e;
 }
 
-/* ─── Scan Failure Banner (Fix 1) ─── */
+/* ─── Scan Block Overlay (Fail-Closed) ─── */
 
-.tp-scan-fail-banner {
-  position: fixed;
-  top: 12px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #1c1c1e;
-  color: #e4e4e7;
+.tp-scan-block-card {
+  border-color: #f59e0b;
+}
+
+.tp-scan-block-card h3 {
+  color: #fbbf24;
+}
+
+.tp-scan-block-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.tp-block-btn-secondary {
+  padding: 8px 20px;
+  background: none;
+  color: #a1a1aa;
   border: 1px solid #3f3f46;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.tp-block-btn-secondary:hover {
+  background: #27272a;
+  color: #e4e4e7;
+}
+
+/* ─── Session Loss Banner ─── */
+
+.tp-session-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: #7f1d1d;
+  color: #fecaca;
   padding: 10px 16px;
-  border-radius: 10px;
   font-size: 13px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  z-index: 999999;
+  z-index: 999998;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 12px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-  animation: tp-slide-down 0.2s ease-out;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  animation: tp-session-banner-slide 0.3s ease-out;
 }
 
-.tp-scan-fail-text {
-  flex: 1;
+@keyframes tp-session-banner-slide {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(0); }
 }
 
-.tp-scan-fail-actions {
+.tp-session-banner-text {
+  font-weight: 600;
+}
+
+.tp-session-banner-actions {
   display: flex;
   gap: 8px;
   flex-shrink: 0;
 }
 
-.tp-scan-fail-btn {
-  padding: 5px 12px;
+.tp-session-banner-btn {
+  padding: 5px 14px;
   border-radius: 6px;
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   border: none;
+  background: #dc2626;
+  color: white;
+}
+.tp-session-banner-btn:hover {
+  background: #b91c1c;
 }
 
-.tp-scan-fail-send {
-  background: #f59e0b;
-  color: #18181b;
-}
-.tp-scan-fail-send:hover {
-  background: #eab308;
-}
-
-.tp-scan-fail-cancel {
+.tp-session-banner-btn-dismiss {
   background: none;
-  border: 1px solid #3f3f46;
-  color: #a1a1aa;
+  border: 1px solid rgba(254, 202, 202, 0.3);
+  color: #fecaca;
 }
-.tp-scan-fail-cancel:hover {
-  background: #27272a;
-  color: #e4e4e7;
+.tp-session-banner-btn-dismiss:hover {
+  background: rgba(255, 255, 255, 0.1);
 }
 
 /* ─── Reload Banner (Fix 4) ─── */

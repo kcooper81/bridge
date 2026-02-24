@@ -72,6 +72,9 @@ export default defineBackground(() => {
         // Fix 3: Content scripts can't use browser.tabs.create, so handle here
         browser.tabs.create({ url: CONFIG.SITE_URL + "/extension/welcome?mode=signin" });
         sendResponse({ success: true });
+      } else if (message.type === "PING") {
+        // Content script liveness check — if this fails, context is invalidated
+        sendResponse({ ok: true });
       } else if (message.type === "API_FETCH") {
         // Proxy API calls from content scripts through the background service
         // worker so they use the extension origin instead of the page origin.
@@ -125,7 +128,7 @@ export default defineBackground(() => {
   }
 
   // ─── Token Refresh Alarm ───
-  browser.alarms.create("refresh-token", { periodInMinutes: 30 });
+  browser.alarms.create("refresh-token", { periodInMinutes: 10 });
 
   browser.alarms.onAlarm.addListener(async (alarm) => {
     if (alarm.name === "refresh-token") {

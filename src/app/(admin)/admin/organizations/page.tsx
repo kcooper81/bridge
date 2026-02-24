@@ -18,6 +18,7 @@ import {
   Download,
   ChevronLeft,
   ChevronRight,
+  ArrowUpDown,
 } from "lucide-react";
 
 interface OrgRow {
@@ -27,30 +28,62 @@ interface OrgRow {
   is_suspended: boolean;
   created_at: string;
   plan: string;
+  status: string;
+  seats: number;
   memberCount: number;
   promptCount: number;
+  mrr: number;
 }
 
 const PAGE_SIZE = 20;
 const PLAN_FILTERS = ["all", "free", "pro", "team", "business"] as const;
+const STATUS_FILTERS = ["all", "active", "trialing", "past_due", "canceled", "paused"] as const;
+
+const PLAN_PRICES: Record<string, number> = { free: 0, pro: 9, team: 7, business: 12 };
+
+const STATUS_COLORS: Record<string, string> = {
+  active: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
+  trialing: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
+  past_due: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
+  canceled: "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300",
+  paused: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",
+};
+
+type SortKey = "name" | "plan" | "memberCount" | "promptCount" | "created_at" | "mrr";
 
 export default function OrganizationsPage() {
   const [orgs, setOrgs] = useState<OrgRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [planFilter, setPlanFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [page, setPage] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
+  const [sortKey, setSortKey] = useState<SortKey>("created_at");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
 
   useEffect(() => {
     loadOrgs();
-  }, [page, planFilter]);
+  }, [page, planFilter, statusFilter]);
+
+  const handleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
+  };
+
+  // Re-sort when sort changes (without refetching)
+  useEffect(() => {
+    if (!loading) loadOrgs();
+  }, [sortKey, sortDir]);
 
   const loadOrgs = async () => {
     setLoading(true);
     const supabase = createClient();
 
-    // Get all orgs
     const { data: allOrgs, error } = await supabase
       .from("organizations")
       .select("id, name, domain, is_suspended, created_at")
@@ -61,15 +94,17 @@ export default function OrganizationsPage() {
       return;
     }
 
-    // Get subscriptions, member counts, prompt counts
     const [subsResult, membersResult, promptsResult] = await Promise.all([
-      supabase.from("subscriptions").select("org_id, plan"),
+      supabase.from("subscriptions").select("org_id, plan, status, seats"),
       supabase.from("profiles").select("org_id"),
       supabase.from("prompts").select("org_id"),
     ]);
 
     const subMap = new Map(
-      (subsResult.data || []).map((s: { org_id: string; plan: string }) => [s.org_id, s.plan])
+      (subsResult.data || []).map((s: { org_id: string; plan: string; status: string; seats: number }) => [
+        s.org_id,
+        { plan: s.plan, status: s.status, seats: s.seats },
+      ])
     );
     const memberCounts = new Map<string, number>();
     (membersResult.data || []).forEach((m: { org_id: string }) => {
@@ -80,20 +115,33 @@ export default function OrganizationsPage() {
       promptCounts.set(p.org_id, (promptCounts.get(p.org_id) || 0) + 1);
     });
 
-    let rows: OrgRow[] = allOrgs.map((o) => ({
-      ...o,
-      is_suspended: o.is_suspended || false,
-      plan: subMap.get(o.id) || "free",
-      memberCount: memberCounts.get(o.id) || 0,
-      promptCount: promptCounts.get(o.id) || 0,
-    }));
+    let rows: OrgRow[] = allOrgs.map((o) => {
+      const sub = subMap.get(o.id);
+      const plan = sub?.plan || "free";
+      const seats = sub?.seats || 1;
+      return {
+        ...o,
+        is_suspended: o.is_suspended || false,
+        plan,
+        status: sub?.status || "active",
+        seats,
+        memberCount: memberCounts.get(o.id) || 0,
+        promptCount: promptCounts.get(o.id) || 0,
+        mrr: (PLAN_PRICES[plan] || 0) * seats,
+      };
+    });
 
-    // Apply filters
+    // Apply plan filter
     if (planFilter !== "all") {
       rows = rows.filter((r) => r.plan === planFilter);
     }
 
-    // Apply search (client-side for simplicity)
+    // Apply status filter
+    if (statusFilter !== "all") {
+      rows = rows.filter((r) => r.status === statusFilter);
+    }
+
+    // Apply search
     if (search.trim()) {
       const q = search.toLowerCase();
       rows = rows.filter(
@@ -103,9 +151,33 @@ export default function OrganizationsPage() {
       );
     }
 
-    setTotalCount(rows.length);
+    // Sort
+    rows.sort((a, b) => {
+      let cmp = 0;
+      switch (sortKey) {
+        case "name":
+          cmp = a.name.localeCompare(b.name);
+          break;
+        case "plan":
+          cmp = a.plan.localeCompare(b.plan);
+          break;
+        case "memberCount":
+          cmp = a.memberCount - b.memberCount;
+          break;
+        case "promptCount":
+          cmp = a.promptCount - b.promptCount;
+          break;
+        case "mrr":
+          cmp = a.mrr - b.mrr;
+          break;
+        case "created_at":
+          cmp = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+          break;
+      }
+      return sortDir === "asc" ? cmp : -cmp;
+    });
 
-    // Paginate
+    setTotalCount(rows.length);
     setOrgs(rows.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE));
     setLoading(false);
   };
@@ -116,10 +188,10 @@ export default function OrganizationsPage() {
   };
 
   const exportCsv = () => {
-    const header = "Name,Domain,Plan,Members,Prompts,Created,Suspended";
+    const header = "Name,Domain,Plan,Status,Members,Prompts,MRR,Created,Suspended";
     const csvRows = orgs.map(
       (o) =>
-        `"${o.name}","${o.domain || ""}","${o.plan}",${o.memberCount},${o.promptCount},"${o.created_at}",${o.is_suspended}`
+        `"${o.name}","${o.domain || ""}","${o.plan}","${o.status}",${o.memberCount},${o.promptCount},${o.mrr.toFixed(2)},"${o.created_at}",${o.is_suspended}`
     );
     const csv = [header, ...csvRows].join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
@@ -149,30 +221,49 @@ export default function OrganizationsPage() {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search by name or domain..."
-            className="pl-9"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-          />
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search by name or domain..."
+              className="pl-9"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+            />
+          </div>
+          <div className="flex gap-1 flex-wrap">
+            {PLAN_FILTERS.map((f) => (
+              <Button
+                key={f}
+                variant={planFilter === f ? "default" : "outline"}
+                size="sm"
+                onClick={() => {
+                  setPlanFilter(f);
+                  setPage(0);
+                }}
+                className="capitalize"
+              >
+                {f}
+              </Button>
+            ))}
+          </div>
         </div>
-        <div className="flex gap-1">
-          {PLAN_FILTERS.map((f) => (
+        <div className="flex gap-1 flex-wrap">
+          <span className="text-sm text-muted-foreground self-center mr-1">Status:</span>
+          {STATUS_FILTERS.map((f) => (
             <Button
               key={f}
-              variant={planFilter === f ? "default" : "outline"}
+              variant={statusFilter === f ? "default" : "outline"}
               size="sm"
               onClick={() => {
-                setPlanFilter(f);
+                setStatusFilter(f);
                 setPage(0);
               }}
               className="capitalize"
             >
-              {f}
+              {f === "past_due" ? "Past Due" : f}
             </Button>
           ))}
         </div>
@@ -195,12 +286,38 @@ export default function OrganizationsPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b bg-muted/50">
-                    <th className="text-left p-3 font-medium">Name</th>
+                    <th className="text-left p-3 font-medium">
+                      <button className="flex items-center gap-1 hover:text-foreground" onClick={() => handleSort("name")}>
+                        Name <ArrowUpDown className="h-3 w-3" />
+                      </button>
+                    </th>
                     <th className="text-left p-3 font-medium hidden md:table-cell">Domain</th>
-                    <th className="text-left p-3 font-medium">Plan</th>
-                    <th className="text-right p-3 font-medium hidden sm:table-cell">Members</th>
-                    <th className="text-right p-3 font-medium hidden sm:table-cell">Prompts</th>
-                    <th className="text-left p-3 font-medium hidden lg:table-cell">Created</th>
+                    <th className="text-left p-3 font-medium">
+                      <button className="flex items-center gap-1 hover:text-foreground" onClick={() => handleSort("plan")}>
+                        Plan <ArrowUpDown className="h-3 w-3" />
+                      </button>
+                    </th>
+                    <th className="text-left p-3 font-medium">Status</th>
+                    <th className="text-right p-3 font-medium hidden sm:table-cell">
+                      <button className="flex items-center gap-1 hover:text-foreground ml-auto" onClick={() => handleSort("memberCount")}>
+                        Members <ArrowUpDown className="h-3 w-3" />
+                      </button>
+                    </th>
+                    <th className="text-right p-3 font-medium hidden sm:table-cell">
+                      <button className="flex items-center gap-1 hover:text-foreground ml-auto" onClick={() => handleSort("promptCount")}>
+                        Prompts <ArrowUpDown className="h-3 w-3" />
+                      </button>
+                    </th>
+                    <th className="text-right p-3 font-medium hidden md:table-cell">
+                      <button className="flex items-center gap-1 hover:text-foreground ml-auto" onClick={() => handleSort("mrr")}>
+                        MRR <ArrowUpDown className="h-3 w-3" />
+                      </button>
+                    </th>
+                    <th className="text-left p-3 font-medium hidden lg:table-cell">
+                      <button className="flex items-center gap-1 hover:text-foreground" onClick={() => handleSort("created_at")}>
+                        Created <ArrowUpDown className="h-3 w-3" />
+                      </button>
+                    </th>
                     <th className="text-right p-3 font-medium">Actions</th>
                   </tr>
                 </thead>
@@ -221,18 +338,28 @@ export default function OrganizationsPage() {
                         </div>
                       </td>
                       <td className="p-3 text-muted-foreground hidden md:table-cell">
-                        {org.domain || "—"}
+                        {org.domain || "\u2014"}
                       </td>
                       <td className="p-3">
                         <Badge variant="outline" className="capitalize">
                           {org.plan}
                         </Badge>
                       </td>
+                      <td className="p-3">
+                        <span
+                          className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_COLORS[org.status] || ""}`}
+                        >
+                          {org.status === "past_due" ? "past due" : org.status}
+                        </span>
+                      </td>
                       <td className="p-3 text-right hidden sm:table-cell">
                         {org.memberCount}
                       </td>
                       <td className="p-3 text-right hidden sm:table-cell">
                         {org.promptCount}
+                      </td>
+                      <td className="p-3 text-right hidden md:table-cell">
+                        ${org.mrr.toFixed(0)}
                       </td>
                       <td className="p-3 text-muted-foreground hidden lg:table-cell">
                         {new Date(org.created_at).toLocaleDateString()}

@@ -68,7 +68,6 @@ import { trackPurchase, trackPromptUsed } from "@/lib/analytics";
 import type { Prompt, PromptStatus } from "@/lib/types";
 import { PageSkeleton } from "@/components/dashboard/skeleton-loader";
 import { NoOrgBanner } from "@/components/dashboard/no-org-banner";
-import { GettingStarted } from "@/components/dashboard/getting-started";
 import { UpgradePrompt, LimitNudge } from "@/components/upgrade";
 import { ImportExportModal } from "@/components/dashboard/import-export-modal";
 
@@ -320,8 +319,6 @@ export default function VaultPage() {
           </div>
         }
       />
-
-      <GettingStarted />
 
       {!checkLimit("create_prompt", prompts.length) && (
         <UpgradePrompt feature="create_prompt" current={prompts.length} max={planLimits.max_prompts} className="mb-6" />

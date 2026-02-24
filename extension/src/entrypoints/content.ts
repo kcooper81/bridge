@@ -12,6 +12,9 @@ import "../styles/content.css";
 // Flag to allow re-dispatched Enter key to pass through without re-scanning
 let _tpAllowNext = false;
 
+// Track last blocked text to prevent double-Enter bypass
+let _lastBlockedText: string | null = null;
+
 // Track shield indicator state
 let _shieldEl: HTMLElement | null = null;
 let _shieldStatusEl: HTMLElement | null = null;
@@ -149,6 +152,16 @@ export default defineContentScript({
               return;
             }
 
+            // Block repeat submissions of previously blocked text
+            if (_lastBlockedText !== null && text.trim() === _lastBlockedText.trim()) {
+              e.preventDefault();
+              e.stopPropagation();
+              e.stopImmediatePropagation();
+              console.log("[TP-DLP] Repeat blocked text detected, blocking again");
+              showBlockOverlay([{ ruleName: "Previously blocked", category: "dlp", matchedText: "Same content was blocked moments ago", action: "block" as const }]);
+              return;
+            }
+
             // ALWAYS block synchronously, then scan async
             e.preventDefault();
             e.stopPropagation();
@@ -175,6 +188,7 @@ export default defineContentScript({
               console.log("[TP-DLP] Scan result:", JSON.stringify(result));
 
               if (result?.action === "block") {
+                _lastBlockedText = text;
                 showBlockOverlay(result.violations);
                 logInteraction(text, "blocked", result.violations);
                 pulseShield("block");
@@ -208,6 +222,9 @@ export default defineContentScript({
       },
       true // capture phase — fires before AI client handlers
     );
+
+    // Clear blocked text tracking when user edits input
+    document.addEventListener("input", () => { _lastBlockedText = null; }, true);
   },
 });
 
@@ -293,6 +310,8 @@ function updateShieldState() {
 
 function reDispatchEnter(target: HTMLElement) {
   _tpAllowNext = true;
+  // Safety net: reset flag if synthetic event doesn't trigger our capture handler
+  setTimeout(() => { _tpAllowNext = false; }, 100);
   const syntheticDown = new KeyboardEvent("keydown", {
     key: "Enter",
     code: "Enter",

@@ -31,6 +31,7 @@ import {
   CreditCard,
   FolderOpen,
   HelpCircle,
+  Home,
   Library,
   LogOut,
   Menu,
@@ -52,27 +53,27 @@ interface NavItem {
 
 const navSections: { title: string; items: NavItem[] }[] = [
   {
-    title: "Setup",
-    items: [
-      { label: "Settings", href: "/settings", icon: Settings },
-      { label: "Team", href: "/team", icon: Users, roles: ["admin", "manager"] },
-      { label: "Guardrails", href: "/guardrails", icon: Shield, roles: ["admin", "manager"] },
-      { label: "Guidelines", href: "/guidelines", icon: BookOpen, roles: ["admin", "manager"] },
-    ],
-  },
-  {
-    title: "Content",
+    title: "Workspace",
     items: [
       { label: "Prompts", href: "/vault", icon: Archive },
       { label: "Collections", href: "/collections", icon: FolderOpen },
       { label: "Library", href: "/library", icon: Library },
+      { label: "Guidelines", href: "/guidelines", icon: BookOpen, roles: ["admin", "manager"] },
     ],
   },
   {
-    title: "Insights",
+    title: "Intelligence",
     items: [
       { label: "Analytics", href: "/analytics", icon: BarChart3 },
       { label: "Activity Log", href: "/activity", icon: Activity, roles: ["admin", "manager"] },
+      { label: "Guardrails", href: "/guardrails", icon: Shield, roles: ["admin", "manager"] },
+    ],
+  },
+  {
+    title: "Manage",
+    items: [
+      { label: "Settings", href: "/settings", icon: Settings },
+      { label: "Team", href: "/team", icon: Users, roles: ["admin", "manager"] },
       { label: "Notifications", href: "/notifications", icon: Bell },
     ],
   },
@@ -107,6 +108,27 @@ function NavContent({ onItemClick }: { onItemClick?: () => void }) {
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto scrollbar-thin px-3 py-5 space-y-6">
+        {/* Home link */}
+        <div className="mb-4">
+          <Link
+            href="/"
+            onClick={onItemClick}
+            className={cn(
+              "relative flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium",
+              "transition-all duration-200 ease-spring",
+              pathname === "/"
+                ? "bg-primary/10 text-primary shadow-sm"
+                : "text-muted-foreground hover:bg-muted/50 hover:text-foreground hover:scale-[1.02]"
+            )}
+          >
+            {pathname === "/" && (
+              <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 rounded-r-full bg-primary shadow-glow-sm" />
+            )}
+            <Home className={cn("h-[18px] w-[18px]", pathname === "/" && "drop-shadow-sm")} />
+            Home
+          </Link>
+        </div>
+
         {navSections.map((section) => {
           const visibleItems = section.items.filter(
             (item) =>
@@ -116,7 +138,7 @@ function NavContent({ onItemClick }: { onItemClick?: () => void }) {
 
           return (
             <div key={section.title}>
-              <p className="mb-3 px-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+              <p className="mb-3 px-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/70">
                 {section.title}
               </p>
               <div className="space-y-1">
@@ -132,7 +154,7 @@ function NavContent({ onItemClick }: { onItemClick?: () => void }) {
                         "transition-all duration-200 ease-spring",
                         isActive
                           ? "bg-primary/10 text-primary shadow-sm"
-                          : "text-foreground/70 hover:bg-muted/50 hover:text-foreground hover:scale-[1.02]"
+                          : "text-muted-foreground hover:bg-muted/50 hover:text-foreground hover:scale-[1.02]"
                       )}
                     >
                       {isActive && (

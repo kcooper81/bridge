@@ -21,7 +21,8 @@ export async function GET(request: NextRequest) {
       error: authError,
     } = await db.auth.getUser(token);
     if (authError || !user) {
-      return withCors(NextResponse.json({ error: "Unauthorized" }, { status: 401 }), request);
+      console.error("Extension auth failed:", authError?.message, authError?.status);
+      return withCors(NextResponse.json({ error: "Unauthorized", detail: authError?.message }, { status: 401 }), request);
     }
 
     const extVersion = request.headers.get("x-extension-version");

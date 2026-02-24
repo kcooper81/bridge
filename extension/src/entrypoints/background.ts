@@ -67,12 +67,27 @@ export default defineBackground(() => {
           headers?: Record<string, string>;
           body?: string;
         };
-        fetch(msg.url, {
-          method: msg.method || "GET",
-          headers: msg.headers || {},
-          body: msg.body || undefined,
-        })
+        const doFetch = (headers: Record<string, string>) =>
+          fetch(msg.url, {
+            method: msg.method || "GET",
+            headers,
+            body: msg.body || undefined,
+          });
+
+        doFetch(msg.headers || {})
           .then(async (res) => {
+            if (res.status === 401) {
+              // Token may be expired — refresh and retry once
+              await refreshSession();
+              const { accessToken } = await browser.storage.local.get(["accessToken"]);
+              if (accessToken) {
+                const retryHeaders = { ...msg.headers, Authorization: `Bearer ${accessToken}` };
+                const retry = await doFetch(retryHeaders);
+                const data = await retry.json().catch(() => null);
+                sendResponse({ ok: retry.ok, status: retry.status, data });
+                return;
+              }
+            }
             const data = await res.json().catch(() => null);
             sendResponse({ ok: res.ok, status: res.status, data });
           })

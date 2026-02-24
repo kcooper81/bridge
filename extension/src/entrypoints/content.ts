@@ -158,7 +158,7 @@ export default defineContentScript({
               e.stopPropagation();
               e.stopImmediatePropagation();
               console.log("[TP-DLP] Repeat blocked text detected, blocking again");
-              showBlockOverlay([{ ruleName: "Previously blocked", category: "dlp", matchedText: "Same content was blocked moments ago", action: "block" as const }]);
+              showBlockOverlay([{ ruleId: "repeat-block", ruleName: "Previously blocked", category: "dlp", severity: "block", matchedText: "Same content was blocked moments ago" }]);
               return;
             }
 

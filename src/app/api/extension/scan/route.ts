@@ -56,14 +56,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Fetch active security rules for the org
-    const { data: rules } = await db
-      .from("security_rules")
-      .select("*")
-      .eq("org_id", profile.org_id)
-      .eq("is_active", true);
+    // Fetch active security rules AND sensitive terms for the org
+    const [rulesResult, termsResult] = await Promise.all([
+      db
+        .from("security_rules")
+        .select("*")
+        .eq("org_id", profile.org_id)
+        .eq("is_active", true),
+      db
+        .from("sensitive_terms")
+        .select("*")
+        .eq("org_id", profile.org_id)
+        .eq("is_active", true),
+    ]);
 
-    const activeRules = rules || [];
+    const activeRules = rulesResult.data || [];
+    const activeTerms = termsResult.data || [];
     const violations: {
       ruleId: string;
       ruleName: string;
@@ -72,6 +80,7 @@ export async function POST(request: NextRequest) {
       matchedText: string;
     }[] = [];
 
+    // Check security rules
     for (const rule of activeRules) {
       const matched = matchPattern(content, rule.pattern, rule.pattern_type);
       if (matched) {
@@ -83,13 +92,35 @@ export async function POST(request: NextRequest) {
           matchedText: redactMatch(matched),
         });
 
-        // Log the violation
         await db.from("security_violations").insert({
           org_id: profile.org_id,
           rule_id: rule.id,
           matched_text: redactMatch(matched),
           user_id: user.id,
           action_taken: rule.severity === "block" ? "blocked" : "overridden",
+        });
+      }
+    }
+
+    // Check sensitive terms
+    for (const term of activeTerms) {
+      const patternType = term.term_type === "keyword" ? "exact" : term.term_type;
+      const matched = matchPattern(content, term.term, patternType);
+      if (matched) {
+        violations.push({
+          ruleId: term.id,
+          ruleName: `Sensitive term: ${term.term}`,
+          category: term.category,
+          severity: term.severity,
+          matchedText: redactMatch(matched),
+        });
+
+        await db.from("security_violations").insert({
+          org_id: profile.org_id,
+          rule_id: null,
+          matched_text: redactMatch(matched),
+          user_id: user.id,
+          action_taken: term.severity === "block" ? "blocked" : "overridden",
         });
       }
     }

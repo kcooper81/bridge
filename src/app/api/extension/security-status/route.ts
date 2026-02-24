@@ -45,10 +45,17 @@ export async function GET(request: NextRequest) {
     // Fetch in parallel: active rules count, weekly violations, recent violations
     const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
-    const [rulesResult, weeklyResult, recentResult] = await Promise.all([
+    const [rulesResult, termsResult, weeklyResult, recentResult] = await Promise.all([
       // Active security rules count
       db
         .from("security_rules")
+        .select("id", { count: "exact", head: true })
+        .eq("org_id", orgId)
+        .eq("is_active", true),
+
+      // Active sensitive terms count
+      db
+        .from("sensitive_terms")
         .select("id", { count: "exact", head: true })
         .eq("org_id", orgId)
         .eq("is_active", true),
@@ -69,7 +76,7 @@ export async function GET(request: NextRequest) {
         .limit(5),
     ]);
 
-    const activeRuleCount = rulesResult.count ?? 0;
+    const activeRuleCount = (rulesResult.count ?? 0) + (termsResult.count ?? 0);
 
     const weeklyViolations = weeklyResult.data || [];
     const blockedCount = weeklyViolations.filter((v) => v.action_taken === "blocked").length;

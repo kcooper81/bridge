@@ -5,7 +5,7 @@
 .tp-shield {
   position: fixed;
   bottom: 20px;
-  left: 20px;
+  right: 20px;
   display: flex;
   align-items: center;
   gap: 8px;

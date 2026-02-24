@@ -2,6 +2,7 @@
 
 import { CONFIG, API_ENDPOINTS, apiHeaders } from "./config";
 import { getSession } from "./auth";
+import { apiFetch } from "./api";
 
 export interface Prompt {
   id: string;
@@ -28,7 +29,7 @@ export async function fetchPrompts(opts?: {
   if (opts?.query) params.set("q", opts.query);
   if (opts?.templatesOnly) params.set("templates", "true");
 
-  const res = await fetch(
+  const res = await apiFetch(
     `${CONFIG.SITE_URL}${API_ENDPOINTS.prompts}?${params}`,
     { headers: apiHeaders(session.accessToken) }
   );
@@ -41,8 +42,8 @@ export async function fetchPrompts(opts?: {
     return [];
   }
 
-  const data = await res.json();
-  return data.prompts || [];
+  const data = res.data as { prompts?: Prompt[] };
+  return data?.prompts || [];
 }
 
 export function fillTemplate(

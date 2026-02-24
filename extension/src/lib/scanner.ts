@@ -2,6 +2,7 @@
 
 import { CONFIG, API_ENDPOINTS, apiHeaders } from "./config";
 import { getSession } from "./auth";
+import { apiFetch } from "./api";
 
 export interface ScanResult {
   passed: boolean;
@@ -20,14 +21,14 @@ export async function scanOutbound(text: string): Promise<ScanResult | null> {
   if (!session) return null;
 
   try {
-    const res = await fetch(`${CONFIG.SITE_URL}${API_ENDPOINTS.scan}`, {
+    const res = await apiFetch(`${CONFIG.SITE_URL}${API_ENDPOINTS.scan}`, {
       method: "POST",
       headers: apiHeaders(session.accessToken),
       body: JSON.stringify({ content: text }),
     });
 
     if (!res.ok) return null;
-    return (await res.json()) as ScanResult;
+    return res.data as ScanResult;
   } catch {
     return null;
   }

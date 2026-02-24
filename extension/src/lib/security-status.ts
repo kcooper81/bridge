@@ -2,6 +2,7 @@
 
 import { CONFIG, API_ENDPOINTS, apiHeaders } from "./config";
 import { getSession } from "./auth";
+import { apiFetch } from "./api";
 
 export interface SecurityViolation {
   id: string;
@@ -29,7 +30,7 @@ export async function fetchSecurityStatus(): Promise<SecurityStatus | null> {
   if (!session) return null;
 
   try {
-    const res = await fetch(
+    const res = await apiFetch(
       `${CONFIG.SITE_URL}${API_ENDPOINTS.securityStatus}`,
       {
         method: "GET",
@@ -38,7 +39,7 @@ export async function fetchSecurityStatus(): Promise<SecurityStatus | null> {
     );
 
     if (!res.ok) return null;
-    return (await res.json()) as SecurityStatus;
+    return res.data as SecurityStatus;
   } catch {
     return null;
   }
@@ -49,7 +50,7 @@ export async function enableDefaultRules(): Promise<{ installed: boolean; ruleCo
   if (!session) return null;
 
   try {
-    const res = await fetch(
+    const res = await apiFetch(
       `${CONFIG.SITE_URL}${API_ENDPOINTS.enableShield}`,
       {
         method: "POST",
@@ -58,7 +59,7 @@ export async function enableDefaultRules(): Promise<{ installed: boolean; ruleCo
     );
 
     if (!res.ok) return null;
-    return (await res.json()) as { installed: boolean; ruleCount: number };
+    return res.data as { installed: boolean; ruleCount: number };
   } catch {
     return null;
   }

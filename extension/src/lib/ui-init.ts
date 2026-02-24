@@ -7,6 +7,7 @@ import { fetchPrompts, fillTemplate, type Prompt } from "./prompts";
 import { fetchSecurityStatus, enableDefaultRules, type SecurityStatus } from "./security-status";
 import { CONFIG, API_ENDPOINTS, apiHeaders } from "./config";
 import { detectAiTool } from "./ai-tools";
+import { apiFetch } from "./api";
 
 export interface UIElements {
   loginView: HTMLElement;
@@ -374,7 +375,7 @@ async function logConversation(promptText: string, method: string) {
     });
     const aiTool = detectAiTool(tab?.url || "");
 
-    await fetch(`${CONFIG.SITE_URL}${API_ENDPOINTS.log}`, {
+    await apiFetch(`${CONFIG.SITE_URL}${API_ENDPOINTS.log}`, {
       method: "POST",
       headers: apiHeaders(session.accessToken),
       body: JSON.stringify({

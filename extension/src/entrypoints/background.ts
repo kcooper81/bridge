@@ -58,6 +58,28 @@ export default defineBackground(() => {
             });
         }
         sendResponse({ success: true });
+      } else if (message.type === "API_FETCH") {
+        // Proxy API calls from content scripts through the background service
+        // worker so they use the extension origin instead of the page origin.
+        const msg = message as unknown as {
+          url: string;
+          method?: string;
+          headers?: Record<string, string>;
+          body?: string;
+        };
+        fetch(msg.url, {
+          method: msg.method || "GET",
+          headers: msg.headers || {},
+          body: msg.body || undefined,
+        })
+          .then(async (res) => {
+            const data = await res.json().catch(() => null);
+            sendResponse({ ok: res.ok, status: res.status, data });
+          })
+          .catch(() => {
+            sendResponse({ ok: false, status: 0, data: null });
+          });
+        return true; // keep message channel open for async response
       }
     }
   );

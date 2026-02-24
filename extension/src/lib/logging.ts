@@ -3,6 +3,7 @@
 import { CONFIG, API_ENDPOINTS, apiHeaders } from "./config";
 import { getSession } from "./auth";
 import { detectAiTool } from "./ai-tools";
+import { apiFetch } from "./api";
 
 export async function logInteraction(
   text: string,
@@ -17,7 +18,7 @@ export async function logInteraction(
   const aiTool = detectAiTool(url);
 
   try {
-    await fetch(`${CONFIG.SITE_URL}${API_ENDPOINTS.log}`, {
+    await apiFetch(`${CONFIG.SITE_URL}${API_ENDPOINTS.log}`, {
       method: "POST",
       headers: apiHeaders(session.accessToken),
       body: JSON.stringify({

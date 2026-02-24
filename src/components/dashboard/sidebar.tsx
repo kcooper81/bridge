@@ -144,24 +144,10 @@ function NavContent({ onItemClick }: { onItemClick?: () => void }) {
         })}
       </nav>
 
-      {/* Super Admin link */}
-      {isSuperAdmin && (
-        <div className="px-3 pb-2">
-          <Link
-            href="/admin"
-            onClick={onItemClick}
-            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 transition-colors"
-          >
-            <Shield className="h-4 w-4" />
-            Admin Panel
-          </Link>
-        </div>
-      )}
-
       <HelpModal open={helpOpen} onOpenChange={setHelpOpen} />
 
       {/* Utility icons */}
-      <div className="flex items-center justify-center gap-1 px-4 pb-2">
+      <div className="flex items-center justify-between px-5 pb-2">
         <Link
           href="/settings"
           onClick={onItemClick}
@@ -271,6 +257,18 @@ function NavContent({ onItemClick }: { onItemClick?: () => void }) {
                 Billing
               </Link>
             </DropdownMenuItem>
+
+            {isSuperAdmin && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/admin" onClick={onItemClick} className="text-amber-600 focus:text-amber-600 dark:text-amber-400 dark:focus:text-amber-400">
+                    <Shield className="mr-2 h-4 w-4" />
+                    Admin Panel
+                  </Link>
+                </DropdownMenuItem>
+              </>
+            )}
 
             <DropdownMenuSeparator />
 

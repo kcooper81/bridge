@@ -16,18 +16,18 @@ import {
 } from "lucide-react";
 
 const industries = [
-  { label: "Healthcare", href: "/industries/healthcare", icon: HeartPulse },
-  { label: "Legal", href: "/industries/legal", icon: Gavel },
-  { label: "Technology", href: "/industries/technology", icon: Laptop },
-  { label: "Finance", href: "/industries/finance", icon: PiggyBank },
-  { label: "Government", href: "/industries/government", icon: Landmark },
+  { label: "Healthcare", description: "HIPAA-ready AI workflows", href: "/industries/healthcare", icon: HeartPulse, color: "bg-rose-500/10 text-rose-600 dark:text-rose-400" },
+  { label: "Legal", description: "Confidential prompt governance", href: "/industries/legal", icon: Gavel, color: "bg-amber-500/10 text-amber-600 dark:text-amber-400" },
+  { label: "Technology", description: "Ship faster with shared prompts", href: "/industries/technology", icon: Laptop, color: "bg-blue-500/10 text-blue-600 dark:text-blue-400" },
+  { label: "Finance", description: "Compliant AI for financial teams", href: "/industries/finance", icon: PiggyBank, color: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" },
+  { label: "Government", description: "Secure AI for public sector", href: "/industries/government", icon: Landmark, color: "bg-violet-500/10 text-violet-600 dark:text-violet-400" },
 ];
 
 const useCases = [
-  { label: "Prompt Management", href: "/features", icon: Zap },
-  { label: "Security & Compliance", href: "/security", icon: Shield },
-  { label: "Team Collaboration", href: "/features#teams", icon: Users },
-  { label: "Enterprise", href: "/enterprise", icon: Landmark },
+  { label: "Prompt Management", description: "Organize and version prompts", href: "/features", icon: Zap, color: "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400" },
+  { label: "Security & Compliance", description: "Guardrails and audit trails", href: "/security", icon: Shield, color: "bg-red-500/10 text-red-600 dark:text-red-400" },
+  { label: "Team Collaboration", description: "Share prompts across teams", href: "/features#teams", icon: Users, color: "bg-sky-500/10 text-sky-600 dark:text-sky-400" },
+  { label: "Enterprise", description: "SSO, roles, and analytics", href: "/enterprise", icon: Landmark, color: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400" },
 ];
 
 export function SolutionsDropdown({
@@ -81,45 +81,69 @@ export function SolutionsDropdown({
 
       {open && (
         <div className="absolute top-full left-1/2 -translate-x-1/2 pt-3 z-50">
-          <div className="w-[420px] rounded-xl border border-border bg-card shadow-xl shadow-black/10 p-4 grid grid-cols-2 gap-4">
-            {/* By Industry */}
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-2 px-2">
-                By Industry
-              </p>
-              <div className="space-y-0.5">
-                {industries.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => setOpen(false)}
-                    className="flex items-center gap-2.5 px-2 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
-                  >
-                    <item.icon className="h-4 w-4 text-primary/70" />
-                    {item.label}
-                  </Link>
-                ))}
+          <div className="w-[520px] rounded-xl border border-border bg-card shadow-xl shadow-black/10 p-5">
+            <div className="grid grid-cols-2 gap-6">
+              {/* By Industry */}
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-3 px-2">
+                  By Industry
+                </p>
+                <div className="space-y-1">
+                  {industries.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setOpen(false)}
+                      className="flex items-center gap-3 px-2 py-2.5 rounded-lg text-foreground/80 hover:text-foreground hover:bg-muted/50 transition-colors"
+                    >
+                      <span className={cn("flex h-8 w-8 items-center justify-center rounded-lg shrink-0", item.color)}>
+                        <item.icon className="h-4 w-4" />
+                      </span>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium">{item.label}</p>
+                        <p className="text-xs text-muted-foreground truncate">{item.description}</p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+
+              {/* By Use Case */}
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-3 px-2">
+                  By Use Case
+                </p>
+                <div className="space-y-1">
+                  {useCases.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setOpen(false)}
+                      className="flex items-center gap-3 px-2 py-2.5 rounded-lg text-foreground/80 hover:text-foreground hover:bg-muted/50 transition-colors"
+                    >
+                      <span className={cn("flex h-8 w-8 items-center justify-center rounded-lg shrink-0", item.color)}>
+                        <item.icon className="h-4 w-4" />
+                      </span>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium">{item.label}</p>
+                        <p className="text-xs text-muted-foreground truncate">{item.description}</p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
               </div>
             </div>
 
-            {/* By Use Case */}
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-2 px-2">
-                By Use Case
-              </p>
-              <div className="space-y-0.5">
-                {useCases.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => setOpen(false)}
-                    className="flex items-center gap-2.5 px-2 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
-                  >
-                    <item.icon className="h-4 w-4 text-primary/70" />
-                    {item.label}
-                  </Link>
-                ))}
-              </div>
+            {/* Bottom CTA */}
+            <div className="mt-4 pt-4 border-t border-border/50">
+              <Link
+                href="/solutions"
+                onClick={() => setOpen(false)}
+                className="flex items-center justify-center gap-1 text-sm font-medium text-primary hover:text-primary/80 transition-colors py-1"
+              >
+                See all solutions
+                <span aria-hidden="true">&rarr;</span>
+              </Link>
             </div>
           </div>
         </div>
@@ -160,9 +184,11 @@ export function MobileSolutionsMenu({
               key={item.href}
               href={item.href}
               onClick={onNavigate}
-              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="flex items-center gap-2 text-sm text-foreground/80 hover:text-foreground transition-colors"
             >
-              <item.icon className="h-3.5 w-3.5" />
+              <span className={cn("flex h-6 w-6 items-center justify-center rounded-md shrink-0", item.color)}>
+                <item.icon className="h-3.5 w-3.5" />
+              </span>
               {item.label}
             </Link>
           ))}
@@ -174,9 +200,11 @@ export function MobileSolutionsMenu({
               key={item.href}
               href={item.href}
               onClick={onNavigate}
-              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="flex items-center gap-2 text-sm text-foreground/80 hover:text-foreground transition-colors"
             >
-              <item.icon className="h-3.5 w-3.5" />
+              <span className={cn("flex h-6 w-6 items-center justify-center rounded-md shrink-0", item.color)}>
+                <item.icon className="h-3.5 w-3.5" />
+              </span>
               {item.label}
             </Link>
           ))}

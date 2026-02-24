@@ -23,7 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { FolderOpen, Pencil, Plus, Trash2 } from "lucide-react";
+import { FolderOpen, Pencil, Plus, Trash2, Users } from "lucide-react";
 import { NoOrgBanner } from "@/components/dashboard/no-org-banner";
 import { saveCollectionApi, deleteCollectionApi } from "@/lib/vault-api";
 import { toast } from "sonner";
@@ -31,13 +31,14 @@ import { trackCollectionCreated } from "@/lib/analytics";
 import type { Collection, CollectionVisibility } from "@/lib/types";
 
 export default function CollectionsPage() {
-  const { collections, prompts, loading, refresh, noOrg } = useOrg();
+  const { collections, prompts, teams, loading, refresh, noOrg } = useOrg();
   const [modalOpen, setModalOpen] = useState(false);
   const [editCollection, setEditCollection] = useState<Collection | null>(null);
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [visibility, setVisibility] = useState<CollectionVisibility>("org");
+  const [teamId, setTeamId] = useState<string | null>(null);
   const [selectedPromptIds, setSelectedPromptIds] = useState<string[]>([]);
 
   function openModal(coll: Collection | null) {
@@ -46,12 +47,14 @@ export default function CollectionsPage() {
       setName(coll.name);
       setDescription(coll.description || "");
       setVisibility(coll.visibility);
+      setTeamId(coll.team_id || null);
       setSelectedPromptIds(coll.promptIds || []);
     } else {
       setEditCollection(null);
       setName("");
       setDescription("");
       setVisibility("org");
+      setTeamId(null);
       setSelectedPromptIds([]);
     }
     setModalOpen(true);
@@ -68,6 +71,7 @@ export default function CollectionsPage() {
         name: name.trim(),
         description: description.trim() || null,
         visibility,
+        team_id: teamId,
         promptIds: selectedPromptIds,
       });
       if (!editCollection) trackCollectionCreated();
@@ -154,8 +158,17 @@ export default function CollectionsPage() {
                     {coll.description}
                   </p>
                 )}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <Badge variant="outline">{coll.visibility}</Badge>
+                  {coll.team_id && (() => {
+                    const team = teams.find((t) => t.id === coll.team_id);
+                    return team ? (
+                      <Badge variant="secondary" className="gap-1">
+                        <Users className="h-3 w-3" />
+                        {team.name}
+                      </Badge>
+                    ) : null;
+                  })()}
                   <span className="text-xs text-muted-foreground">
                     {coll.promptIds?.length || 0} prompts
                   </span>
@@ -194,6 +207,20 @@ export default function CollectionsPage() {
                 </SelectContent>
               </Select>
             </div>
+            {teams.length > 0 && (
+              <div className="space-y-2">
+                <Label>Team</Label>
+                <Select value={teamId || "none"} onValueChange={(v) => setTeamId(v === "none" ? null : v)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No team</SelectItem>
+                    {teams.map((t) => (
+                      <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <div className="space-y-2">
               <Label>Prompts</Label>
               <div className="max-h-48 overflow-y-auto space-y-2 rounded-md border p-3">

@@ -12,16 +12,18 @@ import {
   Chrome,
   Circle,
   FileText,
+  FolderOpen,
   Rocket,
   Shield,
   UserPlus,
+  Users,
   X,
 } from "lucide-react";
 
 const DISMISS_KEY = "teamprompt-getting-started-dismissed";
 
 export function GettingStarted() {
-  const { org, members, guidelines, prompts, currentUserRole } = useOrg();
+  const { org, members, teams, collections, guidelines, prompts, currentUserRole } = useOrg();
   const { detected: extensionDetected } = useExtensionDetection();
   const [dismissed, setDismissed] = useState(true);
 
@@ -39,19 +41,25 @@ export function GettingStarted() {
       icon: Building,
     },
     {
+      label: "Create a team",
+      done: teams.length > 0,
+      href: "/team",
+      icon: Users,
+    },
+    {
       label: "Invite team members",
       done: members.length > 1,
       href: "/team",
       icon: UserPlus,
     },
     {
-      label: "Configure guardrails",
+      label: "Set up guardrails",
       done: guidelines.length > 0,
       href: "/guardrails",
       icon: Shield,
     },
     {
-      label: "Install the extension",
+      label: "Install the Chrome extension",
       done: extensionDetected,
       href: "https://chromewebstore.google.com/detail/teamprompt",
       icon: Chrome,
@@ -62,6 +70,12 @@ export function GettingStarted() {
       done: prompts.some((p) => !p.is_template),
       href: "/vault",
       icon: FileText,
+    },
+    {
+      label: "Organize into a collection",
+      done: collections.length > 0,
+      href: "/collections",
+      icon: FolderOpen,
     },
   ];
 

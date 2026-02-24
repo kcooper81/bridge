@@ -52,27 +52,27 @@ interface NavItem {
 
 const navSections: { title: string; items: NavItem[] }[] = [
   {
-    title: "Workspace",
+    title: "Setup",
     items: [
-      { label: "Prompts", href: "/vault", icon: Archive },
-      { label: "Collections", href: "/collections", icon: FolderOpen },
-      { label: "Library", href: "/library", icon: Library },
+      { label: "Settings", href: "/settings", icon: Settings },
+      { label: "Team", href: "/team", icon: Users, roles: ["admin", "manager"] },
+      { label: "Guardrails", href: "/guardrails", icon: Shield, roles: ["admin", "manager"] },
       { label: "Guidelines", href: "/guidelines", icon: BookOpen, roles: ["admin", "manager"] },
     ],
   },
   {
-    title: "Intelligence",
+    title: "Content",
     items: [
-      { label: "Analytics", href: "/analytics", icon: BarChart3 },
-      { label: "Activity Log", href: "/activity", icon: Activity, roles: ["admin", "manager"] },
-      { label: "Guardrails", href: "/guardrails", icon: Shield, roles: ["admin", "manager"] },
+      { label: "Prompts", href: "/vault", icon: Archive },
+      { label: "Collections", href: "/collections", icon: FolderOpen },
+      { label: "Library", href: "/library", icon: Library },
     ],
   },
   {
-    title: "Manage",
+    title: "Insights",
     items: [
-      { label: "Settings", href: "/settings", icon: Settings },
-      { label: "Team", href: "/team", icon: Users, roles: ["admin", "manager"] },
+      { label: "Analytics", href: "/analytics", icon: BarChart3 },
+      { label: "Activity Log", href: "/activity", icon: Activity, roles: ["admin", "manager"] },
       { label: "Notifications", href: "/notifications", icon: Bell },
     ],
   },
@@ -116,7 +116,7 @@ function NavContent({ onItemClick }: { onItemClick?: () => void }) {
 
           return (
             <div key={section.title}>
-              <p className="mb-3 px-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/70">
+              <p className="mb-3 px-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
                 {section.title}
               </p>
               <div className="space-y-1">
@@ -132,7 +132,7 @@ function NavContent({ onItemClick }: { onItemClick?: () => void }) {
                         "transition-all duration-200 ease-spring",
                         isActive
                           ? "bg-primary/10 text-primary shadow-sm"
-                          : "text-muted-foreground hover:bg-muted/50 hover:text-foreground hover:scale-[1.02]"
+                          : "text-foreground/70 hover:bg-muted/50 hover:text-foreground hover:scale-[1.02]"
                       )}
                     >
                       {isActive && (

@@ -41,6 +41,9 @@ export default defineContentScript({
   runAt: "document_idle",
 
   main() {
+    // Guard: if context is already invalidated at startup, bail out silently
+    if (!browser.runtime?.id) return;
+
     // ─── Initialize Shield Indicator ───
     initShieldIndicator();
 

@@ -18,6 +18,28 @@ export default defineContentScript({
   main() {
     let lastSyncedToken = "";
     let supabaseCookieName = "";
+    let _bridgeInvalidated = false;
+    let _syncIntervalId: ReturnType<typeof setInterval> | null = null;
+
+    function safeSendMessage(message: Record<string, unknown>): void {
+      if (_bridgeInvalidated) return;
+      try {
+        browser.runtime.sendMessage(message);
+      } catch (err: unknown) {
+        if (
+          err instanceof Error &&
+          (err.message.includes("Extension context invalidated") ||
+            err.message.includes("Receiving end does not exist"))
+        ) {
+          _bridgeInvalidated = true;
+          if (_syncIntervalId !== null) {
+            clearInterval(_syncIntervalId);
+            _syncIntervalId = null;
+          }
+          extAuthDebug.warn("bridge", "Extension context invalidated — auth bridge stopped");
+        }
+      }
+    }
 
     // --- Extension marker (lets the web app detect the extension is installed) ---
 
@@ -152,6 +174,7 @@ export default defineContentScript({
     let lastDirectSyncAt = 0;
 
     function syncWebToExtension() {
+      if (_bridgeInvalidated) return;
       const session = getSupabaseSession();
       const token = session?.access_token || "";
 
@@ -160,7 +183,7 @@ export default defineContentScript({
         lastSyncedToken = token;
         emptyReadCount = 0;
         webSessionCleared = false;
-        browser.runtime.sendMessage({
+        safeSendMessage({
           type: "SESSION_SYNC",
           accessToken: session!.access_token,
           refreshToken: session!.refresh_token,
@@ -178,7 +201,7 @@ export default defineContentScript({
           lastSyncedToken = "";
           emptyReadCount = 0;
           webSessionCleared = true;
-          browser.runtime.sendMessage({ type: "SESSION_CLEAR" });
+          safeSendMessage({ type: "SESSION_CLEAR" });
         }
       }
     }
@@ -189,6 +212,7 @@ export default defineContentScript({
       /^\/(login|signup|forgot-password|reset-password|logout)(\/|$)/;
 
     async function syncExtensionToWeb() {
+      if (_bridgeInvalidated) return;
       if (sessionStorage.getItem("tp-ext-sync")) {
         extAuthDebug.log("bridge", "syncExtensionToWeb: skip (tp-ext-sync flag)"); // AUTH-DEBUG
         sessionStorage.removeItem("tp-ext-sync");
@@ -274,7 +298,7 @@ export default defineContentScript({
         lastDirectSyncAt = Date.now();
         emptyReadCount = 0;
         webSessionCleared = false;
-        browser.runtime.sendMessage({
+        safeSendMessage({
           type: "SESSION_SYNC",
           accessToken: e.data.accessToken,
           refreshToken: e.data.refreshToken,
@@ -288,33 +312,49 @@ export default defineContentScript({
     // Check if extension was explicitly logged out — if so, clear web cookies
     // UNLESS the user has since logged in again via the web (cookies present).
     async function initSync() {
-      // Pre-resolve the cookie name so getSupabaseSession() can use it
-      await getCookieName();
-      extAuthDebug.log("bridge", "initSync() start"); // AUTH-DEBUG
+      if (_bridgeInvalidated) return;
+      try {
+        // Pre-resolve the cookie name so getSupabaseSession() can use it
+        await getCookieName();
+        extAuthDebug.log("bridge", "initSync() start"); // AUTH-DEBUG
 
-      const { loggedOut } = await browser.storage.local.get(["loggedOut"]);
-      extAuthDebug.log("bridge", "initSync() loggedOut flag", { loggedOut }); // AUTH-DEBUG
+        const { loggedOut } = await browser.storage.local.get(["loggedOut"]);
+        extAuthDebug.log("bridge", "initSync() loggedOut flag", { loggedOut }); // AUTH-DEBUG
 
-      if (loggedOut === true) {
-        // Check if the web app has a valid session — if so, the user logged
-        // in again via the web after the extension logout.  Honour the new
-        // web session instead of clearing it.
-        const webSession = getSupabaseSession();
-        if (webSession) {
-          extAuthDebug.log("bridge", "initSync() loggedOut stale, web has session → syncing"); // AUTH-DEBUG
-          await browser.storage.local.remove(["loggedOut"]);
-          // Fall through to normal sync
-        } else {
-          await clearWebSession();
-          await browser.storage.local.remove(["loggedOut"]);
-          webSessionCleared = true;
-          extAuthDebug.log("bridge", "initSync() cleared web session"); // AUTH-DEBUG
-          return;
+        if (loggedOut === true) {
+          // Check if the web app has a valid session — if so, the user logged
+          // in again via the web after the extension logout.  Honour the new
+          // web session instead of clearing it.
+          const webSession = getSupabaseSession();
+          if (webSession) {
+            extAuthDebug.log("bridge", "initSync() loggedOut stale, web has session → syncing"); // AUTH-DEBUG
+            await browser.storage.local.remove(["loggedOut"]);
+            // Fall through to normal sync
+          } else {
+            await clearWebSession();
+            await browser.storage.local.remove(["loggedOut"]);
+            webSessionCleared = true;
+            extAuthDebug.log("bridge", "initSync() cleared web session"); // AUTH-DEBUG
+            return;
+          }
+        }
+
+        syncWebToExtension();
+        syncExtensionToWeb();
+      } catch (err: unknown) {
+        if (
+          err instanceof Error &&
+          (err.message.includes("Extension context invalidated") ||
+            err.message.includes("Receiving end does not exist"))
+        ) {
+          _bridgeInvalidated = true;
+          if (_syncIntervalId !== null) {
+            clearInterval(_syncIntervalId);
+            _syncIntervalId = null;
+          }
+          extAuthDebug.warn("bridge", "Extension context invalidated — auth bridge stopped");
         }
       }
-
-      syncWebToExtension();
-      syncExtensionToWeb();
     }
 
     initSync();
@@ -325,7 +365,7 @@ export default defineContentScript({
       }
     });
 
-    setInterval(syncWebToExtension, 2000);
+    _syncIntervalId = setInterval(syncWebToExtension, 2000);
 
     browser.storage.onChanged.addListener((changes, area) => {
       if (area !== "local" || !changes.accessToken) return;

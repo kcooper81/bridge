@@ -21,6 +21,11 @@ export default defineContentScript({
     let _bridgeInvalidated = false;
     let _syncIntervalId: ReturnType<typeof setInterval> | null = null;
 
+    // Guard: if context is already invalidated at startup, bail out silently
+    if (!browser.runtime?.id) {
+      return;
+    }
+
     function safeSendMessage(message: Record<string, unknown>): void {
       if (_bridgeInvalidated) return;
       try {
@@ -43,7 +48,13 @@ export default defineContentScript({
 
     // --- Extension marker (lets the web app detect the extension is installed) ---
 
-    const extVersion = browser.runtime.getManifest().version;
+    let extVersion: string;
+    try {
+      extVersion = browser.runtime.getManifest().version;
+    } catch {
+      // Extension was updated — context invalidated before main() ran
+      return;
+    }
     document.documentElement.dataset.tpExtension = extVersion;
     window.dispatchEvent(
       new CustomEvent("tp-extension-detected", { detail: { version: extVersion } })

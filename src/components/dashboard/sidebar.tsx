@@ -25,6 +25,7 @@ import {
   Activity,
   Archive,
   BarChart3,
+  Bell,
   BookOpen,
   ChevronUp,
   CreditCard,
@@ -39,8 +40,8 @@ import {
   Sun,
   Users,
 } from "lucide-react";
-import { NotificationBell } from "@/components/dashboard/notification-bell";
-import { HelpModal } from "@/components/dashboard/help-modal";
+import { useNotifications } from "@/hooks/use-notifications";
+import { SupportModal } from "@/components/dashboard/support-modal";
 
 interface NavItem {
   label: string;
@@ -67,6 +68,14 @@ const navSections: { title: string; items: NavItem[] }[] = [
       { label: "Guardrails", href: "/guardrails", icon: Shield, roles: ["admin", "manager"] },
     ],
   },
+  {
+    title: "Manage",
+    items: [
+      { label: "Settings", href: "/settings", icon: Settings },
+      { label: "Team", href: "/team", icon: Users, roles: ["admin", "manager"] },
+      { label: "Notifications", href: "/notifications", icon: Bell },
+    ],
+  },
 ];
 
 function NavContent({ onItemClick }: { onItemClick?: () => void }) {
@@ -75,7 +84,8 @@ function NavContent({ onItemClick }: { onItemClick?: () => void }) {
   const { user, signOut, isSuperAdmin } = useAuth();
   const { theme, setTheme } = useTheme();
   const { subscription } = useSubscription();
-  const [helpOpen, setHelpOpen] = useState(false);
+  const { unreadCount } = useNotifications();
+  const [supportOpen, setSupportOpen] = useState(false);
 
   const pendingCount = prompts.filter((p) => p.status === "pending").length;
   const currentMember = members.find((m) => m.isCurrentUser);
@@ -135,6 +145,11 @@ function NavContent({ onItemClick }: { onItemClick?: () => void }) {
                           {pendingCount}
                         </Badge>
                       )}
+                      {item.href === "/notifications" && unreadCount > 0 && (
+                        <Badge variant="destructive" className="ml-auto h-5 min-w-5 px-1.5 text-[10px] shadow-sm">
+                          {unreadCount > 99 ? "99+" : unreadCount}
+                        </Badge>
+                      )}
                     </Link>
                   );
                 })}
@@ -144,47 +159,7 @@ function NavContent({ onItemClick }: { onItemClick?: () => void }) {
         })}
       </nav>
 
-      <HelpModal open={helpOpen} onOpenChange={setHelpOpen} />
-
-      {/* Utility icons */}
-      <div className="flex items-center justify-between px-5 pb-2">
-        <Link
-          href="/settings"
-          onClick={onItemClick}
-          className={cn(
-            "flex h-9 w-9 items-center justify-center rounded-lg transition-colors",
-            pathname.startsWith("/settings")
-              ? "bg-primary/10 text-primary"
-              : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-          )}
-          title="Settings"
-        >
-          <Settings className="h-[18px] w-[18px]" />
-        </Link>
-        {(currentUserRole === "admin" || currentUserRole === "manager") && (
-          <Link
-            href="/team"
-            onClick={onItemClick}
-            className={cn(
-              "flex h-9 w-9 items-center justify-center rounded-lg transition-colors",
-              pathname.startsWith("/team")
-                ? "bg-primary/10 text-primary"
-                : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-            )}
-            title="Team"
-          >
-            <Users className="h-[18px] w-[18px]" />
-          </Link>
-        )}
-        <NotificationBell />
-        <button
-          onClick={() => setHelpOpen(true)}
-          className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
-          title="Help & Docs"
-        >
-          <HelpCircle className="h-[18px] w-[18px]" />
-        </button>
-      </div>
+      <SupportModal open={supportOpen} onOpenChange={setSupportOpen} />
 
       {/* User footer */}
       <div className="border-t border-border/50 px-4 py-4">
@@ -256,6 +231,11 @@ function NavContent({ onItemClick }: { onItemClick?: () => void }) {
                 <CreditCard className="mr-2 h-4 w-4" />
                 Billing
               </Link>
+            </DropdownMenuItem>
+
+            <DropdownMenuItem onSelect={() => setSupportOpen(true)}>
+              <HelpCircle className="mr-2 h-4 w-4" />
+              Help & Support
             </DropdownMenuItem>
 
             {isSuperAdmin && (

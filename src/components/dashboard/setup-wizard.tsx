@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   Building,
-  CheckCircle2,
+  Check,
   Chrome,
   ExternalLink,
   FileText,
@@ -94,11 +94,8 @@ export function SetupWizard() {
   ];
 
   const completedCount = steps.filter((s) => s.done).length;
-
-  // Auto-hide when all steps complete
   if (completedCount === steps.length) return null;
 
-  // Find current (first incomplete) step
   const currentStepIndex = steps.findIndex((s) => !s.done);
 
   function handleDismiss() {
@@ -108,36 +105,131 @@ export function SetupWizard() {
 
   return (
     <Card className="mb-6 border-primary/20 overflow-hidden">
-      {/* Gradient top border */}
       <div className="h-1 bg-gradient-to-r from-primary via-primary/70 to-primary/40" />
 
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="flex items-center gap-2 text-base">
           <Rocket className="h-5 w-5 text-primary" />
           Get started with TeamPrompt
         </CardTitle>
-        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleDismiss}>
-          <X className="h-3.5 w-3.5" />
-        </Button>
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-muted-foreground">
+            {completedCount}/{steps.length} complete
+          </span>
+          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleDismiss}>
+            <X className="h-3.5 w-3.5" />
+          </Button>
+        </div>
       </CardHeader>
 
-      <CardContent className="space-y-4">
+      <CardContent className="pt-4">
         {/* Progress bar */}
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Progress</span>
-            <span className="font-medium">{completedCount}/{steps.length} complete</span>
-          </div>
+        <div className="mb-6">
           <div className="h-2 rounded-full bg-muted overflow-hidden">
             <div
-              className="h-full rounded-full bg-primary transition-all duration-500"
+              className="h-full rounded-full bg-emerald-500 transition-all duration-500"
               style={{ width: `${(completedCount / steps.length) * 100}%` }}
             />
           </div>
         </div>
 
-        {/* Vertical stepper */}
-        <div className="space-y-0">
+        {/* Horizontal stepper on lg+, vertical on smaller */}
+        <div className="hidden lg:block">
+          {/* Horizontal step indicators */}
+          <div className="flex items-start">
+            {steps.map((step, i) => {
+              const isCurrent = i === currentStepIndex;
+              const Icon = step.icon;
+
+              return (
+                <div key={step.id} className="flex-1 relative">
+                  {/* Connector line */}
+                  {i < steps.length - 1 && (
+                    <div
+                      className={cn(
+                        "absolute top-4 left-[calc(50%+20px)] right-0 h-0.5",
+                        step.done ? "bg-emerald-500/40" : "bg-border"
+                      )}
+                    />
+                  )}
+
+                  <div className="flex flex-col items-center text-center px-2">
+                    {/* Step circle */}
+                    {step.done ? (
+                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-500/15 ring-2 ring-emerald-500/30 mb-3">
+                        <Check className="h-5 w-5 text-emerald-500" />
+                      </div>
+                    ) : (
+                      <div
+                        className={cn(
+                          "flex h-9 w-9 items-center justify-center rounded-full border-2 text-sm font-bold mb-3 transition-all",
+                          isCurrent
+                            ? "border-primary text-primary bg-primary/5 ring-4 ring-primary/10"
+                            : "border-muted-foreground/25 text-muted-foreground/40"
+                        )}
+                      >
+                        {i + 1}
+                      </div>
+                    )}
+
+                    {/* Icon + title */}
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <Icon
+                        className={cn(
+                          "h-3.5 w-3.5",
+                          step.done
+                            ? "text-emerald-500"
+                            : isCurrent
+                              ? "text-primary"
+                              : "text-muted-foreground/40"
+                        )}
+                      />
+                      <h4
+                        className={cn(
+                          "text-sm font-semibold",
+                          step.done
+                            ? "text-emerald-600 dark:text-emerald-400"
+                            : isCurrent
+                              ? "text-foreground"
+                              : "text-muted-foreground/50"
+                        )}
+                      >
+                        {step.title}
+                      </h4>
+                    </div>
+
+                    {/* Description — only for current step */}
+                    {isCurrent && (
+                      <div className="mt-1 space-y-2">
+                        <p className="text-xs text-muted-foreground max-w-[180px]">
+                          {step.description}
+                        </p>
+                        <Button size="sm" asChild>
+                          {step.external ? (
+                            <a href={step.href} target="_blank" rel="noopener noreferrer">
+                              {step.actionLabel}
+                              <ExternalLink className="ml-1.5 h-3.5 w-3.5" />
+                            </a>
+                          ) : (
+                            <Link href={step.href}>{step.actionLabel}</Link>
+                          )}
+                        </Button>
+                      </div>
+                    )}
+
+                    {/* Done label */}
+                    {step.done && (
+                      <p className="text-[11px] text-emerald-500 font-medium">Done</p>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Vertical stepper on small screens */}
+        <div className="lg:hidden space-y-0">
           {steps.map((step, i) => {
             const isCurrent = i === currentStepIndex;
             const Icon = step.icon;
@@ -148,8 +240,8 @@ export function SetupWizard() {
                 {i < steps.length - 1 && (
                   <div
                     className={cn(
-                      "absolute left-[15px] top-8 w-0.5 bottom-0",
-                      step.done ? "bg-primary/40" : "bg-border"
+                      "absolute left-[15px] top-9 w-0.5 bottom-0",
+                      step.done ? "bg-emerald-500/40" : "bg-border"
                     )}
                   />
                 )}
@@ -157,16 +249,16 @@ export function SetupWizard() {
                 {/* Step circle */}
                 <div className="relative z-10 shrink-0">
                   {step.done ? (
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
-                      <CheckCircle2 className="h-5 w-5 text-primary" />
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500/15 ring-2 ring-emerald-500/30">
+                      <Check className="h-4 w-4 text-emerald-500" />
                     </div>
                   ) : (
                     <div
                       className={cn(
-                        "flex h-8 w-8 items-center justify-center rounded-full border-2 text-sm font-semibold",
+                        "flex h-8 w-8 items-center justify-center rounded-full border-2 text-sm font-bold transition-all",
                         isCurrent
-                          ? "border-primary text-primary bg-primary/5"
-                          : "border-muted-foreground/30 text-muted-foreground/50"
+                          ? "border-primary text-primary bg-primary/5 ring-4 ring-primary/10"
+                          : "border-muted-foreground/25 text-muted-foreground/40"
                       )}
                     >
                       {i + 1}
@@ -175,14 +267,15 @@ export function SetupWizard() {
                 </div>
 
                 {/* Step content */}
-                <div className={cn("flex-1 pb-4", i === steps.length - 1 && "pb-0")}>
+                <div className={cn("flex-1 pb-5", i === steps.length - 1 && "pb-0")}>
                   {step.done ? (
-                    // Completed: collapsed
-                    <p className="pt-1.5 text-sm text-muted-foreground line-through">
-                      {step.title}
-                    </p>
+                    <div className="pt-1.5 flex items-center gap-2">
+                      <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
+                        {step.title}
+                      </p>
+                      <span className="text-[11px] text-emerald-500 font-medium">Done</span>
+                    </div>
                   ) : isCurrent ? (
-                    // Current: expanded
                     <div className="space-y-2 pt-0.5">
                       <div className="flex items-center gap-2">
                         <Icon className="h-4 w-4 text-primary" />
@@ -201,7 +294,6 @@ export function SetupWizard() {
                       </Button>
                     </div>
                   ) : (
-                    // Future: muted
                     <p className="pt-1.5 text-sm text-muted-foreground/50">
                       {step.title}
                     </p>

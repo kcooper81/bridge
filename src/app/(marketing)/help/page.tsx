@@ -4,9 +4,10 @@ import { generateFAQSchema } from "@/lib/seo/schemas";
 import { FAQSection } from "@/components/marketing/faq-section";
 import { CTASection } from "@/components/marketing/cta-section";
 import { SectionLabel } from "@/components/marketing/section-label";
-import { ChevronDown, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { SupportForm } from "./_components/support-form";
-import { HELP_CATEGORIES, HELP_FAQS, HELP_OVERVIEW } from "@/lib/help-content";
+import { HelpDocs } from "./_components/help-docs";
+import { HELP_FAQS, HELP_OVERVIEW } from "@/lib/help-content";
 
 export const metadata: Metadata = generatePageMetadata({
   title: "Help & Documentation",
@@ -54,60 +55,9 @@ export default function HelpPage() {
             </div>
           </div>
 
-          {/* Quick links */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 mb-16">
-            {HELP_CATEGORIES.map((cat) => {
-              const Icon = cat.icon;
-              return (
-                <a
-                  key={cat.id}
-                  href={`#${cat.id}`}
-                  className="flex flex-col items-center gap-2 rounded-xl border p-4 text-center hover:bg-muted/50 hover:border-primary/20 transition-colors"
-                >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                    <Icon className="h-5 w-5" />
-                  </div>
-                  <span className="text-xs font-medium">{cat.title}</span>
-                </a>
-              );
-            })}
-          </div>
-
-          {/* Documentation Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-24">
-            {HELP_CATEGORIES.map((cat) => {
-              const Icon = cat.icon;
-              return (
-                <details
-                  key={cat.id}
-                  id={cat.id}
-                  className="group rounded-2xl border border-border bg-card overflow-hidden scroll-mt-24"
-                >
-                  <summary className="flex items-center gap-4 p-6 cursor-pointer select-none list-none [&::-webkit-details-marker]:hidden">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                      <Icon className="h-5 w-5" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h2 className="text-lg font-semibold">{cat.title}</h2>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        {cat.description}
-                      </p>
-                    </div>
-                    <ChevronDown className="h-5 w-5 text-muted-foreground transition-transform group-open:rotate-180 shrink-0" />
-                  </summary>
-                  <div className="px-6 pb-6 space-y-5">
-                    {cat.articles.map((article) => (
-                      <div key={article.q}>
-                        <h3 className="font-medium text-sm">{article.q}</h3>
-                        <p className="mt-1 text-sm text-muted-foreground leading-relaxed">
-                          {article.a}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </details>
-              );
-            })}
+          {/* Documentation — navigable views */}
+          <div className="mb-24">
+            <HelpDocs />
           </div>
 
           {/* FAQ */}

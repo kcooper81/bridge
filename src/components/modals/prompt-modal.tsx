@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { SelectWithQuickAdd } from "@/components/ui/select-with-quick-add";
 import { Loader2, CheckCircle2, XCircle, Braces, ShieldAlert } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { TONE_OPTIONS } from "@/lib/constants";
@@ -28,6 +29,8 @@ import {
   validatePrompt,
   getPromptVersions,
   getDefaultStatus,
+  saveFolderApi,
+  saveTeamApi,
 } from "@/lib/vault-api";
 import { createClient } from "@/lib/supabase/client";
 import { scanContent } from "@/lib/security/scanner";
@@ -56,7 +59,7 @@ export function PromptModal({
   prompt,
   onSaved,
 }: PromptModalProps) {
-  const { folders, departments, guidelines, org, currentUserRole } = useOrg();
+  const { folders, teams, guidelines, org, currentUserRole, setFolders, setTeams } = useOrg();
   const [saving, setSaving] = useState(false);
   const [validation, setValidation] = useState<ValidationResult | null>(null);
   const [scanResult, setScanResult] = useState<ScanResult | null>(null);
@@ -72,7 +75,7 @@ export function PromptModal({
   const [exampleOutput, setExampleOutput] = useState("");
   const [tagsInput, setTagsInput] = useState("");
   const [folderId, setFolderId] = useState<string>("");
-  const [departmentId, setDepartmentId] = useState<string>("");
+  const [teamId, setTeamId] = useState<string>("");
   const [isTemplate, setIsTemplate] = useState(false);
   const [status, setStatus] = useState<PromptStatus>(() =>
     getDefaultStatus(currentUserRole)
@@ -92,7 +95,7 @@ export function PromptModal({
       setExampleOutput(prompt.example_output || "");
       setTagsInput((prompt.tags || []).join(", "));
       setFolderId(prompt.folder_id || "");
-      setDepartmentId(prompt.department_id || "");
+      setTeamId(prompt.department_id || "");
       setIsTemplate(prompt.is_template || false);
       setStatus(prompt.status || "approved");
       getPromptVersions(prompt.id).then(setVersions);
@@ -107,7 +110,7 @@ export function PromptModal({
       setExampleOutput("");
       setTagsInput("");
       setFolderId("");
-      setDepartmentId("");
+      setTeamId("");
       setIsTemplate(false);
       setStatus(getDefaultStatus(currentUserRole));
       setVersions([]);
@@ -131,7 +134,7 @@ export function PromptModal({
         .map((t) => t.trim())
         .filter(Boolean),
       folder_id: folderId || null,
-      department_id: departmentId || null,
+      department_id: teamId || null,
     };
     const result = validatePrompt(fields, guidelines);
     setValidation(result);
@@ -179,7 +182,7 @@ export function PromptModal({
           .map((t) => t.trim())
           .filter(Boolean),
         folder_id: folderId || null,
-        department_id: departmentId || null,
+        department_id: teamId || null,
         is_template: isTemplate,
         template_variables: extractTemplateVariables(content),
         status: getDefaultStatus(currentUserRole, status),
@@ -254,36 +257,40 @@ export function PromptModal({
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Folder</Label>
-              <Select value={folderId || "__none__"} onValueChange={(v) => setFolderId(v === "__none__" ? "" : v)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="No folder" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="__none__">No folder</SelectItem>
-                  {folders.map((f) => (
-                    <SelectItem key={f.id} value={f.id}>
-                      {f.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <SelectWithQuickAdd
+                value={folderId}
+                onValueChange={setFolderId}
+                items={folders.map((f) => ({ id: f.id, name: f.name }))}
+                onQuickCreate={async (name) => {
+                  const folder = await saveFolderApi({ name });
+                  if (folder) {
+                    setFolders((prev) => [folder, ...prev]);
+                    return { id: folder.id, name: folder.name };
+                  }
+                  return null;
+                }}
+                noneLabel="No folder"
+                createLabel="folder"
+              />
             </div>
 
             <div className="space-y-2">
-              <Label>Department</Label>
-              <Select value={departmentId || "__none__"} onValueChange={(v) => setDepartmentId(v === "__none__" ? "" : v)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="No department" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="__none__">No department</SelectItem>
-                  {departments.map((d) => (
-                    <SelectItem key={d.id} value={d.id}>
-                      {d.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label>Team</Label>
+              <SelectWithQuickAdd
+                value={teamId}
+                onValueChange={setTeamId}
+                items={teams.map((t) => ({ id: t.id, name: t.name }))}
+                onQuickCreate={async (name) => {
+                  const team = await saveTeamApi({ name });
+                  if (team) {
+                    setTeams((prev) => [team, ...prev]);
+                    return { id: team.id, name: team.name };
+                  }
+                  return null;
+                }}
+                noneLabel="No team"
+                createLabel="team"
+              />
             </div>
           </div>
 

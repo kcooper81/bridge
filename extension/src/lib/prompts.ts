@@ -15,6 +15,7 @@ export interface Prompt {
   template_variables: string[];
   usage_count: number;
   folder_id: string | null;
+  /** References a team. DB column retained. */
   department_id: string | null;
 }
 

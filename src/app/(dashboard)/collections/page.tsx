@@ -24,14 +24,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { FolderOpen, Pencil, Plus, Trash2, Users } from "lucide-react";
+import { SelectWithQuickAdd } from "@/components/ui/select-with-quick-add";
 import { NoOrgBanner } from "@/components/dashboard/no-org-banner";
-import { saveCollectionApi, deleteCollectionApi } from "@/lib/vault-api";
+import { saveCollectionApi, deleteCollectionApi, saveTeamApi } from "@/lib/vault-api";
 import { toast } from "sonner";
 import { trackCollectionCreated } from "@/lib/analytics";
 import type { Collection, CollectionVisibility } from "@/lib/types";
 
 export default function CollectionsPage() {
-  const { collections, prompts, teams, loading, refresh, noOrg } = useOrg();
+  const { collections, prompts, teams, setTeams, loading, refresh, noOrg } = useOrg();
   const [modalOpen, setModalOpen] = useState(false);
   const [editCollection, setEditCollection] = useState<Collection | null>(null);
 
@@ -207,20 +208,24 @@ export default function CollectionsPage() {
                 </SelectContent>
               </Select>
             </div>
-            {teams.length > 0 && (
-              <div className="space-y-2">
-                <Label>Team</Label>
-                <Select value={teamId || "none"} onValueChange={(v) => setTeamId(v === "none" ? null : v)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">No team</SelectItem>
-                    {teams.map((t) => (
-                      <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
+            <div className="space-y-2">
+              <Label>Team</Label>
+              <SelectWithQuickAdd
+                value={teamId || ""}
+                onValueChange={(v) => setTeamId(v || null)}
+                items={teams.map((t) => ({ id: t.id, name: t.name }))}
+                onQuickCreate={async (name) => {
+                  const team = await saveTeamApi({ name });
+                  if (team) {
+                    setTeams((prev) => [team, ...prev]);
+                    return { id: team.id, name: team.name };
+                  }
+                  return null;
+                }}
+                noneLabel="No team"
+                createLabel="team"
+              />
+            </div>
             <div className="space-y-2">
               <Label>Prompts</Label>
               <div className="max-h-48 overflow-y-auto space-y-2 rounded-md border p-3">

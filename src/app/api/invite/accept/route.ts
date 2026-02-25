@@ -89,11 +89,10 @@ export async function POST(request: NextRequest) {
       // Solo personal org — clean it up so user can join the invited org
       const oldOrgId = existingProfile.org_id;
 
-      // Remove any teams, folders, departments, prompts, etc. tied to the old org
+      // Remove any teams, folders, prompts, etc. tied to the old org
       await Promise.all([
         db.from("prompts").delete().eq("org_id", oldOrgId),
         db.from("folders").delete().eq("org_id", oldOrgId),
-        db.from("departments").delete().eq("org_id", oldOrgId),
         db.from("teams").delete().eq("org_id", oldOrgId),
         db.from("collections").delete().eq("org_id", oldOrgId),
         db.from("standards").delete().eq("org_id", oldOrgId),

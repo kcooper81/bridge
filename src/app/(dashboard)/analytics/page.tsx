@@ -23,7 +23,7 @@ import type { Analytics } from "@/lib/types";
 import { NoOrgBanner } from "@/components/dashboard/no-org-banner";
 
 export default function AnalyticsPage() {
-  const { departments, members, noOrg } = useOrg();
+  const { teams, members, noOrg } = useOrg();
   const { canAccess } = useSubscription();
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [loading, setLoading] = useState(true);
@@ -68,8 +68,8 @@ export default function AnalyticsPage() {
     );
   }
 
-  const deptNames = new Map(departments.map((d) => [d.id, d.name]));
-  const maxDeptUsage = Math.max(...Object.values(analytics.departmentUsage), 1);
+  const teamNames = new Map(teams.map((t) => [t.id, t.name]));
+  const maxTeamUsage = Math.max(...Object.values(analytics.teamUsage), 1);
 
   // Week-over-week trend
   const weekTrend =
@@ -235,28 +235,28 @@ export default function AnalyticsPage() {
         </Card>
       </div>
 
-      {/* Department Usage */}
+      {/* Team Usage */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Usage by Department</CardTitle>
+          <CardTitle className="text-base">Usage by Team</CardTitle>
         </CardHeader>
         <CardContent>
-          {Object.keys(analytics.departmentUsage).length === 0 ? (
-            <p className="text-sm text-muted-foreground">No department data — assign prompts to departments to see usage breakdown.</p>
+          {Object.keys(analytics.teamUsage).length === 0 ? (
+            <p className="text-sm text-muted-foreground">No team data — assign prompts to teams to see usage breakdown.</p>
           ) : (
             <div className="grid gap-3 sm:grid-cols-2">
-              {Object.entries(analytics.departmentUsage)
+              {Object.entries(analytics.teamUsage)
                 .sort(([, a], [, b]) => b - a)
-                .map(([deptId, count]) => (
-                  <div key={deptId}>
+                .map(([tid, count]) => (
+                  <div key={tid}>
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm">{deptNames.get(deptId) || "Unknown"}</span>
+                      <span className="text-sm">{teamNames.get(tid) || "Unknown"}</span>
                       <span className="text-xs text-muted-foreground tabular-nums">{count}</span>
                     </div>
                     <div className="h-2 rounded-full bg-muted overflow-hidden">
                       <div
                         className="h-full rounded-full bg-primary"
-                        style={{ width: `${(count / maxDeptUsage) * 100}%` }}
+                        style={{ width: `${(count / maxTeamUsage) * 100}%` }}
                       />
                     </div>
                   </div>

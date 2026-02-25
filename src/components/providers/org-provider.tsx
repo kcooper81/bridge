@@ -13,7 +13,6 @@ import type {
   Organization,
   Prompt,
   Folder,
-  Department,
   Team,
   Member,
   Collection,
@@ -25,7 +24,6 @@ interface OrgContextValue {
   org: Organization | null;
   prompts: Prompt[];
   folders: Folder[];
-  departments: Department[];
   teams: Team[];
   members: Member[];
   collections: Collection[];
@@ -38,7 +36,6 @@ interface OrgContextValue {
   refresh: () => Promise<void>;
   setPrompts: React.Dispatch<React.SetStateAction<Prompt[]>>;
   setFolders: React.Dispatch<React.SetStateAction<Folder[]>>;
-  setDepartments: React.Dispatch<React.SetStateAction<Department[]>>;
   setTeams: React.Dispatch<React.SetStateAction<Team[]>>;
   setMembers: React.Dispatch<React.SetStateAction<Member[]>>;
   setCollections: React.Dispatch<React.SetStateAction<Collection[]>>;
@@ -51,7 +48,6 @@ export function OrgProvider({ children }: { children: React.ReactNode }) {
   const [org, setOrg] = useState<Organization | null>(null);
   const [prompts, setPrompts] = useState<Prompt[]>([]);
   const [folders, setFolders] = useState<Folder[]>([]);
-  const [departments, setDepartments] = useState<Department[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
   const [collections, setCollections] = useState<Collection[]>([]);
@@ -133,7 +129,6 @@ export function OrgProvider({ children }: { children: React.ReactNode }) {
       orgRes,
       promptsRes,
       foldersRes,
-      deptsRes,
       teamsRes,
       profilesRes,
       collectionsRes,
@@ -142,7 +137,6 @@ export function OrgProvider({ children }: { children: React.ReactNode }) {
       supabase.from("organizations").select("*").eq("id", targetOrgId).single(),
       supabase.from("prompts").select("*").eq("org_id", targetOrgId).order("updated_at", { ascending: false }),
       supabase.from("folders").select("*").eq("org_id", targetOrgId).order("name"),
-      supabase.from("departments").select("*").eq("org_id", targetOrgId).order("name"),
       supabase.from("teams").select("*").eq("org_id", targetOrgId).order("name"),
       supabase.from("profiles").select("*").eq("org_id", targetOrgId).order("name"),
       supabase.from("collections").select("*").eq("org_id", targetOrgId).order("name"),
@@ -157,7 +151,6 @@ export function OrgProvider({ children }: { children: React.ReactNode }) {
     setOrg(orgRes.data);
     setPrompts(promptsRes.data || []);
     setFolders(foldersRes.data || []);
-    setDepartments(deptsRes.data || []);
 
     const orgTeams = teamsRes.data || [];
     setTeams(orgTeams);
@@ -229,7 +222,6 @@ export function OrgProvider({ children }: { children: React.ReactNode }) {
         org,
         prompts,
         folders,
-        departments,
         teams,
         members,
         collections,
@@ -241,7 +233,6 @@ export function OrgProvider({ children }: { children: React.ReactNode }) {
         refresh,
         setPrompts,
         setFolders,
-        setDepartments,
         setTeams,
         setMembers,
         setCollections,

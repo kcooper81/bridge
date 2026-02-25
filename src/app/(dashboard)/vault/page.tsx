@@ -70,6 +70,7 @@ import { PageSkeleton } from "@/components/dashboard/skeleton-loader";
 import { NoOrgBanner } from "@/components/dashboard/no-org-banner";
 import { UpgradePrompt, LimitNudge } from "@/components/upgrade";
 import { ImportExportModal } from "@/components/dashboard/import-export-modal";
+import { FolderManager } from "@/components/dashboard/folder-manager";
 
 const STATUS_TABS: { label: string; value: PromptStatus | "all" }[] = [
   { label: "All", value: "all" },
@@ -87,7 +88,7 @@ const STATUS_BADGE_VARIANT: Record<PromptStatus, "default" | "secondary" | "dest
 };
 
 export default function VaultPage() {
-  const { prompts, folders, departments, guidelines, loading, refresh, currentUserRole, noOrg } = useOrg();
+  const { prompts, folders, teams, guidelines, loading, refresh, currentUserRole, noOrg } = useOrg();
   const { checkLimit, planLimits, canAccess } = useSubscription();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -115,7 +116,7 @@ export default function VaultPage() {
   }, []);
 
   const [filterFolder, setFilterFolder] = useState("");
-  const [filterDept, setFilterDept] = useState("");
+  const [filterTeam, setFilterTeam] = useState("");
   const [sort, setSort] = useState("recent");
   const [page, setPage] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
@@ -146,7 +147,7 @@ export default function VaultPage() {
     }
 
     if (filterFolder) result = result.filter((p) => p.folder_id === filterFolder);
-    if (filterDept) result = result.filter((p) => p.department_id === filterDept);
+    if (filterTeam) result = result.filter((p) => p.department_id === filterTeam);
 
     switch (sort) {
       case "popular":
@@ -170,7 +171,7 @@ export default function VaultPage() {
     }
 
     return result;
-  }, [prompts, search, filterFolder, filterDept, sort, statusFilter]);
+  }, [prompts, search, filterFolder, filterTeam, sort, statusFilter]);
 
   const pageCount = Math.ceil(filtered.length / VAULT_PAGE_SIZE);
   const pageItems = filtered.slice(
@@ -442,20 +443,20 @@ export default function VaultPage() {
           </SelectContent>
         </Select>
         <Select
-          value={filterDept || "__all__"}
+          value={filterTeam || "__all__"}
           onValueChange={(v) => {
-            setFilterDept(v === "__all__" ? "" : v);
+            setFilterTeam(v === "__all__" ? "" : v);
             setPage(0);
           }}
         >
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="All Departments" />
+            <SelectValue placeholder="All Teams" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="__all__">All Departments</SelectItem>
-            {departments.map((d) => (
-              <SelectItem key={d.id} value={d.id}>
-                {d.name}
+            <SelectItem value="__all__">All Teams</SelectItem>
+            {teams.map((t) => (
+              <SelectItem key={t.id} value={t.id}>
+                {t.name}
               </SelectItem>
             ))}
           </SelectContent>
@@ -471,6 +472,11 @@ export default function VaultPage() {
             <SelectItem value="rating">Rating</SelectItem>
           </SelectContent>
         </Select>
+      </div>
+
+      {/* Folder Management */}
+      <div className="mb-4">
+        <FolderManager />
       </div>
 
       {/* Bulk Action Bar */}

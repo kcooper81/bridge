@@ -24,6 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ArrowLeft, Loader2, Mail, Pencil, Plus, Trash2, UserPlus, Users, X } from "lucide-react";
+import { SelectWithQuickAdd } from "@/components/ui/select-with-quick-add";
 import { ExtensionStatusBadge } from "@/components/dashboard/extension-status-badge";
 import { NoOrgBanner } from "@/components/dashboard/no-org-banner";
 import {
@@ -44,7 +45,7 @@ import type { Invite, Team, UserRole } from "@/lib/types";
 import { UpgradePrompt, LimitNudge } from "@/components/upgrade";
 
 export default function TeamPage() {
-  const { teams, members, currentUserRole, loading, refresh, noOrg } = useOrg();
+  const { teams, setTeams, members, currentUserRole, loading, refresh, noOrg } = useOrg();
   const { checkLimit, planLimits } = useSubscription();
 
   const [teamModalOpen, setTeamModalOpen] = useState(false);
@@ -504,15 +505,21 @@ export default function TeamPage() {
             </div>
             <div className="space-y-2">
               <Label>Add to Team (optional)</Label>
-              <Select value={inviteTeamId || "__none__"} onValueChange={(v) => setInviteTeamId(v === "__none__" ? "" : v)}>
-                <SelectTrigger><SelectValue placeholder="No team" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="__none__">No team</SelectItem>
-                  {teams.map((t) => (
-                    <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <SelectWithQuickAdd
+                value={inviteTeamId}
+                onValueChange={setInviteTeamId}
+                items={teams.map((t) => ({ id: t.id, name: t.name }))}
+                onQuickCreate={async (name) => {
+                  const team = await saveTeamApi({ name });
+                  if (team) {
+                    setTeams((prev) => [team, ...prev]);
+                    return { id: team.id, name: team.name };
+                  }
+                  return null;
+                }}
+                noneLabel="No team"
+                createLabel="team"
+              />
             </div>
           </div>
           <div className="mt-4 flex justify-end gap-2">

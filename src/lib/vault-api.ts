@@ -6,7 +6,6 @@ import type {
   Prompt,
   PromptStatus,
   Folder,
-  Department,
   Team,
   Collection,
   Guideline,
@@ -72,7 +71,7 @@ export async function getPrompts(
   query?: string,
   filters?: {
     folderId?: string;
-    departmentId?: string;
+    teamId?: string;
     favoritesOnly?: boolean;
     sort?: "recent" | "popular" | "alpha" | "rating";
   }
@@ -83,7 +82,7 @@ export async function getPrompts(
   let q = supabase().from("prompts").select("*").eq("org_id", orgId);
 
   if (filters?.folderId) q = q.eq("folder_id", filters.folderId);
-  if (filters?.departmentId) q = q.eq("department_id", filters.departmentId);
+  if (filters?.teamId) q = q.eq("department_id", filters.teamId);
   if (filters?.favoritesOnly) q = q.eq("is_favorite", true);
 
   switch (filters?.sort) {
@@ -300,35 +299,6 @@ export async function saveFolderApi(folder: Partial<Folder>): Promise<Folder | n
 
 export async function deleteFolderApi(id: string): Promise<boolean> {
   const { error } = await supabase().from("folders").delete().eq("id", id);
-  return !error;
-}
-
-// ─── Departments ───
-
-export async function saveDepartmentApi(dept: Partial<Department>): Promise<Department | null> {
-  const orgId = await getOrgId();
-  if (!orgId) return null;
-
-  if (dept.id) {
-    const { data } = await supabase()
-      .from("departments")
-      .update({ name: dept.name })
-      .eq("id", dept.id)
-      .select()
-      .single();
-    return data;
-  }
-
-  const { data } = await supabase()
-    .from("departments")
-    .insert({ org_id: orgId, name: dept.name || "" })
-    .select()
-    .single();
-  return data;
-}
-
-export async function deleteDepartmentApi(id: string): Promise<boolean> {
-  const { error } = await supabase().from("departments").delete().eq("id", id);
   return !error;
 }
 
@@ -754,11 +724,11 @@ export async function getAnalytics(): Promise<Analytics | null> {
   const totalRating = prompts.reduce((sum, p) => sum + (p.rating_total || 0), 0);
   const ratingCount = prompts.reduce((sum, p) => sum + (p.rating_count || 0), 0);
 
-  const departmentUsage: Record<string, number> = {};
+  const teamUsage: Record<string, number> = {};
   for (const p of prompts) {
     if (p.department_id) {
-      departmentUsage[p.department_id] =
-        (departmentUsage[p.department_id] || 0) + (p.usage_count || 0);
+      teamUsage[p.department_id] =
+        (teamUsage[p.department_id] || 0) + (p.usage_count || 0);
     }
   }
 
@@ -816,7 +786,7 @@ export async function getAnalytics(): Promise<Analytics | null> {
     usesThisWeek: weekEvents.length,
     usesLastWeek: lastWeekEvents.length,
     topPrompts,
-    departmentUsage,
+    teamUsage,
     dailyUsage,
     userUsage,
     templateCount,
@@ -947,15 +917,10 @@ export async function exportPack(
     .select("*")
     .in("id", promptIds);
 
-  if (!orgId) return { format: "teamprompt-pack", version: "1.0", name: packName, exported_at: new Date().toISOString(), prompts: [], folders: [], departments: [] };
+  if (!orgId) return { format: "teamprompt-pack", version: "1.0", name: packName, exported_at: new Date().toISOString(), prompts: [], folders: [] };
 
   const { data: folders } = await db
     .from("folders")
-    .select("*")
-    .eq("org_id", orgId);
-
-  const { data: departments } = await db
-    .from("departments")
     .select("*")
     .eq("org_id", orgId);
 
@@ -966,7 +931,6 @@ export async function exportPack(
     exported_at: new Date().toISOString(),
     prompts: prompts || [],
     folders: folders || [],
-    departments: departments || [],
   };
 }
 

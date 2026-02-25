@@ -86,7 +86,7 @@ export const FEATURE_CONFIG: Record<BooleanFeature, FeatureMeta> = {
     description: "Track usage patterns, team performance, and prompt effectiveness.",
     benefits: [
       "Daily usage charts and trend tracking",
-      "Per-member and per-department breakdowns",
+      "Per-member and per-team breakdowns",
       "Top prompts and rating insights",
     ],
     unlockPlan: "pro",

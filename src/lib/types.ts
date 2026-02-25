@@ -83,6 +83,7 @@ export interface Prompt {
   example_output: string | null;
   tags: string[];
   folder_id: string | null;
+  /** Stores team_id. DB column name retained. */
   department_id: string | null;
   status: PromptStatus;
   version: number;
@@ -125,13 +126,8 @@ export interface Folder {
   updated_at: string;
 }
 
-export interface Department {
-  id: string;
-  org_id: string;
-  name: string;
-  created_at: string;
-  updated_at: string;
-}
+/** @deprecated Departments removed — use Team instead. */
+export type Department = Team;
 
 export interface Team {
   id: string;
@@ -283,7 +279,6 @@ export interface OrgData {
   org: Organization | null;
   prompts: Prompt[];
   folders: Folder[];
-  departments: Department[];
   teams: Team[];
   members: Member[];
   collections: Collection[];
@@ -308,7 +303,7 @@ export interface Analytics {
   usesThisWeek: number;
   usesLastWeek: number;
   topPrompts: Prompt[];
-  departmentUsage: Record<string, number>;
+  teamUsage: Record<string, number>;
   dailyUsage: { date: string; count: number }[];
   userUsage: { userId: string; name: string; count: number }[];
   templateCount: number;
@@ -338,7 +333,6 @@ export interface ExportPack {
   exported_at: string;
   prompts: Prompt[];
   folders: Folder[];
-  departments: Department[];
 }
 
 // ─── Notifications ───

@@ -52,7 +52,7 @@ import {
   importSensitiveTerms,
 } from "@/lib/sensitive-terms-api";
 import { toast } from "sonner";
-import type { SensitiveTerm, SensitiveTermCategory } from "@/lib/types";
+import type { SensitiveTerm, SensitiveTermCategory, Team } from "@/lib/types";
 
 const CATEGORY_CONFIG: Record<SensitiveTermCategory, { label: string; icon: React.ElementType; color: string }> = {
   customer_data: { label: "Customer Data", icon: Users, color: "text-blue-500 bg-blue-500/10" },
@@ -68,9 +68,10 @@ const CATEGORY_CONFIG: Record<SensitiveTermCategory, { label: string; icon: Reac
 
 interface SensitiveTermsManagerProps {
   canEdit: boolean;
+  teams?: Team[];
 }
 
-export function SensitiveTermsManager({ canEdit }: SensitiveTermsManagerProps) {
+export function SensitiveTermsManager({ canEdit, teams = [] }: SensitiveTermsManagerProps) {
   const [terms, setTerms] = useState<SensitiveTerm[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
@@ -83,6 +84,9 @@ export function SensitiveTermsManager({ canEdit }: SensitiveTermsManagerProps) {
   const [category, setCategory] = useState<SensitiveTermCategory>("custom");
   const [description, setDescription] = useState("");
   const [severity, setSeverity] = useState<"block" | "warn">("warn");
+  const [scopeTeamId, setScopeTeamId] = useState<string>("global");
+
+  const teamNameMap = new Map(teams.map((t) => [t.id, t.name]));
 
   // Import state
   const [importText, setImportText] = useState("");
@@ -111,6 +115,7 @@ export function SensitiveTermsManager({ canEdit }: SensitiveTermsManagerProps) {
       setCategory(termData.category);
       setDescription(termData.description || "");
       setSeverity(termData.severity);
+      setScopeTeamId(termData.team_id || "global");
     } else {
       setEditTerm(null);
       setTerm("");
@@ -118,6 +123,7 @@ export function SensitiveTermsManager({ canEdit }: SensitiveTermsManagerProps) {
       setCategory("custom");
       setDescription("");
       setSeverity("warn");
+      setScopeTeamId("global");
     }
     setModalOpen(true);
   };
@@ -129,6 +135,7 @@ export function SensitiveTermsManager({ canEdit }: SensitiveTermsManagerProps) {
     }
 
     try {
+      const resolvedTeamId = scopeTeamId === "global" ? null : scopeTeamId;
       if (editTerm) {
         await updateSensitiveTerm(editTerm.id, {
           term: term.trim(),
@@ -136,6 +143,7 @@ export function SensitiveTermsManager({ canEdit }: SensitiveTermsManagerProps) {
           category,
           description: description.trim() || null,
           severity,
+          team_id: resolvedTeamId,
         });
         toast.success("Term updated");
       } else {
@@ -147,6 +155,7 @@ export function SensitiveTermsManager({ canEdit }: SensitiveTermsManagerProps) {
           severity,
           is_active: true,
           source: "manual",
+          team_id: resolvedTeamId,
         });
         toast.success("Term created");
       }
@@ -270,6 +279,7 @@ export function SensitiveTermsManager({ canEdit }: SensitiveTermsManagerProps) {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Term</TableHead>
+                      <TableHead>Scope</TableHead>
                       <TableHead>Category</TableHead>
                       <TableHead>Type</TableHead>
                       <TableHead>Severity</TableHead>
@@ -292,6 +302,11 @@ export function SensitiveTermsManager({ canEdit }: SensitiveTermsManagerProps) {
                                 </p>
                               )}
                             </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={t.team_id ? "secondary" : "outline"} className="text-xs">
+                              {t.team_id ? teamNameMap.get(t.team_id) || "Team" : "Global"}
+                            </Badge>
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
@@ -410,17 +425,33 @@ export function SensitiveTermsManager({ canEdit }: SensitiveTermsManagerProps) {
                 placeholder="Why this term is sensitive"
               />
             </div>
-            <div className="space-y-2">
-              <Label>Action</Label>
-              <Select value={severity} onValueChange={(v) => setSeverity(v as typeof severity)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="block">Block (prevent submission)</SelectItem>
-                  <SelectItem value="warn">Warn (allow with alert)</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Action</Label>
+                <Select value={severity} onValueChange={(v) => setSeverity(v as typeof severity)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="block">Block (prevent submission)</SelectItem>
+                    <SelectItem value="warn">Warn (allow with alert)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Scope</Label>
+                <Select value={scopeTeamId} onValueChange={setScopeTeamId}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="global">Global (all teams)</SelectItem>
+                    {teams.map((t) => (
+                      <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
           <div className="flex justify-end gap-2 mt-4">

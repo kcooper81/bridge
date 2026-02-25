@@ -241,6 +241,7 @@ export interface PlanLimits {
 export interface SecurityRule {
   id: string;
   org_id: string;
+  team_id: string | null;
   name: string;
   description: string | null;
   pattern: string;
@@ -394,6 +395,7 @@ export type SensitiveTermSource = "manual" | "import" | "sync" | "ai_suggested";
 export interface SensitiveTerm {
   id: string;
   org_id: string;
+  team_id: string | null;
   term: string;
   term_type: "exact" | "pattern" | "keyword";
   category: SensitiveTermCategory;

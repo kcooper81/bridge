@@ -56,18 +56,32 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Fetch active security rules AND sensitive terms for the org
+    // Fetch user's team memberships for team-scoped rule filtering
+    const { data: teamRows } = await db
+      .from("team_members")
+      .select("team_id")
+      .eq("user_id", user.id);
+    const userTeamIds = (teamRows || []).map((r) => r.team_id);
+
+    // Build team filter: org-wide rules (team_id IS NULL) + user's team rules
+    const teamFilter = userTeamIds.length > 0
+      ? `team_id.is.null,team_id.in.(${userTeamIds.join(",")})`
+      : "team_id.is.null";
+
+    // Fetch active security rules AND sensitive terms for the org (filtered by team scope)
     const [rulesResult, termsResult] = await Promise.all([
       db
         .from("security_rules")
         .select("*")
         .eq("org_id", profile.org_id)
-        .eq("is_active", true),
+        .eq("is_active", true)
+        .or(teamFilter),
       db
         .from("sensitive_terms")
         .select("*")
         .eq("org_id", profile.org_id)
-        .eq("is_active", true),
+        .eq("is_active", true)
+        .or(teamFilter),
     ]);
 
     const activeRules = rulesResult.data || [];

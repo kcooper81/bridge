@@ -43,23 +43,36 @@ export async function GET(request: NextRequest) {
 
     const orgId = profile.org_id;
 
+    // Fetch user's team memberships for team-scoped rule filtering
+    const { data: teamRows } = await db
+      .from("team_members")
+      .select("team_id")
+      .eq("user_id", user.id);
+    const userTeamIds = (teamRows || []).map((r) => r.team_id);
+
+    const teamFilter = userTeamIds.length > 0
+      ? `team_id.is.null,team_id.in.(${userTeamIds.join(",")})`
+      : "team_id.is.null";
+
     // Fetch in parallel: active rules count, weekly violations, recent violations
     const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
     const [rulesResult, termsResult, weeklyResult, recentResult] = await Promise.all([
-      // Active security rules count
+      // Active security rules count (filtered by team scope)
       db
         .from("security_rules")
         .select("id", { count: "exact", head: true })
         .eq("org_id", orgId)
-        .eq("is_active", true),
+        .eq("is_active", true)
+        .or(teamFilter),
 
-      // Active sensitive terms count
+      // Active sensitive terms count (filtered by team scope)
       db
         .from("sensitive_terms")
         .select("id", { count: "exact", head: true })
         .eq("org_id", orgId)
-        .eq("is_active", true),
+        .eq("is_active", true)
+        .or(teamFilter),
 
       // Violations this week
       db

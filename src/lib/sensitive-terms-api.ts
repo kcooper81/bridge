@@ -6,6 +6,7 @@ import type { SensitiveTerm, SuggestedRule, DataImport, SecuritySettings } from 
 export async function getSensitiveTerms(options?: {
   category?: string;
   activeOnly?: boolean;
+  teamId?: string | null; // undefined = all, null = global only, string = specific team
 }): Promise<SensitiveTerm[]> {
   const supabase = createClient();
   let query = supabase.from("sensitive_terms").select("*").order("created_at", { ascending: false });
@@ -16,6 +17,13 @@ export async function getSensitiveTerms(options?: {
   if (options?.activeOnly) {
     query = query.eq("is_active", true);
   }
+  if (options?.teamId !== undefined) {
+    if (options.teamId === null) {
+      query = query.is("team_id", null);
+    } else {
+      query = query.eq("team_id", options.teamId);
+    }
+  }
 
   const { data, error } = await query;
   if (error) throw error;
@@ -23,7 +31,7 @@ export async function getSensitiveTerms(options?: {
 }
 
 export async function createSensitiveTerm(
-  term: Omit<SensitiveTerm, "id" | "org_id" | "created_by" | "created_at" | "updated_at">
+  term: Omit<SensitiveTerm, "id" | "org_id" | "team_id" | "created_by" | "created_at" | "updated_at"> & { team_id?: string | null }
 ): Promise<SensitiveTerm> {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -37,6 +45,7 @@ export async function createSensitiveTerm(
     .from("sensitive_terms")
     .insert({
       ...term,
+      team_id: term.team_id ?? null,
       org_id: profile?.org_id,
       created_by: user?.id,
     })

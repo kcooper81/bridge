@@ -62,6 +62,7 @@ import type {
   SecurityRule,
   SecuritySeverity,
   SecurityViolation,
+  Team,
 } from "@/lib/types";
 
 export default function GuardrailsPage() {
@@ -72,6 +73,8 @@ export default function GuardrailsPage() {
   const [violations, setViolations] = useState<SecurityViolation[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editRule, setEditRule] = useState<SecurityRule | null>(null);
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [teamFilter, setTeamFilter] = useState<string>("all"); // "all" | "global" | team_id
 
   // Form state
   const [name, setName] = useState("");
@@ -80,6 +83,7 @@ export default function GuardrailsPage() {
   const [patternType, setPatternType] = useState<SecurityPatternType>("regex");
   const [category, setCategory] = useState<SecurityCategory>("custom");
   const [severity, setSeverity] = useState<SecuritySeverity>("block");
+  const [scopeTeamId, setScopeTeamId] = useState<string>("global"); // "global" | team_id
   const [testContent, setTestContent] = useState("");
   const [testResult, setTestResult] = useState<{ matched: boolean; matchedText: string | null } | null>(null);
 
@@ -88,7 +92,7 @@ export default function GuardrailsPage() {
     try {
       const supabase = createClient();
 
-      const [rulesRes, violationsRes] = await Promise.all([
+      const [rulesRes, violationsRes, teamsRes] = await Promise.all([
         supabase.from("security_rules").select("*").eq("org_id", org.id).order("name"),
         supabase
           .from("security_violations")
@@ -96,10 +100,12 @@ export default function GuardrailsPage() {
           .eq("org_id", org.id)
           .order("created_at", { ascending: false })
           .limit(100),
+        supabase.from("teams").select("*").eq("org_id", org.id).order("name"),
       ]);
 
       setRules(rulesRes.data || []);
       setViolations(violationsRes.data || []);
+      setTeams(teamsRes.data || []);
     } catch (err) {
       console.error("Failed to load guardrails data:", err);
     }
@@ -118,6 +124,7 @@ export default function GuardrailsPage() {
       setPatternType(rule.pattern_type);
       setCategory(rule.category);
       setSeverity(rule.severity);
+      setScopeTeamId(rule.team_id || "global");
     } else {
       setEditRule(null);
       setName("");
@@ -126,6 +133,7 @@ export default function GuardrailsPage() {
       setPatternType("regex");
       setCategory("custom");
       setSeverity("block");
+      setScopeTeamId("global");
     }
     setTestContent("");
     setTestResult(null);
@@ -138,6 +146,7 @@ export default function GuardrailsPage() {
 
     const data = {
       org_id: org.id,
+      team_id: scopeTeamId === "global" ? null : scopeTeamId,
       name: name.trim(),
       description: description.trim() || null,
       pattern: pattern.trim(),
@@ -225,6 +234,15 @@ export default function GuardrailsPage() {
     setTestResult(result);
   }
 
+  // Filter rules by team scope
+  const filteredRules = rules.filter((r) => {
+    if (teamFilter === "all") return true;
+    if (teamFilter === "global") return r.team_id === null;
+    return r.team_id === teamFilter;
+  });
+
+  const teamNameMap = new Map(teams.map((t) => [t.id, t.name]));
+
   const activeRules = rules.filter((r) => r.is_active).length;
   const weekViolations = violations.filter(
     (v) => new Date(v.created_at) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
@@ -305,11 +323,29 @@ export default function GuardrailsPage() {
           {!canAccess("custom_security") && (
             <UpgradeGate feature="custom_security" title="Custom Security Policies" className="mb-6 py-10" />
           )}
+          {teams.length > 0 && (
+            <div className="mb-4 flex items-center gap-2">
+              <Label className="text-sm text-muted-foreground">Scope:</Label>
+              <Select value={teamFilter} onValueChange={setTeamFilter}>
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Policies</SelectItem>
+                  <SelectItem value="global">Global Only</SelectItem>
+                  {teams.map((t) => (
+                    <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           <div className="rounded-lg border border-border">
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Policy</TableHead>
+                  <TableHead>Scope</TableHead>
                   <TableHead>Pattern</TableHead>
                   <TableHead>Category</TableHead>
                   <TableHead>Severity</TableHead>
@@ -318,14 +354,16 @@ export default function GuardrailsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {rules.length === 0 ? (
+                {filteredRules.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
-                      No policies yet. Install defaults to get started.
+                    <TableCell colSpan={7} className="h-32 text-center text-muted-foreground">
+                      {rules.length === 0
+                        ? "No policies yet. Install defaults to get started."
+                        : "No policies match the current filter."}
                     </TableCell>
                   </TableRow>
                 ) : (
-                  rules.map((rule) => (
+                  filteredRules.map((rule) => (
                     <TableRow key={rule.id}>
                       <TableCell>
                         <div>
@@ -334,6 +372,11 @@ export default function GuardrailsPage() {
                             <p className="text-xs text-muted-foreground truncate max-w-xs">{rule.description}</p>
                           )}
                         </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={rule.team_id ? "secondary" : "outline"} className="text-xs">
+                          {rule.team_id ? teamNameMap.get(rule.team_id) || "Team" : "Global"}
+                        </Badge>
                       </TableCell>
                       <TableCell>
                         <code className="text-xs bg-muted px-1.5 py-0.5 rounded">{rule.pattern_type}</code>
@@ -427,7 +470,7 @@ export default function GuardrailsPage() {
 
         {/* Sensitive Terms Tab */}
         <TabsContent value="terms" className="mt-4">
-          <SensitiveTermsManager canEdit={canEdit} />
+          <SensitiveTermsManager canEdit={canEdit} teams={teams} />
         </TabsContent>
 
         {/* Detection Settings Tab */}
@@ -498,15 +541,29 @@ export default function GuardrailsPage() {
                 className="font-mono text-sm"
               />
             </div>
-            <div className="space-y-2">
-              <Label>Severity</Label>
-              <Select value={severity} onValueChange={(v) => setSeverity(v as SecuritySeverity)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="block">Blocked (prevent save)</SelectItem>
-                  <SelectItem value="warn">Warning (allow with alert)</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Severity</Label>
+                <Select value={severity} onValueChange={(v) => setSeverity(v as SecuritySeverity)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="block">Blocked (prevent save)</SelectItem>
+                    <SelectItem value="warn">Warning (allow with alert)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Scope</Label>
+                <Select value={scopeTeamId} onValueChange={setScopeTeamId}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="global">Global (all teams)</SelectItem>
+                    {teams.map((t) => (
+                      <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             {/* Pattern Tester */}

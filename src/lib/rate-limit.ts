@@ -36,10 +36,12 @@ export const limiters = {
   inviteAccept: createLimiter(10, "1 m", "invite-accept"),
   support: createLimiter(5, "10 m", "support"),
   securityStatus: createLimiter(20, "1 m", "security-status"),
+  enableShield: createLimiter(5, "1 m", "enable-shield"),
   orgEnsure: createLimiter(5, "1 m", "org-ensure"),
   accountDelete: createLimiter(3, "10 m", "account-delete"),
   stripeCheckout: createLimiter(10, "1 m", "stripe-checkout"),
   stripePortal: createLimiter(10, "1 m", "stripe-portal"),
+  stripeWebhook: createLimiter(200, "1 m", "stripe-webhook"),
 };
 
 export async function checkRateLimit(

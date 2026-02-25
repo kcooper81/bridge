@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createServiceClient } from "@/lib/supabase/server";
+import { limiters, checkRateLimit } from "@/lib/rate-limit";
 
 function getStripe() {
   return new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -52,6 +53,11 @@ async function upsertSubscription(
 export async function POST(request: NextRequest) {
   const stripe = getStripe();
   try {
+    // Rate limit by IP to prevent abuse before doing signature verification
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+    const rl = await checkRateLimit(limiters.stripeWebhook, ip);
+    if (!rl.success) return rl.response;
+
     const body = await request.text();
     const signature = request.headers.get("stripe-signature");
 

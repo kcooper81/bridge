@@ -60,6 +60,8 @@ export interface Organization {
     default_visibility?: CollectionVisibility;
     setup_complete?: boolean;
   } | null;
+  security_settings?: Record<string, unknown> | null;
+  is_suspended?: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -259,7 +261,7 @@ export interface SecurityViolation {
   id: string;
   org_id: string;
   prompt_id: string | null;
-  rule_id: string;
+  rule_id: string | null;
   matched_text: string;
   user_id: string;
   action_taken: SecurityAction;

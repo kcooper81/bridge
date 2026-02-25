@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
     const extVersion = request.headers.get("x-extension-version");
     trackExtensionActivity(db, user.id, extVersion);
 
-    const rl = await checkRateLimit(limiters.securityStatus, user.id);
+    const rl = await checkRateLimit(limiters.enableShield, user.id);
     if (!rl.success) return withCors(rl.response, request);
 
     const { data: profile } = await db

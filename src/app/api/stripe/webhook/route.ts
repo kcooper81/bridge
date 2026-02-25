@@ -130,6 +130,7 @@ export async function POST(request: NextRequest) {
           .from("subscriptions")
           .update({
             status: "canceled",
+            plan: "free",
             canceled_at: sub.canceled_at
               ? new Date(sub.canceled_at * 1000).toISOString()
               : new Date().toISOString(),

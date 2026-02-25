@@ -64,6 +64,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check for existing active subscription — plan changes go through the portal
+    const { data: existingSub } = await db
+      .from("subscriptions")
+      .select("stripe_customer_id, stripe_subscription_id, status")
+      .eq("org_id", orgId)
+      .maybeSingle();
+
+    if (existingSub?.status === "active" || existingSub?.status === "trialing") {
+      return NextResponse.json(
+        { error: "You already have an active subscription. Use 'Manage Billing' to change plans." },
+        { status: 409 }
+      );
+    }
+
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://teamprompt.app";
     const seatCount = Math.max(
       planConfig.minSeats,
@@ -89,10 +103,16 @@ export async function POST(request: NextRequest) {
       line_items: [lineItem],
       success_url: `${siteUrl}/vault?checkout=success&plan=${plan}`,
       cancel_url: `${siteUrl}/vault?checkout=cancel`,
-      customer_email: user.email,
       client_reference_id: orgId,
       metadata: { orgId, userId: user.id, plan },
     };
+
+    // Reuse existing Stripe customer if available (prevents orphaned customers)
+    if (existingSub?.stripe_customer_id) {
+      sessionParams.customer = existingSub.stripe_customer_id;
+    } else {
+      sessionParams.customer_email = user.email;
+    }
 
     if (planConfig.trial) {
       sessionParams.subscription_data = {

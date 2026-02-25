@@ -155,16 +155,23 @@ export default defineContentScript({
     window.addEventListener("popstate", () => onUrlChange());
 
     // Periodic refresh every 60 seconds (fast enough to catch rule changes)
-    setInterval(() => {
+    const refreshInterval = setInterval(() => {
+      if (isContextInvalidated()) {
+        clearInterval(refreshInterval);
+        clearInterval(pingInterval);
+        return;
+      }
       if (_isAuthenticated && _isOnline) {
         refreshShieldStatus();
       }
     }, 60 * 1000);
 
     // ─── Proactive Context Invalidation Check ───
-    setInterval(() => {
+    const pingInterval = setInterval(() => {
       browser.runtime.sendMessage({ type: "PING" }).catch(() => {
-        // "Extension context invalidated" — show reload banner immediately
+        // "Extension context invalidated" — show reload banner and stop intervals
+        clearInterval(refreshInterval);
+        clearInterval(pingInterval);
         showReloadBanner();
       });
     }, 30 * 1000);

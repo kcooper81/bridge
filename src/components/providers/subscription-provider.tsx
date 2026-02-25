@@ -62,7 +62,9 @@ export function SubscriptionProvider({
 
     if (sub) {
       setSubscription(sub);
-      setPlanLimits(PLAN_LIMITS[sub.plan as PlanTier] || PLAN_LIMITS.free);
+      // Canceled subscriptions should use free limits
+      const effectivePlan = sub.status === "canceled" ? "free" : (sub.plan as PlanTier);
+      setPlanLimits(PLAN_LIMITS[effectivePlan] || PLAN_LIMITS.free);
     }
   }, []);
 

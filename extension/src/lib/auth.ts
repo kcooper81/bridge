@@ -115,12 +115,16 @@ export async function refreshSession(): Promise<void> {
         accessToken: tokens.access_token,
         refreshToken: tokens.refresh_token,
       });
+    } else if (res.status === 400 || res.status === 403) {
+      // Refresh token is permanently invalid (expired or revoked) — clear
+      // tokens so the UI switches to "not signed in" instead of showing
+      // stale "protected" state with every scan silently failing.
+      extAuthDebug.error("refresh", "refreshSession: token permanently invalid, clearing", { status: res.status }); // AUTH-DEBUG
+      await browser.storage.local.remove(["accessToken", "refreshToken", "user"]);
     } else {
-      // Don't clear tokens on transient failures — an expired access token
-      // is better than no token (user stays "signed in" and the next refresh
-      // or auth-bridge sync can recover). Only a deliberate logout should
-      // clear tokens.
-      extAuthDebug.error("refresh", "refreshSession: failed (keeping tokens)", { status: res.status }); // AUTH-DEBUG
+      // Transient server error (5xx) — keep tokens, will retry on next alarm
+      // or auth-bridge sync can recover.
+      extAuthDebug.error("refresh", "refreshSession: transient failure (keeping tokens)", { status: res.status }); // AUTH-DEBUG
     }
   } catch {
     extAuthDebug.error("refresh", "refreshSession: network error"); // AUTH-DEBUG

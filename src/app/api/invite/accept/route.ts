@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { limiters, checkRateLimit } from "@/lib/rate-limit";
+import { PLAN_LIMITS } from "@/lib/constants";
+import type { PlanTier } from "@/lib/types";
 
 export async function POST(request: NextRequest) {
   try {
@@ -105,6 +107,30 @@ export async function POST(request: NextRequest) {
 
       // Delete the orphaned org
       await db.from("organizations").delete().eq("id", oldOrgId);
+    }
+
+    // Check member limit before allowing join
+    const { data: inviteOrg } = await db
+      .from("organizations")
+      .select("plan")
+      .eq("id", invite.org_id)
+      .single();
+
+    const orgPlan = (inviteOrg?.plan || "free") as PlanTier;
+    const limits = PLAN_LIMITS[orgPlan] || PLAN_LIMITS.free;
+
+    if (limits.max_members !== -1) {
+      const { count: memberCount } = await db
+        .from("profiles")
+        .select("id", { count: "exact", head: true })
+        .eq("org_id", invite.org_id);
+
+      if ((memberCount || 0) >= limits.max_members) {
+        return NextResponse.json(
+          { error: "This organization has reached its member limit. Please ask an admin to upgrade the plan." },
+          { status: 403 }
+        );
+      }
     }
 
     // Update user's profile with org and role

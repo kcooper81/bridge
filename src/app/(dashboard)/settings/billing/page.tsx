@@ -263,6 +263,17 @@ export default function BillingPage() {
                       <Button variant="outline" className="w-full" disabled>
                         Free
                       </Button>
+                    ) : subscription?.stripe_customer_id && (subscription.status === "active" || subscription.status === "trialing") ? (
+                      <Button
+                        className="w-full"
+                        variant="outline"
+                        onClick={openPortal}
+                        disabled={loadingPortal}
+                      >
+                        {loadingPortal && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Switch via Billing
+                        <ArrowUpRight className="ml-2 h-4 w-4" />
+                      </Button>
                     ) : (
                       <Button
                         className="w-full"
@@ -272,7 +283,7 @@ export default function BillingPage() {
                         {loadingCheckout === plan && (
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         )}
-                        {currentPlan !== "free" ? "Switch" : "Upgrade"}
+                        Upgrade
                       </Button>
                     )}
                   </div>

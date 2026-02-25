@@ -60,7 +60,13 @@ export default defineBackground(() => {
         return true; // keep channel open for async response
       } else if (message.type === "SESSION_CLEAR") {
         extAuthDebug.log("bridge", "bg: SESSION_CLEAR received"); // AUTH-DEBUG
-        browser.storage.local.remove(["accessToken", "refreshToken", "user"]);
+        browser.storage.local.get(["user"]).then((data) => {
+          const userId = data.user?.id;
+          browser.storage.local.remove(["accessToken", "refreshToken", "user"]);
+          if (userId) {
+            import("../lib/auth").then((m) => m.sendSessionEvent(userId, "session_lost"));
+          }
+        });
         console.log("TeamPrompt: Session cleared");
         sendResponse({ success: true });
       } else if (message.type === "OPEN_SIDE_PANEL") {

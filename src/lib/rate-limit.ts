@@ -42,6 +42,7 @@ export const limiters = {
   stripeCheckout: createLimiter(10, "1 m", "stripe-checkout"),
   stripePortal: createLimiter(10, "1 m", "stripe-portal"),
   stripeWebhook: createLimiter(200, "1 m", "stripe-webhook"),
+  sessionEvent: createLimiter(5, "1 m", "session-event"),
 };
 
 export async function checkRateLimit(

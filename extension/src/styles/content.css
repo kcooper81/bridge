@@ -448,15 +448,6 @@
   background: #b91c1c;
 }
 
-.tp-session-banner-btn-dismiss {
-  background: none;
-  border: 1px solid rgba(254, 202, 202, 0.3);
-  color: #fecaca;
-}
-.tp-session-banner-btn-dismiss:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
 /* ─── Reload Banner (Fix 4) ─── */
 
 .tp-reload-banner {

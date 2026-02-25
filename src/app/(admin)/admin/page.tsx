@@ -23,7 +23,15 @@ import {
   ArrowDownRight,
   CreditCard,
   UserPlus,
+  Shield,
 } from "lucide-react";
+
+interface ProtectionCoverage {
+  protected: number;
+  inactive: number;
+  unprotected: number;
+  noExtension: number;
+}
 
 interface DashboardStats {
   totalOrganizations: number;
@@ -39,6 +47,7 @@ interface DashboardStats {
     team: number;
     business: number;
   };
+  protectionCoverage: ProtectionCoverage;
 }
 
 interface AlertItem {
@@ -91,6 +100,7 @@ export default function AdminDashboardPage() {
       newTicketsResult,
       unresolvedErrorsResult,
       recentOrgsResult,
+      protectionResult,
     ] = await Promise.all([
       supabase.from("organizations").select("*", { count: "exact", head: true }),
       supabase.from("profiles").select("*", { count: "exact", head: true }),
@@ -102,6 +112,7 @@ export default function AdminDashboardPage() {
       supabase.from("feedback").select("*", { count: "exact", head: true }).eq("status", "new"),
       supabase.from("error_logs").select("*", { count: "exact", head: true }).eq("resolved", false),
       supabase.from("organizations").select("id, name, created_at").order("created_at", { ascending: false }).limit(5),
+      supabase.from("profiles").select("extension_status, last_extension_active"),
     ]);
 
     const planDistribution = { free: 0, pro: 0, team: 0, business: 0 };
@@ -122,6 +133,24 @@ export default function AdminDashboardPage() {
       }
     });
 
+    // Compute protection coverage
+    const thirtyMinAgo = Date.now() - 30 * 60 * 1000;
+    const protectionCoverage: ProtectionCoverage = { protected: 0, inactive: 0, unprotected: 0, noExtension: 0 };
+    (protectionResult.data || []).forEach((p: { extension_status: string | null; last_extension_active: string | null }) => {
+      const status = p.extension_status || "unknown";
+      if (status === "session_lost") {
+        protectionCoverage.unprotected++;
+      } else if (status === "active" && p.last_extension_active) {
+        if (new Date(p.last_extension_active).getTime() > thirtyMinAgo) {
+          protectionCoverage.protected++;
+        } else {
+          protectionCoverage.inactive++;
+        }
+      } else {
+        protectionCoverage.noExtension++;
+      }
+    });
+
     const recentOrgIds = recentOrgsResult.data?.map((o: { id: string }) => o.id) || [];
     const { data: recentSubs } = recentOrgIds.length > 0
       ? await supabase.from("subscriptions").select("org_id, plan").in("org_id", recentOrgIds)
@@ -138,6 +167,7 @@ export default function AdminDashboardPage() {
       newOrgsThisMonth: orgsThisMonthResult.count || 0,
       mrr: totalMrr,
       planDistribution,
+      protectionCoverage,
     });
 
     const alertItems: AlertItem[] = [];
@@ -365,6 +395,79 @@ export default function AdminDashboardPage() {
               <div className="text-sm text-muted-foreground">Business</div>
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Protection Coverage */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Shield className="h-5 w-5" />
+            Protection Coverage
+          </CardTitle>
+          <CardDescription>Extension protection status across all users</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-4">
+            <div className="text-center p-4 bg-green-100 dark:bg-green-900/30 rounded-lg">
+              <div className="text-2xl font-bold">
+                {stats?.protectionCoverage.protected || 0}
+              </div>
+              <div className="text-sm text-muted-foreground flex items-center justify-center gap-1.5">
+                <span className="inline-block h-2 w-2 rounded-full bg-green-500" />
+                Protected
+              </div>
+            </div>
+            <div className="text-center p-4 bg-slate-100 dark:bg-slate-800 rounded-lg">
+              <div className="text-2xl font-bold">
+                {stats?.protectionCoverage.inactive || 0}
+              </div>
+              <div className="text-sm text-muted-foreground flex items-center justify-center gap-1.5">
+                <span className="inline-block h-2 w-2 rounded-full bg-gray-400" />
+                Inactive
+              </div>
+            </div>
+            <div className="text-center p-4 bg-red-100 dark:bg-red-900/30 rounded-lg">
+              <div className="text-2xl font-bold">
+                {stats?.protectionCoverage.unprotected || 0}
+              </div>
+              <div className="text-sm text-muted-foreground flex items-center justify-center gap-1.5">
+                <span className="inline-block h-2 w-2 rounded-full bg-red-500" />
+                Unprotected
+              </div>
+            </div>
+            <div className="text-center p-4 bg-slate-100 dark:bg-slate-800 rounded-lg">
+              <div className="text-2xl font-bold">
+                {stats?.protectionCoverage.noExtension || 0}
+              </div>
+              <div className="text-sm text-muted-foreground flex items-center justify-center gap-1.5">
+                <span className="inline-block h-2 w-2 rounded-full bg-gray-400" />
+                No Extension
+              </div>
+            </div>
+          </div>
+          {(() => {
+            const total =
+              (stats?.protectionCoverage.protected || 0) +
+              (stats?.protectionCoverage.inactive || 0) +
+              (stats?.protectionCoverage.unprotected || 0) +
+              (stats?.protectionCoverage.noExtension || 0);
+            const pct = total > 0 ? Math.round(((stats?.protectionCoverage.protected || 0) / total) * 100) : 0;
+            return (
+              <div>
+                <div className="flex items-center justify-between text-sm mb-1">
+                  <span className="text-muted-foreground">Active protection rate</span>
+                  <span className="font-medium">{pct}%</span>
+                </div>
+                <div className="h-2 rounded-full bg-muted overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-green-500 transition-all"
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
+              </div>
+            );
+          })()}
         </CardContent>
       </Card>
 

@@ -18,6 +18,7 @@ import {
   Download,
 } from "lucide-react";
 import { toast } from "sonner";
+import { ProtectionBadge } from "@/components/admin/protection-badge";
 
 interface UserRow {
   id: string;
@@ -30,6 +31,7 @@ interface UserRow {
   created_at: string;
   last_extension_active: string | null;
   extension_version: string | null;
+  extension_status: string;
 }
 
 const PAGE_SIZE = 20;
@@ -59,6 +61,7 @@ export default function UsersPage() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
   const [filterSuperAdmin, setFilterSuperAdmin] = useState(false);
+  const [filterUnprotected, setFilterUnprotected] = useState(false);
   const [roleFilter, setRoleFilter] = useState<string>("all");
   const [sortKey, setSortKey] = useState<SortKey>("created_at");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
@@ -73,7 +76,7 @@ export default function UsersPage() {
     const [profilesRes, orgsRes] = await Promise.all([
       supabase
         .from("profiles")
-        .select("id, name, email, role, is_super_admin, org_id, created_at, last_extension_active, extension_version")
+        .select("id, name, email, role, is_super_admin, org_id, created_at, last_extension_active, extension_version, extension_status")
         .order("created_at", { ascending: false }),
       supabase.from("organizations").select("id, name"),
     ]);
@@ -93,6 +96,7 @@ export default function UsersPage() {
         created_at: string;
         last_extension_active: string | null;
         extension_version: string | null;
+        extension_status: string;
       }) => ({
         ...p,
         org_name: p.org_id ? orgMap.get(p.org_id) || null : null,
@@ -126,6 +130,10 @@ export default function UsersPage() {
 
     if (filterSuperAdmin) {
       filtered = filtered.filter((u) => u.is_super_admin);
+    }
+
+    if (filterUnprotected) {
+      filtered = filtered.filter((u) => u.extension_status === "session_lost");
     }
 
     if (roleFilter !== "all") {
@@ -250,6 +258,17 @@ export default function UsersPage() {
             <Shield className="mr-2 h-4 w-4" />
             Super Admins
           </Button>
+          <Button
+            variant={filterUnprotected ? "destructive" : "outline"}
+            size="sm"
+            onClick={() => {
+              setFilterUnprotected(!filterUnprotected);
+              setPage(0);
+            }}
+          >
+            <ShieldOff className="mr-2 h-4 w-4" />
+            Unprotected
+          </Button>
         </div>
         <div className="flex gap-1 flex-wrap">
           <span className="text-sm text-muted-foreground self-center mr-1">Role:</span>
@@ -303,8 +322,7 @@ export default function UsersPage() {
                         Role <ArrowUpDown className="h-3 w-3" />
                       </button>
                     </th>
-                    <th className="text-left p-3 font-medium hidden lg:table-cell">Last Active</th>
-                    <th className="text-left p-3 font-medium hidden lg:table-cell">Extension</th>
+                    <th className="text-left p-3 font-medium hidden lg:table-cell">Protection</th>
                     <th className="text-left p-3 font-medium hidden xl:table-cell">
                       <button className="flex items-center gap-1 hover:text-foreground" onClick={() => handleSort("created_at")}>
                         Joined <ArrowUpDown className="h-3 w-3" />
@@ -349,17 +367,11 @@ export default function UsersPage() {
                           {user.role}
                         </Badge>
                       </td>
-                      <td className="p-3 text-muted-foreground hidden lg:table-cell">
-                        {relativeTime(user.last_extension_active)}
-                      </td>
                       <td className="p-3 hidden lg:table-cell">
-                        {user.extension_version ? (
-                          <Badge variant="secondary" className="text-xs">
-                            v{user.extension_version}
-                          </Badge>
-                        ) : (
-                          <span className="text-muted-foreground">&mdash;</span>
-                        )}
+                        <ProtectionBadge
+                          status={user.extension_status || "unknown"}
+                          lastActive={user.last_extension_active}
+                        />
                       </td>
                       <td className="p-3 text-muted-foreground hidden xl:table-cell">
                         {new Date(user.created_at).toLocaleDateString()}

@@ -25,6 +25,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
+import { ProtectionBadge } from "@/components/admin/protection-badge";
 
 interface OrgDetail {
   id: string;
@@ -52,6 +53,8 @@ interface MemberRow {
   role: string;
   is_super_admin: boolean;
   created_at: string;
+  extension_status: string;
+  last_extension_active: string | null;
 }
 
 export default function OrgDetailPage() {
@@ -75,7 +78,7 @@ export default function OrgDetailPage() {
     const [orgRes, subRes, membersRes, promptsRes] = await Promise.all([
       supabase.from("organizations").select("*").eq("id", orgId).single(),
       supabase.from("subscriptions").select("plan, status, seats, current_period_end, stripe_customer_id, stripe_subscription_id").eq("org_id", orgId).maybeSingle(),
-      supabase.from("profiles").select("id, name, email, role, is_super_admin, created_at").eq("org_id", orgId).order("created_at"),
+      supabase.from("profiles").select("id, name, email, role, is_super_admin, created_at, extension_status, last_extension_active").eq("org_id", orgId).order("created_at"),
       supabase.from("prompts").select("*", { count: "exact", head: true }).eq("org_id", orgId),
     ]);
 
@@ -294,6 +297,7 @@ export default function OrgDetailPage() {
                   <th className="text-left p-3 font-medium">Name</th>
                   <th className="text-left p-3 font-medium hidden sm:table-cell">Email</th>
                   <th className="text-left p-3 font-medium">Role</th>
+                  <th className="text-left p-3 font-medium hidden md:table-cell">Protection</th>
                   <th className="text-left p-3 font-medium hidden md:table-cell">Joined</th>
                 </tr>
               </thead>
@@ -320,6 +324,12 @@ export default function OrgDetailPage() {
                       <Badge variant="outline" className="capitalize">
                         {m.role}
                       </Badge>
+                    </td>
+                    <td className="p-3 hidden md:table-cell">
+                      <ProtectionBadge
+                        status={m.extension_status || "unknown"}
+                        lastActive={m.last_extension_active}
+                      />
                     </td>
                     <td className="p-3 text-muted-foreground hidden md:table-cell">
                       {new Date(m.created_at).toLocaleDateString()}

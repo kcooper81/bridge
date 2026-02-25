@@ -747,18 +747,12 @@ function showSessionLossBanner() {
     <span class="tp-session-banner-text">TeamPrompt protection paused \u2014 Sign in to restore guardrails</span>
     <div class="tp-session-banner-actions">
       <button id="tp-session-banner-signin" class="tp-session-banner-btn">Sign In</button>
-      <button id="tp-session-banner-dismiss" class="tp-session-banner-btn tp-session-banner-btn-dismiss">Dismiss</button>
     </div>
   `;
   document.body.appendChild(banner);
 
   document.getElementById("tp-session-banner-signin")!.addEventListener("click", () => {
-    banner.remove();
     browser.runtime.sendMessage({ type: "OPEN_LOGIN" }).catch(() => {});
-  });
-
-  document.getElementById("tp-session-banner-dismiss")!.addEventListener("click", () => {
-    banner.remove();
   });
 }
 

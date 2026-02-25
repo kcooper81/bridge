@@ -82,11 +82,11 @@ END $$;
 -- Usage: SELECT * FROM plan_limits WHERE plan = 'pro';
 CREATE OR REPLACE VIEW plan_limits AS
 SELECT * FROM (VALUES
-  ('free',     25,    3,    3,    5,     false, false),
-  ('pro',      -1,    1,   -1,   14,     true,  true),
-  ('team',     -1,   50,   -1,   14,     true,  true),
-  ('business', -1,  500,   -1,   14,     true,  true)
-) AS t(plan, max_prompts, max_members, max_ai_tools, max_standards, analytics, import_export);
+  ('free',     25,    3,    3,    5,  false, false, true,  false, false),
+  ('pro',      -1,    1,   -1,   14,  true,  true,  true,  true,  false),
+  ('team',     -1,   50,   -1,   14,  true,  true,  true,  true,  true),
+  ('business', -1,  500,   -1,   -1,  true,  true,  true,  true,  true)
+) AS t(plan, max_prompts, max_members, max_ai_tools, max_guidelines, analytics, import_export, basic_security, custom_security, audit_log);
 
 COMMENT ON VIEW plan_limits IS
   'Plan feature limits. -1 means unlimited. Join with organizations.plan to enforce limits.';

@@ -15,8 +15,7 @@ import type { PlanTier } from "@/lib/types";
 export type LimitAction =
   | "create_prompt"
   | "add_member"
-  | "add_guideline"
-  | "add_standard";
+  | "add_guideline";
 
 export interface LimitMeta {
   icon: LucideIcon;
@@ -49,14 +48,6 @@ export const LIMIT_CONFIG: Record<LimitAction, LimitMeta> = {
     noun: "guideline",
     nounPlural: "guidelines",
     upgradeValue: "up to 14 guidelines",
-    unlockPlan: "pro",
-    unlockPlanName: "Pro",
-  },
-  add_standard: {
-    icon: BookOpen,
-    noun: "standard",
-    nounPlural: "standards",
-    upgradeValue: "up to 14 standards",
     unlockPlan: "pro",
     unlockPlanName: "Pro",
   },

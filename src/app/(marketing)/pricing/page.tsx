@@ -9,7 +9,7 @@ import { generateFAQSchema } from "@/lib/seo/schemas";
 export const metadata: Metadata = generatePageMetadata({
   title: "Pricing",
   description:
-    "Pick the plan that fits your team. Start free, no credit card required. All paid plans include a 14-day trial.",
+    "Pick the plan that fits your team. Start free, no credit card required. Pro and Team plans include a 14-day trial.",
   path: "/pricing",
   keywords: ["TeamPrompt pricing", "AI tool pricing", "prompt management plans"],
 });
@@ -18,7 +18,7 @@ const faqs = [
   {
     question: "Can I try paid plans before committing?",
     answer:
-      "Yes. All paid plans include a 14-day free trial. You can explore every feature before deciding.",
+      "Yes. Pro and Team plans include a 14-day free trial — no credit card required to start. Business plans start immediately without a trial.",
   },
   {
     question: "What happens when my trial ends?",
@@ -65,7 +65,7 @@ export default function PricingPage() {
             Pick the plan that fits your team
           </h1>
           <p className="mt-5 text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            Start free, no credit card required. All paid plans include a
+            Start free, no credit card required. Pro and Team plans include a
             14-day trial.
           </p>
         </div>

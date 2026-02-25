@@ -187,6 +187,41 @@ export async function POST(request: NextRequest) {
         break;
       }
 
+      case "customer.subscription.paused": {
+        const sub = event.data.object as Stripe.Subscription;
+        const orgId = sub.metadata?.orgId;
+        if (!orgId) {
+          console.warn("Webhook customer.subscription.paused missing orgId", { subId: sub.id });
+          break;
+        }
+
+        await db
+          .from("subscriptions")
+          .update({
+            status: "paused",
+            updated_at: new Date().toISOString(),
+          })
+          .eq("org_id", orgId);
+        break;
+      }
+
+      case "customer.subscription.resumed": {
+        const sub = event.data.object as Stripe.Subscription;
+        const orgId = sub.metadata?.orgId;
+        if (!orgId) {
+          console.warn("Webhook customer.subscription.resumed missing orgId", { subId: sub.id });
+          break;
+        }
+
+        await upsertSubscription(
+          db,
+          orgId,
+          sub,
+          sub.customer as string
+        );
+        break;
+      }
+
       case "charge.dispute.created":
       case "charge.dispute.updated": {
         const dispute = event.data.object as Stripe.Dispute;

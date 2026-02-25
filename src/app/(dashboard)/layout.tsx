@@ -8,6 +8,7 @@ import { ImpersonationBanner } from "@/components/admin/impersonation-banner";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { ExtensionInstallBanner } from "@/components/dashboard/extension-install-banner";
+import { PaymentBanner } from "@/components/dashboard/payment-banner";
 import { NotificationsProvider } from "@/hooks/use-notifications";
 
 export default async function DashboardLayout({
@@ -41,6 +42,7 @@ export default async function DashboardLayout({
                 <div className="flex-1 flex flex-col overflow-hidden">
                   <DashboardHeader />
                   <main className="flex-1 overflow-y-auto scrollbar-thin p-4 md:p-6">
+                    <PaymentBanner />
                     <ExtensionInstallBanner />
                     {children}
                   </main>

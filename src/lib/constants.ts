@@ -101,7 +101,7 @@ export const PLAN_DISPLAY: Record<
       "Security Audit Log": false,
       Analytics: false,
       "Import/Export": false,
-      "Browser Extension": true,
+      "Chrome Extension": true,
     },
   },
   pro: {
@@ -119,7 +119,7 @@ export const PLAN_DISPLAY: Record<
       "Security Audit Log": false,
       Analytics: true,
       "Import/Export": true,
-      "Browser Extension": true,
+      "Chrome Extension": true,
     },
   },
   team: {
@@ -138,7 +138,7 @@ export const PLAN_DISPLAY: Record<
       "Security Audit Log": true,
       Analytics: true,
       "Import/Export": true,
-      "Browser Extension": true,
+      "Chrome Extension": true,
     },
   },
   business: {
@@ -156,7 +156,7 @@ export const PLAN_DISPLAY: Record<
       "Security Audit Log": true,
       Analytics: true,
       "Import/Export": true,
-      "Browser Extension": true,
+      "Chrome Extension": true,
     },
   },
 };

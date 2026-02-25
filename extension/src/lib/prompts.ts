@@ -78,6 +78,11 @@ export async function fetchPrompts(opts?: {
     throw new Error("SESSION_EXPIRED");
   }
 
+  if (!res.ok) {
+    console.warn("[TP] fetchPrompts: non-ok response", res.status);
+    throw new Error("FETCH_FAILED");
+  }
+
   const data = res.data as { prompts?: Prompt[] };
   return data?.prompts || [];
 }

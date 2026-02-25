@@ -39,16 +39,25 @@ export default defineBackground(() => {
     (message: { type: string; accessToken?: string; refreshToken?: string; user?: unknown }, _sender, sendResponse) => {
       if (message.type === "SESSION_SYNC") {
         extAuthDebug.log("bridge", "bg: SESSION_SYNC received", { hasToken: !!message.accessToken }); // AUTH-DEBUG
-        // Clear loggedOut flag AND set tokens in a single atomic operation
-        // to prevent race conditions where the flag persists momentarily.
-        browser.storage.local.set({
-          accessToken: message.accessToken,
-          refreshToken: message.refreshToken,
-          user: message.user,
-          loggedOut: false,
+        // Dedup: if the incoming accessToken matches what we already have, skip
+        // the write. This prevents the auth-bridge from overwriting a freshly-
+        // rotated refresh token with an older one from the web cookie.
+        browser.storage.local.get(["accessToken"]).then((stored) => {
+          if (stored.accessToken === message.accessToken) {
+            extAuthDebug.log("bridge", "bg: SESSION_SYNC skipped (same accessToken)"); // AUTH-DEBUG
+            sendResponse({ success: true, skipped: true });
+            return;
+          }
+          browser.storage.local.set({
+            accessToken: message.accessToken,
+            refreshToken: message.refreshToken,
+            user: message.user,
+            loggedOut: false,
+          });
+          console.log("TeamPrompt: Session synced from web app");
+          sendResponse({ success: true });
         });
-        console.log("TeamPrompt: Session synced from web app");
-        sendResponse({ success: true });
+        return true; // keep channel open for async response
       } else if (message.type === "SESSION_CLEAR") {
         extAuthDebug.log("bridge", "bg: SESSION_CLEAR received"); // AUTH-DEBUG
         browser.storage.local.remove(["accessToken", "refreshToken", "user"]);
@@ -84,12 +93,17 @@ export default defineBackground(() => {
           headers?: Record<string, string>;
           body?: string;
         };
-        const doFetch = (headers: Record<string, string>) =>
-          fetch(msg.url, {
+        const FETCH_TIMEOUT = 15_000;
+        const doFetch = (headers: Record<string, string>) => {
+          const controller = new AbortController();
+          const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT);
+          return fetch(msg.url, {
             method: msg.method || "GET",
             headers,
             body: msg.body || undefined,
-          });
+            signal: controller.signal,
+          }).finally(() => clearTimeout(timer));
+        };
 
         doFetch(msg.headers || {})
           .then(async (res) => {

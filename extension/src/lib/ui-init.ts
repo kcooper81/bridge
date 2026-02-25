@@ -144,13 +144,17 @@ async function loadPrompts(query = "") {
     );
   } catch (err) {
     if (err instanceof Error && err.message === "SESSION_EXPIRED") {
-      els.promptList.innerHTML =
-        '<div class="empty-state"><p>Session expired</p><p style="font-size:12px;margin-top:4px;opacity:0.7">Please sign out and sign back in</p></div>';
-      setStatus("Session expired");
+      // Token is dead and refresh failed — force re-login
+      await logout();
+      showLoginView();
+      setStatus("Session expired — please sign in again");
     } else {
       els.promptList.innerHTML =
-        '<div class="empty-state"><p>Failed to load prompts</p></div>';
-      setStatus("Error loading prompts");
+        '<div class="empty-state"><p>Could not reach server</p><button class="retry-btn">Retry</button></div>';
+      setStatus("Connection error");
+      els.promptList.querySelector(".retry-btn")?.addEventListener("click", () => {
+        loadPrompts(els.searchInput.value.trim());
+      });
     }
   }
 }

@@ -64,6 +64,7 @@ export default function TeamPage() {
   const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
   const [addMemberToTeamOpen, setAddMemberToTeamOpen] = useState(false);
   const [selectedMemberToAdd, setSelectedMemberToAdd] = useState<string>("");
+  const [addingMember, setAddingMember] = useState(false);
 
   useEffect(() => {
     getInvites().then(setInvites).catch(() => {});
@@ -195,15 +196,20 @@ export default function TeamPage() {
   }
 
   async function handleAddMemberToTeam() {
-    if (!selectedTeam || !selectedMemberToAdd) return;
-    const success = await addTeamMember(selectedTeam.id, selectedMemberToAdd);
-    if (success) {
-      toast.success("Member added to team");
-      setAddMemberToTeamOpen(false);
-      setSelectedMemberToAdd("");
-      refresh();
-    } else {
-      toast.error("Failed to add member to team");
+    if (!selectedTeam || !selectedMemberToAdd || addingMember) return;
+    setAddingMember(true);
+    try {
+      const success = await addTeamMember(selectedTeam.id, selectedMemberToAdd);
+      if (success) {
+        toast.success("Member added to team");
+        setAddMemberToTeamOpen(false);
+        setSelectedMemberToAdd("");
+        refresh();
+      } else {
+        toast.error("Failed to add member to team");
+      }
+    } finally {
+      setAddingMember(false);
     }
   }
 
@@ -317,7 +323,10 @@ export default function TeamPage() {
             </div>
             <div className="mt-4 flex justify-end gap-2">
               <Button variant="outline" onClick={() => setAddMemberToTeamOpen(false)}>Cancel</Button>
-              <Button onClick={handleAddMemberToTeam} disabled={!selectedMemberToAdd}>Add to Team</Button>
+              <Button onClick={handleAddMemberToTeam} disabled={!selectedMemberToAdd || addingMember}>
+                {addingMember && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Add to Team
+              </Button>
             </div>
           </DialogContent>
         </Dialog>

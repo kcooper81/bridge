@@ -198,16 +198,18 @@ export function SensitiveTermsManager({ canEdit, teams = [] }: SensitiveTermsMan
     try {
       // Parse CSV or line-separated terms
       const lines = importText.split("\n").filter((l) => l.trim());
-      const termsToImport = lines.map((line) => {
-        const parts = line.split(",").map((p) => p.trim());
-        return {
-          term: parts[0],
-          term_type: "exact" as const,
-          category: (parts[1] as SensitiveTermCategory) || "custom",
-          description: parts[2] || undefined,
-          severity: (parts[3] as "block" | "warn") || "warn",
-        };
-      });
+      const termsToImport = lines
+        .map((line) => {
+          const parts = line.split(",").map((p) => p.trim());
+          return {
+            term: parts[0],
+            term_type: "exact" as const,
+            category: (parts[1] as SensitiveTermCategory) || "custom",
+            description: parts[2] || undefined,
+            severity: (parts[3] as "block" | "warn") || "warn",
+          };
+        })
+        .filter((t) => t.term);
 
       const result = await importSensitiveTerms(termsToImport);
       toast.success(`Imported ${result.imported} terms`);

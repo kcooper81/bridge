@@ -23,6 +23,10 @@ function getAllowedOrigin(request?: NextRequest | Request): string {
   // Allow browser extension origins — validate ID if configured
   if (origin.startsWith("chrome-extension://") || origin.startsWith("moz-extension://")) {
     if (ALLOWED_EXTENSION_IDS.length === 0) {
+      // In production, require explicit extension IDs — reject if none configured
+      if (process.env.NODE_ENV === "production") {
+        return SITE_URL;
+      }
       return origin;
     }
     const id = origin.replace(/^(chrome|moz)-extension:\/\//, "").replace(/\/$/, "");

@@ -117,6 +117,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate team_id belongs to this org (if provided)
+    if (team_id) {
+      const { data: teamRow } = await db
+        .from("teams")
+        .select("id")
+        .eq("id", team_id)
+        .eq("org_id", profile.org_id)
+        .single();
+      if (!teamRow) {
+        return NextResponse.json({ error: "Invalid team" }, { status: 400 });
+      }
+    }
+
     // Create invite
     const { data: invite, error: insertError } = await db
       .from("invites")

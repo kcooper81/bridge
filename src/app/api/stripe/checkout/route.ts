@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createServiceClient } from "@/lib/supabase/server";
 import { STRIPE_PLAN_CONFIG, TRIAL_DAYS } from "@/lib/billing/plans";
+import { PLAN_LIMITS } from "@/lib/constants";
 import { limiters, checkRateLimit } from "@/lib/rate-limit";
+import type { PlanTier } from "@/lib/types";
 
 function getStripe() {
   return new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -62,6 +64,22 @@ export async function POST(request: NextRequest) {
         { error: "Plan not configured" },
         { status: 500 }
       );
+    }
+
+    // Validate member count against target plan limits
+    const targetLimits = PLAN_LIMITS[plan as PlanTier];
+    if (targetLimits && targetLimits.max_members !== -1) {
+      const { count: memberCount } = await db
+        .from("profiles")
+        .select("id", { count: "exact", head: true })
+        .eq("org_id", orgId);
+
+      if ((memberCount || 0) > targetLimits.max_members) {
+        return NextResponse.json(
+          { error: `Your organization has ${memberCount} members but the ${plan} plan allows ${targetLimits.max_members}. Please choose a plan that supports your team size.` },
+          { status: 400 }
+        );
+      }
     }
 
     // Check for existing active subscription — plan changes go through the portal

@@ -74,11 +74,8 @@ export async function fetchPrompts(opts?: {
   );
 
   if (res.status === 401) {
-    // Don't auto-logout on 401 — it may be a transient error, CORS issue,
-    // or token/origin mismatch.  Just return empty; the user can manually
-    // sign out if needed.
-    console.warn("[TP] fetchPrompts: 401 from API, returning empty");
-    return [];
+    console.warn("[TP] fetchPrompts: 401 from API");
+    throw new Error("SESSION_EXPIRED");
   }
 
   const data = res.data as { prompts?: Prompt[] };

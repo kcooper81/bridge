@@ -142,10 +142,16 @@ async function loadPrompts(query = "") {
     setStatus(
       `${currentPrompts.length} prompt${currentPrompts.length !== 1 ? "s" : ""}`
     );
-  } catch {
-    els.promptList.innerHTML =
-      '<div class="empty-state"><p>Failed to load prompts</p></div>';
-    setStatus("Error loading prompts");
+  } catch (err) {
+    if (err instanceof Error && err.message === "SESSION_EXPIRED") {
+      els.promptList.innerHTML =
+        '<div class="empty-state"><p>Session expired</p><p style="font-size:12px;margin-top:4px;opacity:0.7">Please sign out and sign back in</p></div>';
+      setStatus("Session expired");
+    } else {
+      els.promptList.innerHTML =
+        '<div class="empty-state"><p>Failed to load prompts</p></div>';
+      setStatus("Error loading prompts");
+    }
   }
 }
 

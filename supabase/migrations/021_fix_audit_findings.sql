@@ -50,11 +50,11 @@ CREATE INDEX IF NOT EXISTS idx_usage_events_user_id ON usage_events(user_id);
 CREATE OR REPLACE FUNCTION notify_owner_on_prompt_status_change()
 RETURNS TRIGGER AS $$
 BEGIN
-  IF NEW.status = 'approved' THEN
+  IF OLD.status = 'pending' AND NEW.status = 'approved' THEN
     INSERT INTO notifications (org_id, user_id, type, title, message, metadata)
     VALUES (
       NEW.org_id,
-      NEW.created_by,
+      NEW.owner_id,
       'prompt_approved',
       'Prompt approved',
       format('Your prompt "%s" has been approved', NEW.title),

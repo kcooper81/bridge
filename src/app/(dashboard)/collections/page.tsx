@@ -32,7 +32,8 @@ import { trackCollectionCreated } from "@/lib/analytics";
 import type { Collection, CollectionVisibility } from "@/lib/types";
 
 export default function CollectionsPage() {
-  const { collections, prompts, teams, setTeams, loading, refresh, noOrg } = useOrg();
+  const { collections, prompts, teams, setTeams, loading, refresh, noOrg, currentUserRole } = useOrg();
+  const canEdit = currentUserRole === "admin" || currentUserRole === "manager";
   const [modalOpen, setModalOpen] = useState(false);
   const [editCollection, setEditCollection] = useState<Collection | null>(null);
 
@@ -41,6 +42,7 @@ export default function CollectionsPage() {
   const [visibility, setVisibility] = useState<CollectionVisibility>("org");
   const [teamId, setTeamId] = useState<string | null>(null);
   const [selectedPromptIds, setSelectedPromptIds] = useState<string[]>([]);
+  const [saving, setSaving] = useState(false);
 
   function openModal(coll: Collection | null) {
     if (coll) {
@@ -66,6 +68,7 @@ export default function CollectionsPage() {
       toast.error("Name is required");
       return;
     }
+    setSaving(true);
     try {
       await saveCollectionApi({
         id: editCollection?.id,
@@ -81,6 +84,8 @@ export default function CollectionsPage() {
       refresh();
     } catch {
       toast.error("Failed to save collection");
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -123,10 +128,12 @@ export default function CollectionsPage() {
         title="Collections"
         description="Group related prompts into collections"
         actions={
-          <Button onClick={() => openModal(null)}>
-            <Plus className="mr-2 h-4 w-4" />
-            New Collection
-          </Button>
+          canEdit ? (
+            <Button onClick={() => openModal(null)}>
+              <Plus className="mr-2 h-4 w-4" />
+              New Collection
+            </Button>
+          ) : undefined
         }
       />
 
@@ -144,14 +151,16 @@ export default function CollectionsPage() {
             <Card key={coll.id} className="group">
               <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
                 <CardTitle className="text-base">{coll.name}</CardTitle>
-                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openModal(coll)}>
-                    <Pencil className="h-3.5 w-3.5" />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => handleDelete(coll.id)}>
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
-                </div>
+                {canEdit && (
+                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openModal(coll)}>
+                      <Pencil className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => handleDelete(coll.id)}>
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                )}
               </CardHeader>
               <CardContent>
                 {coll.description && (
@@ -252,7 +261,7 @@ export default function CollectionsPage() {
           </div>
           <div className="mt-4 flex justify-end gap-2">
             <Button variant="outline" onClick={() => setModalOpen(false)}>Cancel</Button>
-            <Button onClick={handleSave}>{editCollection ? "Save" : "Create"}</Button>
+            <Button onClick={handleSave} disabled={saving}>{editCollection ? "Save" : "Create"}</Button>
           </div>
         </DialogContent>
       </Dialog>

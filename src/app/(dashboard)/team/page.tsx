@@ -190,14 +190,18 @@ export default function TeamPage() {
   }
 
   async function handleRevokeInvite(id: string) {
-    const success = await revokeInvite(id);
-    if (success) {
-      toast.success("Invite revoked");
-    } else {
+    try {
+      const success = await revokeInvite(id);
+      if (success) {
+        toast.success("Invite revoked");
+      } else {
+        toast.error("Failed to revoke invite");
+      }
+      const newInvites = await getInvites();
+      setInvites(newInvites);
+    } catch {
       toast.error("Failed to revoke invite");
     }
-    const newInvites = await getInvites();
-    setInvites(newInvites);
   }
 
   async function handleAddMemberToTeam() {

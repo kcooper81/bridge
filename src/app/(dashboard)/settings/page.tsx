@@ -34,6 +34,8 @@ export default function SettingsPage() {
         const data = await res.json();
         toast.error(data.error || "Failed to delete account");
       }
+    } catch {
+      toast.error("Failed to delete account");
     } finally {
       setDeleting(false);
     }

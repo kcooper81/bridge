@@ -77,7 +77,10 @@ export async function POST(request: NextRequest) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
         const orgId = session.metadata?.orgId || session.client_reference_id;
-        if (!orgId || !session.subscription) break;
+        if (!orgId || !session.subscription) {
+          console.warn("Webhook checkout.session.completed missing orgId or subscription", { sessionId: session.id });
+          break;
+        }
 
         const sub = await stripe.subscriptions.retrieve(
           session.subscription as string
@@ -95,7 +98,10 @@ export async function POST(request: NextRequest) {
       case "customer.subscription.updated": {
         const sub = event.data.object as Stripe.Subscription;
         const orgId = sub.metadata?.orgId;
-        if (!orgId) break;
+        if (!orgId) {
+          console.warn(`Webhook ${event.type} missing orgId in subscription metadata`, { subId: sub.id });
+          break;
+        }
 
         await upsertSubscription(
           db,
@@ -109,7 +115,10 @@ export async function POST(request: NextRequest) {
       case "customer.subscription.deleted": {
         const sub = event.data.object as Stripe.Subscription;
         const orgId = sub.metadata?.orgId;
-        if (!orgId) break;
+        if (!orgId) {
+          console.warn("Webhook customer.subscription.deleted missing orgId", { subId: sub.id });
+          break;
+        }
 
         await db
           .from("subscriptions")

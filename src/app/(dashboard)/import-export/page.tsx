@@ -42,21 +42,30 @@ export default function ImportExportPage() {
     );
   }
 
+  const [exporting, setExporting] = useState(false);
+
   async function handleExport() {
     if (selectedIds.length === 0) {
       toast.error("Select at least one prompt to export");
       return;
     }
-    const pack = await exportPack(selectedIds, packName.trim() || "Prompt Pack");
-    const blob = new Blob([JSON.stringify(pack, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${packName.trim().replace(/\s+/g, "-").toLowerCase() || "prompts"}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-    trackExport(selectedIds.length);
-    toast.success(`Exported ${selectedIds.length} prompts`);
+    setExporting(true);
+    try {
+      const pack = await exportPack(selectedIds, packName.trim() || "Prompt Pack");
+      const blob = new Blob([JSON.stringify(pack, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${packName.trim().replace(/\s+/g, "-").toLowerCase() || "prompts"}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      trackExport(selectedIds.length);
+      toast.success(`Exported ${selectedIds.length} prompts`);
+    } catch {
+      toast.error("Failed to export prompts");
+    } finally {
+      setExporting(false);
+    }
   }
 
   async function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
@@ -136,7 +145,7 @@ export default function ImportExportPage() {
                 ))}
               </div>
             </div>
-            <Button onClick={handleExport} disabled={selectedIds.length === 0} className="w-full">
+            <Button onClick={handleExport} disabled={selectedIds.length === 0 || exporting} className="w-full">
               <Download className="mr-2 h-4 w-4" />
               Export {selectedIds.length} Prompt{selectedIds.length !== 1 ? "s" : ""}
             </Button>

@@ -88,7 +88,7 @@ export default function LoginPage() {
 
       {searchParams.get("error") && (
         <div className="mb-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
-          {searchParams.get("error_description") || "Authentication failed"}
+          Authentication failed. Please try again.
         </div>
       )}
 

@@ -79,13 +79,13 @@ function GuardrailsMockup() {
       </div>
       <div className="space-y-2">
         {[
-          { label: "Social Security Number", status: "Blocked", color: "destructive" },
-          { label: "Patient Name (PHI)", status: "Blocked", color: "destructive" },
-          { label: "Internal Account Number", status: "Warning", color: "yellow-500" },
+          { label: "Social Security Number", status: "Blocked", dotClass: "bg-destructive" },
+          { label: "Patient Name (PHI)", status: "Blocked", dotClass: "bg-destructive" },
+          { label: "Internal Account Number", status: "Warning", dotClass: "bg-yellow-500" },
         ].map((item) => (
           <div key={item.label} className="flex items-center justify-between py-2 px-3 rounded-lg bg-muted/30">
             <div className="flex items-center gap-2">
-              <div className={`w-2 h-2 rounded-full bg-${item.color}`} />
+              <div className={`w-2 h-2 rounded-full ${item.dotClass}`} />
               <span className="text-xs text-muted-foreground">{item.label}</span>
             </div>
             <span className={`text-[10px] font-semibold ${item.status === "Blocked" ? "text-destructive" : "text-yellow-600"}`}>

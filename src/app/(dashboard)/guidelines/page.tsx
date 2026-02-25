@@ -32,7 +32,8 @@ import { toast } from "sonner";
 import type { Guideline, GuidelineRules } from "@/lib/types";
 
 export default function GuidelinesPage() {
-  const { guidelines, loading, refresh, noOrg } = useOrg();
+  const { guidelines, loading, refresh, noOrg, currentUserRole } = useOrg();
+  const canEdit = currentUserRole === "admin" || currentUserRole === "manager";
   const { checkLimit, planLimits } = useSubscription();
   const [modalOpen, setModalOpen] = useState(false);
   const [editGuideline, setEditGuideline] = useState<Guideline | null>(null);
@@ -48,6 +49,7 @@ export default function GuidelinesPage() {
   const [requiredTags, setRequiredTags] = useState<string[]>([]);
   const [minLength, setMinLength] = useState("");
   const [maxLength, setMaxLength] = useState("");
+  const [saving, setSaving] = useState(false);
 
   function openModal(g: Guideline | null) {
     if (!g && !checkLimit("add_guideline", guidelines.length)) return;
@@ -84,6 +86,7 @@ export default function GuidelinesPage() {
       toast.error("Name is required");
       return;
     }
+    setSaving(true);
     try {
       const parsedMin = minLength ? parseInt(minLength) : 0;
       const parsedMax = maxLength ? parseInt(maxLength) : 0;
@@ -117,6 +120,8 @@ export default function GuidelinesPage() {
       refresh();
     } catch {
       toast.error("Failed to save guideline");
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -181,18 +186,20 @@ export default function GuidelinesPage() {
         title="Guidelines"
         description="Define quality guidelines for your team's prompts"
         actions={
-          <div className="flex gap-2">
-            {guidelines.length === 0 && (
-              <Button variant="outline" onClick={handleInstallDefaults} disabled={installing}>
-                <Download className="mr-2 h-4 w-4" />
-                Install Defaults
+          canEdit ? (
+            <div className="flex gap-2">
+              {guidelines.length === 0 && (
+                <Button variant="outline" onClick={handleInstallDefaults} disabled={installing}>
+                  <Download className="mr-2 h-4 w-4" />
+                  Install Defaults
+                </Button>
+              )}
+              <Button onClick={() => openModal(null)}>
+                <Plus className="mr-2 h-4 w-4" />
+                New Guideline
               </Button>
-            )}
-            <Button onClick={() => openModal(null)}>
-              <Plus className="mr-2 h-4 w-4" />
-              New Guideline
-            </Button>
-          </div>
+            </div>
+          ) : undefined
         }
       />
 
@@ -223,15 +230,17 @@ export default function GuidelinesPage() {
                   )}
                 </div>
                 <div className="flex items-center gap-2">
-                  <Switch checked={g.enforced} onCheckedChange={() => handleToggleEnforced(g)} />
-                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openModal(g)}>
-                      <Pencil className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => handleDelete(g.id)}>
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
+                  <Switch checked={g.enforced} onCheckedChange={() => handleToggleEnforced(g)} disabled={!canEdit} />
+                  {canEdit && (
+                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openModal(g)}>
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => handleDelete(g.id)}>
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </CardHeader>
               <CardContent>
@@ -315,7 +324,7 @@ export default function GuidelinesPage() {
 
           <div className="mt-4 flex justify-end gap-2">
             <Button variant="outline" onClick={() => setModalOpen(false)}>Cancel</Button>
-            <Button onClick={handleSave}>{editGuideline ? "Save" : "Create"}</Button>
+            <Button onClick={handleSave} disabled={saving}>{editGuideline ? "Save" : "Create"}</Button>
           </div>
         </DialogContent>
       </Dialog>

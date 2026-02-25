@@ -281,7 +281,7 @@ export async function getPromptVersions(promptId: string) {
 export async function saveFolderApi(folder: Partial<Folder>): Promise<Folder | null> {
   const orgId = await getOrgId();
   const userId = await getUserId();
-  if (!orgId) return null;
+  if (!orgId || !userId) return null;
 
   if (folder.id) {
     const { data } = await supabase()
@@ -295,7 +295,7 @@ export async function saveFolderApi(folder: Partial<Folder>): Promise<Folder | n
 
   const { data } = await supabase()
     .from("folders")
-    .insert({ org_id: orgId, name: folder.name || "", icon: folder.icon, color: folder.color, created_by: userId! })
+    .insert({ org_id: orgId, name: folder.name || "", icon: folder.icon, color: folder.color, created_by: userId })
     .select()
     .single();
   return data;
@@ -342,7 +342,7 @@ export async function saveCollectionApi(
 ): Promise<Collection | null> {
   const orgId = await getOrgId();
   const userId = await getUserId();
-  if (!orgId) return null;
+  if (!orgId || !userId) return null;
   const db = supabase();
 
   let collId = coll.id;
@@ -366,7 +366,7 @@ export async function saveCollectionApi(
         description: coll.description,
         visibility: coll.visibility || "org",
         team_id: coll.team_id || null,
-        created_by: userId!,
+        created_by: userId,
       })
       .select()
       .single();
@@ -406,7 +406,7 @@ export async function deleteCollectionApi(id: string): Promise<boolean> {
 export async function saveGuidelineApi(std: Partial<Guideline>): Promise<Guideline | null> {
   const orgId = await getOrgId();
   const userId = await getUserId();
-  if (!orgId) return null;
+  if (!orgId || !userId) return null;
 
   if (std.id) {
     const { data } = await supabase()
@@ -434,7 +434,7 @@ export async function saveGuidelineApi(std: Partial<Guideline>): Promise<Guideli
       scope: "org",
       rules: std.rules || {},
       enforced: std.enforced ?? false,
-      created_by: userId!,
+      created_by: userId,
     })
     .select()
     .single();

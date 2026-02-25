@@ -33,12 +33,16 @@ export async function POST(request: NextRequest) {
 
     const { data: profile } = await db
       .from("profiles")
-      .select("org_id")
+      .select("org_id, role")
       .eq("id", user.id)
       .single();
 
     if (!profile?.org_id) {
       return withCors(NextResponse.json({ error: "No organization" }, { status: 403 }), request);
+    }
+
+    if (profile.role !== "admin" && profile.role !== "manager") {
+      return withCors(NextResponse.json({ error: "Forbidden: admin or manager role required" }, { status: 403 }), request);
     }
 
     const orgId = profile.org_id;

@@ -137,11 +137,11 @@ export function SolutionsDropdown({
             {/* Bottom CTA */}
             <div className="mt-4 pt-4 border-t border-border/50">
               <Link
-                href="/solutions"
+                href="/features"
                 onClick={() => setOpen(false)}
                 className="flex items-center justify-center gap-1 text-sm font-medium text-primary hover:text-primary/80 transition-colors py-1"
               >
-                See all solutions
+                See all features
                 <span aria-hidden="true">&rarr;</span>
               </Link>
             </div>

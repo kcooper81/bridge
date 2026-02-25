@@ -211,7 +211,7 @@ export default function EnterprisePage() {
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
-              <Link href="mailto:sales@teamprompt.app">
+              <a href="mailto:sales@teamprompt.app">
                 <Button
                   variant="outline"
                   size="lg"
@@ -219,7 +219,7 @@ export default function EnterprisePage() {
                 >
                   Talk to sales
                 </Button>
-              </Link>
+              </a>
             </div>
           </div>
         </div>
@@ -358,7 +358,7 @@ export default function EnterprisePage() {
           />
 
           <div className="text-center mt-10">
-            <Link href="mailto:sales@teamprompt.app">
+            <a href="mailto:sales@teamprompt.app">
               <Button
                 size="lg"
                 className="text-base px-8 h-12 rounded-full font-semibold"
@@ -366,7 +366,7 @@ export default function EnterprisePage() {
                 Contact sales for pricing
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
-            </Link>
+            </a>
           </div>
         </div>
       </section>

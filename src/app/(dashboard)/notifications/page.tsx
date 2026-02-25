@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 import { deleteNotification, deleteAllNotifications } from "@/lib/notifications-api";
 import Link from "next/link";
 import type { NotificationType, Notification } from "@/lib/types";
@@ -68,16 +69,25 @@ export default function NotificationsPage() {
   const [deleting, setDeleting] = useState(false);
 
   const handleDelete = async (id: string) => {
-    await deleteNotification(id);
-    refresh();
+    try {
+      await deleteNotification(id);
+      refresh();
+    } catch {
+      toast.error("Failed to delete notification");
+    }
   };
 
   const handleDeleteAll = async () => {
     if (!confirm("Delete all notifications?")) return;
     setDeleting(true);
-    await deleteAllNotifications();
-    refresh();
-    setDeleting(false);
+    try {
+      await deleteAllNotifications();
+      refresh();
+    } catch {
+      toast.error("Failed to delete notifications");
+    } finally {
+      setDeleting(false);
+    }
   };
 
   return (

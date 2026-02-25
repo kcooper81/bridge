@@ -65,10 +65,11 @@ export async function GET(request: NextRequest) {
       q = q.eq("is_template", true);
     }
 
-    // Server-side search — use ilike for title/description, or textSearch for content
+    // Server-side search — use parameterized filters (not string interpolation)
     if (query) {
-      const pattern = `%${query}%`;
-      q = q.or(`title.ilike.${pattern},description.ilike.${pattern},tags.cs.{${query}}`);
+      const sanitized = query.replace(/[%_]/g, "\\$&");
+      const pattern = `%${sanitized}%`;
+      q = q.or(`title.ilike.${pattern},description.ilike.${pattern}`);
     }
 
     const { data: prompts, error } = await q;

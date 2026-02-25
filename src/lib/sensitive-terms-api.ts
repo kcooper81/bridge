@@ -9,7 +9,12 @@ export async function getSensitiveTerms(options?: {
   teamId?: string | null; // undefined = all, null = global only, string = specific team
 }): Promise<SensitiveTerm[]> {
   const supabase = createClient();
-  let query = supabase.from("sensitive_terms").select("*").order("created_at", { ascending: false });
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+  const { data: profile } = await supabase.from("profiles").select("org_id").eq("id", user.id).single();
+  if (!profile?.org_id) return [];
+
+  let query = supabase.from("sensitive_terms").select("*").eq("org_id", profile.org_id).order("created_at", { ascending: false });
 
   if (options?.category) {
     query = query.eq("category", options.category);
@@ -35,19 +40,21 @@ export async function createSensitiveTerm(
 ): Promise<SensitiveTerm> {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not authenticated");
   const { data: profile } = await supabase
     .from("profiles")
     .select("org_id")
-    .eq("id", user?.id)
+    .eq("id", user.id)
     .single();
+  if (!profile?.org_id) throw new Error("No organization");
 
   const { data, error } = await supabase
     .from("sensitive_terms")
     .insert({
       ...term,
       team_id: term.team_id ?? null,
-      org_id: profile?.org_id,
-      created_by: user?.id,
+      org_id: profile.org_id,
+      created_by: user.id,
     })
     .select()
     .single();
@@ -85,10 +92,11 @@ export async function importSensitiveTerms(
 ): Promise<{ imported: number; failed: number }> {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not authenticated");
   const { data: profile } = await supabase
     .from("profiles")
     .select("org_id")
-    .eq("id", user?.id)
+    .eq("id", user.id)
     .single();
 
   if (!profile?.org_id) throw new Error("No organization");
@@ -101,7 +109,7 @@ export async function importSensitiveTerms(
     description: t.description || null,
     severity: t.severity || "warn",
     source: "import" as const,
-    created_by: user?.id,
+    created_by: user.id,
   }));
 
   const { data, error } = await supabase

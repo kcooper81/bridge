@@ -17,6 +17,7 @@ const CHAT_INPUT_SELECTORS = [
   'div[contenteditable="true"].ql-editor',     // Gemini
   "rich-textarea textarea",                     // Gemini (alternate)
   'textarea[name="searchbox"]',                // Copilot
+  'textarea[placeholder*="Ask"]',              // Perplexity
 ];
 
 function isChatInput(target: HTMLElement): boolean {
@@ -28,8 +29,44 @@ function isChatInput(target: HTMLElement): boolean {
   return false;
 }
 
+// Send button selectors for click-to-send DLP interception
+const SEND_BUTTON_SELECTORS = [
+  'button[data-testid="send-button"]',       // ChatGPT
+  'button[aria-label="Send prompt"]',         // ChatGPT
+  'button[aria-label="Send Message"]',        // Claude
+  'button[aria-label="Send message"]',        // Claude / Gemini
+  'button.send-button',                       // Gemini
+  'button[aria-label="Submit"]',              // Copilot / Perplexity
+  'button[data-testid*="send"]',              // Generic
+];
+
+function isSendButton(target: HTMLElement): HTMLElement | null {
+  for (const selector of SEND_BUTTON_SELECTORS) {
+    try {
+      if (target.matches(selector)) return target;
+      const match = target.closest<HTMLElement>(selector);
+      if (match) return match;
+    } catch { /* invalid selector */ }
+  }
+  return null;
+}
+
+function getChatInputText(): string {
+  for (const selector of CHAT_INPUT_SELECTORS) {
+    const el = document.querySelector<HTMLElement>(selector);
+    if (el) {
+      const text = (el as HTMLInputElement).value || el.textContent || el.innerText || "";
+      if (text.trim()) return text;
+    }
+  }
+  return "";
+}
+
 // Flag to allow re-dispatched Enter key to pass through without re-scanning
 let _tpAllowNext = false;
+
+// Flag to allow re-dispatched click to pass through without re-scanning
+let _tpAllowNextClick = false;
 
 // Track last blocked text to prevent double-Enter bypass
 let _lastBlockedText: string | null = null;
@@ -166,72 +203,45 @@ export default defineContentScript({
               return;
             }
 
-            // Block repeat submissions of previously blocked text
-            if (_lastBlockedText !== null && text.trim() === _lastBlockedText.trim()) {
-              e.preventDefault();
-              e.stopPropagation();
-              e.stopImmediatePropagation();
-              showBlockOverlay([{ ruleId: "repeat-block", ruleName: "Previously blocked", category: "dlp", severity: "block", matchedText: "Same content was blocked moments ago" }]);
-              return;
-            }
-
             // ALWAYS block synchronously, then scan async
             e.preventDefault();
             e.stopPropagation();
             e.stopImmediatePropagation();
 
-            // Fail-closed: if not authenticated, block immediately
-            if (!_isAuthenticated) {
-              showSessionLossBanner();
-              showScanBlockOverlay("no-auth");
-              return;
-            }
-
-            // Fail-closed: if offline, block immediately
-            if (!_isOnline) {
-              showScanBlockOverlay("offline");
-              return;
-            }
-
-            updateShieldScanning(true);
-
-            scanOutbound(text).then((result) => {
-              updateShieldScanning(false);
-
-              if (result?.action === "block") {
-                _lastBlockedText = text;
-                showBlockOverlay(result.violations);
-                logInteraction(text, "blocked", result.violations);
-                pulseShield("block");
-                return;
-              }
-
-              if (result?.action === "warn") {
-                showWarningBanner(result.violations);
-                logInteraction(text, "warned", result.violations);
-                pulseShield("warn");
-              } else if (result === null) {
-                // Fail-closed: scan returned null — determine reason and block
-                const reason = _isAuthenticated ? "api-error" : "no-auth";
-                showScanBlockOverlay(reason);
-                logInteraction(text, "blocked", [{ ruleName: "Scan failure", category: "system", matchedText: "", action: "block" as const }]);
-                return;
-              } else {
-                logInteraction(text, "sent", []);
-              }
-
-              // Re-dispatch the Enter key to actually send the message
-              reDispatchEnter(target);
-            }).catch(() => {
-              // Fail-closed: scan failed (network error) — block, don't auto-send
-              updateShieldScanning(false);
-              showScanBlockOverlay("api-error");
-              logInteraction(text, "blocked", [{ ruleName: "Scan failure", category: "system", matchedText: "", action: "block" as const }]);
-            });
+            performScan(text, () => reDispatchEnter(target));
           }
         }
       },
       true // capture phase — fires before AI client handlers
+    );
+
+    // ─── DLP: Click-to-Send Interception (prevents bypassing Enter-key scan) ───
+    document.addEventListener(
+      "click",
+      (e) => {
+        if (_tpAllowNextClick) {
+          _tpAllowNextClick = false;
+          return;
+        }
+
+        const target = e.target as HTMLElement;
+        const sendBtn = isSendButton(target);
+        if (!sendBtn) return;
+
+        const text = getChatInputText();
+        if (!text || text.trim().length < 1) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+
+        performScan(text, () => {
+          _tpAllowNextClick = true;
+          setTimeout(() => { _tpAllowNextClick = false; }, 100);
+          sendBtn.click();
+        });
+      },
+      true // capture phase
     );
 
     // Clear blocked text tracking when user edits input
@@ -356,6 +366,64 @@ function reDispatchEnter(target: HTMLElement) {
       clickSendButton();
     }
   }, 200);
+}
+
+// ─── Shared DLP Scan Logic (used by Enter key and click-to-send handlers) ───
+
+function performScan(text: string, onAllow: () => void) {
+  // Block repeat submissions of previously blocked text
+  if (_lastBlockedText !== null && text.trim() === _lastBlockedText.trim()) {
+    showBlockOverlay([{ ruleId: "repeat-block", ruleName: "Previously blocked", category: "dlp", severity: "block", matchedText: "Same content was blocked moments ago" }]);
+    return;
+  }
+
+  // Fail-closed: if not authenticated, block immediately
+  if (!_isAuthenticated) {
+    showSessionLossBanner();
+    showScanBlockOverlay("no-auth");
+    return;
+  }
+
+  // Fail-closed: if offline, block immediately
+  if (!_isOnline) {
+    showScanBlockOverlay("offline");
+    return;
+  }
+
+  updateShieldScanning(true);
+
+  scanOutbound(text).then((result) => {
+    updateShieldScanning(false);
+
+    if (result?.action === "block") {
+      _lastBlockedText = text;
+      showBlockOverlay(result.violations);
+      logInteraction(text, "blocked", result.violations);
+      pulseShield("block");
+      return;
+    }
+
+    if (result?.action === "warn") {
+      showWarningBanner(result.violations);
+      logInteraction(text, "warned", result.violations);
+      pulseShield("warn");
+    } else if (result === null) {
+      // Fail-closed: scan returned null — determine reason and block
+      const reason = _isAuthenticated ? "api-error" : "no-auth";
+      showScanBlockOverlay(reason);
+      logInteraction(text, "blocked", [{ ruleName: "Scan failure", category: "system", matchedText: "", action: "block" as const }]);
+      return;
+    } else {
+      logInteraction(text, "sent", []);
+    }
+
+    onAllow();
+  }).catch(() => {
+    // Fail-closed: scan failed (network error) — block, don't auto-send
+    updateShieldScanning(false);
+    showScanBlockOverlay("api-error");
+    logInteraction(text, "blocked", [{ ruleName: "Scan failure", category: "system", matchedText: "", action: "block" as const }]);
+  });
 }
 
 function clickSendButton() {

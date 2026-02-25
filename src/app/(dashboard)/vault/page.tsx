@@ -113,7 +113,7 @@ export default function VaultPage() {
 
   // Load user ratings
   useEffect(() => {
-    getUserRatingsForOrg().then(setUserRatings);
+    getUserRatingsForOrg().then(setUserRatings).catch(() => {});
   }, []);
 
   const [filterFolder, setFilterFolder] = useState("");

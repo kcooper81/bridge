@@ -272,8 +272,17 @@
 }
 
 .tp-block-icon {
-  font-size: 28px;
   margin-bottom: 8px;
+  color: #ef4444;
+}
+
+.tp-block-icon svg {
+  width: 28px;
+  height: 28px;
+}
+
+.tp-scan-block-card .tp-block-icon {
+  color: #fbbf24;
 }
 
 .tp-block-card h3 {
@@ -352,6 +361,14 @@
 @keyframes tp-slide-down {
   from { opacity: 0; transform: translate(-50%, -8px); }
   to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+.tp-warning-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  vertical-align: middle;
+  display: inline;
 }
 
 .tp-warning-banner button {

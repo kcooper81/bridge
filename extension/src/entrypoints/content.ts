@@ -635,7 +635,7 @@ function showBlockOverlay(violations: ScanResult["violations"]) {
   overlay.className = "tp-block-overlay";
   overlay.innerHTML = `
     <div class="tp-block-card">
-      <div class="tp-block-icon">&#x1f6d1;</div>
+      <div class="tp-block-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg></div>
       <h3>Message Blocked by TeamPrompt</h3>
       <p>Sensitive data was detected in your message:</p>
       <ul>
@@ -658,7 +658,7 @@ function showWarningBanner(violations: ScanResult["violations"]) {
   banner.id = "tp-warning-banner";
   banner.className = "tp-warning-banner";
   banner.innerHTML = `
-    <span>&#x26a0;&#xfe0f; TeamPrompt: ${violations.length} warning(s) — ${violations.map((v) => escapeHtml(v.ruleName)).join(", ")}</span>
+    <span><svg class="tp-warning-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> TeamPrompt: ${violations.length} warning(s) — ${violations.map((v) => escapeHtml(v.ruleName)).join(", ")}</span>
     <button id="tp-warning-dismiss">Dismiss</button>
   `;
   document.body.appendChild(banner);
@@ -682,21 +682,21 @@ function showScanBlockOverlay(reason: ScanBlockReason) {
 
   const config: Record<Exclude<ScanBlockReason, "context-invalidated">, { icon: string; heading: string; detail: string; btnLabel: string; btnAction: "sign-in" | "dismiss" }> = {
     "no-auth": {
-      icon: "&#x1f512;",
+      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
       heading: "Sign in required to send messages",
       detail: "TeamPrompt must verify your message before sending. Sign in to restore protection.",
       btnLabel: "Sign In",
       btnAction: "sign-in",
     },
     "api-error": {
-      icon: "&#x1f6d1;",
+      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg>',
       heading: "Message blocked \u2014 scan failed",
       detail: "TeamPrompt could not verify this message is safe to send. Press Enter to retry.",
       btnLabel: "Retry Scan",
       btnAction: "dismiss",
     },
     "offline": {
-      icon: "&#x1f4e1;",
+      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.56 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>',
       heading: "Message blocked \u2014 you are offline",
       detail: "TeamPrompt requires a network connection to scan messages. Reconnect and try again.",
       btnLabel: "Got it",

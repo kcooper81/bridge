@@ -44,7 +44,10 @@ export function DetectionSettings({ orgId, canEdit, hasPremiumAccess }: Detectio
 
   useEffect(() => {
     if (orgId) {
-      getSecuritySettings(orgId).then(setSettings).catch(console.error);
+      getSecuritySettings(orgId).then(setSettings).catch((err) => {
+        console.error("Failed to load security settings:", err);
+        toast.error("Failed to load detection settings");
+      });
     }
   }, [orgId]);
 

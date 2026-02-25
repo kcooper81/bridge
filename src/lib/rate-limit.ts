@@ -33,8 +33,11 @@ export const limiters = {
   log: createLimiter(120, "1 m", "log"),
   prompts: createLimiter(30, "1 m", "prompts"),
   invite: createLimiter(10, "1 m", "invite"),
+  inviteAccept: createLimiter(10, "1 m", "invite-accept"),
   support: createLimiter(5, "10 m", "support"),
   securityStatus: createLimiter(20, "1 m", "security-status"),
+  orgEnsure: createLimiter(5, "1 m", "org-ensure"),
+  accountDelete: createLimiter(3, "10 m", "account-delete"),
 };
 
 export async function checkRateLimit(

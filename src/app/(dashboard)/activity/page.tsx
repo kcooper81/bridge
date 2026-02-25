@@ -208,11 +208,11 @@ export default function ActivityPage() {
                   <p className="text-sm text-muted-foreground line-clamp-2">
                     {log.prompt_text}
                   </p>
-                  {log.guardrail_flags && (log.guardrail_flags as unknown[]).length > 0 && (
+                  {Array.isArray(log.guardrail_flags) && log.guardrail_flags.length > 0 && (
                     <div className="flex items-center gap-1 mt-1">
                       <Shield className="h-3 w-3 text-destructive" />
                       <span className="text-xs text-destructive">
-                        {(log.guardrail_flags as unknown[]).length} guardrail flag(s)
+                        {log.guardrail_flags.length} guardrail flag(s)
                       </span>
                     </div>
                   )}

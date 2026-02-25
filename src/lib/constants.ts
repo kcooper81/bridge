@@ -1,5 +1,7 @@
 import type { PlanLimits, PlanTier, GuidelineRules } from "./types";
 
+export const SUPER_ADMIN_EMAILS = ["admin@teamprompt.app"];
+
 export const SITE_NAME = "TeamPrompt";
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || "https://teamprompt.app";

@@ -1,4 +1,4 @@
-import type { SecurityRule } from "@/lib/types";
+import type { SecurityRule, SecurityPatternType } from "@/lib/types";
 import type { ScanResult, ScanViolation, EntropyViolation } from "./types";
 import { detectHighEntropyStrings } from "./entropy";
 
@@ -13,7 +13,7 @@ function globToRegex(glob: string): RegExp {
 function matchPattern(
   content: string,
   pattern: string,
-  patternType: string
+  patternType: SecurityPatternType
 ): string | null {
   switch (patternType) {
     case "exact": {
@@ -119,7 +119,7 @@ export function scanContent(
 export function testPattern(
   testContent: string,
   pattern: string,
-  patternType: string
+  patternType: SecurityPatternType
 ): { matched: boolean; matchedText: string | null } {
   const result = matchPattern(testContent, pattern, patternType);
   return { matched: result !== null, matchedText: result };

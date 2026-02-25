@@ -198,7 +198,11 @@ export default function NotificationsPage() {
                 <Link
                   key={notification.id}
                   href={link}
-                  onClick={() => !notification.read && markRead(notification.id)}
+                  onClick={(e) => {
+                    // Don't mark as read if user clicked a button inside (stopPropagation already handled)
+                    if ((e.target as HTMLElement).closest("button")) return;
+                    if (!notification.read) markRead(notification.id);
+                  }}
                 >
                   {content}
                 </Link>

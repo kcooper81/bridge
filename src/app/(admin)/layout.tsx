@@ -2,8 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { AdminNav } from "@/components/admin/nav";
 import { AdminHeader } from "@/components/admin/header";
-
-const SUPER_ADMIN_EMAILS = ["admin@teamprompt.app"];
+import { SUPER_ADMIN_EMAILS } from "@/lib/constants";
 
 export default async function AdminLayout({
   children,

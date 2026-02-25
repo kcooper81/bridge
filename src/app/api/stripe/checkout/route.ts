@@ -28,6 +28,10 @@ export async function POST(request: NextRequest) {
 
     const { plan, orgId, seats, interval = "monthly" } = await request.json();
 
+    if (!["monthly", "annual"].includes(interval)) {
+      return NextResponse.json({ error: "Invalid interval" }, { status: 400 });
+    }
+
     const planConfig =
       STRIPE_PLAN_CONFIG[plan as keyof typeof STRIPE_PLAN_CONFIG];
     if (!planConfig) {

@@ -141,7 +141,7 @@ export default function GuardrailsPage() {
   }
 
   async function handleSave() {
-    if (!name.trim() || !pattern.trim() || !org) return;
+    if (!canEdit || !name.trim() || !pattern.trim() || !org) return;
     const supabase = createClient();
 
     const data = {

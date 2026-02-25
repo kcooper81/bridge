@@ -4,8 +4,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
 import { authDebug } from "@/lib/auth-debug"; // AUTH-DEBUG
-
-const SUPER_ADMIN_EMAILS = ["admin@teamprompt.app"];
+import { SUPER_ADMIN_EMAILS } from "@/lib/constants";
 
 interface AuthContextValue {
   user: User | null;

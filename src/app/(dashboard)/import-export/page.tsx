@@ -66,6 +66,12 @@ export default function ImportExportPage() {
     try {
       const text = await file.text();
       const data = JSON.parse(text);
+      if (!data || typeof data !== "object" || !Array.isArray(data.prompts)) {
+        toast.error("Invalid pack format: expected { prompts: [...] }");
+        setImporting(false);
+        if (fileRef.current) fileRef.current.value = "";
+        return;
+      }
       const result = await importPack(data);
       if (result.imported > 0) {
         trackImport(result.imported);

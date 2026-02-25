@@ -25,6 +25,7 @@ export function OrganizationTab() {
   const [name, setName] = useState(org?.name || "");
   const [domain, setDomain] = useState(org?.domain || "");
   const [saving, setSaving] = useState(false);
+  const [dirty, setDirty] = useState(false);
 
   // Preferences
   const [allowPersonalPrompts, setAllowPersonalPrompts] = useState(
@@ -36,13 +37,13 @@ export function OrganizationTab() {
   const [savingPrefs, setSavingPrefs] = useState(false);
 
   useEffect(() => {
-    if (org) {
+    if (org && !dirty) {
       setName(org.name || "");
       setDomain(org.domain || "");
       setAllowPersonalPrompts(org.settings?.allow_personal_prompts ?? true);
       setDefaultVisibility(org.settings?.default_visibility ?? "org");
     }
-  }, [org]);
+  }, [org, dirty]);
 
   const isAdmin = currentUserRole === "admin";
 
@@ -51,6 +52,7 @@ export function OrganizationTab() {
     try {
       await saveOrg({ name: name.trim(), domain: domain.trim() || null });
       toast.success("Organization updated");
+      setDirty(false);
       refresh();
     } catch {
       toast.error("Failed to update organization");
@@ -90,13 +92,13 @@ export function OrganizationTab() {
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label>Organization Name</Label>
-            <Input value={name} onChange={(e) => setName(e.target.value)} disabled={!isAdmin} />
+            <Input value={name} onChange={(e) => { setName(e.target.value); setDirty(true); }} disabled={!isAdmin} />
           </div>
           <div className="space-y-2">
             <Label>Domain</Label>
             <Input
               value={domain}
-              onChange={(e) => setDomain(e.target.value)}
+              onChange={(e) => { setDomain(e.target.value); setDirty(true); }}
               placeholder="company.com"
               disabled={!isAdmin}
             />

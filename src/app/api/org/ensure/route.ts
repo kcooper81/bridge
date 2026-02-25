@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { seedOrgDefaults } from "@/lib/seed-defaults";
+import { limiters, checkRateLimit } from "@/lib/rate-limit";
 
 /**
  * POST /api/org/ensure
@@ -26,6 +27,9 @@ export async function POST(request: NextRequest) {
     if (authError || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    const rl = await checkRateLimit(limiters.orgEnsure, user.id);
+    if (!rl.success) return rl.response;
 
     // Check current profile
     const { data: profile, error: profileError } = await db

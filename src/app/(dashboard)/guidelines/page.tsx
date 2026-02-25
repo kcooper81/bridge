@@ -85,14 +85,24 @@ export default function GuidelinesPage() {
       return;
     }
     try {
+      const parsedMin = minLength ? parseInt(minLength) : 0;
+      const parsedMax = maxLength ? parseInt(maxLength) : 0;
+      if (parsedMin < 0 || parsedMax < 0) {
+        toast.error("Length values cannot be negative");
+        return;
+      }
+      if (parsedMin && parsedMax && parsedMin > parsedMax) {
+        toast.error("Min length cannot exceed max length");
+        return;
+      }
       const rules: GuidelineRules = {
         ...(bestPractices.length > 0 && { bestPractices }),
         ...(restrictions.length > 0 && { restrictions }),
         ...(bannedWords.length > 0 && { bannedWords }),
         ...(toneRules.length > 0 && { toneRules }),
         ...(requiredTags.length > 0 && { requiredTags }),
-        ...(minLength && { minLength: parseInt(minLength) }),
-        ...(maxLength && { maxLength: parseInt(maxLength) }),
+        ...(parsedMin > 0 && { minLength: parsedMin }),
+        ...(parsedMax > 0 && { maxLength: parsedMax }),
       };
       await saveGuidelineApi({
         id: editGuideline?.id,

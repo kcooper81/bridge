@@ -120,11 +120,60 @@ const storeScreenshots = [
   { file: "/store-assets/screenshot-8-session-loss.png", label: "Session loss protection banner", dims: "1280 x 800" },
   { file: "/store-assets/screenshot-9-admin-dashboard.png", label: "Admin dashboard — protection coverage", dims: "1280 x 800" },
   { file: "/store-assets/screenshot-10-admin-users.png", label: "Admin users — protection status", dims: "1280 x 800" },
+  { file: "/store-assets/screenshot-11-multi-ai.png", label: "Multi-AI tool support", dims: "1280 x 800" },
+  { file: "/store-assets/screenshot-12-dlp-rules.png", label: "DLP rules configuration", dims: "1280 x 800" },
+  { file: "/store-assets/screenshot-13-activity-log.png", label: "Activity & conversation audit log", dims: "1280 x 800" },
+  { file: "/store-assets/screenshot-light-1-prompts.png", label: "Prompt library (light mode)", dims: "1280 x 800" },
+  { file: "/store-assets/screenshot-light-2-dashboard.png", label: "Admin dashboard (light mode)", dims: "1280 x 800" },
+  { file: "/store-assets/screenshot-light-3-dlp-block.png", label: "DLP block on ChatGPT (light mode)", dims: "1280 x 800" },
+  { file: "/store-assets/screenshot-light-4-popup.png", label: "Extension popup — prompt list (light mode)", dims: "1280 x 800" },
+  { file: "/store-assets/screenshot-light-5-template.png", label: "Template variables (light mode)", dims: "1280 x 800" },
+  { file: "/store-assets/screenshot-light-6-insert.png", label: "Insert prompt into ChatGPT (light mode)", dims: "1280 x 800" },
 ];
 
 const storePromos = [
   { file: "/store-assets/promo-small.png", label: "Small promo tile", dims: "440 x 280" },
   { file: "/store-assets/promo-marquee.png", label: "Marquee promo banner", dims: "1400 x 560" },
+  { file: "/store-assets/social-hero.png", label: "Social / OG hero banner", dims: "1200 x 630" },
+  { file: "/store-assets/promo-dlp.png", label: "DLP feature hero banner", dims: "1400 x 560" },
+];
+
+const socialMediaAssets = [
+  {
+    platform: "YouTube",
+    assets: [
+      { file: "/store-assets/social-profile-800.png", label: "Profile picture", dims: "800 x 800" },
+      { file: "/store-assets/youtube-channel-art.png", label: "Channel art / banner", dims: "2560 x 1440" },
+    ],
+  },
+  {
+    platform: "X (Twitter)",
+    assets: [
+      { file: "/store-assets/social-profile-400.png", label: "Profile picture", dims: "400 x 400" },
+      { file: "/store-assets/twitter-banner.png", label: "Header banner", dims: "1500 x 500" },
+    ],
+  },
+  {
+    platform: "Facebook",
+    assets: [
+      { file: "/store-assets/social-profile-800.png", label: "Profile picture", dims: "720 x 720 (use 800px)" },
+      { file: "/store-assets/facebook-cover.png", label: "Cover photo", dims: "851 x 315" },
+    ],
+  },
+  {
+    platform: "Instagram",
+    assets: [
+      { file: "/store-assets/social-profile-800.png", label: "Profile picture", dims: "720 x 720 (use 800px)" },
+    ],
+  },
+  {
+    platform: "LinkedIn",
+    assets: [
+      { file: "/store-assets/social-profile-400.png", label: "Profile picture", dims: "400 x 400" },
+      { file: "/store-assets/social-profile-300.png", label: "Company logo", dims: "300 x 300" },
+      { file: "/store-assets/linkedin-banner.png", label: "Cover banner", dims: "1584 x 396" },
+    ],
+  },
 ];
 
 const stores = [
@@ -132,7 +181,7 @@ const stores = [
     name: "Chrome Web Store",
     icon: Chrome,
     category: "Productivity",
-    screenshots: { count: 10, dims: "1280 x 800 px", format: "PNG" },
+    screenshots: { count: 16, dims: "1280 x 800 px", format: "PNG" },
     promo: "Small tile 440 x 280, Marquee 1400 x 560",
     icon128: "128 x 128 px PNG",
   },
@@ -140,7 +189,7 @@ const stores = [
     name: "Firefox Add-ons",
     icon: Globe,
     category: "Productivity > Workflow & Planning",
-    screenshots: { count: 10, dims: "1280 x 800 px", format: "PNG" },
+    screenshots: { count: 16, dims: "1280 x 800 px", format: "PNG" },
     promo: "Not required (optional header image)",
     icon128: "128 x 128 px PNG",
   },
@@ -148,7 +197,7 @@ const stores = [
     name: "Edge Add-ons",
     icon: Globe,
     category: "Productivity",
-    screenshots: { count: 10, dims: "1280 x 800 px", format: "PNG" },
+    screenshots: { count: 16, dims: "1280 x 800 px", format: "PNG" },
     promo: "Small tile 440 x 280, Marquee 1400 x 560 (same as Chrome)",
     icon128: "128 x 128 px PNG (same as Chrome)",
   },
@@ -542,6 +591,60 @@ export default function MediaPage() {
             </div>
           </div>
         </DarkSection>
+
+        {/* ── Social Media Assets ──────────────────────────── */}
+        <section className="mb-24">
+          <SectionLabel>Social</SectionLabel>
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3">
+            Social Media Profile & Banner Images
+          </h2>
+          <p className="text-muted-foreground mb-10 max-w-2xl">
+            Ready-to-upload profile pictures and cover banners for every major
+            platform — YouTube, X, Facebook, Instagram, and LinkedIn.
+          </p>
+
+          <div className="space-y-10">
+            {socialMediaAssets.map((platform) => (
+              <div key={platform.platform}>
+                <h3 className="text-lg font-semibold mb-4">{platform.platform}</h3>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {platform.assets.map((asset) => (
+                    <div
+                      key={asset.file}
+                      className="rounded-xl border border-border overflow-hidden"
+                    >
+                      <Image
+                        src={asset.file}
+                        alt={`${platform.platform} ${asset.label}`}
+                        width={640}
+                        height={400}
+                        className="w-full h-auto"
+                      />
+                      <div className="p-3 bg-card flex items-center justify-between">
+                        <div>
+                          <p className="text-xs font-medium">{asset.label}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {asset.dims} px
+                          </p>
+                        </div>
+                        <a href={asset.file} download>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 text-xs gap-1"
+                          >
+                            <Download className="h-3 w-3" />
+                            PNG
+                          </Button>
+                        </a>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
 
         {/* ── Store Listing Copy ──────────────────────────── */}
         <section className="mb-24">

@@ -67,7 +67,7 @@ export function GettingStarted() {
     },
     {
       label: "Create your first prompt",
-      done: prompts.some((p) => !p.is_template),
+      done: prompts.length > 0,
       href: "/vault",
       icon: FileText,
     },

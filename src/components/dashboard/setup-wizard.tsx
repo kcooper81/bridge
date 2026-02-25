@@ -86,7 +86,7 @@ export function SetupWizard() {
       id: "create-prompt",
       title: "Create your first prompt",
       description: "Write a prompt and assign it to your team. They'll see it in the extension.",
-      done: prompts.some((p) => !p.is_template),
+      done: prompts.length > 0,
       href: "/vault",
       actionLabel: "Create Prompt",
       icon: FileText,

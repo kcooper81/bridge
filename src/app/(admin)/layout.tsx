@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { AdminNav } from "@/components/admin/nav";
 import { AdminHeader } from "@/components/admin/header";
 import { SUPER_ADMIN_EMAILS } from "@/lib/constants";
@@ -24,12 +24,21 @@ export default async function AdminLayout({
     .eq("id", user.id)
     .single();
 
-  const isSuperAdmin =
-    profile?.is_super_admin === true ||
-    SUPER_ADMIN_EMAILS.includes(user.email || "");
+  const emailIsAdmin = SUPER_ADMIN_EMAILS.includes(user.email || "");
+  const isSuperAdmin = profile?.is_super_admin === true || emailIsAdmin;
 
   if (!isSuperAdmin) {
     redirect("/vault");
+  }
+
+  // Sync the DB flag if the email is in the allow-list but the flag is missing.
+  // This ensures RLS policies (which only check the DB column) work correctly.
+  if (emailIsAdmin && profile?.is_super_admin !== true) {
+    const db = createServiceClient();
+    await db
+      .from("profiles")
+      .update({ is_super_admin: true })
+      .eq("id", user.id);
   }
 
   return (

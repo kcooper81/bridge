@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Settings, Database, Shield, Server } from "lucide-react";
+import { SUPER_ADMIN_EMAILS } from "@/lib/constants";
 
 export default function SettingsPage() {
   return (
@@ -93,7 +94,7 @@ export default function SettingsPage() {
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Admin Email</span>
               <span className="text-sm font-mono text-muted-foreground">
-                admin@teamprompt.app
+                {SUPER_ADMIN_EMAILS[0]}
               </span>
             </div>
           </CardContent>

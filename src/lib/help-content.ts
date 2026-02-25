@@ -22,6 +22,8 @@ export interface HelpArticle {
   a: string;
   /** Optional keywords to boost search relevance beyond q + a text */
   keywords?: string[];
+  /** URL-safe slug derived from the question */
+  slug: string;
 }
 
 export interface HelpCategory {
@@ -35,6 +37,19 @@ export interface HelpCategory {
 export interface FAQ {
   question: string;
   answer: string;
+}
+
+// ─── Slug helper ───
+
+/** Strips common question prefixes and kebab-cases the remainder. */
+export function generateSlug(question: string): string {
+  return question
+    .replace(/^(how do i |how does |how do |what is the |what is |what are the |what are |what does |what's the |what's |where can i |where do i |can i |does |is there a |is there |do i )/i, "")
+    .replace(/\?$/, "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
 }
 
 // ─── Overview ───
@@ -52,7 +67,9 @@ export const HELP_OVERVIEW = {
 
 // ─── Documentation Categories ───
 
-export const HELP_CATEGORIES: HelpCategory[] = [
+type RawCategory = Omit<HelpCategory, "articles"> & { articles: Omit<HelpArticle, "slug">[] };
+
+const _RAW_CATEGORIES: RawCategory[] = [
   {
     id: "getting-started",
     icon: Rocket,
@@ -402,6 +419,32 @@ export const HELP_CATEGORIES: HelpCategory[] = [
     ],
   },
 ];
+
+/** Categories with slugs computed from article questions. */
+export const HELP_CATEGORIES: HelpCategory[] = _RAW_CATEGORIES.map((cat) => ({
+  ...cat,
+  articles: cat.articles.map((article) => ({
+    ...article,
+    slug: generateSlug(article.q),
+  })),
+}));
+
+// ─── Lookup helpers ───
+
+export function getCategoryById(id: string): HelpCategory | undefined {
+  return HELP_CATEGORIES.find((c) => c.id === id);
+}
+
+export function getArticleBySlug(
+  categoryId: string,
+  slug: string,
+): { category: HelpCategory; article: HelpArticle } | undefined {
+  const category = getCategoryById(categoryId);
+  if (!category) return undefined;
+  const article = category.articles.find((a) => a.slug === slug);
+  if (!article) return undefined;
+  return { category, article };
+}
 
 // ─── FAQs (for public page structured data + summary section) ───
 

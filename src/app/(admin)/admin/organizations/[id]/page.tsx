@@ -74,7 +74,7 @@ export default function OrgDetailPage() {
 
     const [orgRes, subRes, membersRes, promptsRes] = await Promise.all([
       supabase.from("organizations").select("*").eq("id", orgId).single(),
-      supabase.from("subscriptions").select("plan, status, seats, current_period_end, stripe_customer_id, stripe_subscription_id").eq("org_id", orgId).single(),
+      supabase.from("subscriptions").select("plan, status, seats, current_period_end, stripe_customer_id, stripe_subscription_id").eq("org_id", orgId).maybeSingle(),
       supabase.from("profiles").select("id, name, email, role, is_super_admin, created_at").eq("org_id", orgId).order("created_at"),
       supabase.from("prompts").select("*", { count: "exact", head: true }).eq("org_id", orgId),
     ]);

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { createClient } from "@/lib/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -57,72 +56,34 @@ export default function TicketsPage() {
   }, []);
 
   const loadTickets = async () => {
-    const supabase = createClient();
-
-    const { data: rawTickets } = await supabase
-      .from("feedback")
-      .select("id, type, subject, message, status, priority, user_id, org_id, created_at")
-      .order("created_at", { ascending: false });
-
-    if (!rawTickets || rawTickets.length === 0) {
-      setTickets([]);
+    try {
+      const res = await fetch("/api/admin/tickets");
+      if (!res.ok) throw new Error("Failed to fetch tickets");
+      const data = await res.json();
+      setTickets(data.tickets || []);
+    } catch {
+      toast.error("Failed to load tickets");
+    } finally {
       setLoading(false);
-      return;
     }
-
-    const userIds = Array.from(new Set(rawTickets.map((t: { user_id: string | null }) => t.user_id).filter(Boolean) as string[]));
-    const orgIds = Array.from(new Set(rawTickets.map((t: { org_id: string | null }) => t.org_id).filter(Boolean) as string[]));
-
-    const [usersRes, orgsRes] = await Promise.all([
-      userIds.length > 0
-        ? supabase.from("profiles").select("id, email").in("id", userIds)
-        : { data: [] },
-      orgIds.length > 0
-        ? supabase.from("organizations").select("id, name").in("id", orgIds)
-        : { data: [] },
-    ]);
-
-    const userMap = new Map(
-      (usersRes.data || []).map((u: { id: string; email: string }) => [u.id, u.email])
-    );
-    const orgMap = new Map(
-      (orgsRes.data || []).map((o: { id: string; name: string }) => [o.id, o.name])
-    );
-
-    setTickets(
-      rawTickets.map((t: { id: string; type: string; subject: string | null; message: string; status: string; priority: string; user_id: string | null; org_id: string | null; created_at: string }) => ({
-        id: t.id,
-        type: t.type,
-        subject: t.subject,
-        message: t.message,
-        status: t.status,
-        priority: t.priority || "normal",
-        user_email: t.user_id ? userMap.get(t.user_id) || null : null,
-        org_name: t.org_id ? orgMap.get(t.org_id) || null : null,
-        created_at: t.created_at,
-      }))
-    );
-
-    setLoading(false);
   };
 
   const updateStatus = async (id: string, newStatus: string) => {
-    const supabase = createClient();
-    const updates: Record<string, unknown> = { status: newStatus, updated_at: new Date().toISOString() };
-    if (newStatus === "resolved") updates.resolved_at = new Date().toISOString();
+    try {
+      const res = await fetch("/api/admin/tickets", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, status: newStatus }),
+      });
 
-    const { error } = await supabase
-      .from("feedback")
-      .update(updates)
-      .eq("id", id);
+      if (!res.ok) throw new Error("Failed to update ticket");
 
-    if (error) {
-      toast.error("Failed to update ticket");
-    } else {
       toast.success(`Ticket marked as ${newStatus}`);
       setTickets(
         tickets.map((t) => (t.id === id ? { ...t, status: newStatus } : t))
       );
+    } catch {
+      toast.error("Failed to update ticket");
     }
   };
 

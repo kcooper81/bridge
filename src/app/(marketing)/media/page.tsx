@@ -115,6 +115,11 @@ const storeScreenshots = [
   { file: "/store-assets/screenshot-3-insert.png", label: "Insert into AI tool", dims: "1280 x 800" },
   { file: "/store-assets/screenshot-4-template.png", label: "Template variables", dims: "1280 x 800" },
   { file: "/store-assets/screenshot-5-sidepanel.png", label: "Side panel view", dims: "1280 x 800" },
+  { file: "/store-assets/screenshot-6-dlp-block.png", label: "DLP block — sensitive data detected", dims: "1280 x 800" },
+  { file: "/store-assets/screenshot-7-warning.png", label: "Warning banner notification", dims: "1280 x 800" },
+  { file: "/store-assets/screenshot-8-session-loss.png", label: "Session loss protection banner", dims: "1280 x 800" },
+  { file: "/store-assets/screenshot-9-admin-dashboard.png", label: "Admin dashboard — protection coverage", dims: "1280 x 800" },
+  { file: "/store-assets/screenshot-10-admin-users.png", label: "Admin users — protection status", dims: "1280 x 800" },
 ];
 
 const storePromos = [
@@ -127,7 +132,7 @@ const stores = [
     name: "Chrome Web Store",
     icon: Chrome,
     category: "Productivity",
-    screenshots: { count: 5, dims: "1280 x 800 px", format: "PNG" },
+    screenshots: { count: 10, dims: "1280 x 800 px", format: "PNG" },
     promo: "Small tile 440 x 280, Marquee 1400 x 560",
     icon128: "128 x 128 px PNG",
   },
@@ -135,7 +140,7 @@ const stores = [
     name: "Firefox Add-ons",
     icon: Globe,
     category: "Productivity > Workflow & Planning",
-    screenshots: { count: 5, dims: "1280 x 800 px", format: "PNG" },
+    screenshots: { count: 10, dims: "1280 x 800 px", format: "PNG" },
     promo: "Not required (optional header image)",
     icon128: "128 x 128 px PNG",
   },
@@ -143,7 +148,7 @@ const stores = [
     name: "Edge Add-ons",
     icon: Globe,
     category: "Productivity",
-    screenshots: { count: 5, dims: "1280 x 800 px", format: "PNG" },
+    screenshots: { count: 10, dims: "1280 x 800 px", format: "PNG" },
     promo: "Small tile 440 x 280, Marquee 1400 x 560 (same as Chrome)",
     icon128: "128 x 128 px PNG (same as Chrome)",
   },

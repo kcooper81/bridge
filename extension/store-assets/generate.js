@@ -483,6 +483,301 @@ function promoMarquee() {
 </div>`);
 }
 
+// ─── SVG Icons for DLP overlays ───
+const SVG_ICONS = {
+  shieldX: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg>',
+  shieldCheck: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 12 15 16 10"/></svg>',
+  shield: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+  triangleAlert: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+};
+
+// ChatGPT background with message bubbles (reusable for DLP screenshots)
+function chatGPTBackground(inputText = "Message ChatGPT...") {
+  return `
+    <div class="ai-bg">
+      <div class="ai-header">
+        <div class="ai-header-logo">ChatGPT</div>
+        <span style="color:#8e8ea0;font-size:13px;">GPT-4</span>
+      </div>
+      <div class="ai-chat">
+        <div class="ai-msg user">Help me draft a follow-up email for our enterprise client Acme Corp.</div>
+        <div class="ai-msg assistant">Of course! I'd be happy to help you draft a follow-up email. Could you provide some context about the recent interaction with Acme Corp?</div>
+        <div class="ai-msg user">Sure — their API key is sk-proj-abc123def456 and the account contact is john@acme.com. The deal is worth $450K ARR and they need SSO integration by March.</div>
+      </div>
+      <div class="ai-input-bar">
+        <div class="ai-input">${inputText}</div>
+      </div>
+    </div>`;
+}
+
+// Shield indicator element
+function shieldIndicatorHTML(state = "protected", label = "3 rules active") {
+  const colors = {
+    protected: { border: "rgba(34,197,94,0.3)", dotColor: "#22c55e", iconColor: "#22c55e", dotShadow: "0 0 6px rgba(34,197,94,0.5)" },
+    scanning: { border: "rgba(59,130,246,0.4)", dotColor: "#3b82f6", iconColor: "#3b82f6", dotShadow: "0 0 6px rgba(59,130,246,0.5)" },
+    unprotected: { border: "rgba(245,158,11,0.3)", dotColor: "#f59e0b", iconColor: "#f59e0b", dotShadow: "0 0 6px rgba(245,158,11,0.5)" },
+  };
+  const c = colors[state] || colors.protected;
+  return `
+    <div style="position:fixed;bottom:20px;right:20px;display:flex;align-items:center;gap:8px;padding:8px 12px;background:#18181b;border:1px solid ${c.border};border-radius:10px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:12px;color:#a1a1aa;z-index:999990;box-shadow:0 4px 16px rgba(0,0,0,0.4);">
+      <div style="width:16px;height:16px;color:${c.iconColor};filter:drop-shadow(0 0 4px ${c.iconColor}40);">${SVG_ICONS.shield}</div>
+      <span style="width:6px;height:6px;border-radius:50%;background:${c.dotColor};box-shadow:${c.dotShadow};flex-shrink:0;"></span>
+      <span style="display:flex;flex-direction:column;gap:1px;">
+        <span style="font-weight:600;color:#e4e4e7;font-size:11px;white-space:nowrap;">${label}</span>
+        <span style="font-size:10px;color:#71717a;white-space:nowrap;">on ChatGPT</span>
+      </span>
+      <div style="display:flex;align-items:center;justify-content:center;width:18px;height:18px;color:#52525b;">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+      </div>
+    </div>`;
+}
+
+// ─── Screenshot 6: DLP Block Overlay ───
+function screenshot6() {
+  return baseHTML(1280, 800, `
+<div style="position:relative;height:100%;">
+  ${chatGPTBackground()}
+  ${shieldIndicatorHTML("protected", "3 rules active")}
+  <!-- Block overlay -->
+  <div style="position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:999999;display:flex;align-items:center;justify-content:center;">
+    <div style="background:#18181b;color:#e4e4e7;border:1px solid #ef4444;border-radius:12px;padding:24px;max-width:420px;width:90%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;box-shadow:0 8px 32px rgba(0,0,0,0.5);">
+      <div style="color:#ef4444;margin-bottom:8px;width:28px;height:28px;">${SVG_ICONS.shieldX}</div>
+      <h3 style="font-size:16px;font-weight:600;margin-bottom:8px;color:#fca5a5;">Message Blocked by TeamPrompt</h3>
+      <p style="font-size:13px;color:#a1a1aa;margin-bottom:8px;">Sensitive data was detected in your message:</p>
+      <ul style="list-style:none;padding:0;margin:8px 0;">
+        <li style="padding:6px 10px;background:#27272a;border-radius:6px;font-size:12px;margin-bottom:4px;"><strong style="color:#ef4444;">API Key Detection</strong>: sk-proj-abc123def456</li>
+        <li style="padding:6px 10px;background:#27272a;border-radius:6px;font-size:12px;margin-bottom:4px;"><strong style="color:#ef4444;">Email Address (PII)</strong>: john@acme.com</li>
+        <li style="padding:6px 10px;background:#27272a;border-radius:6px;font-size:12px;margin-bottom:4px;"><strong style="color:#ef4444;">Financial Data</strong>: $450K ARR</li>
+      </ul>
+      <p style="font-size:12px;color:#71717a;">Remove the flagged content and try again.</p>
+      <button style="margin-top:12px;padding:8px 20px;background:#2563eb;color:white;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">Got it</button>
+    </div>
+  </div>
+</div>`);
+}
+
+// ─── Screenshot 7: Warning Banner ───
+function screenshot7() {
+  return baseHTML(1280, 800, `
+<div style="position:relative;height:100%;">
+  ${chatGPTBackground()}
+  ${shieldIndicatorHTML("protected", "3 rules active")}
+  <!-- Warning banner -->
+  <div style="position:fixed;top:12px;left:50%;transform:translateX(-50%);background:#422006;color:#fbbf24;border:1px solid #854d0e;padding:8px 16px;border-radius:8px;font-size:13px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;z-index:999999;display:flex;align-items:center;gap:12px;box-shadow:0 4px 12px rgba(0,0,0,0.3);">
+    <span style="display:flex;align-items:center;gap:6px;">
+      <span style="width:16px;height:16px;display:inline-flex;flex-shrink:0;">${SVG_ICONS.triangleAlert}</span>
+      TeamPrompt: 2 warning(s) — Informal Tone Detected, Client Name Shared
+    </span>
+    <button style="background:none;border:1px solid #854d0e;color:#fbbf24;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;">Dismiss</button>
+  </div>
+</div>`);
+}
+
+// ─── Screenshot 8: Session Loss Banner (Undismissable) ───
+function screenshot8() {
+  return baseHTML(1280, 800, `
+<div style="position:relative;height:100%;">
+  ${chatGPTBackground()}
+  <!-- Shield in inactive state -->
+  <div style="position:fixed;bottom:20px;right:20px;display:flex;align-items:center;gap:8px;padding:8px 12px;background:#18181b;border:1px solid #27272a;border-radius:10px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:12px;color:#a1a1aa;z-index:999990;box-shadow:0 4px 16px rgba(0,0,0,0.4);opacity:0.6;cursor:pointer;">
+    <div style="width:16px;height:16px;color:#71717a;">${SVG_ICONS.shield}</div>
+    <span style="width:6px;height:6px;border-radius:50%;background:#71717a;flex-shrink:0;"></span>
+    <span style="display:flex;flex-direction:column;gap:1px;">
+      <span style="font-weight:600;color:#e4e4e7;font-size:11px;white-space:nowrap;">Not signed in</span>
+      <span style="font-size:10px;color:#71717a;white-space:nowrap;">on ChatGPT</span>
+    </span>
+  </div>
+  <!-- Session loss banner — no dismiss button -->
+  <div style="position:fixed;top:0;left:0;right:0;background:#7f1d1d;color:#fecaca;padding:10px 16px;font-size:13px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;z-index:999998;display:flex;align-items:center;justify-content:center;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,0.3);">
+    <span style="font-weight:600;">TeamPrompt protection paused \u2014 Sign in to restore guardrails</span>
+    <div style="display:flex;gap:8px;flex-shrink:0;">
+      <button style="padding:5px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:#dc2626;color:white;">Sign In</button>
+    </div>
+  </div>
+</div>`);
+}
+
+// ─── Screenshot 9: Admin Dashboard (Web App) ───
+function screenshot9() {
+  const adminBg = "#09090b";
+  const cardBg = "#0f0f11";
+  const borderClr = "#27272a";
+  return baseHTML(1280, 800, `
+<div style="display:flex;height:100%;background:${adminBg};font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  <!-- Sidebar -->
+  <div style="width:240px;background:${cardBg};border-right:1px solid ${borderClr};padding:20px 16px;display:flex;flex-direction:column;gap:4px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;padding:0 8px;">
+      ${logoIcon(32)}
+      <span style="font-size:16px;font-weight:700;color:white;">TeamPrompt</span>
+    </div>
+    <div style="padding:8px 12px;border-radius:8px;background:rgba(59,130,246,0.1);color:#60a5fa;font-size:13px;font-weight:500;">Dashboard</div>
+    <div style="padding:8px 12px;border-radius:8px;color:#71717a;font-size:13px;">Organizations</div>
+    <div style="padding:8px 12px;border-radius:8px;color:#71717a;font-size:13px;">Users</div>
+    <div style="padding:8px 12px;border-radius:8px;color:#71717a;font-size:13px;">Subscriptions</div>
+    <div style="padding:8px 12px;border-radius:8px;color:#71717a;font-size:13px;">Support Tickets</div>
+    <div style="padding:8px 12px;border-radius:8px;color:#71717a;font-size:13px;">Error Logs</div>
+  </div>
+
+  <!-- Main content -->
+  <div style="flex:1;padding:32px;overflow:hidden;">
+    <h1 style="font-size:24px;font-weight:700;color:white;margin-bottom:4px;">Admin Dashboard</h1>
+    <p style="font-size:14px;color:#71717a;margin-bottom:24px;">Platform overview and key metrics</p>
+
+    <!-- Key Metrics Row -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;">
+      <div style="background:${cardBg};border:1px solid ${borderClr};border-radius:12px;padding:16px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><span style="font-size:13px;color:#a1a1aa;">MRR</span><span style="color:#71717a;font-size:14px;">$</span></div>
+        <div style="font-size:24px;font-weight:700;color:white;">$2,847</div>
+        <div style="font-size:12px;color:#71717a;margin-top:4px;">$34,164 ARR</div>
+      </div>
+      <div style="background:${cardBg};border:1px solid ${borderClr};border-radius:12px;padding:16px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><span style="font-size:13px;color:#a1a1aa;">Organizations</span></div>
+        <div style="font-size:24px;font-weight:700;color:white;">42</div>
+        <div style="font-size:12px;color:#22c55e;margin-top:4px;">+3 this week (+18%)</div>
+      </div>
+      <div style="background:${cardBg};border:1px solid ${borderClr};border-radius:12px;padding:16px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><span style="font-size:13px;color:#a1a1aa;">Total Users</span></div>
+        <div style="font-size:24px;font-weight:700;color:white;">189</div>
+        <div style="font-size:12px;color:#71717a;margin-top:4px;">4.5 avg per org</div>
+      </div>
+      <div style="background:${cardBg};border:1px solid ${borderClr};border-radius:12px;padding:16px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><span style="font-size:13px;color:#a1a1aa;">Total Prompts</span></div>
+        <div style="font-size:24px;font-weight:700;color:white;">1,247</div>
+        <div style="font-size:12px;color:#71717a;margin-top:4px;">29.7 avg per org</div>
+      </div>
+    </div>
+
+    <!-- Protection Coverage Card -->
+    <div style="background:${cardBg};border:1px solid ${borderClr};border-radius:12px;padding:20px;margin-bottom:24px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+        <div style="width:20px;height:20px;color:#a1a1aa;">${SVG_ICONS.shield}</div>
+        <span style="font-size:16px;font-weight:600;color:white;">Protection Coverage</span>
+      </div>
+      <p style="font-size:13px;color:#71717a;margin-bottom:16px;">Extension protection status across all users</p>
+
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px;">
+        <div style="text-align:center;padding:16px;background:rgba(34,197,94,0.1);border-radius:8px;">
+          <div style="font-size:24px;font-weight:700;color:white;">127</div>
+          <div style="font-size:13px;color:#a1a1aa;display:flex;align-items:center;justify-content:center;gap:6px;margin-top:4px;">
+            <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#22c55e;"></span> Protected
+          </div>
+        </div>
+        <div style="text-align:center;padding:16px;background:rgba(161,161,170,0.08);border-radius:8px;">
+          <div style="font-size:24px;font-weight:700;color:white;">31</div>
+          <div style="font-size:13px;color:#a1a1aa;display:flex;align-items:center;justify-content:center;gap:6px;margin-top:4px;">
+            <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#71717a;"></span> Inactive
+          </div>
+        </div>
+        <div style="text-align:center;padding:16px;background:rgba(239,68,68,0.1);border-radius:8px;">
+          <div style="font-size:24px;font-weight:700;color:white;">8</div>
+          <div style="font-size:13px;color:#a1a1aa;display:flex;align-items:center;justify-content:center;gap:6px;margin-top:4px;">
+            <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#ef4444;"></span> Unprotected
+          </div>
+        </div>
+        <div style="text-align:center;padding:16px;background:rgba(161,161,170,0.08);border-radius:8px;">
+          <div style="font-size:24px;font-weight:700;color:white;">23</div>
+          <div style="font-size:13px;color:#a1a1aa;display:flex;align-items:center;justify-content:center;gap:6px;margin-top:4px;">
+            <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#71717a;"></span> No Extension
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
+          <span style="color:#a1a1aa;">Active protection rate</span>
+          <span style="color:white;font-weight:500;">67%</span>
+        </div>
+        <div style="height:8px;border-radius:4px;background:#27272a;overflow:hidden;">
+          <div style="height:100%;width:67%;border-radius:4px;background:#22c55e;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>`);
+}
+
+// ─── Screenshot 10: Admin Users Page with Protection Badges ───
+function screenshot10() {
+  const adminBg = "#09090b";
+  const cardBg = "#0f0f11";
+  const borderClr = "#27272a";
+  const rows = [
+    { name: "Sarah Chen", email: "sarah@acme.com", org: "Acme Corp", role: "admin", status: "protected", badge: '<span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#22c55e;"></span>Protected</span>' },
+    { name: "James Wilson", email: "james@acme.com", org: "Acme Corp", role: "member", status: "protected", badge: '<span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#22c55e;"></span>Protected</span>' },
+    { name: "Maria Garcia", email: "maria@globex.io", org: "Globex Inc", role: "admin", status: "unprotected", badge: '<span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;color:#fca5a5;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#ef4444;"></span>Unprotected</span>' },
+    { name: "Alex Turner", email: "alex@globex.io", org: "Globex Inc", role: "member", status: "inactive", badge: '<span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#71717a;"></span>Inactive</span>' },
+    { name: "Priya Patel", email: "priya@initech.com", org: "Initech", role: "manager", status: "protected", badge: '<span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#22c55e;"></span>Protected</span>' },
+    { name: "Tom Baker", email: "tom@initech.com", org: "Initech", role: "member", status: "noext", badge: '<span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#71717a;"></span>No Extension</span>' },
+    { name: "Lisa Kim", email: "lisa@stark.dev", org: "Stark Labs", role: "admin", status: "unprotected", badge: '<span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;color:#fca5a5;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#ef4444;"></span>Unprotected</span>' },
+    { name: "David Brown", email: "david@stark.dev", org: "Stark Labs", role: "member", status: "protected", badge: '<span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#22c55e;"></span>Protected</span>' },
+  ];
+  const tableRows = rows.map((r, i) => `
+    <tr style="border-bottom:1px solid ${borderClr};${r.status === 'unprotected' ? 'background:rgba(239,68,68,0.04);' : ''}">
+      <td style="padding:10px 14px;font-weight:500;color:white;font-size:13px;">${r.name}</td>
+      <td style="padding:10px 14px;color:#71717a;font-size:13px;">${r.email}</td>
+      <td style="padding:10px 14px;font-size:13px;"><a style="color:#60a5fa;text-decoration:none;">${r.org}</a></td>
+      <td style="padding:10px 14px;"><span style="font-size:11px;padding:2px 8px;border:1px solid ${borderClr};border-radius:6px;color:#a1a1aa;text-transform:capitalize;">${r.role}</span></td>
+      <td style="padding:10px 14px;">${r.badge}</td>
+      <td style="padding:10px 14px;color:#71717a;font-size:13px;">${['Jan 15', 'Feb 3', 'Jan 22', 'Dec 10', 'Feb 1', 'Jan 28', 'Feb 8', 'Jan 19'][i]}, 2025</td>
+    </tr>`).join("");
+
+  return baseHTML(1280, 800, `
+<div style="display:flex;height:100%;background:${adminBg};font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  <!-- Sidebar -->
+  <div style="width:240px;background:${cardBg};border-right:1px solid ${borderClr};padding:20px 16px;display:flex;flex-direction:column;gap:4px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;padding:0 8px;">
+      ${logoIcon(32)}
+      <span style="font-size:16px;font-weight:700;color:white;">TeamPrompt</span>
+    </div>
+    <div style="padding:8px 12px;border-radius:8px;color:#71717a;font-size:13px;">Dashboard</div>
+    <div style="padding:8px 12px;border-radius:8px;color:#71717a;font-size:13px;">Organizations</div>
+    <div style="padding:8px 12px;border-radius:8px;background:rgba(59,130,246,0.1);color:#60a5fa;font-size:13px;font-weight:500;">Users</div>
+    <div style="padding:8px 12px;border-radius:8px;color:#71717a;font-size:13px;">Subscriptions</div>
+    <div style="padding:8px 12px;border-radius:8px;color:#71717a;font-size:13px;">Support Tickets</div>
+    <div style="padding:8px 12px;border-radius:8px;color:#71717a;font-size:13px;">Error Logs</div>
+  </div>
+
+  <!-- Main content -->
+  <div style="flex:1;padding:32px;overflow:hidden;">
+    <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:24px;">
+      <div>
+        <h1 style="font-size:24px;font-weight:700;color:white;margin-bottom:4px;">Users</h1>
+        <p style="font-size:14px;color:#71717a;">189 users across all organizations</p>
+      </div>
+      <button style="padding:8px 14px;border:1px solid ${borderClr};border-radius:8px;background:transparent;color:#a1a1aa;font-size:13px;cursor:pointer;">Export CSV</button>
+    </div>
+
+    <!-- Filters -->
+    <div style="display:flex;gap:8px;margin-bottom:16px;">
+      <div style="flex:1;padding:8px 12px;border:1px solid ${borderClr};border-radius:8px;background:${cardBg};color:#71717a;font-size:13px;">Search by name or email...</div>
+      <button style="padding:6px 12px;border:1px solid ${borderClr};border-radius:8px;background:transparent;color:#a1a1aa;font-size:12px;display:flex;align-items:center;gap:6px;">
+        <span style="width:14px;height:14px;display:inline-flex;">${SVG_ICONS.shield}</span> Super Admins
+      </button>
+      <button style="padding:6px 12px;border:none;border-radius:8px;background:#dc2626;color:white;font-size:12px;font-weight:500;display:flex;align-items:center;gap:6px;">
+        <span style="width:14px;height:14px;display:inline-flex;">${SVG_ICONS.shieldX}</span> Unprotected
+      </button>
+    </div>
+
+    <!-- Table -->
+    <div style="background:${cardBg};border:1px solid ${borderClr};border-radius:12px;overflow:hidden;">
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead>
+          <tr style="border-bottom:1px solid ${borderClr};background:rgba(255,255,255,0.02);">
+            <th style="text-align:left;padding:10px 14px;font-weight:500;color:#a1a1aa;font-size:12px;">Name</th>
+            <th style="text-align:left;padding:10px 14px;font-weight:500;color:#a1a1aa;font-size:12px;">Email</th>
+            <th style="text-align:left;padding:10px 14px;font-weight:500;color:#a1a1aa;font-size:12px;">Organization</th>
+            <th style="text-align:left;padding:10px 14px;font-weight:500;color:#a1a1aa;font-size:12px;">Role</th>
+            <th style="text-align:left;padding:10px 14px;font-weight:500;color:#a1a1aa;font-size:12px;">Protection</th>
+            <th style="text-align:left;padding:10px 14px;font-weight:500;color:#a1a1aa;font-size:12px;">Joined</th>
+          </tr>
+        </thead>
+        <tbody>${tableRows}</tbody>
+      </table>
+    </div>
+  </div>
+</div>`);
+}
+
 // ─── Generate all assets ───
 async function main() {
   console.log("Generating Chrome Web Store assets...\n");
@@ -498,6 +793,11 @@ async function main() {
     { name: "screenshot-3-insert.png", width: 1280, height: 800, html: screenshot3() },
     { name: "screenshot-4-template.png", width: 1280, height: 800, html: screenshot4() },
     { name: "screenshot-5-sidepanel.png", width: 1280, height: 800, html: screenshot5() },
+    { name: "screenshot-6-dlp-block.png", width: 1280, height: 800, html: screenshot6() },
+    { name: "screenshot-7-warning.png", width: 1280, height: 800, html: screenshot7() },
+    { name: "screenshot-8-session-loss.png", width: 1280, height: 800, html: screenshot8() },
+    { name: "screenshot-9-admin-dashboard.png", width: 1280, height: 800, html: screenshot9() },
+    { name: "screenshot-10-admin-users.png", width: 1280, height: 800, html: screenshot10() },
     { name: "promo-small.png", width: 440, height: 280, html: promoSmall() },
     { name: "promo-marquee.png", width: 1400, height: 560, html: promoMarquee() },
   ];

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,9 +18,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { SelectWithQuickAdd } from "@/components/ui/select-with-quick-add";
-import { Loader2, CheckCircle2, XCircle, Braces, ShieldAlert } from "lucide-react";
-import { Switch } from "@/components/ui/switch";
+import { Loader2, CheckCircle2, XCircle, Braces, ShieldAlert, ChevronDown, ChevronUp, Plus } from "lucide-react";
 import { TONE_OPTIONS } from "@/lib/constants";
 import { useOrg } from "@/components/providers/org-provider";
 import {
@@ -34,17 +38,16 @@ import {
 } from "@/lib/vault-api";
 import { createClient } from "@/lib/supabase/client";
 import { scanContent } from "@/lib/security/scanner";
-import type { Prompt, PromptStatus, PromptVersion, SecurityRule, ValidationResult } from "@/lib/types";
+import {
+  extractTemplateVariables,
+  normalizeVariables,
+  mergeVariablesWithMetadata,
+  getDisplayLabel,
+} from "@/lib/variables";
+import type { Prompt, PromptStatus, PromptVersion, SecurityRule, ValidationResult, VariableConfig } from "@/lib/types";
 import type { ScanResult } from "@/lib/security/types";
 import { toast } from "sonner";
 import { trackPromptCreated, trackGuardrailViolation } from "@/lib/analytics";
-
-function extractTemplateVariables(content: string): string[] {
-  const matches = content.match(/\{\{([^}]+)\}\}/g);
-  if (!matches) return [];
-  const vars = matches.map((m) => m.replace(/^\{\{|\}\}$/g, "").trim());
-  return Array.from(new Set(vars));
-}
 
 interface PromptModalProps {
   open: boolean;
@@ -76,12 +79,25 @@ export function PromptModal({
   const [tagsInput, setTagsInput] = useState("");
   const [folderId, setFolderId] = useState<string>("");
   const [teamId, setTeamId] = useState<string>("");
-  const [isTemplate, setIsTemplate] = useState(false);
   const [status, setStatus] = useState<PromptStatus>(() =>
     getDefaultStatus(currentUserRole)
   );
 
+  // Variable config state
+  const [variableConfigs, setVariableConfigs] = useState<VariableConfig[]>([]);
+  const [expandedVars, setExpandedVars] = useState<Set<string>>(new Set());
+  const [insertVarName, setInsertVarName] = useState("");
+  const [insertPopoverOpen, setInsertPopoverOpen] = useState(false);
+  const contentRef = useRef<HTMLTextAreaElement>(null);
+
   const canApprove = currentUserRole === "admin" || currentUserRole === "manager";
+
+  // Auto-detect variables whenever content changes
+  const detectedNames = useMemo(() => extractTemplateVariables(content), [content]);
+
+  useEffect(() => {
+    setVariableConfigs((prev) => mergeVariablesWithMetadata(detectedNames, prev));
+  }, [detectedNames]);
 
   useEffect(() => {
     if (prompt) {
@@ -96,8 +112,8 @@ export function PromptModal({
       setTagsInput((prompt.tags || []).join(", "));
       setFolderId(prompt.folder_id || "");
       setTeamId(prompt.department_id || "");
-      setIsTemplate(prompt.is_template || false);
       setStatus(prompt.status || "approved");
+      setVariableConfigs(normalizeVariables(prompt.template_variables));
       getPromptVersions(prompt.id).then(setVersions);
     } else {
       setTitle("");
@@ -111,13 +127,53 @@ export function PromptModal({
       setTagsInput("");
       setFolderId("");
       setTeamId("");
-      setIsTemplate(false);
       setStatus(getDefaultStatus(currentUserRole));
       setVersions([]);
+      setVariableConfigs([]);
     }
     setValidation(null);
     setScanResult(null);
+    setExpandedVars(new Set());
   }, [prompt, open]);
+
+  function insertVariable(name: string) {
+    const textarea = contentRef.current;
+    if (!textarea) return;
+    const token = `{{${name}}}`;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const newContent = content.slice(0, start) + token + content.slice(end);
+    setContent(newContent);
+    setInsertVarName("");
+    setInsertPopoverOpen(false);
+    // Restore focus and cursor position after the inserted token
+    requestAnimationFrame(() => {
+      textarea.focus();
+      const pos = start + token.length;
+      textarea.setSelectionRange(pos, pos);
+    });
+  }
+
+  function handleInsertSubmit() {
+    const name = insertVarName.trim().replace(/\s+/g, "_").toLowerCase();
+    if (!name) return;
+    insertVariable(name);
+  }
+
+  function updateVariableConfig(name: string, patch: Partial<VariableConfig>) {
+    setVariableConfigs((prev) =>
+      prev.map((v) => (v.name === name ? { ...v, ...patch } : v))
+    );
+  }
+
+  function toggleExpanded(name: string) {
+    setExpandedVars((prev) => {
+      const next = new Set(prev);
+      if (next.has(name)) next.delete(name);
+      else next.add(name);
+      return next;
+    });
+  }
 
   function handleValidate() {
     const fields = {
@@ -168,6 +224,8 @@ export function PromptModal({
           }
         }
       }
+
+      const hasVariables = detectedNames.length > 0;
       const fields = {
         title: title.trim(),
         content: content.trim(),
@@ -183,8 +241,8 @@ export function PromptModal({
           .filter(Boolean),
         folder_id: folderId || null,
         department_id: teamId || null,
-        is_template: isTemplate,
-        template_variables: extractTemplateVariables(content),
+        is_template: hasVariables,
+        template_variables: variableConfigs,
         status: getDefaultStatus(currentUserRole, status),
       };
 
@@ -229,19 +287,153 @@ export function PromptModal({
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label htmlFor="content">Content *</Label>
+              <div className="flex items-center gap-2">
+                <Label htmlFor="content">Content *</Label>
+                <Popover open={insertPopoverOpen} onOpenChange={setInsertPopoverOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 gap-1 px-2 text-xs text-muted-foreground hover:text-primary"
+                    >
+                      <Braces className="h-3.5 w-3.5" />
+                      Insert Variable
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-64 p-3" align="start">
+                    <div className="space-y-3">
+                      <div className="space-y-1.5">
+                        <Label className="text-xs">New variable</Label>
+                        <form
+                          onSubmit={(e) => {
+                            e.preventDefault();
+                            handleInsertSubmit();
+                          }}
+                          className="flex gap-1.5"
+                        >
+                          <Input
+                            value={insertVarName}
+                            onChange={(e) => setInsertVarName(e.target.value)}
+                            placeholder="variable_name"
+                            className="h-8 text-xs font-mono"
+                          />
+                          <Button type="submit" size="sm" className="h-8 px-2.5 shrink-0">
+                            <Plus className="h-3.5 w-3.5" />
+                          </Button>
+                        </form>
+                      </div>
+                      {detectedNames.length > 0 && (
+                        <div className="space-y-1.5">
+                          <Label className="text-xs text-muted-foreground">Existing variables</Label>
+                          <div className="flex flex-wrap gap-1">
+                            {detectedNames.map((name) => (
+                              <button
+                                key={name}
+                                type="button"
+                                onClick={() => insertVariable(name)}
+                                className="inline-flex items-center gap-1 rounded-md bg-primary/10 text-primary px-2 py-0.5 text-xs font-mono hover:bg-primary/20 transition-colors"
+                              >
+                                <Braces className="h-3 w-3" />
+                                {name}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </div>
               <span className="text-xs text-muted-foreground">
                 {content.length} chars
               </span>
             </div>
             <Textarea
+              ref={contentRef}
               id="content"
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder="Write your prompt content..."
+              placeholder="Write your prompt content... Use {{variable_name}} for fill-in fields"
               rows={6}
             />
           </div>
+
+          {/* Variable Config Editor */}
+          {variableConfigs.length > 0 && (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Braces className="h-4 w-4 text-primary" />
+                <Label className="text-sm font-medium">
+                  Template Variables ({variableConfigs.length})
+                </Label>
+              </div>
+              <div className="space-y-2">
+                {variableConfigs.map((v) => {
+                  const isExpanded = expandedVars.has(v.name);
+                  return (
+                    <div
+                      key={v.name}
+                      className="rounded-lg border border-border bg-muted/30 overflow-hidden"
+                    >
+                      {/* Compact header */}
+                      <button
+                        type="button"
+                        onClick={() => toggleExpanded(v.name)}
+                        className="flex items-center justify-between w-full px-3 py-2 text-left hover:bg-muted/50 transition-colors"
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <code className="text-xs font-mono bg-primary/10 text-primary px-1.5 py-0.5 rounded shrink-0">
+                            {`{{${v.name}}}`}
+                          </code>
+                          <span className="text-sm text-muted-foreground truncate">
+                            {getDisplayLabel(v)}
+                          </span>
+                        </div>
+                        {isExpanded ? (
+                          <ChevronUp className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                        ) : (
+                          <ChevronDown className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                        )}
+                      </button>
+
+                      {/* Expanded editor */}
+                      {isExpanded && (
+                        <div className="px-3 pb-3 space-y-2 border-t border-border">
+                          <div className="pt-2 space-y-1">
+                            <Label className="text-xs text-muted-foreground">Display Label</Label>
+                            <Input
+                              value={v.label || ""}
+                              onChange={(e) => updateVariableConfig(v.name, { label: e.target.value || null })}
+                              placeholder={getDisplayLabel({ name: v.name })}
+                              className="h-8 text-sm"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <Label className="text-xs text-muted-foreground">Description</Label>
+                            <Input
+                              value={v.description || ""}
+                              onChange={(e) => updateVariableConfig(v.name, { description: e.target.value || null })}
+                              placeholder="Shown as hint text when filling in"
+                              className="h-8 text-sm"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <Label className="text-xs text-muted-foreground">Default Value</Label>
+                            <Input
+                              value={v.defaultValue || ""}
+                              onChange={(e) => updateVariableConfig(v.name, { defaultValue: e.target.value || null })}
+                              placeholder="Pre-filled when users fill this template"
+                              className="h-8 text-sm"
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="description">Description</Label>
@@ -353,44 +545,6 @@ export function PromptModal({
               placeholder="marketing, email, outreach"
             />
           </div>
-
-          {/* Template toggle */}
-          <div className="flex items-center justify-between rounded-lg border border-border p-3">
-            <div className="flex items-center gap-3">
-              <Braces className="h-4 w-4 text-muted-foreground" />
-              <div>
-                <Label htmlFor="isTemplate" className="text-sm font-medium cursor-pointer">
-                  Prompt template
-                </Label>
-                <p className="text-xs text-muted-foreground">
-                  {"Use {{variable_name}} in content for fill-in fields"}
-                </p>
-              </div>
-            </div>
-            <Switch
-              id="isTemplate"
-              checked={isTemplate}
-              onCheckedChange={setIsTemplate}
-            />
-          </div>
-
-          {/* Detected template variables */}
-          {isTemplate && extractTemplateVariables(content).length > 0 && (
-            <div className="rounded-lg bg-muted/50 p-3">
-              <p className="text-xs font-medium text-muted-foreground mb-2">Detected variables:</p>
-              <div className="flex flex-wrap gap-1.5">
-                {extractTemplateVariables(content).map((v) => (
-                  <span
-                    key={v}
-                    className="inline-flex items-center gap-1 rounded-md bg-primary/10 text-primary px-2 py-0.5 text-xs font-mono"
-                  >
-                    <Braces className="h-3 w-3" />
-                    {v}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
 
           <div className="space-y-2">
             <Label htmlFor="intendedOutcome">Intended Outcome</Label>

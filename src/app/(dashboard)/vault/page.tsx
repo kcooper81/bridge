@@ -71,6 +71,7 @@ import { NoOrgBanner } from "@/components/dashboard/no-org-banner";
 import { UpgradePrompt, LimitNudge } from "@/components/upgrade";
 import { ImportExportModal } from "@/components/dashboard/import-export-modal";
 import { FolderManager } from "@/components/dashboard/folder-manager";
+import { FillTemplateModal } from "@/components/modals/fill-template-modal";
 
 const STATUS_TABS: { label: string; value: PromptStatus | "all" }[] = [
   { label: "All", value: "all" },
@@ -122,6 +123,7 @@ export default function VaultPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [importExportOpen, setImportExportOpen] = useState(false);
   const [editPrompt, setEditPrompt] = useState<Prompt | null>(null);
+  const [fillPrompt, setFillPrompt] = useState<Prompt | null>(null);
 
   const pendingCount = useMemo(
     () => prompts.filter((p) => p.status === "pending").length,
@@ -233,12 +235,17 @@ export default function VaultPage() {
     [refresh]
   );
 
-  async function handleCopy(id: string, content: string) {
+  async function handleCopy(prompt: Prompt) {
+    // If it's a template with variables, open the fill modal instead
+    if (prompt.is_template && prompt.template_variables?.length > 0) {
+      setFillPrompt(prompt);
+      return;
+    }
     try {
-      await navigator.clipboard.writeText(content);
+      await navigator.clipboard.writeText(prompt.content);
       toast.success("Copied to clipboard");
       trackPromptUsed("copy");
-      recordUsage(id).catch(() => {});
+      recordUsage(prompt.id).catch(() => {});
     } catch {
       toast.error("Failed to copy to clipboard");
     }
@@ -643,7 +650,7 @@ export default function VaultPage() {
                           <DropdownMenuItem
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleCopy(p.id, p.content);
+                              handleCopy(p);
                             }}
                           >
                             <Copy className="mr-2 h-4 w-4" />
@@ -729,6 +736,12 @@ export default function VaultPage() {
         onOpenChange={setImportExportOpen}
         prompts={prompts}
         onImported={refresh}
+      />
+
+      <FillTemplateModal
+        open={!!fillPrompt}
+        onOpenChange={(open) => { if (!open) setFillPrompt(null); }}
+        prompt={fillPrompt}
       />
     </>
   );

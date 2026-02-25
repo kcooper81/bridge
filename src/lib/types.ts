@@ -38,6 +38,15 @@ export type SecurityCategory =
 export type SecuritySeverity = "block" | "warn";
 export type SecurityAction = "blocked" | "overridden" | "auto_redacted";
 
+// ─── Variable Config ───
+
+export interface VariableConfig {
+  name: string;
+  label?: string | null;
+  description?: string | null;
+  defaultValue?: string | null;
+}
+
 // ─── Database Row Types ───
 
 export interface Organization {
@@ -93,7 +102,7 @@ export interface Prompt {
   usage_count: number;
   last_used_at: string | null;
   is_template: boolean;
-  template_variables: string[];
+  template_variables: VariableConfig[];
   created_at: string;
   updated_at: string;
 }

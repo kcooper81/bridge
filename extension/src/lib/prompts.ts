@@ -4,6 +4,14 @@ import { CONFIG, API_ENDPOINTS, apiHeaders } from "./config";
 import { getSession } from "./auth";
 import { apiFetch } from "./api";
 
+// Duplicated for bundle independence (matches web app's VariableConfig)
+export interface VariableConfig {
+  name: string;
+  label?: string | null;
+  description?: string | null;
+  defaultValue?: string | null;
+}
+
 export interface Prompt {
   id: string;
   title: string;
@@ -12,11 +20,41 @@ export interface Prompt {
   tags: string[];
   tone: string;
   is_template: boolean;
-  template_variables: string[];
+  template_variables: (string | VariableConfig)[];
   usage_count: number;
   folder_id: string | null;
   /** References a team. DB column retained. */
   department_id: string | null;
+}
+
+/**
+ * Normalize template_variables from DB (handles both old string[] and new VariableConfig[]).
+ */
+export function normalizeVariables(raw: unknown): VariableConfig[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.map((item) => {
+    if (typeof item === "string") return { name: item };
+    if (typeof item === "object" && item !== null && "name" in item)
+      return item as VariableConfig;
+    return { name: String(item) };
+  });
+}
+
+/**
+ * Convert snake_case to Title Case.
+ */
+export function snakeToTitleCase(name: string): string {
+  return name
+    .split("_")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(" ");
+}
+
+/**
+ * Return display label for a variable config.
+ */
+export function getDisplayLabel(v: VariableConfig): string {
+  return v.label?.trim() || snakeToTitleCase(v.name);
 }
 
 export async function fetchPrompts(opts?: {

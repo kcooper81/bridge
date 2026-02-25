@@ -3,7 +3,7 @@
 
 import { getSession, login, logout, openLogin, openSignup, openGoogleAuth, openGithubAuth } from "./auth";
 import { extAuthDebug } from "./auth-debug"; // AUTH-DEBUG
-import { fetchPrompts, fillTemplate, type Prompt } from "./prompts";
+import { fetchPrompts, fillTemplate, normalizeVariables, getDisplayLabel, type Prompt } from "./prompts";
 import { fetchSecurityStatus, enableDefaultRules, type SecurityStatus } from "./security-status";
 import { CONFIG, API_ENDPOINTS, apiHeaders } from "./config";
 import { detectAiTool } from "./ai-tools";
@@ -68,17 +68,32 @@ function showDetailView(prompt: Prompt) {
   els.templateFields.classList.add("hidden");
 
   if (prompt.is_template && prompt.template_variables?.length > 0) {
-    els.templateFields.classList.remove("hidden");
-    for (const v of prompt.template_variables) {
-      const label = document.createElement("label");
-      label.textContent = v;
-      const input = document.createElement("input");
-      input.type = "text";
-      input.placeholder = `Enter ${v}...`;
-      input.dataset.variable = v;
-      input.addEventListener("input", updatePreview);
-      els.templateFields.appendChild(label);
-      els.templateFields.appendChild(input);
+    const configs = normalizeVariables(prompt.template_variables);
+    if (configs.length > 0) {
+      els.templateFields.classList.remove("hidden");
+      for (const v of configs) {
+        const label = document.createElement("label");
+        label.textContent = getDisplayLabel(v);
+
+        // Add description hint below label
+        if (v.description) {
+          const hint = document.createElement("span");
+          hint.className = "field-hint";
+          hint.textContent = v.description;
+          label.appendChild(hint);
+        }
+
+        const input = document.createElement("input");
+        input.type = "text";
+        input.placeholder = v.description || `Enter ${getDisplayLabel(v).toLowerCase()}...`;
+        input.dataset.variable = v.name;
+        if (v.defaultValue) input.value = v.defaultValue;
+        input.addEventListener("input", updatePreview);
+        els.templateFields.appendChild(label);
+        els.templateFields.appendChild(input);
+      }
+      // Trigger initial preview with defaults
+      updatePreview();
     }
   }
 }

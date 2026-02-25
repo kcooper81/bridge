@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/client";
 import { DEFAULT_GUIDELINES, PLAN_LIMITS } from "@/lib/constants";
 import { getLibraryPack } from "@/lib/library/packs";
 import { DEFAULT_SECURITY_RULES } from "@/lib/security/default-rules";
+import { extractTemplateVariables, normalizeVariables } from "@/lib/variables";
 import type {
   Prompt,
   PromptStatus,
@@ -122,13 +123,16 @@ export async function createPrompt(
   const userId = await getUserId();
   if (!orgId || !userId) return null;
 
+  const contentStr = fields.content || "";
+  const autoIsTemplate = fields.is_template ?? extractTemplateVariables(contentStr).length > 0;
+
   const { data, error } = await supabase()
     .from("prompts")
     .insert({
       org_id: orgId,
       owner_id: userId,
       title: fields.title || "",
-      content: fields.content || "",
+      content: contentStr,
       description: fields.description || null,
       intended_outcome: fields.intended_outcome || null,
       tone: (fields.tone as PromptTone) || "professional",
@@ -140,7 +144,7 @@ export async function createPrompt(
       department_id: fields.department_id || null,
       status: fields.status || "draft",
       version: 1,
-      is_template: fields.is_template || false,
+      is_template: autoIsTemplate,
       template_variables: fields.template_variables || [],
     })
     .select()
@@ -950,11 +954,13 @@ export async function importPack(
   const errors: string[] = [];
 
   for (const prompt of pack.prompts) {
+    const importContent = prompt.content || "";
+    const importIsTemplate = prompt.is_template ?? extractTemplateVariables(importContent).length > 0;
     const { error } = await db.from("prompts").insert({
       org_id: orgId,
       owner_id: userId,
       title: prompt.title,
-      content: prompt.content,
+      content: importContent,
       description: prompt.description,
       intended_outcome: prompt.intended_outcome,
       tone: prompt.tone || "professional",
@@ -964,8 +970,8 @@ export async function importPack(
       tags: prompt.tags || [],
       status: "draft",
       version: 1,
-      is_template: prompt.is_template || false,
-      template_variables: prompt.template_variables || [],
+      is_template: importIsTemplate,
+      template_variables: normalizeVariables(prompt.template_variables),
     });
 
     if (error) {
@@ -1042,19 +1048,23 @@ export async function installLibraryPack(
   let rulesCreated = 0;
 
   // 1. Insert prompts
-  const promptInserts = pack.prompts.map((p) => ({
-    org_id: orgId,
-    owner_id: userId,
-    title: p.title,
-    content: p.content,
-    description: p.description,
-    tags: p.tags,
-    tone: p.tone,
-    status: "approved" as const,
-    version: 1,
-    is_template: p.is_template,
-    template_variables: p.template_variables,
-  }));
+  const promptInserts = pack.prompts.map((p) => {
+    const packContent = p.content || "";
+    const packIsTemplate = p.is_template ?? extractTemplateVariables(packContent).length > 0;
+    return {
+      org_id: orgId,
+      owner_id: userId,
+      title: p.title,
+      content: packContent,
+      description: p.description,
+      tags: p.tags,
+      tone: p.tone,
+      status: "approved" as const,
+      version: 1,
+      is_template: packIsTemplate,
+      template_variables: normalizeVariables(p.template_variables),
+    };
+  });
 
   const { data: insertedPrompts } = await db
     .from("prompts")

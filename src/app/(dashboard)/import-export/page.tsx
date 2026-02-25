@@ -22,6 +22,7 @@ export default function ImportExportPage() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [packName, setPackName] = useState("My Prompt Pack");
   const [importing, setImporting] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   if (noOrg) {
@@ -41,8 +42,6 @@ export default function ImportExportPage() {
       </>
     );
   }
-
-  const [exporting, setExporting] = useState(false);
 
   async function handleExport() {
     if (selectedIds.length === 0) {

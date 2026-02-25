@@ -5,7 +5,6 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { generatePageMetadata } from "@/lib/seo/metadata";
 import {
   HELP_CATEGORIES,
-  getCategoryById,
   getArticleBySlug,
 } from "@/lib/help-content";
 import { HelpBreadcrumbs } from "../../_components/help-breadcrumbs";

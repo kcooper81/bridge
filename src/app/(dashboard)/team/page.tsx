@@ -170,18 +170,23 @@ export default function TeamPage() {
     if (!inviteEmail.trim()) return;
     if (!checkLimit("add_member", members.length)) return;
     setInviting(true);
-    const result = await sendInvite(inviteEmail.trim(), inviteRole, inviteTeamId || undefined);
-    if (result.success) {
-      trackInviteSent();
-      toast.success("Invite sent");
-      setInviteEmail("");
-      setInviteTeamId("");
-      const newInvites = await getInvites();
-      setInvites(newInvites);
-    } else {
-      toast.error(result.error || "Failed to send invite");
+    try {
+      const result = await sendInvite(inviteEmail.trim(), inviteRole, inviteTeamId || undefined);
+      if (result.success) {
+        trackInviteSent();
+        toast.success("Invite sent");
+        setInviteEmail("");
+        setInviteTeamId("");
+        const newInvites = await getInvites();
+        setInvites(newInvites);
+      } else {
+        toast.error(result.error || "Failed to send invite");
+      }
+    } catch {
+      toast.error("Failed to send invite");
+    } finally {
+      setInviting(false);
     }
-    setInviting(false);
   }
 
   async function handleRevokeInvite(id: string) {

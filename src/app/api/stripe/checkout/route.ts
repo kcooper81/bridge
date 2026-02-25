@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createServiceClient } from "@/lib/supabase/server";
 import { STRIPE_PLAN_CONFIG, TRIAL_DAYS } from "@/lib/billing/plans";
+import { limiters, checkRateLimit } from "@/lib/rate-limit";
 
 function getStripe() {
   return new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -25,6 +26,9 @@ export async function POST(request: NextRequest) {
     if (authError || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    const rl = await checkRateLimit(limiters.stripeCheckout, user.id);
+    if (!rl.success) return rl.response;
 
     const { plan, orgId, seats, interval = "monthly" } = await request.json();
 

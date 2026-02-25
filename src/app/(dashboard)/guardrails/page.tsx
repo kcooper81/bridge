@@ -69,6 +69,7 @@ export default function GuardrailsPage() {
   const { org, currentUserRole, noOrg } = useOrg();
   const { canAccess } = useSubscription();
   const canEdit = currentUserRole === "admin" || currentUserRole === "manager";
+  const [dataLoading, setDataLoading] = useState(true);
   const [rules, setRules] = useState<SecurityRule[]>([]);
   const [violations, setViolations] = useState<SecurityViolation[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
@@ -108,6 +109,8 @@ export default function GuardrailsPage() {
       setTeams(teamsRes.data || []);
     } catch (err) {
       console.error("Failed to load guardrails data:", err);
+    } finally {
+      setDataLoading(false);
     }
   }, [org]);
 
@@ -261,6 +264,20 @@ export default function GuardrailsPage() {
       <>
         <PageHeader title="AI Guardrails" description="Protect sensitive data from leaking into AI prompts" />
         <NoOrgBanner />
+      </>
+    );
+  }
+
+  if (dataLoading) {
+    return (
+      <>
+        <PageHeader title="AI Guardrails" description="Protect sensitive data from leaking into AI prompts" />
+        <div className="mb-6 grid grid-cols-3 gap-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-24 rounded-lg bg-muted animate-pulse" />
+          ))}
+        </div>
+        <div className="h-64 rounded-lg bg-muted animate-pulse" />
       </>
     );
   }

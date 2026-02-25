@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -16,7 +15,6 @@ export default function ResetPasswordPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [sessionValid, setSessionValid] = useState<boolean | null>(null);
-  const router = useRouter();
 
   useEffect(() => {
     const supabase = createClient();
@@ -71,7 +69,7 @@ export default function ResetPasswordPage() {
       }
 
       toast.success("Password updated successfully");
-      router.push("/vault");
+      window.location.href = "/vault";
     } catch {
       setError("An unexpected error occurred");
     } finally {

@@ -43,9 +43,9 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { ai_tool, prompt_text, prompt_id, response_text, guardrail_flags, action, metadata } = body;
 
-    if (!ai_tool || !prompt_text) {
+    if (!ai_tool || typeof ai_tool !== "string" || !prompt_text || typeof prompt_text !== "string") {
       return withCors(NextResponse.json(
-        { error: "ai_tool and prompt_text are required" },
+        { error: "ai_tool and prompt_text are required strings" },
         { status: 400 }
       ), request);
     }
@@ -53,6 +53,14 @@ export async function POST(request: NextRequest) {
     const validActions = ["sent", "blocked", "warned"];
     if (action && !validActions.includes(action)) {
       return withCors(NextResponse.json({ error: "Invalid action" }, { status: 400 }), request);
+    }
+
+    if (guardrail_flags && !Array.isArray(guardrail_flags)) {
+      return withCors(NextResponse.json({ error: "guardrail_flags must be an array" }, { status: 400 }), request);
+    }
+
+    if (metadata && (typeof metadata !== "object" || Array.isArray(metadata))) {
+      return withCors(NextResponse.json({ error: "metadata must be an object" }, { status: 400 }), request);
     }
 
     const { data: log, error: insertError } = await db

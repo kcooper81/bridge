@@ -14,6 +14,11 @@ const PUBLIC_ROUTES = [
   "/blog",
   "/use-cases",
   "/comparisons",
+  "/privacy",
+  "/terms",
+  "/solutions",
+  "/integrations",
+  "/help",
 ];
 
 function isPublicRoute(pathname: string) {

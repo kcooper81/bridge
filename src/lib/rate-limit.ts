@@ -38,6 +38,8 @@ export const limiters = {
   securityStatus: createLimiter(20, "1 m", "security-status"),
   orgEnsure: createLimiter(5, "1 m", "org-ensure"),
   accountDelete: createLimiter(3, "10 m", "account-delete"),
+  stripeCheckout: createLimiter(10, "1 m", "stripe-checkout"),
+  stripePortal: createLimiter(10, "1 m", "stripe-portal"),
 };
 
 export async function checkRateLimit(

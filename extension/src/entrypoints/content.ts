@@ -9,6 +9,25 @@ import { getSession } from "../lib/auth";
 import { isContextInvalidated } from "../lib/api";
 import "../styles/content.css";
 
+// Selectors that specifically target AI chat input fields (not generic inputs like rename/search)
+const CHAT_INPUT_SELECTORS = [
+  "#prompt-textarea",                           // ChatGPT
+  'textarea[data-id="root"]',                  // ChatGPT (older)
+  'div[contenteditable="true"].ProseMirror',   // Claude
+  'div[contenteditable="true"].ql-editor',     // Gemini
+  "rich-textarea textarea",                     // Gemini (alternate)
+  'textarea[name="searchbox"]',                // Copilot
+];
+
+function isChatInput(target: HTMLElement): boolean {
+  for (const selector of CHAT_INPUT_SELECTORS) {
+    try {
+      if (target.matches(selector) || target.closest(selector)) return true;
+    } catch { /* invalid selector in matches() */ }
+  }
+  return false;
+}
+
 // Flag to allow re-dispatched Enter key to pass through without re-scanning
 let _tpAllowNext = false;
 
@@ -38,6 +57,7 @@ export default defineContentScript({
     "https://chatgpt.com/*",
     "https://claude.ai/*",
     "https://gemini.google.com/*",
+    "https://github.com/copilot/*",
     "https://copilot.microsoft.com/*",
     "https://www.perplexity.ai/*",
   ],
@@ -135,20 +155,14 @@ export default defineContentScript({
 
         if (e.key === "Enter" && !e.shiftKey) {
           const target = e.target as HTMLElement;
-          console.log("[TP-DLP] Enter on:", target.tagName, target.id, "contentEditable:", target.contentEditable, "isTextarea:", target instanceof HTMLTextAreaElement);
-          if (
-            target instanceof HTMLTextAreaElement ||
-            target instanceof HTMLInputElement ||
-            target.contentEditable === "true"
-          ) {
+          // Only intercept Enter on known AI chat input fields, not rename/search inputs
+          if (isChatInput(target)) {
             const text =
               (target as HTMLInputElement).value ||
               target.textContent ||
               target.innerText ||
               "";
-            console.log("[TP-DLP] Text captured:", text.length, "chars, first 80:", text.slice(0, 80));
             if (text.trim().length < 1) {
-              console.log("[TP-DLP] Text empty, skipping scan");
               return;
             }
 
@@ -157,7 +171,6 @@ export default defineContentScript({
               e.preventDefault();
               e.stopPropagation();
               e.stopImmediatePropagation();
-              console.log("[TP-DLP] Repeat blocked text detected, blocking again");
               showBlockOverlay([{ ruleId: "repeat-block", ruleName: "Previously blocked", category: "dlp", severity: "block", matchedText: "Same content was blocked moments ago" }]);
               return;
             }
@@ -166,7 +179,6 @@ export default defineContentScript({
             e.preventDefault();
             e.stopPropagation();
             e.stopImmediatePropagation();
-            console.log("[TP-DLP] Intercepted Enter, scanning...");
 
             // Fail-closed: if not authenticated, block immediately
             if (!_isAuthenticated) {
@@ -185,7 +197,6 @@ export default defineContentScript({
 
             scanOutbound(text).then((result) => {
               updateShieldScanning(false);
-              console.log("[TP-DLP] Scan result:", JSON.stringify(result));
 
               if (result?.action === "block") {
                 _lastBlockedText = text;

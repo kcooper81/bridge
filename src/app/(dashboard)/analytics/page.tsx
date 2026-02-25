@@ -27,12 +27,14 @@ export default function AnalyticsPage() {
   const { canAccess } = useSubscription();
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(false);
 
   useEffect(() => {
     getAnalytics()
       .then(setAnalytics)
       .catch((err) => {
         console.error("Failed to load analytics:", err);
+        setFetchError(true);
       })
       .finally(() => setLoading(false));
   }, []);
@@ -55,7 +57,7 @@ export default function AnalyticsPage() {
     );
   }
 
-  if (loading || !analytics) {
+  if (loading) {
     return (
       <>
         <PageHeader title="Analytics" description="Usage insights and trends for your team" />
@@ -63,6 +65,21 @@ export default function AnalyticsPage() {
           {[1, 2, 3, 4].map((i) => (
             <div key={i} className="h-24 rounded-lg bg-muted animate-pulse" />
           ))}
+        </div>
+      </>
+    );
+  }
+
+  if (fetchError || !analytics) {
+    return (
+      <>
+        <PageHeader title="Analytics" description="Usage insights and trends for your team" />
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <BarChart3 className="h-12 w-12 text-muted-foreground mb-4" />
+          <h3 className="text-lg font-medium">Unable to load analytics</h3>
+          <p className="text-sm text-muted-foreground mt-1">
+            Please try refreshing the page.
+          </p>
         </div>
       </>
     );

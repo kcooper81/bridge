@@ -454,7 +454,7 @@ function performScan(text: string, onAllow: () => void) {
   if (_isDisabled) { onAllow(); return; }
   // Block repeat submissions of previously blocked text
   if (_lastBlockedText !== null && text.trim() === _lastBlockedText.trim()) {
-    showBlockOverlay([{ ruleId: "repeat-block", ruleName: "Previously blocked", category: "dlp", severity: "block", matchedText: "Same content was blocked moments ago" }]);
+    showBlockOverlay([{ ruleId: "repeat-block", ruleName: "Previously blocked", category: "dlp", severity: "block", matchedText: "Same content was blocked moments ago", detectionType: "pattern" }]);
     return;
   }
 

@@ -57,6 +57,7 @@ import { DetectionSettings } from "./_components/detection-settings";
 import { SensitiveTermsManager } from "./_components/sensitive-terms-manager";
 import { SuggestedRules } from "./_components/suggested-rules";
 import type {
+  DetectionType,
   SecurityCategory,
   SecurityPatternType,
   SecurityRule,
@@ -64,6 +65,28 @@ import type {
   SecurityViolation,
   Team,
 } from "@/lib/types";
+
+function detectionTypeLabel(dt: DetectionType | string): string {
+  switch (dt) {
+    case "pattern": return "Pattern Rule";
+    case "term": return "Sensitive Term";
+    case "smart_pattern": return "Smart Pattern";
+    case "entropy": return "Entropy";
+    case "ai": return "AI Detection";
+    default: return dt;
+  }
+}
+
+function detectionTypeBadgeClass(dt: DetectionType | string): string {
+  switch (dt) {
+    case "pattern": return "border-blue-300 text-blue-700 dark:border-blue-700 dark:text-blue-400";
+    case "term": return "border-orange-300 text-orange-700 dark:border-orange-700 dark:text-orange-400";
+    case "smart_pattern": return "border-green-300 text-green-700 dark:border-green-700 dark:text-green-400";
+    case "entropy": return "border-yellow-300 text-yellow-700 dark:border-yellow-700 dark:text-yellow-400";
+    case "ai": return "border-purple-300 text-purple-700 dark:border-purple-700 dark:text-purple-400";
+    default: return "";
+  }
+}
 
 export default function GuardrailsPage() {
   const { org, currentUserRole, noOrg } = useOrg();
@@ -76,6 +99,7 @@ export default function GuardrailsPage() {
   const [editRule, setEditRule] = useState<SecurityRule | null>(null);
   const [teams, setTeams] = useState<Team[]>([]);
   const [teamFilter, setTeamFilter] = useState<string>("all"); // "all" | "global" | team_id
+  const [detectionFilter, setDetectionFilter] = useState<string>("all"); // "all" | DetectionType
 
   // Form state
   const [name, setName] = useState("");
@@ -97,10 +121,10 @@ export default function GuardrailsPage() {
         supabase.from("security_rules").select("*").eq("org_id", org.id).order("name"),
         supabase
           .from("security_violations")
-          .select("*, rule:security_rules(name, category, severity)")
+          .select("*, rule:security_rules(name, category, severity), user:profiles!security_violations_user_id_fkey(name, email)")
           .eq("org_id", org.id)
           .order("created_at", { ascending: false })
-          .limit(100),
+          .limit(200),
         supabase.from("teams").select("*").eq("org_id", org.id).order("name"),
       ]);
 
@@ -437,51 +461,95 @@ export default function GuardrailsPage() {
           {!canAccess("audit_log") ? (
             <UpgradeGate feature="audit_log" title="Security Violation Log" />
           ) : (
-            <div className="rounded-lg border border-border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Policy</TableHead>
-                    <TableHead>Match</TableHead>
-                    <TableHead>Action</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {violations.length === 0 ? (
+            <>
+              {/* Detection type filter */}
+              <div className="mb-4 flex items-center gap-2 flex-wrap">
+                <Label className="text-sm text-muted-foreground">Detection:</Label>
+                {(["all", "pattern", "term", "smart_pattern", "entropy", "ai"] as const).map((dt) => (
+                  <button
+                    key={dt}
+                    onClick={() => setDetectionFilter(dt)}
+                    className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-colors hover:scale-100 active:scale-100 ${
+                      detectionFilter === dt
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted text-muted-foreground hover:bg-muted/80"
+                    }`}
+                  >
+                    {dt === "all" ? "All" : detectionTypeLabel(dt)}
+                    {dt !== "all" && (
+                      <span className="text-[10px] opacity-70">
+                        ({violations.filter((v) => (v.detection_type || "pattern") === dt).length})
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+              <div className="rounded-lg border border-border">
+                <Table>
+                  <TableHeader>
                     <TableRow>
-                      <TableCell colSpan={4} className="h-32 text-center text-muted-foreground">
-                        No violations recorded yet.
-                      </TableCell>
+                      <TableHead>Date</TableHead>
+                      <TableHead>User</TableHead>
+                      <TableHead>Policy / Source</TableHead>
+                      <TableHead>Detection</TableHead>
+                      <TableHead>Match</TableHead>
+                      <TableHead>Action</TableHead>
                     </TableRow>
-                  ) : (
-                    violations.map((v) => (
-                      <TableRow key={v.id}>
-                        <TableCell className="text-sm text-muted-foreground">
-                          {formatDistanceToNow(new Date(v.created_at), { addSuffix: true })}
-                        </TableCell>
-                        <TableCell className="text-sm font-medium">
-                          {(v.rule as unknown as SecurityRule)?.name || "Unknown"}
-                        </TableCell>
-                        <TableCell>
-                          <code className="text-xs bg-muted px-1.5 py-0.5 rounded">
-                            {v.matched_text}
-                          </code>
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            variant={v.action_taken === "blocked" ? "destructive" : "default"}
-                            className="text-xs"
-                          >
-                            {v.action_taken === "blocked" ? "Blocked" : v.action_taken === "overridden" ? "Overridden" : "Auto-redacted"}
-                          </Badge>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+                  </TableHeader>
+                  <TableBody>
+                    {(() => {
+                      const filtered = detectionFilter === "all"
+                        ? violations
+                        : violations.filter((v) => (v.detection_type || "pattern") === detectionFilter);
+                      if (filtered.length === 0) {
+                        return (
+                          <TableRow>
+                            <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
+                              {violations.length === 0
+                                ? "No violations recorded yet."
+                                : "No violations match the selected detection type."}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      }
+                      return filtered.map((v) => (
+                        <TableRow key={v.id}>
+                          <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
+                            {formatDistanceToNow(new Date(v.created_at), { addSuffix: true })}
+                          </TableCell>
+                          <TableCell className="text-sm">
+                            {(v.user as unknown as { name: string; email: string })?.name
+                              || (v.user as unknown as { name: string; email: string })?.email
+                              || "—"}
+                          </TableCell>
+                          <TableCell className="text-sm font-medium">
+                            {(v.rule as unknown as SecurityRule)?.name || v.matched_text?.slice(0, 20) || "—"}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className={`text-[10px] ${detectionTypeBadgeClass(v.detection_type || "pattern")}`}>
+                              {detectionTypeLabel(v.detection_type || "pattern")}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <code className="text-xs bg-muted px-1.5 py-0.5 rounded">
+                              {v.matched_text}
+                            </code>
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              variant={v.action_taken === "blocked" ? "destructive" : "default"}
+                              className="text-xs"
+                            >
+                              {v.action_taken === "blocked" ? "Blocked" : v.action_taken === "overridden" ? "Overridden" : "Auto-redacted"}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      ));
+                    })()}
+                  </TableBody>
+                </Table>
+              </div>
+            </>
           )}
         </TabsContent>
 

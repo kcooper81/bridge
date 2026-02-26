@@ -3,6 +3,9 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { handleOptions, withCors } from "../cors";
 import { limiters, checkRateLimit } from "@/lib/rate-limit";
 import { trackExtensionActivity } from "../track-activity";
+import { detectHighEntropyStrings } from "@/lib/security/entropy";
+import { SMART_DETECTION_RULES } from "@/lib/security/default-rules";
+import type { DetectionType } from "@/lib/types";
 
 const MAX_CONTENT_LENGTH = 50_000; // 50 KB max scan payload
 const REGEX_TIMEOUT_MS = 500; // Per-rule regex execution limit
@@ -73,8 +76,8 @@ export async function POST(request: NextRequest) {
       ? `team_id.is.null,team_id.in.(${userTeamIds.join(",")})`
       : "team_id.is.null";
 
-    // Fetch active security rules AND sensitive terms for the org (filtered by team scope)
-    const [rulesResult, termsResult] = await Promise.all([
+    // Fetch active security rules, sensitive terms, AND org security settings
+    const [rulesResult, termsResult, orgResult] = await Promise.all([
       db
         .from("security_rules")
         .select("*")
@@ -87,19 +90,27 @@ export async function POST(request: NextRequest) {
         .eq("org_id", profile.org_id)
         .eq("is_active", true)
         .or(teamFilter),
+      db
+        .from("organizations")
+        .select("security_settings")
+        .eq("id", profile.org_id)
+        .single(),
     ]);
 
     const activeRules = rulesResult.data || [];
     const activeTerms = termsResult.data || [];
+    const securitySettings = orgResult.data?.security_settings || {};
+
     const violations: {
-      ruleId: string;
+      ruleId: string | null;
       ruleName: string;
       category: string;
       severity: string;
       matchedText: string;
+      detectionType: DetectionType;
     }[] = [];
 
-    // Check security rules
+    // ── 1. Check security rules (pattern-based) ──
     for (const rule of activeRules) {
       const matched = matchPattern(content, rule.pattern, rule.pattern_type);
       if (matched) {
@@ -109,6 +120,7 @@ export async function POST(request: NextRequest) {
           category: rule.category,
           severity: rule.severity,
           matchedText: redactMatch(matched),
+          detectionType: "pattern",
         });
 
         await db.from("security_violations").insert({
@@ -117,21 +129,23 @@ export async function POST(request: NextRequest) {
           matched_text: redactMatch(matched),
           user_id: user.id,
           action_taken: rule.severity === "block" ? "blocked" : "overridden",
+          detection_type: "pattern",
         });
       }
     }
 
-    // Check sensitive terms
+    // ── 2. Check sensitive terms ──
     for (const term of activeTerms) {
       const patternType = term.term_type === "keyword" ? "exact" : term.term_type;
       const matched = matchPattern(content, term.term, patternType);
       if (matched) {
         violations.push({
-          ruleId: term.id,
+          ruleId: null,
           ruleName: `Sensitive term: ${term.term}`,
           category: term.category,
           severity: term.severity,
           matchedText: redactMatch(matched),
+          detectionType: "term",
         });
 
         await db.from("security_violations").insert({
@@ -140,6 +154,65 @@ export async function POST(request: NextRequest) {
           matched_text: redactMatch(matched),
           user_id: user.id,
           action_taken: term.severity === "block" ? "blocked" : "overridden",
+          detection_type: "term",
+        });
+      }
+    }
+
+    // ── 3. Smart pattern detection (if enabled) ──
+    if (securitySettings.smart_patterns_enabled) {
+      for (const smartRule of SMART_DETECTION_RULES) {
+        if (!smartRule.is_active) continue;
+        const matched = matchPattern(content, smartRule.pattern, smartRule.pattern_type);
+        if (matched) {
+          violations.push({
+            ruleId: null,
+            ruleName: smartRule.name,
+            category: smartRule.category,
+            severity: smartRule.severity,
+            matchedText: redactMatch(matched),
+            detectionType: "smart_pattern",
+          });
+
+          await db.from("security_violations").insert({
+            org_id: profile.org_id,
+            rule_id: null,
+            matched_text: redactMatch(matched),
+            user_id: user.id,
+            action_taken: smartRule.severity === "block" ? "blocked" : "overridden",
+            detection_type: "smart_pattern",
+          });
+        }
+      }
+    }
+
+    // ── 4. Entropy detection (if enabled) ──
+    if (securitySettings.entropy_detection_enabled) {
+      const threshold = securitySettings.entropy_threshold ?? 4.0;
+      const highEntropyStrings = detectHighEntropyStrings(content, {
+        entropyThreshold: threshold,
+        minLength: 16,
+        maxLength: 128,
+      });
+
+      for (const detected of highEntropyStrings) {
+        const severity = detected.entropy >= 4.5 ? "block" : "warn";
+        violations.push({
+          ruleId: null,
+          ruleName: `High entropy string (${detected.entropy.toFixed(1)} bits/char)`,
+          category: "secrets",
+          severity,
+          matchedText: detected.redacted,
+          detectionType: "entropy",
+        });
+
+        await db.from("security_violations").insert({
+          org_id: profile.org_id,
+          rule_id: null,
+          matched_text: detected.redacted,
+          user_id: user.id,
+          action_taken: severity === "block" ? "blocked" : "overridden",
+          detection_type: "entropy",
         });
       }
     }
@@ -161,9 +234,19 @@ export async function POST(request: NextRequest) {
 
 function matchPattern(content: string, pattern: string, patternType: string): string | null {
   switch (patternType) {
-    case "exact": {
+    case "exact":
+    case "keyword": {
       const idx = content.toLowerCase().indexOf(pattern.toLowerCase());
       if (idx !== -1) return content.slice(idx, idx + pattern.length);
+      return null;
+    }
+    case "keywords": {
+      const keywords = pattern.split(",").map((k) => k.trim()).filter(Boolean);
+      const lower = content.toLowerCase();
+      for (const kw of keywords) {
+        const idx = lower.indexOf(kw.toLowerCase());
+        if (idx !== -1) return content.slice(idx, idx + kw.length);
+      }
       return null;
     }
     case "regex": {
@@ -189,7 +272,6 @@ function matchPattern(content: string, pattern: string, patternType: string): st
  */
 function safeRegexMatch(pattern: string, content: string): string | null {
   // Reject patterns with nested quantifiers that cause catastrophic backtracking
-  // e.g., (a+)+, (a*)*b, (a|b+)*, (.+)+
   if (/\([^)]*[+*][^)]*\)[+*]/.test(pattern) || /\(\?:[^)]*[+*][^)]*\)[+*]/.test(pattern)) {
     console.warn("Rejected potentially catastrophic regex pattern:", pattern.slice(0, 100));
     return null;
@@ -198,12 +280,10 @@ function safeRegexMatch(pattern: string, content: string): string | null {
   try {
     const regex = new RegExp(pattern, "gi");
 
-    // For very long content, limit what we scan to prevent long-running matches
     const scanContent = content.length > MAX_CONTENT_LENGTH
       ? content.slice(0, MAX_CONTENT_LENGTH)
       : content;
 
-    // Use a manual timeout via performance tracking
     const start = performance.now();
     regex.lastIndex = 0;
     const match = regex.exec(scanContent);
@@ -224,6 +304,5 @@ function safeRegexMatch(pattern: string, content: string): string | null {
 
 function redactMatch(text: string): string {
   if (text.length <= 8) return "*".repeat(text.length);
-  // Show category hint (first 3 chars) but mask the rest
   return text.slice(0, 3) + "*".repeat(Math.min(text.length - 3, 24));
 }

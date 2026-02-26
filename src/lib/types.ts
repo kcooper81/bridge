@@ -242,6 +242,8 @@ export interface SecurityRule {
   updated_at: string;
 }
 
+export type DetectionType = "pattern" | "term" | "entropy" | "smart_pattern" | "ai";
+
 export interface SecurityViolation {
   id: string;
   org_id: string;
@@ -250,6 +252,7 @@ export interface SecurityViolation {
   matched_text: string;
   user_id: string;
   action_taken: SecurityAction;
+  detection_type: DetectionType;
   created_at: string;
   // Joined fields
   rule?: SecurityRule;

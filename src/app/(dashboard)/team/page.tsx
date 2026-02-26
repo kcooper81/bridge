@@ -531,7 +531,7 @@ export default function TeamPage() {
                     </th>
                     <th className="text-left p-3 font-medium hidden sm:table-cell">Extension</th>
                     {currentUserRole === "admin" && (
-                      <th className="text-left p-3 font-medium hidden md:table-cell">Shield</th>
+                      <th className="text-left p-3 font-medium hidden sm:table-cell">Shield</th>
                     )}
                     <th className="text-left p-3 font-medium">
                       <button className="flex items-center gap-1 hover:text-foreground" onClick={() => handleMemberSort("role")}>
@@ -568,24 +568,20 @@ export default function TeamPage() {
                           />
                         </td>
                         {currentUserRole === "admin" && (
-                          <td className="p-3 hidden md:table-cell">
-                            {!member.isCurrentUser ? (
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-7 w-7"
-                                title={member.shield_disabled ? "Re-enable shield" : "Disable shield"}
-                                onClick={() => handleToggleShield(member.id, member.shield_disabled)}
-                              >
-                                {member.shield_disabled ? (
-                                  <ShieldOff className="h-3.5 w-3.5 text-muted-foreground" />
-                                ) : (
-                                  <Shield className="h-3.5 w-3.5 text-green-500" />
-                                )}
-                              </Button>
-                            ) : (
-                              <Shield className="h-3.5 w-3.5 text-green-500 ml-2" />
-                            )}
+                          <td className="p-3 hidden sm:table-cell">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7"
+                              title={member.shield_disabled ? "Re-enable shield" : "Disable shield"}
+                              onClick={() => handleToggleShield(member.id, member.shield_disabled)}
+                            >
+                              {member.shield_disabled ? (
+                                <ShieldOff className="h-3.5 w-3.5 text-muted-foreground" />
+                              ) : (
+                                <Shield className="h-3.5 w-3.5 text-green-500" />
+                              )}
+                            </Button>
                           </td>
                         )}
                         <td className="p-3">

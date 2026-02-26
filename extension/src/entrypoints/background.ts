@@ -16,6 +16,16 @@ export default defineBackground(() => {
     return refreshPromise;
   }
 
+  // ─── Sidebar behavior helper ───
+  function applySidebarBehavior(enabled: boolean) {
+    const chrome = globalThis as unknown as {
+      chrome?: { sidePanel?: { setPanelBehavior?: (opts: { openPanelOnActionClick: boolean }) => Promise<void> } };
+    };
+    if (chrome.chrome?.sidePanel?.setPanelBehavior) {
+      chrome.chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: enabled }).catch(() => {});
+    }
+  }
+
   // ─── Install Handler ───
   browser.runtime.onInstalled.addListener((details) => {
     // Extension installed — sync config to storage
@@ -32,6 +42,16 @@ export default defineBackground(() => {
     if (details.reason === "install") {
       browser.tabs.create({ url: CONFIG.SITE_URL + "/extension/welcome" });
     }
+
+    // Apply saved sidebar preference
+    browser.storage.local.get(["alwaysOpenSidebar"]).then((data) => {
+      applySidebarBehavior(!!data.alwaysOpenSidebar);
+    });
+  });
+
+  // Apply sidebar preference on startup
+  browser.storage.local.get(["alwaysOpenSidebar"]).then((data) => {
+    applySidebarBehavior(!!data.alwaysOpenSidebar);
   });
 
   // ─── Internal Message Handler ───
@@ -86,6 +106,10 @@ export default defineBackground(() => {
       } else if (message.type === "OPEN_LOGIN") {
         // Fix 3: Content scripts can't use browser.tabs.create, so handle here
         browser.tabs.create({ url: CONFIG.SITE_URL + "/extension/welcome?mode=signin" });
+        sendResponse({ success: true });
+      } else if (message.type === "SET_SIDEBAR_BEHAVIOR") {
+        const msg = message as unknown as { enabled: boolean };
+        applySidebarBehavior(msg.enabled);
         sendResponse({ success: true });
       } else if (message.type === "PING") {
         // Content script liveness check — if this fails, context is invalidated

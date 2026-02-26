@@ -46,6 +46,9 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const query = searchParams.get("q") || "";
     const templatesOnly = searchParams.get("templates") === "true";
+    const sortRecent = searchParams.get("sort") === "recent";
+    const favoritesOnly = searchParams.get("favorites") === "true";
+    const folderId = searchParams.get("folderId") || "";
     const limit = Math.min(
       Math.max(parseInt(searchParams.get("limit") || String(DEFAULT_LIMIT), 10) || DEFAULT_LIMIT, 1),
       MAX_LIMIT
@@ -54,14 +57,30 @@ export async function GET(request: NextRequest) {
 
     let q = db
       .from("prompts")
-      .select("id, title, content, description, tags, tone, is_template, template_variables, usage_count, folder_id, department_id")
+      .select("id, title, content, description, tags, tone, is_template, template_variables, usage_count, folder_id, department_id, is_favorite, last_used_at")
       .eq("org_id", profile.org_id)
-      .eq("status", "approved")
-      .order("usage_count", { ascending: false })
-      .range(offset, offset + limit - 1);
+      .eq("status", "approved");
+
+    if (sortRecent) {
+      q = q.order("last_used_at", { ascending: false, nullsFirst: false });
+    } else {
+      q = q.order("usage_count", { ascending: false });
+    }
+
+    q = q.range(offset, offset + limit - 1);
 
     if (templatesOnly) {
       q = q.eq("is_template", true);
+    }
+
+    if (favoritesOnly) {
+      q = q.eq("is_favorite", true);
+    }
+
+    if (folderId === "unfiled") {
+      q = q.is("folder_id", null);
+    } else if (folderId) {
+      q = q.eq("folder_id", folderId);
     }
 
     // Server-side search — use parameterized filters (not string interpolation)

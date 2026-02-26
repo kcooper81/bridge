@@ -3,7 +3,7 @@
 
 import { getSession, login, logout, openLogin, openSignup, openGoogleAuth, openGithubAuth } from "./auth";
 import { extAuthDebug } from "./auth-debug"; // AUTH-DEBUG
-import { fetchPrompts, fillTemplate, normalizeVariables, getDisplayLabel, type Prompt } from "./prompts";
+import { fetchPrompts, fetchFolders, fillTemplate, normalizeVariables, getDisplayLabel, type Prompt, type ExtFolder } from "./prompts";
 import { fetchSecurityStatus, enableDefaultRules, type SecurityStatus } from "./security-status";
 import { CONFIG, API_ENDPOINTS, apiHeaders } from "./config";
 import { detectAiTool } from "./ai-tools";
@@ -35,10 +35,14 @@ export interface UIElements {
 
 let currentPrompts: Prompt[] = [];
 let selectedPrompt: Prompt | null = null;
-let activeFilter: "all" | "templates" | "favorites" | "shield" = "all";
+let activeFilter: "recent" | "favorites" | "folders" | "shield" = "recent";
 let searchTimeout: ReturnType<typeof setTimeout> | undefined;
 let cachedShieldStatus: SecurityStatus | null = null;
 let els: UIElements;
+
+// Folder drill-down state
+let currentFolderId: string | null = null;
+let currentFolderName: string | null = null;
 
 // ─── Views ───
 
@@ -126,25 +130,52 @@ async function loadPrompts(query = "") {
   els.promptList.innerHTML = '<div class="loading">Loading prompts...</div>';
   setStatus("Fetching prompts...");
 
-  try {
-    let prompts = await fetchPrompts({
-      query,
-      templatesOnly: activeFilter === "templates",
-    });
+  // Hide folder back bar when not in folder contents
+  const folderBackBar = document.getElementById("folder-back-bar");
+  if (folderBackBar && !(activeFilter === "folders" && currentFolderId)) {
+    folderBackBar.remove();
+  }
 
-    if (activeFilter === "favorites") {
-      prompts.sort((a, b) => (b.usage_count || 0) - (a.usage_count || 0));
-      prompts = prompts.slice(0, 10);
+  try {
+    // If search is active, search all prompts regardless of tab
+    if (query) {
+      const prompts = await fetchPrompts({ query });
+      currentPrompts = prompts;
+      renderPrompts();
+      setStatus(
+        `${currentPrompts.length} result${currentPrompts.length !== 1 ? "s" : ""}`
+      );
+      return;
     }
 
-    currentPrompts = prompts;
-    renderPrompts();
+    // Tab-specific loading
+    if (activeFilter === "recent") {
+      const prompts = await fetchPrompts({ sort: "recent", limit: 15 });
+      currentPrompts = prompts;
+      renderPrompts("recent");
+    } else if (activeFilter === "favorites") {
+      const prompts = await fetchPrompts({ favorites: true });
+      currentPrompts = prompts;
+      renderPrompts("favorites");
+    } else if (activeFilter === "folders") {
+      if (currentFolderId) {
+        // Show prompts inside a folder
+        const prompts = await fetchPrompts({ folderId: currentFolderId });
+        currentPrompts = prompts;
+        renderFolderBackBar();
+        renderPrompts("folder");
+      } else {
+        // Show folder list
+        await loadFolderList();
+        return;
+      }
+    }
+
     setStatus(
       `${currentPrompts.length} prompt${currentPrompts.length !== 1 ? "s" : ""}`
     );
   } catch (err) {
     if (err instanceof Error && err.message === "SESSION_EXPIRED") {
-      // Token is dead and refresh failed — force re-login
       await logout();
       showLoginView();
       setStatus("Session expired — please sign in again");
@@ -159,10 +190,110 @@ async function loadPrompts(query = "") {
   }
 }
 
-function renderPrompts() {
+async function loadFolderList() {
+  els.promptList.innerHTML = '<div class="loading">Loading folders...</div>';
+
+  try {
+    const { folders, unfiled_count } = await fetchFolders();
+
+    if (folders.length === 0 && unfiled_count === 0) {
+      els.promptList.innerHTML =
+        '<div class="empty-state"><p>No folders yet</p><p style="font-size:12px;margin-top:4px">Create folders at <a href="' + CONFIG.SITE_URL + '/vault" target="_blank" rel="noopener" style="color:var(--primary)">teamprompt.app/vault</a></p></div>';
+      setStatus("0 folders");
+      return;
+    }
+
+    const folderCards = folders.map((f) => {
+      const icon = f.icon || "\uD83D\uDCC1";
+      const bgColor = f.color ? `background:${f.color}20;color:${f.color}` : "";
+      return `<div class="folder-card" data-folder-id="${f.id}" data-folder-name="${escapeHtml(f.name)}">
+        <div class="folder-card-icon" ${bgColor ? `style="${bgColor}"` : ""}>${icon}</div>
+        <div class="folder-card-info">
+          <div class="folder-card-name">${escapeHtml(f.name)}</div>
+          <div class="folder-card-count">${f.prompt_count} prompt${f.prompt_count !== 1 ? "s" : ""}</div>
+        </div>
+        <svg class="folder-card-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="9 18 15 12 9 6" />
+        </svg>
+      </div>`;
+    }).join("");
+
+    const unfiledCard = unfiled_count > 0
+      ? `<div class="folder-card unfiled" data-folder-id="unfiled" data-folder-name="Unfiled">
+          <div class="folder-card-icon">\uD83D\uDCC4</div>
+          <div class="folder-card-info">
+            <div class="folder-card-name">Unfiled</div>
+            <div class="folder-card-count">${unfiled_count} prompt${unfiled_count !== 1 ? "s" : ""}</div>
+          </div>
+          <svg class="folder-card-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="9 18 15 12 9 6" />
+          </svg>
+        </div>`
+      : "";
+
+    els.promptList.innerHTML = `<div class="folder-list">${folderCards}${unfiledCard}</div>`;
+    setStatus(`${folders.length} folder${folders.length !== 1 ? "s" : ""}`);
+
+    // Bind click handlers for folder drill-down
+    els.promptList.querySelectorAll<HTMLElement>(".folder-card").forEach((card) => {
+      card.addEventListener("click", () => {
+        currentFolderId = card.dataset.folderId || null;
+        currentFolderName = card.dataset.folderName || null;
+        loadPrompts();
+      });
+    });
+  } catch (err) {
+    if (err instanceof Error && err.message === "SESSION_EXPIRED") {
+      await logout();
+      showLoginView();
+      setStatus("Session expired — please sign in again");
+    } else {
+      els.promptList.innerHTML =
+        '<div class="empty-state"><p>Could not load folders</p><button class="retry-btn">Retry</button></div>';
+      setStatus("Connection error");
+      els.promptList.querySelector(".retry-btn")?.addEventListener("click", () => {
+        loadFolderList();
+      });
+    }
+  }
+}
+
+function renderFolderBackBar() {
+  // Remove existing back bar if any
+  document.getElementById("folder-back-bar")?.remove();
+
+  const backBar = document.createElement("div");
+  backBar.id = "folder-back-bar";
+  backBar.className = "folder-back-bar";
+  backBar.innerHTML = `
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polyline points="15 18 9 12 15 6" />
+    </svg>
+    <span class="folder-back-name">${escapeHtml(currentFolderName || "Folders")}</span>
+  `;
+  backBar.addEventListener("click", () => {
+    currentFolderId = null;
+    currentFolderName = null;
+    backBar.remove();
+    loadPrompts();
+  });
+
+  // Insert before the prompt list
+  els.promptList.parentElement?.insertBefore(backBar, els.promptList);
+}
+
+function renderPrompts(context?: "recent" | "favorites" | "folder") {
   if (currentPrompts.length === 0) {
+    let emptyMsg = "No prompts found";
+    if (context === "recent") {
+      emptyMsg = "No recently used prompts yet";
+    } else if (context === "favorites") {
+      emptyMsg = "No favorite prompts yet — star prompts on teamprompt.app";
+    } else if (context === "folder") {
+      emptyMsg = "This folder is empty";
+    }
     els.promptList.innerHTML =
-      '<div class="empty-state"><p>No prompts found</p></div>';
+      `<div class="empty-state"><p>${emptyMsg}</p></div>`;
     return;
   }
 
@@ -174,7 +305,7 @@ function renderPrompts() {
         <div class="prompt-card-header">
           <div class="prompt-card-title">
             ${escapeHtml(p.title)}
-            ${p.is_template ? '<span class="badge-template">Package</span>' : ""}
+            ${p.is_template ? '<span class="badge-template">Template</span>' : ""}
           </div>
           <svg class="prompt-card-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="9 18 15 12 9 6" />
@@ -196,7 +327,7 @@ function renderPrompts() {
 
   // Show onboarding tip when user has only the sample prompt
   const onboardingHtml =
-    currentPrompts.length <= 1 && activeFilter === "all"
+    currentPrompts.length <= 1 && activeFilter === "recent"
       ? `<div class="onboarding-tip">
           <strong>Get started:</strong> This is a sample template. Click it to see how it works, then create your own prompts at
           <a href="${CONFIG.SITE_URL}/vault" target="_blank" rel="noopener">teamprompt.app/vault</a>.
@@ -231,6 +362,17 @@ async function loadShieldView() {
   }
 
   renderShieldView(shieldView, status);
+}
+
+function filterShieldViolations(container: HTMLElement, query: string) {
+  const violations = container.querySelectorAll<HTMLElement>(".shield-violation");
+  const q = query.toLowerCase();
+  violations.forEach((v) => {
+    const ruleName = v.querySelector(".shield-violation-rule")?.textContent?.toLowerCase() || "";
+    const matchedText = v.querySelector(".shield-violation-match")?.textContent?.toLowerCase() || "";
+    const visible = !q || ruleName.includes(q) || matchedText.includes(q);
+    v.style.display = visible ? "" : "none";
+  });
 }
 
 function renderShieldView(container: HTMLElement, status: SecurityStatus) {
@@ -324,6 +466,12 @@ function renderShieldView(container: HTMLElement, status: SecurityStatus) {
     violationsHtml = '<div class="shield-empty">No violations detected this week</div>';
   }
 
+  const shieldSearchHtml = status.protected && status.recentViolations.length > 0
+    ? `<div class="shield-search-wrap">
+        <input type="text" id="shield-search-input" placeholder="Search violations..." />
+      </div>`
+    : "";
+
   const manageUrl = `${CONFIG.SITE_URL}/guardrails`;
   container.innerHTML = `
     <div class="shield-status-card">
@@ -335,6 +483,7 @@ function renderShieldView(container: HTMLElement, status: SecurityStatus) {
     </div>
     ${onboardingHtml}
     ${statsHtml}
+    ${shieldSearchHtml}
     ${violationsHtml}
     <a href="${manageUrl}" target="_blank" rel="noopener" class="shield-manage-link">
       ${status.protected ? "Manage guardrails on teamprompt.app" : "Customize rules on teamprompt.app"}
@@ -349,10 +498,8 @@ function renderShieldView(container: HTMLElement, status: SecurityStatus) {
       enableBtn.textContent = "Installing rules...";
       const result = await enableDefaultRules();
       if (result?.installed) {
-        // Reload the shield view to show the new "Protected" state
         loadShieldView();
       } else if (result && !result.installed) {
-        // Already configured — just reload
         loadShieldView();
       } else {
         enableBtn.disabled = false;
@@ -360,6 +507,14 @@ function renderShieldView(container: HTMLElement, status: SecurityStatus) {
         const hint = container.querySelector(".shield-onboarding-hint");
         if (hint) hint.textContent = "Something went wrong. Try again or set up on the dashboard.";
       }
+    });
+  }
+
+  // Bind shield search
+  const shieldSearchInput = container.querySelector<HTMLInputElement>("#shield-search-input");
+  if (shieldSearchInput) {
+    shieldSearchInput.addEventListener("input", () => {
+      filterShieldViolations(container, shieldSearchInput.value.trim());
     });
   }
 }
@@ -529,7 +684,26 @@ export function initSharedUI(elements: UIElements) {
   els.searchInput.addEventListener("input", () => {
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
-      loadPrompts(els.searchInput.value.trim());
+      const query = els.searchInput.value.trim();
+      if (query) {
+        // Search overrides tabs — search all prompts
+        const shieldView = document.getElementById("shield-view");
+        shieldView?.classList.add("hidden");
+        els.promptList.classList.remove("hidden");
+        document.getElementById("folder-back-bar")?.classList.add("hidden");
+        loadPrompts(query);
+      } else {
+        // Clear search → return to current tab view
+        document.getElementById("folder-back-bar")?.classList.remove("hidden");
+        if (activeFilter === "shield") {
+          els.promptList.classList.add("hidden");
+          const shieldView = document.getElementById("shield-view");
+          shieldView?.classList.remove("hidden");
+          loadShieldView();
+        } else {
+          loadPrompts();
+        }
+      }
     }, 300);
   });
 
@@ -542,21 +716,74 @@ export function initSharedUI(elements: UIElements) {
         .querySelectorAll(".tab")
         .forEach((t) => t.classList.remove("active"));
       tab.classList.add("active");
-      activeFilter = (tab.dataset.filter || "all") as typeof activeFilter;
+      activeFilter = (tab.dataset.filter || "recent") as typeof activeFilter;
+
+      // Reset folder drill-down when switching tabs
+      currentFolderId = null;
+      currentFolderName = null;
+      document.getElementById("folder-back-bar")?.remove();
+
+      // Clear search when switching tabs
+      els.searchInput.value = "";
 
       if (activeFilter === "shield") {
         els.promptList.classList.add("hidden");
-        els.searchInput.closest(".search-wrap")?.classList.add("hidden");
+        els.searchInput.closest(".search-wrap")?.classList.remove("hidden");
         shieldView?.classList.remove("hidden");
         loadShieldView();
       } else {
         shieldView?.classList.add("hidden");
         els.promptList.classList.remove("hidden");
         els.searchInput.closest(".search-wrap")?.classList.remove("hidden");
-        loadPrompts(els.searchInput.value.trim());
+        loadPrompts();
       }
     });
   });
+
+  // Settings gear
+  const settingsBtn = document.getElementById("settings-btn");
+  const settingsDropdown = document.getElementById("settings-dropdown");
+  const sidebarToggle = document.getElementById("sidebar-toggle") as HTMLInputElement | null;
+  const sidebarToggleLabel = document.getElementById("sidebar-toggle-label");
+
+  // Hide sidebar toggle on Firefox (no sidePanel API)
+  const chromeForSidebar = globalThis as unknown as {
+    chrome?: { sidePanel?: { setPanelBehavior?: unknown } };
+  };
+  if (!chromeForSidebar.chrome?.sidePanel && sidebarToggleLabel) {
+    sidebarToggleLabel.classList.add("hidden");
+  }
+
+  if (settingsBtn && settingsDropdown) {
+    settingsBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      settingsDropdown.classList.toggle("hidden");
+    });
+    // Close dropdown on outside click
+    document.addEventListener("click", () => {
+      settingsDropdown.classList.add("hidden");
+    });
+    settingsDropdown.addEventListener("click", (e) => {
+      e.stopPropagation();
+    });
+  }
+
+  // Sidebar toggle
+  if (sidebarToggle) {
+    // Load saved preference
+    browser.storage.local.get(["alwaysOpenSidebar"]).then((data) => {
+      sidebarToggle.checked = !!data.alwaysOpenSidebar;
+    });
+
+    sidebarToggle.addEventListener("change", () => {
+      const enabled = sidebarToggle.checked;
+      browser.storage.local.set({ alwaysOpenSidebar: enabled });
+      browser.runtime.sendMessage({
+        type: "SET_SIDEBAR_BEHAVIOR",
+        enabled,
+      });
+    });
+  }
 
   // Detail actions
   els.backBtn.addEventListener("click", () => {

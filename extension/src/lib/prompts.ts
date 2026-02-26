@@ -25,6 +25,16 @@ export interface Prompt {
   folder_id: string | null;
   /** References a team. DB column retained. */
   department_id: string | null;
+  is_favorite: boolean;
+  last_used_at: string | null;
+}
+
+export interface ExtFolder {
+  id: string;
+  name: string;
+  icon: string | null;
+  color: string | null;
+  prompt_count: number;
 }
 
 /**
@@ -60,6 +70,10 @@ export function getDisplayLabel(v: VariableConfig): string {
 export async function fetchPrompts(opts?: {
   query?: string;
   templatesOnly?: boolean;
+  sort?: "recent";
+  favorites?: boolean;
+  folderId?: string;
+  limit?: number;
 }): Promise<Prompt[]> {
   const session = await getSession();
   if (!session) return [];
@@ -67,6 +81,10 @@ export async function fetchPrompts(opts?: {
   const params = new URLSearchParams();
   if (opts?.query) params.set("q", opts.query);
   if (opts?.templatesOnly) params.set("templates", "true");
+  if (opts?.sort) params.set("sort", opts.sort);
+  if (opts?.favorites) params.set("favorites", "true");
+  if (opts?.folderId) params.set("folderId", opts.folderId);
+  if (opts?.limit) params.set("limit", String(opts.limit));
 
   const res = await apiFetch(
     `${CONFIG.SITE_URL}${API_ENDPOINTS.prompts}?${params}`,
@@ -85,6 +103,27 @@ export async function fetchPrompts(opts?: {
 
   const data = res.data as { prompts?: Prompt[] };
   return data?.prompts || [];
+}
+
+export async function fetchFolders(): Promise<{ folders: ExtFolder[]; unfiled_count: number }> {
+  const session = await getSession();
+  if (!session) return { folders: [], unfiled_count: 0 };
+
+  const res = await apiFetch(
+    `${CONFIG.SITE_URL}${API_ENDPOINTS.folders}`,
+    { headers: apiHeaders(session.accessToken) }
+  );
+
+  if (res.status === 401) {
+    throw new Error("SESSION_EXPIRED");
+  }
+
+  if (!res.ok) {
+    throw new Error("FETCH_FAILED");
+  }
+
+  const data = res.data as { folders?: ExtFolder[]; unfiled_count?: number };
+  return { folders: data?.folders || [], unfiled_count: data?.unfiled_count || 0 };
 }
 
 export function fillTemplate(

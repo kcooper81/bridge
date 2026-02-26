@@ -367,14 +367,22 @@ export default defineContentScript({
     initSync();
 
     window.addEventListener("storage", (e) => {
+      if (_bridgeInvalidated) return;
       if (e.key?.startsWith("sb-") && e.key?.endsWith("-auth-token")) {
         syncWebToExtension();
       }
     });
 
-    _syncIntervalId = setInterval(syncWebToExtension, 2000);
+    _syncIntervalId = setInterval(() => {
+      if (_bridgeInvalidated) {
+        if (_syncIntervalId !== null) { clearInterval(_syncIntervalId); _syncIntervalId = null; }
+        return;
+      }
+      syncWebToExtension();
+    }, 2000);
 
     browser.storage.onChanged.addListener((changes, area) => {
+      if (_bridgeInvalidated) return;
       if (area !== "local" || !changes.accessToken) return;
 
       if (changes.accessToken.newValue && !changes.accessToken.oldValue) {
@@ -389,6 +397,10 @@ export default defineContentScript({
             sessionStorage.setItem("tp-ext-sync", "1");
             window.location.reload();
           });
+        }).catch(() => {
+          // Context invalidated during async call
+          _bridgeInvalidated = true;
+          if (_syncIntervalId !== null) { clearInterval(_syncIntervalId); _syncIntervalId = null; }
         });
       }
     });

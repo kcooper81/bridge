@@ -6,7 +6,7 @@ import { scanOutbound, type ScanResult } from "../lib/scanner";
 import { fetchSecurityStatus } from "../lib/security-status";
 import { logInteraction } from "../lib/logging";
 import { getSession } from "../lib/auth";
-import { isContextInvalidated } from "../lib/api";
+
 import "../styles/content.css";
 
 // Selectors that specifically target AI chat input fields (not generic inputs like rename/search)
@@ -88,6 +88,39 @@ let _currentUrl = location.href;
 // Debounce timer for shield refresh
 let _refreshTimer: ReturnType<typeof setTimeout> | null = null;
 
+// ─── Context Invalidation Guard ───
+// When the extension is reloaded/updated, all browser.* APIs throw.
+// This flag stops ALL activity immediately to prevent console spam.
+let _contextDead = false;
+let _refreshIntervalId: ReturnType<typeof setInterval> | null = null;
+let _pingIntervalId: ReturnType<typeof setInterval> | null = null;
+
+function killContentScript() {
+  if (_contextDead) return;
+  _contextDead = true;
+  if (_refreshIntervalId) clearInterval(_refreshIntervalId);
+  if (_pingIntervalId) clearInterval(_pingIntervalId);
+  _refreshIntervalId = null;
+  _pingIntervalId = null;
+  showReloadBanner();
+}
+
+/** Returns true if the extension context is dead (all browser.* calls will throw). */
+function isContextDead(): boolean {
+  if (_contextDead) return true;
+  // Cheap check: browser.runtime.id is undefined when context is invalidated
+  try {
+    if (!browser.runtime?.id) {
+      killContentScript();
+      return true;
+    }
+  } catch {
+    killContentScript();
+    return true;
+  }
+  return false;
+}
+
 export default defineContentScript({
   matches: [
     "https://chat.openai.com/*",
@@ -109,6 +142,7 @@ export default defineContentScript({
 
     // ─── Auth Change Listener (Fix 2) ───
     browser.storage.onChanged.addListener((changes, area) => {
+      if (isContextDead()) return;
       if (area !== "local" || !changes.accessToken) return;
       if (changes.accessToken.newValue) {
         _isAuthenticated = true;
@@ -125,6 +159,7 @@ export default defineContentScript({
 
     // ─── Offline Detection (Fix 5) ───
     window.addEventListener("online", () => {
+      if (_contextDead) return;
       _isOnline = true;
       if (_isAuthenticated) {
         refreshShieldStatus();
@@ -134,6 +169,7 @@ export default defineContentScript({
     });
 
     window.addEventListener("offline", () => {
+      if (_contextDead) return;
       _isOnline = false;
       updateShieldState();
     });
@@ -155,30 +191,38 @@ export default defineContentScript({
     window.addEventListener("popstate", () => onUrlChange());
 
     // Periodic refresh every 60 seconds (fast enough to catch rule changes)
-    const refreshInterval = setInterval(() => {
-      if (isContextInvalidated()) {
-        clearInterval(refreshInterval);
-        clearInterval(pingInterval);
-        return;
-      }
+    _refreshIntervalId = setInterval(() => {
+      if (isContextDead()) return;
       if (_isAuthenticated && _isOnline) {
         refreshShieldStatus();
       }
     }, 60 * 1000);
 
     // ─── Proactive Context Invalidation Check ───
-    const pingInterval = setInterval(() => {
+    // Check every 5 seconds so errors stop quickly after extension reload
+    _pingIntervalId = setInterval(() => {
+      if (_contextDead) { // Don't call isContextDead() to avoid recursion
+        if (_pingIntervalId) clearInterval(_pingIntervalId);
+        return;
+      }
+      try {
+        if (!browser.runtime?.id) {
+          killContentScript();
+          return;
+        }
+      } catch {
+        killContentScript();
+        return;
+      }
       browser.runtime.sendMessage({ type: "PING" }).catch(() => {
-        // "Extension context invalidated" — show reload banner and stop intervals
-        clearInterval(refreshInterval);
-        clearInterval(pingInterval);
-        showReloadBanner();
+        killContentScript();
       });
-    }, 30 * 1000);
+    }, 5_000);
 
     // ─── Message Handler ───
     browser.runtime.onMessage.addListener(
       (message: { type: string; content?: string }, _sender, sendResponse) => {
+        if (isContextDead()) return;
         if (message.type === "INSERT_PROMPT" && message.content) {
           const success = insertIntoAiTool(message.content);
           showToast(success ? "Prompt inserted" : "Could not find input field", !success);
@@ -191,6 +235,9 @@ export default defineContentScript({
     document.addEventListener(
       "keydown",
       (e) => {
+        // If context is dead, let everything through — don't block user
+        if (_contextDead) return;
+
         // If this is our re-dispatched event, let it through
         if (_tpAllowNext) {
           _tpAllowNext = false;
@@ -226,6 +273,7 @@ export default defineContentScript({
     document.addEventListener(
       "click",
       (e) => {
+        if (_contextDead) return;
         if (_tpAllowNextClick) {
           _tpAllowNextClick = false;
           return;
@@ -259,6 +307,7 @@ export default defineContentScript({
 // ─── SPA Navigation Handler (Fix 7) ───
 
 function onUrlChange() {
+  if (_contextDead) return;
   const newUrl = location.href;
   if (newUrl === _currentUrl) return;
   _currentUrl = newUrl;
@@ -278,7 +327,9 @@ function debouncedRefreshShieldStatus() {
 // ─── Shield State Management (Fix 2) ───
 
 async function refreshShieldStatus() {
+  if (_contextDead) return;
   const status = await fetchSecurityStatus();
+  if (_contextDead) return;
   if (status) {
     _isProtected = status.protected;
     _ruleCount = status.activeRuleCount;
@@ -299,7 +350,7 @@ function updateShieldState() {
   );
 
   // Fix 4: Context invalidated — show reload banner
-  if (isContextInvalidated()) {
+  if (_contextDead) {
     _shieldEl.classList.add("tp-shield-invalidated");
     _shieldDotEl.className = "tp-shield-dot tp-dot-gray";
     _shieldLabelEl.textContent = "Reload page required";
@@ -378,6 +429,7 @@ function reDispatchEnter(target: HTMLElement) {
 // ─── Shared DLP Scan Logic (used by Enter key and click-to-send handlers) ───
 
 function performScan(text: string, onAllow: () => void) {
+  if (_contextDead) { onAllow(); return; }
   // Block repeat submissions of previously blocked text
   if (_lastBlockedText !== null && text.trim() === _lastBlockedText.trim()) {
     showBlockOverlay([{ ruleId: "repeat-block", ruleName: "Previously blocked", category: "dlp", severity: "block", matchedText: "Same content was blocked moments ago" }]);
@@ -530,7 +582,7 @@ function createShieldElement() {
   const shieldSvg = `<svg class="tp-shield-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`;
 
   // Status dot
-  const dotClass = !_isOnline || isContextInvalidated()
+  const dotClass = !_isOnline || _contextDead
     ? "tp-dot-gray"
     : !_isAuthenticated
       ? "tp-dot-gray"
@@ -540,7 +592,7 @@ function createShieldElement() {
 
   // Status text
   let statusText = "";
-  if (isContextInvalidated()) {
+  if (_contextDead) {
     statusText = "Reload page required";
   } else if (!_isOnline) {
     statusText = "Offline \u2014 scans paused";
@@ -673,7 +725,7 @@ type ScanBlockReason = "no-auth" | "api-error" | "offline" | "context-invalidate
 
 function showScanBlockOverlay(reason: ScanBlockReason) {
   // Context invalidated delegates to the existing reload banner
-  if (reason === "context-invalidated" || isContextInvalidated()) {
+  if (reason === "context-invalidated" || _contextDead) {
     showReloadBanner();
     return;
   }

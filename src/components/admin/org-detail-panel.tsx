@@ -56,7 +56,6 @@ export function OrgDetailPanel({
   subscription,
   members,
   promptCount,
-  onRefresh,
   onOrgUpdate,
   onOrgDelete,
   showBackButton,

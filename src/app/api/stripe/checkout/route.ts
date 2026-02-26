@@ -55,13 +55,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
+    // Debug: check which env vars are set
+    if (!process.env.STRIPE_SECRET_KEY) {
+      return NextResponse.json({ error: "Missing env: STRIPE_SECRET_KEY" }, { status: 500 });
+    }
+
     const priceEnvKey = interval === "annual"
       ? planConfig.priceEnv.annual
       : planConfig.priceEnv.monthly;
     const priceId = process.env[priceEnvKey];
     if (!priceId) {
       return NextResponse.json(
-        { error: "Plan not configured" },
+        { error: `Missing env: ${priceEnvKey}` },
         { status: 500 }
       );
     }

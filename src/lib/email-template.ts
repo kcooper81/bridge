@@ -53,7 +53,7 @@ export function buildEmail(options: EmailOptions): string {
               <table role="presentation" cellpadding="0" cellspacing="0">
                 <tr>
                   <td style="width: 32px; height: 32px; vertical-align: middle;">
-                    <img src="https://teamprompt.app/brand/logo-icon-blue.svg" alt="TeamPrompt" width="32" height="32" style="display: block; border-radius: 8px;" />
+                    <img src="https://teamprompt.app/brand/social-profile-512.png" alt="TeamPrompt" width="32" height="32" style="display: block; border-radius: 8px;" />
                   </td>
                   <td style="padding-left: 12px;">
                     <span style="color: ${LIGHT_TEXT}; font-size: 18px; font-weight: 700;">TeamPrompt</span>
@@ -145,7 +145,7 @@ export function buildTicketResponseEmail(options: TicketResponseEmailOptions): s
               <table role="presentation" cellpadding="0" cellspacing="0">
                 <tr>
                   <td style="width: 32px; height: 32px; vertical-align: middle;">
-                    <img src="https://teamprompt.app/brand/logo-icon-blue.svg" alt="TeamPrompt" width="32" height="32" style="display: block; border-radius: 8px;" />
+                    <img src="https://teamprompt.app/brand/social-profile-512.png" alt="TeamPrompt" width="32" height="32" style="display: block; border-radius: 8px;" />
                   </td>
                   <td style="padding-left: 12px;">
                     <span style="color: ${LIGHT_TEXT}; font-size: 18px; font-weight: 700;">TeamPrompt</span>

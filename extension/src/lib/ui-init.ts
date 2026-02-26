@@ -130,10 +130,9 @@ async function loadPrompts(query = "") {
   els.promptList.innerHTML = '<div class="loading">Loading prompts...</div>';
   setStatus("Fetching prompts...");
 
-  // Hide folder back bar when not in folder contents
-  const folderBackBar = document.getElementById("folder-back-bar");
-  if (folderBackBar && !(activeFilter === "folders" && currentFolderId)) {
-    folderBackBar.remove();
+  // Remove folder pills when not on folders tab
+  if (activeFilter !== "folders") {
+    document.getElementById("folder-pills")?.remove();
   }
 
   try {
@@ -158,17 +157,8 @@ async function loadPrompts(query = "") {
       currentPrompts = prompts;
       renderPrompts("favorites");
     } else if (activeFilter === "folders") {
-      if (currentFolderId) {
-        // Show prompts inside a folder
-        const prompts = await fetchPrompts({ folderId: currentFolderId });
-        currentPrompts = prompts;
-        renderFolderBackBar();
-        renderPrompts("folder");
-      } else {
-        // Show folder list
-        await loadFolderList();
-        return;
-      }
+      await loadFoldersTab();
+      return;
     }
 
     setStatus(
@@ -190,58 +180,24 @@ async function loadPrompts(query = "") {
   }
 }
 
-async function loadFolderList() {
-  els.promptList.innerHTML = '<div class="loading">Loading folders...</div>';
+async function loadFoldersTab() {
+  els.promptList.innerHTML = '<div class="loading">Loading prompts...</div>';
 
   try {
-    const { folders, unfiled_count } = await fetchFolders();
+    // Fetch folders and prompts in parallel
+    const [foldersData, prompts] = await Promise.all([
+      fetchFolders(),
+      fetchPrompts(currentFolderId ? { folderId: currentFolderId } : {}),
+    ]);
 
-    if (folders.length === 0 && unfiled_count === 0) {
-      els.promptList.innerHTML =
-        '<div class="empty-state"><p>No folders yet</p><p style="font-size:12px;margin-top:4px">Create folders at <a href="' + CONFIG.SITE_URL + '/vault" target="_blank" rel="noopener" style="color:var(--primary)">teamprompt.app/vault</a></p></div>';
-      setStatus("0 folders");
-      return;
-    }
+    // Render folder pills bar
+    renderFolderPills(foldersData.folders, foldersData.unfiled_count);
 
-    const folderCards = folders.map((f) => {
-      const icon = f.icon || "\uD83D\uDCC1";
-      const bgColor = f.color ? `background:${f.color}20;color:${f.color}` : "";
-      return `<div class="folder-card" data-folder-id="${f.id}" data-folder-name="${escapeHtml(f.name)}">
-        <div class="folder-card-icon" ${bgColor ? `style="${bgColor}"` : ""}>${icon}</div>
-        <div class="folder-card-info">
-          <div class="folder-card-name">${escapeHtml(f.name)}</div>
-          <div class="folder-card-count">${f.prompt_count} prompt${f.prompt_count !== 1 ? "s" : ""}</div>
-        </div>
-        <svg class="folder-card-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="9 18 15 12 9 6" />
-        </svg>
-      </div>`;
-    }).join("");
-
-    const unfiledCard = unfiled_count > 0
-      ? `<div class="folder-card unfiled" data-folder-id="unfiled" data-folder-name="Unfiled">
-          <div class="folder-card-icon">\uD83D\uDCC4</div>
-          <div class="folder-card-info">
-            <div class="folder-card-name">Unfiled</div>
-            <div class="folder-card-count">${unfiled_count} prompt${unfiled_count !== 1 ? "s" : ""}</div>
-          </div>
-          <svg class="folder-card-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="9 18 15 12 9 6" />
-          </svg>
-        </div>`
-      : "";
-
-    els.promptList.innerHTML = `<div class="folder-list">${folderCards}${unfiledCard}</div>`;
-    setStatus(`${folders.length} folder${folders.length !== 1 ? "s" : ""}`);
-
-    // Bind click handlers for folder drill-down
-    els.promptList.querySelectorAll<HTMLElement>(".folder-card").forEach((card) => {
-      card.addEventListener("click", () => {
-        currentFolderId = card.dataset.folderId || null;
-        currentFolderName = card.dataset.folderName || null;
-        loadPrompts();
-      });
-    });
+    currentPrompts = prompts;
+    renderPrompts("folder");
+    setStatus(
+      `${currentPrompts.length} prompt${currentPrompts.length !== 1 ? "s" : ""}`
+    );
   } catch (err) {
     if (err instanceof Error && err.message === "SESSION_EXPIRED") {
       await logout();
@@ -249,37 +205,63 @@ async function loadFolderList() {
       setStatus("Session expired — please sign in again");
     } else {
       els.promptList.innerHTML =
-        '<div class="empty-state"><p>Could not load folders</p><button class="retry-btn">Retry</button></div>';
+        '<div class="empty-state"><p>Could not load prompts</p><button class="retry-btn">Retry</button></div>';
       setStatus("Connection error");
       els.promptList.querySelector(".retry-btn")?.addEventListener("click", () => {
-        loadFolderList();
+        loadFoldersTab();
       });
     }
   }
 }
 
-function renderFolderBackBar() {
-  // Remove existing back bar if any
-  document.getElementById("folder-back-bar")?.remove();
+function renderFolderPills(folders: ExtFolder[], unfiledCount: number) {
+  // Remove existing pill bar
+  document.getElementById("folder-pills")?.remove();
 
-  const backBar = document.createElement("div");
-  backBar.id = "folder-back-bar";
-  backBar.className = "folder-back-bar";
-  backBar.innerHTML = `
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <polyline points="15 18 9 12 15 6" />
-    </svg>
-    <span class="folder-back-name">${escapeHtml(currentFolderName || "Folders")}</span>
-  `;
-  backBar.addEventListener("click", () => {
+  const pillBar = document.createElement("div");
+  pillBar.id = "folder-pills";
+  pillBar.className = "folder-pills";
+
+  // "All" pill
+  const allPill = document.createElement("button");
+  allPill.className = `folder-pill${!currentFolderId ? " active" : ""}`;
+  allPill.textContent = "All";
+  allPill.addEventListener("click", () => {
     currentFolderId = null;
     currentFolderName = null;
-    backBar.remove();
-    loadPrompts();
+    loadFoldersTab();
   });
+  pillBar.appendChild(allPill);
+
+  // Folder pills
+  for (const f of folders) {
+    if (f.prompt_count === 0) continue;
+    const pill = document.createElement("button");
+    pill.className = `folder-pill${currentFolderId === f.id ? " active" : ""}`;
+    pill.textContent = `${f.icon || "\uD83D\uDCC1"} ${f.name}`;
+    pill.addEventListener("click", () => {
+      currentFolderId = f.id;
+      currentFolderName = f.name;
+      loadFoldersTab();
+    });
+    pillBar.appendChild(pill);
+  }
+
+  // Unfiled pill
+  if (unfiledCount > 0) {
+    const pill = document.createElement("button");
+    pill.className = `folder-pill${currentFolderId === "unfiled" ? " active" : ""}`;
+    pill.textContent = "Unfiled";
+    pill.addEventListener("click", () => {
+      currentFolderId = "unfiled";
+      currentFolderName = "Unfiled";
+      loadFoldersTab();
+    });
+    pillBar.appendChild(pill);
+  }
 
   // Insert before the prompt list
-  els.promptList.parentElement?.insertBefore(backBar, els.promptList);
+  els.promptList.parentElement?.insertBefore(pillBar, els.promptList);
 }
 
 function renderPrompts(context?: "recent" | "favorites" | "folder") {
@@ -684,11 +666,11 @@ export function initSharedUI(elements: UIElements) {
         const shieldView = document.getElementById("shield-view");
         shieldView?.classList.add("hidden");
         els.promptList.classList.remove("hidden");
-        document.getElementById("folder-back-bar")?.classList.add("hidden");
+        document.getElementById("folder-pills")?.classList.add("hidden");
         loadPrompts(query);
       } else {
         // Clear search → return to current tab view
-        document.getElementById("folder-back-bar")?.classList.remove("hidden");
+        document.getElementById("folder-pills")?.classList.remove("hidden");
         loadPrompts();
       }
     }, 300);
@@ -708,7 +690,7 @@ export function initSharedUI(elements: UIElements) {
       // Reset folder drill-down when switching tabs
       currentFolderId = null;
       currentFolderName = null;
-      document.getElementById("folder-back-bar")?.remove();
+      document.getElementById("folder-pills")?.remove();
 
       // Clear search and update placeholder when switching tabs
       els.searchInput.value = "";

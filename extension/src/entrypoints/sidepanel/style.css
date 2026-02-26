@@ -893,105 +893,38 @@ input:focus {
   background: white;
 }
 
-/* ─── Folder Cards ─── */
-.folder-list {
+/* ─── Folder Pills ─── */
+.folder-pills {
   display: flex;
-  flex-direction: column;
   gap: 6px;
+  padding: 0 14px 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
+.folder-pills::-webkit-scrollbar { display: none; }
 
-.folder-card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-lg);
-  cursor: pointer;
-  transition: border-color 150ms ease, background 150ms ease, box-shadow 150ms ease;
-  background: var(--card);
-  box-shadow: 0 1px 4px -1px rgba(0, 0, 0, 0.25);
-}
-[data-theme="light"] .folder-card {
-  box-shadow: 0 1px 4px -1px rgba(0, 0, 0, 0.08);
-}
-.folder-card:hover {
-  border-color: var(--primary);
-  background: var(--primary-surface);
-  box-shadow: 0 2px 12px -2px rgba(59, 130, 246, 0.15);
-}
-.folder-card.unfiled {
-  border-style: dashed;
-}
-
-.folder-card-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.folder-pill {
   flex-shrink: 0;
-  font-size: 16px;
+  padding: 4px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 150ms ease, background 150ms ease, color 150ms ease;
+  white-space: nowrap;
+}
+.folder-pill:hover {
+  color: var(--text);
+  border-color: var(--border-light);
+}
+.folder-pill.active {
   background: var(--primary-surface);
   color: var(--primary);
-}
-
-.folder-card-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.folder-card-name {
-  font-size: 14px;
-  font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.folder-card-count {
-  font-size: 12px;
-  color: var(--text-muted);
-}
-
-.folder-card-arrow {
-  flex-shrink: 0;
-  color: var(--text-dim);
-  opacity: 0;
-  transform: translateX(-4px);
-  transition: opacity 150ms ease, transform 150ms ease;
-}
-.folder-card:hover .folder-card-arrow {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-/* ─── Folder Back Bar ─── */
-.folder-back-bar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  cursor: pointer;
-  transition: background var(--transition);
-}
-.folder-back-bar:hover {
-  background: var(--hover);
-}
-.folder-back-bar svg {
-  flex-shrink: 0;
-  color: var(--text-muted);
-}
-.folder-back-name {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  border-color: var(--primary);
 }
 
 /* ─── Shield Search ─── */

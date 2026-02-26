@@ -133,7 +133,7 @@ export default function GuardrailsPage() {
       setName("");
       setDescription("");
       setPattern("");
-      setPatternType("regex");
+      setPatternType("keywords");
       setCategory("custom");
       setSeverity("block");
       setScopeTeamId("global");
@@ -528,9 +528,10 @@ export default function GuardrailsPage() {
                 <Select value={patternType} onValueChange={(v) => setPatternType(v as SecurityPatternType)}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="keywords">Keywords (simplest)</SelectItem>
                     <SelectItem value="exact">Exact Match</SelectItem>
-                    <SelectItem value="regex">Regex</SelectItem>
-                    <SelectItem value="glob">Glob</SelectItem>
+                    <SelectItem value="regex">Regex (advanced)</SelectItem>
+                    <SelectItem value="glob">Glob / Wildcard</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -544,6 +545,8 @@ export default function GuardrailsPage() {
                     <SelectItem value="pii">Personal Info (PII)</SelectItem>
                     <SelectItem value="secrets">Secrets</SelectItem>
                     <SelectItem value="internal_terms">Internal Terms</SelectItem>
+                    <SelectItem value="financial">Financial</SelectItem>
+                    <SelectItem value="health">Health</SelectItem>
                     <SelectItem value="custom">Custom</SelectItem>
                   </SelectContent>
                 </Select>
@@ -551,12 +554,54 @@ export default function GuardrailsPage() {
             </div>
             <div className="space-y-2">
               <Label>Pattern</Label>
-              <Input
-                value={pattern}
-                onChange={(e) => setPattern(e.target.value)}
-                placeholder={patternType === "regex" ? "sk_[A-Za-z0-9]{20,}" : "Enter pattern"}
-                className="font-mono text-sm"
-              />
+              {patternType === "keywords" ? (
+                <Textarea
+                  value={pattern}
+                  onChange={(e) => setPattern(e.target.value)}
+                  placeholder="password, secret key, api token, internal only"
+                  rows={2}
+                  className="text-sm"
+                />
+              ) : (
+                <Input
+                  value={pattern}
+                  onChange={(e) => setPattern(e.target.value)}
+                  placeholder={
+                    patternType === "regex"
+                      ? "sk_[A-Za-z0-9]{20,}"
+                      : patternType === "glob"
+                        ? "*.secret.*"
+                        : "Enter exact text to match"
+                  }
+                  className="font-mono text-sm"
+                />
+              )}
+              <div className="rounded-md bg-muted/50 p-2.5 text-xs text-muted-foreground space-y-1">
+                {patternType === "keywords" && (
+                  <>
+                    <p className="font-medium text-foreground">Type words or phrases separated by commas.</p>
+                    <p>Each keyword is matched case-insensitively anywhere in the prompt text. Example: <code className="bg-muted px-1 rounded">project alpha, internal memo, confidential</code></p>
+                  </>
+                )}
+                {patternType === "exact" && (
+                  <>
+                    <p className="font-medium text-foreground">Matches the exact text you type (case-insensitive).</p>
+                    <p>Use for specific strings like company codes or project names.</p>
+                  </>
+                )}
+                {patternType === "regex" && (
+                  <>
+                    <p className="font-medium text-foreground">Regular expression pattern for advanced matching.</p>
+                    <p>Examples: <code className="bg-muted px-1 rounded">sk_[A-Za-z0-9]{"{20,"}</code> (API keys), <code className="bg-muted px-1 rounded">\b\d{"{3}"}-\d{"{2}"}-\d{"{4}"}\b</code> (SSN format), <code className="bg-muted px-1 rounded">[A-Z]{"{2}"}\d{"{6}"}</code> (ID codes)</p>
+                  </>
+                )}
+                {patternType === "glob" && (
+                  <>
+                    <p className="font-medium text-foreground">Use * as a wildcard to match any text.</p>
+                    <p>Examples: <code className="bg-muted px-1 rounded">*password*</code> (contains &ldquo;password&rdquo;), <code className="bg-muted px-1 rounded">PROJ-*</code> (starts with PROJ-)</p>
+                  </>
+                )}
+              </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">

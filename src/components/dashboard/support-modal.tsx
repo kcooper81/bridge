@@ -11,7 +11,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Search,
   ChevronRight,
@@ -194,7 +193,7 @@ export function SupportModal({ open, onOpenChange }: SupportModalProps) {
           )}
         </DialogHeader>
 
-        <ScrollArea className="flex-1 min-h-0">
+        <div className="flex-1 min-h-0 overflow-y-auto">
           <div className="p-6">
             {tab === "help" ? (
               isSearching ? (
@@ -242,7 +241,7 @@ export function SupportModal({ open, onOpenChange }: SupportModalProps) {
               />
             )}
           </div>
-        </ScrollArea>
+        </div>
 
         {/* Footer — help tab only */}
         {tab === "help" && (

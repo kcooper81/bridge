@@ -470,7 +470,7 @@ export default function TeamPage() {
             <Button
               variant={memberTeamFilter === "all" ? "default" : "outline"}
               size="sm"
-              className="h-7 text-xs"
+              className="h-7 text-xs hover:scale-100 active:scale-100"
               onClick={() => setMemberTeamFilter("all")}
             >
               All teams
@@ -480,7 +480,7 @@ export default function TeamPage() {
                 key={team.id}
                 variant={memberTeamFilter === team.id ? "default" : "outline"}
                 size="sm"
-                className="h-7 text-xs"
+                className="h-7 text-xs hover:scale-100 active:scale-100"
                 onClick={() => setMemberTeamFilter(memberTeamFilter === team.id ? "all" : team.id)}
                 onDoubleClick={() => { if (currentUserRole === "admin") setSelectedTeam(team); }}
                 title={currentUserRole === "admin" ? "Click to filter, double-click to manage" : undefined}

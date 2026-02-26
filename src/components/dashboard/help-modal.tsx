@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Search, ChevronRight, ArrowLeft, ExternalLink } from "lucide-react";
 import {
   HELP_CATEGORIES,
@@ -90,7 +89,7 @@ export function HelpModal({ open, onOpenChange }: HelpModalProps) {
           </div>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 min-h-0">
+        <div className="flex-1 min-h-0 overflow-y-auto">
           <div className="p-6">
             {isSearching ? (
               <SearchResultsView
@@ -114,7 +113,7 @@ export function HelpModal({ open, onOpenChange }: HelpModalProps) {
               <ArticleView category={view.category} article={view.article} />
             )}
           </div>
-        </ScrollArea>
+        </div>
 
         {/* Footer */}
         <div className="border-t px-6 py-3 flex items-center justify-between">

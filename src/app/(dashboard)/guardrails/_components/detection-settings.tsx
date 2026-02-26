@@ -15,12 +15,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import {
   Brain,
+  Eye,
+  EyeOff,
   Sparkles,
   Zap,
   Lock,
   Info,
+  Loader2,
 } from "lucide-react";
 import { getSecuritySettings, updateSecuritySettings } from "@/lib/sensitive-terms-api";
 import { toast } from "sonner";
@@ -38,13 +42,23 @@ export function DetectionSettings({ orgId, canEdit, hasPremiumAccess }: Detectio
     entropy_threshold: 4.0,
     ai_detection_enabled: false,
     ai_detection_provider: null,
+    ai_api_key: "",
+    ai_endpoint_url: "",
     smart_patterns_enabled: false,
   });
   const [saving, setSaving] = useState(false);
+  const [showApiKey, setShowApiKey] = useState(false);
+  const [apiKeyDraft, setApiKeyDraft] = useState("");
+  const [endpointDraft, setEndpointDraft] = useState("");
+  const [savingApi, setSavingApi] = useState(false);
 
   useEffect(() => {
     if (orgId) {
-      getSecuritySettings(orgId).then(setSettings).catch((err) => {
+      getSecuritySettings(orgId).then((s) => {
+        setSettings(s);
+        setApiKeyDraft(s.ai_api_key || "");
+        setEndpointDraft(s.ai_endpoint_url || "");
+      }).catch((err) => {
         console.error("Failed to load security settings:", err);
         toast.error("Failed to load detection settings");
       });
@@ -186,28 +200,137 @@ export function DetectionSettings({ orgId, canEdit, hasPremiumAccess }: Detectio
             Use machine learning models to detect names, addresses, medical information, and other sensitive data that pattern matching might miss.
           </p>
           {hasPremiumAccess && settings.ai_detection_enabled && (
-            <div className="space-y-3">
-              <Label className="text-sm">Detection Provider</Label>
-              <Select
-                value={settings.ai_detection_provider || ""}
-                onValueChange={(value) => handleSave({ ai_detection_provider: value as SecuritySettings["ai_detection_provider"] })}
-                disabled={!canEdit}
-              >
-                <SelectTrigger className="w-full md:w-[300px]">
-                  <SelectValue placeholder="Select a provider" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="presidio">Microsoft Presidio (Self-hosted)</SelectItem>
-                  <SelectItem value="aws_comprehend">AWS Comprehend</SelectItem>
-                  <SelectItem value="openai">OpenAI (GPT-4)</SelectItem>
-                </SelectContent>
-              </Select>
-              <div className="flex items-start gap-2 p-3 rounded-lg bg-muted/50">
-                <Info className="h-4 w-4 text-muted-foreground mt-0.5" />
-                <p className="text-xs text-muted-foreground">
-                  AI detection requires additional configuration. Contact support for setup assistance.
-                </p>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label className="text-sm">Detection Provider</Label>
+                <Select
+                  value={settings.ai_detection_provider || ""}
+                  onValueChange={(value) => handleSave({ ai_detection_provider: value as SecuritySettings["ai_detection_provider"] })}
+                  disabled={!canEdit}
+                >
+                  <SelectTrigger className="w-full md:w-[300px]">
+                    <SelectValue placeholder="Select a provider" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="presidio">Microsoft Presidio (Self-hosted)</SelectItem>
+                    <SelectItem value="aws_comprehend">AWS Comprehend</SelectItem>
+                    <SelectItem value="openai">OpenAI (GPT-4)</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
+
+              {settings.ai_detection_provider && (
+                <div className="rounded-lg border border-border p-4 space-y-4">
+                  <h4 className="text-sm font-medium">API Configuration</h4>
+
+                  {settings.ai_detection_provider === "presidio" && (
+                    <div className="space-y-2">
+                      <Label className="text-sm">Presidio Endpoint URL</Label>
+                      <Input
+                        value={endpointDraft}
+                        onChange={(e) => setEndpointDraft(e.target.value)}
+                        placeholder="https://your-presidio-instance.example.com/analyze"
+                        disabled={!canEdit}
+                      />
+                      <p className="text-[11px] text-muted-foreground">
+                        Your self-hosted Presidio analyzer endpoint. Must be accessible from our servers.
+                      </p>
+                    </div>
+                  )}
+
+                  {(settings.ai_detection_provider === "aws_comprehend" || settings.ai_detection_provider === "openai") && (
+                    <div className="space-y-2">
+                      <Label className="text-sm">
+                        {settings.ai_detection_provider === "aws_comprehend" ? "AWS Access Key" : "OpenAI API Key"}
+                      </Label>
+                      <div className="relative">
+                        <Input
+                          type={showApiKey ? "text" : "password"}
+                          value={apiKeyDraft}
+                          onChange={(e) => setApiKeyDraft(e.target.value)}
+                          placeholder={settings.ai_detection_provider === "aws_comprehend" ? "AKIA..." : "sk-..."}
+                          disabled={!canEdit}
+                          className="pr-10"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowApiKey(!showApiKey)}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1"
+                        >
+                          {showApiKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </button>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground">
+                        {settings.ai_detection_provider === "aws_comprehend"
+                          ? "Your AWS access key for Comprehend. Secret key is stored encrypted."
+                          : "Your OpenAI API key. Stored encrypted and only used for PII detection."}
+                      </p>
+                    </div>
+                  )}
+
+                  {settings.ai_detection_provider === "aws_comprehend" && (
+                    <div className="space-y-2">
+                      <Label className="text-sm">AWS Region / Endpoint</Label>
+                      <Input
+                        value={endpointDraft}
+                        onChange={(e) => setEndpointDraft(e.target.value)}
+                        placeholder="us-east-1"
+                        disabled={!canEdit}
+                      />
+                    </div>
+                  )}
+
+                  <Button
+                    size="sm"
+                    disabled={!canEdit || savingApi}
+                    onClick={async () => {
+                      setSavingApi(true);
+                      try {
+                        await updateSecuritySettings(orgId, {
+                          ai_api_key: apiKeyDraft || undefined,
+                          ai_endpoint_url: endpointDraft || undefined,
+                        });
+                        setSettings((prev) => ({
+                          ...prev,
+                          ai_api_key: apiKeyDraft,
+                          ai_endpoint_url: endpointDraft,
+                        }));
+                        toast.success("API configuration saved");
+                      } catch {
+                        toast.error("Failed to save API configuration");
+                      } finally {
+                        setSavingApi(false);
+                      }
+                    }}
+                  >
+                    {savingApi ? (
+                      <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Saving...</>
+                    ) : (
+                      "Save API Configuration"
+                    )}
+                  </Button>
+
+                  <div className="flex items-start gap-2 p-3 rounded-lg bg-muted/50">
+                    <Info className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+                    <p className="text-xs text-muted-foreground">
+                      {settings.ai_detection_provider === "presidio"
+                        ? "Deploy Presidio using the official Docker image, then enter your endpoint URL above."
+                        : settings.ai_detection_provider === "aws_comprehend"
+                          ? "Create an IAM user with ComprehendFullAccess policy. Enter the access key above."
+                          : "Create an API key at platform.openai.com. Only gpt-4 class models are used for detection."}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {!settings.ai_detection_provider && (
+                <div className="flex items-start gap-2 p-3 rounded-lg bg-muted/50">
+                  <Info className="h-4 w-4 text-muted-foreground mt-0.5" />
+                  <p className="text-xs text-muted-foreground">
+                    Select a provider above to configure API access.
+                  </p>
+                </div>
+              )}
             </div>
           )}
           {!hasPremiumAccess && (

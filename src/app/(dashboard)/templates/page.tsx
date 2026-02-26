@@ -84,7 +84,11 @@ interface CustomPack {
   created_at: string;
   updated_at: string;
   promptIds: string[];
+  guidelineIds: string[];
+  ruleIds: string[];
   prompts: { id: string; title: string; description: string | null; tags: string[]; content: string }[];
+  guidelines: { id: string; name: string; description: string | null; category: string }[];
+  rules: { id: string; name: string; description: string | null; category: string; severity: string; pattern_type: string }[];
 }
 
 // ─── Preview item type (union of built-in + custom) ───
@@ -245,7 +249,11 @@ export default function TemplatesPage() {
 
       const data = await res.json();
       if (res.ok) {
-        toast.success(`Installed ${data.promptsCreated} prompt(s)`);
+        const parts = [];
+        if (data.promptsCreated > 0) parts.push(`${data.promptsCreated} prompt(s)`);
+        if (data.guidelinesCreated > 0) parts.push(`${data.guidelinesCreated} guideline(s)`);
+        if (data.rulesCreated > 0) parts.push(`${data.rulesCreated} policy(ies)`);
+        toast.success(`Installed ${parts.join(", ") || "pack"}`);
         setInstallDialogOpen(false);
         refresh();
       } else {
@@ -324,6 +332,8 @@ export default function TemplatesPage() {
               {customPacks.map((pack) => {
                 const IconComponent = ICON_MAP[pack.icon] || FolderOpen;
                 const pCount = pack.prompts.length;
+                const gCount = pack.guidelines?.length || 0;
+                const rCount = pack.rules?.length || 0;
 
                 return (
                   <Card
@@ -351,9 +361,21 @@ export default function TemplatesPage() {
                       {!pack.description && <div className="flex-1" />}
 
                       <div className="flex flex-wrap gap-1.5 mb-4">
-                        <Badge variant="secondary" className="text-xs">
-                          {pCount} {pCount === 1 ? "prompt" : "prompts"}
-                        </Badge>
+                        {pCount > 0 && (
+                          <Badge variant="secondary" className="text-xs">
+                            {pCount} {pCount === 1 ? "prompt" : "prompts"}
+                          </Badge>
+                        )}
+                        {gCount > 0 && (
+                          <Badge variant="secondary" className="text-xs">
+                            {gCount} {gCount === 1 ? "guideline" : "guidelines"}
+                          </Badge>
+                        )}
+                        {rCount > 0 && (
+                          <Badge variant="secondary" className="text-xs">
+                            {rCount} {rCount === 1 ? "policy" : "policies"}
+                          </Badge>
+                        )}
                       </div>
 
                       <div className="flex gap-2">
@@ -526,8 +548,12 @@ export default function TemplatesPage() {
           <DialogHeader>
             <DialogTitle>Install Pack</DialogTitle>
             <DialogDescription>
-              {installTargetPack?.prompts.length || 0} prompt(s) will be duplicated into your workspace.
-              Optionally assign them to a category.
+              {[
+                installTargetPack?.prompts.length ? `${installTargetPack.prompts.length} prompt(s)` : null,
+                installTargetPack?.guidelines?.length ? `${installTargetPack.guidelines.length} guideline(s)` : null,
+                installTargetPack?.rules?.length ? `${installTargetPack.rules.length} policy(ies)` : null,
+              ].filter(Boolean).join(", ") || "Items"}{" "}
+              will be duplicated into your workspace. Optionally assign prompts to a category.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
@@ -739,10 +765,24 @@ function CustomPackPreview({
       </SheetHeader>
 
       <div className="flex flex-wrap gap-2">
-        <Badge variant="secondary" className="gap-1.5">
-          <FileText className="h-3 w-3" />
-          {pack.prompts.length} {pack.prompts.length === 1 ? "prompt" : "prompts"}
-        </Badge>
+        {pack.prompts.length > 0 && (
+          <Badge variant="secondary" className="gap-1.5">
+            <FileText className="h-3 w-3" />
+            {pack.prompts.length} {pack.prompts.length === 1 ? "prompt" : "prompts"}
+          </Badge>
+        )}
+        {pack.guidelines && pack.guidelines.length > 0 && (
+          <Badge variant="secondary" className="gap-1.5">
+            <BookOpen className="h-3 w-3" />
+            {pack.guidelines.length} {pack.guidelines.length === 1 ? "guideline" : "guidelines"}
+          </Badge>
+        )}
+        {pack.rules && pack.rules.length > 0 && (
+          <Badge variant="secondary" className="gap-1.5">
+            <Shield className="h-3 w-3" />
+            {pack.rules.length} {pack.rules.length === 1 ? "policy" : "policies"}
+          </Badge>
+        )}
         <Badge variant="outline" className="capitalize">{pack.visibility}</Badge>
       </div>
 
@@ -782,6 +822,54 @@ function CustomPackPreview({
           </div>
         </div>
       )}
+
+      {pack.guidelines && pack.guidelines.length > 0 && (
+        <div>
+          <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+            <BookOpen className="h-4 w-4 text-muted-foreground" />
+            Guidelines
+          </h3>
+          <div className="space-y-2">
+            {pack.guidelines.map((g) => (
+              <div key={g.id} className="rounded-lg border border-border p-3">
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-medium">{g.name}</p>
+                  {g.category && (
+                    <Badge variant="outline" className="text-[10px] px-1.5 py-0">{g.category}</Badge>
+                  )}
+                </div>
+                {g.description && (
+                  <p className="text-xs text-muted-foreground mt-1">{g.description}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {pack.rules && pack.rules.length > 0 && (
+        <div>
+          <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+            <Shield className="h-4 w-4 text-muted-foreground" />
+            Guardrail Policies
+          </h3>
+          <div className="space-y-2">
+            {pack.rules.map((r) => (
+              <div key={r.id} className="rounded-lg border border-border p-3">
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-medium">{r.name}</p>
+                  <Badge variant={r.severity === "block" ? "destructive" : "outline"} className="text-[10px] px-1.5 py-0">
+                    {r.severity}
+                  </Badge>
+                </div>
+                {r.description && (
+                  <p className="text-xs text-muted-foreground mt-1">{r.description}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -797,14 +885,32 @@ function CreatePackDialog({
   onOpenChange: (open: boolean) => void;
   onCreated: () => void;
 }) {
-  const { prompts, teams } = useOrg();
+  const { prompts, guidelines, teams } = useOrg();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [visibility, setVisibility] = useState("org");
   const [teamId, setTeamId] = useState<string>("__none__");
   const [selectedPromptIds, setSelectedPromptIds] = useState<Set<string>>(new Set());
+  const [selectedGuidelineIds, setSelectedGuidelineIds] = useState<Set<string>>(new Set());
+  const [selectedRuleIds, setSelectedRuleIds] = useState<Set<string>>(new Set());
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState("");
+  const [securityRules, setSecurityRules] = useState<{ id: string; name: string; category: string; severity: string }[]>([]);
+
+  // Fetch security rules when dialog opens
+  useEffect(() => {
+    if (!open) return;
+    (async () => {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      const { data } = await supabase
+        .from("security_rules")
+        .select("id, name, category, severity")
+        .order("name");
+      setSecurityRules(data || []);
+    })();
+  }, [open]);
 
   function resetForm() {
     setName("");
@@ -812,6 +918,8 @@ function CreatePackDialog({
     setVisibility("org");
     setTeamId("__none__");
     setSelectedPromptIds(new Set());
+    setSelectedGuidelineIds(new Set());
+    setSelectedRuleIds(new Set());
     setSearch("");
   }
 
@@ -823,8 +931,8 @@ function CreatePackDialog({
       )
     : prompts;
 
-  function togglePrompt(id: string) {
-    setSelectedPromptIds((prev) => {
+  function toggleSet(setter: React.Dispatch<React.SetStateAction<Set<string>>>, id: string) {
+    setter((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
@@ -837,8 +945,8 @@ function CreatePackDialog({
       toast.error("Name is required");
       return;
     }
-    if (selectedPromptIds.size === 0) {
-      toast.error("Select at least one prompt");
+    if (selectedPromptIds.size === 0 && selectedGuidelineIds.size === 0 && selectedRuleIds.size === 0) {
+      toast.error("Select at least one prompt, guideline, or policy");
       return;
     }
 
@@ -860,6 +968,8 @@ function CreatePackDialog({
           visibility,
           team_id: visibility === "team" ? (teamId === "__none__" ? null : teamId) : null,
           promptIds: Array.from(selectedPromptIds),
+          guidelineIds: Array.from(selectedGuidelineIds),
+          ruleIds: Array.from(selectedRuleIds),
         }),
       });
 
@@ -878,13 +988,15 @@ function CreatePackDialog({
     }
   }
 
+  const totalSelected = selectedPromptIds.size + selectedGuidelineIds.size + selectedRuleIds.size;
+
   return (
     <Dialog open={open} onOpenChange={(o) => { if (!o) resetForm(); onOpenChange(o); }}>
       <DialogContent className="max-w-lg max-h-[85vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Create Template Pack</DialogTitle>
           <DialogDescription>
-            Bundle existing prompts into a reusable pack that can be installed by team members.
+            Bundle prompts, guidelines, and policies into a reusable pack.
           </DialogDescription>
         </DialogHeader>
 
@@ -940,9 +1052,11 @@ function CreatePackDialog({
             )}
           </div>
 
+          {/* Prompts */}
           <div className="space-y-2">
-            <Label>
-              Select Prompts ({selectedPromptIds.size} selected)
+            <Label className="flex items-center gap-2">
+              <FileText className="h-3.5 w-3.5 text-muted-foreground" />
+              Prompts ({selectedPromptIds.size} selected)
             </Label>
             <Input
               value={search}
@@ -950,7 +1064,7 @@ function CreatePackDialog({
               placeholder="Search prompts..."
               className="mb-2"
             />
-            <div className="max-h-48 overflow-y-auto rounded-lg border border-border">
+            <div className="max-h-36 overflow-y-auto rounded-lg border border-border">
               {filteredPrompts.length === 0 ? (
                 <p className="p-3 text-sm text-muted-foreground text-center">No prompts found</p>
               ) : (
@@ -961,7 +1075,7 @@ function CreatePackDialog({
                   >
                     <Checkbox
                       checked={selectedPromptIds.has(p.id)}
-                      onCheckedChange={() => togglePrompt(p.id)}
+                      onCheckedChange={() => toggleSet(setSelectedPromptIds, p.id)}
                     />
                     <span className="text-sm truncate">{p.title}</span>
                   </label>
@@ -969,6 +1083,63 @@ function CreatePackDialog({
               )}
             </div>
           </div>
+
+          {/* Guidelines */}
+          {guidelines.length > 0 && (
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                <BookOpen className="h-3.5 w-3.5 text-muted-foreground" />
+                Guidelines ({selectedGuidelineIds.size} selected)
+              </Label>
+              <div className="max-h-36 overflow-y-auto rounded-lg border border-border">
+                {guidelines.map((g) => (
+                  <label
+                    key={g.id}
+                    className="flex items-center gap-3 px-3 py-2 hover:bg-muted/50 cursor-pointer border-b border-border/50 last:border-0"
+                  >
+                    <Checkbox
+                      checked={selectedGuidelineIds.has(g.id)}
+                      onCheckedChange={() => toggleSet(setSelectedGuidelineIds, g.id)}
+                    />
+                    <span className="text-sm truncate">{g.name}</span>
+                    {g.category && (
+                      <Badge variant="outline" className="text-[10px] px-1.5 py-0 ml-auto shrink-0">{g.category}</Badge>
+                    )}
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Security Rules / Policies */}
+          {securityRules.length > 0 && (
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                <Shield className="h-3.5 w-3.5 text-muted-foreground" />
+                Guardrail Policies ({selectedRuleIds.size} selected)
+              </Label>
+              <div className="max-h-36 overflow-y-auto rounded-lg border border-border">
+                {securityRules.map((r) => (
+                  <label
+                    key={r.id}
+                    className="flex items-center gap-3 px-3 py-2 hover:bg-muted/50 cursor-pointer border-b border-border/50 last:border-0"
+                  >
+                    <Checkbox
+                      checked={selectedRuleIds.has(r.id)}
+                      onCheckedChange={() => toggleSet(setSelectedRuleIds, r.id)}
+                    />
+                    <span className="text-sm truncate">{r.name}</span>
+                    <Badge
+                      variant={r.severity === "block" ? "destructive" : "outline"}
+                      className="text-[10px] px-1.5 py-0 ml-auto shrink-0"
+                    >
+                      {r.severity}
+                    </Badge>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         <DialogFooter>
@@ -979,7 +1150,7 @@ function CreatePackDialog({
             {saving ? (
               <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Creating...</>
             ) : (
-              "Create Pack"
+              `Create Pack (${totalSelected} items)`
             )}
           </Button>
         </DialogFooter>

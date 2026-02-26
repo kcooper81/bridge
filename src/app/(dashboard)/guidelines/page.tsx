@@ -52,7 +52,10 @@ export default function GuidelinesPage() {
   const [saving, setSaving] = useState(false);
 
   function openModal(g: Guideline | null) {
-    if (!g && !checkLimit("add_guideline", guidelines.length)) return;
+    if (!g && !checkLimit("add_guideline", guidelines.length)) {
+      toast.error(`You've reached your plan limit of ${planLimits.max_guidelines} guidelines. Upgrade to add more.`);
+      return;
+    }
     if (g) {
       setEditGuideline(g);
       setName(g.name);

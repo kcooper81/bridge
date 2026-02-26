@@ -44,6 +44,20 @@ function matchPattern(
       }
       return null;
     }
+    case "keywords": {
+      const keywords = pattern
+        .split(",")
+        .map((k) => k.trim())
+        .filter(Boolean);
+      const lower = content.toLowerCase();
+      for (const kw of keywords) {
+        const idx = lower.indexOf(kw.toLowerCase());
+        if (idx !== -1) {
+          return redactMatch(content.slice(idx, idx + kw.length));
+        }
+      }
+      return null;
+    }
     default:
       return null;
   }

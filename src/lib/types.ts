@@ -22,7 +22,7 @@ export type SubscriptionStatus =
   | "canceled"
   | "paused";
 
-export type SecurityPatternType = "exact" | "regex" | "glob";
+export type SecurityPatternType = "exact" | "regex" | "glob" | "keywords";
 export type SecurityCategory =
   | "api_keys"
   | "credentials"
@@ -362,6 +362,8 @@ export interface SecuritySettings {
   entropy_threshold: number;
   ai_detection_enabled: boolean;
   ai_detection_provider: "presidio" | "aws_comprehend" | "openai" | null;
+  ai_api_key?: string;
+  ai_endpoint_url?: string;
   smart_patterns_enabled: boolean;
 }
 

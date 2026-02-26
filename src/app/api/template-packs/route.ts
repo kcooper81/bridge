@@ -45,43 +45,57 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: packsError.message }, { status: 500 });
     }
 
-    // Fetch prompt associations
+    // Fetch associations
     const packIds = (packs || []).map((p) => p.id);
     let packPrompts: { pack_id: string; prompt_id: string }[] = [];
+    let packGuidelines: { pack_id: string; guideline_id: string }[] = [];
+    let packRules: { pack_id: string; rule_id: string }[] = [];
 
     if (packIds.length > 0) {
-      const { data } = await db
-        .from("template_pack_prompts")
-        .select("pack_id, prompt_id")
-        .in("pack_id", packIds);
-      packPrompts = data || [];
+      const [promptsRes, guidelinesRes, rulesRes] = await Promise.all([
+        db.from("template_pack_prompts").select("pack_id, prompt_id").in("pack_id", packIds),
+        db.from("template_pack_guidelines").select("pack_id, guideline_id").in("pack_id", packIds),
+        db.from("template_pack_rules").select("pack_id, rule_id").in("pack_id", packIds),
+      ]);
+      packPrompts = promptsRes.data || [];
+      packGuidelines = guidelinesRes.data || [];
+      packRules = rulesRes.data || [];
     }
 
-    // Fetch actual prompt details for associated prompts
+    // Fetch details in parallel
     const allPromptIds = Array.from(new Set(packPrompts.map((pp) => pp.prompt_id)));
-    let promptDetails: { id: string; title: string; description: string | null; tags: string[]; content: string }[] = [];
+    const allGuidelineIds = Array.from(new Set(packGuidelines.map((pg) => pg.guideline_id)));
+    const allRuleIds = Array.from(new Set(packRules.map((pr) => pr.rule_id)));
 
-    if (allPromptIds.length > 0) {
-      const { data } = await db
-        .from("prompts")
-        .select("id, title, description, tags, content")
-        .in("id", allPromptIds);
-      promptDetails = data || [];
-    }
+    const [promptDetails, guidelineDetails, ruleDetails] = await Promise.all([
+      allPromptIds.length > 0
+        ? db.from("prompts").select("id, title, description, tags, content").in("id", allPromptIds).then((r) => r.data || [])
+        : Promise.resolve([]),
+      allGuidelineIds.length > 0
+        ? db.from("standards").select("id, name, description, category").in("id", allGuidelineIds).then((r) => r.data || [])
+        : Promise.resolve([]),
+      allRuleIds.length > 0
+        ? db.from("security_rules").select("id, name, description, category, severity, pattern_type").in("id", allRuleIds).then((r) => r.data || [])
+        : Promise.resolve([]),
+    ]);
 
-    const promptMap = new Map(promptDetails.map((p) => [p.id, p]));
+    const promptMap = new Map(promptDetails.map((p: { id: string }) => [p.id, p]));
+    const guidelineMap = new Map(guidelineDetails.map((g: { id: string }) => [g.id, g]));
+    const ruleMap = new Map(ruleDetails.map((r: { id: string }) => [r.id, r]));
 
     const result = (packs || []).map((pack) => {
-      const promptIds = packPrompts
-        .filter((pp) => pp.pack_id === pack.id)
-        .map((pp) => pp.prompt_id);
+      const promptIds = packPrompts.filter((pp) => pp.pack_id === pack.id).map((pp) => pp.prompt_id);
+      const guidelineIds = packGuidelines.filter((pg) => pg.pack_id === pack.id).map((pg) => pg.guideline_id);
+      const ruleIds = packRules.filter((pr) => pr.pack_id === pack.id).map((pr) => pr.rule_id);
 
       return {
         ...pack,
         promptIds,
-        prompts: promptIds
-          .map((id) => promptMap.get(id))
-          .filter(Boolean),
+        guidelineIds,
+        ruleIds,
+        prompts: promptIds.map((id) => promptMap.get(id)).filter(Boolean),
+        guidelines: guidelineIds.map((id) => guidelineMap.get(id)).filter(Boolean),
+        rules: ruleIds.map((id) => ruleMap.get(id)).filter(Boolean),
       };
     });
 
@@ -105,7 +119,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, description, icon, visibility, team_id, promptIds } = body;
+    const { name, description, icon, visibility, team_id, promptIds, guidelineIds, ruleIds } = body;
 
     if (!name?.trim()) {
       return NextResponse.json({ error: "Name is required" }, { status: 400 });
@@ -131,15 +145,30 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: packError.message }, { status: 500 });
     }
 
-    // Associate prompts
+    // Associate prompts, guidelines, and rules
+    const associations = [];
     if (promptIds && promptIds.length > 0) {
-      await db.from("template_pack_prompts").insert(
-        promptIds.map((pid: string) => ({
-          pack_id: pack.id,
-          prompt_id: pid,
-        }))
+      associations.push(
+        db.from("template_pack_prompts").insert(
+          promptIds.map((pid: string) => ({ pack_id: pack.id, prompt_id: pid }))
+        )
       );
     }
+    if (guidelineIds && guidelineIds.length > 0) {
+      associations.push(
+        db.from("template_pack_guidelines").insert(
+          guidelineIds.map((gid: string) => ({ pack_id: pack.id, guideline_id: gid }))
+        )
+      );
+    }
+    if (ruleIds && ruleIds.length > 0) {
+      associations.push(
+        db.from("template_pack_rules").insert(
+          ruleIds.map((rid: string) => ({ pack_id: pack.id, rule_id: rid }))
+        )
+      );
+    }
+    await Promise.all(associations);
 
     return NextResponse.json(pack, { status: 201 });
   } catch (error) {

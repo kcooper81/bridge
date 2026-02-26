@@ -132,6 +132,12 @@ export function DashboardHeader() {
               </p>
             </div>
             <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link href="/settings">
+                <User className="mr-2 h-4 w-4" />
+                Profile Settings
+              </Link>
+            </DropdownMenuItem>
             <DropdownMenuItem
               onSelect={(e) => {
                 e.preventDefault();

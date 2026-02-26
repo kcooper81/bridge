@@ -126,6 +126,25 @@ export async function fetchFolders(): Promise<{ folders: ExtFolder[]; unfiled_co
   return { folders: data?.folders || [], unfiled_count: data?.unfiled_count || 0 };
 }
 
+export async function toggleFavorite(promptId: string): Promise<boolean | null> {
+  const session = await getSession();
+  if (!session) return null;
+
+  const res = await apiFetch(
+    `${CONFIG.SITE_URL}${API_ENDPOINTS.prompts}/${promptId}/favorite`,
+    {
+      method: "PATCH",
+      headers: apiHeaders(session.accessToken),
+    }
+  );
+
+  if (res.status === 401) throw new Error("SESSION_EXPIRED");
+  if (!res.ok) return null;
+
+  const data = res.data as { is_favorite?: boolean };
+  return data?.is_favorite ?? null;
+}
+
 export function fillTemplate(
   content: string,
   values: Record<string, string>

@@ -52,7 +52,7 @@ function getAllowedOrigin(request?: NextRequest | Request): string {
 function buildHeaders(request?: NextRequest | Request) {
   return {
     "Access-Control-Allow-Origin": getAllowedOrigin(request),
-    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Methods": "GET, POST, PATCH, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Extension-Version",
   };
 }

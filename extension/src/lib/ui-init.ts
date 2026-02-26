@@ -3,7 +3,7 @@
 
 import { getSession, login, logout, openLogin, openSignup, openGoogleAuth, openGithubAuth } from "./auth";
 import { extAuthDebug } from "./auth-debug"; // AUTH-DEBUG
-import { fetchPrompts, fetchFolders, fillTemplate, normalizeVariables, getDisplayLabel, type Prompt, type ExtFolder } from "./prompts";
+import { fetchPrompts, fetchFolders, fillTemplate, normalizeVariables, getDisplayLabel, toggleFavorite, type Prompt, type ExtFolder } from "./prompts";
 import { fetchSecurityStatus, enableDefaultRules, type SecurityStatus } from "./security-status";
 import { CONFIG, API_ENDPOINTS, apiHeaders } from "./config";
 import { detectAiTool } from "./ai-tools";
@@ -35,7 +35,7 @@ export interface UIElements {
 
 let currentPrompts: Prompt[] = [];
 let selectedPrompt: Prompt | null = null;
-let activeFilter: "recent" | "favorites" | "folders" | "shield" = "recent";
+let activeFilter: "recent" | "favorites" | "prompts" | "shield" = "recent";
 let searchTimeout: ReturnType<typeof setTimeout> | undefined;
 let cachedShieldStatus: SecurityStatus | null = null;
 let els: UIElements;
@@ -65,6 +65,14 @@ function showDetailView(prompt: Prompt) {
   els.detailView.classList.remove("hidden");
 
   els.detailTitle.textContent = prompt.title;
+
+  // Update favorite button in detail toolbar
+  const detailFavBtn = document.getElementById("detail-fav-btn");
+  if (detailFavBtn) {
+    detailFavBtn.innerHTML = heartSvg(prompt.is_favorite);
+    detailFavBtn.title = prompt.is_favorite ? "Remove from favorites" : "Add to favorites";
+  }
+
   els.detailContent.textContent = prompt.content;
 
   // Template variable fields
@@ -131,7 +139,7 @@ async function loadPrompts(query = "") {
   setStatus("Fetching prompts...");
 
   // Remove folder pills when not on folders tab
-  if (activeFilter !== "folders") {
+  if (activeFilter !== "prompts") {
     document.getElementById("folder-pills")?.remove();
   }
 
@@ -156,7 +164,7 @@ async function loadPrompts(query = "") {
       const prompts = await fetchPrompts({ favorites: true });
       currentPrompts = prompts;
       renderPrompts("favorites");
-    } else if (activeFilter === "folders") {
+    } else if (activeFilter === "prompts") {
       await loadFoldersTab();
       return;
     }
@@ -270,7 +278,7 @@ function renderPrompts(context?: "recent" | "favorites" | "folder") {
     if (context === "recent") {
       emptyMsg = "No recently used prompts yet";
     } else if (context === "favorites") {
-      emptyMsg = "No favorite prompts yet — star prompts on teamprompt.app";
+      emptyMsg = "No favorite prompts yet — tap the heart on any prompt";
     } else if (context === "folder") {
       emptyMsg = "This folder is empty";
     }
@@ -289,9 +297,12 @@ function renderPrompts(context?: "recent" | "favorites" | "folder") {
             ${escapeHtml(p.title)}
             ${p.is_template ? '<span class="badge-template">Template</span>' : ""}
           </div>
-          <svg class="prompt-card-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="9 18 15 12 9 6" />
-          </svg>
+          <div class="prompt-card-actions">
+            <button class="btn-fav" data-fav-id="${p.id}" title="${p.is_favorite ? "Remove from favorites" : "Add to favorites"}">${heartSvg(p.is_favorite)}</button>
+            <svg class="prompt-card-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </div>
         </div>
         <div class="prompt-card-desc">${escapeHtml(p.description || p.content.slice(0, 80))}</div>
         ${
@@ -317,6 +328,15 @@ function renderPrompts(context?: "recent" | "favorites" | "folder") {
       : "";
 
   els.promptList.innerHTML = cardsHtml + onboardingHtml;
+
+  // Wire favorite buttons (stop propagation so card click doesn't fire)
+  els.promptList.querySelectorAll<HTMLElement>(".btn-fav").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const id = btn.dataset.favId;
+      if (id) handleFavoriteToggle(id, btn);
+    });
+  });
 
   els.promptList.querySelectorAll<HTMLElement>(".prompt-card").forEach((card) => {
     card.addEventListener("click", () => {
@@ -562,6 +582,30 @@ function escapeHtml(str: string): string {
   return div.innerHTML;
 }
 
+function heartSvg(filled: boolean): string {
+  return `<svg class="fav-heart${filled ? " filled" : ""}" width="14" height="14" viewBox="0 0 24 24" fill="${filled ? "currentColor" : "none"}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`;
+}
+
+async function handleFavoriteToggle(promptId: string, btn: HTMLElement) {
+  btn.classList.add("fav-loading");
+  try {
+    const newVal = await toggleFavorite(promptId);
+    if (newVal !== null) {
+      // Update local state
+      const p = currentPrompts.find((x) => x.id === promptId);
+      if (p) p.is_favorite = newVal;
+      if (selectedPrompt?.id === promptId) selectedPrompt.is_favorite = newVal;
+      // Update button
+      btn.innerHTML = heartSvg(newVal);
+      btn.title = newVal ? "Remove from favorites" : "Add to favorites";
+    }
+  } catch {
+    // silently fail
+  } finally {
+    btn.classList.remove("fav-loading");
+  }
+}
+
 // ─── Theme ───
 
 function applyTheme(theme: "light" | "dark") {
@@ -755,6 +799,14 @@ export function initSharedUI(elements: UIElements) {
           window.close();
         }
       }
+    });
+  }
+
+  // Detail favorite button
+  const detailFavBtn = document.getElementById("detail-fav-btn");
+  if (detailFavBtn) {
+    detailFavBtn.addEventListener("click", () => {
+      if (selectedPrompt) handleFavoriteToggle(selectedPrompt.id, detailFavBtn);
     });
   }
 

@@ -425,8 +425,8 @@ input:focus {
 .prompt-card:hover .btn-fav { opacity: 1; }
 .btn-fav .fav-heart.filled { opacity: 1; }
 .prompt-card .btn-fav:has(.filled) { opacity: 1; }
-.btn-fav:hover { color: #f87171; }
-.btn-fav .fav-heart.filled { color: #f87171; }
+.btn-fav:hover { color: var(--text-secondary); }
+.btn-fav .fav-heart.filled { color: var(--text-secondary); }
 .btn-fav.fav-loading { opacity: 0.4; pointer-events: none; }
 
 .btn-fav-detail {
@@ -441,8 +441,8 @@ input:focus {
   margin-left: auto;
   transition: color 150ms ease;
 }
-.btn-fav-detail:hover { color: #f87171; }
-.btn-fav-detail .fav-heart.filled { color: #f87171; }
+.btn-fav-detail:hover { color: var(--text-secondary); }
+.btn-fav-detail .fav-heart.filled { color: var(--text-secondary); }
 .btn-fav-detail.fav-loading { opacity: 0.4; pointer-events: none; }
 
 .prompt-card-arrow {
@@ -922,38 +922,138 @@ input:focus {
   background: white;
 }
 
-/* ─── Folder Pills ─── */
-.folder-pills {
+/* ─── Filter Bar (Folder + Tag Dropdowns) ─── */
+.filter-bar {
   display: flex;
   gap: 6px;
   padding: 0 14px 8px;
-  overflow-x: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
 }
-.folder-pills::-webkit-scrollbar { display: none; }
 
-.folder-pill {
-  flex-shrink: 0;
-  padding: 4px 12px;
+.filter-dropdown {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+.filter-dropdown-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  width: 100%;
+  padding: 5px 10px;
   border: 1.5px solid var(--border);
-  border-radius: 20px;
-  background: transparent;
-  color: var(--text-muted);
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--text-secondary);
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  transition: border-color 150ms ease, background 150ms ease, color 150ms ease;
+  transition: border-color 150ms ease, background 150ms ease;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-.folder-pill:hover {
-  color: var(--text);
+.filter-dropdown-toggle:hover {
   border-color: var(--border-light);
+  color: var(--text);
 }
-.folder-pill.active {
+.filter-dropdown-toggle span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.filter-chevron {
+  flex-shrink: 0;
+  color: var(--text-dim);
+}
+
+.filter-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 60;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 4px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  max-height: 200px;
+  overflow-y: auto;
+  min-width: 140px;
+}
+
+.filter-option {
+  display: block;
+  width: 100%;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: background 100ms ease, color 100ms ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.filter-option:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+.filter-option.selected {
   background: var(--primary-surface);
   color: var(--primary);
-  border-color: var(--primary);
+  font-weight: 600;
+}
+
+.filter-option-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.filter-option-check input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  padding: 0;
+  accent-color: var(--primary);
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.filter-option-check span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.filter-option-clear {
+  color: var(--text-dim);
+  font-size: 11px;
+  font-weight: 500;
+  border-bottom: 1px solid var(--border);
+  border-radius: 6px 6px 0 0;
+  margin-bottom: 2px;
+}
+.filter-option-clear:hover {
+  color: var(--destructive);
+}
+
+.filter-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: var(--primary);
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  margin-left: 4px;
 }
 
 /* ─── Shield Search ─── */

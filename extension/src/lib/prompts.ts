@@ -73,6 +73,7 @@ export async function fetchPrompts(opts?: {
   sort?: "recent";
   favorites?: boolean;
   folderId?: string;
+  tags?: string[];
   limit?: number;
 }): Promise<Prompt[]> {
   const session = await getSession();
@@ -84,6 +85,7 @@ export async function fetchPrompts(opts?: {
   if (opts?.sort) params.set("sort", opts.sort);
   if (opts?.favorites) params.set("favorites", "true");
   if (opts?.folderId) params.set("folderId", opts.folderId);
+  if (opts?.tags?.length) params.set("tags", opts.tags.join(","));
   if (opts?.limit) params.set("limit", String(opts.limit));
 
   const res = await apiFetch(
@@ -105,9 +107,9 @@ export async function fetchPrompts(opts?: {
   return data?.prompts || [];
 }
 
-export async function fetchFolders(): Promise<{ folders: ExtFolder[]; unfiled_count: number }> {
+export async function fetchFolders(): Promise<{ folders: ExtFolder[]; unfiled_count: number; tags: string[] }> {
   const session = await getSession();
-  if (!session) return { folders: [], unfiled_count: 0 };
+  if (!session) return { folders: [], unfiled_count: 0, tags: [] };
 
   const res = await apiFetch(
     `${CONFIG.SITE_URL}${API_ENDPOINTS.folders}`,
@@ -122,8 +124,8 @@ export async function fetchFolders(): Promise<{ folders: ExtFolder[]; unfiled_co
     throw new Error("FETCH_FAILED");
   }
 
-  const data = res.data as { folders?: ExtFolder[]; unfiled_count?: number };
-  return { folders: data?.folders || [], unfiled_count: data?.unfiled_count || 0 };
+  const data = res.data as { folders?: ExtFolder[]; unfiled_count?: number; tags?: string[] };
+  return { folders: data?.folders || [], unfiled_count: data?.unfiled_count || 0, tags: data?.tags || [] };
 }
 
 export async function toggleFavorite(promptId: string): Promise<boolean | null> {

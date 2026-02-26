@@ -35,12 +35,17 @@ export async function POST(request: NextRequest) {
 
     const { data: profile } = await db
       .from("profiles")
-      .select("org_id")
+      .select("org_id, shield_disabled")
       .eq("id", user.id)
       .single();
 
     if (!profile?.org_id) {
       return withCors(NextResponse.json({ error: "No organization" }, { status: 403 }), request);
+    }
+
+    // Per-member shield disable — admin exempted this user from scanning
+    if (profile.shield_disabled === true) {
+      return withCors(NextResponse.json({ passed: true, violations: [], action: "allow" }), request);
     }
 
     const body = await request.json();

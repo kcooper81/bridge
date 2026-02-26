@@ -32,12 +32,23 @@ export async function GET(request: NextRequest) {
 
     const { data: profile } = await db
       .from("profiles")
-      .select("org_id")
+      .select("org_id, role, shield_disabled")
       .eq("id", user.id)
       .single();
 
     if (!profile?.org_id) {
       return withCors(NextResponse.json({ error: "No organization" }, { status: 403 }), request);
+    }
+
+    // Per-member shield disable — return early with disabled status
+    if (profile.shield_disabled === true) {
+      return withCors(NextResponse.json({
+        protected: false,
+        disabled: true,
+        activeRuleCount: 0,
+        weeklyStats: { blocked: 0, warned: 0, total: 0 },
+        recentViolations: [],
+      }), request);
     }
 
     const orgId = profile.org_id;
@@ -111,6 +122,8 @@ export async function GET(request: NextRequest) {
 
     return withCors(NextResponse.json({
       protected: activeRuleCount > 0,
+      disabled: false,
+      canManage: profile.role === "admin",
       activeRuleCount,
       weeklyStats: {
         blocked: blockedCount,

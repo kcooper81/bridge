@@ -73,6 +73,7 @@ export interface Profile {
   email: string;
   role: UserRole;
   avatar_url: string | null;
+  shield_disabled: boolean;
   is_super_admin: boolean;
   extension_version: string | null;
   last_extension_active: string | null;

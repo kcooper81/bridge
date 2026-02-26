@@ -49,6 +49,7 @@ export async function GET(request: NextRequest) {
     const sortRecent = searchParams.get("sort") === "recent";
     const favoritesOnly = searchParams.get("favorites") === "true";
     const folderId = searchParams.get("folderId") || "";
+    const tagsParam = searchParams.get("tags") || "";
     const limit = Math.min(
       Math.max(parseInt(searchParams.get("limit") || String(DEFAULT_LIMIT), 10) || DEFAULT_LIMIT, 1),
       MAX_LIMIT
@@ -81,6 +82,14 @@ export async function GET(request: NextRequest) {
       q = q.is("folder_id", null);
     } else if (folderId) {
       q = q.eq("folder_id", folderId);
+    }
+
+    // Tag filter — show prompts that have ANY of the selected tags
+    if (tagsParam) {
+      const tags = tagsParam.split(",").map((t) => t.trim()).filter(Boolean);
+      if (tags.length > 0) {
+        q = q.overlaps("tags", tags);
+      }
     }
 
     // Server-side search — use parameterized filters (not string interpolation)

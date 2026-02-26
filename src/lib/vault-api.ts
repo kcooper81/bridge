@@ -680,6 +680,14 @@ export async function updateTeamMemberRole(teamId: string, userId: string, role:
   return !error;
 }
 
+export async function toggleMemberShield(memberId: string, disabled: boolean): Promise<boolean> {
+  const { error } = await supabase()
+    .from("profiles")
+    .update({ shield_disabled: disabled })
+    .eq("id", memberId);
+  return !error;
+}
+
 // ─── Analytics ───
 
 export async function getAnalytics(): Promise<Analytics | null> {

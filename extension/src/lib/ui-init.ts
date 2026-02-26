@@ -40,9 +40,11 @@ let searchTimeout: ReturnType<typeof setTimeout> | undefined;
 let cachedShieldStatus: SecurityStatus | null = null;
 let els: UIElements;
 
-// Folder drill-down state
+// Folder & tag filter state
 let currentFolderId: string | null = null;
 let currentFolderName: string | null = null;
+let currentTags: string[] = [];
+let availableTags: string[] = [];
 
 // ─── Views ───
 
@@ -138,9 +140,9 @@ async function loadPrompts(query = "") {
   els.promptList.innerHTML = '<div class="loading">Loading prompts...</div>';
   setStatus("Fetching prompts...");
 
-  // Remove folder pills when not on folders tab
+  // Remove filter bar when not on folders tab
   if (activeFilter !== "prompts") {
-    document.getElementById("folder-pills")?.remove();
+    document.getElementById("filter-bar")?.remove();
   }
 
   try {
@@ -192,14 +194,20 @@ async function loadFoldersTab() {
   els.promptList.innerHTML = '<div class="loading">Loading prompts...</div>';
 
   try {
+    const fetchOpts: Parameters<typeof fetchPrompts>[0] = {};
+    if (currentFolderId) fetchOpts.folderId = currentFolderId;
+    if (currentTags.length > 0) fetchOpts.tags = currentTags;
+
     // Fetch folders and prompts in parallel
     const [foldersData, prompts] = await Promise.all([
       fetchFolders(),
-      fetchPrompts(currentFolderId ? { folderId: currentFolderId } : {}),
+      fetchPrompts(fetchOpts),
     ]);
 
-    // Render folder pills bar
-    renderFolderPills(foldersData.folders, foldersData.unfiled_count);
+    availableTags = foldersData.tags;
+
+    // Render filter bar (folder + tags dropdowns)
+    renderFilterBar(foldersData.folders);
 
     currentPrompts = prompts;
     renderPrompts("folder");
@@ -222,40 +230,140 @@ async function loadFoldersTab() {
   }
 }
 
-function renderFolderPills(folders: ExtFolder[], unfiledCount: number) {
-  // Remove existing pill bar
-  document.getElementById("folder-pills")?.remove();
+function renderFilterBar(folders: ExtFolder[]) {
+  // Remove existing filter bar
+  document.getElementById("filter-bar")?.remove();
 
-  const pillBar = document.createElement("div");
-  pillBar.id = "folder-pills";
-  pillBar.className = "folder-pills";
+  const bar = document.createElement("div");
+  bar.id = "filter-bar";
+  bar.className = "filter-bar";
 
-  // "All" pill
-  const allPill = document.createElement("button");
-  allPill.className = `folder-pill${!currentFolderId ? " active" : ""}`;
-  allPill.textContent = "All";
-  allPill.addEventListener("click", () => {
+  // ── Folder dropdown (single-select) ──
+  const folderWrap = document.createElement("div");
+  folderWrap.className = "filter-dropdown";
+
+  const folderBtn = document.createElement("button");
+  folderBtn.className = "filter-dropdown-toggle";
+  folderBtn.innerHTML = `<span>${currentFolderName ? escapeHtml(currentFolderName) : "All folders"}</span>${chevronSvg()}`;
+  folderWrap.appendChild(folderBtn);
+
+  const folderMenu = document.createElement("div");
+  folderMenu.className = "filter-dropdown-menu hidden";
+
+  // "All folders" option
+  const allOpt = document.createElement("button");
+  allOpt.className = `filter-option${!currentFolderId ? " selected" : ""}`;
+  allOpt.textContent = "All folders";
+  allOpt.addEventListener("click", () => {
     currentFolderId = null;
     currentFolderName = null;
+    closeAllDropdowns();
     loadFoldersTab();
   });
-  pillBar.appendChild(allPill);
+  folderMenu.appendChild(allOpt);
 
-  // Folder pills — show all folders (even empty)
   for (const f of folders) {
-    const pill = document.createElement("button");
-    pill.className = `folder-pill${currentFolderId === f.id ? " active" : ""}`;
-    pill.textContent = `${f.icon || "\uD83D\uDCC1"} ${f.name}`;
-    pill.addEventListener("click", () => {
+    const opt = document.createElement("button");
+    opt.className = `filter-option${currentFolderId === f.id ? " selected" : ""}`;
+    opt.textContent = f.name;
+    opt.addEventListener("click", () => {
       currentFolderId = f.id;
       currentFolderName = f.name;
+      closeAllDropdowns();
       loadFoldersTab();
     });
-    pillBar.appendChild(pill);
+    folderMenu.appendChild(opt);
+  }
+
+  folderWrap.appendChild(folderMenu);
+
+  folderBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const isOpen = !folderMenu.classList.contains("hidden");
+    closeAllDropdowns();
+    if (!isOpen) folderMenu.classList.remove("hidden");
+  });
+
+  bar.appendChild(folderWrap);
+
+  // ── Tags dropdown (multi-select) ──
+  if (availableTags.length > 0) {
+    const tagWrap = document.createElement("div");
+    tagWrap.className = "filter-dropdown";
+
+    const tagBtn = document.createElement("button");
+    tagBtn.className = "filter-dropdown-toggle";
+    const tagLabel = currentTags.length > 0
+      ? `Tags <span class="filter-count">${currentTags.length}</span>`
+      : "All tags";
+    tagBtn.innerHTML = `<span>${tagLabel}</span>${chevronSvg()}`;
+    tagWrap.appendChild(tagBtn);
+
+    const tagMenu = document.createElement("div");
+    tagMenu.className = "filter-dropdown-menu hidden";
+
+    // "Clear all" option at top when tags are selected
+    if (currentTags.length > 0) {
+      const clearOpt = document.createElement("button");
+      clearOpt.className = "filter-option filter-option-clear";
+      clearOpt.textContent = "Clear all";
+      clearOpt.addEventListener("click", (e) => {
+        e.stopPropagation();
+        currentTags = [];
+        closeAllDropdowns();
+        loadFoldersTab();
+      });
+      tagMenu.appendChild(clearOpt);
+    }
+
+    for (const tag of availableTags) {
+      const opt = document.createElement("label");
+      opt.className = "filter-option filter-option-check";
+
+      const cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.checked = currentTags.includes(tag);
+      cb.addEventListener("change", (e) => {
+        e.stopPropagation();
+        if (cb.checked) {
+          if (!currentTags.includes(tag)) currentTags.push(tag);
+        } else {
+          currentTags = currentTags.filter((t) => t !== tag);
+        }
+        // Don't close — let user pick multiple, then click away
+        loadFoldersTab();
+      });
+
+      const span = document.createElement("span");
+      span.textContent = tag;
+
+      opt.appendChild(cb);
+      opt.appendChild(span);
+      tagMenu.appendChild(opt);
+    }
+
+    tagWrap.appendChild(tagMenu);
+
+    tagBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isOpen = !tagMenu.classList.contains("hidden");
+      closeAllDropdowns();
+      if (!isOpen) tagMenu.classList.remove("hidden");
+    });
+
+    bar.appendChild(tagWrap);
   }
 
   // Insert before the prompt list
-  els.promptList.parentElement?.insertBefore(pillBar, els.promptList);
+  els.promptList.parentElement?.insertBefore(bar, els.promptList);
+}
+
+function chevronSvg(): string {
+  return '<svg class="filter-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>';
+}
+
+function closeAllDropdowns() {
+  document.querySelectorAll(".filter-dropdown-menu").forEach((m) => m.classList.add("hidden"));
 }
 
 function renderPrompts(context?: "recent" | "favorites" | "folder") {
@@ -364,6 +472,25 @@ function filterShieldViolations(container: HTMLElement, query: string) {
 }
 
 function renderShieldView(container: HTMLElement, status: SecurityStatus) {
+  // Shield disabled by admin — show disabled message instead of normal view
+  if (status.disabled) {
+    container.innerHTML = `
+      <div class="shield-status-card shield-disabled-card">
+        <div class="shield-icon-wrap disabled">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <line x1="4" y1="4" x2="20" y2="20" stroke-width="2.5"/>
+          </svg>
+        </div>
+        <div class="shield-status-info">
+          <div class="shield-status-label">Shield Disabled</div>
+          <div class="shield-status-detail">Shield has been disabled for your account by an admin. Contact your admin to re-enable protection.</div>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
   const statusIcon = status.protected
     ? `<div class="shield-icon-wrap protected">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -455,6 +582,14 @@ function renderShieldView(container: HTMLElement, status: SecurityStatus) {
   }
 
   const manageUrl = `${CONFIG.SITE_URL}/guardrails`;
+  const footerHtml = status.canManage
+    ? `<a href="${manageUrl}" target="_blank" rel="noopener" class="shield-manage-link">
+        ${status.protected ? "Manage guardrails on teamprompt.app" : "Customize rules on teamprompt.app"}
+      </a>`
+    : status.protected
+      ? `<div class="shield-manage-link shield-managed-note">Protected by your organization&apos;s guardrails</div>`
+      : "";
+
   container.innerHTML = `
     <div class="shield-status-card">
       ${statusIcon}
@@ -466,9 +601,7 @@ function renderShieldView(container: HTMLElement, status: SecurityStatus) {
     ${onboardingHtml}
     ${statsHtml}
     ${violationsHtml}
-    <a href="${manageUrl}" target="_blank" rel="noopener" class="shield-manage-link">
-      ${status.protected ? "Manage guardrails on teamprompt.app" : "Customize rules on teamprompt.app"}
-    </a>
+    ${footerHtml}
   `;
 
   // Bind enable button if present
@@ -496,11 +629,16 @@ function renderShieldView(container: HTMLElement, status: SecurityStatus) {
 function updateShieldIndicator(status: SecurityStatus | null) {
   const indicator = document.getElementById("shield-indicator");
   if (!indicator) return;
-  if (status?.protected) {
+  if (status?.disabled) {
+    indicator.classList.remove("active");
+    indicator.classList.add("disabled");
+    indicator.title = "Shield disabled by admin";
+  } else if (status?.protected) {
     indicator.classList.add("active");
+    indicator.classList.remove("disabled");
     indicator.title = `Protected — ${status.activeRuleCount} active rules`;
   } else {
-    indicator.classList.remove("active");
+    indicator.classList.remove("active", "disabled");
     indicator.title = "Security not configured";
   }
 }
@@ -686,11 +824,11 @@ export function initSharedUI(elements: UIElements) {
         const shieldView = document.getElementById("shield-view");
         shieldView?.classList.add("hidden");
         els.promptList.classList.remove("hidden");
-        document.getElementById("folder-pills")?.classList.add("hidden");
+        document.getElementById("filter-bar")?.classList.add("hidden");
         loadPrompts(query);
       } else {
         // Clear search → return to current tab view
-        document.getElementById("folder-pills")?.classList.remove("hidden");
+        document.getElementById("filter-bar")?.classList.remove("hidden");
         loadPrompts();
       }
     }, 300);
@@ -707,10 +845,11 @@ export function initSharedUI(elements: UIElements) {
       tab.classList.add("active");
       activeFilter = (tab.dataset.filter || "recent") as typeof activeFilter;
 
-      // Reset folder drill-down when switching tabs
+      // Reset folder/tag filters when switching tabs
       currentFolderId = null;
       currentFolderName = null;
-      document.getElementById("folder-pills")?.remove();
+      currentTags = [];
+      document.getElementById("filter-bar")?.remove();
 
       // Clear search and update placeholder when switching tabs
       els.searchInput.value = "";
@@ -728,6 +867,11 @@ export function initSharedUI(elements: UIElements) {
         loadPrompts();
       }
     });
+  });
+
+  // Close filter dropdowns on outside click
+  document.addEventListener("click", () => {
+    closeAllDropdowns();
   });
 
   // Settings gear

@@ -79,6 +79,7 @@ let _shieldLabelEl: HTMLElement | null = null;
 let _shieldCollapsed = false;
 let _ruleCount = 0;
 let _isProtected = false;
+let _isDisabled = false;
 let _isAuthenticated = false;
 let _isOnline = navigator.onLine;
 
@@ -338,6 +339,7 @@ async function refreshShieldStatus() {
     if (status) {
       _isProtected = status.protected;
       _ruleCount = status.activeRuleCount;
+      _isDisabled = status.disabled ?? false;
     }
     updateShieldState();
   } catch {
@@ -355,7 +357,8 @@ function updateShieldState() {
     "tp-shield-protected",
     "tp-shield-unprotected",
     "tp-shield-offline",
-    "tp-shield-invalidated"
+    "tp-shield-invalidated",
+    "tp-shield-disabled"
   );
 
   // Fix 4: Context invalidated — show reload banner
@@ -371,6 +374,14 @@ function updateShieldState() {
     _shieldEl.classList.add("tp-shield-offline");
     _shieldDotEl.className = "tp-shield-dot tp-dot-gray";
     _shieldLabelEl.textContent = "Offline \u2014 scans paused";
+    return;
+  }
+
+  // Shield disabled by admin
+  if (_isDisabled) {
+    _shieldEl.classList.add("tp-shield-disabled");
+    _shieldDotEl.className = "tp-shield-dot tp-dot-gray";
+    _shieldLabelEl.textContent = "Shield disabled by admin";
     return;
   }
 
@@ -439,6 +450,8 @@ function reDispatchEnter(target: HTMLElement) {
 
 function performScan(text: string, onAllow: () => void) {
   if (_contextDead) { onAllow(); return; }
+  // Shield disabled by admin — let messages through without scanning
+  if (_isDisabled) { onAllow(); return; }
   // Block repeat submissions of previously blocked text
   if (_lastBlockedText !== null && text.trim() === _lastBlockedText.trim()) {
     showBlockOverlay([{ ruleId: "repeat-block", ruleName: "Previously blocked", category: "dlp", severity: "block", matchedText: "Same content was blocked moments ago" }]);
@@ -564,6 +577,7 @@ async function initShieldIndicator() {
       if (status) {
         _isProtected = status.protected;
         _ruleCount = status.activeRuleCount;
+        _isDisabled = status.disabled ?? false;
       }
     }
   } catch {
@@ -584,7 +598,9 @@ function createShieldElement() {
   shield.id = "tp-shield-indicator";
   shield.className = "tp-shield";
 
-  if (!_isAuthenticated) {
+  if (_isDisabled) {
+    shield.classList.add("tp-shield-disabled");
+  } else if (!_isAuthenticated) {
     shield.classList.add("tp-shield-inactive");
   } else if (_isProtected) {
     shield.classList.add("tp-shield-protected");
@@ -596,7 +612,7 @@ function createShieldElement() {
   const shieldSvg = `<svg class="tp-shield-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`;
 
   // Status dot
-  const dotClass = !_isOnline || _contextDead
+  const dotClass = !_isOnline || _contextDead || _isDisabled
     ? "tp-dot-gray"
     : !_isAuthenticated
       ? "tp-dot-gray"
@@ -610,6 +626,8 @@ function createShieldElement() {
     statusText = "Reload page required";
   } else if (!_isOnline) {
     statusText = "Offline \u2014 scans paused";
+  } else if (_isDisabled) {
+    statusText = "Shield disabled by admin";
   } else if (!_isAuthenticated) {
     statusText = "Not signed in \u2014 Click to sign in";
   } else if (_isProtected) {

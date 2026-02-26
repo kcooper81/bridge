@@ -77,6 +77,26 @@ export async function GET(request: NextRequest) {
       .eq("status", "approved")
       .is("folder_id", null);
 
+    // Collect distinct tags from all approved prompts in the org
+    const { data: tagRows } = await db
+      .from("prompts")
+      .select("tags")
+      .eq("org_id", profile.org_id)
+      .eq("status", "approved")
+      .not("tags", "eq", "{}");
+
+    const tagSet = new Set<string>();
+    if (tagRows) {
+      for (const row of tagRows) {
+        if (Array.isArray(row.tags)) {
+          for (const t of row.tags) {
+            if (t) tagSet.add(t);
+          }
+        }
+      }
+    }
+    const tags = Array.from(tagSet).sort();
+
     const result = (folders || []).map((f) => ({
       id: f.id,
       name: f.name,
@@ -88,6 +108,7 @@ export async function GET(request: NextRequest) {
     return withCors(NextResponse.json({
       folders: result,
       unfiled_count: unfiledCount || 0,
+      tags,
     }), request);
   } catch (error) {
     console.error("Extension folders error:", error);

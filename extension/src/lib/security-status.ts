@@ -16,6 +16,8 @@ export interface SecurityViolation {
 
 export interface SecurityStatus {
   protected: boolean;
+  disabled: boolean;
+  canManage?: boolean;
   activeRuleCount: number;
   weeklyStats: {
     blocked: number;

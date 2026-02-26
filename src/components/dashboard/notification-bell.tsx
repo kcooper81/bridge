@@ -209,10 +209,10 @@ export function NotificationBell() {
               <p className="text-sm text-muted-foreground">No notifications yet</p>
             </div>
           ) : (
-            <div className="p-2">
+            <div className="p-2 space-y-1">
               {notifications.map((notification, i) => (
                 <div key={notification.id}>
-                  {i > 0 && <div className="mx-3 border-t border-border/40" />}
+                  {i > 0 && <div className="mx-3 my-1 border-t border-border/40" />}
                   <NotificationItem
                     notification={notification}
                     onMarkRead={markRead}

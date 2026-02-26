@@ -57,7 +57,6 @@ export async function GET(request: NextRequest) {
       .select("id, title, content, description, tags, tone, is_template, template_variables, usage_count, folder_id, department_id")
       .eq("org_id", profile.org_id)
       .eq("status", "approved")
-      .is("deleted_at", null)
       .order("usage_count", { ascending: false })
       .range(offset, offset + limit - 1);
 

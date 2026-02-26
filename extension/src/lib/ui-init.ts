@@ -466,12 +466,6 @@ function renderShieldView(container: HTMLElement, status: SecurityStatus) {
     violationsHtml = '<div class="shield-empty">No violations detected this week</div>';
   }
 
-  const shieldSearchHtml = status.protected && status.recentViolations.length > 0
-    ? `<div class="shield-search-wrap">
-        <input type="text" id="shield-search-input" placeholder="Search violations..." />
-      </div>`
-    : "";
-
   const manageUrl = `${CONFIG.SITE_URL}/guardrails`;
   container.innerHTML = `
     <div class="shield-status-card">
@@ -483,7 +477,6 @@ function renderShieldView(container: HTMLElement, status: SecurityStatus) {
     </div>
     ${onboardingHtml}
     ${statsHtml}
-    ${shieldSearchHtml}
     ${violationsHtml}
     <a href="${manageUrl}" target="_blank" rel="noopener" class="shield-manage-link">
       ${status.protected ? "Manage guardrails on teamprompt.app" : "Customize rules on teamprompt.app"}
@@ -510,13 +503,6 @@ function renderShieldView(container: HTMLElement, status: SecurityStatus) {
     });
   }
 
-  // Bind shield search
-  const shieldSearchInput = container.querySelector<HTMLInputElement>("#shield-search-input");
-  if (shieldSearchInput) {
-    shieldSearchInput.addEventListener("input", () => {
-      filterShieldViolations(container, shieldSearchInput.value.trim());
-    });
-  }
 }
 
 function updateShieldIndicator(status: SecurityStatus | null) {
@@ -685,6 +671,14 @@ export function initSharedUI(elements: UIElements) {
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
       const query = els.searchInput.value.trim();
+
+      if (activeFilter === "shield") {
+        // Shield tab — filter violations client-side using the main search bar
+        const shieldView = document.getElementById("shield-view");
+        if (shieldView) filterShieldViolations(shieldView, query);
+        return;
+      }
+
       if (query) {
         // Search overrides tabs — search all prompts
         const shieldView = document.getElementById("shield-view");
@@ -695,14 +689,7 @@ export function initSharedUI(elements: UIElements) {
       } else {
         // Clear search → return to current tab view
         document.getElementById("folder-back-bar")?.classList.remove("hidden");
-        if (activeFilter === "shield") {
-          els.promptList.classList.add("hidden");
-          const shieldView = document.getElementById("shield-view");
-          shieldView?.classList.remove("hidden");
-          loadShieldView();
-        } else {
-          loadPrompts();
-        }
+        loadPrompts();
       }
     }, 300);
   });
@@ -723,8 +710,9 @@ export function initSharedUI(elements: UIElements) {
       currentFolderName = null;
       document.getElementById("folder-back-bar")?.remove();
 
-      // Clear search when switching tabs
+      // Clear search and update placeholder when switching tabs
       els.searchInput.value = "";
+      els.searchInput.placeholder = activeFilter === "shield" ? "Search violations..." : "Search prompts...";
 
       if (activeFilter === "shield") {
         els.promptList.classList.add("hidden");

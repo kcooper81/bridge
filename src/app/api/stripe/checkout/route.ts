@@ -13,6 +13,25 @@ function getStripe() {
 }
 
 export async function POST(request: NextRequest) {
+  // Early env var check before anything else
+  const missingEnvs = [
+    "STRIPE_SECRET_KEY",
+    "STRIPE_PRICE_PRO",
+    "STRIPE_PRICE_PRO_ANNUAL",
+    "STRIPE_PRICE_TEAM",
+    "STRIPE_PRICE_TEAM_ANNUAL",
+    "STRIPE_PRICE_BUSINESS",
+    "STRIPE_PRICE_BUSINESS_ANNUAL",
+  ].filter((key) => !process.env[key]);
+
+  if (missingEnvs.length > 0) {
+    console.error("Missing Stripe env vars:", missingEnvs);
+    return NextResponse.json(
+      { error: `Stripe not configured. Missing: ${missingEnvs.join(", ")}` },
+      { status: 500 }
+    );
+  }
+
   try {
     const authHeader = request.headers.get("authorization");
     if (!authHeader?.startsWith("Bearer ")) {
@@ -55,21 +74,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    // Debug: check which env vars are set
-    if (!process.env.STRIPE_SECRET_KEY) {
-      return NextResponse.json({ error: "Missing env: STRIPE_SECRET_KEY" }, { status: 500 });
-    }
-
     const priceEnvKey = interval === "annual"
       ? planConfig.priceEnv.annual
       : planConfig.priceEnv.monthly;
     const priceId = process.env[priceEnvKey];
-    if (!priceId) {
-      return NextResponse.json(
-        { error: `Missing env: ${priceEnvKey}` },
-        { status: 500 }
-      );
-    }
 
     // Validate member count against target plan limits
     const targetLimits = PLAN_LIMITS[plan as PlanTier];

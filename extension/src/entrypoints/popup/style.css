@@ -212,6 +212,11 @@ input[type="text"] {
   transition: border-color var(--transition), box-shadow var(--transition);
 }
 
+input::placeholder {
+  color: var(--text-dim);
+  opacity: 1;
+}
+
 input:focus {
   border-color: var(--primary);
   box-shadow: 0 0 0 3px var(--primary-glow);
@@ -360,7 +365,7 @@ input:focus {
 .prompt-list {
   flex: 1;
   overflow-y: auto;
-  padding: 0 14px 14px;
+  padding: 6px 14px 14px;
   max-height: 340px;
 }
 

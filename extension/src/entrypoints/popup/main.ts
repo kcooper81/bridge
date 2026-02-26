@@ -31,13 +31,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // "Open in side panel" button — only show on Chrome/Edge
   const sidePanelBtn = document.getElementById("open-sidepanel-btn");
-  const chrome = globalThis as unknown as {
-    chrome?: { sidePanel?: unknown };
+  const chromeApi = globalThis as unknown as {
+    chrome?: { sidePanel?: { open: (opts: { tabId: number }) => Promise<void> } };
   };
-  if (sidePanelBtn && chrome.chrome?.sidePanel) {
+  if (sidePanelBtn && chromeApi.chrome?.sidePanel) {
     sidePanelBtn.classList.remove("hidden");
-    sidePanelBtn.addEventListener("click", () => {
-      browser.runtime.sendMessage({ type: "OPEN_SIDE_PANEL" });
+    sidePanelBtn.addEventListener("click", async () => {
+      // Must call sidePanel.open() directly from user gesture context (not via background message)
+      const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
+      if (tab?.id) {
+        await chromeApi.chrome!.sidePanel!.open({ tabId: tab.id });
+      }
       window.close();
     });
   }

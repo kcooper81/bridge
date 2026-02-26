@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     const db = createServiceClient();
     await db
       .from("profiles")
-      .update({ extension_status: "session_lost" })
+      .update({ last_extension_active: new Date().toISOString() })
       .eq("id", userId);
 
     return NextResponse.json({ ok: true });

@@ -11,7 +11,6 @@ export function trackExtensionActivity(
 ) {
   const update: Record<string, unknown> = {
     last_extension_active: new Date().toISOString(),
-    extension_status: "active",
   };
   if (extensionVersion) {
     update.extension_version = extensionVersion;

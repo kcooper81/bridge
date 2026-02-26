@@ -775,13 +775,26 @@ export function initSharedUI(elements: UIElements) {
       sidebarToggle.checked = !!data.alwaysOpenSidebar;
     });
 
-    sidebarToggle.addEventListener("change", () => {
+    sidebarToggle.addEventListener("change", async () => {
       const enabled = sidebarToggle.checked;
       browser.storage.local.set({ alwaysOpenSidebar: enabled });
       browser.runtime.sendMessage({
         type: "SET_SIDEBAR_BEHAVIOR",
         enabled,
       });
+      // If toggled on, open side panel immediately and close the popup
+      if (enabled) {
+        const chrome = globalThis as unknown as {
+          chrome?: { sidePanel?: { open: (opts: { tabId: number }) => Promise<void> } };
+        };
+        if (chrome.chrome?.sidePanel) {
+          const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
+          if (tab?.id) {
+            await chrome.chrome.sidePanel.open({ tabId: tab.id });
+          }
+          window.close();
+        }
+      }
     });
   }
 

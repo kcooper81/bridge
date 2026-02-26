@@ -4,7 +4,6 @@ import {
   BarChart3,
   BookOpen,
   Globe,
-  FolderOpen,
   Import,
   Shield,
   Users,
@@ -205,26 +204,6 @@ function AnalyticsMockup() {
   );
 }
 
-function CollectionsMockup() {
-  return (
-    <MockBrowser>
-      <div className="grid grid-cols-2 gap-2">
-        {[
-          { name: "Marketing", count: 24 },
-          { name: "Engineering", count: 18 },
-          { name: "Support", count: 12 },
-          { name: "Legal", count: 8 },
-        ].map((item) => (
-          <div key={item.name} className="rounded-lg border border-border p-3 hover:border-primary/20 transition-colors">
-            <div className="text-xs font-semibold text-foreground">{item.name}</div>
-            <div className="text-[10px] text-muted-foreground mt-1">{item.count} prompts</div>
-          </div>
-        ))}
-      </div>
-    </MockBrowser>
-  );
-}
-
 function ImportMockup() {
   return (
     <MockBrowser>
@@ -246,7 +225,6 @@ const mockups: Record<string, () => React.JSX.Element> = {
   "Team Management": TeamsMockup,
   "Browser Extension": ExtensionMockup,
   "Analytics & Insights": AnalyticsMockup,
-  "Collections": CollectionsMockup,
   "Import / Export": ImportMockup,
 };
 
@@ -324,18 +302,6 @@ const features = [
       "Top prompts ranking by usage",
       "Per-user and per-department breakdowns",
       "Week-over-week trend tracking",
-    ],
-  },
-  {
-    icon: FolderOpen,
-    title: "Collections",
-    description:
-      "Group related prompts into themed collections — by department, workflow, or use case. Share them or keep them personal.",
-    details: [
-      "Personal, team, org, or public visibility",
-      "Add/remove prompts with checklist UI",
-      "Team-scoped collections for departments",
-      "Grid view with prompt counts",
     ],
   },
   {

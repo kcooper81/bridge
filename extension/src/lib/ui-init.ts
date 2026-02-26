@@ -244,16 +244,16 @@ function renderFilterBar(folders: ExtFolder[]) {
 
   const folderBtn = document.createElement("button");
   folderBtn.className = "filter-dropdown-toggle";
-  folderBtn.innerHTML = `<span>${currentFolderName ? escapeHtml(currentFolderName) : "All folders"}</span>${chevronSvg()}`;
+  folderBtn.innerHTML = `<span>${currentFolderName ? escapeHtml(currentFolderName) : "All categories"}</span>${chevronSvg()}`;
   folderWrap.appendChild(folderBtn);
 
   const folderMenu = document.createElement("div");
   folderMenu.className = "filter-dropdown-menu hidden";
 
-  // "All folders" option
+  // "All categories" option
   const allOpt = document.createElement("button");
   allOpt.className = `filter-option${!currentFolderId ? " selected" : ""}`;
-  allOpt.textContent = "All folders";
+  allOpt.textContent = "All categories";
   allOpt.addEventListener("click", () => {
     currentFolderId = null;
     currentFolderName = null;
@@ -374,7 +374,7 @@ function renderPrompts(context?: "recent" | "favorites" | "folder") {
     } else if (context === "favorites") {
       emptyMsg = "No favorite prompts yet — tap the heart on any prompt";
     } else if (context === "folder") {
-      emptyMsg = "This folder is empty";
+      emptyMsg = "This category is empty";
     }
     els.promptList.innerHTML =
       `<div class="empty-state"><p>${emptyMsg}</p></div>`;

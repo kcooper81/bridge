@@ -43,10 +43,10 @@ export function FolderManager() {
       const updated = await saveFolderApi({ id: folderId, name: trimmed });
       if (updated) {
         setFolders((prev) => prev.map((f) => (f.id === folderId ? { ...f, name: trimmed } : f)));
-        toast.success("Folder renamed");
+        toast.success("Category renamed");
       }
     } catch {
-      toast.error("Failed to rename folder");
+      toast.error("Failed to rename category");
     } finally {
       setSaving(false);
       cancelEdit();
@@ -56,18 +56,18 @@ export function FolderManager() {
   async function handleDelete(folderId: string) {
     const count = promptCount(folderId);
     const msg = count > 0
-      ? `This folder has ${count} prompt(s). They won't be deleted, just unassigned. Continue?`
-      : "Delete this folder?";
+      ? `This category has ${count} prompt(s). They won't be deleted, just unassigned. Continue?`
+      : "Delete this category?";
     if (!confirm(msg)) return;
 
     try {
       const ok = await deleteFolderApi(folderId);
       if (ok) {
         setFolders((prev) => prev.filter((f) => f.id !== folderId));
-        toast.success("Folder deleted");
+        toast.success("Category deleted");
       }
     } catch {
-      toast.error("Failed to delete folder");
+      toast.error("Failed to delete category");
     }
   }
 
@@ -81,10 +81,10 @@ export function FolderManager() {
         setFolders((prev) => [...prev, folder]);
         setNewName("");
         setCreating(false);
-        toast.success("Folder created");
+        toast.success("Category created");
       }
     } catch {
-      toast.error("Failed to create folder");
+      toast.error("Failed to create category");
     } finally {
       setSaving(false);
     }
@@ -98,7 +98,7 @@ export function FolderManager() {
       >
         <span className="flex items-center gap-2">
           <FolderOpen className="h-4 w-4 text-muted-foreground" />
-          Manage Folders ({folders.length})
+          Manage Categories ({folders.length})
         </span>
         {expanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
       </button>
@@ -106,7 +106,7 @@ export function FolderManager() {
       {expanded && (
         <div className="border-t border-border px-4 py-3 space-y-2">
           {folders.length === 0 && !creating && (
-            <p className="text-sm text-muted-foreground">No folders yet.</p>
+            <p className="text-sm text-muted-foreground">No categories yet.</p>
           )}
 
           {folders.map((folder) => (
@@ -168,7 +168,7 @@ export function FolderManager() {
                     setNewName("");
                   }
                 }}
-                placeholder="Folder name..."
+                placeholder="Category name..."
                 className="h-8 text-sm flex-1"
                 autoFocus
                 disabled={saving}
@@ -183,7 +183,7 @@ export function FolderManager() {
               onClick={() => setCreating(true)}
             >
               <Plus className="mr-1.5 h-3.5 w-3.5" />
-              New Folder
+              New Category
             </Button>
           )}
         </div>

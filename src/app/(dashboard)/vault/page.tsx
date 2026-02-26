@@ -41,6 +41,7 @@ import {
   CheckCircle2,
   Copy,
   Files,
+  FolderOpen,
   Heart,
   Import,
   Lightbulb,
@@ -71,6 +72,7 @@ import { NoOrgBanner } from "@/components/dashboard/no-org-banner";
 import { UpgradePrompt, LimitNudge } from "@/components/upgrade";
 import { ImportExportModal } from "@/components/dashboard/import-export-modal";
 import { FolderManager } from "@/components/dashboard/folder-manager";
+import { ManageCategoriesModal } from "@/components/dashboard/manage-categories-modal";
 import { FillTemplateModal } from "@/components/modals/fill-template-modal";
 
 const STATUS_TABS: { label: string; value: PromptStatus | "all" }[] = [
@@ -122,6 +124,7 @@ export default function VaultPage() {
   const [page, setPage] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
   const [importExportOpen, setImportExportOpen] = useState(false);
+  const [categoriesOpen, setCategoriesOpen] = useState(false);
   const [editPrompt, setEditPrompt] = useState<Prompt | null>(null);
   const [fillPrompt, setFillPrompt] = useState<Prompt | null>(null);
 
@@ -438,10 +441,10 @@ export default function VaultPage() {
           }}
         >
           <SelectTrigger className="w-[160px]">
-            <SelectValue placeholder="All Folders" />
+            <SelectValue placeholder="All Categories" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="__all__">All Folders</SelectItem>
+            <SelectItem value="__all__">All Categories</SelectItem>
             {folders.map((f) => (
               <SelectItem key={f.id} value={f.id}>
                 {f.name}
@@ -449,6 +452,11 @@ export default function VaultPage() {
             ))}
           </SelectContent>
         </Select>
+        {canApprove && (
+          <Button variant="outline" size="icon" className="shrink-0" onClick={() => setCategoriesOpen(true)} title="Manage Categories">
+            <FolderOpen className="h-4 w-4" />
+          </Button>
+        )}
         <Select
           value={filterTeam || "__all__"}
           onValueChange={(v) => {
@@ -742,6 +750,11 @@ export default function VaultPage() {
         open={!!fillPrompt}
         onOpenChange={(open) => { if (!open) setFillPrompt(null); }}
         prompt={fillPrompt}
+      />
+
+      <ManageCategoriesModal
+        open={categoriesOpen}
+        onOpenChange={setCategoriesOpen}
       />
     </>
   );

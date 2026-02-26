@@ -15,7 +15,6 @@ import type {
   Folder,
   Team,
   Member,
-  Collection,
   Guideline,
   UserRole,
 } from "@/lib/types";
@@ -26,7 +25,6 @@ interface OrgContextValue {
   folders: Folder[];
   teams: Team[];
   members: Member[];
-  collections: Collection[];
   guidelines: Guideline[];
   /** @deprecated Use guidelines instead */
   standards: Guideline[];
@@ -38,7 +36,6 @@ interface OrgContextValue {
   setFolders: React.Dispatch<React.SetStateAction<Folder[]>>;
   setTeams: React.Dispatch<React.SetStateAction<Team[]>>;
   setMembers: React.Dispatch<React.SetStateAction<Member[]>>;
-  setCollections: React.Dispatch<React.SetStateAction<Collection[]>>;
   setGuidelines: React.Dispatch<React.SetStateAction<Guideline[]>>;
 }
 
@@ -50,7 +47,6 @@ export function OrgProvider({ children }: { children: React.ReactNode }) {
   const [folders, setFolders] = useState<Folder[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
-  const [collections, setCollections] = useState<Collection[]>([]);
   const [guidelines, setGuidelines] = useState<Guideline[]>([]);
   const [currentUserRole, setCurrentUserRole] = useState<UserRole>("member");
   const [loading, setLoading] = useState(true);
@@ -131,7 +127,6 @@ export function OrgProvider({ children }: { children: React.ReactNode }) {
       foldersRes,
       teamsRes,
       profilesRes,
-      collectionsRes,
       standardsRes,
     ] = await Promise.all([
       supabase.from("organizations").select("*").eq("id", targetOrgId).single(),
@@ -139,7 +134,6 @@ export function OrgProvider({ children }: { children: React.ReactNode }) {
       supabase.from("folders").select("*").eq("org_id", targetOrgId).order("name"),
       supabase.from("teams").select("*").eq("org_id", targetOrgId).order("name"),
       supabase.from("profiles").select("*").eq("org_id", targetOrgId).order("name"),
-      supabase.from("collections").select("*").eq("org_id", targetOrgId).order("name"),
       supabase.from("standards").select("*").eq("org_id", targetOrgId).order("name"),
     ]);
 
@@ -155,17 +149,12 @@ export function OrgProvider({ children }: { children: React.ReactNode }) {
     const orgTeams = teamsRes.data || [];
     setTeams(orgTeams);
 
-    // Batch 2: Fetch junction tables scoped to org's teams/collections
+    // Batch 2: Fetch junction tables scoped to org's teams
     const orgTeamIds = orgTeams.map((t: Team) => t.id);
-    const orgCollections = collectionsRes.data || [];
-    const orgCollectionIds = orgCollections.map((c: Collection) => c.id);
 
-    const [teamMembersRes, collectionPromptsRes] = await Promise.all([
+    const [teamMembersRes] = await Promise.all([
       orgTeamIds.length > 0
         ? supabase.from("team_members").select("*").in("team_id", orgTeamIds)
-        : Promise.resolve({ data: [], error: null }),
-      orgCollectionIds.length > 0
-        ? supabase.from("collection_prompts").select("*").in("collection_id", orgCollectionIds)
         : Promise.resolve({ data: [], error: null }),
     ]);
 
@@ -190,20 +179,6 @@ export function OrgProvider({ children }: { children: React.ReactNode }) {
       }))
     );
 
-    // Map collection prompts
-    const collPromptMap = new Map<string, string[]>();
-    (collectionPromptsRes.data || []).forEach((cp: { collection_id: string; prompt_id: string }) => {
-      const existing = collPromptMap.get(cp.collection_id) || [];
-      existing.push(cp.prompt_id);
-      collPromptMap.set(cp.collection_id, existing);
-    });
-    setCollections(
-      orgCollections.map((c: Collection) => ({
-        ...c,
-        promptIds: collPromptMap.get(c.id) || [],
-      }))
-    );
-
     setGuidelines(
       (standardsRes.data || []).map((s: Guideline) => ({
         ...s,
@@ -224,7 +199,6 @@ export function OrgProvider({ children }: { children: React.ReactNode }) {
         folders,
         teams,
         members,
-        collections,
         guidelines,
         standards: guidelines,
         currentUserRole,
@@ -235,7 +209,6 @@ export function OrgProvider({ children }: { children: React.ReactNode }) {
         setFolders,
         setTeams,
         setMembers,
-        setCollections,
         setGuidelines,
       }}
     >

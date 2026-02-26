@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Seed default content: prompts, collection, guidelines, security rules
+    // Seed default content: prompts, guidelines, security rules
     await seedOrgDefaults(db, org.id, user.id);
 
     return NextResponse.json({ orgId: org.id, created: true });

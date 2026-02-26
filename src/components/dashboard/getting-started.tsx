@@ -12,7 +12,6 @@ import {
   Chrome,
   Circle,
   FileText,
-  FolderOpen,
   Rocket,
   Shield,
   UserPlus,
@@ -23,7 +22,7 @@ import {
 const DISMISS_KEY = "teamprompt-getting-started-dismissed";
 
 export function GettingStarted() {
-  const { org, members, teams, collections, guidelines, prompts, currentUserRole } = useOrg();
+  const { org, members, teams, guidelines, prompts, currentUserRole } = useOrg();
   const { detected: extensionDetected } = useExtensionDetection();
   const [dismissed, setDismissed] = useState(true);
 
@@ -70,12 +69,6 @@ export function GettingStarted() {
       done: prompts.length > 0,
       href: "/vault",
       icon: FileText,
-    },
-    {
-      label: "Organize into a collection",
-      done: collections.length > 0,
-      href: "/collections",
-      icon: FolderOpen,
     },
   ];
 

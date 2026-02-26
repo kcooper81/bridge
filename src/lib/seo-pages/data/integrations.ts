@@ -74,7 +74,7 @@ export const integrationPages: SeoPageData[] = [
         { icon: "BookOpen", title: "Template variables", description: "Fill in dynamic fields before inserting into Claude. Consistent prompts, customized every time." },
         { icon: "ShieldAlert", title: "DLP scanning", description: "Scan prompts for sensitive data before they reach Anthropic's servers. Protect PHI, PII, and credentials." },
         { icon: "BarChart3", title: "Usage analytics", description: "Track which prompts your team uses with Claude. Identify top performers." },
-        { icon: "Users", title: "Team collaboration", description: "Share Claude-optimized prompts across your organization with team collections." },
+        { icon: "Users", title: "Team collaboration", description: "Share Claude-optimized prompts across your organization with team categories." },
       ],
     },
     benefits: {
@@ -234,7 +234,7 @@ export const integrationPages: SeoPageData[] = [
     },
     faqs: [
       { question: "Does this work with Perplexity Pro?", answer: "Yes. The extension works with both Perplexity Free and Pro plans, including all available models and search modes." },
-      { question: "Can I share research prompts with my team?", answer: "Yes. Create a collection of research-focused prompts and share it with your team. Everyone gets the same proven queries." },
+      { question: "Can I share research prompts with my team?", answer: "Yes. Create a category of research-focused prompts and share it with your team. Everyone gets the same proven queries." },
     ],
     cta: {
       headline: "Better research starts with",

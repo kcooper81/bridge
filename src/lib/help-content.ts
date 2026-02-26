@@ -11,7 +11,6 @@ import {
   CreditCard,
   Lock,
   BarChart3,
-  FolderOpen,
   Import,
 } from "lucide-react";
 
@@ -98,7 +97,7 @@ const _RAW_CATEGORIES: RawCategory[] = [
       },
       {
         q: "What are the user roles?",
-        a: "Admin: full access including billing, settings, team management, and guardrails configuration. Manager: can manage prompts, collections, approve content, and view the activity log. Member: can use approved prompts, create drafts, and view shared content. All roles can use the browser extension.",
+        a: "Admin: full access including billing, settings, team management, and guardrails configuration. Manager: can manage prompts, approve content, and view the activity log. Member: can use approved prompts, create drafts, and view shared content. All roles can use the browser extension.",
         keywords: ["roles", "permissions", "admin", "manager", "member", "access"],
       },
       {
@@ -136,36 +135,13 @@ const _RAW_CATEGORIES: RawCategory[] = [
       },
       {
         q: "How do I share prompts with my team?",
-        a: "Approved prompts are automatically visible to everyone in your workspace — in both the web app and the browser extension. You can also add prompts to collections for better organization or share a direct link to any prompt.",
+        a: "Approved prompts are automatically visible to everyone in your workspace — in both the web app and the browser extension. You can organize prompts into categories or share a direct link to any prompt.",
         keywords: ["share", "team", "visible", "access"],
       },
       {
         q: "Can I import existing prompts?",
         a: "Yes. Go to Import/Export in the sidebar. You can import prompts from a JSON or CSV file. The importer maps your columns to TeamPrompt fields and lets you preview before confirming. Bulk export is also available for backup or migration.",
         keywords: ["import", "export", "csv", "json", "migrate", "backup"],
-      },
-    ],
-  },
-  {
-    id: "collections",
-    icon: FolderOpen,
-    title: "Collections",
-    description: "Organize prompts into curated groups for projects, teams, or workflows.",
-    articles: [
-      {
-        q: "How do collections work?",
-        a: "Collections are curated groups of prompts organized around a theme, project, or workflow. Create a collection, give it a name and description, then add prompts to it. Collections can be scoped to the whole organization or specific teams. Think of them as playlists for your prompts.",
-        keywords: ["collection", "group", "organize", "folder"],
-      },
-      {
-        q: "How do I create a collection?",
-        a: "Go to the Collections page in the sidebar. Click \"New Collection,\" name it, add an optional description, and choose visibility (org-wide or team-specific). Then add prompts by browsing the vault or searching.",
-        keywords: ["create", "new collection", "add"],
-      },
-      {
-        q: "Can I share collections with specific teams?",
-        a: "Yes. When creating or editing a collection, set its visibility to a specific team. Only members of that team will see it. Org-wide collections are visible to everyone.",
-        keywords: ["share", "team", "visibility", "scope"],
       },
     ],
   },
@@ -187,7 +163,7 @@ const _RAW_CATEGORIES: RawCategory[] = [
       },
       {
         q: "Can I install pre-built guidelines?",
-        a: "Yes. TeamPrompt ships with a library of default guidelines covering common needs — professional writing, coding standards, customer support tone, marketing voice, and executive communication. Install them with one click from the Library page and customize to fit your team.",
+        a: "Yes. TeamPrompt ships with a library of default guidelines covering common needs — professional writing, coding standards, customer support tone, marketing voice, and executive communication. Install them with one click from the Templates page and customize to fit your team.",
         keywords: ["default", "pre-built", "install", "library", "template"],
       },
       {
@@ -253,7 +229,7 @@ const _RAW_CATEGORIES: RawCategory[] = [
       },
       {
         q: "How do I install and sign in?",
-        a: "Install from the Chrome Web Store (search \"TeamPrompt\"). Click the TeamPrompt icon in your browser toolbar and sign in with your email/password, Google, or GitHub account. Your prompts, collections, and guardrail settings sync automatically from your workspace.",
+        a: "Install from the Chrome Web Store (search \"TeamPrompt\"). Click the TeamPrompt icon in your browser toolbar and sign in with your email/password, Google, or GitHub account. Your prompts and guardrail settings sync automatically from your workspace.",
         keywords: ["install", "sign in", "login", "chrome", "setup"],
       },
       {
@@ -291,7 +267,7 @@ const _RAW_CATEGORIES: RawCategory[] = [
       },
       {
         q: "How do teams (sub-groups) work?",
-        a: "Teams are sub-groups within your organization — for departments, projects, or functional groups. Create teams on the Team page, then assign members. Collections and guidelines can be scoped to specific teams for targeted content.",
+        a: "Teams are sub-groups within your organization — for departments, projects, or functional groups. Create teams on the Team page, then assign members. Guidelines can be scoped to specific teams for targeted content.",
         keywords: ["teams", "sub-groups", "departments", "organize", "assign"],
       },
       {
@@ -301,7 +277,7 @@ const _RAW_CATEGORIES: RawCategory[] = [
       },
       {
         q: "How do I remove a member?",
-        a: "On the Team page, hover over the member's row and click the remove button. Confirm the action. Their access is revoked immediately. Content they created (prompts, collections) remains in the workspace.",
+        a: "On the Team page, hover over the member's row and click the remove button. Confirm the action. Their access is revoked immediately. Content they created (prompts) remains in the workspace.",
         keywords: ["remove", "delete", "deactivate", "revoke"],
       },
       {
@@ -347,7 +323,7 @@ const _RAW_CATEGORIES: RawCategory[] = [
       },
       {
         q: "How do I export my data?",
-        a: "On the Import/Export page, choose what to export — prompts, collections, activity logs, or all data. Select JSON or CSV format and download. Exports include all metadata like tags, descriptions, and timestamps.",
+        a: "On the Import/Export page, choose what to export — prompts, activity logs, or all data. Select JSON or CSV format and download. Exports include all metadata like tags, descriptions, and timestamps.",
         keywords: ["export", "download", "backup", "data"],
       },
       {
@@ -462,7 +438,7 @@ export const HELP_FAQS: FAQ[] = [
   {
     question: "Can I use TeamPrompt without the browser extension?",
     answer:
-      "Absolutely. The web app works on its own for managing prompts, collections, guidelines, and team settings. The extension adds the convenience of prompt insertion and real-time DLP scanning directly inside AI tools.",
+      "Absolutely. The web app works on its own for managing prompts, guidelines, and team settings. The extension adds the convenience of prompt insertion and real-time DLP scanning directly inside AI tools.",
   },
   {
     question: "How does DLP scanning protect my data?",

@@ -12,7 +12,7 @@ export default function robots(): MetadataRoute.Robots {
         disallow: [
           "/api/",
           "/vault",
-          "/collections",
+          "/templates",
           "/guidelines",
           "/team",
           "/guardrails",

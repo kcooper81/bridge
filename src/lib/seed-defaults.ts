@@ -32,15 +32,6 @@ export const SEED_PROMPTS: SeedPrompt[] = [
   },
 ];
 
-// ─── Seed Collection ───
-
-export const SEED_COLLECTION = {
-  name: "Getting Started",
-  description:
-    "Sample prompts to help you explore TeamPrompt. Edit or delete these anytime.",
-  visibility: "org" as const,
-};
-
 // ─── Default Guideline IDs to auto-install (5 — free tier limit) ───
 
 const AUTO_INSTALL_GUIDELINE_IDS = [
@@ -73,36 +64,12 @@ export async function seedOrgDefaults(
     template_variables: p.template_variables,
   }));
 
-  const { data: insertedPrompts } = await db
+  await db
     .from("prompts")
     .insert(promptInserts)
     .select("id");
 
-  // 2. Create the "Getting Started" collection with those prompts
-  if (insertedPrompts && insertedPrompts.length > 0) {
-    const { data: collection } = await db
-      .from("collections")
-      .insert({
-        org_id: orgId,
-        name: SEED_COLLECTION.name,
-        description: SEED_COLLECTION.description,
-        visibility: SEED_COLLECTION.visibility,
-        created_by: userId,
-      })
-      .select("id")
-      .single();
-
-    if (collection) {
-      await db.from("collection_prompts").insert(
-        insertedPrompts.map((p) => ({
-          collection_id: collection.id,
-          prompt_id: p.id,
-        }))
-      );
-    }
-  }
-
-  // 3. Auto-install 5 default guidelines
+  // 2. Auto-install 5 default guidelines
   const guidelinesToInstall = DEFAULT_GUIDELINES.filter((g) =>
     AUTO_INSTALL_GUIDELINE_IDS.includes(g.id)
   );

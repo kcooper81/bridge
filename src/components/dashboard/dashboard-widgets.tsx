@@ -142,7 +142,7 @@ export function DashboardWidgets({ analytics, loading }: DashboardWidgetsProps) 
                 { label: "New Prompt", href: "/vault", icon: Plus },
                 { label: "Analytics", href: "/analytics", icon: BarChart3 },
                 { label: "Manage Team", href: "/team", icon: Users },
-                { label: "Library", href: "/library", icon: BookOpen },
+                { label: "Templates", href: "/templates", icon: BookOpen },
               ].map((action) => (
                 <Link
                   key={action.href}

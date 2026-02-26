@@ -8,17 +8,9 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Loader2, Building, Settings } from "lucide-react";
 import { saveOrg } from "@/lib/vault-api";
 import { toast } from "sonner";
-import type { CollectionVisibility } from "@/lib/types";
 
 export function OrganizationTab() {
   const { org, currentUserRole, refresh } = useOrg();
@@ -31,9 +23,6 @@ export function OrganizationTab() {
   const [allowPersonalPrompts, setAllowPersonalPrompts] = useState(
     org?.settings?.allow_personal_prompts ?? true
   );
-  const [defaultVisibility, setDefaultVisibility] = useState<CollectionVisibility>(
-    org?.settings?.default_visibility ?? "org"
-  );
   const [savingPrefs, setSavingPrefs] = useState(false);
 
   useEffect(() => {
@@ -41,7 +30,6 @@ export function OrganizationTab() {
       setName(org.name || "");
       setDomain(org.domain || "");
       setAllowPersonalPrompts(org.settings?.allow_personal_prompts ?? true);
-      setDefaultVisibility(org.settings?.default_visibility ?? "org");
     }
   }, [org, dirty]);
 
@@ -67,7 +55,6 @@ export function OrganizationTab() {
       const merged = {
         ...(org?.settings || {}),
         allow_personal_prompts: allowPersonalPrompts,
-        default_visibility: defaultVisibility,
       };
       await saveOrg({ settings: merged });
       toast.success("Preferences updated");
@@ -136,28 +123,6 @@ export function OrganizationTab() {
               onCheckedChange={setAllowPersonalPrompts}
               disabled={!isAdmin}
             />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="default-visibility">Default Visibility</Label>
-            <p className="text-sm text-muted-foreground">
-              Default visibility for new collections and prompts
-            </p>
-            <Select
-              value={defaultVisibility}
-              onValueChange={(v) => setDefaultVisibility(v as CollectionVisibility)}
-              disabled={!isAdmin}
-            >
-              <SelectTrigger id="default-visibility" className="w-[200px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="personal">Personal</SelectItem>
-                <SelectItem value="team">Team</SelectItem>
-                <SelectItem value="org">Organization</SelectItem>
-                <SelectItem value="public">Public</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
 
           <Button onClick={handleSavePrefs} disabled={savingPrefs || !isAdmin}>

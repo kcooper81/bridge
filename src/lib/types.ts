@@ -22,8 +22,6 @@ export type SubscriptionStatus =
   | "canceled"
   | "paused";
 
-export type CollectionVisibility = "personal" | "team" | "org" | "public";
-
 export type SecurityPatternType = "exact" | "regex" | "glob";
 export type SecurityCategory =
   | "api_keys"
@@ -57,7 +55,6 @@ export interface Organization {
   plan: PlanTier;
   settings: {
     allow_personal_prompts?: boolean;
-    default_visibility?: CollectionVisibility;
     setup_complete?: boolean;
   } | null;
   security_settings?: Record<string, unknown> | null;
@@ -156,21 +153,6 @@ export interface Member extends Profile {
   teamIds: string[];
   teamRoles: Record<string, string>;
   isCurrentUser?: boolean;
-}
-
-export interface Collection {
-  id: string;
-  org_id: string;
-  team_id: string | null;
-  name: string;
-  description: string | null;
-  icon: string | null;
-  color: string | null;
-  visibility: CollectionVisibility;
-  created_by: string;
-  promptIds: string[];
-  created_at: string;
-  updated_at: string;
 }
 
 export interface Guideline {
@@ -296,7 +278,6 @@ export interface OrgData {
   folders: Folder[];
   teams: Team[];
   members: Member[];
-  collections: Collection[];
   guidelines: Guideline[];
   subscription: Subscription | null;
   planLimits: PlanLimits | null;

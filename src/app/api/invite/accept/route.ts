@@ -100,7 +100,6 @@ export async function POST(request: NextRequest) {
         db.from("prompts").delete().eq("org_id", oldOrgId),
         db.from("folders").delete().eq("org_id", oldOrgId),
         db.from("teams").delete().eq("org_id", oldOrgId),
-        db.from("collections").delete().eq("org_id", oldOrgId),
         db.from("standards").delete().eq("org_id", oldOrgId),
         db.from("invites").delete().eq("org_id", oldOrgId),
       ]);

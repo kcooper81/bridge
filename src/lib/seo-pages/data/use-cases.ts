@@ -20,9 +20,9 @@ export const useCasePages: SeoPageData[] = [
       sectionLabel: "Features",
       heading: "Everything a prompt library needs",
       items: [
-        { icon: "Archive", title: "Organized vault", description: "Store prompts in collections with tags, descriptions, and usage notes. Find any prompt in seconds." },
+        { icon: "Archive", title: "Organized vault", description: "Store prompts in categories with tags, descriptions, and usage notes. Find any prompt in seconds." },
         { icon: "Globe", title: "Works everywhere", description: "Access your library from ChatGPT, Claude, Gemini, Copilot, and Perplexity via our browser extension." },
-        { icon: "Users", title: "Team sharing", description: "Share prompts across your organization. Control who can view, edit, or manage each collection." },
+        { icon: "Users", title: "Team sharing", description: "Share prompts across your organization. Control who can view, edit, or manage each category." },
         { icon: "Zap", title: "One-click insert", description: "Browse and insert prompts directly into any AI tool without copy-pasting or switching tabs." },
         { icon: "BookOpen", title: "Template variables", description: "Create reusable templates with {{variables}} that get filled in before each use." },
         { icon: "BarChart3", title: "Usage analytics", description: "See which prompts are most popular, who uses them, and how they perform over time." },
@@ -127,7 +127,7 @@ export const useCasePages: SeoPageData[] = [
         { icon: "BookOpen", title: "Quality guidelines", description: "Set organization-wide standards for prompt quality, tone, and structure. Guide your team toward better AI usage." },
         { icon: "ShieldAlert", title: "DLP guardrails", description: "Automatically scan outbound prompts for sensitive data — SSNs, API keys, patient records, financial data, and more." },
         { icon: "BarChart3", title: "Usage analytics", description: "See who uses AI, which tools they use, what prompts they send, and how often. Complete visibility." },
-        { icon: "Users", title: "Team management", description: "Organize users into teams with role-based access control. Assign collections and guidelines per team." },
+        { icon: "Users", title: "Team management", description: "Organize users into teams with role-based access control. Assign guidelines per team." },
         { icon: "Eye", title: "Audit trails", description: "Every prompt insertion and DLP violation is logged. Export audit data for compliance reporting." },
         { icon: "Lock", title: "Policy enforcement", description: "Block or warn on prompts that violate your data protection policies. Configurable severity levels." },
       ],
@@ -215,21 +215,21 @@ export const useCasePages: SeoPageData[] = [
     meta: {
       title: "Share AI Prompts Across Your Team — Collaborative Prompt Management",
       description:
-        "Share proven AI prompts across your team with collections, permissions, and usage tracking. Stop reinventing prompts in silos.",
+        "Share proven AI prompts across your team with categories, permissions, and usage tracking. Stop reinventing prompts in silos.",
       keywords: ["prompt sharing", "team collaboration AI", "share AI prompts", "collaborative prompts"],
     },
     hero: {
       headline: "Share prompts, not Slack messages",
       subtitle:
         "When someone writes a great prompt, the whole team should benefit. Share prompts through a searchable library — not chat threads.",
-      badges: ["Team sharing", "Collections", "Permissions"],
+      badges: ["Team sharing", "Categories", "Permissions"],
     },
     features: {
       sectionLabel: "Sharing",
       heading: "Designed for team collaboration",
       items: [
-        { icon: "Users", title: "Team collections", description: "Organize prompts into shared collections by team, project, or use case. Everyone sees the latest version." },
-        { icon: "Lock", title: "Granular permissions", description: "Control who can view, edit, or manage each collection. Role-based access keeps things organized." },
+        { icon: "Users", title: "Team categories", description: "Organize prompts into shared categories by team, project, or use case. Everyone sees the latest version." },
+        { icon: "Lock", title: "Granular permissions", description: "Control who can view, edit, or manage each category. Role-based access keeps things organized." },
         { icon: "Globe", title: "Works in every AI tool", description: "Shared prompts are accessible from ChatGPT, Claude, Gemini, Copilot, and Perplexity via the browser extension." },
         { icon: "BarChart3", title: "Usage tracking", description: "See which shared prompts get used most. Understand what's working and what's gathering dust." },
         { icon: "Zap", title: "Instant updates", description: "Edit a shared prompt once, and every team member gets the update immediately. No version confusion." },
@@ -244,12 +244,12 @@ export const useCasePages: SeoPageData[] = [
         "Consistent AI interactions across your entire organization",
         "Reduce duplicate effort — stop reinventing the same prompts",
         "Track which prompts actually get used by the team",
-        "Control access with team-based collections and permissions",
+        "Control access with team-based categories and permissions",
       ],
     },
     faqs: [
-      { question: "How do shared prompts work?", answer: "Create a prompt and add it to a team collection. Anyone with access to that collection can search, browse, and insert the prompt from the browser extension." },
-      { question: "Can I share prompts with specific teams only?", answer: "Yes. Collections have granular permissions. You can share with specific teams, roles, or individual users." },
+      { question: "How do shared prompts work?", answer: "Create a prompt and assign it to a team category. Anyone with access can search, browse, and insert the prompt from the browser extension." },
+      { question: "Can I share prompts with specific teams only?", answer: "Yes. Categories have granular permissions. You can share with specific teams, roles, or individual users." },
       { question: "What happens when someone edits a shared prompt?", answer: "The update is reflected immediately for everyone with access. Version history tracks all changes." },
     ],
     cta: {

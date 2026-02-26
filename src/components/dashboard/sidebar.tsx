@@ -14,7 +14,6 @@ import {
   Archive,
   BarChart3,
   BookOpen,
-  FolderOpen,
   HelpCircle,
   LayoutDashboard,
   Library,
@@ -35,8 +34,7 @@ const navSections: { title: string; items: NavItem[] }[] = [
     title: "Workspace",
     items: [
       { label: "Prompts", href: "/vault", icon: Archive },
-      { label: "Collections", href: "/collections", icon: FolderOpen },
-      { label: "Library", href: "/library", icon: Library },
+      { label: "Templates", href: "/templates", icon: Library },
       { label: "Guidelines", href: "/guidelines", icon: BookOpen, roles: ["admin", "manager"] },
       { label: "Team", href: "/team", icon: Users, roles: ["admin", "manager"] },
     ],

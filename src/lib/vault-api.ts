@@ -8,7 +8,6 @@ import type {
   PromptStatus,
   Folder,
   Team,
-  Collection,
   Guideline,
   Organization,
   PromptTone,
@@ -332,72 +331,6 @@ export async function saveTeamApi(team: Partial<Team>): Promise<Team | null> {
 
 export async function deleteTeamApi(id: string): Promise<boolean> {
   const { error } = await supabase().from("teams").delete().eq("id", id);
-  return !error;
-}
-
-// ─── Collections ───
-
-export async function saveCollectionApi(
-  coll: Partial<Collection> & { promptIds?: string[] }
-): Promise<Collection | null> {
-  const orgId = await getOrgId();
-  const userId = await getUserId();
-  if (!orgId || !userId) return null;
-  const db = supabase();
-
-  let collId = coll.id;
-
-  if (collId) {
-    await db
-      .from("collections")
-      .update({
-        name: coll.name,
-        description: coll.description,
-        visibility: coll.visibility,
-        team_id: coll.team_id,
-      })
-      .eq("id", collId);
-  } else {
-    const { data } = await db
-      .from("collections")
-      .insert({
-        org_id: orgId,
-        name: coll.name || "",
-        description: coll.description,
-        visibility: coll.visibility || "org",
-        team_id: coll.team_id || null,
-        created_by: userId,
-      })
-      .select()
-      .single();
-    if (!data) return null;
-    collId = data.id;
-  }
-
-  // Sync prompt associations
-  if (coll.promptIds !== undefined) {
-    await db.from("collection_prompts").delete().eq("collection_id", collId);
-    if (coll.promptIds.length > 0) {
-      await db.from("collection_prompts").insert(
-        coll.promptIds.map((pid) => ({
-          collection_id: collId!,
-          prompt_id: pid,
-        }))
-      );
-    }
-  }
-
-  const { data: result } = await db
-    .from("collections")
-    .select("*")
-    .eq("id", collId)
-    .single();
-
-  return result ? { ...result, promptIds: coll.promptIds || [] } : null;
-}
-
-export async function deleteCollectionApi(id: string): Promise<boolean> {
-  const { error } = await supabase().from("collections").delete().eq("id", id);
   return !error;
 }
 
@@ -1081,31 +1014,7 @@ export async function installLibraryPack(
 
   promptsCreated = insertedPrompts?.length || 0;
 
-  // 2. Create a collection named after the pack
-  if (insertedPrompts && insertedPrompts.length > 0) {
-    const { data: collection } = await db
-      .from("collections")
-      .insert({
-        org_id: orgId,
-        name: pack.name,
-        description: pack.description,
-        visibility: "org",
-        created_by: userId,
-      })
-      .select("id")
-      .single();
-
-    if (collection) {
-      await db.from("collection_prompts").insert(
-        insertedPrompts.map((p) => ({
-          collection_id: collection.id,
-          prompt_id: p.id,
-        }))
-      );
-    }
-  }
-
-  // 3. Insert guidelines
+  // 2. Insert guidelines
   for (const g of pack.guidelines) {
     const defaultGuideline = DEFAULT_GUIDELINES.find((dg) => dg.id === g.id);
     if (!defaultGuideline) continue;

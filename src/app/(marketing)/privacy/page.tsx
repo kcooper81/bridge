@@ -73,7 +73,7 @@ export default function PrivacyPage() {
             <h3 className="text-base font-medium mb-2">Prompt Content</h3>
             <p className="text-muted-foreground leading-relaxed mb-3">
               We store the prompts you create, including prompt text, templates,
-              collections, tags, and any associated metadata. This is the core
+              tags, and any associated metadata. This is the core
               data that powers TeamPrompt&apos;s prompt management features.
             </p>
 

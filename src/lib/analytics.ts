@@ -148,10 +148,6 @@ export function trackExtensionInstallClick() {
   trackEvent({ action: "extension_install_click", category: "engagement" });
 }
 
-export function trackCollectionCreated() {
-  trackEvent({ action: "collection_created", category: "engagement" });
-}
-
 export function trackExport(count: number) {
   trackEvent({ action: "export", category: "engagement", value: count });
 }

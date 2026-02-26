@@ -828,9 +828,12 @@ input:focus {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 8px 12px;
+  padding: 10px 12px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
   min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .settings-toggle {

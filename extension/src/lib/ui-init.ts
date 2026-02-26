@@ -566,25 +566,15 @@ function escapeHtml(str: string): string {
 
 function applyTheme(theme: "light" | "dark") {
   document.documentElement.setAttribute("data-theme", theme);
-  const sunIcon = document.getElementById("theme-icon-sun");
-  const moonIcon = document.getElementById("theme-icon-moon");
-  if (sunIcon && moonIcon) {
-    // Show sun in dark mode (click to switch to light), moon in light mode
-    sunIcon.classList.toggle("hidden", theme !== "dark");
-    moonIcon.classList.toggle("hidden", theme !== "light");
+  const themeToggle = document.getElementById("theme-toggle") as HTMLInputElement | null;
+  if (themeToggle) {
+    themeToggle.checked = theme === "dark";
   }
 }
 
 async function initTheme() {
-  const { theme } = await browser.storage.local.get(["theme"]);
-  applyTheme(theme || "dark");
-}
-
-async function toggleTheme() {
-  const { theme } = await browser.storage.local.get(["theme"]);
-  const next = (theme || "dark") === "dark" ? "light" : "dark";
-  await browser.storage.local.set({ theme: next });
-  applyTheme(next);
+  const data = await browser.storage.local.get(["theme"]);
+  applyTheme((data.theme as "light" | "dark") || "dark");
 }
 
 // ─── Init ───
@@ -817,10 +807,14 @@ export function initSharedUI(elements: UIElements) {
     });
   }
 
-  // Theme toggle
-  const themeToggleBtn = document.getElementById("theme-toggle-btn");
-  if (themeToggleBtn) {
-    themeToggleBtn.addEventListener("click", toggleTheme);
+  // Theme toggle (in settings dropdown)
+  const themeToggleCheckbox = document.getElementById("theme-toggle") as HTMLInputElement | null;
+  if (themeToggleCheckbox) {
+    themeToggleCheckbox.addEventListener("change", () => {
+      const next = themeToggleCheckbox.checked ? "dark" : "light";
+      browser.storage.local.set({ theme: next });
+      applyTheme(next);
+    });
   }
 
   // Init theme and check session

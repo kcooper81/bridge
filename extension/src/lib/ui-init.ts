@@ -35,6 +35,7 @@ export interface UIElements {
 
 let currentPrompts: Prompt[] = [];
 let selectedPrompt: Prompt | null = null;
+let currentSearchQuery = "";
 let activeFilter: "recent" | "favorites" | "prompts" | "shield" = "recent";
 let searchTimeout: ReturnType<typeof setTimeout> | undefined;
 let cachedShieldStatus: SecurityStatus | null = null;
@@ -85,6 +86,7 @@ function showDetailView(prompt: Prompt) {
     const configs = normalizeVariables(prompt.template_variables);
     if (configs.length > 0) {
       els.templateFields.classList.remove("hidden");
+      const fieldInputs: HTMLInputElement[] = [];
       for (const v of configs) {
         const label = document.createElement("label");
         label.textContent = getDisplayLabel(v);
@@ -105,9 +107,39 @@ function showDetailView(prompt: Prompt) {
         input.addEventListener("input", updatePreview);
         els.templateFields.appendChild(label);
         els.templateFields.appendChild(input);
+        fieldInputs.push(input);
       }
+
+      // Keyboard navigation: Enter → next field, Ctrl+Enter → insert
+      fieldInputs.forEach((input, i) => {
+        input.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" && !e.ctrlKey && !e.metaKey) {
+            e.preventDefault();
+            if (i < fieldInputs.length - 1) {
+              fieldInputs[i + 1].focus();
+            } else {
+              els.insertBtn.click();
+            }
+          } else if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+            e.preventDefault();
+            els.insertBtn.click();
+          }
+        });
+      });
+
+      // Hint text below fields
+      const hintEl = document.createElement("div");
+      hintEl.className = "template-hint";
+      hintEl.textContent = "Fill in the fields above, then insert";
+      els.templateFields.appendChild(hintEl);
+
       // Trigger initial preview with defaults
       updatePreview();
+
+      // Auto-focus first field
+      if (fieldInputs.length > 0) {
+        requestAnimationFrame(() => fieldInputs[0].focus());
+      }
     }
   }
 }
@@ -131,6 +163,27 @@ function getFilledContent(): string {
   return els.detailContent.textContent || "";
 }
 
+/** Returns true if any template fields have unfilled {{var}} placeholders still showing. */
+function hasUnfilledVariables(): boolean {
+  const content = getFilledContent();
+  return /\{\{.+?\}\}/.test(content);
+}
+
+/** Flash unfilled template fields to draw attention. Returns true if any were unfilled. */
+function flashUnfilledFields(): boolean {
+  const inputs = els.templateFields.querySelectorAll<HTMLInputElement>("input");
+  let hasEmpty = false;
+  inputs.forEach((input) => {
+    const varName = input.dataset.variable;
+    if (varName && !input.value.trim()) {
+      hasEmpty = true;
+      input.classList.add("highlight-unfilled");
+      setTimeout(() => input.classList.remove("highlight-unfilled"), 600);
+    }
+  });
+  return hasEmpty;
+}
+
 // ─── Prompts ───
 
 async function loadPrompts(query = "") {
@@ -148,6 +201,7 @@ async function loadPrompts(query = "") {
   try {
     // If search is active, search all prompts regardless of tab
     if (query) {
+      currentSearchQuery = query;
       const prompts = await fetchPrompts({ query });
       currentPrompts = prompts;
       renderPrompts();
@@ -158,10 +212,17 @@ async function loadPrompts(query = "") {
     }
 
     // Tab-specific loading
+    currentSearchQuery = "";
     if (activeFilter === "recent") {
-      const prompts = await fetchPrompts({ sort: "recent", limit: 15 });
-      currentPrompts = prompts;
-      renderPrompts("recent");
+      const [favs, recents] = await Promise.all([
+        fetchPrompts({ favorites: true, limit: 5 }),
+        fetchPrompts({ sort: "recent", limit: 15 }),
+      ]);
+      // Dedupe: remove favorites from recent list
+      const favIds = new Set(favs.map((f) => f.id));
+      const dedupedRecents = recents.filter((r) => !favIds.has(r.id));
+      currentPrompts = [...favs, ...dedupedRecents];
+      renderCombinedView(favs, dedupedRecents);
     } else if (activeFilter === "favorites") {
       const prompts = await fetchPrompts({ favorites: true });
       currentPrompts = prompts;
@@ -366,6 +427,41 @@ function closeAllDropdowns() {
   document.querySelectorAll(".filter-dropdown-menu").forEach((m) => m.classList.add("hidden"));
 }
 
+function buildCardHtml(p: Prompt): string {
+  const titleHtml = currentSearchQuery
+    ? highlightMatch(escapeHtml(p.title), currentSearchQuery)
+    : escapeHtml(p.title);
+  const descHtml = currentSearchQuery
+    ? highlightMatch(escapeHtml(p.description || p.content.slice(0, 80)), currentSearchQuery)
+    : escapeHtml(p.description || p.content.slice(0, 80));
+
+  return `
+    <div class="prompt-card" data-id="${p.id}">
+      <div class="prompt-card-header">
+        <div class="prompt-card-title">
+          ${titleHtml}
+          ${p.is_template ? '<span class="badge-template">Template</span>' : ""}
+        </div>
+        <div class="prompt-card-actions">
+          <button class="btn-fav" data-fav-id="${p.id}" title="${p.is_favorite ? "Remove from favorites" : "Add to favorites"}">${heartSvg(p.is_favorite)}</button>
+          <svg class="prompt-card-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="9 18 15 12 9 6" />
+          </svg>
+        </div>
+      </div>
+      <div class="prompt-card-desc">${descHtml}</div>
+      ${
+        p.tags?.length
+          ? `<div>${p.tags
+              .slice(0, 3)
+              .map((t) => `<span class="tag">${escapeHtml(t)}</span>`)
+              .join("")}</div>`
+          : ""
+      }
+    </div>
+  `;
+}
+
 function renderPrompts(context?: "recent" | "favorites" | "folder") {
   if (currentPrompts.length === 0) {
     let emptyMsg = "No prompts found";
@@ -382,35 +478,7 @@ function renderPrompts(context?: "recent" | "favorites" | "folder") {
   }
 
   // Build prompt cards
-  const cardsHtml = currentPrompts
-    .map(
-      (p) => `
-      <div class="prompt-card" data-id="${p.id}">
-        <div class="prompt-card-header">
-          <div class="prompt-card-title">
-            ${escapeHtml(p.title)}
-            ${p.is_template ? '<span class="badge-template">Template</span>' : ""}
-          </div>
-          <div class="prompt-card-actions">
-            <button class="btn-fav" data-fav-id="${p.id}" title="${p.is_favorite ? "Remove from favorites" : "Add to favorites"}">${heartSvg(p.is_favorite)}</button>
-            <svg class="prompt-card-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
-          </div>
-        </div>
-        <div class="prompt-card-desc">${escapeHtml(p.description || p.content.slice(0, 80))}</div>
-        ${
-          p.tags?.length
-            ? `<div>${p.tags
-                .slice(0, 3)
-                .map((t) => `<span class="tag">${escapeHtml(t)}</span>`)
-                .join("")}</div>`
-            : ""
-        }
-      </div>
-    `
-    )
-    .join("");
+  const cardsHtml = currentPrompts.map((p) => buildCardHtml(p)).join("");
 
   // Show onboarding tip when user has only the sample prompt
   const onboardingHtml =
@@ -424,6 +492,53 @@ function renderPrompts(context?: "recent" | "favorites" | "folder") {
   els.promptList.innerHTML = cardsHtml + onboardingHtml;
 
   // Wire favorite buttons (stop propagation so card click doesn't fire)
+  els.promptList.querySelectorAll<HTMLElement>(".btn-fav").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const id = btn.dataset.favId;
+      if (id) handleFavoriteToggle(id, btn);
+    });
+  });
+
+  els.promptList.querySelectorAll<HTMLElement>(".prompt-card").forEach((card) => {
+    card.addEventListener("click", () => {
+      const prompt = currentPrompts.find((p) => p.id === card.dataset.id);
+      if (prompt) showDetailView(prompt);
+    });
+  });
+}
+
+function renderCombinedView(favs: Prompt[], recents: Prompt[]) {
+  if (favs.length === 0 && recents.length === 0) {
+    els.promptList.innerHTML =
+      '<div class="empty-state"><p>No recently used prompts yet</p></div>';
+    return;
+  }
+
+  let html = "";
+
+  if (favs.length > 0) {
+    html += '<div class="section-header">Favorites</div>';
+    html += favs.map((p) => buildCardHtml(p)).join("");
+  }
+
+  if (recents.length > 0) {
+    html += '<div class="section-header">Recent</div>';
+    html += recents.map((p) => buildCardHtml(p)).join("");
+  }
+
+  // Show onboarding tip when user has only the sample prompt
+  const totalCount = favs.length + recents.length;
+  if (totalCount <= 1) {
+    html += `<div class="onboarding-tip">
+      <strong>Get started:</strong> This is a sample template. Click it to see how it works, then create your own prompts at
+      <a href="${CONFIG.SITE_URL}/vault" target="_blank" rel="noopener">teamprompt.app/vault</a>.
+    </div>`;
+  }
+
+  els.promptList.innerHTML = html;
+
+  // Wire favorite buttons
   els.promptList.querySelectorAll<HTMLElement>(".btn-fav").forEach((btn) => {
     btn.addEventListener("click", (e) => {
       e.stopPropagation();
@@ -706,6 +821,12 @@ function escapeHtml(str: string): string {
   return div.innerHTML;
 }
 
+function highlightMatch(html: string, query: string): string {
+  if (!query) return html;
+  const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return html.replace(new RegExp(escaped, "gi"), "<mark>$&</mark>");
+}
+
 function heartSvg(filled: boolean): string {
   return `<svg class="fav-heart${filled ? " filled" : ""}" width="14" height="14" viewBox="0 0 24 24" fill="${filled ? "currentColor" : "none"}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`;
 }
@@ -947,6 +1068,7 @@ export function initSharedUI(elements: UIElements) {
   });
 
   els.copyBtn.addEventListener("click", async () => {
+    if (hasUnfilledVariables()) flashUnfilledFields();
     const content = getFilledContent();
     await navigator.clipboard.writeText(content);
     els.copyBtn.textContent = "Copied!";
@@ -955,6 +1077,7 @@ export function initSharedUI(elements: UIElements) {
   });
 
   els.insertBtn.addEventListener("click", async () => {
+    if (hasUnfilledVariables()) flashUnfilledFields();
     const content = getFilledContent();
     const [tab] = await browser.tabs.query({
       active: true,

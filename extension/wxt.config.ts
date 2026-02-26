@@ -23,6 +23,15 @@ export default defineConfig({
         128: "/icons/icon-128.png",
       },
       permissions,
+      commands: {
+        _execute_action: {
+          suggested_key: {
+            default: "Ctrl+Shift+P",
+            mac: "Command+Shift+P",
+          },
+          description: "Open TeamPrompt",
+        },
+      },
       host_permissions: [
         "https://chat.openai.com/*",
         "https://chatgpt.com/*",

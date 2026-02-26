@@ -475,6 +475,13 @@ input:focus {
   text-overflow: ellipsis;
 }
 
+.prompt-card mark {
+  background: var(--primary-glow);
+  color: var(--text);
+  border-radius: 2px;
+  padding: 0 2px;
+}
+
 .badge-template {
   font-size: 10px;
   padding: 1px 6px;
@@ -493,6 +500,18 @@ input:focus {
   color: var(--text-secondary);
   margin-right: 4px;
   margin-top: 4px;
+}
+
+.section-header {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 8px 2px 4px;
+}
+.section-header:first-child {
+  padding-top: 2px;
 }
 
 .empty-state {
@@ -583,6 +602,19 @@ input:focus {
 }
 .template-fields input {
   margin-bottom: 0;
+}
+.template-fields input.highlight-unfilled {
+  animation: field-flash 600ms ease;
+}
+@keyframes field-flash {
+  0%, 100% { border-color: var(--border); box-shadow: none; }
+  30%, 70% { border-color: #f59e0b; box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2); }
+}
+.template-hint {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 8px;
+  text-align: center;
 }
 .field-hint {
   display: block;

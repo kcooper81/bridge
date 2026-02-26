@@ -481,6 +481,10 @@ function performScan(text: string, onAllow: () => void) {
       showBlockOverlay(result.violations);
       logInteraction(text, "blocked", result.violations);
       pulseShield("block");
+      try {
+        browser.runtime.sendMessage({ type: "SET_BADGE", text: "!", color: "#ef4444" });
+        setTimeout(() => { try { browser.runtime.sendMessage({ type: "SET_BADGE", text: "" }); } catch {} }, 10000);
+      } catch {}
       return;
     }
 
@@ -488,6 +492,10 @@ function performScan(text: string, onAllow: () => void) {
       showWarningBanner(result.violations);
       logInteraction(text, "warned", result.violations);
       pulseShield("warn");
+      try {
+        browser.runtime.sendMessage({ type: "SET_BADGE", text: "!", color: "#f59e0b" });
+        setTimeout(() => { try { browser.runtime.sendMessage({ type: "SET_BADGE", text: "" }); } catch {} }, 10000);
+      } catch {}
     } else if (result === null) {
       // Fail-closed: scan returned null — determine reason and block
       const reason = _isAuthenticated ? "api-error" : "no-auth";

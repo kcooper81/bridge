@@ -111,6 +111,13 @@ export default defineBackground(() => {
         const msg = message as unknown as { enabled: boolean };
         applySidebarBehavior(msg.enabled);
         sendResponse({ success: true });
+      } else if (message.type === "SET_BADGE") {
+        const msg = message as unknown as { text: string; color?: string };
+        browser.action.setBadgeText({ text: msg.text });
+        if (msg.color) {
+          browser.action.setBadgeBackgroundColor({ color: msg.color });
+        }
+        sendResponse({ success: true });
       } else if (message.type === "PING") {
         // Content script liveness check — if this fails, context is invalidated
         sendResponse({ ok: true });

@@ -181,25 +181,32 @@ const stores = [
     name: "Chrome Web Store",
     icon: Chrome,
     category: "Productivity",
-    screenshots: { count: 16, dims: "1280 x 800 px", format: "PNG" },
-    promo: "Small tile 440 x 280, Marquee 1400 x 560",
-    icon128: "128 x 128 px PNG",
+    assets: [
+      { name: "Store Icon", dims: "128 x 128", format: "PNG", required: true, file: "/store-assets/store-icon-128.png" },
+      { name: "Small Promo Tile", dims: "440 x 280", format: "PNG", required: true, file: "/store-assets/promo-small.png" },
+      { name: "Marquee Promo", dims: "1400 x 560", format: "PNG", required: false, file: "/store-assets/promo-marquee.png" },
+      { name: "Screenshots", dims: "1280 x 800", format: "PNG", required: true, note: "Min 1, max 5" },
+    ],
   },
   {
     name: "Firefox Add-ons",
     icon: Globe,
     category: "Productivity > Workflow & Planning",
-    screenshots: { count: 16, dims: "1280 x 800 px", format: "PNG" },
-    promo: "Not required (optional header image)",
-    icon128: "128 x 128 px PNG",
+    assets: [
+      { name: "Extension Icon", dims: "128 x 128", format: "PNG", required: true, file: "/store-assets/store-icon-128.png" },
+      { name: "Screenshots", dims: "1280 x 800 (recommended)", format: "PNG/JPEG", required: false, note: "Optional, no hard limit" },
+    ],
   },
   {
     name: "Edge Add-ons",
     icon: Globe,
     category: "Productivity",
-    screenshots: { count: 16, dims: "1280 x 800 px", format: "PNG" },
-    promo: "Small tile 440 x 280, Marquee 1400 x 560 (same as Chrome)",
-    icon128: "128 x 128 px PNG (same as Chrome)",
+    assets: [
+      { name: "Store Logo", dims: "300 x 300", format: "PNG", required: true, file: "/store-assets/edge-store-icon-300.png" },
+      { name: "Small Promo Tile", dims: "440 x 280", format: "PNG", required: false, file: "/store-assets/promo-small.png" },
+      { name: "Large Promo", dims: "1400 x 560", format: "PNG", required: false, file: "/store-assets/promo-marquee.png" },
+      { name: "Screenshots", dims: "1280 x 800 or 640 x 480", format: "PNG/JPEG", required: true, note: "Min 1, max 10" },
+    ],
   },
 ];
 
@@ -476,57 +483,80 @@ export default function MediaPage() {
             Firefox Add-ons, and Edge Add-ons submissions.
           </p>
 
-          {/* Store requirements grid */}
+          {/* Per-store asset checklists */}
           <div className="grid gap-4 sm:grid-cols-3 mb-12">
             {stores.map((store) => (
               <div
                 key={store.name}
                 className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-5"
               >
-                <div className="flex items-center gap-2 mb-3">
+                <div className="flex items-center gap-2 mb-1">
                   <store.icon className="h-4 w-4 text-blue-400" />
                   <h3 className="text-sm font-semibold">{store.name}</h3>
                 </div>
-                <dl className="space-y-2 text-xs">
-                  <div>
-                    <dt className="text-zinc-500 font-medium">Category</dt>
-                    <dd className="text-zinc-300">{store.category}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-zinc-500 font-medium">Screenshots</dt>
-                    <dd className="text-zinc-300">{store.screenshots.count} &times; {store.screenshots.dims} {store.screenshots.format}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-zinc-500 font-medium">Promo images</dt>
-                    <dd className="text-zinc-300">{store.promo}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-zinc-500 font-medium">Icon</dt>
-                    <dd className="text-zinc-300">{store.icon128}</dd>
-                  </div>
-                </dl>
+                <p className="text-[11px] text-zinc-500 mb-3">Category: {store.category}</p>
+                <ul className="space-y-2">
+                  {store.assets.map((asset) => (
+                    <li key={asset.name} className="flex items-start gap-2 text-xs">
+                      <span className={`shrink-0 mt-0.5 ${asset.required ? "text-blue-400" : "text-zinc-600"}`}>
+                        {asset.required ? "\u2713" : "\u25CB"}
+                      </span>
+                      <div>
+                        <span className="text-zinc-200 font-medium">{asset.name}</span>
+                        <span className="text-zinc-500 ml-1">
+                          {asset.dims} {asset.format}
+                        </span>
+                        {asset.note && (
+                          <span className="text-zinc-500 block">{asset.note}</span>
+                        )}
+                        <span className={`text-[10px] uppercase tracking-wider ml-1 ${asset.required ? "text-blue-400/80" : "text-zinc-600"}`}>
+                          {asset.required ? "Required" : "Optional"}
+                        </span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
               </div>
             ))}
           </div>
 
-          {/* Store icon */}
+          {/* Store icons */}
           <div className="mb-12">
-            <h3 className="text-lg font-semibold mb-4">Store Icon</h3>
-            <div className="inline-flex items-center gap-4 rounded-xl border border-zinc-800 bg-zinc-900/60 p-4">
-              <Image
-                src="/store-assets/store-icon-128.png"
-                alt="Store icon 128x128"
-                width={64}
-                height={64}
-                className="rounded-lg"
-              />
-              <div>
-                <p className="text-sm font-medium">128 &times; 128 px</p>
-                <p className="text-xs text-zinc-500">PNG, transparent background</p>
-                <a href="/store-assets/store-icon-128.png" download className="inline-flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300 mt-1">
-                  <Download className="h-3 w-3" />
-                  Download
-                </a>
+            <h3 className="text-lg font-semibold mb-4">Store Icons</h3>
+            <div className="flex flex-wrap gap-4">
+              <div className="inline-flex items-center gap-4 rounded-xl border border-zinc-800 bg-zinc-900/60 p-4">
+                <Image
+                  src="/store-assets/store-icon-128.png"
+                  alt="Store icon 128x128"
+                  width={64}
+                  height={64}
+                  className="rounded-lg"
+                />
+                <div>
+                  <p className="text-sm font-medium">128 &times; 128 px</p>
+                  <p className="text-xs text-zinc-500">Chrome Web Store & Firefox</p>
+                  <a href="/store-assets/store-icon-128.png" download className="inline-flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300 mt-1">
+                    <Download className="h-3 w-3" />
+                    Download
+                  </a>
+                </div>
+              </div>
+              <div className="inline-flex items-center gap-4 rounded-xl border border-zinc-800 bg-zinc-900/60 p-4">
+                <Image
+                  src="/store-assets/edge-store-icon-300.png"
+                  alt="Edge store icon 300x300"
+                  width={64}
+                  height={64}
+                  className="rounded-lg"
+                />
+                <div>
+                  <p className="text-sm font-medium">300 &times; 300 px</p>
+                  <p className="text-xs text-zinc-500">Edge Add-ons (required size)</p>
+                  <a href="/store-assets/edge-store-icon-300.png" download className="inline-flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300 mt-1">
+                    <Download className="h-3 w-3" />
+                    Download
+                  </a>
+                </div>
               </div>
             </div>
           </div>
@@ -564,6 +594,12 @@ export default function MediaPage() {
           {/* Screenshots */}
           <div className="mb-12">
             <h3 className="text-lg font-semibold mb-4">Store Screenshots</h3>
+            <div className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-4 mb-6 text-xs text-zinc-400 space-y-1">
+              <p><strong className="text-zinc-300">Chrome Web Store:</strong> Upload screenshots 1–5 (max 5 allowed)</p>
+              <p><strong className="text-zinc-300">Edge Add-ons:</strong> Upload screenshots 1–10 (max 10 allowed)</p>
+              <p><strong className="text-zinc-300">Firefox Add-ons:</strong> Optional — upload as many as needed, 1280 x 800 recommended</p>
+              <p className="text-zinc-500">All screenshots are 1280 x 800 px PNG. Dark-mode screenshots are listed first (1–13), light-mode variants follow (14–19).</p>
+            </div>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {storeScreenshots.map((ss, i) => (
                 <div key={ss.file} className="rounded-xl border border-zinc-800 overflow-hidden">

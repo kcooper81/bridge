@@ -35,6 +35,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Download,
+  Loader2,
   Pencil,
   Plus,
   Shield,
@@ -111,6 +112,10 @@ export default function GuardrailsPage() {
   const [scopeTeamId, setScopeTeamId] = useState<string>("global"); // "global" | team_id
   const [testContent, setTestContent] = useState("");
   const [testResult, setTestResult] = useState<{ matched: boolean; matchedText: string | null } | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState<string | null>(null);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [installingDefaults, setInstallingDefaults] = useState(false);
 
   const fetchData = useCallback(async () => {
     if (!org) return;
@@ -169,90 +174,111 @@ export default function GuardrailsPage() {
 
   async function handleSave() {
     if (!canEdit || !name.trim() || !pattern.trim() || !org) return;
-    const supabase = createClient();
+    setSaving(true);
+    try {
+      const supabase = createClient();
 
-    const data = {
-      org_id: org.id,
-      team_id: scopeTeamId === "global" ? null : scopeTeamId,
-      name: name.trim(),
-      description: description.trim() || null,
-      pattern: pattern.trim(),
-      pattern_type: patternType,
-      category,
-      severity,
-      is_active: editRule?.is_active ?? true,
-      is_built_in: editRule?.is_built_in ?? false,
-    };
+      const data = {
+        org_id: org.id,
+        team_id: scopeTeamId === "global" ? null : scopeTeamId,
+        name: name.trim(),
+        description: description.trim() || null,
+        pattern: pattern.trim(),
+        pattern_type: patternType,
+        category,
+        severity,
+        is_active: editRule?.is_active ?? true,
+        is_built_in: editRule?.is_built_in ?? false,
+      };
 
-    if (editRule) {
-      const { error } = await supabase.from("security_rules").update(data).eq("id", editRule.id);
-      if (error) {
-        toast.error("Failed to update policy");
-        return;
+      if (editRule) {
+        const { error } = await supabase.from("security_rules").update(data).eq("id", editRule.id);
+        if (error) {
+          toast.error("Failed to update policy");
+          return;
+        }
+        toast.success("Policy updated");
+      } else {
+        const { error } = await supabase.from("security_rules").insert(data);
+        if (error) {
+          toast.error("Failed to create policy");
+          return;
+        }
+        trackGuardrailCreated();
+        toast.success("Policy created");
       }
-      toast.success("Policy updated");
-    } else {
-      const { error } = await supabase.from("security_rules").insert(data);
-      if (error) {
-        toast.error("Failed to create policy");
-        return;
-      }
-      trackGuardrailCreated();
-      toast.success("Policy created");
+
+      setModalOpen(false);
+      fetchData();
+    } finally {
+      setSaving(false);
     }
-
-    setModalOpen(false);
-    fetchData();
   }
 
   async function handleToggle(rule: SecurityRule) {
-    const supabase = createClient();
-    const { error } = await supabase.from("security_rules").update({ is_active: !rule.is_active }).eq("id", rule.id);
-    if (error) {
-      toast.error("Failed to toggle policy");
-      return;
+    setTogglingId(rule.id);
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.from("security_rules").update({ is_active: !rule.is_active }).eq("id", rule.id);
+      if (error) {
+        toast.error("Failed to toggle policy");
+        return;
+      }
+      fetchData();
+    } finally {
+      setTogglingId(null);
     }
-    fetchData();
   }
 
   async function handleDelete(id: string) {
-    if (!confirm("Delete this policy?")) return;
-    const supabase = createClient();
-    const { error } = await supabase.from("security_rules").delete().eq("id", id);
-    if (error) {
-      toast.error("Failed to delete policy");
-      return;
+    if (!confirm("Delete this policy? This action cannot be undone.")) return;
+    setDeleting(id);
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.from("security_rules").delete().eq("id", id);
+      if (error) {
+        toast.error("Failed to delete policy");
+        return;
+      }
+      toast.success("Policy deleted");
+      fetchData();
+    } finally {
+      setDeleting(null);
     }
-    toast.success("Policy deleted");
-    fetchData();
   }
 
   async function handleInstallDefaults() {
     if (!org) return;
     if (!canAccess("custom_security")) return;
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    if (!confirm(`Install ${DEFAULT_SECURITY_RULES.length} default security policies? You can customize or disable them later.`)) return;
+    setInstallingDefaults(true);
+    try {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
 
-    const inserts = DEFAULT_SECURITY_RULES.map((r) => ({
-      org_id: org.id,
-      name: r.name,
-      description: r.description,
-      pattern: r.pattern,
-      pattern_type: r.pattern_type,
-      category: r.category,
-      severity: r.severity,
-      is_active: r.is_active,
-      is_built_in: true,
-      created_by: user?.id,
-    }));
+      const inserts = DEFAULT_SECURITY_RULES.map((r) => ({
+        org_id: org.id,
+        name: r.name,
+        description: r.description,
+        pattern: r.pattern,
+        pattern_type: r.pattern_type,
+        category: r.category,
+        severity: r.severity,
+        is_active: r.is_active,
+        is_built_in: true,
+        created_by: user?.id,
+      }));
 
-    const { error } = await supabase.from("security_rules").insert(inserts);
-    if (error) {
-      toast.error("Failed to install default policies");
-      return;
+      const { error } = await supabase.from("security_rules").insert(inserts);
+      if (error) {
+        toast.error("Failed to install default policies");
+        return;
+      }
+      toast.success("Default policies installed");
+      fetchData();
+    } finally {
+      setInstallingDefaults(false);
     }
-    toast.success("Default policies installed");
-    fetchData();
   }
 
   function handleTestPattern() {
@@ -314,9 +340,9 @@ export default function GuardrailsPage() {
         actions={
           <div className="flex gap-2">
             {rules.length === 0 && (
-              <Button variant="outline" onClick={handleInstallDefaults}>
-                <Download className="mr-2 h-4 w-4" />
-                Install Defaults
+              <Button variant="outline" onClick={handleInstallDefaults} disabled={installingDefaults}>
+                {installingDefaults ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+                {installingDefaults ? "Installing..." : "Install Defaults"}
               </Button>
             )}
             {canAccess("custom_security") && (
@@ -433,7 +459,7 @@ export default function GuardrailsPage() {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <Switch checked={rule.is_active} onCheckedChange={() => handleToggle(rule)} disabled={!canEdit} />
+                        <Switch checked={rule.is_active} onCheckedChange={() => handleToggle(rule)} disabled={!canEdit || togglingId === rule.id} />
                       </TableCell>
                       <TableCell>
                         {canEdit && (
@@ -442,8 +468,8 @@ export default function GuardrailsPage() {
                               <Pencil className="h-3.5 w-3.5" />
                             </Button>
                             {!rule.is_built_in && (
-                              <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => handleDelete(rule.id)}>
-                                <Trash2 className="h-3.5 w-3.5" />
+                              <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => handleDelete(rule.id)} disabled={deleting === rule.id}>
+                                {deleting === rule.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
                               </Button>
                             )}
                           </div>
@@ -720,8 +746,11 @@ export default function GuardrailsPage() {
             </div>
           </div>
           <div className="mt-4 flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setModalOpen(false)}>Cancel</Button>
-            <Button onClick={handleSave}>{editRule ? "Save" : "Create Policy"}</Button>
+            <Button variant="outline" onClick={() => setModalOpen(false)} disabled={saving}>Cancel</Button>
+            <Button onClick={handleSave} disabled={saving || !name.trim() || !pattern.trim()}>
+              {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {saving ? "Saving..." : editRule ? "Save" : "Create Policy"}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

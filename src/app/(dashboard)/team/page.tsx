@@ -66,6 +66,11 @@ export default function TeamPage() {
   const [addMemberToTeamOpen, setAddMemberToTeamOpen] = useState(false);
   const [selectedMemberToAdd, setSelectedMemberToAdd] = useState<string>("");
   const [addingMember, setAddingMember] = useState(false);
+  const [savingTeam, setSavingTeam] = useState(false);
+  const [changingRoleId, setChangingRoleId] = useState<string | null>(null);
+  const [removingMemberId, setRemovingMemberId] = useState<string | null>(null);
+  const [removingFromTeamId, setRemovingFromTeamId] = useState<string | null>(null);
+  const [togglingShieldId, setTogglingShieldId] = useState<string | null>(null);
 
   // Member search, filter & sort
   const [memberSearch, setMemberSearch] = useState("");
@@ -162,6 +167,7 @@ export default function TeamPage() {
 
   async function handleSaveTeam() {
     if (!teamName.trim()) return;
+    setSavingTeam(true);
     try {
       await saveTeamApi({ id: editTeam?.id, name: teamName.trim(), description: teamDesc.trim() || null });
       toast.success(editTeam ? "Team updated" : "Team created");
@@ -169,6 +175,8 @@ export default function TeamPage() {
       refresh();
     } catch {
       toast.error("Failed to save team");
+    } finally {
+      setSavingTeam(false);
     }
   }
 
@@ -181,12 +189,15 @@ export default function TeamPage() {
         return;
       }
     }
+    setChangingRoleId(memberId);
     try {
       await updateMemberRole(memberId, role);
       toast.success("Role updated");
       refresh();
     } catch {
       toast.error("Failed to update role");
+    } finally {
+      setChangingRoleId(null);
     }
   }
 
@@ -199,13 +210,16 @@ export default function TeamPage() {
         return;
       }
     }
-    if (!confirm("Remove this member from the organization?")) return;
+    if (!confirm(`Remove ${member?.name || member?.email || "this member"} from the organization? This cannot be undone.`)) return;
+    setRemovingMemberId(memberId);
     try {
       await removeMember(memberId);
       toast.success("Member removed");
       refresh();
     } catch {
       toast.error("Failed to remove member");
+    } finally {
+      setRemovingMemberId(null);
     }
   }
 
@@ -266,12 +280,18 @@ export default function TeamPage() {
   }
 
   async function handleRemoveFromTeam(teamId: string, userId: string) {
-    const success = await removeTeamMember(teamId, userId);
-    if (success) {
-      toast.success("Removed from team");
-      refresh();
-    } else {
-      toast.error("Failed to remove from team");
+    if (!confirm("Remove this member from the team?")) return;
+    setRemovingFromTeamId(userId);
+    try {
+      const success = await removeTeamMember(teamId, userId);
+      if (success) {
+        toast.success("Removed from team");
+        refresh();
+      } else {
+        toast.error("Failed to remove from team");
+      }
+    } finally {
+      setRemovingFromTeamId(null);
     }
   }
 
@@ -286,6 +306,7 @@ export default function TeamPage() {
   }
 
   async function handleToggleShield(memberId: string, currentlyDisabled: boolean) {
+    setTogglingShieldId(memberId);
     try {
       const success = await toggleMemberShield(memberId, !currentlyDisabled);
       if (success) {
@@ -296,6 +317,8 @@ export default function TeamPage() {
       }
     } catch {
       toast.error("Failed to toggle shield");
+    } finally {
+      setTogglingShieldId(null);
     }
   }
 
@@ -357,8 +380,8 @@ export default function TeamPage() {
                           <SelectItem value="member">Member</SelectItem>
                         </SelectContent>
                       </Select>
-                      <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive opacity-0 group-hover:opacity-100" onClick={() => handleRemoveFromTeam(selectedTeam.id, member.id)}>
-                        <X className="h-3.5 w-3.5" />
+                      <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive opacity-0 group-hover:opacity-100" onClick={() => handleRemoveFromTeam(selectedTeam.id, member.id)} disabled={removingFromTeamId === member.id}>
+                        {removingFromTeamId === member.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <X className="h-3.5 w-3.5" />}
                       </Button>
                     </div>
                   )}
@@ -568,8 +591,11 @@ export default function TeamPage() {
                                   : "text-green-600 border-green-200 bg-green-50 hover:bg-green-100 dark:text-green-400 dark:border-green-800 dark:bg-green-950/30 dark:hover:bg-green-950/50"
                               )}
                               onClick={() => handleToggleShield(member.id, member.shield_disabled)}
+                              disabled={togglingShieldId === member.id}
                             >
-                              {member.shield_disabled ? (
+                              {togglingShieldId === member.id ? (
+                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                              ) : member.shield_disabled ? (
                                 <>
                                   <ShieldOff className="h-3.5 w-3.5" />
                                   Off
@@ -585,7 +611,7 @@ export default function TeamPage() {
                         )}
                         <td className="p-3">
                           {currentUserRole === "admin" && !member.isCurrentUser ? (
-                            <Select value={member.role} onValueChange={(v) => handleChangeRole(member.id, v)}>
+                            <Select value={member.role} onValueChange={(v) => handleChangeRole(member.id, v)} disabled={changingRoleId === member.id}>
                               <SelectTrigger className="h-7 w-24 text-xs"><SelectValue /></SelectTrigger>
                               <SelectContent>
                                 <SelectItem value="admin">Admin</SelectItem>
@@ -605,8 +631,9 @@ export default function TeamPage() {
                                 size="icon"
                                 className="h-7 w-7 text-destructive opacity-0 group-hover:opacity-100"
                                 onClick={() => handleRemoveMember(member.id)}
+                                disabled={removingMemberId === member.id}
                               >
-                                <X className="h-3.5 w-3.5" />
+                                {removingMemberId === member.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <X className="h-3.5 w-3.5" />}
                               </Button>
                             )}
                           </td>
@@ -659,8 +686,11 @@ export default function TeamPage() {
             </div>
           </div>
           <div className="mt-4 flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setTeamModalOpen(false)}>Cancel</Button>
-            <Button onClick={handleSaveTeam}>{editTeam ? "Save" : "Create"}</Button>
+            <Button variant="outline" onClick={() => setTeamModalOpen(false)} disabled={savingTeam}>Cancel</Button>
+            <Button onClick={handleSaveTeam} disabled={savingTeam || !teamName.trim()}>
+              {savingTeam && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {savingTeam ? "Saving..." : editTeam ? "Save" : "Create"}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

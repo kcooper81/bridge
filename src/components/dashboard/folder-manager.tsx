@@ -17,6 +17,7 @@ export function FolderManager() {
   const [creating, setCreating] = useState(false);
   const [newName, setNewName] = useState("");
   const [saving, setSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const canManage = currentUserRole === "admin" || currentUserRole === "manager";
   if (!canManage) return null;
@@ -57,9 +58,10 @@ export function FolderManager() {
     const count = promptCount(folderId);
     const msg = count > 0
       ? `This category has ${count} prompt(s). They won't be deleted, just unassigned. Continue?`
-      : "Delete this category?";
+      : "Delete this category? This cannot be undone.";
     if (!confirm(msg)) return;
 
+    setDeletingId(folderId);
     try {
       const ok = await deleteFolderApi(folderId);
       if (ok) {
@@ -68,6 +70,8 @@ export function FolderManager() {
       }
     } catch {
       toast.error("Failed to delete category");
+    } finally {
+      setDeletingId(null);
     }
   }
 
@@ -148,8 +152,9 @@ export function FolderManager() {
                     size="icon"
                     className="h-7 w-7 text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
                     onClick={() => handleDelete(folder.id)}
+                    disabled={deletingId === folder.id}
                   >
-                    <Trash2 className="h-3.5 w-3.5" />
+                    {deletingId === folder.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
                   </Button>
                 </>
               )}

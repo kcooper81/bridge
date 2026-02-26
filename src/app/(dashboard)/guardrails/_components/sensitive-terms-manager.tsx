@@ -31,6 +31,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
+  Loader2,
   Plus,
   Upload,
   Pencil,
@@ -88,6 +89,12 @@ export function SensitiveTermsManager({ canEdit, teams = [] }: SensitiveTermsMan
 
   const teamNameMap = new Map(teams.map((t) => [t.id, t.name]));
 
+  // Loading states
+  const [saving, setSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [importing, setImporting] = useState(false);
+
   // Import state
   const [importText, setImportText] = useState("");
 
@@ -134,6 +141,7 @@ export function SensitiveTermsManager({ canEdit, teams = [] }: SensitiveTermsMan
       return;
     }
 
+    setSaving(true);
     try {
       const resolvedTeamId = scopeTeamId === "global" ? null : scopeTeamId;
       if (editTerm) {
@@ -164,11 +172,14 @@ export function SensitiveTermsManager({ canEdit, teams = [] }: SensitiveTermsMan
     } catch (err) {
       toast.error("Failed to save term");
       console.error(err);
+    } finally {
+      setSaving(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Delete this term?")) return;
+    if (!confirm("Delete this sensitive term? This cannot be undone.")) return;
+    setDeletingId(id);
     try {
       await deleteSensitiveTerm(id);
       toast.success("Term deleted");
@@ -176,16 +187,21 @@ export function SensitiveTermsManager({ canEdit, teams = [] }: SensitiveTermsMan
     } catch (err) {
       toast.error("Failed to delete term");
       console.error(err);
+    } finally {
+      setDeletingId(null);
     }
   };
 
   const handleToggle = async (termData: SensitiveTerm) => {
+    setTogglingId(termData.id);
     try {
       await updateSensitiveTerm(termData.id, { is_active: !termData.is_active });
       fetchTerms();
     } catch (err) {
       toast.error("Failed to toggle term");
       console.error(err);
+    } finally {
+      setTogglingId(null);
     }
   };
 
@@ -195,6 +211,7 @@ export function SensitiveTermsManager({ canEdit, teams = [] }: SensitiveTermsMan
       return;
     }
 
+    setImporting(true);
     try {
       // Parse CSV or line-separated terms
       const lines = importText.split("\n").filter((l) => l.trim());
@@ -219,6 +236,8 @@ export function SensitiveTermsManager({ canEdit, teams = [] }: SensitiveTermsMan
     } catch (err) {
       toast.error("Failed to import terms");
       console.error(err);
+    } finally {
+      setImporting(false);
     }
   };
 
@@ -335,7 +354,7 @@ export function SensitiveTermsManager({ canEdit, teams = [] }: SensitiveTermsMan
                             <Switch
                               checked={t.is_active}
                               onCheckedChange={() => handleToggle(t)}
-                              disabled={!canEdit}
+                              disabled={!canEdit || togglingId === t.id}
                             />
                           </TableCell>
                           <TableCell>
@@ -354,8 +373,9 @@ export function SensitiveTermsManager({ canEdit, teams = [] }: SensitiveTermsMan
                                   size="icon"
                                   className="h-7 w-7 text-destructive"
                                   onClick={() => handleDelete(t.id)}
+                                  disabled={deletingId === t.id}
                                 >
-                                  <Trash2 className="h-3.5 w-3.5" />
+                                  {deletingId === t.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
                                 </Button>
                               </div>
                             )}
@@ -457,10 +477,13 @@ export function SensitiveTermsManager({ canEdit, teams = [] }: SensitiveTermsMan
             </div>
           </div>
           <div className="flex justify-end gap-2 mt-4">
-            <Button variant="outline" onClick={() => setModalOpen(false)}>
+            <Button variant="outline" onClick={() => setModalOpen(false)} disabled={saving}>
               Cancel
             </Button>
-            <Button onClick={handleSave}>{editTerm ? "Save" : "Add Term"}</Button>
+            <Button onClick={handleSave} disabled={saving || !term.trim()}>
+              {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {saving ? "Saving..." : editTerm ? "Save" : "Add Term"}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
@@ -495,12 +518,12 @@ ACME-2024, internal_codes`}
             </div>
           </div>
           <div className="flex justify-end gap-2 mt-4">
-            <Button variant="outline" onClick={() => setImportModalOpen(false)}>
+            <Button variant="outline" onClick={() => setImportModalOpen(false)} disabled={importing}>
               Cancel
             </Button>
-            <Button onClick={handleImport}>
-              <Upload className="mr-2 h-4 w-4" />
-              Import
+            <Button onClick={handleImport} disabled={importing || !importText.trim()}>
+              {importing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
+              {importing ? "Importing..." : "Import"}
             </Button>
           </div>
         </DialogContent>

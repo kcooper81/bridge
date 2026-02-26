@@ -20,7 +20,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { TagInput } from "@/components/ui/tag-input";
 import { CategoryCombobox } from "@/components/ui/category-combobox";
-import { BookOpen, Download, Pencil, Plus, Trash2 } from "lucide-react";
+import { BookOpen, Download, Loader2, Pencil, Plus, Trash2 } from "lucide-react";
 import { NoOrgBanner } from "@/components/dashboard/no-org-banner";
 import { UpgradePrompt, LimitNudge } from "@/components/upgrade";
 import {
@@ -50,6 +50,7 @@ export default function GuidelinesPage() {
   const [minLength, setMinLength] = useState("");
   const [maxLength, setMaxLength] = useState("");
   const [saving, setSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   function openModal(g: Guideline | null) {
     if (!g && !checkLimit("add_guideline", guidelines.length)) {
@@ -138,17 +139,21 @@ export default function GuidelinesPage() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm("Delete this guideline?")) return;
+    if (!confirm("Delete this guideline? This cannot be undone.")) return;
+    setDeletingId(id);
     try {
       await deleteGuidelineApi(id);
       toast.success("Guideline deleted");
       refresh();
     } catch {
       toast.error("Failed to delete guideline");
+    } finally {
+      setDeletingId(null);
     }
   }
 
   async function handleInstallDefaults() {
+    if (!confirm("Install default guidelines? You can customize or delete them later.")) return;
     setInstalling(true);
     try {
       await installDefaultGuidelines();
@@ -239,8 +244,8 @@ export default function GuidelinesPage() {
                       <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openModal(g)}>
                         <Pencil className="h-3.5 w-3.5" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => handleDelete(g.id)}>
-                        <Trash2 className="h-3.5 w-3.5" />
+                      <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => handleDelete(g.id)} disabled={deletingId === g.id}>
+                        {deletingId === g.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
                       </Button>
                     </div>
                   )}

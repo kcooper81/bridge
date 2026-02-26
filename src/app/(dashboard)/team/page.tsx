@@ -425,25 +425,54 @@ export default function TeamPage() {
 
       {/* Search & Filters */}
       <div className="space-y-2 mb-3">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search by name or email..."
-            className="pl-9"
-            value={memberSearch}
-            onChange={(e) => setMemberSearch(e.target.value)}
-          />
+        <div className="flex flex-col sm:flex-row gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search by name or email..."
+              className="pl-9"
+              value={memberSearch}
+              onChange={(e) => setMemberSearch(e.target.value)}
+            />
+          </div>
+          <div className="flex gap-2">
+            <Select value={memberRoleFilter} onValueChange={(v) => setMemberRoleFilter(v as typeof memberRoleFilter)}>
+              <SelectTrigger className="w-[130px] h-10">
+                <SelectValue placeholder="Role" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All roles</SelectItem>
+                <SelectItem value="admin">Admin</SelectItem>
+                <SelectItem value="manager">Manager</SelectItem>
+                <SelectItem value="member">Member</SelectItem>
+              </SelectContent>
+            </Select>
+            {currentUserRole === "admin" && (
+              <Select value={memberShieldFilter} onValueChange={(v) => setMemberShieldFilter(v as typeof memberShieldFilter)}>
+                <SelectTrigger className="w-[140px] h-10">
+                  <div className="flex items-center gap-1.5">
+                    <Shield className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span>{memberShieldFilter === "all" ? "All shields" : memberShieldFilter === "enabled" ? "Enabled" : "Disabled"}</span>
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All shields</SelectItem>
+                  <SelectItem value="enabled">Enabled</SelectItem>
+                  <SelectItem value="disabled">Disabled</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+          </div>
         </div>
         {teams.length > 0 && (
-          <div className="flex gap-1 flex-wrap items-center">
-            <span className="text-xs text-muted-foreground mr-1">Team:</span>
+          <div className="flex gap-1.5 flex-wrap items-center">
             <Button
               variant={memberTeamFilter === "all" ? "default" : "outline"}
               size="sm"
               className="h-7 text-xs"
               onClick={() => setMemberTeamFilter("all")}
             >
-              All
+              All teams
             </Button>
             {teams.map((team) => (
               <div key={team.id} className="relative group/pill inline-flex">
@@ -472,36 +501,6 @@ export default function TeamPage() {
                   </div>
                 )}
               </div>
-            ))}
-          </div>
-        )}
-        <div className="flex gap-1 flex-wrap">
-          <span className="text-xs text-muted-foreground self-center mr-1">Role:</span>
-          {(["all", "admin", "manager", "member"] as const).map((f) => (
-            <Button
-              key={f}
-              variant={memberRoleFilter === f ? "default" : "outline"}
-              size="sm"
-              className="capitalize h-7 text-xs"
-              onClick={() => setMemberRoleFilter(f)}
-            >
-              {f}
-            </Button>
-          ))}
-        </div>
-        {currentUserRole === "admin" && (
-          <div className="flex gap-1 flex-wrap">
-            <span className="text-xs text-muted-foreground self-center mr-1">Shield:</span>
-            {(["all", "enabled", "disabled"] as const).map((f) => (
-              <Button
-                key={f}
-                variant={memberShieldFilter === f ? "default" : "outline"}
-                size="sm"
-                className="capitalize h-7 text-xs"
-                onClick={() => setMemberShieldFilter(f)}
-              >
-                {f}
-              </Button>
             ))}
           </div>
         )}

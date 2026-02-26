@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { cn } from "@/lib/utils";
 import { useOrg } from "@/components/providers/org-provider";
 import { useSubscription } from "@/components/providers/subscription-provider";
 import { PageHeader } from "@/components/dashboard/page-header";
@@ -558,16 +559,26 @@ export default function TeamPage() {
                         {currentUserRole === "admin" && (
                           <td className="p-3 hidden sm:table-cell">
                             <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-7 w-7"
-                              title={member.shield_disabled ? "Re-enable shield" : "Disable shield"}
+                              variant="outline"
+                              size="sm"
+                              className={cn(
+                                "h-7 text-xs gap-1.5",
+                                member.shield_disabled
+                                  ? "text-muted-foreground"
+                                  : "text-green-600 border-green-200 bg-green-50 hover:bg-green-100 dark:text-green-400 dark:border-green-800 dark:bg-green-950/30 dark:hover:bg-green-950/50"
+                              )}
                               onClick={() => handleToggleShield(member.id, member.shield_disabled)}
                             >
                               {member.shield_disabled ? (
-                                <ShieldOff className="h-3.5 w-3.5 text-muted-foreground" />
+                                <>
+                                  <ShieldOff className="h-3.5 w-3.5" />
+                                  Off
+                                </>
                               ) : (
-                                <Shield className="h-3.5 w-3.5 text-green-500" />
+                                <>
+                                  <Shield className="h-3.5 w-3.5" />
+                                  On
+                                </>
                               )}
                             </Button>
                           </td>

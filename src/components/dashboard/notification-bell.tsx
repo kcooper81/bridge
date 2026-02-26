@@ -209,7 +209,7 @@ export function NotificationBell() {
               <p className="text-sm text-muted-foreground">No notifications yet</p>
             </div>
           ) : (
-            <div className="p-2 space-y-1">
+            <div className="p-2 space-y-2">
               {notifications.map((notification) => (
                 <NotificationItem
                   key={notification.id}

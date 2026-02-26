@@ -130,7 +130,7 @@ export default function NotificationsPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-3">
           {notifications.map((notification) => {
             const Icon = NOTIFICATION_ICONS[notification.type] || Info;
             const colorClass = NOTIFICATION_COLORS[notification.type] || "text-muted-foreground bg-muted";

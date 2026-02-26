@@ -599,6 +599,14 @@ export function initSharedUI(elements: UIElements) {
     }
   });
 
+  // Open dashboard button
+  const dashboardBtn = document.getElementById("open-dashboard-btn");
+  if (dashboardBtn) {
+    dashboardBtn.addEventListener("click", () => {
+      browser.tabs.create({ url: CONFIG.SITE_URL + "/home" });
+    });
+  }
+
   // Theme toggle
   const themeToggleBtn = document.getElementById("theme-toggle-btn");
   if (themeToggleBtn) {

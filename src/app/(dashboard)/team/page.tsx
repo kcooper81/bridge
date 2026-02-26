@@ -6,7 +6,7 @@ import { useSubscription } from "@/components/providers/subscription-provider";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Dialog,
@@ -23,13 +23,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, ArrowUpDown, Loader2, Mail, Pencil, Plus, Search, Shield, ShieldOff, Trash2, UserPlus, Users, X } from "lucide-react";
+import { ArrowLeft, ArrowUpDown, Loader2, Mail, Pencil, Plus, Search, Shield, ShieldOff, UserPlus, Users, X } from "lucide-react";
 import { SelectWithQuickAdd } from "@/components/ui/select-with-quick-add";
 import { ExtensionStatusBadge } from "@/components/dashboard/extension-status-badge";
 import { NoOrgBanner } from "@/components/dashboard/no-org-banner";
 import {
   saveTeamApi,
-  deleteTeamApi,
   updateMemberRole,
   removeMember,
   sendInvite,
@@ -69,6 +68,7 @@ export default function TeamPage() {
 
   // Member search, filter & sort
   const [memberSearch, setMemberSearch] = useState("");
+  const [memberTeamFilter, setMemberTeamFilter] = useState<string>("all");
   const [memberRoleFilter, setMemberRoleFilter] = useState<"all" | "admin" | "manager" | "member">("all");
   const [memberShieldFilter, setMemberShieldFilter] = useState<"all" | "enabled" | "disabled">("all");
   const [memberSort, setMemberSort] = useState<{ key: "name" | "email" | "role"; dir: "asc" | "desc" }>({ key: "name", dir: "asc" });
@@ -81,6 +81,10 @@ export default function TeamPage() {
       result = result.filter(
         (m) => m.name?.toLowerCase().includes(q) || m.email.toLowerCase().includes(q)
       );
+    }
+
+    if (memberTeamFilter !== "all") {
+      result = result.filter((m) => m.teamIds.includes(memberTeamFilter));
     }
 
     if (memberRoleFilter !== "all") {
@@ -110,7 +114,7 @@ export default function TeamPage() {
     });
 
     return result;
-  }, [members, memberSearch, memberRoleFilter, memberShieldFilter, memberSort]);
+  }, [members, memberSearch, memberTeamFilter, memberRoleFilter, memberShieldFilter, memberSort]);
 
   const handleMemberSort = (key: "name" | "email" | "role") => {
     setMemberSort((prev) =>
@@ -128,13 +132,11 @@ export default function TeamPage() {
     return (
       <>
         <PageHeader title="Team" description="Manage members, teams, and invitations" />
-        <div className="grid gap-6 lg:grid-cols-2">
-          {[1, 2].map((i) => (
-            <div key={i} className="space-y-3">
-              {[1, 2, 3].map((j) => (
-                <div key={j} className="h-20 rounded-lg bg-muted animate-pulse" />
-              ))}
-            </div>
+        <div className="space-y-3">
+          <div className="h-10 rounded-lg bg-muted animate-pulse" />
+          <div className="h-8 w-64 rounded-lg bg-muted animate-pulse" />
+          {[1, 2, 3, 4].map((j) => (
+            <div key={j} className="h-14 rounded-lg bg-muted animate-pulse" />
           ))}
         </div>
       </>
@@ -166,18 +168,6 @@ export default function TeamPage() {
       refresh();
     } catch {
       toast.error("Failed to save team");
-    }
-  }
-
-  async function handleDeleteTeam(id: string) {
-    if (!confirm("Delete this team?")) return;
-    try {
-      await deleteTeamApi(id);
-      toast.success("Team deleted");
-      if (selectedTeam?.id === id) setSelectedTeam(null);
-      refresh();
-    } catch {
-      toast.error("Failed to delete team");
     }
   }
 
@@ -433,240 +423,230 @@ export default function TeamPage() {
       )}
       <LimitNudge feature="add_member" current={members.length} max={planLimits.max_members} className="mb-4" />
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Teams */}
-        <div>
-          <h2 className="text-lg font-semibold mb-3">Teams</h2>
-          {teams.length === 0 ? (
-            <Card>
-              <CardContent className="flex flex-col items-center py-8">
-                <Users className="h-8 w-8 text-muted-foreground mb-2" />
-                <p className="text-sm text-muted-foreground">No teams yet</p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="space-y-3">
-              {teams.map((team) => {
-                const teamMembers = members.filter((m) => m.teamIds.includes(team.id));
-                return (
-                  <Card
-                    key={team.id}
-                    className="group cursor-pointer hover:border-primary/30 transition-colors"
-                    onClick={() => setSelectedTeam(team)}
-                  >
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-base">{team.name}</CardTitle>
-                      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={(e) => { e.stopPropagation(); openTeamModal(team); }}>
-                          <Pencil className="h-3.5 w-3.5" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={(e) => { e.stopPropagation(); handleDeleteTeam(team.id); }}>
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      {team.description && <p className="text-sm text-muted-foreground mb-2">{team.description}</p>}
-                      <span className="text-xs text-muted-foreground">{teamMembers.length} members</span>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-          )}
+      {/* Search & Filters */}
+      <div className="space-y-2 mb-3">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search by name or email..."
+            className="pl-9"
+            value={memberSearch}
+            onChange={(e) => setMemberSearch(e.target.value)}
+          />
         </div>
-
-        {/* Members */}
-        <div>
-          <h2 className="text-lg font-semibold mb-3">
-            Members ({members.length})
-          </h2>
-
-          {/* Search & Filters */}
-          <div className="space-y-2 mb-3">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search by name or email..."
-                className="pl-9"
-                value={memberSearch}
-                onChange={(e) => setMemberSearch(e.target.value)}
-              />
-            </div>
-            <div className="flex gap-1 flex-wrap">
-              <span className="text-xs text-muted-foreground self-center mr-1">Role:</span>
-              {(["all", "admin", "manager", "member"] as const).map((f) => (
+        {teams.length > 0 && (
+          <div className="flex gap-1 flex-wrap items-center">
+            <span className="text-xs text-muted-foreground mr-1">Team:</span>
+            <Button
+              variant={memberTeamFilter === "all" ? "default" : "outline"}
+              size="sm"
+              className="h-7 text-xs"
+              onClick={() => setMemberTeamFilter("all")}
+            >
+              All
+            </Button>
+            {teams.map((team) => (
+              <div key={team.id} className="relative group/pill inline-flex">
                 <Button
-                  key={f}
-                  variant={memberRoleFilter === f ? "default" : "outline"}
+                  variant={memberTeamFilter === team.id ? "default" : "outline"}
                   size="sm"
-                  className="capitalize h-7 text-xs"
-                  onClick={() => setMemberRoleFilter(f)}
+                  className="h-7 text-xs pr-7"
+                  onClick={() => setMemberTeamFilter(memberTeamFilter === team.id ? "all" : team.id)}
                 >
-                  {f}
+                  {team.name}
+                  <span className="ml-1 text-[10px] opacity-60">
+                    {members.filter((m) => m.teamIds.includes(team.id)).length}
+                  </span>
                 </Button>
-              ))}
-            </div>
-            {currentUserRole === "admin" && (
-              <div className="flex gap-1 flex-wrap">
-                <span className="text-xs text-muted-foreground self-center mr-1">Shield:</span>
-                {(["all", "enabled", "disabled"] as const).map((f) => (
-                  <Button
-                    key={f}
-                    variant={memberShieldFilter === f ? "default" : "outline"}
-                    size="sm"
-                    className="capitalize h-7 text-xs"
-                    onClick={() => setMemberShieldFilter(f)}
-                  >
-                    {f}
-                  </Button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Result count */}
-          <p className="text-xs text-muted-foreground mb-2">
-            {filteredMembers.length} member{filteredMembers.length !== 1 ? "s" : ""}
-          </p>
-
-          {/* Members Table */}
-          <Card>
-            <CardContent className="p-0">
-              {filteredMembers.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <Users className="h-10 w-10 text-muted-foreground mb-3" />
-                  <p className="text-muted-foreground">No members found</p>
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b bg-muted/50">
-                        <th className="text-left p-3 font-medium">
-                          <button className="flex items-center gap-1 hover:text-foreground" onClick={() => handleMemberSort("name")}>
-                            Name <ArrowUpDown className="h-3 w-3" />
-                          </button>
-                        </th>
-                        <th className="text-left p-3 font-medium hidden sm:table-cell">Extension</th>
-                        {currentUserRole === "admin" && (
-                          <th className="text-left p-3 font-medium hidden md:table-cell">Shield</th>
-                        )}
-                        <th className="text-left p-3 font-medium">
-                          <button className="flex items-center gap-1 hover:text-foreground" onClick={() => handleMemberSort("role")}>
-                            Role <ArrowUpDown className="h-3 w-3" />
-                          </button>
-                        </th>
-                        {currentUserRole === "admin" && (
-                          <th className="text-left p-3 font-medium w-10">
-                            <span className="sr-only">Actions</span>
-                          </th>
-                        )}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredMembers.map((member) => {
-                        const initials = member.name?.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2) || "U";
-                        return (
-                          <tr key={member.id} className="border-b hover:bg-muted/30 transition-colors group">
-                            <td className="p-3">
-                              <div className="flex items-center gap-3">
-                                <Avatar className="h-8 w-8">
-                                  <AvatarFallback className="bg-primary/20 text-primary text-xs">{initials}</AvatarFallback>
-                                </Avatar>
-                                <div className="min-w-0">
-                                  <p className="font-medium truncate">{member.name}</p>
-                                  <p className="text-xs text-muted-foreground truncate">{member.email}</p>
-                                </div>
-                              </div>
-                            </td>
-                            <td className="p-3 hidden sm:table-cell">
-                              <ExtensionStatusBadge
-                                lastActive={member.last_extension_active}
-                                version={member.extension_version}
-                              />
-                            </td>
-                            {currentUserRole === "admin" && (
-                              <td className="p-3 hidden md:table-cell">
-                                {!member.isCurrentUser ? (
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-7 w-7"
-                                    title={member.shield_disabled ? "Re-enable shield" : "Disable shield"}
-                                    onClick={() => handleToggleShield(member.id, member.shield_disabled)}
-                                  >
-                                    {member.shield_disabled ? (
-                                      <ShieldOff className="h-3.5 w-3.5 text-muted-foreground" />
-                                    ) : (
-                                      <Shield className="h-3.5 w-3.5 text-green-500" />
-                                    )}
-                                  </Button>
-                                ) : (
-                                  <Shield className="h-3.5 w-3.5 text-green-500 ml-2" />
-                                )}
-                              </td>
-                            )}
-                            <td className="p-3">
-                              {currentUserRole === "admin" && !member.isCurrentUser ? (
-                                <Select value={member.role} onValueChange={(v) => handleChangeRole(member.id, v)}>
-                                  <SelectTrigger className="h-7 w-24 text-xs"><SelectValue /></SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="admin">Admin</SelectItem>
-                                    <SelectItem value="manager">Manager</SelectItem>
-                                    <SelectItem value="member">Member</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              ) : (
-                                <Badge variant="outline" className="text-xs capitalize">{member.role}</Badge>
-                              )}
-                            </td>
-                            {currentUserRole === "admin" && (
-                              <td className="p-3">
-                                {!member.isCurrentUser && (
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-7 w-7 text-destructive opacity-0 group-hover:opacity-100"
-                                    onClick={() => handleRemoveMember(member.id)}
-                                  >
-                                    <X className="h-3.5 w-3.5" />
-                                  </Button>
-                                )}
-                              </td>
-                            )}
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Pending Invites */}
-          {pendingInvites.length > 0 && (
-            <div className="mt-6">
-              <h3 className="text-sm font-semibold mb-2">Pending Invites</h3>
-              <div className="space-y-2">
-                {pendingInvites.map((inv) => (
-                  <div key={inv.id} className="flex items-center gap-3 rounded-lg border border-border/50 bg-muted/30 p-3">
-                    <Mail className="h-4 w-4 text-muted-foreground" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm truncate">{inv.email}</p>
-                      <Badge variant="outline" className="text-xs mt-0.5">{inv.role}</Badge>
-                    </div>
-                    <Button variant="ghost" size="sm" className="text-destructive h-7" onClick={() => handleRevokeInvite(inv.id)}>
-                      Revoke
+                {currentUserRole === "admin" && (
+                  <div className="absolute right-0 top-0 bottom-0 flex items-center opacity-0 group-hover/pill:opacity-100 transition-opacity">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-5 w-5 mr-0.5"
+                      onClick={(e) => { e.stopPropagation(); setSelectedTeam(team); }}
+                      title="Manage team"
+                    >
+                      <Pencil className="h-2.5 w-2.5" />
                     </Button>
                   </div>
-                ))}
+                )}
               </div>
+            ))}
+          </div>
+        )}
+        <div className="flex gap-1 flex-wrap">
+          <span className="text-xs text-muted-foreground self-center mr-1">Role:</span>
+          {(["all", "admin", "manager", "member"] as const).map((f) => (
+            <Button
+              key={f}
+              variant={memberRoleFilter === f ? "default" : "outline"}
+              size="sm"
+              className="capitalize h-7 text-xs"
+              onClick={() => setMemberRoleFilter(f)}
+            >
+              {f}
+            </Button>
+          ))}
+        </div>
+        {currentUserRole === "admin" && (
+          <div className="flex gap-1 flex-wrap">
+            <span className="text-xs text-muted-foreground self-center mr-1">Shield:</span>
+            {(["all", "enabled", "disabled"] as const).map((f) => (
+              <Button
+                key={f}
+                variant={memberShieldFilter === f ? "default" : "outline"}
+                size="sm"
+                className="capitalize h-7 text-xs"
+                onClick={() => setMemberShieldFilter(f)}
+              >
+                {f}
+              </Button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Result count */}
+      <p className="text-xs text-muted-foreground mb-2">
+        {filteredMembers.length} member{filteredMembers.length !== 1 ? "s" : ""}
+      </p>
+
+      {/* Members Table */}
+      <Card>
+        <CardContent className="p-0">
+          {filteredMembers.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <Users className="h-10 w-10 text-muted-foreground mb-3" />
+              <p className="text-muted-foreground">No members found</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b bg-muted/50">
+                    <th className="text-left p-3 font-medium">
+                      <button className="flex items-center gap-1 hover:text-foreground" onClick={() => handleMemberSort("name")}>
+                        Name <ArrowUpDown className="h-3 w-3" />
+                      </button>
+                    </th>
+                    <th className="text-left p-3 font-medium hidden sm:table-cell">Extension</th>
+                    {currentUserRole === "admin" && (
+                      <th className="text-left p-3 font-medium hidden md:table-cell">Shield</th>
+                    )}
+                    <th className="text-left p-3 font-medium">
+                      <button className="flex items-center gap-1 hover:text-foreground" onClick={() => handleMemberSort("role")}>
+                        Role <ArrowUpDown className="h-3 w-3" />
+                      </button>
+                    </th>
+                    {currentUserRole === "admin" && (
+                      <th className="text-left p-3 font-medium w-10">
+                        <span className="sr-only">Actions</span>
+                      </th>
+                    )}
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredMembers.map((member) => {
+                    const initials = member.name?.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2) || "U";
+                    return (
+                      <tr key={member.id} className="border-b hover:bg-muted/30 transition-colors group">
+                        <td className="p-3">
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-8 w-8">
+                              <AvatarFallback className="bg-primary/20 text-primary text-xs">{initials}</AvatarFallback>
+                            </Avatar>
+                            <div className="min-w-0">
+                              <p className="font-medium truncate">{member.name}</p>
+                              <p className="text-xs text-muted-foreground truncate">{member.email}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="p-3 hidden sm:table-cell">
+                          <ExtensionStatusBadge
+                            lastActive={member.last_extension_active}
+                            version={member.extension_version}
+                          />
+                        </td>
+                        {currentUserRole === "admin" && (
+                          <td className="p-3 hidden md:table-cell">
+                            {!member.isCurrentUser ? (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7"
+                                title={member.shield_disabled ? "Re-enable shield" : "Disable shield"}
+                                onClick={() => handleToggleShield(member.id, member.shield_disabled)}
+                              >
+                                {member.shield_disabled ? (
+                                  <ShieldOff className="h-3.5 w-3.5 text-muted-foreground" />
+                                ) : (
+                                  <Shield className="h-3.5 w-3.5 text-green-500" />
+                                )}
+                              </Button>
+                            ) : (
+                              <Shield className="h-3.5 w-3.5 text-green-500 ml-2" />
+                            )}
+                          </td>
+                        )}
+                        <td className="p-3">
+                          {currentUserRole === "admin" && !member.isCurrentUser ? (
+                            <Select value={member.role} onValueChange={(v) => handleChangeRole(member.id, v)}>
+                              <SelectTrigger className="h-7 w-24 text-xs"><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="admin">Admin</SelectItem>
+                                <SelectItem value="manager">Manager</SelectItem>
+                                <SelectItem value="member">Member</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <Badge variant="outline" className="text-xs capitalize">{member.role}</Badge>
+                          )}
+                        </td>
+                        {currentUserRole === "admin" && (
+                          <td className="p-3">
+                            {!member.isCurrentUser && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 text-destructive opacity-0 group-hover:opacity-100"
+                                onClick={() => handleRemoveMember(member.id)}
+                              >
+                                <X className="h-3.5 w-3.5" />
+                              </Button>
+                            )}
+                          </td>
+                        )}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Pending Invites */}
+      {pendingInvites.length > 0 && (
+        <div className="mt-6">
+          <h3 className="text-sm font-semibold mb-2">Pending Invites</h3>
+          <div className="space-y-2">
+            {pendingInvites.map((inv) => (
+              <div key={inv.id} className="flex items-center gap-3 rounded-lg border border-border/50 bg-muted/30 p-3">
+                <Mail className="h-4 w-4 text-muted-foreground" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm truncate">{inv.email}</p>
+                  <Badge variant="outline" className="text-xs mt-0.5">{inv.role}</Badge>
+                </div>
+                <Button variant="ghost" size="sm" className="text-destructive h-7" onClick={() => handleRevokeInvite(inv.id)}>
+                  Revoke
+                </Button>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Team Modal */}
       <Dialog open={teamModalOpen} onOpenChange={setTeamModalOpen}>

@@ -392,11 +392,11 @@ input:focus {
 
 .prompt-card {
   padding: 12px 14px;
-  border: 1px solid var(--border);
+  border: 1.5px solid var(--border);
   border-radius: var(--radius-lg);
   margin-bottom: 6px;
   cursor: pointer;
-  transition: all var(--transition);
+  transition: border-color 150ms ease, background 150ms ease, box-shadow 150ms ease;
   background: var(--card);
   box-shadow: 0 1px 4px -1px rgba(0, 0, 0, 0.25);
 }
@@ -407,7 +407,6 @@ input:focus {
   border-color: var(--primary);
   background: var(--primary-surface);
   box-shadow: 0 2px 12px -2px rgba(59, 130, 246, 0.15);
-  transform: translateY(-1px);
 }
 
 .prompt-card-header {
@@ -422,7 +421,7 @@ input:focus {
   color: var(--text-dim);
   opacity: 0;
   transform: translateX(-4px);
-  transition: all var(--transition);
+  transition: opacity 150ms ease, transform 150ms ease;
 }
 .prompt-card:hover .prompt-card-arrow {
   opacity: 1;
@@ -906,10 +905,10 @@ input:focus {
   align-items: center;
   gap: 12px;
   padding: 12px 14px;
-  border: 1px solid var(--border);
+  border: 1.5px solid var(--border);
   border-radius: var(--radius-lg);
   cursor: pointer;
-  transition: all var(--transition);
+  transition: border-color 150ms ease, background 150ms ease, box-shadow 150ms ease;
   background: var(--card);
   box-shadow: 0 1px 4px -1px rgba(0, 0, 0, 0.25);
 }
@@ -920,7 +919,6 @@ input:focus {
   border-color: var(--primary);
   background: var(--primary-surface);
   box-shadow: 0 2px 12px -2px rgba(59, 130, 246, 0.15);
-  transform: translateY(-1px);
 }
 .folder-card.unfiled {
   border-style: dashed;
@@ -962,7 +960,7 @@ input:focus {
   color: var(--text-dim);
   opacity: 0;
   transform: translateX(-4px);
-  transition: all var(--transition);
+  transition: opacity 150ms ease, transform 150ms ease;
 }
 .folder-card:hover .folder-card-arrow {
   opacity: 1;

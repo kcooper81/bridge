@@ -10,13 +10,17 @@ export interface SessionData {
 }
 
 export async function getSession(): Promise<SessionData | null> {
-  const data = await browser.storage.local.get([
-    "accessToken",
-    "refreshToken",
-    "user",
-  ]);
-  extAuthDebug.log("session", "getSession()", { hasToken: !!data.accessToken }); // AUTH-DEBUG
-  if (data.accessToken) return data as SessionData;
+  try {
+    const data = await browser.storage.local.get([
+      "accessToken",
+      "refreshToken",
+      "user",
+    ]);
+    extAuthDebug.log("session", "getSession()", { hasToken: !!data.accessToken }); // AUTH-DEBUG
+    if (data.accessToken) return data as SessionData;
+  } catch {
+    // Context invalidated or storage unavailable
+  }
   return null;
 }
 
@@ -57,13 +61,17 @@ export async function login(
 
 export async function logout(): Promise<void> {
   extAuthDebug.log("login", "ext logout initiated"); // AUTH-DEBUG
-  const data = await browser.storage.local.get(["user"]);
-  const userId = data.user?.id;
-  // Set loggedOut flag BEFORE removing tokens so the auth-bridge knows
-  // not to re-sync web cookies back to the extension on the next page load.
-  await browser.storage.local.set({ loggedOut: true });
-  await browser.storage.local.remove(["accessToken", "refreshToken", "user"]);
-  if (userId) sendSessionEvent(userId, "session_lost");
+  try {
+    const data = await browser.storage.local.get(["user"]);
+    const userId = data.user?.id;
+    // Set loggedOut flag BEFORE removing tokens so the auth-bridge knows
+    // not to re-sync web cookies back to the extension on the next page load.
+    await browser.storage.local.set({ loggedOut: true });
+    await browser.storage.local.remove(["accessToken", "refreshToken", "user"]);
+    if (userId) sendSessionEvent(userId, "session_lost");
+  } catch {
+    // Context invalidated
+  }
 }
 
 export function openLogin(): void {
@@ -103,7 +111,12 @@ export async function sendSessionEvent(userId: string, event: string): Promise<v
 }
 
 export async function refreshSession(): Promise<void> {
-  const data = await browser.storage.local.get(["refreshToken"]);
+  let data;
+  try {
+    data = await browser.storage.local.get(["refreshToken"]);
+  } catch {
+    return; // Context invalidated
+  }
   if (!data.refreshToken) {
     extAuthDebug.log("refresh", "refreshSession: no refresh token"); // AUTH-DEBUG
     return;

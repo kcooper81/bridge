@@ -241,28 +241,14 @@ function renderFolderPills(folders: ExtFolder[], unfiledCount: number) {
   });
   pillBar.appendChild(allPill);
 
-  // Folder pills
+  // Folder pills — show all folders (even empty)
   for (const f of folders) {
-    if (f.prompt_count === 0) continue;
     const pill = document.createElement("button");
     pill.className = `folder-pill${currentFolderId === f.id ? " active" : ""}`;
     pill.textContent = `${f.icon || "\uD83D\uDCC1"} ${f.name}`;
     pill.addEventListener("click", () => {
       currentFolderId = f.id;
       currentFolderName = f.name;
-      loadFoldersTab();
-    });
-    pillBar.appendChild(pill);
-  }
-
-  // Unfiled pill
-  if (unfiledCount > 0) {
-    const pill = document.createElement("button");
-    pill.className = `folder-pill${currentFolderId === "unfiled" ? " active" : ""}`;
-    pill.textContent = "Unfiled";
-    pill.addEventListener("click", () => {
-      currentFolderId = "unfiled";
-      currentFolderName = "Unfiled";
       loadFoldersTab();
     });
     pillBar.appendChild(pill);

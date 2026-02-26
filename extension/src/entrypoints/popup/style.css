@@ -344,15 +344,16 @@ input:focus {
 }
 .tab {
   flex: 1;
-  padding: 6px 10px;
+  padding: 6px 4px;
   border: none;
   border-radius: 8px;
   background: transparent;
   color: var(--text-muted);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   cursor: pointer;
   transition: all var(--transition);
+  white-space: nowrap;
 }
 .tab:hover { color: var(--text); }
 .tab.active {

@@ -214,9 +214,13 @@ export default defineContentScript({
         killContentScript();
         return;
       }
-      browser.runtime.sendMessage({ type: "PING" }).catch(() => {
+      try {
+        browser.runtime.sendMessage({ type: "PING" }).catch(() => {
+          killContentScript();
+        });
+      } catch {
         killContentScript();
-      });
+      }
     }, 5_000);
 
     // ─── Message Handler ───
@@ -328,13 +332,18 @@ function debouncedRefreshShieldStatus() {
 
 async function refreshShieldStatus() {
   if (_contextDead) return;
-  const status = await fetchSecurityStatus();
-  if (_contextDead) return;
-  if (status) {
-    _isProtected = status.protected;
-    _ruleCount = status.activeRuleCount;
+  try {
+    const status = await fetchSecurityStatus();
+    if (_contextDead) return;
+    if (status) {
+      _isProtected = status.protected;
+      _ruleCount = status.activeRuleCount;
+    }
+    updateShieldState();
+  } catch {
+    // Context likely invalidated — stop silently
+    if (!_contextDead) killContentScript();
   }
-  updateShieldState();
 }
 
 function updateShieldState() {
@@ -545,16 +554,21 @@ function clickSendButton() {
 // ─── Shield Indicator ───
 
 async function initShieldIndicator() {
-  // Check auth status
-  const session = await getSession();
-  _isAuthenticated = !!session;
+  try {
+    // Check auth status
+    const session = await getSession();
+    _isAuthenticated = !!session;
 
-  if (_isAuthenticated) {
-    const status = await fetchSecurityStatus();
-    if (status) {
-      _isProtected = status.protected;
-      _ruleCount = status.activeRuleCount;
+    if (_isAuthenticated && !_contextDead) {
+      const status = await fetchSecurityStatus();
+      if (status) {
+        _isProtected = status.protected;
+        _ruleCount = status.activeRuleCount;
+      }
     }
+  } catch {
+    // Context likely invalidated during init
+    if (!_contextDead) killContentScript();
   }
 
   createShieldElement();

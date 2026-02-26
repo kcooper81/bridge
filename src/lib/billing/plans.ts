@@ -36,7 +36,7 @@ export const STRIPE_PLAN_CONFIG = {
   },
   business: {
     priceEnv: { monthly: "STRIPE_PRICE_BUSINESS", annual: "STRIPE_PRICE_BUSINESS_ANNUAL" },
-    minSeats: 5,
+    minSeats: 10,
     maxSeats: 500,
     trial: false,
   },

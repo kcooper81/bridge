@@ -6,6 +6,8 @@ import {
   Import,
   Shield,
   Activity,
+  Headphones,
+  ShieldCheck,
   type LucideIcon,
 } from "lucide-react";
 import type { PlanTier } from "@/lib/types";
@@ -59,7 +61,9 @@ export type BooleanFeature =
   | "analytics"
   | "import_export"
   | "custom_security"
-  | "audit_log";
+  | "audit_log"
+  | "priority_support"
+  | "sla";
 
 export interface FeatureMeta {
   icon: LucideIcon;
@@ -104,8 +108,8 @@ export const FEATURE_CONFIG: Record<BooleanFeature, FeatureMeta> = {
       "Category-based policy management",
       "AI-powered detection capabilities",
     ],
-    unlockPlan: "pro",
-    unlockPlanName: "Pro",
+    unlockPlan: "team",
+    unlockPlanName: "Team",
   },
   audit_log: {
     icon: Activity,
@@ -118,5 +122,29 @@ export const FEATURE_CONFIG: Record<BooleanFeature, FeatureMeta> = {
     ],
     unlockPlan: "team",
     unlockPlanName: "Team",
+  },
+  priority_support: {
+    icon: Headphones,
+    title: "Priority Support",
+    description: "Get dedicated support with faster response times for your organization.",
+    benefits: [
+      "Priority ticket queue with faster response",
+      "Dedicated account manager",
+      "Direct escalation path for critical issues",
+    ],
+    unlockPlan: "business",
+    unlockPlanName: "Business",
+  },
+  sla: {
+    icon: ShieldCheck,
+    title: "SLA Guarantee",
+    description: "Enterprise-grade uptime guarantee with service level agreement.",
+    benefits: [
+      "99.9% uptime guarantee",
+      "Service credits for downtime",
+      "Scheduled maintenance windows",
+    ],
+    unlockPlan: "business",
+    unlockPlanName: "Business",
   },
 };

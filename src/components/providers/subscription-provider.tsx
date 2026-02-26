@@ -19,7 +19,7 @@ interface SubscriptionContextValue {
   planLimits: PlanLimits;
   loading: boolean;
   refresh: () => Promise<void>;
-  canAccess: (feature: keyof Pick<PlanLimits, "analytics" | "import_export" | "custom_security" | "audit_log">) => boolean;
+  canAccess: (feature: keyof Pick<PlanLimits, "analytics" | "import_export" | "custom_security" | "audit_log" | "priority_support" | "sla">) => boolean;
   checkLimit: (action: "create_prompt" | "add_member" | "add_guideline", currentCount: number) => boolean;
 }
 
@@ -116,7 +116,7 @@ export function SubscriptionProvider({
   }, [refresh]);
 
   const canAccess = useCallback(
-    (feature: keyof Pick<PlanLimits, "analytics" | "import_export" | "custom_security" | "audit_log">): boolean => {
+    (feature: keyof Pick<PlanLimits, "analytics" | "import_export" | "custom_security" | "audit_log" | "priority_support" | "sla">): boolean => {
       if (isSuperAdmin) return true;
       return planLimits[feature];
     },

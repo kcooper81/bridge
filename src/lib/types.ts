@@ -238,6 +238,8 @@ export interface PlanLimits {
   basic_security: boolean;
   custom_security: boolean;
   audit_log: boolean;
+  priority_support: boolean;
+  sla: boolean;
 }
 
 export interface SecurityRule {

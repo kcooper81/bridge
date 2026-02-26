@@ -3,10 +3,10 @@ import { createServerClient } from "@supabase/ssr";
 import { authDebug } from "@/lib/auth-debug"; // AUTH-DEBUG
 
 function sanitizeRedirect(next: string | null): string {
-  if (!next) return "/vault";
+  if (!next) return "/home";
   // Only allow relative paths — block protocol-relative URLs and external redirects
   if (next.startsWith("/") && !next.startsWith("//")) return next;
-  return "/vault";
+  return "/home";
 }
 
 export async function GET(request: NextRequest) {

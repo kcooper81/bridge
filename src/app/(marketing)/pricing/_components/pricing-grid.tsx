@@ -35,13 +35,15 @@ const plans: PlanData[] = [
     href: "/signup",
     features: {
       Prompts: "25",
-      Members: "3",
+      Members: "1",
       Guidelines: "5",
       "Basic Security Patterns": true,
       "Custom Security Rules": false,
       "Security Audit Log": false,
       Analytics: false,
       "Import/Export": false,
+      "Priority Support": false,
+      "SLA Guarantee": false,
       "Chrome Extension": true,
     },
   },
@@ -60,10 +62,12 @@ const plans: PlanData[] = [
       Members: "1",
       Guidelines: "All 14",
       "Basic Security Patterns": true,
-      "Custom Security Rules": true,
+      "Custom Security Rules": false,
       "Security Audit Log": false,
       Analytics: true,
       "Import/Export": true,
+      "Priority Support": false,
+      "SLA Guarantee": false,
       "Chrome Extension": true,
     },
   },
@@ -74,7 +78,7 @@ const plans: PlanData[] = [
     annualPrice: "$67",
     period: "/user/month",
     annualPeriod: "/user/month",
-    description: "For teams up to 50",
+    description: "For growing teams",
     cta: "Start 14-Day Trial",
     href: "/signup?plan=team",
     popular: true,
@@ -87,6 +91,8 @@ const plans: PlanData[] = [
       "Security Audit Log": true,
       Analytics: true,
       "Import/Export": true,
+      "Priority Support": false,
+      "SLA Guarantee": false,
       "Chrome Extension": true,
     },
   },
@@ -97,18 +103,20 @@ const plans: PlanData[] = [
     annualPrice: "$115",
     period: "/user/month",
     annualPeriod: "/user/month",
-    description: "For larger organizations",
+    description: "For large organizations",
     cta: "Get Started",
     href: "/signup?plan=business",
     features: {
       Prompts: "Unlimited",
       Members: "Up to 500",
-      Guidelines: "All 14 + custom",
+      Guidelines: "Unlimited",
       "Basic Security Patterns": true,
       "Custom Security Rules": true,
       "Security Audit Log": true,
       Analytics: true,
       "Import/Export": true,
+      "Priority Support": true,
+      "SLA Guarantee": true,
       "Chrome Extension": true,
     },
   },
@@ -169,7 +177,7 @@ export function PricingGrid() {
                 </div>
                 {annual && plan.name !== "Free" && (
                   <p className="mt-1 text-xs text-muted-foreground">
-                    billed as {plan.annualPrice}/user/year
+                    billed as {plan.annualPrice}{plan.period.includes("/user") ? "/user" : ""}/year
                   </p>
                 )}
                 <p className="mt-3 text-sm text-muted-foreground leading-relaxed">

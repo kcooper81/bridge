@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useOrg } from "@/components/providers/org-provider";
 import { useSubscription } from "@/components/providers/subscription-provider";
 import { PageHeader } from "@/components/dashboard/page-header";
@@ -23,7 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, Loader2, Mail, Pencil, Plus, Trash2, UserPlus, Users, X } from "lucide-react";
+import { ArrowLeft, ArrowUpDown, Loader2, Mail, Pencil, Plus, Search, Shield, ShieldOff, Trash2, UserPlus, Users, X } from "lucide-react";
 import { SelectWithQuickAdd } from "@/components/ui/select-with-quick-add";
 import { ExtensionStatusBadge } from "@/components/dashboard/extension-status-badge";
 import { NoOrgBanner } from "@/components/dashboard/no-org-banner";
@@ -38,6 +38,7 @@ import {
   addTeamMember,
   removeTeamMember,
   updateTeamMemberRole,
+  toggleMemberShield,
 } from "@/lib/vault-api";
 import { toast } from "sonner";
 import { trackInviteSent } from "@/lib/analytics";
@@ -65,6 +66,57 @@ export default function TeamPage() {
   const [addMemberToTeamOpen, setAddMemberToTeamOpen] = useState(false);
   const [selectedMemberToAdd, setSelectedMemberToAdd] = useState<string>("");
   const [addingMember, setAddingMember] = useState(false);
+
+  // Member search, filter & sort
+  const [memberSearch, setMemberSearch] = useState("");
+  const [memberRoleFilter, setMemberRoleFilter] = useState<"all" | "admin" | "manager" | "member">("all");
+  const [memberShieldFilter, setMemberShieldFilter] = useState<"all" | "enabled" | "disabled">("all");
+  const [memberSort, setMemberSort] = useState<{ key: "name" | "email" | "role"; dir: "asc" | "desc" }>({ key: "name", dir: "asc" });
+
+  const filteredMembers = useMemo(() => {
+    let result = [...members];
+
+    if (memberSearch.trim()) {
+      const q = memberSearch.toLowerCase();
+      result = result.filter(
+        (m) => m.name?.toLowerCase().includes(q) || m.email.toLowerCase().includes(q)
+      );
+    }
+
+    if (memberRoleFilter !== "all") {
+      result = result.filter((m) => m.role === memberRoleFilter);
+    }
+
+    if (memberShieldFilter !== "all") {
+      result = result.filter((m) =>
+        memberShieldFilter === "disabled" ? m.shield_disabled : !m.shield_disabled
+      );
+    }
+
+    result.sort((a, b) => {
+      let cmp = 0;
+      switch (memberSort.key) {
+        case "name":
+          cmp = (a.name || "").localeCompare(b.name || "");
+          break;
+        case "email":
+          cmp = a.email.localeCompare(b.email);
+          break;
+        case "role":
+          cmp = a.role.localeCompare(b.role);
+          break;
+      }
+      return memberSort.dir === "asc" ? cmp : -cmp;
+    });
+
+    return result;
+  }, [members, memberSearch, memberRoleFilter, memberShieldFilter, memberSort]);
+
+  const handleMemberSort = (key: "name" | "email" | "role") => {
+    setMemberSort((prev) =>
+      prev.key === key ? { key, dir: prev.dir === "asc" ? "desc" : "asc" } : { key, dir: "asc" }
+    );
+  };
 
   useEffect(() => {
     getInvites().then(setInvites).catch(() => {});
@@ -242,6 +294,20 @@ export default function TeamPage() {
     }
   }
 
+  async function handleToggleShield(memberId: string, currentlyDisabled: boolean) {
+    try {
+      const success = await toggleMemberShield(memberId, !currentlyDisabled);
+      if (success) {
+        toast.success(currentlyDisabled ? "Shield re-enabled" : "Shield disabled for member");
+        refresh();
+      } else {
+        toast.error("Failed to toggle shield");
+      }
+    } catch {
+      toast.error("Failed to toggle shield");
+    }
+  }
+
   // Team detail view
   if (selectedTeam) {
     const teamMembers = members.filter((m) => m.teamIds.includes(selectedTeam.id));
@@ -415,43 +481,169 @@ export default function TeamPage() {
           <h2 className="text-lg font-semibold mb-3">
             Members ({members.length})
           </h2>
-          <div className="space-y-2">
-            {members.map((member) => {
-              const initials = member.name?.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2) || "U";
-              return (
-                <div key={member.id} className="flex items-center gap-3 rounded-lg border border-border p-3 group">
-                  <Avatar className="h-9 w-9">
-                    <AvatarFallback className="bg-primary/20 text-primary text-xs">{initials}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{member.name}</p>
-                    <p className="text-xs text-muted-foreground truncate">{member.email}</p>
-                  </div>
-                  <ExtensionStatusBadge
-                    lastActive={member.last_extension_active}
-                    version={member.extension_version}
-                  />
-                  {currentUserRole === "admin" && !member.isCurrentUser ? (
-                    <div className="flex items-center gap-2">
-                      <Select value={member.role} onValueChange={(v) => handleChangeRole(member.id, v)}>
-                        <SelectTrigger className="h-7 w-24 text-xs"><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="admin">Admin</SelectItem>
-                          <SelectItem value="manager">Manager</SelectItem>
-                          <SelectItem value="member">Member</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive opacity-0 group-hover:opacity-100" onClick={() => handleRemoveMember(member.id)}>
-                        <X className="h-3.5 w-3.5" />
-                      </Button>
-                    </div>
-                  ) : (
-                    <Badge variant="outline" className="text-xs">{member.role}</Badge>
-                  )}
-                </div>
-              );
-            })}
+
+          {/* Search & Filters */}
+          <div className="space-y-2 mb-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search by name or email..."
+                className="pl-9"
+                value={memberSearch}
+                onChange={(e) => setMemberSearch(e.target.value)}
+              />
+            </div>
+            <div className="flex gap-1 flex-wrap">
+              <span className="text-xs text-muted-foreground self-center mr-1">Role:</span>
+              {(["all", "admin", "manager", "member"] as const).map((f) => (
+                <Button
+                  key={f}
+                  variant={memberRoleFilter === f ? "default" : "outline"}
+                  size="sm"
+                  className="capitalize h-7 text-xs"
+                  onClick={() => setMemberRoleFilter(f)}
+                >
+                  {f}
+                </Button>
+              ))}
+            </div>
+            {currentUserRole === "admin" && (
+              <div className="flex gap-1 flex-wrap">
+                <span className="text-xs text-muted-foreground self-center mr-1">Shield:</span>
+                {(["all", "enabled", "disabled"] as const).map((f) => (
+                  <Button
+                    key={f}
+                    variant={memberShieldFilter === f ? "default" : "outline"}
+                    size="sm"
+                    className="capitalize h-7 text-xs"
+                    onClick={() => setMemberShieldFilter(f)}
+                  >
+                    {f}
+                  </Button>
+                ))}
+              </div>
+            )}
           </div>
+
+          {/* Result count */}
+          <p className="text-xs text-muted-foreground mb-2">
+            {filteredMembers.length} member{filteredMembers.length !== 1 ? "s" : ""}
+          </p>
+
+          {/* Members Table */}
+          <Card>
+            <CardContent className="p-0">
+              {filteredMembers.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <Users className="h-10 w-10 text-muted-foreground mb-3" />
+                  <p className="text-muted-foreground">No members found</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b bg-muted/50">
+                        <th className="text-left p-3 font-medium">
+                          <button className="flex items-center gap-1 hover:text-foreground" onClick={() => handleMemberSort("name")}>
+                            Name <ArrowUpDown className="h-3 w-3" />
+                          </button>
+                        </th>
+                        <th className="text-left p-3 font-medium hidden sm:table-cell">Extension</th>
+                        {currentUserRole === "admin" && (
+                          <th className="text-left p-3 font-medium hidden md:table-cell">Shield</th>
+                        )}
+                        <th className="text-left p-3 font-medium">
+                          <button className="flex items-center gap-1 hover:text-foreground" onClick={() => handleMemberSort("role")}>
+                            Role <ArrowUpDown className="h-3 w-3" />
+                          </button>
+                        </th>
+                        {currentUserRole === "admin" && (
+                          <th className="text-left p-3 font-medium w-10">
+                            <span className="sr-only">Actions</span>
+                          </th>
+                        )}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredMembers.map((member) => {
+                        const initials = member.name?.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2) || "U";
+                        return (
+                          <tr key={member.id} className="border-b hover:bg-muted/30 transition-colors group">
+                            <td className="p-3">
+                              <div className="flex items-center gap-3">
+                                <Avatar className="h-8 w-8">
+                                  <AvatarFallback className="bg-primary/20 text-primary text-xs">{initials}</AvatarFallback>
+                                </Avatar>
+                                <div className="min-w-0">
+                                  <p className="font-medium truncate">{member.name}</p>
+                                  <p className="text-xs text-muted-foreground truncate">{member.email}</p>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="p-3 hidden sm:table-cell">
+                              <ExtensionStatusBadge
+                                lastActive={member.last_extension_active}
+                                version={member.extension_version}
+                              />
+                            </td>
+                            {currentUserRole === "admin" && (
+                              <td className="p-3 hidden md:table-cell">
+                                {!member.isCurrentUser ? (
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-7 w-7"
+                                    title={member.shield_disabled ? "Re-enable shield" : "Disable shield"}
+                                    onClick={() => handleToggleShield(member.id, member.shield_disabled)}
+                                  >
+                                    {member.shield_disabled ? (
+                                      <ShieldOff className="h-3.5 w-3.5 text-muted-foreground" />
+                                    ) : (
+                                      <Shield className="h-3.5 w-3.5 text-green-500" />
+                                    )}
+                                  </Button>
+                                ) : (
+                                  <Shield className="h-3.5 w-3.5 text-green-500 ml-2" />
+                                )}
+                              </td>
+                            )}
+                            <td className="p-3">
+                              {currentUserRole === "admin" && !member.isCurrentUser ? (
+                                <Select value={member.role} onValueChange={(v) => handleChangeRole(member.id, v)}>
+                                  <SelectTrigger className="h-7 w-24 text-xs"><SelectValue /></SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="admin">Admin</SelectItem>
+                                    <SelectItem value="manager">Manager</SelectItem>
+                                    <SelectItem value="member">Member</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              ) : (
+                                <Badge variant="outline" className="text-xs capitalize">{member.role}</Badge>
+                              )}
+                            </td>
+                            {currentUserRole === "admin" && (
+                              <td className="p-3">
+                                {!member.isCurrentUser && (
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-7 w-7 text-destructive opacity-0 group-hover:opacity-100"
+                                    onClick={() => handleRemoveMember(member.id)}
+                                  >
+                                    <X className="h-3.5 w-3.5" />
+                                  </Button>
+                                )}
+                              </td>
+                            )}
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
           {/* Pending Invites */}
           {pendingInvites.length > 0 && (

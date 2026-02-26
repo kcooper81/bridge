@@ -42,7 +42,6 @@ export default defineConfig({
               matches: [
                 "https://teamprompt.app/*",
                 "https://www.teamprompt.app/*",
-                "http://localhost:3000/*",
               ],
             },
           }),

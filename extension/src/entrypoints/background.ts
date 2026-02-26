@@ -18,7 +18,7 @@ export default defineBackground(() => {
 
   // ─── Install Handler ───
   browser.runtime.onInstalled.addListener((details) => {
-    console.log("TeamPrompt extension installed");
+    // Extension installed — sync config to storage
     browser.storage.local.set({
       siteUrl: CONFIG.SITE_URL,
       supabaseUrl: CONFIG.SUPABASE_URL,
@@ -54,7 +54,7 @@ export default defineBackground(() => {
             user: message.user,
             loggedOut: false,
           });
-          console.log("TeamPrompt: Session synced from web app");
+          // Session synced from web app
           sendResponse({ success: true });
         });
         return true; // keep channel open for async response
@@ -67,7 +67,7 @@ export default defineBackground(() => {
             import("../lib/auth").then((m) => m.sendSessionEvent(userId, "session_lost"));
           }
         });
-        console.log("TeamPrompt: Session cleared");
+        // Session cleared
         sendResponse({ success: true });
       } else if (message.type === "OPEN_SIDE_PANEL") {
         const chrome = globalThis as unknown as {

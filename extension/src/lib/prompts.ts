@@ -74,12 +74,12 @@ export async function fetchPrompts(opts?: {
   );
 
   if (res.status === 401) {
-    console.warn("[TP] fetchPrompts: 401 from API");
+    // 401 — token expired or invalid
     throw new Error("SESSION_EXPIRED");
   }
 
   if (!res.ok) {
-    console.warn("[TP] fetchPrompts: non-ok response", res.status);
+    // Non-ok response from API
     throw new Error("FETCH_FAILED");
   }
 

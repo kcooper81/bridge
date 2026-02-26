@@ -23,7 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, ArrowUpDown, Loader2, Mail, Pencil, Plus, Search, Shield, ShieldOff, UserPlus, Users, X } from "lucide-react";
+import { ArrowLeft, ArrowUpDown, Loader2, Mail, Plus, Search, Shield, ShieldOff, UserPlus, Users, X } from "lucide-react";
 import { SelectWithQuickAdd } from "@/components/ui/select-with-quick-add";
 import { ExtensionStatusBadge } from "@/components/dashboard/extension-status-badge";
 import { NoOrgBanner } from "@/components/dashboard/no-org-banner";
@@ -475,32 +475,20 @@ export default function TeamPage() {
               All teams
             </Button>
             {teams.map((team) => (
-              <div key={team.id} className="relative group/pill inline-flex">
-                <Button
-                  variant={memberTeamFilter === team.id ? "default" : "outline"}
-                  size="sm"
-                  className="h-7 text-xs pr-7"
-                  onClick={() => setMemberTeamFilter(memberTeamFilter === team.id ? "all" : team.id)}
-                >
-                  {team.name}
-                  <span className="ml-1 text-[10px] opacity-60">
-                    {members.filter((m) => m.teamIds.includes(team.id)).length}
-                  </span>
-                </Button>
-                {currentUserRole === "admin" && (
-                  <div className="absolute right-0 top-0 bottom-0 flex items-center opacity-0 group-hover/pill:opacity-100 transition-opacity">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-5 w-5 mr-0.5"
-                      onClick={(e) => { e.stopPropagation(); setSelectedTeam(team); }}
-                      title="Manage team"
-                    >
-                      <Pencil className="h-2.5 w-2.5" />
-                    </Button>
-                  </div>
-                )}
-              </div>
+              <Button
+                key={team.id}
+                variant={memberTeamFilter === team.id ? "default" : "outline"}
+                size="sm"
+                className="h-7 text-xs"
+                onClick={() => setMemberTeamFilter(memberTeamFilter === team.id ? "all" : team.id)}
+                onDoubleClick={() => { if (currentUserRole === "admin") setSelectedTeam(team); }}
+                title={currentUserRole === "admin" ? "Click to filter, double-click to manage" : undefined}
+              >
+                {team.name}
+                <span className="ml-1 text-[10px] opacity-60">
+                  {members.filter((m) => m.teamIds.includes(team.id)).length}
+                </span>
+              </Button>
             ))}
           </div>
         )}

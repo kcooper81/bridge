@@ -19,6 +19,8 @@ import {
   BookOpen,
   Braces,
   CheckCircle2,
+  CheckSquare,
+  FileCheck,
   Globe,
   Shield,
   Users,
@@ -288,11 +290,13 @@ export default function LandingPage() {
           </div>
 
           {/* Secondary features row */}
-          <div className="mt-4 grid gap-4 sm:grid-cols-3">
+          <div className="mt-4 grid gap-4 sm:grid-cols-3 lg:grid-cols-5">
             {[
               { icon: Users, title: "Teams & Roles", desc: "Admin, Manager, Member — the right access for the right people." },
-              { icon: BarChart3, title: "Usage Analytics", desc: "See which prompts get reused and where your library has gaps." },
+              { icon: BarChart3, title: "Usage Analytics", desc: "See which prompts get reused, track effectiveness ratings, and find gaps in your library." },
               { icon: Zap, title: "Import / Export", desc: "Move prompt packs between orgs. No copy-pasting required." },
+              { icon: FileCheck, title: "Compliance Packs", desc: "One-click HIPAA, GDPR, PCI-DSS, CCPA, SOC 2, and PII policy packs." },
+              { icon: CheckSquare, title: "Approval Queue", desc: "Review pending prompts and rule suggestions in a dedicated queue." },
             ].map((f) => (
               <div key={f.title} className="group rounded-2xl border border-border bg-card p-6 hover:border-primary/30 transition-all duration-300">
                 <div className="flex items-center gap-3">
@@ -384,7 +388,7 @@ export default function LandingPage() {
                 price: "$0",
                 period: "forever",
                 desc: "For trying it out",
-                features: ["25 prompts", "3 members", "5 guidelines", "Basic guardrails"],
+                features: ["25 prompts", "1 member", "5 guidelines", "Basic guardrails"],
               },
               {
                 name: "Pro",

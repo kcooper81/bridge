@@ -22,6 +22,8 @@ import {
   Users,
 } from "lucide-react";
 import { SupportModal } from "@/components/dashboard/support-modal";
+import { APP_VERSION } from "@/lib/release-notes";
+import { useHasUnseenRelease } from "@/components/dashboard/whats-new-modal";
 
 interface NavItem {
   label: string;
@@ -56,6 +58,8 @@ function NavContent({ onItemClick }: { onItemClick?: () => void }) {
   const { currentUserRole, prompts } = useOrg();
   const { theme } = useTheme();
   const [supportOpen, setSupportOpen] = useState(false);
+  const [supportTab, setSupportTab] = useState<"help" | "whats-new" | "contact">("help");
+  const { unseen } = useHasUnseenRelease();
 
   const pendingCount = prompts.filter((p) => p.status === "pending").length;
 
@@ -137,10 +141,10 @@ function NavContent({ onItemClick }: { onItemClick?: () => void }) {
         })}
       </nav>
 
-      {/* Help & Support button */}
-      <div className="px-3 pb-3">
+      {/* Help & Support button + version */}
+      <div className="px-3 pb-3 space-y-1">
         <button
-          onClick={() => setSupportOpen(true)}
+          onClick={() => { setSupportTab("help"); setSupportOpen(true); }}
           className={cn(
             "flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium",
             "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
@@ -150,9 +154,18 @@ function NavContent({ onItemClick }: { onItemClick?: () => void }) {
           <HelpCircle className="h-[18px] w-[18px]" />
           Help & Support
         </button>
+        <button
+          onClick={() => { setSupportTab("whats-new"); setSupportOpen(true); }}
+          className="flex items-center gap-1.5 px-4 py-1 text-[11px] text-muted-foreground/60 hover:text-muted-foreground transition-colors w-full"
+        >
+          v{APP_VERSION}
+          {unseen && (
+            <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+          )}
+        </button>
       </div>
 
-      <SupportModal open={supportOpen} onOpenChange={setSupportOpen} />
+      <SupportModal open={supportOpen} onOpenChange={setSupportOpen} initialTab={supportTab} />
     </div>
   );
 }

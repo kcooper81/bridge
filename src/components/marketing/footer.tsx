@@ -15,10 +15,13 @@ const footerLinks = {
     { label: "Technology", href: "/industries/technology" },
     { label: "Finance", href: "/industries/finance" },
     { label: "Government", href: "/industries/government" },
+    { label: "Education", href: "/industries/education" },
+    { label: "Insurance", href: "/industries/insurance" },
   ],
   Resources: [
     { label: "Help & Support", href: "/help" },
     { label: "Security", href: "/security" },
+    { label: "Changelog", href: "/changelog" },
     { label: "Media Kit", href: "/media" },
     { label: "Privacy Policy", href: "/privacy" },
     { label: "Terms of Use", href: "/terms" },

@@ -3,9 +3,13 @@ import {
   Archive,
   BarChart3,
   BookOpen,
+  CheckSquare,
+  FileCheck,
+  GitCompare,
   Globe,
   Import,
   Shield,
+  ShieldCheck,
   Users,
   Zap,
 } from "lucide-react";
@@ -18,7 +22,7 @@ export const metadata: Metadata = generatePageMetadata({
   description:
     "Explore TeamPrompt's features: prompt vault, AI guardrails, quality guidelines, team management, browser extension, and analytics.",
   path: "/features",
-  keywords: ["prompt vault", "AI guardrails", "browser extension", "prompt templates"],
+  keywords: ["prompt vault", "AI guardrails", "browser extension", "prompt templates", "compliance packs", "auto-sanitization", "approval queue", "version diff"],
 });
 
 /* ── CSS-only app preview mockups ────────────────────────── */
@@ -218,6 +222,126 @@ function ImportMockup() {
   );
 }
 
+function CompliancePacksMockup() {
+  return (
+    <MockBrowser>
+      <div className="grid grid-cols-2 gap-2">
+        {[
+          { name: "HIPAA", color: "bg-rose-500/10 text-rose-600" },
+          { name: "GDPR", color: "bg-blue-500/10 text-blue-600" },
+          { name: "PCI-DSS", color: "bg-amber-500/10 text-amber-600" },
+          { name: "CCPA", color: "bg-emerald-500/10 text-emerald-600" },
+          { name: "SOC 2", color: "bg-violet-500/10 text-violet-600" },
+          { name: "General PII", color: "bg-sky-500/10 text-sky-600" },
+        ].map((pack) => (
+          <div key={pack.name} className="flex items-center gap-2 rounded-lg border border-border p-2.5">
+            <div className={`w-7 h-7 rounded-md flex items-center justify-center ${pack.color}`}>
+              <ShieldCheck className="w-3.5 h-3.5" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium truncate">{pack.name}</p>
+              <p className="text-[9px] text-muted-foreground">Policy pack</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </MockBrowser>
+  );
+}
+
+function AutoSanitizationMockup() {
+  return (
+    <MockBrowser>
+      <div className="space-y-3">
+        <div className="rounded-lg border border-border p-3 bg-muted/20">
+          <p className="text-[10px] text-muted-foreground mb-1.5">Original</p>
+          <p className="text-xs text-foreground">
+            Patient <span className="bg-destructive/15 text-destructive px-1 rounded">John Smith</span> SSN{" "}
+            <span className="bg-destructive/15 text-destructive px-1 rounded">123-45-6789</span>
+          </p>
+        </div>
+        <div className="flex justify-center">
+          <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center">
+            <span className="text-[10px] text-primary font-bold">&darr;</span>
+          </div>
+        </div>
+        <div className="rounded-lg border border-primary/30 p-3 bg-primary/[0.03]">
+          <p className="text-[10px] text-primary mb-1.5">Sanitized</p>
+          <p className="text-xs text-foreground">
+            Patient <span className="bg-primary/15 text-primary px-1 rounded font-mono">{"{{PATIENT_NAME}}"}</span> SSN{" "}
+            <span className="bg-primary/15 text-primary px-1 rounded font-mono">{"{{SSN}}"}</span>
+          </p>
+        </div>
+      </div>
+    </MockBrowser>
+  );
+}
+
+function ApprovalQueueMockup() {
+  return (
+    <MockBrowser>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-medium">Pending Review</span>
+          <span className="text-[10px] bg-amber-500/10 text-amber-600 px-2 py-0.5 rounded-full font-medium">3</span>
+        </div>
+      </div>
+      {[
+        { title: "New onboarding prompt", author: "KP", type: "Prompt" },
+        { title: "Block internal IPs rule", author: "SR", type: "Rule" },
+        { title: "Q1 report template", author: "ML", type: "Prompt" },
+      ].map((item, i) => (
+        <div key={i} className="flex items-center gap-3 py-2.5 border-b border-border/50 last:border-0">
+          <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-[9px] font-bold text-primary">
+            {item.author}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-medium truncate">{item.title}</p>
+            <p className="text-[9px] text-muted-foreground">{item.type}</p>
+          </div>
+          <div className="flex gap-1.5">
+            <div className="h-6 w-14 rounded-md bg-primary text-[9px] text-primary-foreground font-medium flex items-center justify-center">
+              Approve
+            </div>
+            <div className="h-6 w-14 rounded-md bg-muted text-[9px] text-muted-foreground font-medium flex items-center justify-center">
+              Reject
+            </div>
+          </div>
+        </div>
+      ))}
+    </MockBrowser>
+  );
+}
+
+function VersionDiffMockup() {
+  return (
+    <MockBrowser>
+      <div className="flex items-center gap-2 mb-3">
+        <span className="text-[10px] bg-muted px-2 py-0.5 rounded-full font-medium">v2</span>
+        <span className="text-[10px] text-muted-foreground">vs</span>
+        <span className="text-[10px] bg-muted px-2 py-0.5 rounded-full font-medium">v3</span>
+      </div>
+      <div className="space-y-1.5 font-mono text-[10px]">
+        <div className="rounded bg-muted/30 px-2 py-1 text-muted-foreground">
+          Analyze the quarterly report for...
+        </div>
+        <div className="rounded bg-destructive/10 px-2 py-1 text-destructive line-through">
+          - Focus on revenue trends
+        </div>
+        <div className="rounded bg-emerald-500/10 px-2 py-1 text-emerald-600">
+          + Focus on revenue trends and cost reduction
+        </div>
+        <div className="rounded bg-emerald-500/10 px-2 py-1 text-emerald-600">
+          + Include year-over-year comparison
+        </div>
+        <div className="rounded bg-muted/30 px-2 py-1 text-muted-foreground">
+          Output as bullet points...
+        </div>
+      </div>
+    </MockBrowser>
+  );
+}
+
 const mockups: Record<string, () => React.JSX.Element> = {
   "Prompt Vault": VaultMockup,
   "AI Guardrails": GuardrailsMockup,
@@ -226,6 +350,10 @@ const mockups: Record<string, () => React.JSX.Element> = {
   "Browser Extension": ExtensionMockup,
   "Analytics & Insights": AnalyticsMockup,
   "Import / Export": ImportMockup,
+  "Compliance Policy Packs": CompliancePacksMockup,
+  "Auto-Sanitization": AutoSanitizationMockup,
+  "Approval Queue": ApprovalQueueMockup,
+  "Version Diff": VersionDiffMockup,
 };
 
 /* ── Feature data ────────────────────────────────────────── */
@@ -300,6 +428,7 @@ const features = [
     details: [
       "30-day daily usage chart",
       "Top prompts ranking by usage",
+      "Effectiveness ratings and distribution metrics",
       "Per-user and per-department breakdowns",
       "Week-over-week trend tracking",
     ],
@@ -314,6 +443,58 @@ const features = [
       "Named prompt packs with metadata",
       "Drag-and-drop import from JSON",
       "Cross-organization portability",
+    ],
+  },
+  {
+    icon: FileCheck,
+    title: "Compliance Policy Packs",
+    badge: "NEW",
+    description:
+      "Pre-built security policy bundles for regulated industries. Install HIPAA, GDPR, PCI-DSS, CCPA, SOC 2, or General PII rules with one click.",
+    details: [
+      "6 compliance frameworks ready to deploy",
+      "One-click install activates all relevant rules",
+      "Covers PHI, PII, financial data, and credentials",
+      "Customize or extend any pack after installation",
+    ],
+  },
+  {
+    icon: ShieldCheck,
+    title: "Auto-Sanitization",
+    badge: "NEW",
+    description:
+      "Automatically replace sensitive data with safe placeholder tokens before prompts reach AI tools. Keep the context, remove the risk.",
+    details: [
+      "Replaces detected data with {{PLACEHOLDER}} tokens",
+      "Works with all built-in and custom security rules",
+      "Preserves prompt structure and intent",
+      "Sanitized version logged for audit trail",
+    ],
+  },
+  {
+    icon: CheckSquare,
+    title: "Approval Queue",
+    badge: "NEW",
+    description:
+      "A dedicated dashboard for reviewing pending prompts and rule suggestions. Approve, reject, or request changes — all in one place.",
+    details: [
+      "Unified queue for prompts and rule suggestions",
+      "Approve or reject with one click",
+      "Inline feedback for rejected items",
+      "Badge count in sidebar for pending items",
+    ],
+  },
+  {
+    icon: GitCompare,
+    title: "Version Diff",
+    badge: "NEW",
+    description:
+      "Compare any two versions of a prompt side by side. See exactly what changed — additions, deletions, and modifications — in a clean diff view.",
+    details: [
+      "Side-by-side comparison of any two versions",
+      "Color-coded additions and deletions",
+      "Full version history timeline",
+      "Restore any previous version instantly",
     ],
   },
 ];

@@ -258,4 +258,169 @@ export const useCasePages: SeoPageData[] = [
       subtitle: "Start sharing with your team today. Free plan available.",
     },
   },
+  {
+    slug: "ai-dlp",
+    category: "use-case",
+    meta: {
+      title: "AI Data Loss Prevention — Stop Sensitive Data Leaking into AI Tools",
+      description:
+        "Real-time DLP scanning, auto-sanitization, and compliance policy packs protect your organization's sensitive data from leaking into ChatGPT, Claude, Gemini, and more.",
+      keywords: ["AI DLP", "data loss prevention AI", "AI data protection", "sensitive data AI tools"],
+    },
+    hero: {
+      headline: "AI data loss prevention that works in real-time",
+      subtitle:
+        "Scan every outbound prompt for sensitive data. Auto-sanitize with safe placeholders. Deploy compliance packs for HIPAA, GDPR, PCI-DSS, CCPA, SOC 2, and PII.",
+      badges: ["Real-time scanning", "Auto-sanitization", "6 compliance packs"],
+    },
+    features: {
+      sectionLabel: "DLP",
+      heading: "Complete AI data loss prevention",
+      items: [
+        { icon: "ShieldAlert", title: "Real-time scanning", description: "Every prompt is scanned against your security rules before it reaches any AI tool. Block or warn on violations." },
+        { icon: "Shield", title: "Auto-sanitization", description: "Automatically replace sensitive data with safe {{PLACEHOLDER}} tokens. Preserve prompt context, remove the risk." },
+        { icon: "FileCheck", title: "Compliance packs", description: "One-click policy bundles for HIPAA, GDPR, PCI-DSS, CCPA, SOC 2, and General PII. Deploy a full compliance framework in seconds." },
+        { icon: "Eye", title: "Full audit trail", description: "Every scan, violation, and sanitization is logged with timestamps. Export for compliance reviews and auditor requests." },
+        { icon: "Lock", title: "Custom patterns", description: "Define organization-specific sensitive data patterns with regex, keyword, and exact match rules." },
+        { icon: "Globe", title: "Works everywhere", description: "DLP scanning runs on ChatGPT, Claude, Gemini, Copilot, and Perplexity via the browser extension." },
+      ],
+    },
+    benefits: {
+      heading: "Why teams choose TeamPrompt for AI DLP",
+      items: [
+        "Stop PHI, PII, and financial data from reaching AI models",
+        "Auto-sanitize instead of just blocking — keep workflows moving",
+        "6 pre-built compliance packs cover major regulatory frameworks",
+        "Full audit trail for compliance reviews and auditor requests",
+        "Custom rules for organization-specific sensitive data",
+        "Works across all major AI tools via browser extension",
+      ],
+    },
+    stats: [
+      { value: "6", label: "Compliance packs" },
+      { value: "Real-time", label: "DLP scanning" },
+      { value: "Full", label: "Audit trail" },
+    ],
+    faqs: [
+      { question: "What types of sensitive data are detected?", answer: "Built-in rules detect SSNs, credit card numbers, API keys, patient identifiers (PHI), financial data, credentials, and common PII. Compliance packs add framework-specific patterns. You can also define custom patterns." },
+      { question: "How does auto-sanitization work?", answer: "When sensitive data is detected, it's automatically replaced with descriptive {{PLACEHOLDER}} tokens like {{SSN}} or {{PATIENT_NAME}}. The prompt structure is preserved while removing actual sensitive data." },
+      { question: "Does DLP scanning slow down the user?", answer: "No. Scanning happens in milliseconds before the prompt is sent. Users experience no noticeable delay." },
+      { question: "Can I use compliance packs with custom rules?", answer: "Yes. Compliance packs and custom rules work together. Install a pack and add organization-specific rules on top." },
+    ],
+    cta: {
+      headline: "Your team sends sensitive data to AI",
+      gradientText: "every day. Fix that now.",
+      subtitle: "Free plan includes basic DLP patterns. Upgrade for compliance packs and auto-sanitization.",
+    },
+  },
+  {
+    slug: "prompt-management",
+    category: "use-case",
+    meta: {
+      title: "AI Prompt Management Platform — Centralize, Version, and Govern Prompts",
+      description:
+        "Centralized prompt vault with version history, diff view, approval workflows, template variables, and guardrails. The complete prompt management platform for teams.",
+      keywords: ["prompt management", "prompt management platform", "manage AI prompts", "prompt version control"],
+    },
+    hero: {
+      headline: "The complete prompt management platform",
+      subtitle:
+        "A centralized vault, version history with diff, approval workflows, reusable templates, and security guardrails — everything your team needs to manage AI prompts at scale.",
+      badges: ["Centralized vault", "Version diff", "Approval workflows"],
+    },
+    features: {
+      sectionLabel: "Platform",
+      heading: "Everything for prompt management",
+      items: [
+        { icon: "Archive", title: "Centralized vault", description: "One searchable home for every prompt. Tags, categories, and full-text search make finding the right prompt instant." },
+        { icon: "GitBranch", title: "Version history & diff", description: "Track every change. Compare any two versions side by side with color-coded additions and deletions." },
+        { icon: "CheckSquare", title: "Approval workflows", description: "Submit prompts for review. Admins and managers approve or reject from a dedicated queue. Nothing goes live without review." },
+        { icon: "Braces", title: "Template variables", description: "Create reusable templates with {{variables}}. Fill-in forms ensure consistency across every use." },
+        { icon: "Shield", title: "Security guardrails", description: "DLP scanning, compliance packs, and auto-sanitization protect sensitive data on every prompt." },
+        { icon: "Globe", title: "Browser extension", description: "Insert prompts directly into ChatGPT, Claude, Gemini, Copilot, and Perplexity. No tab switching." },
+      ],
+    },
+    benefits: {
+      heading: "Why teams need dedicated prompt management",
+      items: [
+        "Centralized library replaces scattered docs, Slack messages, and bookmarks",
+        "Version history and diff prevent accidental overwrites and track changes",
+        "Approval workflows ensure quality before prompts go live",
+        "Template variables standardize outputs across the team",
+        "Guardrails protect sensitive data on every interaction",
+        "Analytics show which prompts work and where gaps exist",
+      ],
+    },
+    stats: [
+      { value: "10x", label: "Faster prompt access" },
+      { value: "0", label: "Lost versions" },
+      { value: "100%", label: "Review coverage" },
+    ],
+    faqs: [
+      { question: "How is this different from a shared doc?", answer: "TeamPrompt offers one-click insertion into AI tools, version history with diff, approval workflows, DLP scanning, and usage analytics — none of which a shared document provides." },
+      { question: "Can I version prompts?", answer: "Yes. Every edit creates a new version. You can view the full history, compare any two versions with a side-by-side diff, and restore previous versions instantly." },
+      { question: "Does it work with my AI tools?", answer: "TeamPrompt works with ChatGPT, Claude, Gemini, Microsoft Copilot, and Perplexity through the browser extension." },
+      { question: "Is there an approval process?", answer: "Yes. Prompts can be submitted for review. Admins and managers approve or reject from a dedicated approval queue, with optional feedback." },
+    ],
+    cta: {
+      headline: "Your prompts need",
+      gradientText: "a management system.",
+      subtitle: "Start managing prompts properly. Free plan available.",
+    },
+  },
+  {
+    slug: "ai-audit-trail",
+    category: "use-case",
+    meta: {
+      title: "AI Audit Trail — Activity Logging & Compliance Reporting for AI Tools",
+      description:
+        "Complete audit trail for your organization's AI usage. Log every interaction, track violations, export compliance reports. Built for regulated industries.",
+      keywords: ["AI audit trail", "AI activity logging", "AI compliance reporting", "AI usage tracking"],
+    },
+    hero: {
+      headline: "Complete audit trail for your AI usage",
+      subtitle:
+        "Log every AI interaction, track every DLP violation, and export compliance reports. Built for teams that need to prove oversight to regulators.",
+      badges: ["Activity logging", "Violation tracking", "Exportable reports"],
+    },
+    features: {
+      sectionLabel: "Audit",
+      heading: "Full visibility into AI usage",
+      items: [
+        { icon: "Eye", title: "Activity logging", description: "Every prompt insertion, AI tool interaction, and user action is logged with timestamps, user info, and tool details." },
+        { icon: "ShieldAlert", title: "Violation tracking", description: "DLP violations are logged with the rule triggered, matched text (redacted), and action taken — block, warn, or sanitize." },
+        { icon: "BarChart3", title: "Compliance dashboards", description: "See violation trends, most-triggered rules, team compliance scores, and risk posture at a glance." },
+        { icon: "FileText", title: "Exportable reports", description: "Export audit data in CSV or JSON for compliance reviews, SIEM integration, and internal reporting." },
+        { icon: "Users", title: "Per-user tracking", description: "See which users interact with which AI tools, how often, and whether any violations occurred." },
+        { icon: "Lock", title: "Configurable retention", description: "Control how long interaction data is retained. Set retention policies per your organization's compliance requirements." },
+      ],
+    },
+    benefits: {
+      heading: "Why organizations need AI audit trails",
+      items: [
+        "Prove AI oversight to regulators with timestamped, exportable logs",
+        "Track every DLP violation with rule details and actions taken",
+        "Identify shadow AI usage gaps where employees bypass controls",
+        "Generate compliance reports for HIPAA, SOX, GDPR, and internal reviews",
+        "Monitor adoption trends and AI tool usage across departments",
+        "Maintain configurable retention policies for data governance",
+      ],
+    },
+    stats: [
+      { value: "100%", label: "Interaction visibility" },
+      { value: "Full", label: "Violation history" },
+      { value: "CSV/JSON", label: "Export formats" },
+    ],
+    faqs: [
+      { question: "What is logged in the audit trail?", answer: "Every prompt insertion, DLP scan result, violation event, and user action. Each log entry includes timestamp, user, AI tool, action type, and relevant details." },
+      { question: "Can I export audit data?", answer: "Yes. Export in CSV or JSON format for compliance reviews, SIEM integration, or internal analysis." },
+      { question: "How long is data retained?", answer: "Retention is configurable by your admin. Set policies per your organization's compliance requirements." },
+      { question: "Does logging slow down the user?", answer: "No. Logging happens asynchronously and has no impact on the user experience." },
+    ],
+    cta: {
+      headline: "Prove your AI oversight",
+      gradientText: "to any auditor.",
+      subtitle: "Start logging AI activity today. Free plan includes basic logging.",
+    },
+  },
 ];

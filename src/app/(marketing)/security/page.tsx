@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import {
   ArrowRight,
   Eye,
+  FileCheck,
   Key,
   Lock,
   Shield,
@@ -59,9 +60,11 @@ const categories = [
 const benefits = [
   "Automatic scanning on every prompt save",
   "Block or warn severity levels",
+  "Auto-sanitization replaces sensitive data with {{PLACEHOLDER}} tokens",
   "Pattern tester built into rule editor",
   "Full audit trail of all violations",
   "15 pre-built policies covering common data types",
+  "6 one-click compliance packs (HIPAA, GDPR, PCI-DSS, CCPA, SOC 2, PII)",
   "Custom policies for your industry's requirements",
   "Role-based access for policy management",
   "Browser extension scans outbound text in real-time",
@@ -125,6 +128,42 @@ export default function SecurityPage() {
           ))}
         </div>
 
+        {/* Compliance Packs */}
+        <div className="mb-24">
+          <div className="text-center mb-10">
+            <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm text-primary mb-4">
+              <FileCheck className="h-3.5 w-3.5" />
+              <span className="font-medium">New</span>
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-bold">
+              One-click compliance policy packs
+            </h2>
+            <p className="mt-3 text-muted-foreground max-w-xl mx-auto">
+              Pre-built security rule bundles for regulated industries. Install an entire compliance framework in seconds.
+            </p>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 max-w-4xl mx-auto">
+            {[
+              { name: "HIPAA", desc: "Protected health information detection", color: "bg-rose-500/10 text-rose-600 dark:text-rose-400" },
+              { name: "GDPR", desc: "EU personal data protection rules", color: "bg-blue-500/10 text-blue-600 dark:text-blue-400" },
+              { name: "PCI-DSS", desc: "Payment card industry standards", color: "bg-amber-500/10 text-amber-600 dark:text-amber-400" },
+              { name: "CCPA", desc: "California consumer privacy act", color: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" },
+              { name: "SOC 2", desc: "Service organization controls", color: "bg-violet-500/10 text-violet-600 dark:text-violet-400" },
+              { name: "General PII", desc: "Common personally identifiable info", color: "bg-sky-500/10 text-sky-600 dark:text-sky-400" },
+            ].map((pack) => (
+              <div key={pack.name} className="flex items-center gap-4 rounded-xl border border-border bg-card p-5 hover:border-primary/20 transition-colors">
+                <div className={`flex h-11 w-11 items-center justify-center rounded-xl shrink-0 ${pack.color}`}>
+                  <ShieldCheck className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">{pack.name}</h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">{pack.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* How it works — dark section */}
         <DarkSection gradient="right" className="mb-24">
           <SectionLabel dark>How it works</SectionLabel>
@@ -142,8 +181,8 @@ export default function SecurityPage() {
               {
                 step: "02",
                 icon: ShieldAlert,
-                title: "Auto-Scan",
-                desc: "Every prompt is automatically scanned against active policies before saving. Violations are caught in real-time.",
+                title: "Auto-Scan & Sanitize",
+                desc: "Every prompt is automatically scanned against active policies before saving. Detected data is blocked, warned, or auto-sanitized with safe {{PLACEHOLDER}} tokens.",
               },
               {
                 step: "03",

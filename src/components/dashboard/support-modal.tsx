@@ -33,6 +33,7 @@ import {
   type HelpCategory,
   type HelpArticle,
 } from "@/lib/help-content";
+import { ReleaseNotesList, useHasUnseenRelease } from "@/components/dashboard/whats-new-modal";
 
 interface SupportModalProps {
   open: boolean;
@@ -52,8 +53,9 @@ const TICKET_TYPES: { value: TicketType; label: string; icon: typeof Bug }[] = [
   { value: "feedback", label: "Feedback", icon: MessageSquare },
 ];
 
-export function SupportModal({ open, onOpenChange }: SupportModalProps) {
-  const [tab, setTab] = useState<"help" | "contact">("help");
+export function SupportModal({ open, onOpenChange, initialTab }: SupportModalProps & { initialTab?: "help" | "whats-new" | "contact" }) {
+  const [tab, setTab] = useState<"help" | "whats-new" | "contact">(initialTab || "help");
+  const { unseen, markSeen } = useHasUnseenRelease();
 
   // Help tab state
   const [query, setQuery] = useState("");
@@ -73,7 +75,7 @@ export function SupportModal({ open, onOpenChange }: SupportModalProps) {
   // Reset on close
   useEffect(() => {
     if (!open) {
-      setTab("help");
+      setTab(initialTab || "help");
       setQuery("");
       setHelpView({ type: "home" });
       setTicketType("feedback");
@@ -82,7 +84,7 @@ export function SupportModal({ open, onOpenChange }: SupportModalProps) {
       setSubmitting(false);
       setSubmitted(false);
     }
-  }, [open]);
+  }, [open, initialTab]);
 
   // Help search
   const searchResults = useMemo(
@@ -167,6 +169,20 @@ export function SupportModal({ open, onOpenChange }: SupportModalProps) {
               Help
             </button>
             <button
+              onClick={() => setTab("whats-new")}
+              className={cn(
+                "flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors relative",
+                tab === "whats-new"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              What&apos;s New
+              {unseen && tab !== "whats-new" && (
+                <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-primary" />
+              )}
+            </button>
+            <button
               onClick={() => setTab("contact")}
               className={cn(
                 "flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
@@ -195,7 +211,9 @@ export function SupportModal({ open, onOpenChange }: SupportModalProps) {
 
         <div className="flex-1 min-h-0 overflow-y-auto">
           <div className="p-6">
-            {tab === "help" ? (
+            {tab === "whats-new" ? (
+              <ReleaseNotesList onView={markSeen} />
+            ) : tab === "help" ? (
               isSearching ? (
                 <SearchResultsView
                   results={searchResults}

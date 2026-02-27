@@ -105,6 +105,11 @@ const _RAW_CATEGORIES: RawCategory[] = [
         a: "New prompts can be saved as drafts (visible only to you) or submitted for review. Submitted prompts appear in the \"Pending\" queue. Admins and managers review them and approve or reject with feedback. Approved prompts become available to the entire team.",
         keywords: ["approval", "review", "pending", "draft", "workflow"],
       },
+      {
+        q: "How do I use the approval queue?",
+        a: "The Approval Queue (accessible from the sidebar for Admins and Managers) is a dedicated dashboard showing all pending items that need review — including submitted prompts and suggested security rules. Each item shows the author, submission date, and content preview. You can approve or reject with one click, and optionally add feedback. The sidebar badge shows the current count of pending items so you always know when reviews are waiting.",
+        keywords: ["approval queue", "approvals", "pending", "review", "dashboard", "approve", "reject"],
+      },
     ],
   },
   {
@@ -142,6 +147,11 @@ const _RAW_CATEGORIES: RawCategory[] = [
         q: "Can I import existing prompts?",
         a: "Yes. Go to Import/Export in the sidebar. You can import prompts from a JSON or CSV file. The importer maps your columns to TeamPrompt fields and lets you preview before confirming. Bulk export is also available for backup or migration.",
         keywords: ["import", "export", "csv", "json", "migrate", "backup"],
+      },
+      {
+        q: "How do I compare prompt versions?",
+        a: "Open any prompt and click the version history icon. You'll see a timeline of all changes. Select any two versions to view a side-by-side diff — additions are highlighted in green, deletions in red, and unchanged text is shown in context. You can also restore any previous version with one click.",
+        keywords: ["version", "diff", "compare", "history", "changes", "restore"],
       },
     ],
   },
@@ -213,6 +223,21 @@ const _RAW_CATEGORIES: RawCategory[] = [
         q: "How do I enable guardrails for the first time?",
         a: "Go to the Guardrails page and click \"Enable Default Rules\" to install the built-in security patterns. They're active immediately. You can also open the extension's Shield tab and enable them from there. Once active, the extension's shield indicator turns green on AI pages.",
         keywords: ["enable", "setup", "first time", "activate", "default rules"],
+      },
+      {
+        q: "What are compliance policy packs?",
+        a: "Compliance policy packs are pre-built bundles of security rules designed for specific regulatory frameworks. TeamPrompt includes 6 packs: HIPAA (protected health information), GDPR (EU personal data), PCI-DSS (payment card data), CCPA (California consumer privacy), SOC 2 (service organization controls), and General PII (common personally identifiable information). Install any pack with one click from the Guardrails page — all relevant rules activate immediately. You can customize or extend any pack after installation.",
+        keywords: ["compliance", "policy packs", "hipaa", "gdpr", "pci-dss", "ccpa", "soc2", "regulatory"],
+      },
+      {
+        q: "How does auto-sanitization work?",
+        a: "Auto-sanitization automatically replaces detected sensitive data with safe placeholder tokens (like {{PATIENT_NAME}} or {{SSN}}) before the prompt reaches an AI tool. When a guardrail rule detects sensitive content, instead of just blocking or warning, the sanitization option replaces the matched text with a descriptive {{PLACEHOLDER}} token. The original prompt structure and intent are preserved while removing the actual sensitive data. Sanitized prompts are logged in the audit trail with both the original detection and the replacement applied.",
+        keywords: ["auto-sanitization", "sanitize", "placeholder", "token", "replace", "sensitive data"],
+      },
+      {
+        q: "How do I suggest a security rule?",
+        a: "Members can suggest new security rules from the Guardrails page by clicking \"Suggest Rule.\" Fill in the rule name, description, pattern, and category. The suggestion is submitted to the approval queue where admins and managers can review, approve, or reject it. Approved suggestions become active security rules. You'll be notified when your suggestion is reviewed.",
+        keywords: ["suggest", "rule suggestion", "propose", "new rule", "request"],
       },
     ],
   },
@@ -295,8 +320,8 @@ const _RAW_CATEGORIES: RawCategory[] = [
     articles: [
       {
         q: "What does the Analytics page show?",
-        a: "Analytics provides an overview of your workspace's AI usage — total interactions, most-used prompts, active users, interactions by AI tool, and guardrail statistics. Use it to understand adoption patterns and identify opportunities.",
-        keywords: ["analytics", "dashboard", "metrics", "usage", "stats"],
+        a: "Analytics provides an overview of your workspace's AI usage — total interactions, most-used prompts, active users, interactions by AI tool, guardrail statistics, and prompt effectiveness metrics. The effectiveness view shows rating distributions, average scores, and trends over time so you can see which prompts actually deliver results. Use it to understand adoption patterns and identify opportunities.",
+        keywords: ["analytics", "dashboard", "metrics", "usage", "stats", "effectiveness", "ratings"],
       },
       {
         q: "What is the Activity Log?",
@@ -331,6 +356,11 @@ const _RAW_CATEGORIES: RawCategory[] = [
         a: "Yes. If your prompts are in a spreadsheet or another tool that exports CSV/JSON, you can import them directly. The column mapper handles different field names. For custom migrations, contact support.",
         keywords: ["migrate", "switch", "transfer", "another tool"],
       },
+      {
+        q: "What are template packs?",
+        a: "Template packs are curated collections of prompt templates bundled together for a specific use case or workflow. TeamPrompt includes built-in packs for common scenarios like customer support, sales outreach, and content creation. You can also create custom packs by selecting prompts and exporting them as a named pack. Template packs can be shared across organizations or imported from JSON files.",
+        keywords: ["template packs", "packs", "bundles", "collections", "curated", "built-in"],
+      },
     ],
   },
   {
@@ -341,7 +371,7 @@ const _RAW_CATEGORIES: RawCategory[] = [
     articles: [
       {
         q: "What plans are available?",
-        a: "Free: up to 5 members and 50 prompts with core features. Team ($12/user/mo): up to 25 members with guardrails, analytics, and priority support. Business ($24/user/mo): up to 500 members with full audit logging, SSO, and dedicated support. See the pricing page for full details.",
+        a: "Free: 1 member and 25 prompts with core features. Pro ($9/mo): unlimited prompts, 1 member, analytics, and all 14 guidelines. Team ($7/user/mo): up to 50 members, custom guardrails, audit log, and import/export. Business ($12/user/mo): up to 500 members, unlimited guidelines, priority support, and SLA guarantee. See the pricing page for full details.",
         keywords: ["plans", "pricing", "free", "team", "business", "cost"],
       },
       {
@@ -428,7 +458,7 @@ export const HELP_FAQS: FAQ[] = [
   {
     question: "Is TeamPrompt free to use?",
     answer:
-      "Yes. The free plan includes up to 5 team members, 50 prompts, and core features like the browser extension. Paid plans unlock higher limits and advanced features like DLP guardrails and analytics.",
+      "Yes. The free plan includes 1 member, 25 prompts, and core features like the browser extension. Paid plans unlock higher limits and advanced features like DLP guardrails, analytics, and compliance packs.",
   },
   {
     question: "Which AI tools does the browser extension support?",

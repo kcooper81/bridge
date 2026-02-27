@@ -34,6 +34,36 @@
   - API: `GET /api/guardrails/suggest` (admin/manager gets pending suggestions)
   - API: `PATCH /api/guardrails/suggest/[id]` (approve/reject with notes)
 
+- [x] Marketing, Help Docs & Release Notes Update
+  - **Phase 1: Fix inconsistencies**
+    - Homepage: "3 members" → "1 member" on Free plan
+    - Enterprise: "6 AI tools" → "5 AI tools" in stats
+    - Help content: corrected plan info (Free: 1 member/25 prompts, Pro $9, Team $7/user, Business $12/user)
+    - Help FAQs: corrected free plan description
+  - **Phase 2: Update marketing pages**
+    - Homepage: added Compliance Packs + Approval Queue to secondary features, updated analytics desc
+    - Features: added 4 new sections (Compliance Packs, Auto-Sanitization, Approval Queue, Version Diff) with mockups
+    - Security: added compliance packs grid (6 frameworks), auto-sanitization to benefits, updated How It Works step 02
+    - Pricing: added Compliance Packs, Auto-Sanitization, Approval Queue, Version History & Diff rows
+    - Enterprise: added Compliance Policy Packs to platform features + benefits, added compliance FAQ
+  - **Phase 3: Help articles (7 new)**
+    - Guardrails: "What are compliance policy packs?", "How does auto-sanitization work?", "How do I suggest a security rule?"
+    - Prompt Vault: "How do I compare prompt versions?"
+    - Getting Started: "How do I use the approval queue?"
+    - Import/Export: "What are template packs?"
+    - Analytics: updated existing article with effectiveness metrics mention
+  - **Phase 4: New SEO pages**
+    - Use cases: ai-dlp, prompt-management, ai-audit-trail (3 pages)
+    - Comparisons: vs-custom-gpts, vs-prompt-managers (2 pages)
+    - Industries: education + insurance (data files + page files)
+    - Navigation: mega-menu + footer updated with Education, Insurance, Changelog
+  - **Phase 5: Release notes system**
+    - `src/lib/release-notes.ts` — data file with ReleaseNote interface, APP_VERSION, 4 releases
+    - `src/components/dashboard/whats-new-modal.tsx` — modal + reusable ReleaseNotesList + useHasUnseenRelease hook
+    - Support modal: added "What's New" tab with red dot indicator for unseen updates
+    - Sidebar: version number display (v1.3.0) with unseen dot, clickable to open What's New
+    - `src/app/(marketing)/changelog/page.tsx` — public changelog page with SEO metadata
+
 ## Pending
 - [ ] Compliance Policy Template Packs
   - SOC 2 template added to `compliance-templates.ts`

@@ -153,4 +153,112 @@ export const comparisonPages: SeoPageData[] = [
       subtitle: "Import your prompts in minutes. Free plan available.",
     },
   },
+  {
+    slug: "vs-custom-gpts",
+    category: "comparison",
+    meta: {
+      title: "TeamPrompt vs Custom GPTs — Cross-Platform Prompt Management",
+      description:
+        "Compare TeamPrompt and OpenAI Custom GPTs for managing AI prompts across your team. See why cross-platform beats single-vendor lock-in.",
+      keywords: ["TeamPrompt vs Custom GPTs", "Custom GPTs alternative", "cross-platform AI prompts"],
+    },
+    hero: {
+      headline: "TeamPrompt vs. Custom GPTs",
+      subtitle:
+        "Custom GPTs lock you into ChatGPT. TeamPrompt works across ChatGPT, Claude, Gemini, Copilot, and Perplexity — with DLP, team controls, and analytics.",
+      badges: ["Cross-platform", "DLP included", "Team controls"],
+    },
+    features: {
+      sectionLabel: "Comparison",
+      heading: "What Custom GPTs can't do",
+      items: [
+        { icon: "Globe", title: "Cross-platform", description: "TeamPrompt works in ChatGPT, Claude, Gemini, Copilot, and Perplexity. Custom GPTs only work inside ChatGPT." },
+        { icon: "ShieldAlert", title: "DLP scanning", description: "Real-time sensitive data detection and auto-sanitization. Custom GPTs have no DLP or data protection." },
+        { icon: "Users", title: "Team management", description: "Role-based access, teams, and approval workflows. Custom GPTs lack team management features." },
+        { icon: "BarChart3", title: "Usage analytics", description: "Track which prompts get used, by whom, and in which AI tool. Custom GPTs offer limited analytics." },
+        { icon: "Shield", title: "Compliance packs", description: "One-click HIPAA, GDPR, PCI-DSS policy packs. Custom GPTs have no compliance framework support." },
+        { icon: "Eye", title: "Full audit trail", description: "Every interaction logged for compliance. Custom GPTs don't provide audit trails." },
+      ],
+    },
+    benefits: {
+      heading: "Why teams choose TeamPrompt over Custom GPTs",
+      items: [
+        "Use prompts across all major AI tools, not just ChatGPT",
+        "DLP scanning and auto-sanitization protect sensitive data",
+        "Team management with roles, approvals, and access control",
+        "Usage analytics and audit trails for compliance",
+        "Compliance policy packs for regulated industries",
+        "No vendor lock-in — your prompts work everywhere",
+      ],
+    },
+    stats: [
+      { value: "5", label: "AI tools supported" },
+      { value: "Built-in", label: "DLP & compliance" },
+      { value: "Full", label: "Team controls" },
+    ],
+    faqs: [
+      { question: "Can I still use Custom GPTs?", answer: "Yes. TeamPrompt complements Custom GPTs by adding cross-platform access, DLP, and team management. Use both together or switch fully to TeamPrompt." },
+      { question: "Does TeamPrompt support GPT-based prompts?", answer: "Yes. Any prompt that works in ChatGPT can be stored in TeamPrompt and used across all supported AI tools." },
+      { question: "Is TeamPrompt more expensive?", answer: "TeamPrompt has a free plan. Paid plans start at $9/month — comparable to or less than ChatGPT Plus, with multi-tool support included." },
+    ],
+    cta: {
+      headline: "Stop being locked into",
+      gradientText: "a single AI tool.",
+      subtitle: "Manage prompts across every AI tool your team uses. Free plan available.",
+    },
+  },
+  {
+    slug: "vs-prompt-managers",
+    category: "comparison",
+    meta: {
+      title: "TeamPrompt vs AIPRM & Prompt Managers — Governance-First Prompt Management",
+      description:
+        "Compare TeamPrompt with AIPRM, PromptPerfect, and other prompt managers. See why governance-first matters: compliance packs, approval workflows, audit trails.",
+      keywords: ["TeamPrompt vs AIPRM", "prompt manager comparison", "AI governance platform"],
+    },
+    hero: {
+      headline: "TeamPrompt vs. other prompt managers",
+      subtitle:
+        "Most prompt managers help you organize prompts. TeamPrompt adds governance: compliance packs, DLP scanning, approval workflows, and full audit trails.",
+      badges: ["Governance-first", "Compliance packs", "Audit trails"],
+    },
+    features: {
+      sectionLabel: "Comparison",
+      heading: "Beyond basic prompt management",
+      items: [
+        { icon: "Shield", title: "Compliance packs", description: "One-click HIPAA, GDPR, PCI-DSS, CCPA, SOC 2, and PII policy packs. Other prompt managers have no compliance features." },
+        { icon: "ShieldAlert", title: "DLP scanning", description: "Real-time scanning with auto-sanitization. AIPRM and others don't scan for sensitive data." },
+        { icon: "CheckSquare", title: "Approval workflows", description: "Submit prompts for review before they go live. Other tools lack governance workflows." },
+        { icon: "Eye", title: "Full audit trail", description: "Every interaction logged with timestamps. Export for compliance reviews. Other tools don't offer audit capabilities." },
+        { icon: "Users", title: "Team management", description: "Roles, teams, and access control. Most prompt managers are built for individual use, not organizations." },
+        { icon: "BarChart3", title: "Effectiveness analytics", description: "Track prompt effectiveness with ratings and distribution metrics. Go beyond basic usage counts." },
+      ],
+    },
+    benefits: {
+      heading: "Why governance-first matters",
+      items: [
+        "Compliance packs cover HIPAA, GDPR, PCI-DSS, CCPA, and SOC 2",
+        "DLP scanning prevents sensitive data leaks that other tools ignore",
+        "Approval workflows ensure quality and compliance before prompts go live",
+        "Full audit trail proves AI oversight to regulators",
+        "Team management with roles and access control for organizations",
+        "Effectiveness analytics show which prompts actually deliver results",
+      ],
+    },
+    stats: [
+      { value: "6", label: "Compliance packs" },
+      { value: "Built-in", label: "DLP + audit" },
+      { value: "Full", label: "Approval workflow" },
+    ],
+    faqs: [
+      { question: "How is TeamPrompt different from AIPRM?", answer: "AIPRM focuses on prompt discovery and templates for individual ChatGPT users. TeamPrompt is built for teams with governance: DLP scanning, compliance packs, approval workflows, audit trails, and team management." },
+      { question: "Can I migrate from another prompt manager?", answer: "Yes. Export prompts from any tool as CSV or JSON and import into TeamPrompt. The column mapper handles different formats." },
+      { question: "Is TeamPrompt for individuals or teams?", answer: "Both. The Pro plan works for solo power users. Team and Business plans add multi-user governance features." },
+    ],
+    cta: {
+      headline: "Your prompts need governance,",
+      gradientText: "not just organization.",
+      subtitle: "Start with the free plan. Add governance as your team grows.",
+    },
+  },
 ];

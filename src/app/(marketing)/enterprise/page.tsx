@@ -19,6 +19,7 @@ import {
   Globe,
   Server,
   FileText,
+  FileCheck,
 } from "lucide-react";
 
 export const metadata = generatePageMetadata({
@@ -91,6 +92,12 @@ const platformFeatures = [
       "We're building SAML, OIDC, and SCIM provisioning so employees get the right access on day one. Contact sales to join the early access program.",
   },
   {
+    icon: FileCheck,
+    title: "Compliance Policy Packs",
+    description:
+      "Deploy pre-built compliance frameworks — HIPAA, GDPR, PCI-DSS, CCPA, SOC 2, and General PII — with one click. Customize rules to fit your organization's requirements.",
+  },
+  {
     icon: Lock,
     title: "Secure by Default",
     description:
@@ -108,7 +115,7 @@ const stats = [
   { value: "100%", label: "Browser coverage" },
   { value: "<5min", label: "MDM deployment" },
   { value: "0", label: "User setup steps" },
-  { value: "6", label: "AI tools monitored" },
+  { value: "5", label: "AI tools monitored" },
 ];
 
 const capabilityBadges = [
@@ -149,6 +156,11 @@ const faqs = [
     question: "Do you support regulated industries like healthcare and finance?",
     answer:
       "TeamPrompt's guardrails can detect PHI, PII, financial data, and other sensitive information patterns. We're actively working toward formal compliance certifications. Contact our sales team to discuss your specific regulatory requirements.",
+  },
+  {
+    question: "Which compliance frameworks are supported?",
+    answer:
+      "TeamPrompt includes 6 one-click compliance policy packs: HIPAA (healthcare), GDPR (EU data protection), PCI-DSS (payment cards), CCPA (California privacy), SOC 2 (service organizations), and General PII detection. Each pack installs pre-configured security rules that detect and block the specific data patterns relevant to that framework.",
   },
 ];
 
@@ -347,6 +359,8 @@ export default function EnterprisePage() {
               "Unlimited users and teams",
               "Force-install Chrome extension via MDM",
               "Custom guardrail rules per team",
+              "6 one-click compliance packs (HIPAA, GDPR, PCI-DSS, CCPA, SOC 2, PII)",
+              "Auto-sanitization with safe placeholder tokens",
               "Full audit log with exportable reports",
               "SSO and SCIM provisioning (coming soon)",
               "Priority support",

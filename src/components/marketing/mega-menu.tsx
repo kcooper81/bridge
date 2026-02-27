@@ -6,11 +6,13 @@ import { cn } from "@/lib/utils";
 import {
   ChevronDown,
   Gavel,
+  GraduationCap,
   HeartPulse,
   Landmark,
   Laptop,
   PiggyBank,
   Shield,
+  ShieldCheck,
   Users,
   Zap,
 } from "lucide-react";
@@ -21,6 +23,8 @@ const industries = [
   { label: "Technology", description: "Ship faster with shared prompts", href: "/industries/technology", icon: Laptop, color: "bg-blue-500/10 text-blue-600 dark:text-blue-400" },
   { label: "Finance", description: "Compliant AI for financial teams", href: "/industries/finance", icon: PiggyBank, color: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" },
   { label: "Government", description: "Secure AI for public sector", href: "/industries/government", icon: Landmark, color: "bg-violet-500/10 text-violet-600 dark:text-violet-400" },
+  { label: "Education", description: "FERPA-safe AI for institutions", href: "/industries/education", icon: GraduationCap, color: "bg-orange-500/10 text-orange-600 dark:text-orange-400" },
+  { label: "Insurance", description: "Compliant AI for claims & underwriting", href: "/industries/insurance", icon: ShieldCheck, color: "bg-teal-500/10 text-teal-600 dark:text-teal-400" },
 ];
 
 const useCases = [

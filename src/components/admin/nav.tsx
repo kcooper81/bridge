@@ -93,7 +93,7 @@ export function AdminNav() {
         <item.icon className="h-5 w-5" />
         <span className="flex-1">{item.label}</span>
         {badgeCount > 0 && (
-          <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-blue-500 px-1.5 text-xs font-bold text-white">
+          <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-slate-700 px-1.5 text-[10px] font-medium text-slate-300">
             {badgeCount > 99 ? "99+" : badgeCount}
           </span>
         )}

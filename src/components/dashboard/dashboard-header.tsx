@@ -61,51 +61,47 @@ export function DashboardHeader() {
       <div className="flex items-center gap-1">
         <NotificationBell />
 
-        {/* Settings dropdown */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-9 w-9 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-200"
-            >
-              <Settings className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-52" sideOffset={8}>
-            <DropdownMenuItem asChild>
-              <Link href="/settings">
-                <User className="mr-2 h-4 w-4" />
-                Profile
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link href="/settings/organization">
-                <Building className="mr-2 h-4 w-4" />
-                Organization
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link href="/settings/plan">
-                <CreditCard className="mr-2 h-4 w-4" />
-                Plan & Usage
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link href="/settings/billing">
-                <Receipt className="mr-2 h-4 w-4" />
-                Billing
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link href="/team">
-                <Users className="mr-2 h-4 w-4" />
-                Team
-              </Link>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {/* Settings dropdown — admin/manager only */}
+        {(currentUserRole === "admin" || currentUserRole === "manager") && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-9 w-9 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-200"
+              >
+                <Settings className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-52" sideOffset={8}>
+              <DropdownMenuItem asChild>
+                <Link href="/settings/organization">
+                  <Building className="mr-2 h-4 w-4" />
+                  Organization
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/settings/plan">
+                  <CreditCard className="mr-2 h-4 w-4" />
+                  Plan & Usage
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/settings/billing">
+                  <Receipt className="mr-2 h-4 w-4" />
+                  Billing
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link href="/team">
+                  <Users className="mr-2 h-4 w-4" />
+                  Team
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
 
         {/* User dropdown */}
         <DropdownMenu>

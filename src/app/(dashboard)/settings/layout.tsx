@@ -10,7 +10,7 @@ import type { UserRole } from "@/lib/types";
 
 const tabs: { label: string; href: string; icon: typeof User; roles?: UserRole[] }[] = [
   { label: "Profile", href: "/settings", icon: User },
-  { label: "Organization", href: "/settings/organization", icon: Building },
+  { label: "Organization", href: "/settings/organization", icon: Building, roles: ["admin", "manager"] as UserRole[] },
   { label: "Plan & Usage", href: "/settings/plan", icon: CreditCard, roles: ["admin", "manager"] },
   { label: "Billing", href: "/settings/billing", icon: Receipt, roles: ["admin", "manager"] },
 ];

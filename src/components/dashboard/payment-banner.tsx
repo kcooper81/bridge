@@ -23,11 +23,17 @@ export function PaymentBanner() {
         <div className="mb-4 flex items-center gap-3 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3">
           <AlertTriangle className="h-4 w-4 text-destructive shrink-0" />
           <p className="text-sm text-destructive flex-1">
-            Your last payment failed. Please{" "}
-            <Link href="/settings/billing" className="font-semibold underline">
-              update your payment method
-            </Link>{" "}
-            to keep your plan active.
+            {isAdmin ? (
+              <>
+                Your last payment failed. Please{" "}
+                <Link href="/settings/billing" className="font-semibold underline">
+                  update your payment method
+                </Link>{" "}
+                to keep your plan active.
+              </>
+            ) : (
+              "There\u2019s a billing issue with your organization. Contact your admin to resolve it."
+            )}
           </p>
         </div>
       )}
@@ -36,10 +42,16 @@ export function PaymentBanner() {
         <div className="mb-4 flex items-center gap-3 rounded-lg border border-tp-yellow/30 bg-tp-yellow/10 px-4 py-3">
           <AlertTriangle className="h-4 w-4 text-tp-yellow shrink-0" />
           <p className="text-sm flex-1">
-            Your subscription has been canceled. You&apos;ve been moved to the Free plan.{" "}
-            <Link href="/settings/billing" className="font-semibold text-primary underline">
-              Resubscribe
-            </Link>
+            {isAdmin ? (
+              <>
+                Your subscription has been canceled. You&apos;ve been moved to the Free plan.{" "}
+                <Link href="/settings/billing" className="font-semibold text-primary underline">
+                  Resubscribe
+                </Link>
+              </>
+            ) : (
+              "Your organization\u2019s subscription has been canceled. Contact your admin for details."
+            )}
           </p>
         </div>
       )}

@@ -1,7 +1,10 @@
+"use client";
+
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useOrg } from "@/components/providers/org-provider";
 import { FEATURE_CONFIG, type BooleanFeature } from "./config";
 import type { LucideIcon } from "lucide-react";
 
@@ -16,6 +19,8 @@ export function UpgradeGate({ feature, title, icon, className }: UpgradeGateProp
   const meta = FEATURE_CONFIG[feature];
   const Icon = icon ?? meta.icon;
   const heading = title ?? meta.title;
+  const { currentUserRole } = useOrg();
+  const isMember = currentUserRole === "member";
 
   return (
     <div className={cn("flex flex-col items-center justify-center py-16 text-center", className)}>
@@ -24,23 +29,31 @@ export function UpgradeGate({ feature, title, icon, className }: UpgradeGateProp
       </div>
 
       <h3 className="text-lg font-semibold">{heading}</h3>
-      <p className="mt-1 max-w-sm text-sm text-muted-foreground">{meta.description}</p>
+      <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+        {isMember
+          ? "This feature requires a plan upgrade. Contact your admin to enable it."
+          : meta.description}
+      </p>
 
-      <ul className="mt-4 space-y-2 text-sm text-left">
-        {meta.benefits.map((b) => (
-          <li key={b} className="flex items-center gap-2">
-            <span className="h-1 w-1 shrink-0 rounded-full bg-primary" />
-            {b}
-          </li>
-        ))}
-      </ul>
+      {!isMember && (
+        <>
+          <ul className="mt-4 space-y-2 text-sm text-left">
+            {meta.benefits.map((b) => (
+              <li key={b} className="flex items-center gap-2">
+                <span className="h-1 w-1 shrink-0 rounded-full bg-primary" />
+                {b}
+              </li>
+            ))}
+          </ul>
 
-      <div className="mt-6 flex items-center gap-3">
-        <Button asChild>
-          <Link href="/settings/billing">Upgrade to {meta.unlockPlanName}</Link>
-        </Button>
-        <Badge variant="secondary">{meta.unlockPlanName} plan</Badge>
-      </div>
+          <div className="mt-6 flex items-center gap-3">
+            <Button asChild>
+              <Link href="/settings/billing">Upgrade to {meta.unlockPlanName}</Link>
+            </Button>
+            <Badge variant="secondary">{meta.unlockPlanName} plan</Badge>
+          </div>
+        </>
+      )}
     </div>
   );
 }

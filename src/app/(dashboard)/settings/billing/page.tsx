@@ -19,7 +19,7 @@ import type { PlanTier } from "@/lib/types";
 import type { BillingInterval } from "@/lib/billing/plans";
 
 export default function BillingPage() {
-  const { org, members } = useOrg();
+  const { org, members, currentUserRole } = useOrg();
   const { subscription } = useSubscription();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -112,6 +112,18 @@ export default function BillingPage() {
 
   const currentPlan = org?.plan || "free";
   const plans: PlanTier[] = ["free", "pro", "team", "business"];
+
+  if (currentUserRole === "member") {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <CreditCard className="h-10 w-10 text-muted-foreground mb-4" />
+        <h3 className="text-lg font-semibold">Billing is managed by your admin</h3>
+        <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+          Only admins can manage billing and subscriptions. Contact your organization admin if you need changes to your plan.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-5xl space-y-6">

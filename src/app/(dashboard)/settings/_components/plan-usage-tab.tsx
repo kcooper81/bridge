@@ -11,11 +11,23 @@ import { format } from "date-fns";
 import Link from "next/link";
 
 export function PlanUsageTab() {
-  const { org, prompts, members, guidelines } = useOrg();
+  const { org, prompts, members, guidelines, currentUserRole } = useOrg();
   const { subscription, planLimits } = useSubscription();
 
   const currentPlan = org?.plan || "free";
   const isFree = currentPlan === "free";
+
+  if (currentUserRole === "member") {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <CreditCard className="h-10 w-10 text-muted-foreground mb-4" />
+        <h3 className="text-lg font-semibold">Plan managed by your admin</h3>
+        <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+          Contact your organization admin to manage your plan and usage.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

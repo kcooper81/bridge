@@ -10,6 +10,7 @@ import {
   BarChart3,
   BookOpen,
   Plus,
+  Settings,
   Star,
   TrendingUp,
   Users,
@@ -38,7 +39,7 @@ interface DashboardWidgetsProps {
 }
 
 export function DashboardWidgets({ analytics, loading }: DashboardWidgetsProps) {
-  const { prompts, members } = useOrg();
+  const { prompts, members, currentUserRole } = useOrg();
 
   if (loading) {
     return <WidgetsSkeleton />;
@@ -141,7 +142,9 @@ export function DashboardWidgets({ analytics, loading }: DashboardWidgetsProps) 
               {[
                 { label: "New Prompt", href: "/vault", icon: Plus },
                 { label: "Analytics", href: "/analytics", icon: BarChart3 },
-                { label: "Manage Team", href: "/team", icon: Users },
+                currentUserRole === "member"
+                  ? { label: "My Settings", href: "/settings", icon: Settings }
+                  : { label: "Manage Team", href: "/team", icon: Users },
                 { label: "Templates", href: "/templates", icon: BookOpen },
               ].map((action) => (
                 <Link

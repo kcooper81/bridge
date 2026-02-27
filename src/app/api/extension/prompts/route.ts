@@ -9,6 +9,97 @@ const MAX_LIMIT = 500;
 
 export async function OPTIONS(request: NextRequest) { return handleOptions(request); }
 
+// POST /api/extension/prompts — Create a new prompt from the extension
+export async function POST(request: NextRequest) {
+  try {
+    const authHeader = request.headers.get("authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return withCors(NextResponse.json({ error: "Unauthorized" }, { status: 401 }), request);
+    }
+
+    const token = authHeader.replace("Bearer ", "");
+    const db = createServiceClient();
+    const { data: { user }, error: authError } = await db.auth.getUser(token);
+    if (authError || !user) {
+      return withCors(NextResponse.json({ error: "Unauthorized" }, { status: 401 }), request);
+    }
+
+    const rl = await checkRateLimit(limiters.prompts, user.id);
+    if (!rl.success) return withCors(rl.response, request);
+
+    const { data: profile } = await db
+      .from("profiles")
+      .select("org_id, role, is_super_admin")
+      .eq("id", user.id)
+      .single();
+
+    if (!profile?.org_id) {
+      return withCors(NextResponse.json({ error: "No organization" }, { status: 403 }), request);
+    }
+
+    const body = await request.json();
+    const { title, content, description, tags, folder_id, department_id, tone } = body;
+
+    if (!title?.trim() || !content?.trim()) {
+      return withCors(NextResponse.json({ error: "Title and content are required" }, { status: 400 }), request);
+    }
+
+    // Determine approval status:
+    // - Org admins → always approved
+    // - Team admin (manager) of the selected team → approved
+    // - Everyone else → draft (pending review)
+    const orgRole = profile.is_super_admin ? "admin" : profile.role;
+    let status = "draft";
+
+    if (orgRole === "admin") {
+      status = "approved";
+    } else if (orgRole === "manager") {
+      status = "approved";
+    } else if (department_id) {
+      // Check if user is admin of the target team
+      const { data: membership } = await db
+        .from("team_members")
+        .select("role")
+        .eq("team_id", department_id)
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (membership?.role === "admin") {
+        status = "approved";
+      }
+    }
+
+    const { data: prompt, error } = await db
+      .from("prompts")
+      .insert({
+        org_id: profile.org_id,
+        owner_id: user.id,
+        title: title.trim(),
+        content: content.trim(),
+        description: description?.trim() || null,
+        tags: Array.isArray(tags) ? tags.filter(Boolean) : [],
+        folder_id: folder_id || null,
+        department_id: department_id || null,
+        tone: tone || "professional",
+        status,
+        is_template: false,
+        version: 1,
+      })
+      .select("id, title, status")
+      .single();
+
+    if (error) {
+      console.error("Extension create prompt error:", error);
+      return withCors(NextResponse.json({ error: "Failed to create prompt" }, { status: 500 }), request);
+    }
+
+    return withCors(NextResponse.json({ success: true, prompt }, { status: 201 }), request);
+  } catch (error) {
+    console.error("Extension create prompt error:", error);
+    return withCors(NextResponse.json({ error: "Internal server error" }, { status: 500 }), request);
+  }
+}
+
 // GET /api/extension/prompts — Chrome extension fetches user's prompts
 export async function GET(request: NextRequest) {
   try {

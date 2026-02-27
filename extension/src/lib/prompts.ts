@@ -147,6 +147,84 @@ export async function toggleFavorite(promptId: string): Promise<boolean | null> 
   return data?.is_favorite ?? null;
 }
 
+export interface ExtTeam {
+  id: string;
+  name: string;
+  icon: string | null;
+  color: string | null;
+  team_role: string | null;
+  is_member: boolean;
+}
+
+export async function fetchTeams(): Promise<{ teams: ExtTeam[]; org_role: string }> {
+  const session = await getSession();
+  if (!session) return { teams: [], org_role: "member" };
+
+  const res = await apiFetch(
+    `${CONFIG.SITE_URL}${API_ENDPOINTS.teams}`,
+    { headers: apiHeaders(session.accessToken) }
+  );
+
+  if (res.status === 401) throw new Error("SESSION_EXPIRED");
+  if (!res.ok) return { teams: [], org_role: "member" };
+
+  const data = res.data as { teams?: ExtTeam[]; org_role?: string };
+  return { teams: data?.teams || [], org_role: data?.org_role || "member" };
+}
+
+export async function createPrompt(opts: {
+  title: string;
+  content: string;
+  description?: string;
+  tags?: string[];
+  folder_id?: string;
+  department_id?: string;
+  tone?: string;
+}): Promise<{ success: boolean; prompt?: { id: string; title: string; status: string }; error?: string }> {
+  const session = await getSession();
+  if (!session) return { success: false, error: "Not signed in" };
+
+  const res = await apiFetch(
+    `${CONFIG.SITE_URL}${API_ENDPOINTS.prompts}`,
+    {
+      method: "POST",
+      headers: apiHeaders(session.accessToken),
+      body: JSON.stringify(opts),
+    }
+  );
+
+  if (res.status === 401) throw new Error("SESSION_EXPIRED");
+
+  const data = res.data as { success?: boolean; prompt?: { id: string; title: string; status: string }; error?: string };
+  if (!res.ok) return { success: false, error: data?.error || "Failed to create prompt" };
+  return { success: true, prompt: data?.prompt };
+}
+
+export async function suggestRule(opts: {
+  name: string;
+  description: string;
+  category?: string;
+  severity?: "block" | "warn";
+}): Promise<{ success: boolean; id?: string; error?: string }> {
+  const session = await getSession();
+  if (!session) return { success: false, error: "Not signed in" };
+
+  const res = await apiFetch(
+    `${CONFIG.SITE_URL}/api/guardrails/suggest`,
+    {
+      method: "POST",
+      headers: apiHeaders(session.accessToken),
+      body: JSON.stringify(opts),
+    }
+  );
+
+  if (res.status === 401) throw new Error("SESSION_EXPIRED");
+
+  const data = res.data as { success?: boolean; id?: string; error?: string };
+  if (!res.ok) return { success: false, error: data?.error || "Failed to submit suggestion" };
+  return { success: true, id: data?.id };
+}
+
 export function fillTemplate(
   content: string,
   values: Record<string, string>

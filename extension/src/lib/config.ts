@@ -10,6 +10,7 @@ export const CONFIG = {
 export const API_ENDPOINTS = {
   prompts: "/api/extension/prompts",
   folders: "/api/extension/folders",
+  teams: "/api/extension/teams",
   scan: "/api/extension/scan",
   log: "/api/extension/log",
   securityStatus: "/api/extension/security-status",

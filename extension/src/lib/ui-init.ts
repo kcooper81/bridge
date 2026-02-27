@@ -3,7 +3,7 @@
 
 import { getSession, login, logout, openLogin, openSignup, openGoogleAuth, openGithubAuth } from "./auth";
 import { extAuthDebug } from "./auth-debug"; // AUTH-DEBUG
-import { fetchPrompts, fetchFolders, fillTemplate, normalizeVariables, getDisplayLabel, toggleFavorite, type Prompt, type ExtFolder } from "./prompts";
+import { fetchPrompts, fetchFolders, fetchTeams, fillTemplate, normalizeVariables, getDisplayLabel, toggleFavorite, createPrompt, suggestRule, type Prompt, type ExtFolder, type ExtTeam } from "./prompts";
 import { fetchSecurityStatus, enableDefaultRules, type SecurityStatus } from "./security-status";
 import { CONFIG, API_ENDPOINTS, apiHeaders } from "./config";
 import { detectAiTool } from "./ai-tools";
@@ -36,10 +36,10 @@ export interface UIElements {
 let currentPrompts: Prompt[] = [];
 let selectedPrompt: Prompt | null = null;
 let currentSearchQuery = "";
-let activeFilter: "recent" | "favorites" | "prompts" = "favorites";
+let activeFilter: "recent" | "favorites" | "prompts" | "guardrails" = "favorites";
 let searchTimeout: ReturnType<typeof setTimeout> | undefined;
 let cachedShieldStatus: SecurityStatus | null = null;
-let shieldPanelOpen = false;
+let createPromptPanelOpen = false;
 let els: UIElements;
 
 // Folder & tag filter state
@@ -527,60 +527,201 @@ function renderPrompts(context?: "recent" | "favorites" | "folder") {
 
 // ─── Shield ───
 
-function openShieldPanel() {
-  const shieldView = document.getElementById("shield-view");
-  if (!shieldView) return;
-  shieldPanelOpen = true;
-  shieldView.classList.remove("hidden");
-  shieldView.classList.add("shield-overlay");
+function switchToGuardrailsTab() {
+  // Activate the guardrails tab button
+  els.mainView.querySelectorAll(".tab").forEach((t) => t.classList.remove("active"));
+  const guardrailsTab = els.mainView.querySelector<HTMLElement>('.tab[data-filter="guardrails"]');
+  if (guardrailsTab) guardrailsTab.classList.add("active");
+
+  activeFilter = "guardrails";
+  currentFolderId = null;
+  currentFolderName = null;
+  currentTags = [];
+  document.getElementById("filter-bar")?.remove();
+  els.searchInput.value = "";
   els.searchInput.placeholder = "Search violations...";
+
+  els.promptList.classList.add("hidden");
+  const shieldView = document.getElementById("shield-view");
+  if (shieldView) shieldView.classList.remove("hidden");
+
   loadShieldView();
 }
 
-function closeShieldPanel() {
-  const shieldView = document.getElementById("shield-view");
-  if (!shieldView) return;
-  shieldPanelOpen = false;
-  shieldView.classList.add("hidden");
-  shieldView.classList.remove("shield-overlay");
-  els.searchInput.placeholder = "Search prompts...";
+async function openCreatePromptPanel() {
+  const contentArea = document.getElementById("content-area");
+  if (!contentArea) return;
+
+  // Remove existing panel if any
+  document.getElementById("create-prompt-panel")?.remove();
+
+  createPromptPanelOpen = true;
+
+  // Fetch folders and teams in parallel for dropdowns
+  const [foldersData, teamsData] = await Promise.all([
+    fetchFolders(),
+    fetchTeams(),
+  ]);
+
+  // Build folder options
+  const folderOptions = foldersData.folders
+    .map((f: ExtFolder) => `<option value="${f.id}">${escapeHtml(f.name)}</option>`)
+    .join("");
+
+  // Build team options
+  const teamOptions = teamsData.teams
+    .map((t: ExtTeam) => `<option value="${t.id}">${escapeHtml(t.name)}</option>`)
+    .join("");
+
+  // Approval hint based on role
+  const orgRole = teamsData.org_role;
+  const needsApproval = orgRole !== "admin" && orgRole !== "manager";
+
+  const panel = document.createElement("div");
+  panel.id = "create-prompt-panel";
+  panel.className = "create-prompt-panel";
+  panel.innerHTML = `
+    <div class="panel-header">
+      <span>Create Prompt</span>
+      <button class="panel-close" title="Close">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div class="panel-body">
+      <label>Title *</label>
+      <input type="text" id="cp-title" placeholder="Give your prompt a name..." />
+      <label>Content *</label>
+      <textarea id="cp-content" placeholder="Write your prompt here..."></textarea>
+      <label>Description</label>
+      <input type="text" id="cp-description" placeholder="Brief description..." />
+      <label>Category</label>
+      <select id="cp-folder">
+        <option value="">None</option>
+        ${folderOptions}
+      </select>
+      ${teamOptions ? `
+        <label>Team</label>
+        <select id="cp-team">
+          <option value="">Org-wide</option>
+          ${teamOptions}
+        </select>
+      ` : ""}
+      <label>Tone</label>
+      <select id="cp-tone">
+        <option value="professional">Professional</option>
+        <option value="friendly">Friendly</option>
+        <option value="casual">Casual</option>
+        <option value="formal">Formal</option>
+        <option value="technical">Technical</option>
+        <option value="creative">Creative</option>
+        <option value="persuasive">Persuasive</option>
+      </select>
+      <label>Tags</label>
+      <input type="text" id="cp-tags" placeholder="Comma-separated, e.g. sales, email" />
+      ${needsApproval ? '<div class="panel-hint">Prompts you create will be submitted for admin approval.</div>' : ""}
+      <div id="cp-error" class="panel-error"></div>
+    </div>
+    <div class="panel-actions">
+      <button id="cp-cancel" class="btn-secondary">Cancel</button>
+      <button id="cp-submit" class="btn-primary">${needsApproval ? "Submit for Approval" : "Create"}</button>
+    </div>
+  `;
+
+  contentArea.appendChild(panel);
+
+  // Wire events
+  panel.querySelector(".panel-close")?.addEventListener("click", closeCreatePromptPanel);
+  panel.querySelector("#cp-cancel")?.addEventListener("click", closeCreatePromptPanel);
+  panel.querySelector("#cp-submit")?.addEventListener("click", handleCreatePrompt);
+
+  // Focus title
+  requestAnimationFrame(() => {
+    panel.querySelector<HTMLInputElement>("#cp-title")?.focus();
+  });
+}
+
+function closeCreatePromptPanel() {
+  createPromptPanelOpen = false;
+  document.getElementById("create-prompt-panel")?.remove();
+}
+
+async function handleCreatePrompt() {
+  const title = (document.getElementById("cp-title") as HTMLInputElement)?.value.trim();
+  const content = (document.getElementById("cp-content") as HTMLTextAreaElement)?.value.trim();
+  const description = (document.getElementById("cp-description") as HTMLInputElement)?.value.trim();
+  const folderId = (document.getElementById("cp-folder") as HTMLSelectElement)?.value;
+  const teamId = (document.getElementById("cp-team") as HTMLSelectElement | null)?.value;
+  const tone = (document.getElementById("cp-tone") as HTMLSelectElement)?.value;
+  const tagsStr = (document.getElementById("cp-tags") as HTMLInputElement)?.value.trim();
+  const errorEl = document.getElementById("cp-error");
+  const submitBtn = document.getElementById("cp-submit") as HTMLButtonElement;
+
+  if (!title || !content) {
+    if (errorEl) errorEl.textContent = "Title and content are required";
+    return;
+  }
+
+  const btnText = submitBtn?.textContent || "Create";
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Submitting...";
+  }
+  if (errorEl) errorEl.textContent = "";
+
+  try {
+    const tags = tagsStr ? tagsStr.split(",").map((t) => t.trim()).filter(Boolean) : [];
+    const result = await createPrompt({
+      title,
+      content,
+      description: description || undefined,
+      tags,
+      folder_id: folderId || undefined,
+      department_id: teamId || undefined,
+      tone: tone || undefined,
+    });
+
+    if (result.success) {
+      closeCreatePromptPanel();
+      reloadCurrentTab();
+      const statusMsg = result.prompt?.status === "draft"
+        ? "Prompt submitted for approval!"
+        : "Prompt created!";
+      setStatus(statusMsg);
+      setTimeout(() => setStatus("Ready"), 3000);
+    } else {
+      if (errorEl) errorEl.textContent = result.error || "Failed to create prompt";
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = btnText;
+      }
+    }
+  } catch {
+    if (errorEl) errorEl.textContent = "Something went wrong";
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = btnText;
+    }
+  }
 }
 
 async function loadShieldView() {
   const shieldView = document.getElementById("shield-view");
   if (!shieldView) return;
 
-  // Build panel structure: header + body
-  shieldView.innerHTML = `
-    <div class="shield-panel-header">
-      <span>Guardrails</span>
-      <button class="shield-panel-close" title="Close">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-        </svg>
-      </button>
-    </div>
-    <div class="shield-panel-body">
-      <div class="loading">Loading security status...</div>
-    </div>
-  `;
-
-  // Wire close button
-  shieldView.querySelector(".shield-panel-close")?.addEventListener("click", closeShieldPanel);
-
-  const body = shieldView.querySelector<HTMLElement>(".shield-panel-body");
-  if (!body) return;
+  shieldView.innerHTML = '<div class="loading">Loading security status...</div>';
 
   const status = await fetchSecurityStatus();
   cachedShieldStatus = status;
   updateShieldIndicator(status);
 
   if (!status) {
-    body.innerHTML = '<div class="shield-empty">Unable to load security status</div>';
+    shieldView.innerHTML = '<div class="shield-empty">Unable to load security status</div>';
     return;
   }
 
-  renderShieldView(body, status);
+  renderShieldView(shieldView, status);
 }
 
 function filterShieldViolations(container: HTMLElement, query: string) {
@@ -713,6 +854,39 @@ function renderShieldView(container: HTMLElement, status: SecurityStatus) {
       ? `<div class="shield-manage-link shield-managed-note">Protected by your organization&apos;s guardrails</div>`
       : "";
 
+  const suggestRuleHtml = `
+    <button class="suggest-rule-toggle" id="suggest-rule-toggle">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      Suggest a Rule
+    </button>
+    <div id="suggest-rule-form" class="suggest-rule-form hidden">
+      <label>Rule Name</label>
+      <input type="text" id="sr-name" placeholder="e.g. Block internal project names" />
+      <label>What should be blocked?</label>
+      <textarea id="sr-description" placeholder="Describe in plain language what this rule should catch..."></textarea>
+      <label>Category</label>
+      <select id="sr-category">
+        <option value="custom">Custom</option>
+        <option value="pii">PII / Personal Data</option>
+        <option value="secrets">Secrets / Credentials</option>
+        <option value="compliance">Compliance</option>
+        <option value="ip">Intellectual Property</option>
+      </select>
+      <label>Severity</label>
+      <select id="sr-severity">
+        <option value="warn">Warn (allow with warning)</option>
+        <option value="block">Block (prevent sending)</option>
+      </select>
+      <div id="sr-error" class="panel-error"></div>
+      <div class="suggest-rule-actions">
+        <button id="sr-cancel" class="btn-secondary">Cancel</button>
+        <button id="sr-submit" class="btn-primary">Submit</button>
+      </div>
+    </div>
+  `;
+
   container.innerHTML = `
     <div class="shield-status-card">
       ${statusIcon}
@@ -725,6 +899,7 @@ function renderShieldView(container: HTMLElement, status: SecurityStatus) {
     ${statsHtml}
     ${violationsHtml}
     ${footerHtml}
+    ${suggestRuleHtml}
   `;
 
   // Bind enable button if present
@@ -743,6 +918,55 @@ function renderShieldView(container: HTMLElement, status: SecurityStatus) {
         enableBtn.textContent = "Enable Default Rules";
         const hint = container.querySelector(".shield-onboarding-hint");
         if (hint) hint.textContent = "Something went wrong. Try again or set up on the dashboard.";
+      }
+    });
+  }
+
+  // Suggest rule toggle
+  const srToggle = container.querySelector("#suggest-rule-toggle");
+  const srForm = container.querySelector<HTMLElement>("#suggest-rule-form");
+  if (srToggle && srForm) {
+    srToggle.addEventListener("click", () => {
+      srToggle.classList.add("hidden");
+      srForm.classList.remove("hidden");
+      srForm.querySelector<HTMLInputElement>("#sr-name")?.focus();
+    });
+
+    srForm.querySelector("#sr-cancel")?.addEventListener("click", () => {
+      srForm.classList.add("hidden");
+      srToggle.classList.remove("hidden");
+    });
+
+    srForm.querySelector("#sr-submit")?.addEventListener("click", async () => {
+      const name = (srForm.querySelector("#sr-name") as HTMLInputElement)?.value.trim();
+      const description = (srForm.querySelector("#sr-description") as HTMLTextAreaElement)?.value.trim();
+      const category = (srForm.querySelector("#sr-category") as HTMLSelectElement)?.value;
+      const severity = (srForm.querySelector("#sr-severity") as HTMLSelectElement)?.value as "block" | "warn";
+      const errorEl = srForm.querySelector<HTMLElement>("#sr-error");
+      const submitBtn = srForm.querySelector<HTMLButtonElement>("#sr-submit");
+
+      if (!name || !description) {
+        if (errorEl) errorEl.textContent = "Name and description are required";
+        return;
+      }
+
+      if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = "Submitting..."; }
+      if (errorEl) errorEl.textContent = "";
+
+      try {
+        const result = await suggestRule({ name, description, category, severity });
+        if (result.success) {
+          srForm.classList.add("hidden");
+          srToggle.classList.remove("hidden");
+          setStatus("Rule suggestion submitted!");
+          setTimeout(() => setStatus("Ready"), 2000);
+        } else {
+          if (errorEl) errorEl.textContent = result.error || "Failed to submit";
+          if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = "Submit"; }
+        }
+      } catch {
+        if (errorEl) errorEl.textContent = "Something went wrong";
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = "Submit"; }
       }
     });
   }
@@ -941,10 +1165,10 @@ export function initSharedUI(elements: UIElements) {
     searchTimeout = setTimeout(() => {
       const query = els.searchInput.value.trim();
 
-      if (shieldPanelOpen) {
-        // Shield panel open — filter violations client-side
-        const body = document.querySelector<HTMLElement>(".shield-panel-body");
-        if (body) filterShieldViolations(body, query);
+      if (activeFilter === "guardrails") {
+        // Guardrails tab — filter violations client-side
+        const shieldView = document.getElementById("shield-view");
+        if (shieldView) filterShieldViolations(shieldView, query);
         return;
       }
 
@@ -968,8 +1192,8 @@ export function initSharedUI(elements: UIElements) {
       tab.classList.add("active");
       activeFilter = (tab.dataset.filter || "favorites") as typeof activeFilter;
 
-      // Close shield panel if open
-      if (shieldPanelOpen) closeShieldPanel();
+      // Close create prompt panel if open
+      if (createPromptPanelOpen) closeCreatePromptPanel();
 
       // Reset folder/tag filters when switching tabs
       currentFolderId = null;
@@ -979,30 +1203,42 @@ export function initSharedUI(elements: UIElements) {
 
       // Clear search
       els.searchInput.value = "";
-      els.searchInput.placeholder = "Search prompts...";
 
-      els.promptList.classList.remove("hidden");
-      loadPrompts();
+      if (activeFilter === "guardrails") {
+        els.searchInput.placeholder = "Search violations...";
+        els.promptList.classList.add("hidden");
+        const shieldView = document.getElementById("shield-view");
+        if (shieldView) shieldView.classList.remove("hidden");
+        loadShieldView();
+      } else {
+        els.searchInput.placeholder = "Search prompts...";
+        els.promptList.classList.remove("hidden");
+        const shieldView = document.getElementById("shield-view");
+        if (shieldView) shieldView.classList.add("hidden");
+        loadPrompts();
+      }
     });
   });
 
-  // Guardrails indicator click — toggle overlay panel
+  // Guardrails indicator click — switch to Guardrails tab
   const shieldIndicator = document.getElementById("shield-indicator");
   if (shieldIndicator) {
     shieldIndicator.addEventListener("click", () => {
-      if (shieldPanelOpen) {
-        closeShieldPanel();
-      } else {
-        openShieldPanel();
+      if (activeFilter !== "guardrails") {
+        switchToGuardrailsTab();
       }
     });
   }
 
-  // Add Rule button — opens guardrails page on dashboard
-  const addRuleBtn = document.getElementById("add-rule-btn");
-  if (addRuleBtn) {
-    addRuleBtn.addEventListener("click", () => {
-      browser.tabs.create({ url: CONFIG.SITE_URL + "/guardrails" });
+  // "+" button — open create prompt panel
+  const addPromptBtn = document.getElementById("add-prompt-btn");
+  if (addPromptBtn) {
+    addPromptBtn.addEventListener("click", () => {
+      if (createPromptPanelOpen) {
+        closeCreatePromptPanel();
+      } else {
+        openCreatePromptPanel();
+      }
     });
   }
 

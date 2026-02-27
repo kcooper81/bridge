@@ -329,10 +329,35 @@ input:focus {
 /* ─── Search ─── */
 .search-wrap {
   padding: 10px 14px 0;
+  display: flex;
+  gap: 6px;
+  align-items: center;
 }
 .search-wrap input {
   margin-bottom: 0;
   height: 42px;
+  flex: 1;
+  min-width: 0;
+}
+
+.btn-add-prompt {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--input-bg);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.btn-add-prompt:hover {
+  color: var(--primary);
+  border-color: var(--primary);
+  background: var(--primary-surface);
 }
 
 /* ─── Tabs ─── */
@@ -689,22 +714,6 @@ button.shield-indicator:hover {
   line-height: 1;
 }
 
-.status-bar-action {
-  margin-left: auto;
-  background: none;
-  border: none;
-  color: var(--primary);
-  font-size: 11px;
-  font-weight: 600;
-  font-family: inherit;
-  cursor: pointer;
-  padding: 2px 6px;
-  border-radius: 4px;
-  transition: background var(--transition), color var(--transition);
-}
-.status-bar-action:hover {
-  background: var(--primary-surface);
-}
 
 /* ─── Tab icon ─── */
 .tab-icon {
@@ -719,7 +728,8 @@ button.shield-indicator:hover {
   padding: 14px;
 }
 
-.shield-view.shield-overlay {
+/* ─── Create Prompt Panel (overlay) ─── */
+.create-prompt-panel {
   position: absolute;
   top: 0;
   left: 0;
@@ -732,7 +742,7 @@ button.shield-indicator:hover {
   padding: 0;
 }
 
-.shield-panel-header {
+.panel-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -740,12 +750,12 @@ button.shield-indicator:hover {
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
 }
-.shield-panel-header span {
+.panel-header span {
   font-size: 13px;
   font-weight: 600;
 }
 
-.shield-panel-close {
+.panel-close {
   background: none;
   border: none;
   cursor: pointer;
@@ -756,15 +766,166 @@ button.shield-indicator:hover {
   align-items: center;
   transition: color var(--transition), background var(--transition);
 }
-.shield-panel-close:hover {
+.panel-close:hover {
   color: var(--text);
   background: var(--hover);
 }
 
-.shield-panel-body {
+.panel-body {
   flex: 1;
   overflow-y: auto;
   padding: 14px;
+}
+
+.panel-body label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+  margin-top: 10px;
+}
+.panel-body label:first-child { margin-top: 0; }
+
+.panel-body textarea {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--input-bg);
+  color: var(--text);
+  font-size: 13px;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 80px;
+  outline: none;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+.panel-body textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-glow);
+}
+
+.panel-body select {
+  width: 100%;
+  padding: 9px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--input-bg);
+  color: var(--text);
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  cursor: pointer;
+}
+.panel-body select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-glow);
+}
+
+.panel-actions {
+  display: flex;
+  gap: 8px;
+  padding: 14px;
+  flex-shrink: 0;
+}
+.panel-actions .btn-primary,
+.panel-actions .btn-secondary {
+  flex: 1;
+}
+
+.panel-hint {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 10px;
+  padding: 8px 10px;
+  background: var(--surface);
+  border-radius: 8px;
+  line-height: 1.4;
+}
+
+.panel-error {
+  color: var(--destructive);
+  font-size: 12px;
+  margin-top: 8px;
+}
+
+/* ─── Suggest Rule (inline in Guardrails tab) ─── */
+.suggest-rule-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+  padding: 8px;
+  margin-top: 12px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.suggest-rule-toggle:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-surface);
+}
+
+.suggest-rule-form {
+  margin-top: 12px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.suggest-rule-form label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+  margin-top: 10px;
+}
+.suggest-rule-form label:first-child { margin-top: 0; }
+.suggest-rule-form textarea {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--input-bg);
+  color: var(--text);
+  font-size: 13px;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 60px;
+  outline: none;
+}
+.suggest-rule-form textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-glow);
+}
+.suggest-rule-form select {
+  width: 100%;
+  padding: 7px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--input-bg);
+  color: var(--text);
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+}
+.suggest-rule-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+.suggest-rule-actions button {
+  flex: 1;
 }
 
 .shield-status-card {

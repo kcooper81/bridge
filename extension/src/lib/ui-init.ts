@@ -553,7 +553,7 @@ async function loadShieldView() {
   // Build panel structure: header + body
   shieldView.innerHTML = `
     <div class="shield-panel-header">
-      <span>Shield</span>
+      <span>Guardrails</span>
       <button class="shield-panel-close" title="Close">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
@@ -986,7 +986,7 @@ export function initSharedUI(elements: UIElements) {
     });
   });
 
-  // Shield indicator click — toggle overlay panel
+  // Guardrails indicator click — toggle overlay panel
   const shieldIndicator = document.getElementById("shield-indicator");
   if (shieldIndicator) {
     shieldIndicator.addEventListener("click", () => {
@@ -995,6 +995,14 @@ export function initSharedUI(elements: UIElements) {
       } else {
         openShieldPanel();
       }
+    });
+  }
+
+  // Add Rule button — opens guardrails page on dashboard
+  const addRuleBtn = document.getElementById("add-rule-btn");
+  if (addRuleBtn) {
+    addRuleBtn.addEventListener("click", () => {
+      browser.tabs.create({ url: CONFIG.SITE_URL + "/guardrails" });
     });
   }
 

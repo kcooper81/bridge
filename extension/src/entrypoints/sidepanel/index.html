@@ -119,12 +119,18 @@
       </div>
 
       <div id="status-bar" class="status-bar">
-        <button id="shield-indicator" class="shield-indicator" title="Security status">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <button id="shield-indicator" class="shield-indicator" title="Open Guardrails">
+          <svg class="shield-icon-default" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
           </svg>
+          <svg class="shield-icon-active" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:none">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <polyline points="9 12 11 14 15 10" stroke-width="2.5"/>
+          </svg>
+          <span class="shield-indicator-label">Guardrails</span>
         </button>
         <span id="status-text">Ready</span>
+        <button id="add-rule-btn" class="status-bar-action" title="Submit a rule">+ Add Rule</button>
       </div>
     </div>
 

@@ -74,7 +74,6 @@ let _lastBlockedText: string | null = null;
 // Track shield indicator state
 let _shieldEl: HTMLElement | null = null;
 let _shieldStatusEl: HTMLElement | null = null;
-let _shieldDotEl: HTMLElement | null = null;
 let _shieldLabelEl: HTMLElement | null = null;
 let _shieldCollapsed = false;
 let _ruleCount = 0;
@@ -349,7 +348,7 @@ async function refreshShieldStatus() {
 }
 
 function updateShieldState() {
-  if (!_shieldEl || !_shieldDotEl || !_shieldLabelEl) return;
+  if (!_shieldEl || !_shieldLabelEl) return;
 
   // Remove all state classes
   _shieldEl.classList.remove(
@@ -364,7 +363,6 @@ function updateShieldState() {
   // Fix 4: Context invalidated — show reload banner
   if (_contextDead) {
     _shieldEl.classList.add("tp-shield-invalidated");
-    _shieldDotEl.className = "tp-shield-dot tp-dot-gray";
     _shieldLabelEl.textContent = "Reload page required";
     return;
   }
@@ -372,7 +370,6 @@ function updateShieldState() {
   // Fix 5: Offline
   if (!_isOnline) {
     _shieldEl.classList.add("tp-shield-offline");
-    _shieldDotEl.className = "tp-shield-dot tp-dot-gray";
     _shieldLabelEl.textContent = "Offline \u2014 scans paused";
     return;
   }
@@ -380,27 +377,23 @@ function updateShieldState() {
   // Shield disabled by admin
   if (_isDisabled) {
     _shieldEl.classList.add("tp-shield-disabled");
-    _shieldDotEl.className = "tp-shield-dot tp-dot-gray";
-    _shieldLabelEl.textContent = "Shield disabled by admin";
+    _shieldLabelEl.textContent = "Guardrails disabled by admin";
     return;
   }
 
   // Not authenticated
   if (!_isAuthenticated) {
     _shieldEl.classList.add("tp-shield-inactive");
-    _shieldDotEl.className = "tp-shield-dot tp-dot-gray";
     _shieldLabelEl.textContent = "Not signed in \u2014 Click to sign in";
     return;
   }
 
-  // Protected
+  // Protected — shield icon turns green with checkmark (via CSS)
   if (_isProtected) {
     _shieldEl.classList.add("tp-shield-protected");
-    _shieldDotEl.className = "tp-shield-dot tp-dot-green";
     _shieldLabelEl.textContent = `${_ruleCount} rule${_ruleCount !== 1 ? "s" : ""} active`;
   } else {
     _shieldEl.classList.add("tp-shield-unprotected");
-    _shieldDotEl.className = "tp-shield-dot tp-dot-amber";
     _shieldLabelEl.textContent = "No rules configured";
   }
 }
@@ -616,17 +609,9 @@ function createShieldElement() {
     shield.classList.add("tp-shield-unprotected");
   }
 
-  // Shield icon (SVG)
-  const shieldSvg = `<svg class="tp-shield-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`;
-
-  // Status dot
-  const dotClass = !_isOnline || _contextDead || _isDisabled
-    ? "tp-dot-gray"
-    : !_isAuthenticated
-      ? "tp-dot-gray"
-      : _isProtected
-        ? "tp-dot-green"
-        : "tp-dot-amber";
+  // Shield icon — plain when inactive, checkmark when protected
+  const shieldSvgDefault = `<svg class="tp-shield-icon tp-shield-icon-default" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`;
+  const shieldSvgActive = `<svg class="tp-shield-icon tp-shield-icon-active" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10" stroke-width="2.5"/></svg>`;
 
   // Status text
   let statusText = "";
@@ -635,7 +620,7 @@ function createShieldElement() {
   } else if (!_isOnline) {
     statusText = "Offline \u2014 scans paused";
   } else if (_isDisabled) {
-    statusText = "Shield disabled by admin";
+    statusText = "Guardrails disabled by admin";
   } else if (!_isAuthenticated) {
     statusText = "Not signed in \u2014 Click to sign in";
   } else if (_isProtected) {
@@ -645,8 +630,8 @@ function createShieldElement() {
   }
 
   shield.innerHTML = `
-    ${shieldSvg}
-    <span class="tp-shield-dot ${dotClass}" id="tp-shield-dot"></span>
+    ${shieldSvgDefault}
+    ${shieldSvgActive}
     <span class="tp-shield-status" id="tp-shield-status">
       <span class="tp-shield-label" id="tp-shield-label">${statusText}</span>
       <span class="tp-shield-tool">on ${toolLabel}</span>
@@ -659,7 +644,6 @@ function createShieldElement() {
   document.body.appendChild(shield);
   _shieldEl = shield;
   _shieldStatusEl = document.getElementById("tp-shield-status");
-  _shieldDotEl = document.getElementById("tp-shield-dot");
   _shieldLabelEl = document.getElementById("tp-shield-label");
 
   // Toggle collapse
@@ -686,11 +670,10 @@ function createShieldElement() {
 }
 
 function updateShieldScanning(scanning: boolean) {
-  if (!_shieldEl || !_shieldLabelEl || !_shieldDotEl) return;
+  if (!_shieldEl || !_shieldLabelEl) return;
 
   if (scanning) {
     _shieldEl.classList.add("tp-shield-scanning");
-    _shieldDotEl.className = "tp-shield-dot tp-dot-blue tp-dot-pulse";
     _shieldLabelEl.textContent = "Scanning...";
   } else {
     _shieldEl.classList.remove("tp-shield-scanning");

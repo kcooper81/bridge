@@ -5,19 +5,23 @@
 
 import type { SecurityCategory, SecurityPatternType, SecuritySeverity } from "@/lib/types";
 
+export interface ComplianceRule {
+  name: string;
+  description: string;
+  pattern: string;
+  pattern_type: SecurityPatternType;
+  category: SecurityCategory;
+  severity: SecuritySeverity;
+  /** Example input that this rule would catch — useful for testing */
+  example: string;
+}
+
 export interface ComplianceTemplate {
   id: string;
   name: string;
   description: string;
   framework: "hipaa" | "gdpr" | "pci_dss" | "ccpa" | "sox" | "soc2" | "general";
-  rules: Array<{
-    name: string;
-    description: string;
-    pattern: string;
-    pattern_type: SecurityPatternType;
-    category: SecurityCategory;
-    severity: SecuritySeverity;
-  }>;
+  rules: ComplianceRule[];
 }
 
 export const COMPLIANCE_TEMPLATES: ComplianceTemplate[] = [
@@ -34,6 +38,7 @@ export const COMPLIANCE_TEMPLATES: ComplianceTemplate[] = [
         pattern_type: "regex",
         category: "health",
         severity: "block",
+        example: "Patient MRN: A12345678 was admitted on Monday",
       },
       {
         name: "Health Insurance ID",
@@ -42,6 +47,7 @@ export const COMPLIANCE_TEMPLATES: ComplianceTemplate[] = [
         pattern_type: "regex",
         category: "health",
         severity: "block",
+        example: "Member ID: XYZ123456789 for Blue Cross plan",
       },
       {
         name: "Diagnosis Code (ICD)",
@@ -50,6 +56,7 @@ export const COMPLIANCE_TEMPLATES: ComplianceTemplate[] = [
         pattern_type: "regex",
         category: "health",
         severity: "warn",
+        example: "Diagnosis code J45.20 indicates moderate asthma",
       },
       {
         name: "Drug/Prescription Names",
@@ -58,6 +65,7 @@ export const COMPLIANCE_TEMPLATES: ComplianceTemplate[] = [
         pattern_type: "regex",
         category: "health",
         severity: "warn",
+        example: "Patient is taking Metformin 500 mg twice daily",
       },
     ],
   },
@@ -74,6 +82,7 @@ export const COMPLIANCE_TEMPLATES: ComplianceTemplate[] = [
         pattern_type: "regex",
         category: "financial",
         severity: "block",
+        example: "Please charge card 4111111111111111 for the order",
       },
       {
         name: "Credit Card Number (Mastercard)",
@@ -82,6 +91,7 @@ export const COMPLIANCE_TEMPLATES: ComplianceTemplate[] = [
         pattern_type: "regex",
         category: "financial",
         severity: "block",
+        example: "Customer's Mastercard is 5425233430109903",
       },
       {
         name: "Credit Card Number (Amex)",
@@ -90,6 +100,7 @@ export const COMPLIANCE_TEMPLATES: ComplianceTemplate[] = [
         pattern_type: "regex",
         category: "financial",
         severity: "block",
+        example: "Amex card ending 378282246310005 was declined",
       },
       {
         name: "CVV/CVC Code",
@@ -98,6 +109,7 @@ export const COMPLIANCE_TEMPLATES: ComplianceTemplate[] = [
         pattern_type: "regex",
         category: "financial",
         severity: "block",
+        example: "The CVV is 742 on the back of the card",
       },
       {
         name: "Card Expiration Date",
@@ -106,6 +118,7 @@ export const COMPLIANCE_TEMPLATES: ComplianceTemplate[] = [
         pattern_type: "regex",
         category: "financial",
         severity: "warn",
+        example: "Card expiry 09/2027, please update before then",
       },
     ],
   },
@@ -122,6 +135,7 @@ export const COMPLIANCE_TEMPLATES: ComplianceTemplate[] = [
         pattern_type: "regex",
         category: "pii",
         severity: "block",
+        example: "Her national ID: AB12345678 is on file",
       },
       {
         name: "EU Passport Number",
@@ -130,6 +144,7 @@ export const COMPLIANCE_TEMPLATES: ComplianceTemplate[] = [
         pattern_type: "regex",
         category: "pii",
         severity: "block",
+        example: "Passport #L987654321 expires next year",
       },
       {
         name: "IBAN (International Bank Account)",
@@ -138,6 +153,7 @@ export const COMPLIANCE_TEMPLATES: ComplianceTemplate[] = [
         pattern_type: "regex",
         category: "financial",
         severity: "block",
+        example: "Wire to IBAN DE89370400440532013000 by Friday",
       },
       {
         name: "EU VAT Number",
@@ -146,6 +162,7 @@ export const COMPLIANCE_TEMPLATES: ComplianceTemplate[] = [
         pattern_type: "regex",
         category: "pii",
         severity: "warn",
+        example: "Invoice VAT: DE123456789 for Acme GmbH",
       },
       {
         name: "Date of Birth",
@@ -154,6 +171,7 @@ export const COMPLIANCE_TEMPLATES: ComplianceTemplate[] = [
         pattern_type: "regex",
         category: "pii",
         severity: "warn",
+        example: "Date of birth: 15/03/1990, verified in system",
       },
     ],
   },
@@ -170,6 +188,7 @@ export const COMPLIANCE_TEMPLATES: ComplianceTemplate[] = [
         pattern_type: "regex",
         category: "pii",
         severity: "block",
+        example: "License number B1234567 was used for verification",
       },
       {
         name: "Social Security Number",
@@ -178,6 +197,7 @@ export const COMPLIANCE_TEMPLATES: ComplianceTemplate[] = [
         pattern_type: "regex",
         category: "pii",
         severity: "block",
+        example: "SSN on file is 123-45-6789 for this applicant",
       },
       {
         name: "US Phone Number",
@@ -186,6 +206,7 @@ export const COMPLIANCE_TEMPLATES: ComplianceTemplate[] = [
         pattern_type: "regex",
         category: "pii",
         severity: "warn",
+        example: "Contact the client at (415) 555-0198 for follow-up",
       },
       {
         name: "Physical Address",
@@ -194,6 +215,7 @@ export const COMPLIANCE_TEMPLATES: ComplianceTemplate[] = [
         pattern_type: "regex",
         category: "pii",
         severity: "warn",
+        example: "Ship to 742 Evergreen Ave, Springfield IL 62704",
       },
     ],
   },
@@ -210,6 +232,7 @@ export const COMPLIANCE_TEMPLATES: ComplianceTemplate[] = [
         pattern_type: "regex",
         category: "pii",
         severity: "warn",
+        example: "Send the report to jane.doe@acmecorp.com today",
       },
       {
         name: "Phone Number (International)",
@@ -218,6 +241,7 @@ export const COMPLIANCE_TEMPLATES: ComplianceTemplate[] = [
         pattern_type: "regex",
         category: "pii",
         severity: "warn",
+        example: "Call the vendor at +442071234567 for pricing",
       },
       {
         name: "IP Address",
@@ -226,6 +250,7 @@ export const COMPLIANCE_TEMPLATES: ComplianceTemplate[] = [
         pattern_type: "regex",
         category: "internal",
         severity: "warn",
+        example: "The production server is running on 192.168.1.42",
       },
       {
         name: "Geolocation Coordinates",
@@ -234,6 +259,7 @@ export const COMPLIANCE_TEMPLATES: ComplianceTemplate[] = [
         pattern_type: "regex",
         category: "pii",
         severity: "warn",
+        example: "Office is located at 37.7749, -122.4194 in SF",
       },
     ],
   },
@@ -250,6 +276,7 @@ export const COMPLIANCE_TEMPLATES: ComplianceTemplate[] = [
         pattern_type: "regex",
         category: "internal",
         severity: "warn",
+        example: "access log: 2026-02-27 user=admin@corp.io logged in from VPN",
       },
       {
         name: "Encryption Key Reference",
@@ -258,6 +285,7 @@ export const COMPLIANCE_TEMPLATES: ComplianceTemplate[] = [
         pattern_type: "regex",
         category: "secrets",
         severity: "block",
+        example: "AES key: dGhpcyBpcyBhIHNlY3JldCBrZXkgZm9yIGVuYw==",
       },
       {
         name: "Audit Trail Data",
@@ -266,6 +294,7 @@ export const COMPLIANCE_TEMPLATES: ComplianceTemplate[] = [
         pattern_type: "regex",
         category: "internal",
         severity: "warn",
+        example: "audit: action=delete_record by user=jsmith at 14:32",
       },
       {
         name: "System Configuration",
@@ -274,6 +303,7 @@ export const COMPLIANCE_TEMPLATES: ComplianceTemplate[] = [
         pattern_type: "regex",
         category: "secrets",
         severity: "block",
+        example: "DATABASE_URL=postgres://admin:s3cret@db.internal:5432/prod",
       },
       {
         name: "Internal IP / Hostname",
@@ -282,6 +312,7 @@ export const COMPLIANCE_TEMPLATES: ComplianceTemplate[] = [
         pattern_type: "regex",
         category: "internal",
         severity: "warn",
+        example: "Connect to api-gateway.internal.corp on 10.0.3.55",
       },
       {
         name: "Service Account Credentials",
@@ -290,6 +321,7 @@ export const COMPLIANCE_TEMPLATES: ComplianceTemplate[] = [
         pattern_type: "regex",
         category: "credentials",
         severity: "block",
+        example: "client_secret=aB3dEfGhIjKlMnOpQrStUv_xYz012345",
       },
     ],
   },

@@ -35,7 +35,9 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   CheckCircle2,
+  Copy,
   Download,
+  Eye,
   Loader2,
   Package,
   Pencil,
@@ -50,7 +52,7 @@ import {
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { DEFAULT_SECURITY_RULES } from "@/lib/security/default-rules";
-import { COMPLIANCE_TEMPLATES } from "@/lib/security/compliance-templates";
+import { COMPLIANCE_TEMPLATES, type ComplianceTemplate } from "@/lib/security/compliance-templates";
 import { installComplianceTemplate } from "@/lib/vault-api";
 import { testPattern } from "@/lib/security/scanner";
 import { toast } from "sonner";
@@ -122,6 +124,7 @@ export default function GuardrailsPage() {
   const [installingDefaults, setInstallingDefaults] = useState(false);
   const [installingPack, setInstallingPack] = useState<string | null>(null);
   const [installedPacks, setInstalledPacks] = useState<Set<string>>(new Set());
+  const [previewPack, setPreviewPack] = useState<ComplianceTemplate | null>(null);
 
   const fetchData = useCallback(async () => {
     if (!org) return;
@@ -449,9 +452,20 @@ export default function GuardrailsPage() {
                         </div>
                       </div>
                       <div className="flex items-center justify-between mt-auto pt-2">
-                        <Badge variant="outline" className="text-[10px]">
-                          {tpl.rules.length} rules
-                        </Badge>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="text-[10px]">
+                            {tpl.rules.length} rules
+                          </Badge>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 text-[10px] px-2 gap-1 text-muted-foreground"
+                            onClick={() => setPreviewPack(tpl)}
+                          >
+                            <Eye className="h-3 w-3" />
+                            Preview
+                          </Button>
+                        </div>
                         {isInstalled || allExist ? (
                           <Button
                             variant="ghost"
@@ -700,6 +714,58 @@ export default function GuardrailsPage() {
           <SuggestedRules canEdit={canEdit} />
         </TabsContent>
       </Tabs>
+
+      {/* Compliance Pack Preview Modal */}
+      <Dialog open={!!previewPack} onOpenChange={() => setPreviewPack(null)}>
+        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Package className="h-4 w-4" />
+              {previewPack?.name}
+            </DialogTitle>
+          </DialogHeader>
+          {previewPack && (
+            <div className="space-y-1">
+              <p className="text-sm text-muted-foreground mb-4">{previewPack.description}</p>
+              {previewPack.rules.map((rule, i) => (
+                <div key={i} className="rounded-lg border border-border p-3 space-y-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <p className="text-sm font-medium">{rule.name}</p>
+                      <p className="text-xs text-muted-foreground">{rule.description}</p>
+                    </div>
+                    <Badge
+                      variant={rule.severity === "block" ? "destructive" : "default"}
+                      className="text-[10px] shrink-0"
+                    >
+                      {rule.severity === "block" ? "Block" : "Warn"}
+                    </Badge>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[11px] font-medium text-muted-foreground">Test example — copy &amp; paste into a prompt to test:</p>
+                    <div className="relative group">
+                      <pre className="text-xs bg-muted rounded-md px-3 py-2 pr-8 whitespace-pre-wrap break-all font-mono">
+                        {rule.example}
+                      </pre>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => {
+                          navigator.clipboard.writeText(rule.example);
+                          toast.success("Copied to clipboard");
+                        }}
+                      >
+                        <Copy className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Policy Editor Modal */}
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>

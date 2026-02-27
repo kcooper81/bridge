@@ -1164,47 +1164,32 @@ export async function getPendingPrompts(): Promise<
 }
 
 export async function approvePrompt(id: string): Promise<boolean> {
-  const { error } = await supabase()
-    .from("prompts")
-    .update({ status: "approved" })
-    .eq("id", id);
-  return !error;
+  try {
+    const res = await fetch(`/api/approvals/prompts/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "approve" }),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
 }
 
 export async function rejectPrompt(
   id: string,
   reason?: string
 ): Promise<boolean> {
-  const db = supabase();
-  const { error } = await db
-    .from("prompts")
-    .update({ status: "draft" })
-    .eq("id", id);
-
-  if (error) return false;
-
-  // If reason provided, notify the prompt owner
-  if (reason) {
-    const { data: prompt } = await db
-      .from("prompts")
-      .select("owner_id, title")
-      .eq("id", id)
-      .single();
-
-    if (prompt) {
-      const userId = await getUserId();
-      await db.from("notifications").insert({
-        user_id: prompt.owner_id,
-        org_id: (await getOrgId()) || undefined,
-        type: "prompt_rejected",
-        title: "Prompt returned to draft",
-        message: `"${prompt.title}" was returned to draft: ${reason}`,
-        metadata: { prompt_id: id, reason, rejected_by: userId },
-      });
-    }
+  try {
+    const res = await fetch(`/api/approvals/prompts/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "reject", reason }),
+    });
+    return res.ok;
+  } catch {
+    return false;
   }
-
-  return true;
 }
 
 // ─── Effectiveness Metrics ───

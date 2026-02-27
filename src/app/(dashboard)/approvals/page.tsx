@@ -22,6 +22,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   CheckCircle2,
   XCircle,
@@ -35,7 +43,7 @@ import { getPendingPrompts, approvePrompt, rejectPrompt } from "@/lib/vault-api"
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { NoOrgBanner } from "@/components/dashboard/no-org-banner";
-import type { Prompt } from "@/lib/types";
+import type { Prompt, SecurityPatternType, SecurityCategory, SecuritySeverity } from "@/lib/types";
 
 interface RuleSuggestion {
   id: string;
@@ -62,6 +70,17 @@ export default function ApprovalsPage() {
   const [rejectTargetId, setRejectTargetId] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState("");
   const [previewPrompt, setPreviewPrompt] = useState<Prompt | null>(null);
+
+  // Create-rule-from-suggestion modal state
+  const [ruleModalOpen, setRuleModalOpen] = useState(false);
+  const [ruleFromSuggestion, setRuleFromSuggestion] = useState<RuleSuggestion | null>(null);
+  const [ruleName, setRuleName] = useState("");
+  const [ruleDescription, setRuleDescription] = useState("");
+  const [rulePattern, setRulePattern] = useState("");
+  const [rulePatternType, setRulePatternType] = useState<SecurityPatternType>("exact");
+  const [ruleCategory, setRuleCategory] = useState<SecurityCategory>("custom");
+  const [ruleSeverity, setRuleSeverity] = useState<SecuritySeverity>("block");
+  const [ruleSaving, setRuleSaving] = useState(false);
 
   const fetchData = useCallback(async () => {
     if (!org) return;
@@ -127,22 +146,32 @@ export default function ApprovalsPage() {
     }
   }
 
-  async function handleApproveSuggestion(suggestion: RuleSuggestion) {
-    if (!org) return;
-    setActionId(suggestion.id);
+  function openRuleModal(suggestion: RuleSuggestion) {
+    setRuleFromSuggestion(suggestion);
+    setRuleName(suggestion.name);
+    setRuleDescription(suggestion.description || "");
+    setRulePattern("");
+    setRulePatternType("exact");
+    setRuleCategory((suggestion.category as SecurityCategory) || "custom");
+    setRuleSeverity((suggestion.severity as SecuritySeverity) || "block");
+    setRuleModalOpen(true);
+  }
+
+  async function handleCreateRuleFromSuggestion() {
+    if (!org || !ruleFromSuggestion || !ruleName.trim() || !rulePattern.trim()) return;
+    setRuleSaving(true);
     try {
       const db = createClient();
       const { data: { user } } = await db.auth.getUser();
 
-      // Create the security rule from the suggestion
       const { error: ruleError } = await db.from("security_rules").insert({
         org_id: org.id,
-        name: suggestion.name,
-        description: suggestion.description,
-        pattern: suggestion.name, // Use name as keyword pattern
-        pattern_type: "keywords",
-        category: suggestion.category,
-        severity: suggestion.severity,
+        name: ruleName.trim(),
+        description: ruleDescription.trim() || null,
+        pattern: rulePattern.trim(),
+        pattern_type: rulePatternType,
+        category: ruleCategory,
+        severity: ruleSeverity,
         is_active: true,
         is_built_in: false,
         created_by: user?.id,
@@ -153,16 +182,18 @@ export default function ApprovalsPage() {
         return;
       }
 
-      // Update suggestion status
+      // Mark suggestion as approved
       await db
         .from("rule_suggestions")
         .update({ status: "approved", reviewed_by: user?.id })
-        .eq("id", suggestion.id);
+        .eq("id", ruleFromSuggestion.id);
 
-      toast.success("Rule suggestion approved and created");
+      toast.success("Rule created from suggestion");
+      setRuleModalOpen(false);
+      setRuleFromSuggestion(null);
       fetchData();
     } finally {
-      setActionId(null);
+      setRuleSaving(false);
     }
   }
 
@@ -381,15 +412,10 @@ export default function ApprovalsPage() {
                           <Button
                             size="sm"
                             className="h-7 text-xs gap-1 bg-green-600 hover:bg-green-700"
-                            onClick={() => handleApproveSuggestion(s)}
-                            disabled={actionId === s.id}
+                            onClick={() => openRuleModal(s)}
                           >
-                            {actionId === s.id ? (
-                              <Loader2 className="h-3 w-3 animate-spin" />
-                            ) : (
-                              <CheckCircle2 className="h-3 w-3" />
-                            )}
-                            Approve
+                            <CheckCircle2 className="h-3 w-3" />
+                            Create Rule
                           </Button>
                           <Button
                             size="sm"
@@ -492,6 +518,102 @@ export default function ApprovalsPage() {
                 >
                   <XCircle className="h-4 w-4" />
                   Reject
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Rule from Suggestion Modal */}
+      <Dialog open={ruleModalOpen} onOpenChange={setRuleModalOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Create Rule from Suggestion</DialogTitle>
+          </DialogHeader>
+          {ruleFromSuggestion && (
+            <div className="space-y-4">
+              <div className="rounded-lg bg-muted/50 border p-3 text-sm">
+                <p className="text-xs text-muted-foreground mb-1">Suggested by {ruleFromSuggestion.suggestor?.name || ruleFromSuggestion.suggestor?.email || "a member"}</p>
+                <p className="text-muted-foreground">{ruleFromSuggestion.description}</p>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Rule Name</Label>
+                <Input value={ruleName} onChange={(e) => setRuleName(e.target.value)} />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Textarea value={ruleDescription} onChange={(e) => setRuleDescription(e.target.value)} rows={2} />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Pattern <span className="text-destructive">*</span></Label>
+                <Textarea
+                  value={rulePattern}
+                  onChange={(e) => setRulePattern(e.target.value)}
+                  placeholder={rulePatternType === "exact" ? "Exact text to match..." : rulePatternType === "regex" ? "Regular expression..." : "keyword1, keyword2, ..."}
+                  rows={2}
+                />
+                <p className="text-[11px] text-muted-foreground">
+                  {rulePatternType === "exact" && "Matches the exact text entered."}
+                  {rulePatternType === "regex" && "Uses regular expression matching."}
+                  {rulePatternType === "glob" && "Uses glob-style pattern matching with * and ?."}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                <div className="space-y-2">
+                  <Label>Pattern Type</Label>
+                  <Select value={rulePatternType} onValueChange={(v) => setRulePatternType(v as SecurityPatternType)}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="exact">Exact</SelectItem>
+                      <SelectItem value="regex">Regex</SelectItem>
+                      <SelectItem value="glob">Glob</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Category</Label>
+                  <Select value={ruleCategory} onValueChange={(v) => setRuleCategory(v as SecurityCategory)}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pii">PII</SelectItem>
+                      <SelectItem value="credentials">Credentials</SelectItem>
+                      <SelectItem value="api_keys">API Keys</SelectItem>
+                      <SelectItem value="secrets">Secrets</SelectItem>
+                      <SelectItem value="internal_terms">Internal Terms</SelectItem>
+                      <SelectItem value="custom">Custom</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Severity</Label>
+                  <Select value={ruleSeverity} onValueChange={(v) => setRuleSeverity(v as SecuritySeverity)}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="block">Block</SelectItem>
+                      <SelectItem value="warn">Warn</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2 border-t">
+                <Button variant="outline" onClick={() => setRuleModalOpen(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  className="bg-green-600 hover:bg-green-700 gap-1"
+                  onClick={handleCreateRuleFromSuggestion}
+                  disabled={ruleSaving || !ruleName.trim() || !rulePattern.trim()}
+                >
+                  {ruleSaving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                  Create Rule
                 </Button>
               </div>
             </div>

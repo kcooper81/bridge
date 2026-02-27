@@ -47,9 +47,9 @@ export async function POST(request: NextRequest) {
     // Determine approval status:
     // - Org admins → always approved
     // - Team admin (manager) of the selected team → approved
-    // - Everyone else → draft (pending review)
+    // - Everyone else → pending (awaiting review)
     const orgRole = profile.is_super_admin ? "admin" : profile.role;
-    let status = "draft";
+    let status = "pending";
 
     if (orgRole === "admin") {
       status = "approved";

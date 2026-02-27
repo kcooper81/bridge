@@ -685,7 +685,7 @@ async function handleCreatePrompt() {
     if (result.success) {
       closeCreatePromptPanel();
       reloadCurrentTab();
-      const statusMsg = result.prompt?.status === "draft"
+      const statusMsg = result.prompt?.status === "pending"
         ? "Prompt submitted for approval!"
         : "Prompt created!";
       setStatus(statusMsg);

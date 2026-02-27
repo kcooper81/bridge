@@ -56,7 +56,7 @@ export function getDefaultStatus(
   const canApprove = role === "admin" || role === "manager";
 
   if (!requestedStatus) {
-    return canApprove ? "approved" : "draft";
+    return canApprove ? "approved" : "pending";
   }
 
   // Members cannot directly set "approved" or "archived"

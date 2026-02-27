@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Resend } from "resend";
 import { createServiceClient } from "@/lib/supabase/server";
 import { limiters, checkRateLimit } from "@/lib/rate-limit";
 import { PLAN_LIMITS } from "@/lib/constants";
+import { buildEmail } from "@/lib/email-template";
 import type { PlanTier } from "@/lib/types";
 
 export async function POST(request: NextRequest) {
@@ -173,6 +175,58 @@ export async function POST(request: NextRequest) {
         accepted_at: new Date().toISOString(),
       })
       .eq("id", invite.id);
+
+    // Send extension install email (non-blocking)
+    try {
+      if (process.env.RESEND_API_KEY && user.email) {
+        const resend = new Resend(process.env.RESEND_API_KEY);
+        const siteUrl =
+          process.env.NEXT_PUBLIC_SITE_URL || "https://teamprompt.app";
+        const fromEmail =
+          process.env.RESEND_FROM_EMAIL ||
+          "TeamPrompt <noreply@teamprompt.app>";
+
+        // Get org name and inviter name for the email
+        const [{ data: org }, { data: inviterProfile }] = await Promise.all([
+          db
+            .from("organizations")
+            .select("name")
+            .eq("id", invite.org_id)
+            .single(),
+          db
+            .from("profiles")
+            .select("name")
+            .eq("id", invite.invited_by)
+            .single(),
+        ]);
+
+        const senderName = inviterProfile?.name || "Your team";
+        const orgName = org?.name || "your team";
+        const extensionUrl = `${siteUrl}/extensions`;
+
+        resend.emails
+          .send({
+            from: fromEmail,
+            to: user.email,
+            subject: `Install the TeamPrompt extension for ${orgName}`,
+            html: buildEmail({
+              heading: "Install the TeamPrompt Extension",
+              body: `
+                <p><strong>${senderName}</strong> wants you to install the TeamPrompt browser extension for <strong>${orgName}</strong>.</p>
+                <p>The extension lets you search and insert shared prompts directly into ChatGPT, Claude, Gemini, and more &mdash; with built-in guardrails to protect sensitive data.</p>
+              `,
+              ctaText: "Get the Extension",
+              ctaUrl: extensionUrl,
+              footerNote: "Available for Chrome, Edge, and Firefox.",
+            }),
+          })
+          .catch((err) =>
+            console.error("Failed to send extension install email:", err)
+          );
+      }
+    } catch (emailErr) {
+      console.error("Extension email setup error:", emailErr);
+    }
 
     return NextResponse.json({ success: true, orgId: invite.org_id });
   } catch (error) {

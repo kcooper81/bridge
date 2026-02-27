@@ -8,8 +8,11 @@ import { StatCard } from "@/components/dashboard/stat-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
+  AlertTriangle,
   BarChart3,
   Star,
+  ThumbsDown,
+  ThumbsUp,
   TrendingUp,
   TrendingDown,
   Zap,
@@ -17,8 +20,17 @@ import {
   Shield,
   Braces,
 } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { UpgradeGate } from "@/components/upgrade";
-import { getAnalytics } from "@/lib/vault-api";
+import { getAnalytics, getEffectivenessMetrics } from "@/lib/vault-api";
+import type { EffectivenessMetrics } from "@/lib/vault-api";
 import type { Analytics } from "@/lib/types";
 import { NoOrgBanner } from "@/components/dashboard/no-org-banner";
 
@@ -26,12 +38,16 @@ export default function AnalyticsPage() {
   const { teams, members, noOrg } = useOrg();
   const { canAccess } = useSubscription();
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
+  const [effectiveness, setEffectiveness] = useState<EffectivenessMetrics | null>(null);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(false);
 
   useEffect(() => {
-    getAnalytics()
-      .then(setAnalytics)
+    Promise.all([getAnalytics(), getEffectivenessMetrics()])
+      .then(([a, e]) => {
+        setAnalytics(a);
+        setEffectiveness(e);
+      })
       .catch((err) => {
         console.error("Failed to load analytics:", err);
         setFetchError(true);
@@ -282,6 +298,183 @@ export default function AnalyticsPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* ─── Prompt Effectiveness Section ─── */}
+      {effectiveness && (
+        <>
+          <div className="flex items-center gap-2 mt-8 mb-4">
+            <Star className="h-5 w-5 text-primary" />
+            <h2 className="text-lg font-semibold">Prompt Effectiveness</h2>
+          </div>
+
+          {/* Rating Distribution */}
+          {effectiveness.ratingDistribution.some((b) => b.count > 0) && (
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle className="text-base">Rating Distribution</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {effectiveness.ratingDistribution.map((bucket) => {
+                    const maxBucket = Math.max(...effectiveness.ratingDistribution.map((b) => b.count), 1);
+                    return (
+                      <div key={bucket.bucket} className="flex items-center gap-3">
+                        <span className="text-sm w-10 text-right tabular-nums">{bucket.bucket}</span>
+                        <Star className="h-3 w-3 text-yellow-500" />
+                        <div className="flex-1 h-4 rounded-full bg-muted overflow-hidden">
+                          <div
+                            className="h-full rounded-full bg-yellow-500/80"
+                            style={{ width: `${Math.max((bucket.count / maxBucket) * 100, bucket.count > 0 ? 4 : 0)}%` }}
+                          />
+                        </div>
+                        <span className="text-xs text-muted-foreground w-8 tabular-nums">{bucket.count}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          <div className="grid gap-6 lg:grid-cols-2 mb-6">
+            {/* Top Effective Prompts */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <ThumbsUp className="h-4 w-4 text-green-500" />
+                  Top Effective Prompts
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {effectiveness.topRated.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No rated prompts yet</p>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Prompt</TableHead>
+                        <TableHead className="w-[80px]">Rating</TableHead>
+                        <TableHead className="w-[70px]">Uses</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {effectiveness.topRated.slice(0, 8).map((p) => (
+                        <TableRow key={p.id}>
+                          <TableCell>
+                            <p className="text-sm font-medium truncate max-w-[200px]">{p.title}</p>
+                            {p.ownerName && (
+                              <p className="text-xs text-muted-foreground">{p.ownerName}</p>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1">
+                              <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
+                              <span className="text-sm tabular-nums">{p.avgRating.toFixed(1)}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="secondary" className="text-xs tabular-nums">
+                              {p.usageCount}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Least Effective Prompts */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <ThumbsDown className="h-4 w-4 text-red-500" />
+                  Needs Improvement
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {effectiveness.leastEffective.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No low-rated prompts with sufficient usage</p>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Prompt</TableHead>
+                        <TableHead className="w-[80px]">Rating</TableHead>
+                        <TableHead className="w-[70px]">Uses</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {effectiveness.leastEffective.slice(0, 8).map((p) => (
+                        <TableRow key={p.id}>
+                          <TableCell>
+                            <p className="text-sm font-medium truncate max-w-[200px]">{p.title}</p>
+                            {p.ownerName && (
+                              <p className="text-xs text-muted-foreground">{p.ownerName}</p>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1">
+                              <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
+                              <span className="text-sm tabular-nums">{p.avgRating.toFixed(1)}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="secondary" className="text-xs tabular-nums">
+                              {p.usageCount}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Unrated High-Usage */}
+          {effectiveness.unratedHighUsage.length > 0 && (
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4 text-amber-500" />
+                  Needs Attention — High Usage, No Ratings
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Prompt</TableHead>
+                      <TableHead>Owner</TableHead>
+                      <TableHead className="w-[80px]">Uses</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {effectiveness.unratedHighUsage.map((p) => (
+                      <TableRow key={p.id}>
+                        <TableCell>
+                          <p className="text-sm font-medium">{p.title}</p>
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {p.ownerName || "—"}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="secondary" className="text-xs tabular-nums">
+                            {p.usageCount}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          )}
+        </>
+      )}
     </>
   );
 }

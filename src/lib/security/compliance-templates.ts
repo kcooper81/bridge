@@ -9,7 +9,7 @@ export interface ComplianceTemplate {
   id: string;
   name: string;
   description: string;
-  framework: "hipaa" | "gdpr" | "pci_dss" | "ccpa" | "sox" | "general";
+  framework: "hipaa" | "gdpr" | "pci_dss" | "ccpa" | "sox" | "soc2" | "general";
   rules: Array<{
     name: string;
     description: string;
@@ -234,6 +234,62 @@ export const COMPLIANCE_TEMPLATES: ComplianceTemplate[] = [
         pattern_type: "regex",
         category: "pii",
         severity: "warn",
+      },
+    ],
+  },
+  {
+    id: "soc2",
+    name: "SOC 2 Compliance",
+    description: "Service Organization Control 2 — Protects access logs, encryption details, audit trails, and system configurations",
+    framework: "soc2",
+    rules: [
+      {
+        name: "Access Log Entry",
+        description: "Detects access log patterns with timestamps and user identifiers",
+        pattern: "\\b(?:access|auth)\\s*log[:\\s]+.*(?:user|uid|login)[:\\s=]+[A-Za-z0-9._@-]+",
+        pattern_type: "regex",
+        category: "internal",
+        severity: "warn",
+      },
+      {
+        name: "Encryption Key Reference",
+        description: "Detects encryption key material or references",
+        pattern: "\\b(?:AES|RSA|HMAC|encryption)[\\s_-]*(?:key|secret|cert)[:\\s=]+[A-Za-z0-9+/=]{16,}",
+        pattern_type: "regex",
+        category: "secrets",
+        severity: "block",
+      },
+      {
+        name: "Audit Trail Data",
+        description: "Detects audit trail entries with action and actor details",
+        pattern: "\\b(?:audit|trail)[:\\s]+.*(?:action|event)[:\\s=]+\\w+.*(?:actor|by|user)[:\\s=]+",
+        pattern_type: "regex",
+        category: "internal",
+        severity: "warn",
+      },
+      {
+        name: "System Configuration",
+        description: "Detects system config details like connection strings and environment variables",
+        pattern: "\\b(?:DATABASE_URL|REDIS_URL|SMTP_HOST|DB_PASSWORD|CONNECTION_STRING)[\\s=:]+\\S+",
+        pattern_type: "regex",
+        category: "secrets",
+        severity: "block",
+      },
+      {
+        name: "Internal IP / Hostname",
+        description: "Detects internal network addresses and hostnames",
+        pattern: "\\b(?:10|172\\.(?:1[6-9]|2\\d|3[01])|192\\.168)\\.\\d{1,3}\\.\\d{1,3}\\b|\\b[a-z0-9-]+\\.internal(?:\\.[a-z]+)?\\b",
+        pattern_type: "regex",
+        category: "internal",
+        severity: "warn",
+      },
+      {
+        name: "Service Account Credentials",
+        description: "Detects service account or IAM credentials",
+        pattern: "\\b(?:service[_-]?account|iam[_-]?role|client[_-]?secret)[:\\s=]+[A-Za-z0-9+/=_-]{12,}",
+        pattern_type: "regex",
+        category: "credentials",
+        severity: "block",
       },
     ],
   },

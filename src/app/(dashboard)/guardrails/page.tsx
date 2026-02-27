@@ -34,8 +34,10 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
+  CheckCircle2,
   Download,
   Loader2,
+  Package,
   Pencil,
   Plus,
   Shield,
@@ -48,6 +50,8 @@ import {
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { DEFAULT_SECURITY_RULES } from "@/lib/security/default-rules";
+import { COMPLIANCE_TEMPLATES } from "@/lib/security/compliance-templates";
+import { installComplianceTemplate } from "@/lib/vault-api";
 import { testPattern } from "@/lib/security/scanner";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
@@ -116,6 +120,8 @@ export default function GuardrailsPage() {
   const [deleting, setDeleting] = useState<string | null>(null);
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [installingDefaults, setInstallingDefaults] = useState(false);
+  const [installingPack, setInstallingPack] = useState<string | null>(null);
+  const [installedPacks, setInstalledPacks] = useState<Set<string>>(new Set());
 
   const fetchData = useCallback(async () => {
     if (!org) return;
@@ -281,6 +287,26 @@ export default function GuardrailsPage() {
     }
   }
 
+  async function handleInstallCompliancePack(templateId: string) {
+    if (!canAccess("custom_security")) return;
+    setInstallingPack(templateId);
+    try {
+      const result = await installComplianceTemplate(templateId);
+      if (result.error === "All rules already exist") {
+        toast.info("All rules from this pack are already installed");
+        setInstalledPacks((prev) => new Set(prev).add(templateId));
+      } else if (result.error) {
+        toast.error(result.error);
+      } else {
+        toast.success(`Installed ${result.rulesCreated} compliance rule(s)`);
+        setInstalledPacks((prev) => new Set(prev).add(templateId));
+        fetchData();
+      }
+    } finally {
+      setInstallingPack(null);
+    }
+  }
+
   function handleTestPattern() {
     if (!testContent || !pattern) return;
     const result = testPattern(testContent, pattern, patternType);
@@ -390,6 +416,80 @@ export default function GuardrailsPage() {
           {!canAccess("custom_security") && (
             <UpgradeGate feature="custom_security" title="Custom Security Policies" className="mb-6 py-10" />
           )}
+
+          {/* Compliance Packs */}
+          {canAccess("custom_security") && canEdit && (
+            <div className="mb-6">
+              <div className="flex items-center gap-2 mb-3">
+                <Package className="h-4 w-4 text-primary" />
+                <h3 className="text-sm font-semibold">Compliance Packs</h3>
+                <span className="text-xs text-muted-foreground">One-click install regulatory rule sets</span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {COMPLIANCE_TEMPLATES.map((tpl) => {
+                  const isInstalled = installedPacks.has(tpl.id);
+                  const isInstalling = installingPack === tpl.id;
+                  // Check if any rules from this pack already exist
+                  const existingCount = tpl.rules.filter((r) =>
+                    rules.some((er) => er.name === r.name)
+                  ).length;
+                  const allExist = existingCount === tpl.rules.length;
+
+                  return (
+                    <div
+                      key={tpl.id}
+                      className="rounded-lg border border-border p-4 flex flex-col gap-2"
+                    >
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <p className="font-medium text-sm">{tpl.name}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                            {tpl.description}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between mt-auto pt-2">
+                        <Badge variant="outline" className="text-[10px]">
+                          {tpl.rules.length} rules
+                        </Badge>
+                        {isInstalled || allExist ? (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 text-xs text-tp-green gap-1"
+                            onClick={() => handleInstallCompliancePack(tpl.id)}
+                            disabled={isInstalling}
+                          >
+                            {isInstalling ? (
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                            ) : (
+                              <CheckCircle2 className="h-3 w-3" />
+                            )}
+                            {isInstalling ? "Installing..." : "Installed"}
+                          </Button>
+                        ) : (
+                          <Button
+                            size="sm"
+                            className="h-7 text-xs"
+                            onClick={() => handleInstallCompliancePack(tpl.id)}
+                            disabled={isInstalling}
+                          >
+                            {isInstalling ? (
+                              <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                            ) : (
+                              <Download className="mr-1 h-3 w-3" />
+                            )}
+                            {isInstalling ? "Installing..." : existingCount > 0 ? `Install (${tpl.rules.length - existingCount} new)` : "Install"}
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {teams.length > 0 && (
             <div className="mb-4 flex items-center gap-2">
               <Label className="text-sm text-muted-foreground">Scope:</Label>

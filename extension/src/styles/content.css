@@ -404,6 +404,60 @@
   color: #e4e4e7;
 }
 
+/* ─── Auto-Sanitization ─── */
+
+.tp-block-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  align-items: center;
+}
+
+.tp-block-btn-sanitize {
+  background: #16a34a;
+  margin-top: 0;
+}
+.tp-block-btn-sanitize:hover {
+  background: #15803d;
+}
+
+.tp-block-btn-confirm {
+  background: #16a34a;
+  margin-top: 8px;
+}
+.tp-block-btn-confirm:hover {
+  background: #15803d;
+}
+
+.tp-sanitized-preview {
+  margin-top: 12px;
+  padding: 12px;
+  background: #1a1a2e;
+  border: 1px solid #2d2d44;
+  border-radius: 8px;
+}
+
+.tp-sanitized-label {
+  font-size: 11px;
+  color: #a1a1aa;
+  margin-bottom: 8px;
+}
+
+.tp-sanitized-content {
+  font-family: 'SF Mono', Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #e4e4e7;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 200px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 8px;
+  background: #0f0f1a;
+  border-radius: 6px;
+}
+
 /* ─── Session Loss Banner ─── */
 
 .tp-session-banner {

@@ -14,6 +14,7 @@ import {
   Archive,
   BarChart3,
   BookOpen,
+  CheckSquare,
   HelpCircle,
   LayoutDashboard,
   Library,
@@ -35,6 +36,7 @@ const navSections: { title: string; items: NavItem[] }[] = [
     items: [
       { label: "Prompts", href: "/vault", icon: Archive },
       { label: "Templates", href: "/templates", icon: Library },
+      { label: "Approvals", href: "/approvals", icon: CheckSquare, roles: ["admin", "manager"] },
       { label: "Guidelines", href: "/guidelines", icon: BookOpen, roles: ["admin", "manager"] },
       { label: "Team", href: "/team", icon: Users, roles: ["admin", "manager"] },
     ],
@@ -121,7 +123,7 @@ function NavContent({ onItemClick }: { onItemClick?: () => void }) {
                       )}
                       <item.icon className={cn("h-[18px] w-[18px]", isActive && "drop-shadow-sm")} />
                       {item.label}
-                      {item.href === "/vault" && pendingCount > 0 && (
+                      {(item.href === "/vault" || item.href === "/approvals") && pendingCount > 0 && (
                         <Badge variant="destructive" className="ml-auto h-5 min-w-5 px-1.5 text-[10px] shadow-sm">
                           {pendingCount}
                         </Badge>

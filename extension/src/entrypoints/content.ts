@@ -62,6 +62,28 @@ function getChatInputText(): string {
   return "";
 }
 
+function setChatInputText(text: string): void {
+  for (const selector of CHAT_INPUT_SELECTORS) {
+    const el = document.querySelector<HTMLElement>(selector);
+    if (!el) continue;
+    if (el instanceof HTMLTextAreaElement || el instanceof HTMLInputElement) {
+      // Native setter to trigger React-style onChange
+      const nativeSetter = Object.getOwnPropertyDescriptor(
+        el instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype,
+        "value"
+      )?.set;
+      if (nativeSetter) nativeSetter.call(el, text);
+      else el.value = text;
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+      return;
+    }
+    // contentEditable element
+    el.textContent = text;
+    el.dispatchEvent(new Event("input", { bubbles: true }));
+    return;
+  }
+}
+
 // Flag to allow re-dispatched Enter key to pass through without re-scanning
 let _tpAllowNext = false;
 
@@ -471,7 +493,11 @@ function performScan(text: string, onAllow: () => void) {
 
     if (result?.action === "block") {
       _lastBlockedText = text;
-      showBlockOverlay(result.violations);
+      showBlockOverlay(result.violations, result.sanitized_content, (sanitized) => {
+        setChatInputText(sanitized);
+        _lastBlockedText = null;
+        logInteraction(text, "auto_redacted", result.violations);
+      });
       logInteraction(text, "blocked", result.violations);
       pulseShield("block");
       try {
@@ -702,8 +728,10 @@ function showToast(message: string, isError = false) {
   setTimeout(() => toast.remove(), 3000);
 }
 
-function showBlockOverlay(violations: ScanResult["violations"]) {
+function showBlockOverlay(violations: ScanResult["violations"], sanitizedContent?: string, onSendSanitized?: (text: string) => void) {
   document.getElementById("tp-block-overlay")?.remove();
+
+  const hasSanitized = sanitizedContent && onSendSanitized;
 
   const overlay = document.createElement("div");
   overlay.id = "tp-block-overlay";
@@ -717,13 +745,34 @@ function showBlockOverlay(violations: ScanResult["violations"]) {
         ${violations.map((v) => `<li><strong>${escapeHtml(v.ruleName)}</strong>: ${escapeHtml(v.matchedText)}</li>`).join("")}
       </ul>
       <p class="tp-block-hint">Remove the flagged content and try again.</p>
-      <button id="tp-block-dismiss" class="tp-block-btn">Got it</button>
+      <div class="tp-block-actions">
+        <button id="tp-block-dismiss" class="tp-block-btn">Got it</button>
+        ${hasSanitized ? `<button id="tp-block-sanitize" class="tp-block-btn tp-block-btn-sanitize">Send Sanitized Version</button>` : ""}
+      </div>
+      ${hasSanitized ? `
+      <div id="tp-sanitized-preview" class="tp-sanitized-preview" style="display:none;">
+        <p class="tp-sanitized-label">Preview — sensitive data replaced with placeholders:</p>
+        <pre class="tp-sanitized-content">${escapeHtml(sanitizedContent!)}</pre>
+        <button id="tp-sanitized-confirm" class="tp-block-btn tp-block-btn-confirm">Confirm &amp; Insert</button>
+      </div>
+      ` : ""}
     </div>
   `;
   document.body.appendChild(overlay);
   document
     .getElementById("tp-block-dismiss")!
     .addEventListener("click", () => overlay.remove());
+
+  if (hasSanitized) {
+    document.getElementById("tp-block-sanitize")!.addEventListener("click", () => {
+      const preview = document.getElementById("tp-sanitized-preview")!;
+      preview.style.display = preview.style.display === "none" ? "block" : "none";
+    });
+    document.getElementById("tp-sanitized-confirm")!.addEventListener("click", () => {
+      overlay.remove();
+      onSendSanitized!(sanitizedContent!);
+    });
+  }
 }
 
 function showWarningBanner(violations: ScanResult["violations"]) {

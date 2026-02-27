@@ -2,10 +2,12 @@ import { createClient } from "@/lib/supabase/client";
 import { DEFAULT_GUIDELINES, PLAN_LIMITS } from "@/lib/constants";
 import { getLibraryPack } from "@/lib/library/packs";
 import { DEFAULT_SECURITY_RULES } from "@/lib/security/default-rules";
+import { getComplianceTemplate } from "@/lib/security/compliance-templates";
 import { extractTemplateVariables, normalizeVariables } from "@/lib/variables";
 import type {
   Prompt,
   PromptStatus,
+  PromptVersion,
   Folder,
   Team,
   Guideline,
@@ -173,11 +175,13 @@ export async function updatePrompt(
     current &&
     (fields.title !== undefined || fields.content !== undefined)
   ) {
+    const userId = await getUserId();
     await db.from("prompt_versions").insert({
       prompt_id: id,
       version: current.version,
       title: current.title,
       content: current.content,
+      changed_by: userId,
     });
   }
 
@@ -265,14 +269,21 @@ export async function toggleFavorite(id: string, current: boolean): Promise<bool
   return !error;
 }
 
-export async function getPromptVersions(promptId: string) {
+export async function getPromptVersions(promptId: string): Promise<PromptVersion[]> {
   const { data } = await supabase()
     .from("prompt_versions")
-    .select("*")
+    .select("*, changer:profiles!prompt_versions_changed_by_fkey(name, email)")
     .eq("prompt_id", promptId)
     .order("version", { ascending: false })
     .limit(10);
-  return data || [];
+
+  return (data || []).map((v: Record<string, unknown>) => {
+    const changer = v.changer as { name?: string; email?: string } | null;
+    return {
+      ...v,
+      changed_by_name: changer?.name || changer?.email || undefined,
+    } as PromptVersion;
+  });
 }
 
 // ─── Folders ───
@@ -1075,4 +1086,200 @@ export async function installLibraryPack(
   }
 
   return { promptsCreated, guidelinesCreated, rulesCreated };
+}
+
+// ─── Compliance Template Install ───
+
+export async function installComplianceTemplate(
+  templateId: string
+): Promise<{ rulesCreated: number; error?: string }> {
+  const template = getComplianceTemplate(templateId);
+  if (!template) return { rulesCreated: 0, error: "Template not found" };
+
+  const orgId = await getOrgId();
+  const userId = await getUserId();
+  if (!orgId || !userId) return { rulesCreated: 0, error: "Not authenticated" };
+
+  const db = supabase();
+
+  // Get existing rule names to de-duplicate
+  const { data: existingRules } = await db
+    .from("security_rules")
+    .select("name")
+    .eq("org_id", orgId);
+
+  const existingNames = new Set((existingRules || []).map((r) => r.name));
+  const newRules = template.rules.filter((r) => !existingNames.has(r.name));
+
+  if (newRules.length === 0) {
+    return { rulesCreated: 0, error: "All rules already exist" };
+  }
+
+  const { data: inserted, error } = await db
+    .from("security_rules")
+    .insert(
+      newRules.map((r) => ({
+        org_id: orgId,
+        name: r.name,
+        description: r.description,
+        pattern: r.pattern,
+        pattern_type: r.pattern_type,
+        category: r.category,
+        severity: r.severity,
+        is_active: true,
+        is_built_in: false,
+        created_by: userId,
+      }))
+    )
+    .select("id");
+
+  if (error) return { rulesCreated: 0, error: "Failed to install rules" };
+  return { rulesCreated: inserted?.length || 0 };
+}
+
+// ─── Approval Queue ───
+
+export async function getPendingPrompts(): Promise<
+  (Prompt & { submitter_name?: string; submitter_email?: string })[]
+> {
+  const orgId = await getOrgId();
+  if (!orgId) return [];
+
+  const db = supabase();
+  const { data } = await db
+    .from("prompts")
+    .select("*, owner:profiles!prompts_owner_id_fkey(name, email)")
+    .eq("org_id", orgId)
+    .eq("status", "pending")
+    .order("updated_at", { ascending: false });
+
+  return (data || []).map((p: Record<string, unknown>) => {
+    const owner = p.owner as { name?: string; email?: string } | null;
+    return {
+      ...p,
+      submitter_name: owner?.name || undefined,
+      submitter_email: owner?.email || undefined,
+    } as Prompt & { submitter_name?: string; submitter_email?: string };
+  });
+}
+
+export async function approvePrompt(id: string): Promise<boolean> {
+  const { error } = await supabase()
+    .from("prompts")
+    .update({ status: "approved" })
+    .eq("id", id);
+  return !error;
+}
+
+export async function rejectPrompt(
+  id: string,
+  reason?: string
+): Promise<boolean> {
+  const db = supabase();
+  const { error } = await db
+    .from("prompts")
+    .update({ status: "draft" })
+    .eq("id", id);
+
+  if (error) return false;
+
+  // If reason provided, notify the prompt owner
+  if (reason) {
+    const { data: prompt } = await db
+      .from("prompts")
+      .select("owner_id, title")
+      .eq("id", id)
+      .single();
+
+    if (prompt) {
+      const userId = await getUserId();
+      await db.from("notifications").insert({
+        user_id: prompt.owner_id,
+        org_id: (await getOrgId()) || undefined,
+        type: "prompt_rejected",
+        title: "Prompt returned to draft",
+        message: `"${prompt.title}" was returned to draft: ${reason}`,
+        metadata: { prompt_id: id, reason, rejected_by: userId },
+      });
+    }
+  }
+
+  return true;
+}
+
+// ─── Effectiveness Metrics ───
+
+export interface EffectivenessMetrics {
+  topRated: { id: string; title: string; avgRating: number; ratingCount: number; usageCount: number; ownerName?: string }[];
+  leastEffective: { id: string; title: string; avgRating: number; ratingCount: number; usageCount: number; ownerName?: string }[];
+  ratingDistribution: { bucket: string; count: number }[];
+  unratedHighUsage: { id: string; title: string; usageCount: number; ownerName?: string }[];
+}
+
+export async function getEffectivenessMetrics(): Promise<EffectivenessMetrics | null> {
+  const orgId = await getOrgId();
+  if (!orgId) return null;
+
+  const db = supabase();
+  const { data: prompts } = await db
+    .from("prompts")
+    .select("id, title, rating_total, rating_count, usage_count, owner_id")
+    .eq("org_id", orgId);
+
+  if (!prompts) return null;
+
+  // Fetch owner names
+  const ownerIds = Array.from(new Set(prompts.map((p) => p.owner_id)));
+  const { data: profiles } = await db
+    .from("profiles")
+    .select("id, name, email")
+    .in("id", ownerIds);
+  const nameMap = new Map((profiles || []).map((p) => [p.id, p.name || p.email]));
+
+  // Rated prompts
+  const rated = prompts
+    .filter((p) => p.rating_count > 0)
+    .map((p) => ({
+      id: p.id,
+      title: p.title,
+      avgRating: p.rating_total / p.rating_count,
+      ratingCount: p.rating_count,
+      usageCount: p.usage_count || 0,
+      ownerName: nameMap.get(p.owner_id),
+    }));
+
+  const topRated = [...rated]
+    .sort((a, b) => b.avgRating - a.avgRating)
+    .slice(0, 10);
+
+  const leastEffective = [...rated]
+    .filter((p) => p.usageCount >= 5)
+    .sort((a, b) => a.avgRating - b.avgRating)
+    .slice(0, 10);
+
+  // Rating distribution
+  const buckets = [
+    { bucket: "1-2", min: 1, max: 2 },
+    { bucket: "2-3", min: 2, max: 3 },
+    { bucket: "3-4", min: 3, max: 4 },
+    { bucket: "4-5", min: 4, max: 5 },
+  ];
+  const ratingDistribution = buckets.map(({ bucket, min, max }) => ({
+    bucket,
+    count: rated.filter((p) => p.avgRating >= min && (max === 5 ? p.avgRating <= max : p.avgRating < max)).length,
+  }));
+
+  // Unrated high-usage
+  const unratedHighUsage = prompts
+    .filter((p) => (p.usage_count || 0) > 10 && p.rating_count === 0)
+    .map((p) => ({
+      id: p.id,
+      title: p.title,
+      usageCount: p.usage_count || 0,
+      ownerName: nameMap.get(p.owner_id),
+    }))
+    .sort((a, b) => b.usageCount - a.usageCount)
+    .slice(0, 10);
+
+  return { topRated, leastEffective, ratingDistribution, unratedHighUsage };
 }

@@ -69,24 +69,40 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const { data: prompt, error } = await db
+    const insertRow = {
+      org_id: profile.org_id,
+      owner_id: user.id,
+      title: title.trim(),
+      content: content.trim(),
+      description: description?.trim() || null,
+      tags: Array.isArray(tags) ? tags.filter(Boolean) : [],
+      folder_id: folder_id || null,
+      department_id: department_id || null,
+      tone: tone || "professional",
+      status,
+      is_template: false,
+      version: 1,
+    };
+
+    let { data: prompt, error } = await db
       .from("prompts")
-      .insert({
-        org_id: profile.org_id,
-        owner_id: user.id,
-        title: title.trim(),
-        content: content.trim(),
-        description: description?.trim() || null,
-        tags: Array.isArray(tags) ? tags.filter(Boolean) : [],
-        folder_id: folder_id || null,
-        department_id: department_id || null,
-        tone: tone || "professional",
-        status,
-        is_template: false,
-        version: 1,
-      })
+      .insert(insertRow)
       .select("id, title, status")
       .single();
+
+    // If department_id FK fails (team UUID vs departments table mismatch),
+    // retry without department_id so the prompt still gets created.
+    if (error && department_id) {
+      const { data: retryData, error: retryError } = await db
+        .from("prompts")
+        .insert({ ...insertRow, department_id: null })
+        .select("id, title, status")
+        .single();
+      if (!retryError) {
+        prompt = retryData;
+        error = null;
+      }
+    }
 
     if (error) {
       console.error("Extension create prompt error:", error);

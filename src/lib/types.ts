@@ -121,6 +121,8 @@ export interface PromptVersion {
   version: number;
   title: string;
   content: string;
+  changed_by: string | null;
+  changed_by_name?: string;
   created_at: string;
 }
 

@@ -24,7 +24,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { SelectWithQuickAdd } from "@/components/ui/select-with-quick-add";
-import { Loader2, CheckCircle2, XCircle, Braces, ShieldAlert, ChevronDown, ChevronUp, Plus } from "lucide-react";
+import { Loader2, CheckCircle2, XCircle, Braces, ShieldAlert, ChevronDown, ChevronUp, Plus, GitCompare } from "lucide-react";
 import { TONE_OPTIONS } from "@/lib/constants";
 import { useOrg } from "@/components/providers/org-provider";
 import {
@@ -48,6 +48,8 @@ import type { Prompt, PromptStatus, PromptVersion, SecurityRule, ValidationResul
 import type { ScanResult } from "@/lib/security/types";
 import { toast } from "sonner";
 import { trackPromptCreated, trackGuardrailViolation } from "@/lib/analytics";
+import { computeLineDiff, type DiffLine } from "@/lib/diff";
+import { formatDistanceToNow } from "date-fns";
 
 interface PromptModalProps {
   open: boolean;
@@ -67,6 +69,8 @@ export function PromptModal({
   const [validation, setValidation] = useState<ValidationResult | null>(null);
   const [scanResult, setScanResult] = useState<ScanResult | null>(null);
   const [versions, setVersions] = useState<PromptVersion[]>([]);
+  const [diffVersion, setDiffVersion] = useState<PromptVersion | null>(null);
+  const [diffLines, setDiffLines] = useState<DiffLine[]>([]);
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -134,6 +138,8 @@ export function PromptModal({
     setValidation(null);
     setScanResult(null);
     setExpandedVars(new Set());
+    setDiffVersion(null);
+    setDiffLines([]);
   }, [prompt, open]);
 
   function insertVariable(name: string) {
@@ -173,6 +179,18 @@ export function PromptModal({
       else next.add(name);
       return next;
     });
+  }
+
+  function handleCompare(version: PromptVersion) {
+    if (diffVersion?.id === version.id) {
+      // Toggle off
+      setDiffVersion(null);
+      setDiffLines([]);
+      return;
+    }
+    const lines = computeLineDiff(version.content, content);
+    setDiffVersion(version);
+    setDiffLines(lines);
   }
 
   function handleValidate() {
@@ -627,28 +645,81 @@ export function PromptModal({
           {versions.length > 0 && (
             <div className="space-y-2">
               <Label>Version History</Label>
-              <div className="space-y-1 max-h-32 overflow-y-auto">
+              <div className="space-y-1 max-h-48 overflow-y-auto">
                 {versions.map((v) => (
-                  <div
-                    key={v.id}
-                    className="flex items-center justify-between text-sm rounded-md bg-muted px-3 py-2"
-                  >
-                    <span>
-                      v{v.version} — {v.title}
-                    </span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        setTitle(v.title);
-                        setContent(v.content);
-                      }}
+                  <div key={v.id}>
+                    <div
+                      className={`flex items-center justify-between text-sm rounded-md px-3 py-2 ${
+                        diffVersion?.id === v.id ? "bg-primary/10 border border-primary/30" : "bg-muted"
+                      }`}
                     >
-                      Restore
-                    </Button>
+                      <div className="min-w-0">
+                        <span className="font-medium">v{v.version}</span>
+                        <span className="text-muted-foreground"> — {v.title}</span>
+                        {(v.changed_by_name || v.created_at) && (
+                          <span className="text-xs text-muted-foreground ml-1.5">
+                            {v.changed_by_name && `by ${v.changed_by_name}`}
+                            {v.created_at && ` · ${formatDistanceToNow(new Date(v.created_at), { addSuffix: true })}`}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex gap-1 shrink-0">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 text-xs gap-1"
+                          onClick={() => handleCompare(v)}
+                        >
+                          <GitCompare className="h-3 w-3" />
+                          {diffVersion?.id === v.id ? "Hide" : "Compare"}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 text-xs"
+                          onClick={() => {
+                            setTitle(v.title);
+                            setContent(v.content);
+                            setDiffVersion(null);
+                            setDiffLines([]);
+                          }}
+                        >
+                          Restore
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
+
+              {/* Diff View */}
+              {diffVersion && diffLines.length > 0 && (
+                <div className="rounded-lg border border-border overflow-hidden">
+                  <div className="px-3 py-2 bg-muted text-xs text-muted-foreground border-b border-border">
+                    Comparing v{diffVersion.version} → current
+                    {diffVersion.changed_by_name && ` · changed by ${diffVersion.changed_by_name}`}
+                  </div>
+                  <div className="max-h-64 overflow-y-auto font-mono text-xs leading-relaxed">
+                    {diffLines.map((line, i) => (
+                      <div
+                        key={i}
+                        className={`px-3 py-0.5 whitespace-pre-wrap break-all ${
+                          line.type === "added"
+                            ? "bg-green-50 text-green-800 dark:bg-green-950/40 dark:text-green-300"
+                            : line.type === "removed"
+                              ? "bg-red-50 text-red-800 dark:bg-red-950/40 dark:text-red-300"
+                              : "text-muted-foreground"
+                        }`}
+                      >
+                        <span className="select-none inline-block w-5 text-right mr-2 opacity-50">
+                          {line.type === "added" ? "+" : line.type === "removed" ? "-" : " "}
+                        </span>
+                        {line.line || "\u00A0"}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>

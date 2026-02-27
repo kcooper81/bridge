@@ -7,7 +7,7 @@ import { apiFetch } from "./api";
 
 export async function logInteraction(
   text: string,
-  action: "sent" | "blocked" | "warned",
+  action: "sent" | "blocked" | "warned" | "auto_redacted",
   violations: unknown[],
   opts?: { promptId?: string; method?: string }
 ): Promise<void> {

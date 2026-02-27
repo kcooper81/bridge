@@ -35,3 +35,24 @@
   - API: `PATCH /api/guardrails/suggest/[id]` (approve/reject with notes)
 
 ## Pending
+- [ ] Compliance Policy Template Packs
+  - SOC 2 template added to `compliance-templates.ts`
+  - Compliance pack browser UI in Guardrails → Policies tab
+  - One-click install function in `vault-api.ts` with de-duplication
+- [ ] Auto-Sanitization with Placeholders
+  - Scan endpoint returns `sanitized_content` with `{{CATEGORY_N}}` placeholders
+  - Extension UI: "Send Sanitized Version" button on violation block
+  - Sanitized preview with highlighted placeholders, `action_taken: "auto_redacted"` logging
+- [ ] Prompt Effectiveness Analytics
+  - `getEffectivenessMetrics()` in vault-api: top/least effective, rating distribution, unrated high-usage
+  - UI section in Analytics page: rating distribution bars, top/least effective tables, needs-attention list
+- [ ] Approval Queue Dashboard
+  - New `/approvals` page with Prompts + Rule Suggestions tabs
+  - Approve/reject actions with optional reason modal
+  - Sidebar nav item with pending count badge (admin/manager only)
+  - API: `getPendingPrompts()`, `approvePrompt()`, `rejectPrompt()`
+- [ ] Version History Diff View
+  - Migration: `changed_by` column on `prompt_versions`
+  - `computeLineDiff()` utility (LCS-based line diff)
+  - Compare button in prompt modal showing inline diff with green/red highlighting
+  - `updatePrompt()` stores `changed_by: user.id`

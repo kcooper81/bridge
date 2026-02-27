@@ -17,6 +17,12 @@ export interface ScanResult {
     detectionType: DetectionType;
   }[];
   action: "allow" | "warn" | "block";
+  sanitized_content?: string;
+  replacements?: {
+    placeholder: string;
+    category: string;
+    original_length: number;
+  }[];
 }
 
 export async function scanOutbound(text: string): Promise<ScanResult | null> {

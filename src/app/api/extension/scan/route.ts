@@ -219,10 +219,104 @@ export async function POST(request: NextRequest) {
 
     const hasBlock = violations.some((v) => v.severity === "block");
 
+    // Build sanitized content with placeholder tokens
+    let sanitized_content: string | undefined;
+    let replacements: { placeholder: string; category: string; original_length: number }[] | undefined;
+
+    if (violations.length > 0) {
+      // Re-scan to get actual match positions (not redacted)
+      const matchPositions: { start: number; end: number; category: string; matchedText: string }[] = [];
+
+      for (const rule of activeRules) {
+        const match = matchPatternWithPosition(content, rule.pattern, rule.pattern_type);
+        if (match) {
+          matchPositions.push({ ...match, category: rule.category });
+        }
+      }
+
+      for (const term of activeTerms) {
+        const pt = term.term_type === "keyword" ? "exact" : term.term_type;
+        const match = matchPatternWithPosition(content, term.term, pt);
+        if (match) {
+          matchPositions.push({ ...match, category: term.category });
+        }
+      }
+
+      if (securitySettings.smart_patterns_enabled) {
+        for (const smartRule of SMART_DETECTION_RULES) {
+          if (!smartRule.is_active) continue;
+          const match = matchPatternWithPosition(content, smartRule.pattern, smartRule.pattern_type);
+          if (match) {
+            matchPositions.push({ ...match, category: smartRule.category });
+          }
+        }
+      }
+
+      // Entropy-detected strings: find their positions in content
+      if (securitySettings.entropy_detection_enabled) {
+        const threshold = securitySettings.entropy_threshold ?? 4.0;
+        const entropyMatches = detectHighEntropyStrings(content, {
+          entropyThreshold: threshold,
+          minLength: 16,
+          maxLength: 128,
+        });
+        for (const detected of entropyMatches) {
+          const idx = content.indexOf(detected.text);
+          if (idx !== -1) {
+            matchPositions.push({
+              start: idx,
+              end: idx + detected.text.length,
+              matchedText: detected.text,
+              category: "secrets",
+            });
+          }
+        }
+      }
+
+      // De-duplicate overlapping match positions (keep the longer match)
+      matchPositions.sort((a, b) => a.start - b.start);
+      const deduped: typeof matchPositions = [];
+      for (const pos of matchPositions) {
+        const last = deduped[deduped.length - 1];
+        if (last && pos.start < last.end) {
+          // Overlapping — keep whichever is longer
+          if (pos.end - pos.start > last.end - last.start) {
+            deduped[deduped.length - 1] = pos;
+          }
+        } else {
+          deduped.push(pos);
+        }
+      }
+
+      // Sort by position descending so replacements don't shift indices
+      deduped.sort((a, b) => b.start - a.start);
+
+      // Build category counters and replacements
+      const categoryCounts: Record<string, number> = {};
+      replacements = [];
+      let sanitized = content;
+
+      for (const pos of deduped) {
+        const cat = pos.category.toUpperCase();
+        categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
+        const placeholder = `{{${cat}_${categoryCounts[cat]}}}`;
+        sanitized = sanitized.slice(0, pos.start) + placeholder + sanitized.slice(pos.end);
+        replacements.push({
+          placeholder,
+          category: pos.category,
+          original_length: pos.end - pos.start,
+        });
+      }
+
+      sanitized_content = sanitized;
+      replacements.reverse(); // Return in document order
+    }
+
     return withCors(NextResponse.json({
       passed: !hasBlock,
       violations,
       action: hasBlock ? "block" : violations.length > 0 ? "warn" : "allow",
+      ...(sanitized_content !== undefined && { sanitized_content, replacements }),
     }), request);
   } catch (error) {
     console.error("Extension scan error:", error);
@@ -231,6 +325,61 @@ export async function POST(request: NextRequest) {
 }
 
 // ─── Pattern Matching with Timeout Protection ───
+
+function matchPatternWithPosition(
+  content: string,
+  pattern: string,
+  patternType: string
+): { start: number; end: number; matchedText: string } | null {
+  switch (patternType) {
+    case "exact":
+    case "keyword": {
+      const idx = content.toLowerCase().indexOf(pattern.toLowerCase());
+      if (idx !== -1) return { start: idx, end: idx + pattern.length, matchedText: content.slice(idx, idx + pattern.length) };
+      return null;
+    }
+    case "keywords": {
+      const keywords = pattern.split(",").map((k) => k.trim()).filter(Boolean);
+      const lower = content.toLowerCase();
+      for (const kw of keywords) {
+        const idx = lower.indexOf(kw.toLowerCase());
+        if (idx !== -1) return { start: idx, end: idx + kw.length, matchedText: content.slice(idx, idx + kw.length) };
+      }
+      return null;
+    }
+    case "regex": {
+      return safeRegexMatchWithPosition(pattern, content);
+    }
+    case "glob": {
+      const escaped = pattern
+        .replace(/[.+^${}()|[\]\\]/g, "\\$&")
+        .replace(/\*/g, ".*")
+        .replace(/\?/g, ".");
+      return safeRegexMatchWithPosition(escaped, content);
+    }
+    default:
+      return null;
+  }
+}
+
+function safeRegexMatchWithPosition(
+  pattern: string,
+  content: string
+): { start: number; end: number; matchedText: string } | null {
+  if (/\([^)]*[+*][^)]*\)[+*]/.test(pattern) || /\(\?:[^)]*[+*][^)]*\)[+*]/.test(pattern)) {
+    return null;
+  }
+  try {
+    const regex = new RegExp(pattern, "gi");
+    const scanContent = content.length > MAX_CONTENT_LENGTH ? content.slice(0, MAX_CONTENT_LENGTH) : content;
+    regex.lastIndex = 0;
+    const match = regex.exec(scanContent);
+    if (match) return { start: match.index, end: match.index + match[0].length, matchedText: match[0] };
+  } catch {
+    // Invalid regex
+  }
+  return null;
+}
 
 function matchPattern(content: string, pattern: string, patternType: string): string | null {
   switch (patternType) {

@@ -128,7 +128,7 @@ function NavContent({ onItemClick }: { onItemClick?: () => void }) {
                       <item.icon className={cn("h-[18px] w-[18px]", isActive && "drop-shadow-sm")} />
                       {item.label}
                       {(item.href === "/vault" || item.href === "/approvals") && pendingCount > 0 && (
-                        <Badge variant="destructive" className="ml-auto h-5 min-w-5 px-1.5 text-[10px] shadow-sm">
+                        <Badge variant="notification" className="ml-auto h-5 min-w-5 px-1.5 text-[10px]">
                           {pendingCount}
                         </Badge>
                       )}

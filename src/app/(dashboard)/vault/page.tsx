@@ -408,7 +408,7 @@ export default function VaultPage() {
           >
             {tab.label}
             {tab.value === "pending" && pendingCount > 0 && (
-              <Badge variant="destructive" className="ml-1.5 h-5 min-w-5 px-1.5 text-[10px]">
+              <Badge variant="notification" className="ml-1.5 h-5 min-w-5 px-1.5 text-[10px]">
                 {pendingCount}
               </Badge>
             )}

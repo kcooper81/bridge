@@ -2,12 +2,17 @@
 
 import { useSubscription } from "@/components/providers/subscription-provider";
 import { useOrg } from "@/components/providers/org-provider";
+import { useAuth } from "@/components/providers/auth-provider";
 import { AlertTriangle } from "lucide-react";
 import Link from "next/link";
 
 export function PaymentBanner() {
   const { subscription, planLimits } = useSubscription();
   const { members, currentUserRole } = useOrg();
+  const { isSuperAdmin } = useAuth();
+
+  // Super admins bypass all plan restrictions
+  if (isSuperAdmin) return null;
 
   const isAdmin = currentUserRole === "admin" || currentUserRole === "manager";
 

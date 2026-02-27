@@ -77,7 +77,18 @@ export function SubscriptionProvider({
       return;
     }
 
-    applySubscription(sub);
+    if (sub) {
+      applySubscription(sub);
+    } else {
+      // Fallback: use organizations.plan when no subscription record exists
+      const { data: org } = await supabase
+        .from("organizations")
+        .select("plan")
+        .eq("id", profile.org_id)
+        .single();
+      const orgPlan = (org?.plan || "free") as PlanTier;
+      setPlanLimits(PLAN_LIMITS[orgPlan] || PLAN_LIMITS.free);
+    }
   }, []);
 
   useEffect(() => {

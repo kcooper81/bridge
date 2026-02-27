@@ -74,6 +74,7 @@ export interface Profile {
   is_super_admin: boolean;
   extension_version: string | null;
   last_extension_active: string | null;
+  extension_status: string;
   created_at: string;
   updated_at: string;
 }

@@ -39,6 +39,8 @@ import { toast } from "sonner";
 import {
   BookOpen,
   Check,
+  CheckCircle2,
+  Clock,
   Code2,
   Crown,
   Download,
@@ -51,10 +53,12 @@ import {
   Package,
   Plus,
   Scale,
+  Send,
   Shield,
   Trash2,
   TrendingUp,
   Users,
+  X,
 } from "lucide-react";
 
 // Map icon string names to components
@@ -91,6 +95,20 @@ interface CustomPack {
   rules: { id: string; name: string; description: string | null; category: string; severity: string; pattern_type: string }[];
 }
 
+// ─── Pack install request type ───
+interface PackInstallRequest {
+  id: string;
+  org_id: string;
+  pack_id: string;
+  pack_type: "builtin" | "custom";
+  requested_by: string;
+  requester_name: string;
+  status: "pending" | "approved" | "rejected";
+  reviewed_by: string | null;
+  created_at: string;
+  reviewed_at: string | null;
+}
+
 // ─── Preview item type (union of built-in + custom) ───
 type PreviewItem =
   | { type: "builtin"; pack: LibraryPack }
@@ -115,7 +133,20 @@ export default function TemplatesPage() {
   const [installTargetPack, setInstallTargetPack] = useState<CustomPack | null>(null);
   const [installFolderId, setInstallFolderId] = useState<string>("__none__");
 
+  // Pack install requests
+  const [installRequests, setInstallRequests] = useState<PackInstallRequest[]>([]);
+  const [requestingPackId, setRequestingPackId] = useState<string | null>(null);
+  const [processingRequestId, setProcessingRequestId] = useState<string | null>(null);
+
   const canManage = currentUserRole === "admin" || currentUserRole === "manager";
+  const isMember = currentUserRole === "member";
+
+  const pendingRequests = installRequests.filter((r) => r.status === "pending");
+  const myPendingPackIds = new Set(
+    installRequests
+      .filter((r) => r.status === "pending")
+      .map((r) => r.pack_id)
+  );
 
   // Detect which built-in packs are already installed
   const detectInstalled = useCallback(() => {
@@ -162,6 +193,102 @@ export default function TemplatesPage() {
   useEffect(() => {
     fetchCustomPacks();
   }, [fetchCustomPacks]);
+
+  // Fetch pack install requests
+  const fetchRequests = useCallback(async () => {
+    try {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const res = await fetch("/api/template-packs/request", {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setInstallRequests(data);
+      }
+    } catch {
+      // Silently fail — table may not exist yet
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchRequests();
+  }, [fetchRequests]);
+
+  async function handleRequestInstall(packId: string, packType: "builtin" | "custom") {
+    setRequestingPackId(packId);
+    try {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const res = await fetch("/api/template-packs/request", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ pack_id: packId, pack_type: packType }),
+      });
+
+      if (res.ok) {
+        toast.success("Install request sent to your admin");
+        fetchRequests();
+      } else {
+        const data = await res.json();
+        toast.error(data.error || "Failed to submit request");
+      }
+    } catch {
+      toast.error("Failed to submit request");
+    } finally {
+      setRequestingPackId(null);
+    }
+  }
+
+  async function handleReviewRequest(requestId: string, action: "approve" | "reject", packId: string, packType: string) {
+    setProcessingRequestId(requestId);
+    try {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const res = await fetch(`/api/template-packs/request/${requestId}`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ action }),
+      });
+
+      if (res.ok) {
+        if (action === "approve") {
+          // Trigger the actual install client-side
+          if (packType === "builtin") {
+            await handleInstallBuiltin(packId);
+          } else {
+            const customPack = customPacks.find((p) => p.id === packId);
+            if (customPack) {
+              openCustomInstallDialog(customPack);
+            }
+          }
+          toast.success("Request approved and pack installed");
+        } else {
+          toast.success("Request rejected");
+        }
+        fetchRequests();
+      } else {
+        const data = await res.json();
+        toast.error(data.error || "Failed to process request");
+      }
+    } catch {
+      toast.error("Failed to process request");
+    } finally {
+      setProcessingRequestId(null);
+    }
+  }
 
   async function handleInstallBuiltin(packId: string) {
     if (!confirm("Install this template pack? Prompts, guidelines, and guardrails will be added to your workspace.")) return;
@@ -314,6 +441,58 @@ export default function TemplatesPage() {
         }
       />
 
+      {/* Pending Requests Banner (admin/manager) */}
+      {canManage && pendingRequests.length > 0 && (
+        <div className="mb-6 rounded-lg border border-tp-yellow/30 bg-tp-yellow/10 p-4">
+          <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+            <Clock className="h-4 w-4 text-tp-yellow" />
+            {pendingRequests.length} pending install {pendingRequests.length === 1 ? "request" : "requests"}
+          </h3>
+          <div className="space-y-2">
+            {pendingRequests.map((req) => {
+              const builtinPack = LIBRARY_PACKS.find((p) => p.id === req.pack_id);
+              const customPack = customPacks.find((p) => p.id === req.pack_id);
+              const packName = builtinPack?.name || customPack?.name || req.pack_id;
+
+              return (
+                <div key={req.id} className="flex items-center gap-3 rounded-md border border-border bg-background px-3 py-2">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{packName}</p>
+                    <p className="text-xs text-muted-foreground">
+                      Requested by {req.requester_name} &middot; {req.pack_type}
+                    </p>
+                  </div>
+                  <div className="flex gap-1.5 shrink-0">
+                    <Button
+                      size="sm"
+                      variant="default"
+                      className="h-7 px-2.5 text-xs"
+                      disabled={processingRequestId === req.id}
+                      onClick={() => handleReviewRequest(req.id, "approve", req.pack_id, req.pack_type)}
+                    >
+                      {processingRequestId === req.id ? (
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                      ) : (
+                        <><CheckCircle2 className="mr-1 h-3 w-3" />Approve</>
+                      )}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-7 px-2.5 text-xs"
+                      disabled={processingRequestId === req.id}
+                      onClick={() => handleReviewRequest(req.id, "reject", req.pack_id, req.pack_type)}
+                    >
+                      <X className="mr-1 h-3 w-3" />Reject
+                    </Button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* My Packs Section */}
       {(customPacks.length > 0 || loadingCustom) && (
         <div className="mb-8">
@@ -379,18 +558,39 @@ export default function TemplatesPage() {
                       </div>
 
                       <div className="flex gap-2">
-                        <Button
-                          variant="default"
-                          size="sm"
-                          className="flex-1"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            openCustomInstallDialog(pack);
-                          }}
-                        >
-                          <Download className="mr-2 h-4 w-4" />
-                          Install
-                        </Button>
+                        {isMember ? (
+                          <Button
+                            variant={myPendingPackIds.has(pack.id) ? "outline" : "default"}
+                            size="sm"
+                            className="flex-1"
+                            disabled={myPendingPackIds.has(pack.id) || requestingPackId === pack.id}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRequestInstall(pack.id, "custom");
+                            }}
+                          >
+                            {requestingPackId === pack.id ? (
+                              <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Requesting...</>
+                            ) : myPendingPackIds.has(pack.id) ? (
+                              <><Clock className="mr-2 h-4 w-4" />Requested</>
+                            ) : (
+                              <><Send className="mr-2 h-4 w-4" />Request Install</>
+                            )}
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="default"
+                            size="sm"
+                            className="flex-1"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openCustomInstallDialog(pack);
+                            }}
+                          >
+                            <Download className="mr-2 h-4 w-4" />
+                            Install
+                          </Button>
+                        )}
                         {canManage && (
                           <Button
                             variant="outline"
@@ -477,33 +677,45 @@ export default function TemplatesPage() {
                     )}
                   </div>
 
-                  <Button
-                    variant={isInstalled ? "outline" : "default"}
-                    size="sm"
-                    className="w-full"
-                    disabled={isInstalled || isInstalling}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleInstallBuiltin(pack.id);
-                    }}
-                  >
-                    {isInstalling ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Installing...
-                      </>
-                    ) : isInstalled ? (
-                      <>
-                        <Check className="mr-2 h-4 w-4" />
-                        Installed
-                      </>
-                    ) : (
-                      <>
-                        <Download className="mr-2 h-4 w-4" />
-                        Install Pack
-                      </>
-                    )}
-                  </Button>
+                  {isMember && !isInstalled ? (
+                    <Button
+                      variant={myPendingPackIds.has(pack.id) ? "outline" : "default"}
+                      size="sm"
+                      className="w-full"
+                      disabled={myPendingPackIds.has(pack.id) || requestingPackId === pack.id}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRequestInstall(pack.id, "builtin");
+                      }}
+                    >
+                      {requestingPackId === pack.id ? (
+                        <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Requesting...</>
+                      ) : myPendingPackIds.has(pack.id) ? (
+                        <><Clock className="mr-2 h-4 w-4" />Requested</>
+                      ) : (
+                        <><Send className="mr-2 h-4 w-4" />Request Install</>
+                      )}
+                    </Button>
+                  ) : (
+                    <Button
+                      variant={isInstalled ? "outline" : "default"}
+                      size="sm"
+                      className="w-full"
+                      disabled={isInstalled || isInstalling}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleInstallBuiltin(pack.id);
+                      }}
+                    >
+                      {isInstalling ? (
+                        <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Installing...</>
+                      ) : isInstalled ? (
+                        <><Check className="mr-2 h-4 w-4" />Installed</>
+                      ) : (
+                        <><Download className="mr-2 h-4 w-4" />Install Pack</>
+                      )}
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
             );
@@ -520,6 +732,10 @@ export default function TemplatesPage() {
               isInstalled={installedPacks.has(previewItem.pack.id)}
               isInstalling={installingPack === previewItem.pack.id}
               onInstall={() => handleInstallBuiltin(previewItem.pack.id)}
+              isMember={isMember}
+              isPendingRequest={myPendingPackIds.has(previewItem.pack.id)}
+              isRequesting={requestingPackId === previewItem.pack.id}
+              onRequestInstall={() => handleRequestInstall(previewItem.pack.id, "builtin")}
             />
           )}
           {previewItem?.type === "custom" && (
@@ -527,6 +743,10 @@ export default function TemplatesPage() {
               pack={previewItem.pack}
               onInstall={() => openCustomInstallDialog(previewItem.pack)}
               isInstalling={installingCustomId === previewItem.pack.id}
+              isMember={isMember}
+              isPendingRequest={myPendingPackIds.has(previewItem.pack.id)}
+              isRequesting={requestingPackId === previewItem.pack.id}
+              onRequestInstall={() => handleRequestInstall(previewItem.pack.id, "custom")}
             />
           )}
         </SheetContent>
@@ -606,11 +826,19 @@ function BuiltinPackPreview({
   isInstalled,
   isInstalling,
   onInstall,
+  isMember,
+  isPendingRequest,
+  isRequesting,
+  onRequestInstall,
 }: {
   pack: LibraryPack;
   isInstalled: boolean;
   isInstalling: boolean;
   onInstall: () => void;
+  isMember: boolean;
+  isPendingRequest: boolean;
+  isRequesting: boolean;
+  onRequestInstall: () => void;
 }) {
   const IconComponent = ICON_MAP[pack.icon] || Code2;
   const promptCount = pack.prompts.length;
@@ -650,20 +878,37 @@ function BuiltinPackPreview({
         )}
       </div>
 
-      <Button
-        variant={isInstalled ? "outline" : "default"}
-        className="w-full"
-        disabled={isInstalled || isInstalling}
-        onClick={onInstall}
-      >
-        {isInstalling ? (
-          <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Installing...</>
-        ) : isInstalled ? (
-          <><Check className="mr-2 h-4 w-4" />Installed</>
-        ) : (
-          <><Download className="mr-2 h-4 w-4" />Install Pack</>
-        )}
-      </Button>
+      {isMember && !isInstalled ? (
+        <Button
+          variant={isPendingRequest ? "outline" : "default"}
+          className="w-full"
+          disabled={isPendingRequest || isRequesting}
+          onClick={onRequestInstall}
+        >
+          {isRequesting ? (
+            <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Requesting...</>
+          ) : isPendingRequest ? (
+            <><Clock className="mr-2 h-4 w-4" />Requested</>
+          ) : (
+            <><Send className="mr-2 h-4 w-4" />Request Install</>
+          )}
+        </Button>
+      ) : (
+        <Button
+          variant={isInstalled ? "outline" : "default"}
+          className="w-full"
+          disabled={isInstalled || isInstalling}
+          onClick={onInstall}
+        >
+          {isInstalling ? (
+            <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Installing...</>
+          ) : isInstalled ? (
+            <><Check className="mr-2 h-4 w-4" />Installed</>
+          ) : (
+            <><Download className="mr-2 h-4 w-4" />Install Pack</>
+          )}
+        </Button>
+      )}
 
       {pack.prompts.length > 0 && (
         <div>
@@ -741,10 +986,18 @@ function CustomPackPreview({
   pack,
   onInstall,
   isInstalling,
+  isMember,
+  isPendingRequest,
+  isRequesting,
+  onRequestInstall,
 }: {
   pack: CustomPack;
   onInstall: () => void;
   isInstalling: boolean;
+  isMember: boolean;
+  isPendingRequest: boolean;
+  isRequesting: boolean;
+  onRequestInstall: () => void;
 }) {
   const IconComponent = ICON_MAP[pack.icon] || FolderOpen;
 
@@ -786,13 +1039,30 @@ function CustomPackPreview({
         <Badge variant="outline" className="capitalize">{pack.visibility}</Badge>
       </div>
 
-      <Button className="w-full" onClick={onInstall} disabled={isInstalling}>
-        {isInstalling ? (
-          <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Installing...</>
-        ) : (
-          <><Download className="mr-2 h-4 w-4" />Install Pack</>
-        )}
-      </Button>
+      {isMember ? (
+        <Button
+          variant={isPendingRequest ? "outline" : "default"}
+          className="w-full"
+          disabled={isPendingRequest || isRequesting}
+          onClick={onRequestInstall}
+        >
+          {isRequesting ? (
+            <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Requesting...</>
+          ) : isPendingRequest ? (
+            <><Clock className="mr-2 h-4 w-4" />Requested</>
+          ) : (
+            <><Send className="mr-2 h-4 w-4" />Request Install</>
+          )}
+        </Button>
+      ) : (
+        <Button className="w-full" onClick={onInstall} disabled={isInstalling}>
+          {isInstalling ? (
+            <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Installing...</>
+          ) : (
+            <><Download className="mr-2 h-4 w-4" />Install Pack</>
+          )}
+        </Button>
+      )}
 
       {pack.prompts.length > 0 && (
         <div>

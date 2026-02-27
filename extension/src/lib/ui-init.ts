@@ -36,9 +36,10 @@ export interface UIElements {
 let currentPrompts: Prompt[] = [];
 let selectedPrompt: Prompt | null = null;
 let currentSearchQuery = "";
-let activeFilter: "recent" | "favorites" | "prompts" | "shield" = "recent";
+let activeFilter: "recent" | "favorites" | "prompts" = "favorites";
 let searchTimeout: ReturnType<typeof setTimeout> | undefined;
 let cachedShieldStatus: SecurityStatus | null = null;
+let shieldPanelOpen = false;
 let els: UIElements;
 
 // Folder & tag filter state
@@ -193,15 +194,11 @@ async function loadPrompts(query = "") {
   els.promptList.innerHTML = '<div class="loading">Loading prompts...</div>';
   setStatus("Fetching prompts...");
 
-  // Remove filter bar when not on folders tab
-  if (activeFilter !== "prompts") {
-    document.getElementById("filter-bar")?.remove();
-  }
-
   try {
     // If search is active, search all prompts regardless of tab
     if (query) {
       currentSearchQuery = query;
+      document.getElementById("filter-bar")?.classList.add("hidden");
       const prompts = await fetchPrompts({ query });
       currentPrompts = prompts;
       renderPrompts();
@@ -213,20 +210,32 @@ async function loadPrompts(query = "") {
 
     // Tab-specific loading
     currentSearchQuery = "";
-    if (activeFilter === "recent") {
-      const [favs, recents] = await Promise.all([
-        fetchPrompts({ favorites: true, limit: 5 }),
-        fetchPrompts({ sort: "recent", limit: 15 }),
+    if (activeFilter === "favorites") {
+      const fetchOpts: Parameters<typeof fetchPrompts>[0] = { favorites: true };
+      if (currentFolderId) fetchOpts.folderId = currentFolderId;
+      if (currentTags.length > 0) fetchOpts.tags = currentTags;
+
+      const [foldersData, prompts] = await Promise.all([
+        fetchFolders(),
+        fetchPrompts(fetchOpts),
       ]);
-      // Dedupe: remove favorites from recent list
-      const favIds = new Set(favs.map((f) => f.id));
-      const dedupedRecents = recents.filter((r) => !favIds.has(r.id));
-      currentPrompts = [...favs, ...dedupedRecents];
-      renderCombinedView(favs, dedupedRecents);
-    } else if (activeFilter === "favorites") {
-      const prompts = await fetchPrompts({ favorites: true });
+      availableTags = foldersData.tags;
+      renderFilterBar(foldersData.folders);
       currentPrompts = prompts;
       renderPrompts("favorites");
+    } else if (activeFilter === "recent") {
+      const fetchOpts: Parameters<typeof fetchPrompts>[0] = { sort: "recent", limit: 30 };
+      if (currentFolderId) fetchOpts.folderId = currentFolderId;
+      if (currentTags.length > 0) fetchOpts.tags = currentTags;
+
+      const [foldersData, prompts] = await Promise.all([
+        fetchFolders(),
+        fetchPrompts(fetchOpts),
+      ]);
+      availableTags = foldersData.tags;
+      renderFilterBar(foldersData.folders);
+      currentPrompts = prompts;
+      renderPrompts("recent");
     } else if (activeFilter === "prompts") {
       await loadFoldersTab();
       return;
@@ -319,7 +328,7 @@ function renderFilterBar(folders: ExtFolder[]) {
     currentFolderId = null;
     currentFolderName = null;
     closeAllDropdowns();
-    loadFoldersTab();
+    reloadCurrentTab();
   });
   folderMenu.appendChild(allOpt);
 
@@ -331,7 +340,7 @@ function renderFilterBar(folders: ExtFolder[]) {
       currentFolderId = f.id;
       currentFolderName = f.name;
       closeAllDropdowns();
-      loadFoldersTab();
+      reloadCurrentTab();
     });
     folderMenu.appendChild(opt);
   }
@@ -372,7 +381,7 @@ function renderFilterBar(folders: ExtFolder[]) {
         e.stopPropagation();
         currentTags = [];
         closeAllDropdowns();
-        loadFoldersTab();
+        reloadCurrentTab();
       });
       tagMenu.appendChild(clearOpt);
     }
@@ -392,7 +401,7 @@ function renderFilterBar(folders: ExtFolder[]) {
           currentTags = currentTags.filter((t) => t !== tag);
         }
         // Don't close — let user pick multiple, then click away
-        loadFoldersTab();
+        reloadCurrentTab();
       });
 
       const span = document.createElement("span");
@@ -425,6 +434,14 @@ function chevronSvg(): string {
 
 function closeAllDropdowns() {
   document.querySelectorAll(".filter-dropdown-menu").forEach((m) => m.classList.add("hidden"));
+}
+
+function reloadCurrentTab() {
+  if (activeFilter === "prompts") {
+    loadFoldersTab();
+  } else {
+    loadPrompts();
+  }
 }
 
 function buildCardHtml(p: Prompt): string {
@@ -482,7 +499,7 @@ function renderPrompts(context?: "recent" | "favorites" | "folder") {
 
   // Show onboarding tip when user has only the sample prompt
   const onboardingHtml =
-    currentPrompts.length <= 1 && activeFilter === "recent"
+    currentPrompts.length <= 1 && (activeFilter === "favorites" || activeFilter === "recent")
       ? `<div class="onboarding-tip">
           <strong>Get started:</strong> This is a sample template. Click it to see how it works, then create your own prompts at
           <a href="${CONFIG.SITE_URL}/vault" target="_blank" rel="noopener">teamprompt.app/vault</a>.
@@ -508,71 +525,62 @@ function renderPrompts(context?: "recent" | "favorites" | "folder") {
   });
 }
 
-function renderCombinedView(favs: Prompt[], recents: Prompt[]) {
-  if (favs.length === 0 && recents.length === 0) {
-    els.promptList.innerHTML =
-      '<div class="empty-state"><p>No recently used prompts yet</p></div>';
-    return;
-  }
+// ─── Shield ───
 
-  let html = "";
-
-  if (favs.length > 0) {
-    html += '<div class="section-header">Favorites</div>';
-    html += favs.map((p) => buildCardHtml(p)).join("");
-  }
-
-  if (recents.length > 0) {
-    html += '<div class="section-header">Recent</div>';
-    html += recents.map((p) => buildCardHtml(p)).join("");
-  }
-
-  // Show onboarding tip when user has only the sample prompt
-  const totalCount = favs.length + recents.length;
-  if (totalCount <= 1) {
-    html += `<div class="onboarding-tip">
-      <strong>Get started:</strong> This is a sample template. Click it to see how it works, then create your own prompts at
-      <a href="${CONFIG.SITE_URL}/vault" target="_blank" rel="noopener">teamprompt.app/vault</a>.
-    </div>`;
-  }
-
-  els.promptList.innerHTML = html;
-
-  // Wire favorite buttons
-  els.promptList.querySelectorAll<HTMLElement>(".btn-fav").forEach((btn) => {
-    btn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const id = btn.dataset.favId;
-      if (id) handleFavoriteToggle(id, btn);
-    });
-  });
-
-  els.promptList.querySelectorAll<HTMLElement>(".prompt-card").forEach((card) => {
-    card.addEventListener("click", () => {
-      const prompt = currentPrompts.find((p) => p.id === card.dataset.id);
-      if (prompt) showDetailView(prompt);
-    });
-  });
+function openShieldPanel() {
+  const shieldView = document.getElementById("shield-view");
+  if (!shieldView) return;
+  shieldPanelOpen = true;
+  shieldView.classList.remove("hidden");
+  shieldView.classList.add("shield-overlay");
+  els.searchInput.placeholder = "Search violations...";
+  loadShieldView();
 }
 
-// ─── Shield ───
+function closeShieldPanel() {
+  const shieldView = document.getElementById("shield-view");
+  if (!shieldView) return;
+  shieldPanelOpen = false;
+  shieldView.classList.add("hidden");
+  shieldView.classList.remove("shield-overlay");
+  els.searchInput.placeholder = "Search prompts...";
+}
 
 async function loadShieldView() {
   const shieldView = document.getElementById("shield-view");
   if (!shieldView) return;
 
-  shieldView.innerHTML = '<div class="loading">Loading security status...</div>';
+  // Build panel structure: header + body
+  shieldView.innerHTML = `
+    <div class="shield-panel-header">
+      <span>Shield</span>
+      <button class="shield-panel-close" title="Close">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div class="shield-panel-body">
+      <div class="loading">Loading security status...</div>
+    </div>
+  `;
+
+  // Wire close button
+  shieldView.querySelector(".shield-panel-close")?.addEventListener("click", closeShieldPanel);
+
+  const body = shieldView.querySelector<HTMLElement>(".shield-panel-body");
+  if (!body) return;
 
   const status = await fetchSecurityStatus();
   cachedShieldStatus = status;
   updateShieldIndicator(status);
 
   if (!status) {
-    shieldView.innerHTML = '<div class="shield-empty">Unable to load security status</div>';
+    body.innerHTML = '<div class="shield-empty">Unable to load security status</div>';
     return;
   }
 
-  renderShieldView(shieldView, status);
+  renderShieldView(body, status);
 }
 
 function filterShieldViolations(container: HTMLElement, query: string) {
@@ -933,19 +941,15 @@ export function initSharedUI(elements: UIElements) {
     searchTimeout = setTimeout(() => {
       const query = els.searchInput.value.trim();
 
-      if (activeFilter === "shield") {
-        // Shield tab — filter violations client-side using the main search bar
-        const shieldView = document.getElementById("shield-view");
-        if (shieldView) filterShieldViolations(shieldView, query);
+      if (shieldPanelOpen) {
+        // Shield panel open — filter violations client-side
+        const body = document.querySelector<HTMLElement>(".shield-panel-body");
+        if (body) filterShieldViolations(body, query);
         return;
       }
 
       if (query) {
         // Search overrides tabs — search all prompts
-        const shieldView = document.getElementById("shield-view");
-        shieldView?.classList.add("hidden");
-        els.promptList.classList.remove("hidden");
-        document.getElementById("filter-bar")?.classList.add("hidden");
         loadPrompts(query);
       } else {
         // Clear search → return to current tab view
@@ -956,15 +960,16 @@ export function initSharedUI(elements: UIElements) {
   });
 
   // Tabs
-  const shieldView = document.getElementById("shield-view");
-
   els.mainView.querySelectorAll<HTMLElement>(".tab").forEach((tab) => {
     tab.addEventListener("click", () => {
       els.mainView
         .querySelectorAll(".tab")
         .forEach((t) => t.classList.remove("active"));
       tab.classList.add("active");
-      activeFilter = (tab.dataset.filter || "recent") as typeof activeFilter;
+      activeFilter = (tab.dataset.filter || "favorites") as typeof activeFilter;
+
+      // Close shield panel if open
+      if (shieldPanelOpen) closeShieldPanel();
 
       // Reset folder/tag filters when switching tabs
       currentFolderId = null;
@@ -972,23 +977,26 @@ export function initSharedUI(elements: UIElements) {
       currentTags = [];
       document.getElementById("filter-bar")?.remove();
 
-      // Clear search and update placeholder when switching tabs
+      // Clear search
       els.searchInput.value = "";
-      els.searchInput.placeholder = activeFilter === "shield" ? "Search violations..." : "Search prompts...";
+      els.searchInput.placeholder = "Search prompts...";
 
-      if (activeFilter === "shield") {
-        els.promptList.classList.add("hidden");
-        els.searchInput.closest(".search-wrap")?.classList.remove("hidden");
-        shieldView?.classList.remove("hidden");
-        loadShieldView();
-      } else {
-        shieldView?.classList.add("hidden");
-        els.promptList.classList.remove("hidden");
-        els.searchInput.closest(".search-wrap")?.classList.remove("hidden");
-        loadPrompts();
-      }
+      els.promptList.classList.remove("hidden");
+      loadPrompts();
     });
   });
+
+  // Shield indicator click — toggle overlay panel
+  const shieldIndicator = document.getElementById("shield-indicator");
+  if (shieldIndicator) {
+    shieldIndicator.addEventListener("click", () => {
+      if (shieldPanelOpen) {
+        closeShieldPanel();
+      } else {
+        openShieldPanel();
+      }
+    });
+  }
 
   // Close filter dropdowns on outside click
   document.addEventListener("click", () => {

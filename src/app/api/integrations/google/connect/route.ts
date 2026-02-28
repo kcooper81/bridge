@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { randomBytes } from "crypto";
-import { cookies } from "next/headers";
 
 export async function GET(request: NextRequest) {
   try {
@@ -45,16 +44,11 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // CSRF state
-    const state = randomBytes(32).toString("hex");
-    const cookieStore = await cookies();
-    cookieStore.set("google_oauth_state", state, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "lax",
-      maxAge: 600, // 10 min
-      path: "/",
-    });
+    // Encode user ID + CSRF nonce into state so callback can identify the user
+    const nonce = randomBytes(16).toString("hex");
+    const state = Buffer.from(
+      JSON.stringify({ userId: user.id, nonce })
+    ).toString("base64url");
 
     const redirectUri = `${siteUrl}/api/integrations/google/callback`;
     const scopes = [

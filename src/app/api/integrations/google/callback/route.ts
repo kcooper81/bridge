@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
-import { cookies } from "next/headers";
 
 export async function GET(request: NextRequest) {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://teamprompt.app";
@@ -23,12 +22,15 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Validate CSRF state
-    const cookieStore = await cookies();
-    const savedState = cookieStore.get("google_oauth_state")?.value;
-    cookieStore.delete("google_oauth_state");
-
-    if (!savedState || savedState !== state) {
+    // Decode user ID from state
+    let userId: string;
+    try {
+      const decoded = JSON.parse(
+        Buffer.from(state, "base64url").toString("utf-8")
+      );
+      userId = decoded.userId;
+      if (!userId) throw new Error("No userId in state");
+    } catch {
       return NextResponse.redirect(
         `${siteUrl}/settings/integrations?error=invalid_state`
       );
@@ -76,30 +78,15 @@ export async function GET(request: NextRequest) {
     const userinfo = await userinfoRes.json();
     const adminEmail = userinfo.email;
 
-    // Identify the user — we need their org_id
-    // The user must be logged in and have a Supabase session cookie
+    // Look up the user's profile using the ID from state
     const db = createServiceClient();
-
-    // Try to get the user from the session cookie
-    const supabaseCookie = request.cookies.getAll().find((c) =>
-      c.name.startsWith("sb-") && c.name.endsWith("-auth-token")
-    );
-
-    // Fallback: try to find the profile by Google admin email
-    const { data: matchingProfiles } = await db
+    const { data: profile } = await db
       .from("profiles")
       .select("id, org_id, role, is_super_admin")
-      .eq("email", adminEmail)
-      .limit(1);
+      .eq("id", userId)
+      .single();
 
-    const profile = matchingProfiles?.[0];
     if (!profile?.org_id) {
-      // If we can't identify the org via email match, redirect with error
-      if (!supabaseCookie) {
-        return NextResponse.redirect(
-          `${siteUrl}/settings/integrations?error=no_session`
-        );
-      }
       return NextResponse.redirect(
         `${siteUrl}/settings/integrations?error=no_org`
       );
@@ -118,7 +105,7 @@ export async function GET(request: NextRequest) {
     ).toISOString();
 
     // Upsert workspace integration
-    await db.from("workspace_integrations").upsert(
+    const { error: upsertError } = await db.from("workspace_integrations").upsert(
       {
         org_id: profile.org_id,
         provider: "google_workspace",
@@ -131,6 +118,13 @@ export async function GET(request: NextRequest) {
       },
       { onConflict: "org_id,provider" }
     );
+
+    if (upsertError) {
+      console.error("Upsert workspace integration failed:", upsertError);
+      return NextResponse.redirect(
+        `${siteUrl}/settings/integrations?error=save_failed`
+      );
+    }
 
     return NextResponse.redirect(
       `${siteUrl}/settings/integrations?connected=google`

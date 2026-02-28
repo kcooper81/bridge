@@ -17,10 +17,12 @@ import {
   ArrowLeft,
   ExternalLink,
   Bug,
+  ImagePlus,
   Lightbulb,
   MessageSquare,
   CheckCircle,
   Loader2,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -69,22 +71,28 @@ export function SupportModal({ open, onOpenChange, initialTab }: SupportModalPro
   const [ticketType, setTicketType] = useState<TicketType>("feedback");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
+  const [screenshots, setScreenshots] = useState<{ name: string; dataUrl: string }[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  // Reset on close
+  // Sync tab when initialTab changes (handles "whats-new" from version click)
+  useEffect(() => {
+    if (initialTab) setTab(initialTab);
+  }, [initialTab]);
+
+  // Reset form state on close
   useEffect(() => {
     if (!open) {
-      setTab(initialTab || "help");
       setQuery("");
       setHelpView({ type: "home" });
       setTicketType("feedback");
       setSubject("");
       setMessage("");
+      setScreenshots([]);
       setSubmitting(false);
       setSubmitted(false);
     }
-  }, [open, initialTab]);
+  }, [open]);
 
   // Help search
   const searchResults = useMemo(
@@ -118,6 +126,7 @@ export function SupportModal({ open, onOpenChange, initialTab }: SupportModalPro
           type: ticketType,
           subject: subject.trim(),
           message: message.trim(),
+          screenshots: screenshots.map((s) => ({ name: s.name, dataUrl: s.dataUrl })),
         }),
       });
 
@@ -254,6 +263,8 @@ export function SupportModal({ open, onOpenChange, initialTab }: SupportModalPro
                 onSubjectChange={setSubject}
                 message={message}
                 onMessageChange={setMessage}
+                screenshots={screenshots}
+                onScreenshotsChange={setScreenshots}
                 submitting={submitting}
                 onSubmit={handleSubmit}
               />
@@ -437,6 +448,8 @@ function ContactForm({
   onSubjectChange,
   message,
   onMessageChange,
+  screenshots,
+  onScreenshotsChange,
   submitting,
   onSubmit,
 }: {
@@ -446,9 +459,43 @@ function ContactForm({
   onSubjectChange: (value: string) => void;
   message: string;
   onMessageChange: (value: string) => void;
+  screenshots: { name: string; dataUrl: string }[];
+  onScreenshotsChange: (files: { name: string; dataUrl: string }[]) => void;
   submitting: boolean;
   onSubmit: () => void;
 }) {
+  function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = e.target.files;
+    if (!files) return;
+    const MAX_SIZE = 5 * 1024 * 1024; // 5 MB per file
+    const MAX_FILES = 3;
+
+    Array.from(files).forEach((file) => {
+      if (screenshots.length >= MAX_FILES) {
+        toast.error(`Maximum ${MAX_FILES} screenshots`);
+        return;
+      }
+      if (file.size > MAX_SIZE) {
+        toast.error(`${file.name} exceeds 5 MB limit`);
+        return;
+      }
+      if (!file.type.startsWith("image/")) {
+        toast.error(`${file.name} is not an image`);
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        onScreenshotsChange([
+          ...screenshots,
+          { name: file.name, dataUrl: reader.result as string },
+        ]);
+      };
+      reader.readAsDataURL(file);
+    });
+    // Reset input so re-selecting same file works
+    e.target.value = "";
+  }
+
   return (
     <div className="space-y-5">
       <div className="space-y-2">
@@ -498,6 +545,44 @@ function ContactForm({
           placeholder="Describe your issue or request in detail..."
           rows={5}
         />
+      </div>
+
+      {/* Screenshot upload */}
+      <div className="space-y-2">
+        <label className="text-sm font-medium">Screenshots (optional)</label>
+        <div className="flex flex-wrap gap-2">
+          {screenshots.map((s, i) => (
+            <div key={i} className="relative group">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={s.dataUrl}
+                alt={s.name}
+                className="h-16 w-16 rounded-lg border object-cover"
+              />
+              <button
+                type="button"
+                onClick={() => onScreenshotsChange(screenshots.filter((_, j) => j !== i))}
+                className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </div>
+          ))}
+          {screenshots.length < 3 && (
+            <label className="flex h-16 w-16 cursor-pointer items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/30 transition-colors">
+              <ImagePlus className="h-5 w-5 text-muted-foreground" />
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleFileSelect}
+              />
+            </label>
+          )}
+        </div>
+        <p className="text-[11px] text-muted-foreground">
+          Up to 3 images, max 5 MB each
+        </p>
       </div>
 
       <Button

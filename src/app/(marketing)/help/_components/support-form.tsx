@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Send } from "lucide-react";
+import { ImagePlus, Send, X } from "lucide-react";
 
 export function SupportForm() {
   const [submitting, setSubmitting] = useState(false);
@@ -22,6 +22,7 @@ export function SupportForm() {
   const [type, setType] = useState("feedback");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
+  const [screenshots, setScreenshots] = useState<{ name: string; dataUrl: string }[]>([]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -31,7 +32,14 @@ export function SupportForm() {
       const res = await fetch("/api/support", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, type, subject, message }),
+        body: JSON.stringify({
+          name,
+          email,
+          type,
+          subject,
+          message,
+          screenshots: screenshots.map((s) => ({ name: s.name, dataUrl: s.dataUrl })),
+        }),
       });
 
       const data = await res.json();
@@ -47,11 +55,43 @@ export function SupportForm() {
       setType("feedback");
       setSubject("");
       setMessage("");
+      setScreenshots([]);
     } catch {
       toast.error("Network error. Please check your connection and try again.");
     } finally {
       setSubmitting(false);
     }
+  }
+
+  function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = e.target.files;
+    if (!files) return;
+    const MAX_SIZE = 5 * 1024 * 1024;
+    const MAX_FILES = 3;
+
+    Array.from(files).forEach((file) => {
+      if (screenshots.length >= MAX_FILES) {
+        toast.error(`Maximum ${MAX_FILES} screenshots`);
+        return;
+      }
+      if (file.size > MAX_SIZE) {
+        toast.error(`${file.name} exceeds 5 MB limit`);
+        return;
+      }
+      if (!file.type.startsWith("image/")) {
+        toast.error(`${file.name} is not an image`);
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        setScreenshots((prev) => [
+          ...prev,
+          { name: file.name, dataUrl: reader.result as string },
+        ]);
+      };
+      reader.readAsDataURL(file);
+    });
+    e.target.value = "";
   }
 
   return (
@@ -116,6 +156,44 @@ export function SupportForm() {
           value={message}
           onChange={(e) => setMessage(e.target.value)}
         />
+      </div>
+
+      {/* Screenshots */}
+      <div className="space-y-2">
+        <Label>Screenshots (optional)</Label>
+        <div className="flex flex-wrap gap-2">
+          {screenshots.map((s, i) => (
+            <div key={i} className="relative group">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={s.dataUrl}
+                alt={s.name}
+                className="h-16 w-16 rounded-lg border object-cover"
+              />
+              <button
+                type="button"
+                onClick={() => setScreenshots((prev) => prev.filter((_, j) => j !== i))}
+                className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </div>
+          ))}
+          {screenshots.length < 3 && (
+            <label className="flex h-16 w-16 cursor-pointer items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/30 transition-colors">
+              <ImagePlus className="h-5 w-5 text-muted-foreground" />
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleFileSelect}
+              />
+            </label>
+          )}
+        </div>
+        <p className="text-[11px] text-muted-foreground">
+          Up to 3 images, max 5 MB each
+        </p>
       </div>
 
       <Button type="submit" disabled={submitting} className="rounded-full px-8">

@@ -447,7 +447,15 @@ export default function VaultPage() {
             <SelectItem value="__all__">All Categories</SelectItem>
             {folders.map((f) => (
               <SelectItem key={f.id} value={f.id}>
-                {f.name}
+                <span className="flex items-center gap-2">
+                  {f.color && (
+                    <span
+                      className="h-2.5 w-2.5 rounded-full shrink-0"
+                      style={{ backgroundColor: f.color }}
+                    />
+                  )}
+                  {f.name}
+                </span>
               </SelectItem>
             ))}
           </SelectContent>
@@ -593,6 +601,16 @@ export default function VaultPage() {
                             }`}
                           />
                         </button>
+                        {(() => {
+                          const folderColor = p.folder_id ? folders.find((f) => f.id === p.folder_id)?.color : null;
+                          return folderColor ? (
+                            <span
+                              className="h-2.5 w-2.5 rounded-full shrink-0"
+                              style={{ backgroundColor: folderColor }}
+                              title={folders.find((f) => f.id === p.folder_id)?.name}
+                            />
+                          ) : null;
+                        })()}
                         <div className="min-w-0">
                           <div className="flex items-center gap-1.5">
                             <p className="font-medium truncate">{p.title}</p>

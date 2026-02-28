@@ -515,7 +515,7 @@ export function PromptModal({
               <SelectWithQuickAdd
                 value={folderId}
                 onValueChange={setFolderId}
-                items={folders.map((f) => ({ id: f.id, name: f.name }))}
+                items={folders.map((f) => ({ id: f.id, name: f.name, color: f.color }))}
                 onQuickCreate={async (name) => {
                   const folder = await saveFolderApi({ name });
                   if (folder) {

@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
     if (!rl.success) return rl.response;
 
     const body = await request.json();
-    const { name, email, type, subject, message } = body;
+    const { name, email, type, subject, message, screenshots } = body;
 
     // Validate required fields
     if (!name || !email || !subject || !message) {
@@ -37,12 +37,24 @@ export async function POST(request: NextRequest) {
 
     const db = createServiceClient();
 
+    // Build message body — append screenshot data URLs if provided
+    let fullMessage = `From: ${name} <${email}>\n\n${message}`;
+    const screenshotList = Array.isArray(screenshots) ? screenshots : [];
+    if (screenshotList.length > 0) {
+      fullMessage += `\n\n--- Screenshots (${screenshotList.length}) ---`;
+      for (const s of screenshotList) {
+        if (s?.name && s?.dataUrl) {
+          fullMessage += `\n[${s.name}]\n${s.dataUrl}`;
+        }
+      }
+    }
+
     const { error: insertError } = await db.from("feedback").insert({
       user_id: null,
       org_id: null,
       type: ticketType,
       subject: `[${name}] ${subject}`,
-      message: `From: ${name} <${email}>\n\n${message}`,
+      message: fullMessage,
       status: "new",
       priority: "normal",
     });

@@ -14,7 +14,7 @@ import {
 interface SelectWithQuickAddProps {
   value: string;
   onValueChange: (v: string) => void;
-  items: { id: string; name: string }[];
+  items: { id: string; name: string; color?: string | null }[];
   onQuickCreate: (name: string) => Promise<{ id: string; name: string } | null>;
   placeholder?: string;
   noneLabel?: string;
@@ -65,7 +65,15 @@ export function SelectWithQuickAdd({
           <SelectItem value={noneValue}>{noneLabel}</SelectItem>
           {items.map((item) => (
             <SelectItem key={item.id} value={item.id}>
-              {item.name}
+              <span className="flex items-center gap-2">
+                {item.color && (
+                  <span
+                    className="h-2.5 w-2.5 rounded-full shrink-0"
+                    style={{ backgroundColor: item.color }}
+                  />
+                )}
+                {item.name}
+              </span>
             </SelectItem>
           ))}
         </SelectContent>

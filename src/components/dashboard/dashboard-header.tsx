@@ -23,6 +23,7 @@ import {
   Receipt,
   Settings,
   Shield,
+  ShieldCheck,
   Sun,
   User,
   Users,
@@ -80,6 +81,14 @@ export function DashboardHeader() {
                   Organization
                 </Link>
               </DropdownMenuItem>
+              {currentUserRole === "admin" && (
+                <DropdownMenuItem asChild>
+                  <Link href="/settings/security">
+                    <ShieldCheck className="mr-2 h-4 w-4" />
+                    Security
+                  </Link>
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem asChild>
                 <Link href="/settings/plan">
                   <CreditCard className="mr-2 h-4 w-4" />

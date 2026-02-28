@@ -113,7 +113,7 @@ export default function ApprovalsPage() {
       const ok = await approvePrompt(id);
       if (ok) {
         toast.success("Prompt approved");
-        fetchData();
+        setPendingPrompts((prev) => prev.filter((p) => p.id !== id));
       } else {
         toast.error("Failed to approve prompt");
       }
@@ -130,13 +130,14 @@ export default function ApprovalsPage() {
 
   async function handleReject() {
     if (!rejectTargetId) return;
-    setActionId(rejectTargetId);
+    const targetId = rejectTargetId;
+    setActionId(targetId);
     setRejectModalOpen(false);
     try {
-      const ok = await rejectPrompt(rejectTargetId, rejectReason || undefined);
+      const ok = await rejectPrompt(targetId, rejectReason || undefined);
       if (ok) {
         toast.success("Prompt returned to draft");
-        fetchData();
+        setPendingPrompts((prev) => prev.filter((p) => p.id !== targetId));
       } else {
         toast.error("Failed to reject prompt");
       }
@@ -189,9 +190,9 @@ export default function ApprovalsPage() {
         .eq("id", ruleFromSuggestion.id);
 
       toast.success("Rule created from suggestion");
+      setSuggestions((prev) => prev.filter((s) => s.id !== ruleFromSuggestion.id));
       setRuleModalOpen(false);
       setRuleFromSuggestion(null);
-      fetchData();
     } finally {
       setRuleSaving(false);
     }
@@ -207,7 +208,7 @@ export default function ApprovalsPage() {
         .update({ status: "rejected", reviewed_by: user?.id })
         .eq("id", id);
       toast.success("Suggestion dismissed");
-      fetchData();
+      setSuggestions((prev) => prev.filter((s) => s.id !== id));
     } finally {
       setActionId(null);
     }

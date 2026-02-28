@@ -181,6 +181,51 @@ export function PromptModal({
     });
   }
 
+  async function handleRestore(v: PromptVersion) {
+    if (!prompt) return;
+
+    // Update form fields so UI reflects the change
+    setTitle(v.title);
+    setContent(v.content);
+    setDiffVersion(null);
+    setDiffLines([]);
+
+    setSaving(true);
+    try {
+      // Build fields from the restored version + current form metadata
+      const hasVariables = extractTemplateVariables(v.content).length > 0;
+      const fields = {
+        title: v.title.trim(),
+        content: v.content.trim(),
+        description: description.trim() || null,
+        intended_outcome: intendedOutcome.trim() || null,
+        tone: tone as Prompt["tone"],
+        model_recommendation: modelRecommendation.trim() || null,
+        example_input: exampleInput.trim() || null,
+        example_output: exampleOutput.trim() || null,
+        tags: tagsInput
+          .split(",")
+          .map((t) => t.trim())
+          .filter(Boolean),
+        folder_id: folderId || null,
+        department_id: teamId || null,
+        is_template: hasVariables,
+        template_variables: variableConfigs,
+        status: getDefaultStatus(currentUserRole, status),
+      };
+
+      await updatePrompt(prompt.id, fields as Partial<Prompt>);
+      toast.success(`Restored to v${v.version}`);
+      onSaved();
+      onOpenChange(false);
+    } catch (err) {
+      toast.error("Failed to restore version");
+      console.error(err);
+    } finally {
+      setSaving(false);
+    }
+  }
+
   function handleCompare(version: PromptVersion) {
     if (diffVersion?.id === version.id) {
       // Toggle off
@@ -677,12 +722,8 @@ export function PromptModal({
                           variant="ghost"
                           size="sm"
                           className="h-7 text-xs"
-                          onClick={() => {
-                            setTitle(v.title);
-                            setContent(v.content);
-                            setDiffVersion(null);
-                            setDiffLines([]);
-                          }}
+                          disabled={saving}
+                          onClick={() => handleRestore(v)}
                         >
                           Restore
                         </Button>

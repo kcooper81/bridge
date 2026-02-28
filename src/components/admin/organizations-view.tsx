@@ -221,8 +221,8 @@ export function OrganizationsView() {
       {activeTab === "teams" ? (
         <>
           {/* Desktop: side-by-side */}
-          <div className="hidden md:flex border rounded-lg overflow-hidden h-[calc(100vh-220px)]">
-            <div className="w-80 border-r shrink-0 overflow-hidden">
+          <div className="hidden lg:flex border rounded-lg overflow-hidden h-[calc(100vh-220px)]">
+            <div className="w-72 border-r shrink-0 overflow-hidden">
               <OrgListPanel
                 orgs={orgListItems}
                 selectedOrgId={selectedOrgId}
@@ -252,7 +252,7 @@ export function OrganizationsView() {
           </div>
 
           {/* Mobile: stacked */}
-          <div className="md:hidden">
+          <div className="lg:hidden">
             {mobileShowDetail && selectedOrg ? (
               <div className="border rounded-lg overflow-hidden">
                 <OrgDetailPanel

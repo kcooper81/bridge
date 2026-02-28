@@ -21,7 +21,7 @@ export default function PrivacyPage() {
             Privacy Policy
           </h1>
           <p className="mt-4 text-muted-foreground">
-            Last updated: February 19, 2026
+            Last updated: February 27, 2026
           </p>
         </div>
 
@@ -94,6 +94,22 @@ export default function PrivacyPage() {
               was detected, the severity level, and the action taken (blocked or
               warned). This data is used for your organization&apos;s audit
               trail.
+            </p>
+
+            <h3 className="text-base font-medium mb-2">
+              Two-Factor Authentication Data
+            </h3>
+            <p className="text-muted-foreground leading-relaxed mb-3">
+              If you enable two-factor authentication (2FA), your TOTP factor
+              enrollment is managed entirely by our authentication provider,
+              Supabase. We do not store your TOTP secrets, recovery codes, or
+              authenticator app details on our own servers. Supabase stores the
+              cryptographic data necessary to verify your time-based one-time
+              passwords (TOTP) in its secure{" "}
+              <code className="text-xs bg-muted/80 px-1.5 py-0.5 rounded font-mono">
+                auth.mfa_factors
+              </code>{" "}
+              system table.
             </p>
 
             <h3 className="text-base font-medium mb-2">Support Information</h3>
@@ -222,6 +238,10 @@ export default function PrivacyPage() {
               <li>HTTPS enforcement across all connections</li>
               <li>Row-level security policies in our database to isolate organization data</li>
               <li>Secure, HTTP-only authentication tokens</li>
+              <li>
+                Optional two-factor authentication (TOTP) for admin and
+                manager accounts, with organization-level enforcement
+              </li>
               <li>Role-based access controls within organizations</li>
               <li>Regular security reviews of our codebase and infrastructure</li>
             </ul>

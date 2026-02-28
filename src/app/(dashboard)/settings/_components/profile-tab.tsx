@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/components/providers/auth-provider";
 import { Button } from "@/components/ui/button";
@@ -9,9 +9,10 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Loader2, User, Mail, Github, Sun, Moon } from "lucide-react";
+import { Loader2, User, Mail, Github, Sun, Moon, Camera, X } from "lucide-react";
 import { useTheme } from "@/components/providers/theme-provider";
 import { updateProfile } from "@/lib/vault-api";
+import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
@@ -56,6 +57,18 @@ export function ProfileTab() {
   const [displayName, setDisplayName] = useState(user?.user_metadata?.name || user?.user_metadata?.full_name || "");
   const [saving, setSaving] = useState(false);
 
+  // Avatar upload state
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [removingAvatar, setRemovingAvatar] = useState(false);
+  const [localAvatarUrl, setLocalAvatarUrl] = useState<string | null>(null);
+  const [avatarRemoved, setAvatarRemoved] = useState(false);
+
+  // Email change state
+  const [newEmail, setNewEmail] = useState(user?.email || "");
+  const [savingEmail, setSavingEmail] = useState(false);
+  const emailChanged = newEmail.trim().toLowerCase() !== (user?.email || "").toLowerCase();
+
   async function handleSave() {
     setSaving(true);
     try {
@@ -72,7 +85,116 @@ export function ProfileTab() {
     }
   }
 
-  const avatarUrl = user?.user_metadata?.avatar_url || user?.user_metadata?.picture;
+  async function handleAvatarUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Client-side validation
+    if (!["image/jpeg", "image/png", "image/webp", "image/gif"].includes(file.type)) {
+      toast.error("Please upload a JPEG, PNG, WebP, or GIF image");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Image must be under 2 MB");
+      return;
+    }
+
+    setUploadingAvatar(true);
+    try {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/api/profile/avatar", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${session.access_token}` },
+        body: formData,
+      });
+
+      if (res.ok) {
+        const { avatar_url } = await res.json();
+        setLocalAvatarUrl(avatar_url);
+        setAvatarRemoved(false);
+        toast.success("Avatar updated");
+      } else {
+        const data = await res.json();
+        toast.error(data.error || "Failed to upload avatar");
+      }
+    } catch {
+      toast.error("Failed to upload avatar");
+    } finally {
+      setUploadingAvatar(false);
+      // Reset file input
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }
+
+  async function handleRemoveAvatar() {
+    setRemovingAvatar(true);
+    try {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const res = await fetch("/api/profile/avatar", {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+
+      if (res.ok) {
+        setLocalAvatarUrl(null);
+        setAvatarRemoved(true);
+        toast.success("Avatar removed");
+      } else {
+        const data = await res.json();
+        toast.error(data.error || "Failed to remove avatar");
+      }
+    } catch {
+      toast.error("Failed to remove avatar");
+    } finally {
+      setRemovingAvatar(false);
+    }
+  }
+
+  async function handleEmailChange() {
+    const trimmed = newEmail.trim().toLowerCase();
+    if (!trimmed || !emailChanged) return;
+
+    setSavingEmail(true);
+    try {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const res = await fetch("/api/profile/email", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: trimmed }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        toast.success(data.message || "Email updated");
+      } else {
+        toast.error(data.error || "Failed to update email");
+      }
+    } catch {
+      toast.error("Failed to update email");
+    } finally {
+      setSavingEmail(false);
+    }
+  }
+
+  // Compute avatar URL with local override support
+  const providerAvatarUrl = user?.user_metadata?.avatar_url || user?.user_metadata?.picture;
+  const effectiveAvatarUrl = avatarRemoved ? null : (localAvatarUrl || providerAvatarUrl);
+
   const initials = (displayName || user?.email || "U")
     .split(" ")
     .map((n: string) => n[0])
@@ -94,13 +216,53 @@ export function ProfileTab() {
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex items-center gap-4">
-            <Avatar className="h-16 w-16">
-              {avatarUrl && <AvatarImage src={avatarUrl} alt={displayName || "Avatar"} />}
-              <AvatarFallback className="text-lg">{initials}</AvatarFallback>
-            </Avatar>
+            <div className="relative group">
+              <Avatar className="h-16 w-16">
+                {effectiveAvatarUrl && <AvatarImage src={effectiveAvatarUrl} alt={displayName || "Avatar"} />}
+                <AvatarFallback className="text-lg">{initials}</AvatarFallback>
+              </Avatar>
+              {/* Upload overlay */}
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadingAvatar}
+                className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+              >
+                {uploadingAvatar ? (
+                  <Loader2 className="h-5 w-5 animate-spin text-white" />
+                ) : (
+                  <Camera className="h-5 w-5 text-white" />
+                )}
+              </button>
+              {/* Remove button */}
+              {effectiveAvatarUrl && !uploadingAvatar && (
+                <button
+                  type="button"
+                  onClick={handleRemoveAvatar}
+                  disabled={removingAvatar}
+                  className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  {removingAvatar ? (
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                  ) : (
+                    <X className="h-3 w-3" />
+                  )}
+                </button>
+              )}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                className="hidden"
+                onChange={handleAvatarUpload}
+              />
+            </div>
             <div>
               <p className="font-medium">{displayName || user?.email}</p>
               <p className="text-sm text-muted-foreground">{user?.email}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Hover avatar to change
+              </p>
             </div>
           </div>
 
@@ -115,9 +277,30 @@ export function ProfileTab() {
           </div>
 
           <div className="space-y-2">
-            <Label>Email</Label>
-            <Input value={user?.email || ""} disabled />
-            <p className="text-xs text-muted-foreground">Email is managed by your authentication provider</p>
+            <Label htmlFor="email-change">Email</Label>
+            <div className="flex gap-2">
+              <Input
+                id="email-change"
+                type="email"
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+                placeholder="you@company.com"
+              />
+              {emailChanged && (
+                <Button
+                  onClick={handleEmailChange}
+                  disabled={savingEmail}
+                  size="sm"
+                  className="shrink-0"
+                >
+                  {savingEmail && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Update
+                </Button>
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              A confirmation may be sent to your new email address.
+            </p>
           </div>
 
           {user?.created_at && (

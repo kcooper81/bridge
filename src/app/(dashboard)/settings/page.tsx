@@ -7,10 +7,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Loader2, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
+import { useOrg } from "@/components/providers/org-provider";
 import { ProfileTab } from "./_components/profile-tab";
+import { TwoFactorCard } from "./_components/two-factor-card";
 
 export default function SettingsPage() {
   const { signOut } = useAuth();
+  const { currentUserRole } = useOrg();
   const [deleting, setDeleting] = useState(false);
 
   async function handleDeleteAccount() {
@@ -44,6 +47,10 @@ export default function SettingsPage() {
   return (
     <div className="max-w-4xl space-y-6">
       <ProfileTab />
+
+      {(currentUserRole === "admin" || currentUserRole === "manager") && (
+        <TwoFactorCard />
+      )}
 
       {/* Danger Zone */}
       <Card className="border-destructive/30">

@@ -64,25 +64,60 @@
     - Sidebar: version number display (v1.3.0) with unseen dot, clickable to open What's New
     - `src/app/(marketing)/changelog/page.tsx` — public changelog page with SEO metadata
 
-## Pending
-- [ ] Compliance Policy Template Packs
-  - SOC 2 template added to `compliance-templates.ts`
-  - Compliance pack browser UI in Guardrails → Policies tab
-  - One-click install function in `vault-api.ts` with de-duplication
-- [ ] Auto-Sanitization with Placeholders
+- [x] Two-Factor Authentication (TOTP) for Admins & Managers
+  - `qrcode` dependency installed
+  - `types.ts`: `require_mfa_for_admins` in Organization settings
+  - `supabase/middleware.ts`: returns AAL data
+  - `middleware.ts`: `/verify-mfa` route + AAL1→AAL2 redirect
+  - `verify-mfa/page.tsx`: MFA verification page (6-digit TOTP code)
+  - `login/page.tsx`: post-login MFA check
+  - `two-factor-card.tsx`: enrollment card (QR, secret, verify, disable)
+  - `settings/page.tsx`: renders 2FA card for admin/manager
+  - `organization-tab.tsx`: "Require 2FA" toggle in org preferences
+  - `mfa-required-banner.tsx`: non-dismissible amber banner for enforcement
+  - `layout.tsx`: renders MFA banner in dashboard
+  - Privacy policy & terms of use updated with 2FA data handling + liability
+
+- [x] Compliance Policy Template Packs
+  - SOC 2 template added to `compliance-templates.ts` (6 frameworks total: HIPAA, PCI-DSS, GDPR, CCPA, General PII, SOC 2)
+  - Compliance pack browser UI in Guardrails → Policies tab (grid with preview modal, install states, rule count badges)
+  - One-click install function in `vault-api.ts` with name-based de-duplication
+  - Feature gating: requires `custom_security` subscription + admin/manager role
+- [x] Auto-Sanitization with Placeholders
   - Scan endpoint returns `sanitized_content` with `{{CATEGORY_N}}` placeholders
   - Extension UI: "Send Sanitized Version" button on violation block
   - Sanitized preview with highlighted placeholders, `action_taken: "auto_redacted"` logging
-- [ ] Prompt Effectiveness Analytics
+- [x] Prompt Effectiveness Analytics
   - `getEffectivenessMetrics()` in vault-api: top/least effective, rating distribution, unrated high-usage
   - UI section in Analytics page: rating distribution bars, top/least effective tables, needs-attention list
-- [ ] Approval Queue Dashboard
-  - New `/approvals` page with Prompts + Rule Suggestions tabs
+- [x] Approval Queue Dashboard
+  - `/approvals` page with Prompts + Rule Suggestions tabs (`approvals/page.tsx`, 626 lines)
   - Approve/reject actions with optional reason modal
   - Sidebar nav item with pending count badge (admin/manager only)
-  - API: `getPendingPrompts()`, `approvePrompt()`, `rejectPrompt()`
-- [ ] Version History Diff View
-  - Migration: `changed_by` column on `prompt_versions`
-  - `computeLineDiff()` utility (LCS-based line diff)
+  - API: `getPendingPrompts()`, `approvePrompt()`, `rejectPrompt()` in vault-api.ts
+  - Extras: prompt preview modal, create-rule-from-suggestion flow, dismiss action
+- [x] Version History Diff View
+  - Migration: `changed_by` column on `prompt_versions` (`031_version_metadata.sql`)
+  - `computeLineDiff()` utility (LCS-based line diff) in `src/lib/diff.ts`
   - Compare button in prompt modal showing inline diff with green/red highlighting
   - `updatePrompt()` stores `changed_by: user.id`
+  - Extras: restore button, attribution (who + when), up to 10 versions, active state highlighting
+- [x] Avatar Upload
+  - API: `POST /api/profile/avatar` — validates file type/size, uploads to Supabase Storage `avatars` bucket
+  - API: `DELETE /api/profile/avatar` — removes avatar from storage + clears profile URL
+  - Profile tab: clickable avatar with hover overlay (Camera icon), drag-and-drop support
+  - X button to remove avatar, syncs `avatar_url` in both profiles table and auth metadata
+  - 2 MB max, JPEG/PNG/WebP/GIF supported
+- [x] Email Address Change
+  - API: `POST /api/profile/email` — users can change own email, admins can change non-admin member emails
+  - Profile tab: email field is now editable with inline "Update" button
+  - Team page: admins see pencil icon on non-admin members to change their email via modal
+  - Security: admins cannot change other admins' emails, must be same org, duplicate email check
+- [x] Manage Categories — Button + Modal Redesign
+  - Replaced inline collapsible FolderManager with a button that opens the modal
+  - Added color picker (12 preset colors) to create and edit flows
+  - Colors saved to `folders.color` via existing `saveFolderApi`
+  - Both list and grid views show color-coded folder icons
+  - Color picker inline in both create form and edit form
+
+## Pending

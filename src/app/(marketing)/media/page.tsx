@@ -6,6 +6,13 @@ import { Download, Chrome, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DarkSection } from "@/components/marketing/dark-section";
 import { CopyButton } from "./_components/copy-button";
+import {
+  TwitterBanner,
+  LinkedInBanner,
+  FacebookCover,
+  YouTubeBanner,
+  OGBanner,
+} from "./_components/social-banners";
 
 export const metadata: Metadata = generatePageMetadata({
   title: "Media Kit & Brand Assets",
@@ -628,30 +635,36 @@ export default function MediaPage() {
           </div>
         </DarkSection>
 
-        {/* ── Social Media Assets ──────────────────────────── */}
+        {/* ── Social Banner Previews (React-rendered) ──────────────────── */}
         <section className="mb-24">
           <SectionLabel>Social</SectionLabel>
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3">
-            Social Media Profile & Banner Images
+            Social Media Banners
           </h2>
           <p className="text-muted-foreground mb-10 max-w-2xl">
-            Ready-to-upload profile pictures and cover banners for every major
-            platform — YouTube, X, Facebook, Instagram, and LinkedIn.
+            Visually rich banners for every major platform. Each preview shows
+            the live CSS-rendered banner — download the original PNGs below for
+            upload.
           </p>
 
           <div className="space-y-10">
-            {socialMediaAssets.map((platform) => (
-              <div key={platform.platform}>
-                <h3 className="text-lg font-semibold mb-4">{platform.platform}</h3>
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {platform.assets.map((asset) => (
+            {/* Twitter */}
+            <div>
+              <h3 className="text-lg font-semibold mb-4">X (Twitter)</h3>
+              <div className="rounded-xl border border-border overflow-hidden mb-3">
+                <TwitterBanner />
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {socialMediaAssets
+                  .find((p) => p.platform === "X (Twitter)")
+                  ?.assets.map((asset) => (
                     <div
                       key={asset.file}
                       className="rounded-xl border border-border overflow-hidden"
                     >
                       <Image
                         src={asset.file}
-                        alt={`${platform.platform} ${asset.label}`}
+                        alt={`X (Twitter) ${asset.label}`}
                         width={640}
                         height={400}
                         className="w-full h-auto"
@@ -659,26 +672,171 @@ export default function MediaPage() {
                       <div className="p-3 bg-card flex items-center justify-between">
                         <div>
                           <p className="text-xs font-medium">{asset.label}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {asset.dims} px
-                          </p>
+                          <p className="text-xs text-muted-foreground">{asset.dims} px</p>
                         </div>
                         <a href={asset.file} download>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 text-xs gap-1"
-                          >
-                            <Download className="h-3 w-3" />
-                            PNG
+                          <Button variant="ghost" size="sm" className="h-7 text-xs gap-1">
+                            <Download className="h-3 w-3" /> PNG
                           </Button>
                         </a>
                       </div>
                     </div>
                   ))}
-                </div>
               </div>
-            ))}
+            </div>
+
+            {/* LinkedIn */}
+            <div>
+              <h3 className="text-lg font-semibold mb-4">LinkedIn</h3>
+              <div className="rounded-xl border border-border overflow-hidden mb-3">
+                <LinkedInBanner />
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {socialMediaAssets
+                  .find((p) => p.platform === "LinkedIn")
+                  ?.assets.map((asset) => (
+                    <div
+                      key={asset.file}
+                      className="rounded-xl border border-border overflow-hidden"
+                    >
+                      <Image
+                        src={asset.file}
+                        alt={`LinkedIn ${asset.label}`}
+                        width={640}
+                        height={400}
+                        className="w-full h-auto"
+                      />
+                      <div className="p-3 bg-card flex items-center justify-between">
+                        <div>
+                          <p className="text-xs font-medium">{asset.label}</p>
+                          <p className="text-xs text-muted-foreground">{asset.dims} px</p>
+                        </div>
+                        <a href={asset.file} download>
+                          <Button variant="ghost" size="sm" className="h-7 text-xs gap-1">
+                            <Download className="h-3 w-3" /> PNG
+                          </Button>
+                        </a>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+
+            {/* Facebook */}
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Facebook</h3>
+              <div className="rounded-xl border border-border overflow-hidden mb-3">
+                <FacebookCover />
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {socialMediaAssets
+                  .find((p) => p.platform === "Facebook")
+                  ?.assets.map((asset) => (
+                    <div
+                      key={asset.file}
+                      className="rounded-xl border border-border overflow-hidden"
+                    >
+                      <Image
+                        src={asset.file}
+                        alt={`Facebook ${asset.label}`}
+                        width={640}
+                        height={400}
+                        className="w-full h-auto"
+                      />
+                      <div className="p-3 bg-card flex items-center justify-between">
+                        <div>
+                          <p className="text-xs font-medium">{asset.label}</p>
+                          <p className="text-xs text-muted-foreground">{asset.dims} px</p>
+                        </div>
+                        <a href={asset.file} download>
+                          <Button variant="ghost" size="sm" className="h-7 text-xs gap-1">
+                            <Download className="h-3 w-3" /> PNG
+                          </Button>
+                        </a>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+
+            {/* YouTube */}
+            <div>
+              <h3 className="text-lg font-semibold mb-4">YouTube</h3>
+              <div className="rounded-xl border border-border overflow-hidden mb-3">
+                <YouTubeBanner />
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {socialMediaAssets
+                  .find((p) => p.platform === "YouTube")
+                  ?.assets.map((asset) => (
+                    <div
+                      key={asset.file}
+                      className="rounded-xl border border-border overflow-hidden"
+                    >
+                      <Image
+                        src={asset.file}
+                        alt={`YouTube ${asset.label}`}
+                        width={640}
+                        height={400}
+                        className="w-full h-auto"
+                      />
+                      <div className="p-3 bg-card flex items-center justify-between">
+                        <div>
+                          <p className="text-xs font-medium">{asset.label}</p>
+                          <p className="text-xs text-muted-foreground">{asset.dims} px</p>
+                        </div>
+                        <a href={asset.file} download>
+                          <Button variant="ghost" size="sm" className="h-7 text-xs gap-1">
+                            <Download className="h-3 w-3" /> PNG
+                          </Button>
+                        </a>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+
+            {/* Instagram (profile only, no banner) */}
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Instagram</h3>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {socialMediaAssets
+                  .find((p) => p.platform === "Instagram")
+                  ?.assets.map((asset) => (
+                    <div
+                      key={asset.file}
+                      className="rounded-xl border border-border overflow-hidden"
+                    >
+                      <Image
+                        src={asset.file}
+                        alt={`Instagram ${asset.label}`}
+                        width={640}
+                        height={400}
+                        className="w-full h-auto"
+                      />
+                      <div className="p-3 bg-card flex items-center justify-between">
+                        <div>
+                          <p className="text-xs font-medium">{asset.label}</p>
+                          <p className="text-xs text-muted-foreground">{asset.dims} px</p>
+                        </div>
+                        <a href={asset.file} download>
+                          <Button variant="ghost" size="sm" className="h-7 text-xs gap-1">
+                            <Download className="h-3 w-3" /> PNG
+                          </Button>
+                        </a>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+
+            {/* OG / Social Share Card */}
+            <div>
+              <h3 className="text-lg font-semibold mb-4">OG / Social Share Card</h3>
+              <div className="rounded-xl border border-border overflow-hidden">
+                <OGBanner />
+              </div>
+            </div>
           </div>
         </section>
 

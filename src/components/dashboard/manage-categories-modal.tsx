@@ -22,8 +22,24 @@ import {
   Plus,
   Trash2,
   X,
+  Check,
 } from "lucide-react";
 import type { Folder } from "@/lib/types";
+
+const FOLDER_COLORS = [
+  null,       // default (no color)
+  "#6366f1",  // indigo
+  "#8b5cf6",  // violet
+  "#ec4899",  // pink
+  "#ef4444",  // red
+  "#f97316",  // orange
+  "#eab308",  // yellow
+  "#22c55e",  // green
+  "#14b8a6",  // teal
+  "#3b82f6",  // blue
+  "#6b7280",  // gray
+  "#78716c",  // stone
+];
 
 interface ManageCategoriesModalProps {
   open: boolean;
@@ -35,8 +51,10 @@ export function ManageCategoriesModal({ open, onOpenChange }: ManageCategoriesMo
   const [view, setView] = useState<"list" | "grid">("list");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
+  const [editColor, setEditColor] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [newName, setNewName] = useState("");
+  const [newColor, setNewColor] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
@@ -47,11 +65,13 @@ export function ManageCategoriesModal({ open, onOpenChange }: ManageCategoriesMo
   function startEdit(folder: Folder) {
     setEditingId(folder.id);
     setEditName(folder.name);
+    setEditColor(folder.color);
   }
 
   function cancelEdit() {
     setEditingId(null);
     setEditName("");
+    setEditColor(null);
   }
 
   async function handleRename(folderId: string) {
@@ -59,13 +79,13 @@ export function ManageCategoriesModal({ open, onOpenChange }: ManageCategoriesMo
     if (!trimmed || saving) return;
     setSaving(true);
     try {
-      const updated = await saveFolderApi({ id: folderId, name: trimmed });
+      const updated = await saveFolderApi({ id: folderId, name: trimmed, color: editColor });
       if (updated) {
-        setFolders((prev) => prev.map((f) => (f.id === folderId ? { ...f, name: trimmed } : f)));
-        toast.success("Category renamed");
+        setFolders((prev) => prev.map((f) => (f.id === folderId ? { ...f, name: trimmed, color: editColor } : f)));
+        toast.success("Category updated");
       }
     } catch {
-      toast.error("Failed to rename category");
+      toast.error("Failed to update category");
     } finally {
       setSaving(false);
       cancelEdit();
@@ -98,10 +118,11 @@ export function ManageCategoriesModal({ open, onOpenChange }: ManageCategoriesMo
     if (!trimmed || saving) return;
     setSaving(true);
     try {
-      const folder = await saveFolderApi({ name: trimmed });
+      const folder = await saveFolderApi({ name: trimmed, color: newColor });
       if (folder) {
         setFolders((prev) => [...prev, folder]);
         setNewName("");
+        setNewColor(null);
         setCreating(false);
         toast.success("Category created");
       }
@@ -155,35 +176,40 @@ export function ManageCategoriesModal({ open, onOpenChange }: ManageCategoriesMo
 
         {/* New Category Input */}
         {creating && (
-          <div className="flex items-center gap-2">
-            <Input
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") handleCreate();
-                if (e.key === "Escape") {
+          <div className="space-y-2 rounded-lg border border-border p-3">
+            <div className="flex items-center gap-2">
+              <Input
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleCreate();
+                  if (e.key === "Escape") {
+                    setCreating(false);
+                    setNewName("");
+                    setNewColor(null);
+                  }
+                }}
+                placeholder="Category name..."
+                className="h-9 text-sm flex-1"
+                autoFocus
+                disabled={saving}
+              />
+              <Button size="sm" onClick={handleCreate} disabled={saving || !newName.trim()}>
+                {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create"}
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => {
                   setCreating(false);
                   setNewName("");
-                }
-              }}
-              placeholder="Category name..."
-              className="h-9 text-sm flex-1"
-              autoFocus
-              disabled={saving}
-            />
-            <Button size="sm" onClick={handleCreate} disabled={saving || !newName.trim()}>
-              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create"}
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => {
-                setCreating(false);
-                setNewName("");
-              }}
-            >
-              <X className="h-3.5 w-3.5" />
-            </Button>
+                  setNewColor(null);
+                }}
+              >
+                <X className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+            <ColorPicker value={newColor} onChange={setNewColor} />
           </div>
         )}
 
@@ -205,29 +231,32 @@ export function ManageCategoriesModal({ open, onOpenChange }: ManageCategoriesMo
                   className="flex items-center gap-3 rounded-lg px-3 py-2.5 group hover:bg-muted/50 transition-colors"
                 >
                   {editingId === folder.id ? (
-                    <>
-                      <Input
-                        value={editName}
-                        onChange={(e) => setEditName(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") handleRename(folder.id);
-                          if (e.key === "Escape") cancelEdit();
-                        }}
-                        className="h-8 text-sm flex-1"
-                        autoFocus
-                        disabled={saving}
-                      />
-                      <Button
-                        size="sm"
-                        onClick={() => handleRename(folder.id)}
-                        disabled={saving || !editName.trim()}
-                      >
-                        {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Save"}
-                      </Button>
-                      <Button size="sm" variant="ghost" onClick={cancelEdit}>
-                        <X className="h-3.5 w-3.5" />
-                      </Button>
-                    </>
+                    <div className="flex-1 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <Input
+                          value={editName}
+                          onChange={(e) => setEditName(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") handleRename(folder.id);
+                            if (e.key === "Escape") cancelEdit();
+                          }}
+                          className="h-8 text-sm flex-1"
+                          autoFocus
+                          disabled={saving}
+                        />
+                        <Button
+                          size="sm"
+                          onClick={() => handleRename(folder.id)}
+                          disabled={saving || !editName.trim()}
+                        >
+                          {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Save"}
+                        </Button>
+                        <Button size="sm" variant="ghost" onClick={cancelEdit}>
+                          <X className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                      <ColorPicker value={editColor} onChange={setEditColor} />
+                    </div>
                   ) : (
                     <>
                       <div
@@ -289,6 +318,7 @@ export function ManageCategoriesModal({ open, onOpenChange }: ManageCategoriesMo
                         autoFocus
                         disabled={saving}
                       />
+                      <ColorPicker value={editColor} onChange={setEditColor} />
                       <div className="flex gap-1">
                         <Button
                           size="sm"
@@ -350,5 +380,35 @@ export function ManageCategoriesModal({ open, onOpenChange }: ManageCategoriesMo
         </div>
       </DialogContent>
     </Dialog>
+  );
+}
+
+// ─── Color Picker ───
+
+function ColorPicker({
+  value,
+  onChange,
+}: {
+  value: string | null;
+  onChange: (color: string | null) => void;
+}) {
+  return (
+    <div className="flex items-center gap-1.5">
+      <span className="text-xs text-muted-foreground mr-1">Color:</span>
+      {FOLDER_COLORS.map((color, i) => (
+        <button
+          key={i}
+          type="button"
+          onClick={() => onChange(color)}
+          className="h-5 w-5 rounded-full border border-border flex items-center justify-center transition-transform hover:scale-110"
+          style={{ backgroundColor: color || undefined }}
+          title={color || "Default"}
+        >
+          {value === color && (
+            <Check className={`h-3 w-3 ${color ? "text-white" : "text-foreground"}`} />
+          )}
+        </button>
+      ))}
+    </div>
   );
 }

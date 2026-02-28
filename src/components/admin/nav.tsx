@@ -15,6 +15,7 @@ import {
   AlertTriangle,
   Ticket,
   Settings,
+  ClipboardCheck,
   Menu,
   X,
 } from "lucide-react";
@@ -34,6 +35,7 @@ const navItems = [
   { href: "/admin/activity", label: "Activity Logs", icon: ScrollText, badgeKey: null },
   { href: "/admin/tickets", label: "Tickets", icon: Ticket, badgeKey: "newTickets" as const },
   { href: "/admin/errors", label: "Error Logs", icon: AlertTriangle, badgeKey: "unresolvedErrors" as const },
+  { href: "/admin/testing-guide", label: "Testing Guide", icon: ClipboardCheck, badgeKey: null },
   { href: "/admin/settings", label: "Settings", icon: Settings, badgeKey: null },
 ];
 

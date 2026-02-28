@@ -39,5 +39,9 @@ export async function updateSession(request: NextRequest) {
   // AUTH-DEBUG: log getUser result
   authDebug.log("session", "getUser result", user ? { id: user.id, email: user.email } : null);
 
-  return { supabaseResponse, user };
+  const {
+    data: aal,
+  } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+
+  return { supabaseResponse, user, aal };
 }

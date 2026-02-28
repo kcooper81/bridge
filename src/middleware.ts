@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
 import { authDebug } from "@/lib/auth-debug"; // AUTH-DEBUG
 
-const AUTH_ROUTES = ["/login", "/signup", "/forgot-password", "/reset-password"];
+const AUTH_ROUTES = ["/login", "/signup", "/forgot-password", "/reset-password", "/verify-mfa"];
 const PUBLIC_ROUTES = [
   "/",
   "/pricing",
@@ -35,7 +35,7 @@ export async function middleware(request: NextRequest) {
   authDebug.initServer(request);
   authDebug.log("middleware", `processing ${request.method} ${request.nextUrl.pathname}`);
 
-  const { supabaseResponse, user } = await updateSession(request);
+  const { supabaseResponse, user, aal } = await updateSession(request);
   const { pathname } = request.nextUrl;
 
   authDebug.log("middleware", "user resolved", user ? { id: user.id, email: user.email } : null);
@@ -79,6 +79,25 @@ export async function middleware(request: NextRequest) {
     url.searchParams.set("redirect", fullPath);
     const resp = NextResponse.redirect(url);
     authDebug.attachToResponse(resp); // AUTH-DEBUG
+    return resp;
+  }
+
+  // MFA step-up: user has MFA enrolled but hasn't verified yet this session
+  if (
+    user &&
+    aal?.nextLevel === "aal2" &&
+    aal?.currentLevel === "aal1" &&
+    !isAuthRoute(pathname) &&
+    !pathname.startsWith("/api/") &&
+    !pathname.startsWith("/auth/") &&
+    !pathname.startsWith("/extension/")
+  ) {
+    authDebug.log("middleware", "redirect: AAL1 → /verify-mfa (MFA required)");
+    const url = request.nextUrl.clone();
+    url.pathname = "/verify-mfa";
+    url.searchParams.set("redirect", pathname);
+    const resp = NextResponse.redirect(url);
+    authDebug.attachToResponse(resp);
     return resp;
   }
 

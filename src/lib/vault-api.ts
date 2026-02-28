@@ -413,11 +413,6 @@ export async function installDefaultGuidelines(): Promise<Guideline[]> {
   return data || [];
 }
 
-// Keep backward-compatible aliases
-export const saveStandardApi = saveGuidelineApi;
-export const deleteStandardApi = deleteGuidelineApi;
-export const installDefaultStandards = installDefaultGuidelines;
-
 // ─── Validation ───
 
 export function validatePrompt(

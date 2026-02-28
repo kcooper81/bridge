@@ -43,6 +43,14 @@ export default function LoginPage() {
         return;
       }
 
+      // Check if MFA verification is needed
+      const { data: aalData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+      if (aalData?.nextLevel === "aal2" && aalData?.currentLevel === "aal1") {
+        authDebug.log("login", "MFA required, redirecting to /verify-mfa"); // AUTH-DEBUG
+        window.location.href = `/verify-mfa?redirect=${encodeURIComponent(redirectTo)}`;
+        return;
+      }
+
       if (plan) {
         sessionStorage.setItem("pending_plan", plan);
       }

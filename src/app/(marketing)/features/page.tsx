@@ -14,6 +14,7 @@ import {
   Zap,
 } from "lucide-react";
 import { generatePageMetadata } from "@/lib/seo/metadata";
+import { cn } from "@/lib/utils";
 import { SectionLabel } from "@/components/marketing/section-label";
 import { CTASection } from "@/components/marketing/cta-section";
 
@@ -288,7 +289,7 @@ function ApprovalQueueMockup() {
       </div>
       {[
         { title: "New onboarding prompt", author: "KP", type: "Prompt" },
-        { title: "Block internal IPs rule", author: "SR", type: "Rule" },
+        { title: "Block internal IPs rule", author: "SR", type: "Rule Suggestion" },
         { title: "Q1 report template", author: "ML", type: "Prompt" },
       ].map((item, i) => (
         <div key={i} className="flex items-center gap-3 py-2.5 border-b border-border/50 last:border-0">
@@ -300,11 +301,16 @@ function ApprovalQueueMockup() {
             <p className="text-[9px] text-muted-foreground">{item.type}</p>
           </div>
           <div className="flex gap-1.5">
-            <div className="h-6 w-14 rounded-md bg-primary text-[9px] text-primary-foreground font-medium flex items-center justify-center">
-              Approve
+            <div className={cn(
+              "h-6 rounded-md text-[9px] font-medium flex items-center justify-center",
+              item.type === "Rule Suggestion"
+                ? "w-[4.5rem] bg-primary text-primary-foreground"
+                : "w-14 bg-primary text-primary-foreground"
+            )}>
+              {item.type === "Rule Suggestion" ? "Create Rule" : "Approve"}
             </div>
             <div className="h-6 w-14 rounded-md bg-muted text-[9px] text-muted-foreground font-medium flex items-center justify-center">
-              Reject
+              {item.type === "Rule Suggestion" ? "Dismiss" : "Reject"}
             </div>
           </div>
         </div>

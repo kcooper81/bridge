@@ -24,7 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, ArrowUpDown, Loader2, Mail, Plus, Search, Shield, ShieldOff, UserPlus, Users, X } from "lucide-react";
+import { ArrowLeft, ArrowUpDown, Loader2, Mail, Pencil, Plus, Search, Shield, ShieldOff, UserPlus, Users, X } from "lucide-react";
 import { SelectWithQuickAdd } from "@/components/ui/select-with-quick-add";
 import { ExtensionStatusBadge } from "@/components/dashboard/extension-status-badge";
 import { NoOrgBanner } from "@/components/dashboard/no-org-banner";
@@ -71,6 +71,13 @@ export default function TeamPage() {
   const [removingMemberId, setRemovingMemberId] = useState<string | null>(null);
   const [removingFromTeamId, setRemovingFromTeamId] = useState<string | null>(null);
   const [togglingShieldId, setTogglingShieldId] = useState<string | null>(null);
+
+  // Change member email
+  const [emailModalOpen, setEmailModalOpen] = useState(false);
+  const [emailTargetId, setEmailTargetId] = useState<string | null>(null);
+  const [emailTargetName, setEmailTargetName] = useState("");
+  const [emailNewValue, setEmailNewValue] = useState("");
+  const [savingEmail, setSavingEmail] = useState(false);
 
   // Member search, filter & sort
   const [memberSearch, setMemberSearch] = useState("");
@@ -319,6 +326,48 @@ export default function TeamPage() {
       toast.error("Failed to toggle shield");
     } finally {
       setTogglingShieldId(null);
+    }
+  }
+
+  function openEmailModal(memberId: string, memberName: string, memberEmail: string) {
+    setEmailTargetId(memberId);
+    setEmailTargetName(memberName || memberEmail);
+    setEmailNewValue(memberEmail);
+    setEmailModalOpen(true);
+  }
+
+  async function handleChangeEmail() {
+    if (!emailTargetId || !emailNewValue.trim()) return;
+    setSavingEmail(true);
+    try {
+      const supabase = (await import("@/lib/supabase/client")).createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const res = await fetch("/api/profile/email", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: emailNewValue.trim(),
+          targetUserId: emailTargetId,
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        toast.success(data.message || "Email updated");
+        setEmailModalOpen(false);
+        refresh();
+      } else {
+        toast.error(data.error || "Failed to update email");
+      }
+    } catch {
+      toast.error("Failed to update email");
+    } finally {
+      setSavingEmail(false);
     }
   }
 
@@ -626,15 +675,28 @@ export default function TeamPage() {
                         {currentUserRole === "admin" && (
                           <td className="p-3">
                             {!member.isCurrentUser && (
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-7 w-7 text-destructive opacity-0 group-hover:opacity-100"
-                                onClick={() => handleRemoveMember(member.id)}
-                                disabled={removingMemberId === member.id}
-                              >
-                                {removingMemberId === member.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <X className="h-3.5 w-3.5" />}
-                              </Button>
+                              <div className="flex items-center gap-0.5">
+                                {member.role !== "admin" && (
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-7 w-7 opacity-0 group-hover:opacity-100"
+                                    title="Change email"
+                                    onClick={() => openEmailModal(member.id, member.name, member.email)}
+                                  >
+                                    <Pencil className="h-3.5 w-3.5" />
+                                  </Button>
+                                )}
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-7 w-7 text-destructive opacity-0 group-hover:opacity-100"
+                                  onClick={() => handleRemoveMember(member.id)}
+                                  disabled={removingMemberId === member.id}
+                                >
+                                  {removingMemberId === member.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <X className="h-3.5 w-3.5" />}
+                                </Button>
+                              </div>
                             )}
                           </td>
                         )}
@@ -741,6 +803,33 @@ export default function TeamPage() {
             <Button onClick={handleSendInvite} disabled={inviting}>
               {inviting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Send Invite
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Change Email Modal */}
+      <Dialog open={emailModalOpen} onOpenChange={setEmailModalOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Change Email for {emailTargetName}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>New Email Address</Label>
+              <Input
+                type="email"
+                value={emailNewValue}
+                onChange={(e) => setEmailNewValue(e.target.value)}
+                placeholder="new@company.com"
+              />
+            </div>
+          </div>
+          <div className="mt-4 flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setEmailModalOpen(false)} disabled={savingEmail}>Cancel</Button>
+            <Button onClick={handleChangeEmail} disabled={savingEmail || !emailNewValue.trim()}>
+              {savingEmail && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Update Email
             </Button>
           </div>
         </DialogContent>

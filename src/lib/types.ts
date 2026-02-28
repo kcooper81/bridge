@@ -56,6 +56,7 @@ export interface Organization {
   settings: {
     allow_personal_prompts?: boolean;
     setup_complete?: boolean;
+    require_mfa_for_admins?: boolean;
   } | null;
   security_settings?: Record<string, unknown> | null;
   is_suspended?: boolean;

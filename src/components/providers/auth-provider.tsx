@@ -41,7 +41,32 @@ export function AuthProvider({
       setUser(newSession?.user ?? null);
     });
 
-    return () => subscription.unsubscribe();
+    // Proactive token refresh every 10 minutes to prevent idle logout.
+    // Supabase JWTs expire (default 1hr) and only refresh on navigation
+    // via middleware. This keeps the session alive while the tab is open.
+    const refreshInterval = setInterval(async () => {
+      const { data, error } = await supabase.auth.getSession();
+      if (error) {
+        authDebug.log("state", "proactive refresh failed", { error: error.message });
+      } else if (data.session) {
+        authDebug.log("state", "proactive refresh ok", { expiresAt: data.session.expires_at });
+      }
+    }, 10 * 60 * 1000);
+
+    // Also refresh when the tab becomes visible again (user returns from idle)
+    function handleVisibilityChange() {
+      if (document.visibilityState === "visible") {
+        authDebug.log("state", "tab visible — refreshing session");
+        supabase.auth.getSession();
+      }
+    }
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      subscription.unsubscribe();
+      clearInterval(refreshInterval);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
   }, []);
 
   // Fetch super admin status when user changes

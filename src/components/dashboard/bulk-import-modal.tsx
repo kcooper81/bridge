@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -146,6 +147,7 @@ export function BulkImportModal({
   const [parsedRows, setParsedRows] = useState<BulkImportRow[]>([]);
   const [sendingProgress, setSendingProgress] = useState(0);
   const [result, setResult] = useState<BulkImportResult | null>(null);
+  const [excludedIndexes, setExcludedIndexes] = useState<Set<number>>(new Set());
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const existingEmails = new Set([
@@ -160,6 +162,7 @@ export function BulkImportModal({
     setParsedRows(initialRows ? validateRows(initialRows, existingEmails, existingTeamNames) : []);
     setSendingProgress(0);
     setResult(null);
+    setExcludedIndexes(new Set());
   }, [initialRows]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // When initialRows change, jump to preview
@@ -210,7 +213,7 @@ export function BulkImportModal({
   }
 
   async function handleSendInvites() {
-    const validRows = parsedRows.filter((r) => r.status !== "error");
+    const validRows = parsedRows.filter((r, i) => r.status !== "error" && !excludedIndexes.has(i));
     if (validRows.length === 0) {
       toast.error("No valid rows to import");
       return;
@@ -247,9 +250,13 @@ export function BulkImportModal({
     URL.revokeObjectURL(url);
   }
 
-  const validCount = parsedRows.filter((r) => r.status === "valid").length;
-  const warningCount = parsedRows.filter((r) => r.status === "warning").length;
+  const selectableIndexes = parsedRows
+    .map((r, i) => (r.status !== "error" ? i : -1))
+    .filter((i) => i !== -1);
+  const selectedCount = selectableIndexes.filter((i) => !excludedIndexes.has(i)).length;
+  const warningCount = parsedRows.filter((r, i) => r.status === "warning" && !excludedIndexes.has(i)).length;
   const errorCount = parsedRows.filter((r) => r.status === "error").length;
+  const deselectedCount = excludedIndexes.size;
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -323,13 +330,13 @@ export function BulkImportModal({
           <div className="space-y-4 flex-1 min-h-0 flex flex-col">
             {/* Summary badges */}
             <div className="flex gap-2 flex-wrap">
-              {(validCount + warningCount) > 0 && (
+              {selectedCount > 0 && (
                 <Badge
                   variant="outline"
                   className="text-green-600 border-green-200 bg-green-50 dark:text-green-400 dark:border-green-800 dark:bg-green-950/30"
                 >
                   <CheckCircle2 className="mr-1 h-3 w-3" />
-                  {validCount + warningCount} will be invited
+                  {selectedCount} will be invited
                 </Badge>
               )}
               {warningCount > 0 && (
@@ -350,6 +357,11 @@ export function BulkImportModal({
                   {errorCount} will be skipped
                 </Badge>
               )}
+              {deselectedCount > 0 && (
+                <Badge variant="outline" className="text-muted-foreground">
+                  {deselectedCount} deselected
+                </Badge>
+              )}
             </div>
 
             {/* Scrollable preview table */}
@@ -357,6 +369,18 @@ export function BulkImportModal({
               <table className="w-full text-sm">
                 <thead className="sticky top-0 bg-muted/80 backdrop-blur-sm">
                   <tr className="border-b">
+                    <th className="p-2 w-8">
+                      <Checkbox
+                        checked={selectableIndexes.length > 0 && excludedIndexes.size === 0}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setExcludedIndexes(new Set());
+                          } else {
+                            setExcludedIndexes(new Set(selectableIndexes));
+                          }
+                        }}
+                      />
+                    </th>
                     <th className="text-left p-2 font-medium w-8"></th>
                     <th className="text-left p-2 font-medium">Email</th>
                     <th className="text-left p-2 font-medium">Name</th>
@@ -365,15 +389,34 @@ export function BulkImportModal({
                   </tr>
                 </thead>
                 <tbody>
-                  {parsedRows.map((row, i) => (
+                  {parsedRows.map((row, i) => {
+                    const isExcluded = excludedIndexes.has(i);
+                    const isSelectable = row.status !== "error";
+                    return (
                     <tr
                       key={i}
                       className={cn(
                         "border-b",
+                        isExcluded && "opacity-40",
                         row.status === "error" && "bg-red-50/50 dark:bg-red-950/20",
-                        row.status === "warning" && "bg-yellow-50/50 dark:bg-yellow-950/20"
+                        row.status === "warning" && !isExcluded && "bg-yellow-50/50 dark:bg-yellow-950/20"
                       )}
                     >
+                      <td className="p-2">
+                        {isSelectable ? (
+                          <Checkbox
+                            checked={!isExcluded}
+                            onCheckedChange={(checked) => {
+                              setExcludedIndexes((prev) => {
+                                const next = new Set(prev);
+                                if (checked) next.delete(i);
+                                else next.add(i);
+                                return next;
+                              });
+                            }}
+                          />
+                        ) : null}
+                      </td>
                       <td className="p-2">
                         {row.status === "valid" && (
                           <CheckCircle2 className="h-4 w-4 text-green-500" />
@@ -422,7 +465,8 @@ export function BulkImportModal({
                         )}
                       </td>
                     </tr>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -437,10 +481,10 @@ export function BulkImportModal({
                 </Button>
                 <Button
                   onClick={handleSendInvites}
-                  disabled={validCount + warningCount === 0}
+                  disabled={selectedCount === 0}
                 >
-                  Send {validCount + warningCount} Invite
-                  {validCount + warningCount !== 1 ? "s" : ""}
+                  Send {selectedCount} Invite
+                  {selectedCount !== 1 ? "s" : ""}
                 </Button>
               </div>
             </div>

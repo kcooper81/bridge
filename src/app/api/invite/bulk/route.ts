@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
     // Get org data
     const { data: orgData } = await db
       .from("organizations")
-      .select("name, plan")
+      .select("name, plan, settings")
       .eq("id", profile.org_id)
       .single();
 
@@ -268,7 +268,13 @@ export async function POST(request: NextRequest) {
       for (let i = 0; i < inviteRecords.length; i += BATCH_SIZE) {
         const batch = inviteRecords.slice(i, i + BATCH_SIZE);
 
-        const emailPayloads = batch.map((rec) => {
+        // Build optional welcome message block
+      const rawWelcome = orgData?.settings?.invite_welcome_message;
+      const welcomeHtml = rawWelcome
+        ? `<blockquote style="margin:0 0 16px;padding:12px 16px;border-left:3px solid #2563EB;background:#f4f4f5;border-radius:4px;font-size:14px;line-height:1.5;color:#3f3f46;">${rawWelcome.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\n/g,"<br/>")}</blockquote>`
+        : "";
+
+      const emailPayloads = batch.map((rec) => {
           const inviteUrl = `${siteUrl}/invite?token=${rec.token}`;
           return {
             from: fromEmail,
@@ -277,6 +283,7 @@ export async function POST(request: NextRequest) {
             html: buildEmail({
               heading: "You've been invited!",
               body: `
+                ${welcomeHtml}
                 <p><strong>${senderName}</strong> has invited you to join <strong>${orgName}</strong> on TeamPrompt.</p>
                 <p>TeamPrompt helps teams manage, share, and secure their AI prompts across ChatGPT, Claude, Gemini, and more.</p>
               `,

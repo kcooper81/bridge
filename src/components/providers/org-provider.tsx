@@ -111,6 +111,25 @@ export function OrgProvider({ children }: { children: React.ReactNode }) {
     }
     setNoOrg(false);
 
+    // Fire-and-forget domain auto-join check
+    try {
+      const session = await supabase.auth.getSession();
+      const accessToken = session.data.session?.access_token;
+      if (accessToken) {
+        fetch("/api/auth/domain-join", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${accessToken}` },
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data?.joined) refresh();
+          })
+          .catch(() => {});
+      }
+    } catch {
+      // Non-critical — ignore
+    }
+
     // Super admins act as admin in any org
     setCurrentUserRole(
       profile.is_super_admin ? "admin" : (profile.role as UserRole) || "member"

@@ -82,8 +82,8 @@ const _RAW_CATEGORIES: RawCategory[] = [
       },
       {
         q: "How do I invite my team?",
-        a: "Go to the Team page from the sidebar (or Settings → Organization for naming). Click \"Invite Member,\" enter their email address, and choose a role — Admin, Manager, or Member. They'll receive an email with a link to join your workspace.",
-        keywords: ["invite", "add member", "email", "onboarding"],
+        a: "Go to the Team page from the sidebar. Click \"Invite Member,\" enter their email address, and choose a role — Admin, Manager, or Member. They'll receive an email with a link to join your workspace.\n\nFor larger teams, use \"Import Members\" to upload a CSV with multiple invites at once. You can also connect Google Workspace from Settings → Integrations to sync your directory and invite users directly.\n\nAdmins can customize the invite email with a welcome message in Settings → Organization → Invite Email. If your organization has a domain set, you can enable auto-join so new users with matching email addresses join automatically — no invite required.",
+        keywords: ["invite", "add member", "email", "onboarding", "bulk import", "csv", "auto-join"],
       },
       {
         q: "How do I install the browser extension?",
@@ -287,8 +287,8 @@ const _RAW_CATEGORIES: RawCategory[] = [
     articles: [
       {
         q: "How do I invite and manage members?",
-        a: "Navigate to the Team page from the sidebar. Click \"Invite Member\" to send email invitations — choose a role and optionally assign them to a team. From the same page, you can change roles, view extension status, or remove members.",
-        keywords: ["invite", "manage", "add", "remove", "members"],
+        a: "Navigate to the Team page from the sidebar. Click \"Invite Member\" to send email invitations — choose a role and optionally assign them to a team. Use \"Import Members\" for bulk CSV invites, or connect Google Workspace from Settings → Integrations to sync your directory.\n\nFrom the Team page you can change individual roles via the dropdown, use checkboxes to select multiple members for bulk role changes, view extension status, toggle guardrail shields, or remove members. Admins can also customize the welcome message that appears in all invite emails from Settings → Organization.",
+        keywords: ["invite", "manage", "add", "remove", "members", "bulk", "import"],
       },
       {
         q: "How do teams (sub-groups) work?",
@@ -297,8 +297,8 @@ const _RAW_CATEGORIES: RawCategory[] = [
       },
       {
         q: "How do I change someone's role?",
-        a: "On the Team page, find the member in the Members list. Use the role dropdown next to their name to change between Admin, Manager, and Member. The change takes effect immediately. Note: you can't demote the last remaining admin.",
-        keywords: ["change role", "promote", "demote", "permissions"],
+        a: "On the Team page, find the member in the Members list. Use the role dropdown next to their name to change between Admin, Manager, and Member. The change takes effect immediately. Note: you can't demote the last remaining admin.\n\nTo change roles for multiple people at once, use the checkboxes to select members, then pick a role from the bulk action bar and click Apply.",
+        keywords: ["change role", "promote", "demote", "permissions", "bulk role"],
       },
       {
         q: "How do I remove a member?",
@@ -309,6 +309,26 @@ const _RAW_CATEGORIES: RawCategory[] = [
         q: "Can I see who has the extension installed?",
         a: "Yes. The Team page shows an extension status badge next to each member — indicating whether they have the extension installed, when it was last active, and which version they're running.",
         keywords: ["extension status", "installed", "active", "version"],
+      },
+      {
+        q: "How do I change roles for multiple members at once?",
+        a: "On the Team page, admins can use the checkboxes next to each member to select multiple people. A bulk action bar appears showing the number selected, a role picker, and an Apply button. Choose the target role and click Apply to update everyone at once. Use the header checkbox to select or deselect all visible members (excluding yourself). The system prevents you from demoting the last remaining admin.",
+        keywords: ["bulk role", "bulk assign", "multiple members", "batch", "select all", "checkbox"],
+      },
+      {
+        q: "How do I customize the invite welcome email?",
+        a: "Go to Settings → Organization and scroll to the \"Invite Email\" card (admin only). Enter a custom welcome message — up to 500 characters — that will appear as a styled quote at the top of every invite email your organization sends, including both individual and bulk invites. This is a great way to add a personal greeting or explain how your team uses TeamPrompt.",
+        keywords: ["welcome message", "invite email", "custom email", "onboarding message", "invite customization"],
+      },
+      {
+        q: "What is domain-based auto-join?",
+        a: "Domain-based auto-join lets new users automatically join your organization when they sign up with a matching email domain. For example, if your org domain is \"acme.com\" and auto-join is enabled, anyone who signs up with an @acme.com email will be added as a member automatically — no invite needed.\n\nTo enable it: go to Settings → Organization, set your domain in the Organization Details card, then toggle \"Auto-Join by Domain\" in the Preferences card. Free email providers (Gmail, Yahoo, Outlook, etc.) are excluded to prevent accidental matches. The user must be in a solo personal workspace to be eligible for auto-join.",
+        keywords: ["auto-join", "domain", "automatic", "signup", "onboarding", "no invite"],
+      },
+      {
+        q: "How do I connect Google Workspace to sync my directory?",
+        a: "Go to Settings → Organization → Integrations and click \"Connect\" on the Google Workspace card. You'll be redirected to Google to authorize TeamPrompt to read your directory (users and groups). After authorizing, you're redirected back and the card shows \"Connected\" with the admin email used.\n\nClick \"Sync Now\" to fetch your directory. TeamPrompt pulls all active users (up to 2,000) and groups, filters out anyone who's already a member, and opens the bulk import preview so you can review and send invites. You can sync as often as you like — only new users appear each time.\n\nTo disconnect, click the unplug icon on the Google Workspace card. This revokes the token and removes the connection. Already-synced members are not affected.",
+        keywords: ["google workspace", "directory sync", "google admin", "import users", "google groups", "integration", "connect google"],
       },
     ],
   },

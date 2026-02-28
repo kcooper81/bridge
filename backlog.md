@@ -129,12 +129,36 @@
   - Integrations settings page (`/settings/integrations`) with cards for Google Workspace, Microsoft Entra ID (coming soon), SCIM 2.0 (coming soon)
   - Integrations link card in Organization settings tab
 
+- [x] Google Workspace Directory Sync
+  - Migration: `035_workspace_integrations.sql` — `workspace_integrations` table (org_id, provider, tokens, admin_email, timestamps)
+  - API: `GET /api/integrations/google/connect` — builds OAuth URL with directory scopes, CSRF state cookie
+  - API: `GET /api/integrations/google/callback` — exchanges code, gets admin email, upserts integration
+  - API: `GET /api/integrations/google/status` — returns connected state, admin email, last sync time
+  - API: `POST /api/integrations/google/sync` — fetches users (paginated, cap 2000) + groups, returns BulkImportRow[]
+  - API: `DELETE /api/integrations/google/disconnect` — revokes token, deletes integration
+  - Integrations page: connected/disconnected state, Sync Now → opens bulk import modal with pre-populated rows
+  - Bulk import modal: `initialRows` prop skips input step, goes straight to preview
+
+- [x] Domain-Based Auto-Join
+  - Organization settings: `auto_join_domain` toggle in Preferences card (disabled when no domain set)
+  - API: `POST /api/auth/domain-join` — checks email domain, finds matching org with auto_join enabled, migrates solo personal org
+  - Skips free providers (gmail, yahoo, outlook, etc.)
+  - org-provider: fire-and-forget call after auth, refreshes if user auto-joined
+
+- [x] Welcome Email Customization
+  - Organization settings: `invite_welcome_message` in types.ts (JSONB, no migration)
+  - New "Invite Email" card in org settings with Textarea (max 500 chars, char counter)
+  - Invite send route: prepends escaped welcome message as styled blockquote
+  - Invite bulk route: same welcome message blockquote in batch emails
+
+- [x] Bulk Role Assignment
+  - Team page: `selectedMemberIds` state with Checkbox in table header (select all non-self) and per-row
+  - Bulk action bar: "{N} selected" + role Select + Apply + Clear buttons
+  - `handleBulkRoleChange()`: guards last-admin, Promise.all updateMemberRole, clears selection
+  - Selection clears after individual role changes and member removal
+
 ## Pending
-- [ ] Google Workspace directory sync integration (requires Google Cloud project + OAuth credentials)
-- [ ] Domain-based auto-join (anyone with @company.com auto-joins org on signup)
 - [ ] Microsoft Entra ID (Azure AD) directory sync
 - [ ] SCIM 2.0 provisioning endpoint (for Okta, OneLogin, JumpCloud)
 - [ ] SAML SSO
 - [ ] Auto-deprovisioning (remove access when employee leaves directory)
-- [ ] Welcome email customization (custom message, branding for invites)
-- [ ] Bulk role assignment (select multiple members → change role at once)

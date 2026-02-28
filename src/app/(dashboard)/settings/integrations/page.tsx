@@ -1,18 +1,22 @@
 "use client";
 
+import { useState, useEffect, useCallback } from "react";
 import { useOrg } from "@/components/providers/org-provider";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Loader2, RefreshCw, Unplug } from "lucide-react";
+import { BulkImportModal } from "@/components/dashboard/bulk-import-modal";
+import { toast } from "sonner";
 import Link from "next/link";
+import type { BulkImportRow, Invite } from "@/lib/types";
 
-interface IntegrationCard {
-  id: string;
-  name: string;
-  description: string;
-  icon: React.ReactNode;
-  status: "available" | "coming_soon";
+interface GoogleStatus {
+  connected: boolean;
+  adminEmail?: string;
+  lastSyncedAt?: string;
+  connectedAt?: string;
 }
 
 function GoogleIcon() {
@@ -47,36 +51,140 @@ function ScimIcon() {
   );
 }
 
-const integrations: IntegrationCard[] = [
-  {
-    id: "google_workspace",
-    name: "Google Workspace",
-    description:
-      "Sync your organization's directory from Google Workspace. Import users and map Google groups to TeamPrompt teams.",
-    icon: <GoogleIcon />,
-    status: "available",
-  },
-  {
-    id: "microsoft_entra",
-    name: "Microsoft Entra ID",
-    description:
-      "Connect to Microsoft Entra ID (Azure AD) to sync your organization's directory and user groups.",
-    icon: <MicrosoftIcon />,
-    status: "coming_soon",
-  },
-  {
-    id: "scim",
-    name: "SCIM 2.0",
-    description:
-      "Enable SCIM provisioning for automated user lifecycle management with Okta, OneLogin, JumpCloud, and more.",
-    icon: <ScimIcon />,
-    status: "coming_soon",
-  },
-];
-
 export default function IntegrationsPage() {
-  const { currentUserRole } = useOrg();
+  const { currentUserRole, teams, members, refresh } = useOrg();
+  const searchParams = useSearchParams();
   const isAdmin = currentUserRole === "admin";
+
+  const [googleStatus, setGoogleStatus] = useState<GoogleStatus>({ connected: false });
+  const [loadingStatus, setLoadingStatus] = useState(true);
+  const [syncing, setSyncing] = useState(false);
+  const [disconnecting, setDisconnecting] = useState(false);
+  const [connecting, setConnecting] = useState(false);
+
+  // Bulk import modal state for sync results
+  const [bulkImportOpen, setBulkImportOpen] = useState(false);
+  const [syncedRows, setSyncedRows] = useState<BulkImportRow[]>([]);
+  const [invites] = useState<Invite[]>([]);
+
+  const fetchStatus = useCallback(async () => {
+    try {
+      const supabase = (await import("@/lib/supabase/client")).createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const res = await fetch("/api/integrations/google/status", {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      if (res.ok) {
+        setGoogleStatus(await res.json());
+      }
+    } catch {
+      // ignore
+    } finally {
+      setLoadingStatus(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchStatus();
+  }, [fetchStatus]);
+
+  // Handle ?connected=google param
+  useEffect(() => {
+    if (searchParams.get("connected") === "google") {
+      toast.success("Google Workspace connected successfully!");
+      fetchStatus();
+      // Clean up URL
+      window.history.replaceState({}, "", "/settings/integrations");
+    }
+    if (searchParams.get("error")) {
+      toast.error(`Connection failed: ${searchParams.get("error")}`);
+      window.history.replaceState({}, "", "/settings/integrations");
+    }
+  }, [searchParams, fetchStatus]);
+
+  async function handleConnect() {
+    setConnecting(true);
+    try {
+      const supabase = (await import("@/lib/supabase/client")).createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const res = await fetch("/api/integrations/google/connect", {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        toast.error(data.error || "Failed to start connection");
+        setConnecting(false);
+      }
+    } catch {
+      toast.error("Failed to connect");
+      setConnecting(false);
+    }
+  }
+
+  async function handleSync() {
+    setSyncing(true);
+    try {
+      const supabase = (await import("@/lib/supabase/client")).createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const res = await fetch("/api/integrations/google/sync", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast.error(data.error || "Sync failed");
+        return;
+      }
+
+      if (data.users && data.users.length > 0) {
+        setSyncedRows(data.users);
+        setBulkImportOpen(true);
+        toast.success(
+          `Found ${data.users.length} new user(s) (${data.alreadyMembers} already members)`
+        );
+      } else {
+        toast.info(
+          `All ${data.totalDirectoryUsers} directory users are already members`
+        );
+      }
+
+      fetchStatus();
+    } catch {
+      toast.error("Sync failed");
+    } finally {
+      setSyncing(false);
+    }
+  }
+
+  async function handleDisconnect() {
+    if (!confirm("Disconnect Google Workspace? This won't remove any synced members.")) return;
+    setDisconnecting(true);
+    try {
+      const supabase = (await import("@/lib/supabase/client")).createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      await fetch("/api/integrations/google/disconnect", {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      setGoogleStatus({ connected: false });
+      toast.success("Google Workspace disconnected");
+    } catch {
+      toast.error("Failed to disconnect");
+    } finally {
+      setDisconnecting(false);
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -95,59 +203,149 @@ export default function IntegrationsPage() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {integrations.map((integration) => (
-          <Card
-            key={integration.id}
-            className="relative overflow-hidden"
-          >
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div className="p-2 rounded-lg bg-muted/50">
-                  {integration.icon}
-                </div>
-                {integration.status === "coming_soon" ? (
-                  <Badge variant="outline" className="text-xs text-muted-foreground">
-                    Coming Soon
-                  </Badge>
-                ) : (
-                  <Badge
-                    variant="outline"
-                    className="text-xs text-muted-foreground"
-                  >
-                    Not connected
-                  </Badge>
-                )}
+        {/* Google Workspace */}
+        <Card className="relative overflow-hidden">
+          <CardContent className="p-6">
+            <div className="flex items-start justify-between mb-4">
+              <div className="p-2 rounded-lg bg-muted/50">
+                <GoogleIcon />
               </div>
-
-              <h3 className="font-semibold mb-1">{integration.name}</h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                {integration.description}
-              </p>
-
-              {integration.status === "available" ? (
-                <Button
+              {loadingStatus ? (
+                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+              ) : googleStatus.connected ? (
+                <Badge
                   variant="outline"
-                  size="sm"
-                  className="w-full"
-                  disabled={!isAdmin}
-                  title={!isAdmin ? "Only admins can connect integrations" : undefined}
+                  className="text-xs text-green-600 border-green-200 bg-green-50 dark:text-green-400 dark:border-green-800 dark:bg-green-950/30"
                 >
-                  Connect
-                </Button>
+                  <CheckCircle2 className="mr-1 h-3 w-3" />
+                  Connected
+                </Badge>
               ) : (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full"
-                  disabled
-                >
-                  Coming Soon
-                </Button>
+                <Badge variant="outline" className="text-xs text-muted-foreground">
+                  Not connected
+                </Badge>
               )}
-            </CardContent>
-          </Card>
-        ))}
+            </div>
+
+            <h3 className="font-semibold mb-1">Google Workspace</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Sync your organization&apos;s directory from Google Workspace. Import users and map Google groups to TeamPrompt teams.
+            </p>
+
+            {googleStatus.connected ? (
+              <div className="space-y-3">
+                {googleStatus.adminEmail && (
+                  <p className="text-xs text-muted-foreground">
+                    Connected as {googleStatus.adminEmail}
+                  </p>
+                )}
+                {googleStatus.lastSyncedAt && (
+                  <p className="text-xs text-muted-foreground">
+                    Last synced: {new Date(googleStatus.lastSyncedAt).toLocaleString()}
+                  </p>
+                )}
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1"
+                    onClick={handleSync}
+                    disabled={syncing}
+                  >
+                    {syncing ? (
+                      <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <RefreshCw className="mr-2 h-3.5 w-3.5" />
+                    )}
+                    Sync Now
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleDisconnect}
+                    disabled={disconnecting}
+                    className="text-destructive"
+                  >
+                    {disconnecting ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <Unplug className="h-3.5 w-3.5" />
+                    )}
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full"
+                disabled={!isAdmin || connecting}
+                onClick={handleConnect}
+                title={!isAdmin ? "Only admins can connect integrations" : undefined}
+              >
+                {connecting && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
+                Connect
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Microsoft Entra ID */}
+        <Card className="relative overflow-hidden">
+          <CardContent className="p-6">
+            <div className="flex items-start justify-between mb-4">
+              <div className="p-2 rounded-lg bg-muted/50">
+                <MicrosoftIcon />
+              </div>
+              <Badge variant="outline" className="text-xs text-muted-foreground">
+                Coming Soon
+              </Badge>
+            </div>
+            <h3 className="font-semibold mb-1">Microsoft Entra ID</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Connect to Microsoft Entra ID (Azure AD) to sync your organization&apos;s directory and user groups.
+            </p>
+            <Button variant="outline" size="sm" className="w-full" disabled>
+              Coming Soon
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* SCIM 2.0 */}
+        <Card className="relative overflow-hidden">
+          <CardContent className="p-6">
+            <div className="flex items-start justify-between mb-4">
+              <div className="p-2 rounded-lg bg-muted/50">
+                <ScimIcon />
+              </div>
+              <Badge variant="outline" className="text-xs text-muted-foreground">
+                Coming Soon
+              </Badge>
+            </div>
+            <h3 className="font-semibold mb-1">SCIM 2.0</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Enable SCIM provisioning for automated user lifecycle management with Okta, OneLogin, JumpCloud, and more.
+            </p>
+            <Button variant="outline" size="sm" className="w-full" disabled>
+              Coming Soon
+            </Button>
+          </CardContent>
+        </Card>
       </div>
+
+      {/* Bulk Import Modal — used for sync results */}
+      <BulkImportModal
+        open={bulkImportOpen}
+        onOpenChange={setBulkImportOpen}
+        teams={teams}
+        members={members}
+        pendingInvites={invites}
+        initialRows={syncedRows}
+        onComplete={() => {
+          refresh();
+          setSyncedRows([]);
+        }}
+      />
     </div>
   );
 }

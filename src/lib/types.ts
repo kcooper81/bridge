@@ -57,6 +57,8 @@ export interface Organization {
     allow_personal_prompts?: boolean;
     setup_complete?: boolean;
     require_mfa_for_admins?: boolean;
+    auto_join_domain?: boolean;
+    invite_welcome_message?: string;
   } | null;
   security_settings?: Record<string, unknown> | null;
   is_suspended?: boolean;

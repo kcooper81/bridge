@@ -7,9 +7,21 @@ export interface ReleaseNote {
   badge?: "new" | "fix" | "improvement";
 }
 
-export const APP_VERSION = "1.5.0";
+export const APP_VERSION = "1.6.0";
 
 export const RELEASE_NOTES: ReleaseNote[] = [
+  {
+    version: "1.6.0",
+    date: "2026-02-28",
+    title: "Google Workspace Sync, Auto-Join & Bulk Role Management",
+    highlights: [
+      "Google Workspace directory sync — connect your Google admin, import users, and map groups to teams",
+      "Domain-based auto-join — new users with matching email domains automatically join your org",
+      "Custom invite welcome message — add a personal note that appears in all invite emails",
+      "Bulk role assignment — select multiple members and change their roles at once from the Team page",
+    ],
+    badge: "new",
+  },
   {
     version: "1.5.0",
     date: "2026-02-28",

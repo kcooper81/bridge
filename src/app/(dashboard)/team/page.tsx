@@ -24,6 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft, ArrowUpDown, FileSpreadsheet, Loader2, Mail, Pencil, Plus, Search, Shield, ShieldOff, Trash2, UserPlus, Users, X } from "lucide-react";
 import { SelectWithQuickAdd } from "@/components/ui/select-with-quick-add";
 import { ExtensionStatusBadge } from "@/components/dashboard/extension-status-badge";
@@ -74,6 +75,11 @@ export default function TeamPage() {
   const [removingMemberId, setRemovingMemberId] = useState<string | null>(null);
   const [removingFromTeamId, setRemovingFromTeamId] = useState<string | null>(null);
   const [togglingShieldId, setTogglingShieldId] = useState<string | null>(null);
+
+  // Bulk role assignment
+  const [selectedMemberIds, setSelectedMemberIds] = useState<Set<string>>(new Set());
+  const [bulkRole, setBulkRole] = useState<UserRole>("member");
+  const [applyingBulkRole, setApplyingBulkRole] = useState(false);
 
   // Change member email
   const [emailModalOpen, setEmailModalOpen] = useState(false);
@@ -203,11 +209,40 @@ export default function TeamPage() {
     try {
       await updateMemberRole(memberId, role);
       toast.success("Role updated");
+      setSelectedMemberIds(new Set());
       refresh();
     } catch {
       toast.error("Failed to update role");
     } finally {
       setChangingRoleId(null);
+    }
+  }
+
+  async function handleBulkRoleChange() {
+    if (selectedMemberIds.size === 0) return;
+
+    // Guard last-admin: if any selected admin is being demoted, check count
+    if (bulkRole !== "admin") {
+      const admins = members.filter((m) => m.role === "admin");
+      const selectedAdmins = admins.filter((a) => selectedMemberIds.has(a.id));
+      if (selectedAdmins.length > 0 && admins.length - selectedAdmins.length < 1) {
+        toast.error("Cannot demote the last admin. Promote another member first.");
+        return;
+      }
+    }
+
+    setApplyingBulkRole(true);
+    try {
+      await Promise.all(
+        Array.from(selectedMemberIds).map((id) => updateMemberRole(id, bulkRole))
+      );
+      toast.success(`Updated ${selectedMemberIds.size} member(s) to ${bulkRole}`);
+      setSelectedMemberIds(new Set());
+      refresh();
+    } catch {
+      toast.error("Failed to update some roles");
+    } finally {
+      setApplyingBulkRole(false);
     }
   }
 
@@ -225,6 +260,7 @@ export default function TeamPage() {
     try {
       await removeMember(memberId);
       toast.success("Member removed");
+      setSelectedMemberIds(new Set());
       refresh();
     } catch {
       toast.error("Failed to remove member");
@@ -598,6 +634,28 @@ export default function TeamPage() {
         )}
       </div>
 
+      {/* Bulk action bar */}
+      {currentUserRole === "admin" && selectedMemberIds.size > 0 && (
+        <div className="flex items-center gap-3 rounded-lg border bg-muted/50 px-4 py-2 mb-2">
+          <span className="text-sm font-medium">{selectedMemberIds.size} selected</span>
+          <Select value={bulkRole} onValueChange={(v) => setBulkRole(v as UserRole)}>
+            <SelectTrigger className="h-8 w-28 text-xs"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="admin">Admin</SelectItem>
+              <SelectItem value="manager">Manager</SelectItem>
+              <SelectItem value="member">Member</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button size="sm" className="h-8" onClick={handleBulkRoleChange} disabled={applyingBulkRole}>
+            {applyingBulkRole && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
+            Apply
+          </Button>
+          <Button variant="ghost" size="sm" className="h-8" onClick={() => setSelectedMemberIds(new Set())}>
+            Clear
+          </Button>
+        </div>
+      )}
+
       {/* Result count */}
       <p className="text-xs text-muted-foreground mb-2">
         {filteredMembers.length} member{filteredMembers.length !== 1 ? "s" : ""}
@@ -616,6 +674,23 @@ export default function TeamPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b bg-muted/50">
+                    {currentUserRole === "admin" && (
+                      <th className="p-3 w-10">
+                        <Checkbox
+                          checked={
+                            filteredMembers.filter((m) => !m.isCurrentUser).length > 0 &&
+                            filteredMembers.filter((m) => !m.isCurrentUser).every((m) => selectedMemberIds.has(m.id))
+                          }
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setSelectedMemberIds(new Set(filteredMembers.filter((m) => !m.isCurrentUser).map((m) => m.id)));
+                            } else {
+                              setSelectedMemberIds(new Set());
+                            }
+                          }}
+                        />
+                      </th>
+                    )}
                     <th className="text-left p-3 font-medium">
                       <button className="flex items-center gap-1 hover:text-foreground" onClick={() => handleMemberSort("name")}>
                         Name <ArrowUpDown className="h-3 w-3" />
@@ -641,7 +716,24 @@ export default function TeamPage() {
                   {filteredMembers.map((member) => {
                     const initials = member.name?.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2) || "U";
                     return (
-                      <tr key={member.id} className="border-b hover:bg-muted/30 transition-colors group">
+                      <tr key={member.id} className={cn("border-b hover:bg-muted/30 transition-colors group", selectedMemberIds.has(member.id) && "bg-primary/5")}>
+                        {currentUserRole === "admin" && (
+                          <td className="p-3 w-10">
+                            {!member.isCurrentUser ? (
+                              <Checkbox
+                                checked={selectedMemberIds.has(member.id)}
+                                onCheckedChange={(checked) => {
+                                  setSelectedMemberIds((prev) => {
+                                    const next = new Set(prev);
+                                    if (checked) next.add(member.id);
+                                    else next.delete(member.id);
+                                    return next;
+                                  });
+                                }}
+                              />
+                            ) : null}
+                          </td>
+                        )}
                         <td className="p-3">
                           <div className="flex items-center gap-3">
                             <Avatar className="h-8 w-8">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -32,6 +32,8 @@ interface BulkImportModalProps {
   members: Member[];
   pendingInvites: Invite[];
   onComplete: () => void;
+  /** When provided, skip the input step and go straight to preview */
+  initialRows?: BulkImportRow[];
 }
 
 type Step = "input" | "preview" | "sending" | "results";
@@ -137,8 +139,9 @@ export function BulkImportModal({
   members,
   pendingInvites,
   onComplete,
+  initialRows,
 }: BulkImportModalProps) {
-  const [step, setStep] = useState<Step>("input");
+  const [step, setStep] = useState<Step>(initialRows ? "preview" : "input");
   const [csvText, setCsvText] = useState("");
   const [parsedRows, setParsedRows] = useState<BulkImportRow[]>([]);
   const [sendingProgress, setSendingProgress] = useState(0);
@@ -152,12 +155,21 @@ export function BulkImportModal({
   const existingTeamNames = new Set(teams.map((t) => t.name.toLowerCase()));
 
   const resetState = useCallback(() => {
-    setStep("input");
+    setStep(initialRows ? "preview" : "input");
     setCsvText("");
-    setParsedRows([]);
+    setParsedRows(initialRows ? validateRows(initialRows, existingEmails, existingTeamNames) : []);
     setSendingProgress(0);
     setResult(null);
-  }, []);
+  }, [initialRows]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // When initialRows change, jump to preview
+  useEffect(() => {
+    if (initialRows && initialRows.length > 0 && open) {
+      const validated = validateRows(initialRows, existingEmails, existingTeamNames);
+      setParsedRows(validated);
+      setStep("preview");
+    }
+  }, [initialRows, open]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function handleClose(isOpen: boolean) {
     if (step === "sending") return; // Prevent closing while processing

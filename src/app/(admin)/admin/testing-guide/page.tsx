@@ -117,9 +117,57 @@ const sections: Section[] = [
       },
       {
         action:
+          "On the Team page, select multiple non-admin members using checkboxes, pick a role from the bulk action bar, and click Apply",
+        expected:
+          "Bulk action bar shows '{N} selected'. All selected members' roles update. Selection clears after apply.",
+      },
+      {
+        action:
+          "Try to bulk-demote all admins — select every admin and change to 'member'",
+        expected:
+          "Error toast: 'Cannot demote the last admin'. Operation is blocked.",
+      },
+      {
+        action:
+          "Go to Settings → Organization → Invite Email. Type a custom welcome message (max 500 chars) and save",
+        expected:
+          "Textarea shows character counter. Save succeeds. Message persists on page reload.",
+      },
+      {
+        action:
+          "Send an invite email after setting a custom welcome message",
+        expected:
+          "Invite email contains the custom message as a styled blockquote above the standard invite text.",
+      },
+      {
+        action:
+          "Toggle 'Auto-Join by Domain' in Settings → Organization → Preferences (requires a domain to be set)",
+        expected:
+          "Switch is disabled when no domain is set. When domain is set, toggle saves. New users with matching email domain auto-join on signup.",
+      },
+      {
+        action:
           "Navigate to Settings → Organization and click the Integrations card",
         expected:
           "Integrations page loads with Google Workspace (available), Microsoft Entra ID (Coming Soon), and SCIM 2.0 (Coming Soon) cards.",
+      },
+      {
+        action:
+          "Click 'Connect' on the Google Workspace card (requires GOOGLE_CLIENT_ID env var)",
+        expected:
+          "Redirects to Google OAuth consent screen. After approval, redirects back with 'connected=google' toast.",
+      },
+      {
+        action:
+          "After connecting Google Workspace, click 'Sync Now'",
+        expected:
+          "Fetches directory users. Opens bulk import modal pre-populated with new users (skipping existing members).",
+      },
+      {
+        action:
+          "Disconnect Google Workspace using the unplug button",
+        expected:
+          "Confirmation dialog appears. After disconnect, card reverts to 'Not connected' state.",
       },
       {
         action: 'Send an extension install email (Team → "Send Install Email")',

@@ -8,7 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { ArrowRight, Loader2, Building, Plug, Settings, ShieldCheck } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { ArrowRight, Loader2, Building, Mail, Plug, Settings, ShieldCheck } from "lucide-react";
 import { saveOrg } from "@/lib/vault-api";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -27,6 +28,12 @@ export function OrganizationTab() {
   const [requireMfa, setRequireMfa] = useState(
     org?.settings?.require_mfa_for_admins ?? false
   );
+  const [autoJoinDomain, setAutoJoinDomain] = useState(
+    org?.settings?.auto_join_domain ?? false
+  );
+  const [welcomeMessage, setWelcomeMessage] = useState(
+    org?.settings?.invite_welcome_message ?? ""
+  );
   const [savingPrefs, setSavingPrefs] = useState(false);
 
   useEffect(() => {
@@ -35,6 +42,8 @@ export function OrganizationTab() {
       setDomain(org.domain || "");
       setAllowPersonalPrompts(org.settings?.allow_personal_prompts ?? true);
       setRequireMfa(org.settings?.require_mfa_for_admins ?? false);
+      setAutoJoinDomain(org.settings?.auto_join_domain ?? false);
+      setWelcomeMessage(org.settings?.invite_welcome_message ?? "");
     }
   }, [org, dirty]);
 
@@ -61,6 +70,8 @@ export function OrganizationTab() {
         ...(org?.settings || {}),
         allow_personal_prompts: allowPersonalPrompts,
         require_mfa_for_admins: requireMfa,
+        auto_join_domain: autoJoinDomain,
+        invite_welcome_message: welcomeMessage.trim() || undefined,
       };
       await saveOrg({ settings: merged });
       toast.success("Preferences updated");
@@ -149,12 +160,65 @@ export function OrganizationTab() {
             />
           </div>
 
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="auto-join-domain">Auto-Join by Domain</Label>
+              <p className="text-sm text-muted-foreground">
+                {org?.domain
+                  ? `New users with @${org.domain} emails will automatically join this organization`
+                  : "Set a domain above to enable auto-join"}
+              </p>
+            </div>
+            <Switch
+              id="auto-join-domain"
+              checked={autoJoinDomain}
+              onCheckedChange={setAutoJoinDomain}
+              disabled={!isAdmin || !org?.domain}
+            />
+          </div>
+
           <Button onClick={handleSavePrefs} disabled={savingPrefs || !isAdmin}>
             {savingPrefs && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Save Preferences
           </Button>
         </CardContent>
       </Card>
+
+      {/* Invite Email */}
+      {isAdmin && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Mail className="h-5 w-5" />
+              Invite Email
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="welcome-message">Custom Welcome Message</Label>
+              <p className="text-sm text-muted-foreground">
+                This message will appear at the top of all invite emails sent from your organization.
+              </p>
+              <Textarea
+                id="welcome-message"
+                placeholder="Welcome to our team! We use TeamPrompt to manage and share AI prompts..."
+                value={welcomeMessage}
+                onChange={(e) => {
+                  if (e.target.value.length <= 500) setWelcomeMessage(e.target.value);
+                }}
+                className="min-h-[100px]"
+              />
+              <p className="text-xs text-muted-foreground text-right">
+                {welcomeMessage.length}/500
+              </p>
+            </div>
+            <Button onClick={handleSavePrefs} disabled={savingPrefs}>
+              {savingPrefs && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Save
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Integrations */}
       {isAdmin && (

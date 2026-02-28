@@ -151,10 +151,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get org name for email
+    // Get org name + settings for email
     const { data: org } = await db
       .from("organizations")
-      .select("name")
+      .select("name, settings")
       .eq("id", profile.org_id)
       .single();
 
@@ -180,6 +180,12 @@ export async function POST(request: NextRequest) {
       const senderName = profile.name || "A team member";
       const orgName = org?.name || "their team";
 
+      // Build optional welcome message block
+      const rawWelcome = org?.settings?.invite_welcome_message;
+      const welcomeHtml = rawWelcome
+        ? `<blockquote style="margin:0 0 16px;padding:12px 16px;border-left:3px solid #2563EB;background:#f4f4f5;border-radius:4px;font-size:14px;line-height:1.5;color:#3f3f46;">${rawWelcome.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\n/g,"<br/>")}</blockquote>`
+        : "";
+
       await resend.emails.send({
         from: fromEmail,
         to: email,
@@ -187,6 +193,7 @@ export async function POST(request: NextRequest) {
         html: buildEmail({
           heading: "You've been invited!",
           body: `
+            ${welcomeHtml}
             <p><strong>${senderName}</strong> has invited you to join <strong>${orgName}</strong> on TeamPrompt as a <strong>${role}</strong>.</p>
             <p>TeamPrompt helps teams manage, share, and secure their AI prompts across ChatGPT, Claude, Gemini, and more.</p>
           `,

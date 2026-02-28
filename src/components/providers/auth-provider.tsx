@@ -33,41 +33,72 @@ export function AuthProvider({
   useEffect(() => {
     const supabase = createClient();
 
+    // ── Smart token refresh ──
+    // Schedules a refreshSession() call 60s before the JWT expires.
+    // Re-schedules after every auth state change (login, refresh, etc.)
+    // and refreshes on tab focus if the token is within 5 min of expiry.
+    let refreshTimer: ReturnType<typeof setTimeout> | null = null;
+
+    function scheduleRefresh(sess: Session | null) {
+      if (refreshTimer) clearTimeout(refreshTimer);
+      if (!sess?.expires_at) return;
+
+      const expiresAt = sess.expires_at * 1000; // seconds → ms
+      const refreshAt = expiresAt - 60_000; // 60s before expiry
+      const delay = Math.max(refreshAt - Date.now(), 0);
+
+      authDebug.log("state", "refresh scheduled", {
+        expiresIn: Math.round((expiresAt - Date.now()) / 1000) + "s",
+        refreshIn: Math.round(delay / 1000) + "s",
+      });
+
+      refreshTimer = setTimeout(async () => {
+        const { data, error } = await supabase.auth.refreshSession();
+        if (error) {
+          authDebug.log("state", "scheduled refresh failed", { error: error.message });
+        } else {
+          authDebug.log("state", "scheduled refresh ok");
+          scheduleRefresh(data.session);
+        }
+      }, delay);
+    }
+
+    // Seed the first timer from the current session
+    supabase.auth.getSession().then(({ data }) => scheduleRefresh(data.session));
+
+    // Single auth state listener — updates React state AND re-schedules refresh
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, newSession) => {
-      authDebug.log("state", `onAuthStateChange: ${_event}`, { hasSession: !!newSession, userId: newSession?.user?.id }); // AUTH-DEBUG
+      authDebug.log("state", `onAuthStateChange: ${_event}`, {
+        hasSession: !!newSession,
+        userId: newSession?.user?.id,
+      });
       setSession(newSession);
       setUser(newSession?.user ?? null);
+      scheduleRefresh(newSession);
     });
 
-    // Proactive token refresh to prevent idle logout.
-    // getSession() only reads localStorage — it does NOT refresh the JWT.
-    // getUser() makes a server call that triggers a real token refresh.
-    async function refreshSession() {
-      const { error } = await supabase.auth.getUser();
-      if (error) {
-        authDebug.log("state", "proactive refresh failed", { error: error.message });
-      } else {
-        authDebug.log("state", "proactive refresh ok");
-      }
-    }
-
-    // Refresh every 4 minutes (well within the default 1hr JWT expiry)
-    const refreshInterval = setInterval(refreshSession, 4 * 60 * 1000);
-
-    // Refresh immediately when the tab becomes visible again
+    // On tab focus: refresh immediately if token expires within 5 minutes
     function handleVisibilityChange() {
-      if (document.visibilityState === "visible") {
-        authDebug.log("state", "tab visible — refreshing session");
-        refreshSession();
-      }
+      if (document.visibilityState !== "visible") return;
+      supabase.auth.getSession().then(({ data }) => {
+        const sess = data.session;
+        if (!sess?.expires_at) return;
+        const expiresIn = sess.expires_at * 1000 - Date.now();
+        if (expiresIn < 5 * 60 * 1000) {
+          authDebug.log("state", "tab visible — token expiring soon, refreshing");
+          supabase.auth.refreshSession().then(({ data: refreshed }) => {
+            scheduleRefresh(refreshed.session);
+          });
+        }
+      });
     }
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
       subscription.unsubscribe();
-      clearInterval(refreshInterval);
+      if (refreshTimer) clearTimeout(refreshTimer);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, []);

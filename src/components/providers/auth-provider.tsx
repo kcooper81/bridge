@@ -41,23 +41,26 @@ export function AuthProvider({
       setUser(newSession?.user ?? null);
     });
 
-    // Proactive token refresh every 10 minutes to prevent idle logout.
-    // Supabase JWTs expire (default 1hr) and only refresh on navigation
-    // via middleware. This keeps the session alive while the tab is open.
-    const refreshInterval = setInterval(async () => {
-      const { data, error } = await supabase.auth.getSession();
+    // Proactive token refresh to prevent idle logout.
+    // getSession() only reads localStorage — it does NOT refresh the JWT.
+    // getUser() makes a server call that triggers a real token refresh.
+    async function refreshSession() {
+      const { error } = await supabase.auth.getUser();
       if (error) {
         authDebug.log("state", "proactive refresh failed", { error: error.message });
-      } else if (data.session) {
-        authDebug.log("state", "proactive refresh ok", { expiresAt: data.session.expires_at });
+      } else {
+        authDebug.log("state", "proactive refresh ok");
       }
-    }, 10 * 60 * 1000);
+    }
 
-    // Also refresh when the tab becomes visible again (user returns from idle)
+    // Refresh every 4 minutes (well within the default 1hr JWT expiry)
+    const refreshInterval = setInterval(refreshSession, 4 * 60 * 1000);
+
+    // Refresh immediately when the tab becomes visible again
     function handleVisibilityChange() {
       if (document.visibilityState === "visible") {
         authDebug.log("state", "tab visible — refreshing session");
-        supabase.auth.getSession();
+        refreshSession();
       }
     }
     document.addEventListener("visibilitychange", handleVisibilityChange);

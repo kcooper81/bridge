@@ -69,14 +69,29 @@ const sections: Section[] = [
           'A copy is created with "(Copy)" appended to the title. The copy is editable.',
       },
       {
-        action: "Create a new folder",
+        action: "Create a new folder with a color",
         expected:
-          "Folder appears in the sidebar filter and in the folder dropdown when editing prompts.",
+          "Folder appears in the sidebar filter with its color-coded icon. Color picker shows 12 preset colors.",
+      },
+      {
+        action: "Edit a folder's color via Manage Categories modal",
+        expected:
+          "Color picker appears in edit mode. Updated color reflects in both list and grid views.",
       },
       {
         action: "Create a new team",
         expected:
-          "Team appears in the Team Management page.",
+          "Team appears as a filter chip on the Team page.",
+      },
+      {
+        action: "Double-click a team chip to open team detail view, then click the pencil icon to edit",
+        expected:
+          "Edit modal opens with name and description pre-filled. Changes save and reflect immediately.",
+      },
+      {
+        action: "Delete a team from the team detail view (trash icon)",
+        expected:
+          "Confirmation dialog shows member count. Team is removed and members are unlinked from it.",
       },
       {
         action: "Invite a member via email",
@@ -163,6 +178,11 @@ const sections: Section[] = [
           "Charts render (usage over time, top prompts, user activity). Data is current.",
       },
       {
+        action: "Scroll to the Prompt Effectiveness section on Analytics",
+        expected:
+          "Rating distribution bars, top effective prompts, least effective prompts, and unrated high-usage list all render.",
+      },
+      {
         action: "View Activity Log",
         expected:
           "Events are logged (prompt created, edited, deleted, user invited, etc.).",
@@ -181,6 +201,46 @@ const sections: Section[] = [
         action: "Install a template pack",
         expected:
           "Prompts and/or guidelines from the pack are created in your workspace.",
+      },
+      {
+        action: "Upload an avatar on the Profile tab (Settings → Profile)",
+        expected:
+          "Hover overlay with camera icon appears. After upload, avatar displays immediately. Max 2 MB, JPEG/PNG/WebP/GIF.",
+      },
+      {
+        action: "Remove your avatar using the X button",
+        expected:
+          "Avatar reverts to initials fallback. Toast confirms removal.",
+      },
+      {
+        action: "Change your own email address on the Profile tab",
+        expected:
+          'Inline "Update" button appears when email differs. Confirmation toast on success.',
+      },
+      {
+        action: "Change a non-admin member's email from the Team page (pencil icon)",
+        expected:
+          "Modal opens with current email pre-filled. Email updates on save. Admins cannot change other admins' emails.",
+      },
+      {
+        action: "Enable Two-Factor Authentication in Settings",
+        expected:
+          "QR code appears. Scan with authenticator app, enter 6-digit code to verify. 2FA card shows enabled state with disable option.",
+      },
+      {
+        action: 'Toggle "Require 2FA for Admins & Managers" in Organization preferences',
+        expected:
+          "Setting saves. Admins/managers without 2FA see a non-dismissible amber banner prompting enrollment.",
+      },
+      {
+        action: "Log in as an admin without 2FA when org requires it",
+        expected:
+          "MFA-required banner appears at top of dashboard. Banner links to Settings for enrollment.",
+      },
+      {
+        action: "Log in as an admin with 2FA enrolled",
+        expected:
+          "After password, redirected to /verify-mfa. Enter 6-digit TOTP code to complete login.",
       },
       {
         action: "Click the notification bell in the header",
@@ -249,6 +309,16 @@ const sections: Section[] = [
           "Suggestion appears in the admin's Approvals → Rule Suggestions tab.",
       },
       {
+        action: "Upload and remove your avatar on the Profile tab",
+        expected:
+          "Avatar upload and removal work the same as admin. Hover overlay, camera icon, X to remove.",
+      },
+      {
+        action: "Change your own email address on the Profile tab",
+        expected:
+          'Inline "Update" button appears. Email change works for own account.',
+      },
+      {
         action: "View the Analytics page",
         expected:
           "Basic analytics are accessible. Data loads correctly.",
@@ -312,6 +382,12 @@ const sections: Section[] = [
           'Test guardrails — paste a compliance pack test example (e.g. "Patient MRN: A12345678") into an AI tool',
         expected:
           "Block or warn fires depending on rule severity. Guardrails banner appears.",
+      },
+      {
+        action:
+          'Trigger a block and click "Send Sanitized Version" on the block overlay',
+        expected:
+          'Preview shows content with {{CATEGORY_N}} placeholders replacing sensitive data. Click "Confirm & Insert" to replace the chat input with the sanitized version.',
       },
       {
         action: "Check the guardrails status bar indicator",

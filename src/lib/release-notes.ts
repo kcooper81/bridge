@@ -7,9 +7,22 @@ export interface ReleaseNote {
   badge?: "new" | "fix" | "improvement";
 }
 
-export const APP_VERSION = "1.3.0";
+export const APP_VERSION = "1.4.0";
 
 export const RELEASE_NOTES: ReleaseNote[] = [
+  {
+    version: "1.4.0",
+    date: "2026-02-28",
+    title: "Two-Factor Auth, Profile & Team Improvements",
+    highlights: [
+      "Two-factor authentication (TOTP) for admins and managers with org-level enforcement",
+      "Avatar upload with drag-and-drop on your profile",
+      "Change your email address — admins can update member emails too",
+      "Color-coded categories with 12 preset colors",
+      "Edit and delete teams from the team detail view",
+    ],
+    badge: "new",
+  },
   {
     version: "1.3.0",
     date: "2026-02-27",

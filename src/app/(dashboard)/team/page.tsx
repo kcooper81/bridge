@@ -24,12 +24,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, ArrowUpDown, Loader2, Mail, Pencil, Plus, Search, Shield, ShieldOff, UserPlus, Users, X } from "lucide-react";
+import { ArrowLeft, ArrowUpDown, Loader2, Mail, Pencil, Plus, Search, Shield, ShieldOff, Trash2, UserPlus, Users, X } from "lucide-react";
 import { SelectWithQuickAdd } from "@/components/ui/select-with-quick-add";
 import { ExtensionStatusBadge } from "@/components/dashboard/extension-status-badge";
 import { NoOrgBanner } from "@/components/dashboard/no-org-banner";
 import {
   saveTeamApi,
+  deleteTeamApi,
   updateMemberRole,
   removeMember,
   sendInvite,
@@ -371,6 +372,22 @@ export default function TeamPage() {
     }
   }
 
+  async function handleDeleteTeam(team: Team) {
+    const teamMembers = members.filter((m) => m.teamIds.includes(team.id));
+    const msg = teamMembers.length > 0
+      ? `Delete "${team.name}"? ${teamMembers.length} member(s) will be removed from this team. This cannot be undone.`
+      : `Delete "${team.name}"? This cannot be undone.`;
+    if (!confirm(msg)) return;
+    const ok = await deleteTeamApi(team.id);
+    if (ok) {
+      toast.success("Team deleted");
+      setSelectedTeam(null);
+      refresh();
+    } else {
+      toast.error("Failed to delete team");
+    }
+  }
+
   // Team detail view
   if (selectedTeam) {
     const teamMembers = members.filter((m) => m.teamIds.includes(selectedTeam.id));
@@ -389,10 +406,18 @@ export default function TeamPage() {
               <h3 className="text-lg font-semibold">{selectedTeam.name}</h3>
               <p className="text-sm text-muted-foreground">{selectedTeam.description || `${teamMembers.length} members`}</p>
             </div>
-            <Button variant="outline" onClick={() => setAddMemberToTeamOpen(true)}>
-              <UserPlus className="mr-2 h-4 w-4" />
-              Add Member
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openTeamModal(selectedTeam)} title="Edit team">
+                <Pencil className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDeleteTeam(selectedTeam)} title="Delete team">
+                <Trash2 className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" onClick={() => setAddMemberToTeamOpen(true)}>
+                <UserPlus className="mr-2 h-4 w-4" />
+                Add Member
+              </Button>
+            </div>
           </div>
         </div>
 

@@ -24,7 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, ArrowUpDown, Loader2, Mail, Pencil, Plus, Search, Shield, ShieldOff, Trash2, UserPlus, Users, X } from "lucide-react";
+import { ArrowLeft, ArrowUpDown, FileSpreadsheet, Loader2, Mail, Pencil, Plus, Search, Shield, ShieldOff, Trash2, UserPlus, Users, X } from "lucide-react";
 import { SelectWithQuickAdd } from "@/components/ui/select-with-quick-add";
 import { ExtensionStatusBadge } from "@/components/dashboard/extension-status-badge";
 import { NoOrgBanner } from "@/components/dashboard/no-org-banner";
@@ -41,6 +41,7 @@ import {
   updateTeamMemberRole,
   toggleMemberShield,
 } from "@/lib/vault-api";
+import { BulkImportModal } from "@/components/dashboard/bulk-import-modal";
 import { toast } from "sonner";
 import { trackInviteSent } from "@/lib/analytics";
 import type { Invite, Team, UserRole } from "@/lib/types";
@@ -55,6 +56,7 @@ export default function TeamPage() {
   const [teamName, setTeamName] = useState("");
   const [teamDesc, setTeamDesc] = useState("");
 
+  const [bulkImportOpen, setBulkImportOpen] = useState(false);
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState<UserRole>("member");
@@ -504,6 +506,10 @@ export default function TeamPage() {
         description="Manage members, teams, and invitations"
         actions={
           <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={() => setBulkImportOpen(true)}>
+              <FileSpreadsheet className="mr-2 h-4 w-4" />
+              Import Members
+            </Button>
             <Button variant="outline" size="sm" onClick={() => setInviteModalOpen(true)}>
               <UserPlus className="mr-2 h-4 w-4" />
               Invite Member
@@ -859,6 +865,19 @@ export default function TeamPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Bulk Import Modal */}
+      <BulkImportModal
+        open={bulkImportOpen}
+        onOpenChange={setBulkImportOpen}
+        teams={teams}
+        members={members}
+        pendingInvites={invites}
+        onComplete={() => {
+          refresh();
+          getInvites().then(setInvites).catch(() => {});
+        }}
+      />
     </>
   );
 }

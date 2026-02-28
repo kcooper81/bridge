@@ -7,9 +7,21 @@ export interface ReleaseNote {
   badge?: "new" | "fix" | "improvement";
 }
 
-export const APP_VERSION = "1.4.0";
+export const APP_VERSION = "1.5.0";
 
 export const RELEASE_NOTES: ReleaseNote[] = [
+  {
+    version: "1.5.0",
+    date: "2026-02-28",
+    title: "Bulk Employee Import & Integrations",
+    highlights: [
+      "Bulk CSV import — upload or paste a CSV to invite dozens of members at once",
+      "Auto-create teams during import when team names don't exist yet",
+      "Preview validation before sending: see which rows are valid, which will create new teams, and which will be skipped",
+      "New Integrations settings page with Google Workspace, Microsoft Entra ID, and SCIM 2.0 cards",
+    ],
+    badge: "new",
+  },
   {
     version: "1.4.0",
     date: "2026-02-28",

@@ -18,6 +18,8 @@ import type {
   Analytics,
   ExportPack,
   ConversationLog,
+  BulkImportRow,
+  BulkImportResult,
 } from "@/lib/types";
 
 function supabase() {
@@ -590,6 +592,39 @@ export async function sendInvite(email: string, role: string, teamId?: string): 
   const data = await res.json();
   if (!res.ok) return { success: false, error: data.error };
   return { success: true };
+}
+
+export async function bulkInvite(
+  rows: BulkImportRow[]
+): Promise<BulkImportResult> {
+  const db = supabase();
+  const {
+    data: { session },
+  } = await db.auth.getSession();
+
+  if (!session) {
+    return { invited: [], skipped: [], errors: [{ email: "", reason: "Not authenticated" }], teamsCreated: [] };
+  }
+
+  const res = await fetch("/api/invite/bulk", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${session.access_token}`,
+    },
+    body: JSON.stringify({ rows }),
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    return {
+      invited: [],
+      skipped: [],
+      errors: [{ email: "", reason: data.error || "Bulk invite failed" }],
+      teamsCreated: [],
+    };
+  }
+  return data as BulkImportResult;
 }
 
 // ─── Team Members ───

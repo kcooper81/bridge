@@ -120,4 +120,21 @@
   - Both list and grid views show color-coded folder icons
   - Color picker inline in both create form and edit form
 
+- [x] Bulk Employee Import & Integrations Page
+  - Bulk CSV import modal: file upload, paste, column mapping preview, validation (green/yellow/red), progress bar, results summary
+  - API: `POST /api/invite/bulk` — validates rows, checks plan limits, auto-creates teams, batch invites via Resend
+  - `bulkInvite()` client function in vault-api.ts
+  - `BulkImportRow` and `BulkImportResult` types
+  - "Import Members" button on team page
+  - Integrations settings page (`/settings/integrations`) with cards for Google Workspace, Microsoft Entra ID (coming soon), SCIM 2.0 (coming soon)
+  - Integrations link card in Organization settings tab
+
 ## Pending
+- [ ] Google Workspace directory sync integration (requires Google Cloud project + OAuth credentials)
+- [ ] Domain-based auto-join (anyone with @company.com auto-joins org on signup)
+- [ ] Microsoft Entra ID (Azure AD) directory sync
+- [ ] SCIM 2.0 provisioning endpoint (for Okta, OneLogin, JumpCloud)
+- [ ] SAML SSO
+- [ ] Auto-deprovisioning (remove access when employee leaves directory)
+- [ ] Welcome email customization (custom message, branding for invites)
+- [ ] Bulk role assignment (select multiple members → change role at once)

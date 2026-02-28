@@ -99,6 +99,29 @@ const sections: Section[] = [
           "Invitation email sends successfully. Pending invite appears in the member list.",
       },
       {
+        action:
+          'Click "Import Members" on the Team page and download the CSV template',
+        expected:
+          "Modal opens with upload/paste area. CSV template file downloads with email, name, role, team columns.",
+      },
+      {
+        action:
+          "Paste CSV data with a mix of valid, invalid, and duplicate emails, then click Preview",
+        expected:
+          "Preview table shows green checks (valid), yellow warnings (new teams to be created), and red Xs (invalid/duplicate/already a member).",
+      },
+      {
+        action: 'Click "Send Invites" on the preview step',
+        expected:
+          "Progress bar shows. Results screen displays counts for invited, skipped, and errors. New teams are listed if created.",
+      },
+      {
+        action:
+          "Navigate to Settings → Organization and click the Integrations card",
+        expected:
+          "Integrations page loads with Google Workspace (available), Microsoft Entra ID (Coming Soon), and SCIM 2.0 (Coming Soon) cards.",
+      },
+      {
         action: 'Send an extension install email (Team → "Send Install Email")',
         expected:
           "Email delivers with extension install link.",

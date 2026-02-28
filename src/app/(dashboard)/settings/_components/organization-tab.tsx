@@ -8,9 +8,10 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Loader2, Building, Settings, ShieldCheck } from "lucide-react";
+import { ArrowRight, Loader2, Building, Plug, Settings, ShieldCheck } from "lucide-react";
 import { saveOrg } from "@/lib/vault-api";
 import { toast } from "sonner";
+import Link from "next/link";
 
 export function OrganizationTab() {
   const { org, currentUserRole, refresh } = useOrg();
@@ -154,6 +155,31 @@ export function OrganizationTab() {
           </Button>
         </CardContent>
       </Card>
+
+      {/* Integrations */}
+      {isAdmin && (
+        <Card>
+          <CardContent className="p-6">
+            <Link
+              href="/settings/integrations"
+              className="flex items-center justify-between group"
+            >
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-muted/50">
+                  <Plug className="h-5 w-5 text-muted-foreground" />
+                </div>
+                <div>
+                  <h3 className="font-semibold group-hover:underline">Integrations</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Connect Google Workspace, Microsoft Entra ID, or SCIM to sync your directory
+                  </p>
+                </div>
+              </div>
+              <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
+            </Link>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

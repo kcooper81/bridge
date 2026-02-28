@@ -425,6 +425,26 @@ export interface SuggestedRule {
   updated_at: string;
 }
 
+// ─── Bulk Import ───
+
+export interface BulkImportRow {
+  email: string;
+  name?: string;
+  role: UserRole;
+  teams: string[];
+  /** Validation status set client-side before submission */
+  status: "valid" | "warning" | "error";
+  /** Human-readable reason for warning/error */
+  statusMessage?: string;
+}
+
+export interface BulkImportResult {
+  invited: { email: string; name?: string }[];
+  skipped: { email: string; reason: string }[];
+  errors: { email: string; reason: string }[];
+  teamsCreated: string[];
+}
+
 export type DataImportType = "csv_terms" | "json_terms" | "crm_sync" | "hr_sync" | "custom_api";
 export type DataImportStatus = "pending" | "processing" | "completed" | "failed";
 

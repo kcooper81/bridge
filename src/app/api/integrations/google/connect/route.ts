@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
+import { PLAN_LIMITS } from "@/lib/constants";
+import type { PlanTier } from "@/lib/types";
 import { randomBytes } from "crypto";
 
 export async function GET(request: NextRequest) {
@@ -32,6 +34,22 @@ export async function GET(request: NextRequest) {
     const isAdmin = profile.is_super_admin || profile.role === "admin";
     if (!isAdmin) {
       return NextResponse.json({ error: "Admin only" }, { status: 403 });
+    }
+
+    // Plan gate: google_workspace_sync requires Business
+    if (!profile.is_super_admin) {
+      const { data: org } = await db
+        .from("organizations")
+        .select("plan")
+        .eq("id", profile.org_id)
+        .single();
+      const plan = (org?.plan || "free") as PlanTier;
+      if (!PLAN_LIMITS[plan]?.google_workspace_sync) {
+        return NextResponse.json(
+          { error: "Google Workspace sync requires a Business plan" },
+          { status: 403 }
+        );
+      }
     }
 
     const clientId = process.env.GOOGLE_CLIENT_ID;

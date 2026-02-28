@@ -15,7 +15,7 @@ export function canAccessFeature(
   plan: PlanTier,
   feature: keyof Pick<
     PlanLimits,
-    "analytics" | "import_export" | "custom_security" | "audit_log"
+    "analytics" | "import_export" | "custom_security" | "audit_log" | "bulk_import" | "bulk_role_assignment" | "custom_welcome_email" | "domain_auto_join" | "google_workspace_sync"
   >
 ): boolean {
   return getPlanLimits(plan)[feature];

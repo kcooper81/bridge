@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     // Get sender's profile
     const { data: profile } = await db
       .from("profiles")
-      .select("org_id, role, name")
+      .select("org_id, role, name, is_super_admin")
       .eq("id", user.id)
       .single();
 
@@ -77,6 +77,14 @@ export async function POST(request: NextRequest) {
 
     const currentPlan = (orgData?.plan || "free") as keyof typeof PLAN_LIMITS;
     const planLimits = PLAN_LIMITS[currentPlan] || PLAN_LIMITS.free;
+
+    // Plan gate: bulk_import requires Team+
+    if (!profile.is_super_admin && !planLimits.bulk_import) {
+      return NextResponse.json(
+        { error: "Bulk import requires a Team plan or higher" },
+        { status: 403 }
+      );
+    }
 
     // Count existing members + pending invites
     const [{ count: memberCount }, { count: pendingCount }] =

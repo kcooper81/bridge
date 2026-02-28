@@ -8,6 +8,11 @@ import {
   Activity,
   Headphones,
   ShieldCheck,
+  FileSpreadsheet,
+  UserCog,
+  Mail,
+  Globe,
+  Building2,
   type LucideIcon,
 } from "lucide-react";
 import type { PlanTier } from "@/lib/types";
@@ -62,6 +67,11 @@ export type BooleanFeature =
   | "import_export"
   | "custom_security"
   | "audit_log"
+  | "bulk_import"
+  | "bulk_role_assignment"
+  | "custom_welcome_email"
+  | "domain_auto_join"
+  | "google_workspace_sync"
   | "priority_support"
   | "sla";
 
@@ -122,6 +132,66 @@ export const FEATURE_CONFIG: Record<BooleanFeature, FeatureMeta> = {
     ],
     unlockPlan: "team",
     unlockPlanName: "Team",
+  },
+  bulk_import: {
+    icon: FileSpreadsheet,
+    title: "Bulk CSV Import",
+    description: "Import members in bulk via CSV spreadsheet upload.",
+    benefits: [
+      "Upload CSV with names, emails, and roles",
+      "Preview and validate before sending invites",
+      "Assign teams during import",
+    ],
+    unlockPlan: "team",
+    unlockPlanName: "Team",
+  },
+  bulk_role_assignment: {
+    icon: UserCog,
+    title: "Bulk Role Assignment",
+    description: "Select multiple members and change their roles at once.",
+    benefits: [
+      "Multi-select members with checkboxes",
+      "Batch update roles in one click",
+      "Streamline team management at scale",
+    ],
+    unlockPlan: "team",
+    unlockPlanName: "Team",
+  },
+  custom_welcome_email: {
+    icon: Mail,
+    title: "Custom Welcome Email",
+    description: "Add a personalized message to all invite emails from your organization.",
+    benefits: [
+      "Custom welcome message in invite emails",
+      "Reinforce company culture and onboarding",
+      "Up to 500 characters of personalized text",
+    ],
+    unlockPlan: "team",
+    unlockPlanName: "Team",
+  },
+  domain_auto_join: {
+    icon: Globe,
+    title: "Domain Auto-Join",
+    description: "New users with matching email domains automatically join your organization.",
+    benefits: [
+      "Zero-friction onboarding for your team",
+      "No manual invites needed for domain matches",
+      "Controlled via organization settings toggle",
+    ],
+    unlockPlan: "team",
+    unlockPlanName: "Team",
+  },
+  google_workspace_sync: {
+    icon: Building2,
+    title: "Google Workspace Sync",
+    description: "Connect your Google Workspace directory to import and sync employees.",
+    benefits: [
+      "One-click directory sync from Google Admin",
+      "Automatic Google Groups to Teams mapping",
+      "Keep your roster up to date effortlessly",
+    ],
+    unlockPlan: "business",
+    unlockPlanName: "Business",
   },
   priority_support: {
     icon: Headphones,

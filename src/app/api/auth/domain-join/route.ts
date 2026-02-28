@@ -67,6 +67,12 @@ export async function POST(request: NextRequest) {
 
     const targetOrg = matchingOrgs[0];
 
+    // Plan gate: domain_auto_join requires Team+
+    const targetPlan = (targetOrg.plan || "free") as PlanTier;
+    if (!PLAN_LIMITS[targetPlan]?.domain_auto_join) {
+      return NextResponse.json({ joined: false });
+    }
+
     // Verify user is in a solo personal org (member count = 1, plan = free)
     const { data: currentOrg } = await db
       .from("organizations")

@@ -25,7 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowLeft, ArrowUpDown, FileSpreadsheet, Loader2, Mail, Pencil, Plug, Plus, Search, Shield, ShieldOff, Trash2, UserPlus, Users, X } from "lucide-react";
+import { ArrowLeft, ArrowUpDown, CheckCircle2, FileSpreadsheet, Loader2, Mail, Pencil, Plug, Plus, Search, Shield, ShieldOff, Trash2, UserPlus, Users, X } from "lucide-react";
 import { SelectWithQuickAdd } from "@/components/ui/select-with-quick-add";
 import { ExtensionStatusBadge } from "@/components/dashboard/extension-status-badge";
 import { NoOrgBanner } from "@/components/dashboard/no-org-banner";
@@ -51,7 +51,7 @@ import Link from "next/link";
 
 export default function TeamPage() {
   const { teams, setTeams, members, currentUserRole, loading, refresh, noOrg } = useOrg();
-  const { checkLimit, planLimits } = useSubscription();
+  const { checkLimit, planLimits, canAccess } = useSubscription();
 
   const [teamModalOpen, setTeamModalOpen] = useState(false);
   const [editTeam, setEditTeam] = useState<Team | null>(null);
@@ -91,6 +91,7 @@ export default function TeamPage() {
 
   // Google Workspace sync
   const [googleConnected, setGoogleConnected] = useState<boolean | null>(null);
+  const [lastSyncedAt, setLastSyncedAt] = useState<string | null>(null);
   const [syncingGoogle, setSyncingGoogle] = useState(false);
   const [syncedRows, setSyncedRows] = useState<BulkImportRow[]>([]);
   const [syncImportOpen, setSyncImportOpen] = useState(false);
@@ -108,6 +109,7 @@ export default function TeamPage() {
         if (res.ok) {
           const data = await res.json();
           setGoogleConnected(data.connected);
+          if (data.lastSyncedAt) setLastSyncedAt(data.lastSyncedAt);
         }
       } catch { /* ignore */ }
     })();
@@ -128,6 +130,7 @@ export default function TeamPage() {
         toast.error(data.error || "Sync failed");
         return;
       }
+      setLastSyncedAt(new Date().toISOString());
       if (data.users?.length > 0) {
         setSyncedRows(data.users);
         setSyncImportOpen(true);
@@ -596,10 +599,12 @@ export default function TeamPage() {
         description="Manage members, teams, and invitations"
         actions={
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => setBulkImportOpen(true)}>
-              <FileSpreadsheet className="mr-2 h-4 w-4" />
-              Import Members
-            </Button>
+            {canAccess("bulk_import") && (
+              <Button variant="outline" size="sm" onClick={() => setBulkImportOpen(true)}>
+                <FileSpreadsheet className="mr-2 h-4 w-4" />
+                Import Members
+              </Button>
+            )}
             <Button variant="outline" size="sm" onClick={() => setInviteModalOpen(true)}>
               <UserPlus className="mr-2 h-4 w-4" />
               Invite Member
@@ -618,21 +623,43 @@ export default function TeamPage() {
       <LimitNudge feature="add_member" current={members.length} max={planLimits.max_members} className="mb-4" />
 
       {/* Google Workspace sync banner */}
-      {currentUserRole === "admin" && googleConnected !== null && (
-        <div className="flex items-center gap-3 rounded-lg border bg-muted/30 px-4 py-3 mb-4">
-          <Plug className="h-4 w-4 text-muted-foreground shrink-0" />
-          {googleConnected ? (
+      {currentUserRole === "admin" && (canAccess("google_workspace_sync") ? googleConnected !== null : true) && (
+        <div className={cn(
+          "flex items-center gap-3 rounded-lg border px-4 py-3 mb-4",
+          googleConnected && canAccess("google_workspace_sync") ? "border-green-200 bg-green-50/50 dark:border-green-800/50 dark:bg-green-950/20" : "bg-muted/30"
+        )}>
+          {!canAccess("google_workspace_sync") ? (
             <>
+              <Plug className="h-4 w-4 text-muted-foreground shrink-0" />
               <p className="text-sm text-muted-foreground flex-1">
-                Google Workspace is connected. Sync your directory to import new employees.
+                Sync your company directory from Google Workspace.
               </p>
-              <Button variant="outline" size="sm" onClick={handleGoogleSync} disabled={syncingGoogle}>
+              <Badge variant="secondary" className="text-xs shrink-0">Business</Badge>
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/settings/billing">Upgrade</Link>
+              </Button>
+            </>
+          ) : googleConnected ? (
+            <>
+              <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400 shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-green-700 dark:text-green-300">
+                  Google Workspace connected
+                </p>
+                {lastSyncedAt && (
+                  <p className="text-xs text-green-600/70 dark:text-green-400/70">
+                    Last synced {new Date(lastSyncedAt).toLocaleDateString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
+                  </p>
+                )}
+              </div>
+              <Button variant="outline" size="sm" onClick={handleGoogleSync} disabled={syncingGoogle} className="border-green-200 dark:border-green-800">
                 {syncingGoogle && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
                 Sync Directory
               </Button>
             </>
           ) : (
             <>
+              <Plug className="h-4 w-4 text-muted-foreground shrink-0" />
               <p className="text-sm text-muted-foreground flex-1">
                 Connect Google Workspace to import your company directory.
               </p>
@@ -716,7 +743,7 @@ export default function TeamPage() {
       </div>
 
       {/* Bulk action bar */}
-      {currentUserRole === "admin" && selectedMemberIds.size > 0 && (
+      {currentUserRole === "admin" && canAccess("bulk_role_assignment") && selectedMemberIds.size > 0 && (
         <div className="flex items-center gap-3 rounded-lg border bg-muted/50 px-4 py-2 mb-2">
           <span className="text-sm font-medium">{selectedMemberIds.size} selected</span>
           <Select value={bulkRole} onValueChange={(v) => setBulkRole(v as UserRole)}>
@@ -755,7 +782,7 @@ export default function TeamPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b bg-muted/50">
-                    {currentUserRole === "admin" && (
+                    {currentUserRole === "admin" && canAccess("bulk_role_assignment") && (
                       <th className="p-3 w-10">
                         <Checkbox
                           checked={
@@ -798,7 +825,7 @@ export default function TeamPage() {
                     const initials = member.name?.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2) || "U";
                     return (
                       <tr key={member.id} className={cn("border-b hover:bg-muted/30 transition-colors group", selectedMemberIds.has(member.id) && "bg-primary/5")}>
-                        {currentUserRole === "admin" && (
+                        {currentUserRole === "admin" && canAccess("bulk_role_assignment") && (
                           <td className="p-3 w-10">
                             {!member.isCurrentUser ? (
                               <Checkbox

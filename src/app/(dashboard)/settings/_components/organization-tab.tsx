@@ -9,13 +9,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowRight, Loader2, Building, Mail, Plug, Settings, ShieldCheck } from "lucide-react";
+import { ArrowRight, Lock, Loader2, Building, Mail, Plug, Settings, ShieldCheck } from "lucide-react";
 import { saveOrg } from "@/lib/vault-api";
+import { useSubscription } from "@/components/providers/subscription-provider";
 import { toast } from "sonner";
 import Link from "next/link";
 
 export function OrganizationTab() {
   const { org, currentUserRole, refresh } = useOrg();
+  const { canAccess } = useSubscription();
   const [name, setName] = useState(org?.name || "");
   const [domain, setDomain] = useState(org?.domain || "");
   const [saving, setSaving] = useState(false);
@@ -162,18 +164,28 @@ export function OrganizationTab() {
 
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label htmlFor="auto-join-domain">Auto-Join by Domain</Label>
+              <Label htmlFor="auto-join-domain" className="flex items-center gap-1.5">
+                Auto-Join by Domain
+                {!canAccess("domain_auto_join") && (
+                  <Badge variant="secondary" className="text-[10px] px-1.5 py-0 font-normal">
+                    <Lock className="h-2.5 w-2.5 mr-0.5" />
+                    Team
+                  </Badge>
+                )}
+              </Label>
               <p className="text-sm text-muted-foreground">
-                {org?.domain
-                  ? `New users with @${org.domain} emails will automatically join this organization`
-                  : "Set a domain above to enable auto-join"}
+                {!canAccess("domain_auto_join")
+                  ? "Upgrade to Team to let matching-domain users auto-join"
+                  : org?.domain
+                    ? `New users with @${org.domain} emails will automatically join this organization`
+                    : "Set a domain above to enable auto-join"}
               </p>
             </div>
             <Switch
               id="auto-join-domain"
               checked={autoJoinDomain}
               onCheckedChange={setAutoJoinDomain}
-              disabled={!isAdmin || !org?.domain}
+              disabled={!isAdmin || !org?.domain || !canAccess("domain_auto_join")}
             />
           </div>
 
@@ -186,36 +198,55 @@ export function OrganizationTab() {
 
       {/* Invite Email */}
       {isAdmin && (
-        <Card>
+        <Card className={!canAccess("custom_welcome_email") ? "opacity-60" : undefined}>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Mail className="h-5 w-5" />
               Invite Email
+              {!canAccess("custom_welcome_email") && (
+                <Badge variant="secondary" className="text-[10px] px-1.5 py-0 font-normal">
+                  <Lock className="h-2.5 w-2.5 mr-0.5" />
+                  Team
+                </Badge>
+              )}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="welcome-message">Custom Welcome Message</Label>
-              <p className="text-sm text-muted-foreground">
-                This message will appear at the top of all invite emails sent from your organization.
-              </p>
-              <Textarea
-                id="welcome-message"
-                placeholder="Welcome to our team! We use TeamPrompt to manage and share AI prompts..."
-                value={welcomeMessage}
-                onChange={(e) => {
-                  if (e.target.value.length <= 500) setWelcomeMessage(e.target.value);
-                }}
-                className="min-h-[100px]"
-              />
-              <p className="text-xs text-muted-foreground text-right">
-                {welcomeMessage.length}/500
-              </p>
-            </div>
-            <Button onClick={handleSavePrefs} disabled={savingPrefs}>
-              {savingPrefs && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save
-            </Button>
+            {!canAccess("custom_welcome_email") ? (
+              <div className="space-y-3">
+                <p className="text-sm text-muted-foreground">
+                  Add a personalized welcome message to all invite emails from your organization.
+                </p>
+                <Button variant="outline" size="sm" asChild>
+                  <Link href="/settings/billing">Upgrade to Team</Link>
+                </Button>
+              </div>
+            ) : (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="welcome-message">Custom Welcome Message</Label>
+                  <p className="text-sm text-muted-foreground">
+                    This message will appear at the top of all invite emails sent from your organization.
+                  </p>
+                  <Textarea
+                    id="welcome-message"
+                    placeholder="Welcome to our team! We use TeamPrompt to manage and share AI prompts..."
+                    value={welcomeMessage}
+                    onChange={(e) => {
+                      if (e.target.value.length <= 500) setWelcomeMessage(e.target.value);
+                    }}
+                    className="min-h-[100px]"
+                  />
+                  <p className="text-xs text-muted-foreground text-right">
+                    {welcomeMessage.length}/500
+                  </p>
+                </div>
+                <Button onClick={handleSavePrefs} disabled={savingPrefs}>
+                  {savingPrefs && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Save
+                </Button>
+              </>
+            )}
           </CardContent>
         </Card>
       )}

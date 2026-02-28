@@ -6,8 +6,9 @@ import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, CheckCircle2, Loader2, RefreshCw, Unplug } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Lock, Loader2, RefreshCw, Unplug } from "lucide-react";
 import { BulkImportModal } from "@/components/dashboard/bulk-import-modal";
+import { useSubscription } from "@/components/providers/subscription-provider";
 import { toast } from "sonner";
 import Link from "next/link";
 import type { BulkImportRow, Invite } from "@/lib/types";
@@ -53,8 +54,10 @@ function ScimIcon() {
 
 export default function IntegrationsPage() {
   const { currentUserRole, teams, members, refresh } = useOrg();
+  const { canAccess } = useSubscription();
   const searchParams = useSearchParams();
   const isAdmin = currentUserRole === "admin";
+  const canGoogle = canAccess("google_workspace_sync");
 
   const [googleStatus, setGoogleStatus] = useState<GoogleStatus>({ connected: false });
   const [loadingStatus, setLoadingStatus] = useState(true);
@@ -210,7 +213,12 @@ export default function IntegrationsPage() {
               <div className="p-2 rounded-lg bg-muted/50">
                 <GoogleIcon />
               </div>
-              {loadingStatus ? (
+              {!canGoogle ? (
+                <Badge variant="secondary" className="text-xs">
+                  <Lock className="mr-1 h-2.5 w-2.5" />
+                  Business
+                </Badge>
+              ) : loadingStatus ? (
                 <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
               ) : googleStatus.connected ? (
                 <Badge
@@ -232,7 +240,14 @@ export default function IntegrationsPage() {
               Sync your organization&apos;s directory from Google Workspace. Import users and map Google groups to TeamPrompt teams.
             </p>
 
-            {googleStatus.connected ? (
+            {!canGoogle ? (
+              <Button variant="outline" size="sm" className="w-full" asChild>
+                <Link href="/settings/billing">
+                  <Lock className="mr-2 h-3.5 w-3.5" />
+                  Upgrade to Business
+                </Link>
+              </Button>
+            ) : googleStatus.connected ? (
               <div className="space-y-3">
                 {googleStatus.adminEmail && (
                   <p className="text-xs text-muted-foreground">

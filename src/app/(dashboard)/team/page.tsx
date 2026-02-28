@@ -25,7 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowLeft, ArrowUpDown, FileSpreadsheet, Loader2, Mail, Pencil, Plus, Search, Shield, ShieldOff, Trash2, UserPlus, Users, X } from "lucide-react";
+import { ArrowLeft, ArrowUpDown, FileSpreadsheet, Loader2, Mail, Pencil, Plug, Plus, Search, Shield, ShieldOff, Trash2, UserPlus, Users, X } from "lucide-react";
 import { SelectWithQuickAdd } from "@/components/ui/select-with-quick-add";
 import { ExtensionStatusBadge } from "@/components/dashboard/extension-status-badge";
 import { NoOrgBanner } from "@/components/dashboard/no-org-banner";
@@ -45,8 +45,9 @@ import {
 import { BulkImportModal } from "@/components/dashboard/bulk-import-modal";
 import { toast } from "sonner";
 import { trackInviteSent } from "@/lib/analytics";
-import type { Invite, Team, UserRole } from "@/lib/types";
+import type { BulkImportRow, Invite, Team, UserRole } from "@/lib/types";
 import { UpgradePrompt, LimitNudge } from "@/components/upgrade";
+import Link from "next/link";
 
 export default function TeamPage() {
   const { teams, setTeams, members, currentUserRole, loading, refresh, noOrg } = useOrg();
@@ -87,6 +88,59 @@ export default function TeamPage() {
   const [emailTargetName, setEmailTargetName] = useState("");
   const [emailNewValue, setEmailNewValue] = useState("");
   const [savingEmail, setSavingEmail] = useState(false);
+
+  // Google Workspace sync
+  const [googleConnected, setGoogleConnected] = useState<boolean | null>(null);
+  const [syncingGoogle, setSyncingGoogle] = useState(false);
+  const [syncedRows, setSyncedRows] = useState<BulkImportRow[]>([]);
+  const [syncImportOpen, setSyncImportOpen] = useState(false);
+
+  useEffect(() => {
+    if (currentUserRole !== "admin") return;
+    (async () => {
+      try {
+        const supabase = (await import("@/lib/supabase/client")).createClient();
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) return;
+        const res = await fetch("/api/integrations/google/status", {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setGoogleConnected(data.connected);
+        }
+      } catch { /* ignore */ }
+    })();
+  }, [currentUserRole]);
+
+  async function handleGoogleSync() {
+    setSyncingGoogle(true);
+    try {
+      const supabase = (await import("@/lib/supabase/client")).createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      const res = await fetch("/api/integrations/google/sync", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error || "Sync failed");
+        return;
+      }
+      if (data.users?.length > 0) {
+        setSyncedRows(data.users);
+        setSyncImportOpen(true);
+        toast.success(`Found ${data.users.length} new user(s)`);
+      } else {
+        toast.info("All directory users are already members");
+      }
+    } catch {
+      toast.error("Sync failed");
+    } finally {
+      setSyncingGoogle(false);
+    }
+  }
 
   // Member search, filter & sort
   const [memberSearch, setMemberSearch] = useState("");
@@ -563,6 +617,33 @@ export default function TeamPage() {
       )}
       <LimitNudge feature="add_member" current={members.length} max={planLimits.max_members} className="mb-4" />
 
+      {/* Google Workspace sync banner */}
+      {currentUserRole === "admin" && googleConnected !== null && (
+        <div className="flex items-center gap-3 rounded-lg border bg-muted/30 px-4 py-3 mb-4">
+          <Plug className="h-4 w-4 text-muted-foreground shrink-0" />
+          {googleConnected ? (
+            <>
+              <p className="text-sm text-muted-foreground flex-1">
+                Google Workspace is connected. Sync your directory to import new employees.
+              </p>
+              <Button variant="outline" size="sm" onClick={handleGoogleSync} disabled={syncingGoogle}>
+                {syncingGoogle && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
+                Sync Directory
+              </Button>
+            </>
+          ) : (
+            <>
+              <p className="text-sm text-muted-foreground flex-1">
+                Connect Google Workspace to import your company directory.
+              </p>
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/settings/integrations">Connect</Link>
+              </Button>
+            </>
+          )}
+        </div>
+      )}
+
       {/* Search & Filters */}
       <div className="space-y-2 mb-3">
         <div className="flex flex-col sm:flex-row gap-2">
@@ -967,6 +1048,21 @@ export default function TeamPage() {
         pendingInvites={invites}
         onComplete={() => {
           refresh();
+          getInvites().then(setInvites).catch(() => {});
+        }}
+      />
+
+      {/* Google Sync Import Modal */}
+      <BulkImportModal
+        open={syncImportOpen}
+        onOpenChange={setSyncImportOpen}
+        teams={teams}
+        members={members}
+        pendingInvites={invites}
+        initialRows={syncedRows}
+        onComplete={() => {
+          refresh();
+          setSyncedRows([]);
           getInvites().then(setInvites).catch(() => {});
         }}
       />

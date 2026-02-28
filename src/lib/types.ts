@@ -59,6 +59,13 @@ export interface Organization {
     require_mfa_for_admins?: boolean;
     auto_join_domain?: boolean;
     invite_welcome_message?: string;
+    // Extension & security controls (admin-configurable)
+    require_signin_for_extension?: boolean;
+    guardrails_enabled?: boolean;
+    allow_guardrail_override?: boolean;
+    auto_redact_sensitive_data?: boolean;
+    allow_external_ai_tools?: boolean;
+    activity_logging_enabled?: boolean;
   } | null;
   security_settings?: Record<string, unknown> | null;
   is_suspended?: boolean;
@@ -227,6 +234,11 @@ export interface PlanLimits {
   basic_security: boolean;
   custom_security: boolean;
   audit_log: boolean;
+  bulk_import: boolean;
+  bulk_role_assignment: boolean;
+  custom_welcome_email: boolean;
+  domain_auto_join: boolean;
+  google_workspace_sync: boolean;
   priority_support: boolean;
   sla: boolean;
 }

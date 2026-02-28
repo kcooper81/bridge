@@ -7,9 +7,22 @@ export interface ReleaseNote {
   badge?: "new" | "fix" | "improvement";
 }
 
-export const APP_VERSION = "1.6.0";
+export const APP_VERSION = "1.7.0";
 
 export const RELEASE_NOTES: ReleaseNote[] = [
+  {
+    version: "1.7.0",
+    date: "2026-02-28",
+    title: "Admin Security Controls & Extension Settings",
+    highlights: [
+      "New Security settings tab — 6 org-level toggles to control extension behavior, guardrails, and activity logging",
+      "Disable guardrail overrides — treat all warnings as hard blocks for stricter enforcement",
+      "Auto-redact mode — automatically replace sensitive data with {{PLACEHOLDER}} tokens instead of blocking",
+      "Activity logging toggle — disable conversation logging while still tracking usage counts",
+      "Plan-gated security features with Team+ badges for custom_security and audit_log controls",
+    ],
+    badge: "new",
+  },
   {
     version: "1.6.0",
     date: "2026-02-28",

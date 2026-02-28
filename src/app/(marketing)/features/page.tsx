@@ -8,8 +8,10 @@ import {
   GitCompare,
   Globe,
   Import,
+  Settings,
   Shield,
   ShieldCheck,
+  Upload,
   Users,
   Zap,
 } from "lucide-react";
@@ -409,9 +411,9 @@ const features = [
       "Different people need different access. Admins manage policies, managers curate libraries, members use what's there.",
     details: [
       "Admin, Manager, and Member roles",
-      "Email invitations with 7-day expiry",
-      "Team grouping for department-level organization",
-      "Last-admin protection prevents lockout",
+      "Bulk CSV import and bulk role assignment",
+      "Google Workspace directory sync (Business)",
+      "Domain-based auto-join and custom welcome emails",
     ],
   },
   {
@@ -501,6 +503,32 @@ const features = [
       "Color-coded additions and deletions",
       "Full version history timeline",
       "Restore any previous version instantly",
+    ],
+  },
+  {
+    icon: Settings,
+    title: "Admin Security Controls",
+    badge: "NEW",
+    description:
+      "Fine-tune how the extension behaves across your organization. Control guardrails, sign-in requirements, activity logging, and more from a dedicated Security settings tab.",
+    details: [
+      "Toggle DLP guardrails on/off at the org level",
+      "Disable warning overrides to enforce hard blocks",
+      "Auto-redact sensitive data with placeholder tokens",
+      "Control activity logging and extension sign-in requirements",
+    ],
+  },
+  {
+    icon: Upload,
+    title: "Bulk Operations",
+    badge: "NEW",
+    description:
+      "Onboard entire departments at once. Import members via CSV, assign roles in bulk, and sync your Google Workspace directory — all from the Team page.",
+    details: [
+      "CSV import with preview validation and auto-team creation",
+      "Select multiple members for bulk role changes",
+      "Google Workspace directory sync with one-click invite",
+      "Domain-based auto-join for zero-friction onboarding",
     ],
   },
 ];

@@ -40,6 +40,14 @@ export async function POST(request: NextRequest) {
       return withCors(NextResponse.json({ error: "No organization" }, { status: 403 }), request);
     }
 
+    // Check if activity logging is disabled at the org level
+    const { data: orgRow } = await db
+      .from("organizations")
+      .select("settings")
+      .eq("id", profile.org_id)
+      .single();
+    const orgSettings = (orgRow?.settings || {}) as Record<string, unknown>;
+
     const body = await request.json();
     const { ai_tool, prompt_text, prompt_id, response_text, guardrail_flags, action, metadata } = body;
 
@@ -61,6 +69,14 @@ export async function POST(request: NextRequest) {
 
     if (metadata && (typeof metadata !== "object" || Array.isArray(metadata))) {
       return withCors(NextResponse.json({ error: "metadata must be an object" }, { status: 400 }), request);
+    }
+
+    // If activity logging is disabled, skip the insert but still increment usage
+    if (orgSettings.activity_logging_enabled === false) {
+      if (prompt_id && action !== "blocked") {
+        await db.rpc("increment_usage_count", { prompt_id });
+      }
+      return withCors(NextResponse.json({ success: true, skipped: true }), request);
     }
 
     const { data: log, error: insertError } = await db

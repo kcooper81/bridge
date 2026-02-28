@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
       ? `team_id.is.null,team_id.in.(${userTeamIds.join(",")})`
       : "team_id.is.null";
 
-    // Fetch active security rules, sensitive terms, AND org security settings
+    // Fetch active security rules, sensitive terms, AND org settings
     const [rulesResult, termsResult, orgResult] = await Promise.all([
       db
         .from("security_rules")
@@ -92,10 +92,17 @@ export async function POST(request: NextRequest) {
         .or(teamFilter),
       db
         .from("organizations")
-        .select("security_settings")
+        .select("security_settings, settings")
         .eq("id", profile.org_id)
         .single(),
     ]);
+
+    const orgSettings = (orgResult.data?.settings || {}) as Record<string, unknown>;
+
+    // Org-level guardrails kill switch — if admin has disabled guardrails entirely
+    if (orgSettings.guardrails_enabled === false) {
+      return withCors(NextResponse.json({ passed: true, violations: [], action: "allow" }), request);
+    }
 
     const activeRules = rulesResult.data || [];
     const activeTerms = termsResult.data || [];
@@ -217,7 +224,11 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const hasBlock = violations.some((v) => v.severity === "block");
+    // If admin disabled overrides, treat all "warn" as "block"
+    const overrideDisabled = orgSettings.allow_guardrail_override === false;
+    const hasBlock =
+      violations.some((v) => v.severity === "block") ||
+      (overrideDisabled && violations.some((v) => v.severity === "warn"));
 
     // Build sanitized content with placeholder tokens
     let sanitized_content: string | undefined;
@@ -312,10 +323,24 @@ export async function POST(request: NextRequest) {
       replacements.reverse(); // Return in document order
     }
 
+    // Determine action: auto-redact takes priority over warn when enabled
+    const autoRedactEnabled = orgSettings.auto_redact_sensitive_data === true;
+    let action: string;
+    if (hasBlock) {
+      action = "block";
+    } else if (autoRedactEnabled && violations.length > 0) {
+      action = "auto_redact";
+    } else if (violations.length > 0) {
+      action = "warn";
+    } else {
+      action = "allow";
+    }
+
     return withCors(NextResponse.json({
-      passed: !hasBlock,
+      passed: action !== "block",
       violations,
-      action: hasBlock ? "block" : violations.length > 0 ? "warn" : "allow",
+      action,
+      allow_override: !overrideDisabled,
       ...(sanitized_content !== undefined && { sanitized_content, replacements }),
     }), request);
   } catch (error) {

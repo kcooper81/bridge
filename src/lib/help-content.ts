@@ -225,6 +225,11 @@ const _RAW_CATEGORIES: RawCategory[] = [
         keywords: ["enable", "setup", "first time", "activate", "default rules"],
       },
       {
+        q: "What are admin security settings?",
+        a: "Admin security settings are org-level controls that govern how the browser extension behaves for all members. Admins can configure these from Settings → Security. The 6 settings are:\n\n• **Require Sign-in for Extension** (default: on) — Users must sign in before the extension activates.\n• **Allow All AI Tools** (default: on, Team+) — When disabled, the extension only works on approved AI platforms.\n• **Enable DLP Guardrails** (default: on) — Master switch for all guardrail scanning. Turning this off disables all DLP checks org-wide.\n• **Allow Warning Override** (default: on, Team+) — When disabled, warning-level detections are treated as hard blocks. Users cannot proceed past any guardrail detection.\n• **Auto-Redact Sensitive Data** (default: off, Team+) — Automatically replaces detected sensitive data with {{PLACEHOLDER}} tokens instead of blocking.\n• **Activity Logging** (default: on, Team+) — Logs all AI interactions to the Activity Log. Disabling stops recording but still tracks usage counts.\n\nSome settings are plan-gated and require a Team or Business plan. Changes take effect immediately for all members.",
+        keywords: ["admin security", "security settings", "extension controls", "org settings", "guardrails toggle", "activity logging", "auto-redact", "override"],
+      },
+      {
         q: "What are compliance policy packs?",
         a: "Compliance policy packs are pre-built bundles of security rules designed for specific regulatory frameworks. TeamPrompt includes 6 packs: HIPAA (protected health information), GDPR (EU personal data), PCI-DSS (payment card data), CCPA (California consumer privacy), SOC 2 (service organization controls), and General PII (common personally identifiable information). Install any pack with one click from the Guardrails page — all relevant rules activate immediately. You can customize or extend any pack after installation.",
         keywords: ["compliance", "policy packs", "hipaa", "gdpr", "pci-dss", "ccpa", "soc2", "regulatory"],

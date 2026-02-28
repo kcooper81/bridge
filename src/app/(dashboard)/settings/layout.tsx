@@ -5,12 +5,13 @@ import { usePathname } from "next/navigation";
 import { useOrg } from "@/components/providers/org-provider";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { cn } from "@/lib/utils";
-import { User, Building, CreditCard, Receipt } from "lucide-react";
+import { User, Building, CreditCard, Receipt, ShieldCheck } from "lucide-react";
 import type { UserRole } from "@/lib/types";
 
 const tabs: { label: string; href: string; icon: typeof User; roles?: UserRole[] }[] = [
   { label: "Profile", href: "/settings", icon: User },
   { label: "Organization", href: "/settings/organization", icon: Building, roles: ["admin", "manager"] as UserRole[] },
+  { label: "Security", href: "/settings/security", icon: ShieldCheck, roles: ["admin"] as UserRole[] },
   { label: "Plan & Usage", href: "/settings/plan", icon: CreditCard, roles: ["admin", "manager"] },
   { label: "Billing", href: "/settings/billing", icon: Receipt, roles: ["admin", "manager"] },
 ];

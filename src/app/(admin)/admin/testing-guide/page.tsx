@@ -324,6 +324,42 @@ const sections: Section[] = [
         expected:
           "Release notes modal/page opens showing recent changes.",
       },
+      {
+        action:
+          "Navigate to Settings → Security tab",
+        expected:
+          "Security page loads with 3 cards: Extension Access, Guardrail Behavior, and Activity & Privacy. All 6 toggles render with correct defaults.",
+      },
+      {
+        action:
+          "Toggle 'Enable DLP Guardrails' off in Settings → Security",
+        expected:
+          "Warning banner appears: 'DLP guardrails are disabled.' Override and Auto-Redact toggles become visually disabled. Setting persists on reload.",
+      },
+      {
+        action:
+          "Toggle 'Allow Warning Override' off and test a warn-level guardrail in the extension",
+        expected:
+          "Extension treats the warning as a hard block. User cannot proceed past the detection.",
+      },
+      {
+        action:
+          "Toggle 'Auto-Redact Sensitive Data' on and trigger a guardrail in the extension",
+        expected:
+          "Extension auto-replaces detected data with {{PLACEHOLDER}} tokens instead of blocking. Scan response returns action: 'auto_redact'.",
+      },
+      {
+        action:
+          "Toggle 'Activity Logging' off and send a message in the extension",
+        expected:
+          "Message sends successfully. No new entry appears in the Activity Log. Usage count still increments if a prompt was used.",
+      },
+      {
+        action:
+          "Verify plan-gated toggles on a Free plan org (Allow All AI Tools, Allow Warning Override, Auto-Redact, Activity Logging)",
+        expected:
+          "Gated toggles show Lock + 'Team' badge and are disabled. Upgrading to Team enables them.",
+      },
     ],
   },
   {

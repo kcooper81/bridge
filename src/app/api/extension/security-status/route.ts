@@ -40,6 +40,23 @@ export async function GET(request: NextRequest) {
       return withCors(NextResponse.json({ error: "No organization" }, { status: 403 }), request);
     }
 
+    // Fetch org settings for extension configuration
+    const { data: orgRow } = await db
+      .from("organizations")
+      .select("settings")
+      .eq("id", profile.org_id)
+      .single();
+    const orgSettings = (orgRow?.settings || {}) as Record<string, unknown>;
+
+    const extensionSettings = {
+      require_signin_for_extension: orgSettings.require_signin_for_extension ?? true,
+      guardrails_enabled: orgSettings.guardrails_enabled ?? true,
+      allow_guardrail_override: orgSettings.allow_guardrail_override ?? true,
+      auto_redact_sensitive_data: orgSettings.auto_redact_sensitive_data ?? false,
+      allow_external_ai_tools: orgSettings.allow_external_ai_tools ?? true,
+      activity_logging_enabled: orgSettings.activity_logging_enabled ?? true,
+    };
+
     // Per-member shield disable — return early with disabled status
     if (profile.shield_disabled === true) {
       return withCors(NextResponse.json({
@@ -48,6 +65,7 @@ export async function GET(request: NextRequest) {
         activeRuleCount: 0,
         weeklyStats: { blocked: 0, warned: 0, total: 0 },
         recentViolations: [],
+        extensionSettings,
       }), request);
     }
 
@@ -131,6 +149,7 @@ export async function GET(request: NextRequest) {
         total: weeklyViolations.length,
       },
       recentViolations,
+      extensionSettings,
     }), request);
   } catch (error) {
     console.error("Extension security-status error:", error);

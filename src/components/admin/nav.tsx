@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
+import type { SuperAdminRole } from "@/lib/constants";
 import {
   LayoutDashboard,
   Building2,
@@ -16,6 +17,7 @@ import {
   Ticket,
   Settings,
   ClipboardCheck,
+  UserCog,
   Menu,
   X,
 } from "lucide-react";
@@ -26,25 +28,34 @@ interface NavBadgeCounts {
   unresolvedErrors: number;
 }
 
-const navItems = [
-  { href: "/admin", label: "Dashboard", icon: LayoutDashboard, badgeKey: null },
-  { href: "/admin/organizations", label: "Organizations", icon: Building2, badgeKey: null },
-  { href: "/admin/users", label: "Users", icon: Users, badgeKey: null },
-  { href: "/admin/subscriptions", label: "Subscriptions", icon: CreditCard, badgeKey: null },
-  { href: "/admin/analytics", label: "Analytics", icon: BarChart3, badgeKey: null },
-  { href: "/admin/activity", label: "Activity Logs", icon: ScrollText, badgeKey: null },
-  { href: "/admin/tickets", label: "Tickets", icon: Ticket, badgeKey: "newTickets" as const },
-  { href: "/admin/errors", label: "Error Logs", icon: AlertTriangle, badgeKey: "unresolvedErrors" as const },
-  { href: "/admin/testing-guide", label: "Testing Guide", icon: ClipboardCheck, badgeKey: null },
-  { href: "/admin/settings", label: "Settings", icon: Settings, badgeKey: null },
+const allNavItems = [
+  { href: "/admin", label: "Dashboard", icon: LayoutDashboard, badgeKey: null, supportVisible: false },
+  { href: "/admin/organizations", label: "Organizations", icon: Building2, badgeKey: null, supportVisible: false },
+  { href: "/admin/users", label: "Users", icon: Users, badgeKey: null, supportVisible: false },
+  { href: "/admin/subscriptions", label: "Subscriptions", icon: CreditCard, badgeKey: null, supportVisible: false },
+  { href: "/admin/analytics", label: "Analytics", icon: BarChart3, badgeKey: null, supportVisible: false },
+  { href: "/admin/activity", label: "Activity Logs", icon: ScrollText, badgeKey: null, supportVisible: false },
+  { href: "/admin/tickets", label: "Tickets", icon: Ticket, badgeKey: "newTickets" as const, supportVisible: true },
+  { href: "/admin/errors", label: "Error Logs", icon: AlertTriangle, badgeKey: "unresolvedErrors" as const, supportVisible: false },
+  { href: "/admin/testing-guide", label: "Testing Guide", icon: ClipboardCheck, badgeKey: null, supportVisible: true },
+  { href: "/admin/settings", label: "Settings", icon: Settings, badgeKey: null, supportVisible: false },
+  { href: "/admin/admin-users", label: "Admin Users", icon: UserCog, badgeKey: null, supportVisible: false, superAdminOnly: true },
 ];
 
-export function AdminNav() {
+export function AdminNav({ superAdminRole }: { superAdminRole: SuperAdminRole | null }) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [badges, setBadges] = useState<NavBadgeCounts>({
     newTickets: 0,
     unresolvedErrors: 0,
+  });
+
+  const isSupport = superAdminRole === "support";
+
+  const navItems = allNavItems.filter((item) => {
+    if (isSupport) return item.supportVisible;
+    if (item.superAdminOnly && isSupport) return false;
+    return true;
   });
 
   useEffect(() => {
@@ -73,7 +84,7 @@ export function AdminNav() {
     });
   };
 
-  const renderNavItem = (item: (typeof navItems)[0], mobile?: boolean) => {
+  const renderNavItem = (item: (typeof allNavItems)[0], mobile?: boolean) => {
     const isActive =
       pathname === item.href ||
       (item.href !== "/admin" && pathname.startsWith(item.href));

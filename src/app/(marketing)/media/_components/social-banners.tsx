@@ -1,52 +1,75 @@
+import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { Check } from "lucide-react";
 
 /* ── Shared sub-components ──────────────────────── */
 
 function FeaturePill({ label }: { label: string }) {
   return (
-    <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-white/10 text-[9px] sm:text-[10px] font-medium text-white/90 whitespace-nowrap">
+    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white/10 text-[9px] sm:text-[10px] font-medium text-white/90 whitespace-nowrap">
+      <Check className="h-2.5 w-2.5 text-blue-400" />
       {label}
     </span>
   );
 }
 
 function MiniVaultMockup({ className }: { className?: string }) {
+  const categories = [
+    { color: "bg-blue-400", label: "Sales outreach", count: 142, width: 85 },
+    { color: "bg-emerald-400", label: "Customer support", count: 89, width: 70 },
+    { color: "bg-amber-400", label: "Marketing copy", count: 67, width: 60 },
+    { color: "bg-purple-400", label: "Legal review", count: 34, width: 50 },
+  ];
+
   return (
     <div
       className={cn(
-        "rounded-lg bg-white/10 backdrop-blur-sm border border-white/10 overflow-hidden",
+        "rounded-lg bg-white/[0.07] backdrop-blur-sm border border-white/10 overflow-hidden shadow-2xl",
         className
       )}
     >
       {/* Browser chrome */}
-      <div className="flex items-center gap-1 px-2 py-1.5 border-b border-white/10">
-        <div className="w-1.5 h-1.5 rounded-full bg-red-400/50" />
-        <div className="w-1.5 h-1.5 rounded-full bg-yellow-400/50" />
-        <div className="w-1.5 h-1.5 rounded-full bg-green-400/50" />
-        <div className="ml-1.5 flex-1 h-3 rounded bg-white/5" />
+      <div className="flex items-center gap-1.5 px-3 py-2 border-b border-white/10 bg-white/[0.03]">
+        <div className="w-2 h-2 rounded-full bg-red-400/60" />
+        <div className="w-2 h-2 rounded-full bg-yellow-400/60" />
+        <div className="w-2 h-2 rounded-full bg-green-400/60" />
+        <div className="ml-2 flex-1 h-4 rounded-md bg-white/[0.06] flex items-center px-2">
+          <span className="text-[6px] text-white/30 font-medium">teamprompt.app/vault</span>
+        </div>
       </div>
-      {/* Vault rows */}
-      <div className="p-2 space-y-1.5">
-        {[85, 70, 60, 50].map((w, i) => (
-          <div key={i} className="flex items-center gap-1.5">
-            <div className="w-4 h-4 rounded bg-blue-400/20 shrink-0" />
-            <div className="flex-1 space-y-0.5">
-              <div
-                className="h-1.5 rounded bg-white/15"
-                style={{ width: `${w}%` }}
-              />
-              <div
-                className="h-1 rounded bg-white/8"
-                style={{ width: `${w - 20}%` }}
-              />
-            </div>
-            <div className="h-3 w-8 rounded-full bg-blue-400/15 flex items-center justify-center">
-              <span className="text-[6px] text-blue-300 font-medium">
-                {[142, 89, 67, 34][i]}
-              </span>
-            </div>
+      <div className="flex">
+        {/* Sidebar */}
+        <div className="w-14 border-r border-white/10 p-2 space-y-2 bg-white/[0.02]">
+          <div className="w-full h-5 rounded bg-blue-500/20 flex items-center justify-center">
+            <span className="text-[5px] text-blue-300 font-bold">Vault</span>
           </div>
-        ))}
+          <div className="w-full h-4 rounded bg-white/5" />
+          <div className="w-full h-4 rounded bg-white/5" />
+          <div className="w-full h-4 rounded bg-white/5" />
+        </div>
+        {/* Prompt rows */}
+        <div className="flex-1 p-2 space-y-1.5">
+          {categories.map((item, i) => (
+            <div key={i} className="flex items-center gap-1.5 rounded-md bg-white/[0.03] px-1.5 py-1">
+              <div className={cn("w-1.5 h-1.5 rounded-full shrink-0", item.color)} />
+              <div className="flex-1 space-y-0.5">
+                <div
+                  className="h-1.5 rounded bg-white/15"
+                  style={{ width: `${item.width}%` }}
+                />
+                <div
+                  className="h-1 rounded bg-white/[0.06]"
+                  style={{ width: `${item.width - 20}%` }}
+                />
+              </div>
+              <div className="h-3.5 w-9 rounded-full bg-blue-400/15 flex items-center justify-center">
+                <span className="text-[6px] text-blue-300 font-medium">
+                  {item.count}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -55,12 +78,13 @@ function MiniVaultMockup({ className }: { className?: string }) {
 function LogoWordmark() {
   return (
     <div className="flex items-center gap-2">
-      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-blue-500 flex items-center justify-center">
-        <span className="text-white font-bold text-sm sm:text-base">T</span>
-      </div>
-      <span className="text-white font-bold text-lg sm:text-xl tracking-tight">
-        TeamPrompt
-      </span>
+      <Image
+        src="/brand/logo-wordmark-white.svg"
+        alt="TeamPrompt"
+        width={160}
+        height={32}
+        className="h-6 sm:h-7 w-auto"
+      />
     </div>
   );
 }
@@ -69,11 +93,11 @@ function Tagline({ className }: { className?: string }) {
   return (
     <p
       className={cn(
-        "text-white/70 text-[10px] sm:text-xs font-medium",
+        "text-white/80 text-[11px] sm:text-xs font-semibold tracking-wide",
         className
       )}
     >
-      AI Prompt Management for Teams
+      Your team&apos;s AI prompt library — with built-in guardrails
     </p>
   );
 }
@@ -81,24 +105,43 @@ function Tagline({ className }: { className?: string }) {
 function FeaturePills() {
   return (
     <div className="flex flex-wrap gap-1.5">
-      <FeaturePill label="Shared Vault" />
-      <FeaturePill label="AI Guardrails" />
-      <FeaturePill label="Compliance Packs" />
-      <FeaturePill label="Analytics" />
+      <FeaturePill label="Shared Prompt Vault" />
+      <FeaturePill label="DLP Guardrails" />
+      <FeaturePill label="Usage Analytics" />
+      <FeaturePill label="One-Click Insert" />
     </div>
   );
 }
 
+const aiToolLogos = [
+  { name: "ChatGPT", initial: "G", color: "bg-emerald-500/20 text-emerald-300" },
+  { name: "Claude", initial: "C", color: "bg-amber-500/20 text-amber-300" },
+  { name: "Gemini", initial: "G", color: "bg-blue-500/20 text-blue-300" },
+  { name: "Copilot", initial: "C", color: "bg-cyan-500/20 text-cyan-300" },
+  { name: "Perplexity", initial: "P", color: "bg-purple-500/20 text-purple-300" },
+];
+
 function CompatibilityLine({ className }: { className?: string }) {
   return (
-    <p
-      className={cn(
-        "text-white/40 text-[7px] sm:text-[8px] font-medium",
-        className
-      )}
-    >
-      Works with ChatGPT, Claude, Gemini, Copilot, Perplexity
-    </p>
+    <div className={cn("flex items-center gap-2", className)}>
+      <span className="text-white/30 text-[7px] sm:text-[8px] font-medium uppercase tracking-wider">
+        Works with
+      </span>
+      <div className="flex items-center gap-1">
+        {aiToolLogos.map((tool) => (
+          <div
+            key={tool.name}
+            className={cn(
+              "w-4 h-4 rounded-full flex items-center justify-center",
+              tool.color
+            )}
+            title={tool.name}
+          >
+            <span className="text-[6px] font-bold">{tool.initial}</span>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -116,15 +159,23 @@ function BannerShell({
   return (
     <div
       className={cn(
-        "w-full rounded-xl overflow-hidden bg-gradient-to-br from-blue-600 via-blue-700 to-slate-900",
+        "w-full rounded-xl overflow-hidden bg-[#0F1117]",
         className
       )}
       style={{ aspectRatio }}
     >
       <div className="w-full h-full relative p-4 sm:p-6 flex flex-col justify-between">
+        {/* Subtle radial blue glow */}
+        <div
+          className="absolute inset-0 opacity-30"
+          style={{
+            background:
+              "radial-gradient(ellipse 60% 50% at 70% 50%, rgba(37, 99, 235, 0.15) 0%, transparent 70%)",
+          }}
+        />
         {/* Subtle grid overlay */}
         <div
-          className="absolute inset-0 opacity-[0.04]"
+          className="absolute inset-0 opacity-[0.03]"
           style={{
             backgroundImage:
               "linear-gradient(white 1px, transparent 1px), linear-gradient(90deg, white 1px, transparent 1px)",
@@ -207,7 +258,7 @@ export function YouTubeBanner() {
       <div className="flex flex-col items-center justify-center h-full text-center gap-4">
         <LogoWordmark />
         <p className="text-white/80 text-sm sm:text-base font-semibold max-w-md">
-          AI Prompt Management for Teams
+          Your team&apos;s AI prompt library — with built-in guardrails
         </p>
         <FeaturePills />
         <MiniVaultMockup className="w-full max-w-xs" />

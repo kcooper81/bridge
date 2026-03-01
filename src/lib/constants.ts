@@ -1,6 +1,11 @@
 import type { PlanLimits, PlanTier, GuidelineRules } from "./types";
 
-export const SUPER_ADMIN_EMAILS = ["admin@teamprompt.app"];
+export const SUPER_ADMIN_EMAILS = [
+  "admin@teamprompt.app",
+  "harisharmaofficialldn@gmail.com",
+];
+
+export type SuperAdminRole = "super_admin" | "support";
 
 export const SITE_NAME = "TeamPrompt";
 export const SITE_URL =

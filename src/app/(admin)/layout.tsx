@@ -3,6 +3,7 @@ import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { AdminNav } from "@/components/admin/nav";
 import { AdminHeader } from "@/components/admin/header";
 import { SUPER_ADMIN_EMAILS } from "@/lib/constants";
+import type { SuperAdminRole } from "@/lib/constants";
 
 export default async function AdminLayout({
   children,
@@ -20,14 +21,16 @@ export default async function AdminLayout({
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("is_super_admin")
+    .select("is_super_admin, super_admin_role")
     .eq("id", user.id)
     .single();
 
   const emailIsAdmin = SUPER_ADMIN_EMAILS.includes(user.email || "");
   const isSuperAdmin = profile?.is_super_admin === true || emailIsAdmin;
+  const isSupportStaff = profile?.super_admin_role === "support";
 
-  if (!isSuperAdmin) {
+  // Allow access for super admins and support staff
+  if (!isSuperAdmin && !isSupportStaff) {
     redirect("/vault");
   }
 
@@ -41,11 +44,17 @@ export default async function AdminLayout({
       .eq("id", user.id);
   }
 
+  const superAdminRole: SuperAdminRole | null = isSuperAdmin
+    ? (profile?.super_admin_role as SuperAdminRole) || "super_admin"
+    : isSupportStaff
+      ? "support"
+      : null;
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
       <AdminHeader user={user} />
       <div className="flex">
-        <AdminNav />
+        <AdminNav superAdminRole={superAdminRole} />
         <main className="flex-1 p-3 sm:p-4 md:p-6 min-w-0 overflow-x-hidden">
           {children}
         </main>

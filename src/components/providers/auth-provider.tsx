@@ -5,12 +5,15 @@ import { createClient } from "@/lib/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
 import { authDebug } from "@/lib/auth-debug"; // AUTH-DEBUG
 import { SUPER_ADMIN_EMAILS } from "@/lib/constants";
+import type { SuperAdminRole } from "@/lib/constants";
 
 interface AuthContextValue {
   user: User | null;
   session: Session | null;
   loading: boolean;
   isSuperAdmin: boolean;
+  isSupportStaff: boolean;
+  superAdminRole: SuperAdminRole | null;
   signOut: () => Promise<void>;
 }
 
@@ -29,6 +32,7 @@ export function AuthProvider({
   const [session, setSession] = useState<Session | null>(initialSession);
   const [loading] = useState(false);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [superAdminRole, setSuperAdminRole] = useState<SuperAdminRole | null>(null);
 
   useEffect(() => {
     const supabase = createClient();
@@ -108,21 +112,31 @@ export function AuthProvider({
     async function fetchSuperAdmin() {
       if (!user) {
         setIsSuperAdmin(false);
+        setSuperAdminRole(null);
         return;
       }
       const supabase = createClient();
       const { data } = await supabase
         .from("profiles")
-        .select("is_super_admin")
+        .select("is_super_admin, super_admin_role")
         .eq("id", user.id)
         .maybeSingle();
-      setIsSuperAdmin(
-        data?.is_super_admin === true ||
-          SUPER_ADMIN_EMAILS.includes(user.email || "")
-      );
+
+      const emailIsAdmin = SUPER_ADMIN_EMAILS.includes(user.email || "");
+      const isAdmin = data?.is_super_admin === true || emailIsAdmin;
+      const role: SuperAdminRole | null = isAdmin
+        ? (data?.super_admin_role as SuperAdminRole) || "super_admin"
+        : data?.super_admin_role === "support"
+          ? "support"
+          : null;
+
+      setIsSuperAdmin(isAdmin);
+      setSuperAdminRole(role);
     }
     fetchSuperAdmin();
   }, [user]);
+
+  const isSupportStaff = superAdminRole === "support";
 
   async function signOut() {
     authDebug.log("state", "signOut initiated"); // AUTH-DEBUG
@@ -132,7 +146,7 @@ export function AuthProvider({
   }
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, isSuperAdmin, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading, isSuperAdmin, isSupportStaff, superAdminRole, signOut }}>
       {children}
     </AuthContext.Provider>
   );

@@ -147,38 +147,43 @@ const storePromos = [
 
 const socialMediaAssets = [
   {
-    platform: "YouTube",
-    assets: [
-      { file: "/store-assets/social-profile-800.png", label: "Profile picture", dims: "800 x 800" },
-      { file: "/store-assets/youtube-channel-art.png", label: "Channel art / banner", dims: "2560 x 1440" },
-    ],
-  },
-  {
     platform: "X (Twitter)",
+    BannerComponent: TwitterBanner,
     assets: [
       { file: "/store-assets/social-profile-400.png", label: "Profile picture", dims: "400 x 400" },
       { file: "/store-assets/twitter-banner.png", label: "Header banner", dims: "1500 x 500" },
     ],
   },
   {
+    platform: "LinkedIn",
+    BannerComponent: LinkedInBanner,
+    assets: [
+      { file: "/store-assets/social-profile-400.png", label: "Profile picture", dims: "400 x 400" },
+      { file: "/store-assets/social-profile-300.png", label: "Company logo", dims: "300 x 300" },
+      { file: "/store-assets/linkedin-banner.png", label: "Cover banner", dims: "1584 x 396" },
+    ],
+  },
+  {
     platform: "Facebook",
+    BannerComponent: FacebookCover,
     assets: [
       { file: "/store-assets/social-profile-800.png", label: "Profile picture", dims: "720 x 720 (use 800px)" },
       { file: "/store-assets/facebook-cover.png", label: "Cover photo", dims: "851 x 315" },
     ],
   },
   {
-    platform: "Instagram",
+    platform: "YouTube",
+    BannerComponent: YouTubeBanner,
     assets: [
-      { file: "/store-assets/social-profile-800.png", label: "Profile picture", dims: "720 x 720 (use 800px)" },
+      { file: "/store-assets/social-profile-800.png", label: "Profile picture", dims: "800 x 800" },
+      { file: "/store-assets/youtube-channel-art.png", label: "Channel art / banner", dims: "2560 x 1440" },
     ],
   },
   {
-    platform: "LinkedIn",
+    platform: "Instagram",
+    BannerComponent: null,
     assets: [
-      { file: "/store-assets/social-profile-400.png", label: "Profile picture", dims: "400 x 400" },
-      { file: "/store-assets/social-profile-300.png", label: "Company logo", dims: "300 x 300" },
-      { file: "/store-assets/linkedin-banner.png", label: "Cover banner", dims: "1584 x 396" },
+      { file: "/store-assets/social-profile-800.png", label: "Profile picture", dims: "720 x 720 (use 800px)" },
     ],
   },
 ];
@@ -287,7 +292,7 @@ export default function MediaPage() {
           </p>
         </div>
 
-        {/* ── Logos ──────────────────────────── */}
+        {/* ── 1. Logos ──────────────────────────── */}
         <section className="mb-24">
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3">
             Logos
@@ -363,7 +368,7 @@ export default function MediaPage() {
           </div>
         </section>
 
-        {/* ── Colors ──────────────────────────── */}
+        {/* ── 2. Colors ──────────────────────────── */}
         <section className="mb-24">
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3">
             Brand Colors
@@ -398,7 +403,7 @@ export default function MediaPage() {
           </div>
         </section>
 
-        {/* ── Typography ──────────────────────────── */}
+        {/* ── 3. Typography ──────────────────────────── */}
         <section className="mb-24">
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3">
             Typography
@@ -431,7 +436,7 @@ export default function MediaPage() {
           </div>
         </section>
 
-        {/* ── Product Name & Description ──────────────────────────── */}
+        {/* ── 4. Product Name & Description ──────────────────────────── */}
         <section className="mb-24">
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3">
             Product Name & Description
@@ -479,7 +484,77 @@ export default function MediaPage() {
           </div>
         </section>
 
-        {/* ── Extension Marketplace Assets (NEW) ──────────────────────────── */}
+        {/* ── 5. Social Media Banners (moved up — brand asset) ──────── */}
+        <section className="mb-24">
+          <SectionLabel>Social</SectionLabel>
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3">
+            Social Media Banners
+          </h2>
+          <p className="text-muted-foreground mb-10 max-w-2xl">
+            Visually rich banners for every major platform. Each preview shows
+            the live CSS-rendered banner — download the original PNGs below for
+            upload.
+          </p>
+
+          <div className="space-y-10">
+            {socialMediaAssets.map((platform) => (
+              <div key={platform.platform}>
+                <h3 className="text-lg font-semibold mb-4">{platform.platform}</h3>
+
+                {/* Rendered banner preview */}
+                {platform.BannerComponent && (
+                  <div className="rounded-xl border border-border overflow-hidden mb-4">
+                    <platform.BannerComponent />
+                  </div>
+                )}
+
+                {/* Downloadable assets grid */}
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {platform.assets.map((asset) => (
+                    <div
+                      key={asset.file}
+                      className="rounded-xl border border-border overflow-hidden"
+                    >
+                      <Image
+                        src={asset.file}
+                        alt={`${platform.platform} ${asset.label}`}
+                        width={640}
+                        height={400}
+                        className="w-full h-auto"
+                      />
+                      <div className="p-3 bg-card flex items-center justify-between">
+                        <div>
+                          <p className="text-xs font-medium">{asset.label}</p>
+                          <p className="text-xs text-muted-foreground">{asset.dims} px</p>
+                        </div>
+                        <a href={asset.file} download>
+                          <Button variant="ghost" size="sm" className="h-7 text-xs gap-1">
+                            <Download className="h-3 w-3" /> PNG
+                          </Button>
+                        </a>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ── 6. OG / Social Share Card ──────────────────── */}
+        <section className="mb-24">
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3">
+            OG / Social Share Card
+          </h2>
+          <p className="text-muted-foreground mb-8 max-w-2xl">
+            The default Open Graph image used when sharing any TeamPrompt page on social media.
+          </p>
+          <div className="rounded-xl border border-border overflow-hidden">
+            <OGBanner />
+          </div>
+        </section>
+
+        {/* ── 7. Extension Marketplace Assets (dark) ────────────────── */}
         <DarkSection gradient="right" className="mb-24">
           <SectionLabel dark>Extension</SectionLabel>
           <h2 className="text-2xl sm:text-3xl font-bold mb-4">
@@ -635,212 +710,7 @@ export default function MediaPage() {
           </div>
         </DarkSection>
 
-        {/* ── Social Banner Previews (React-rendered) ──────────────────── */}
-        <section className="mb-24">
-          <SectionLabel>Social</SectionLabel>
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3">
-            Social Media Banners
-          </h2>
-          <p className="text-muted-foreground mb-10 max-w-2xl">
-            Visually rich banners for every major platform. Each preview shows
-            the live CSS-rendered banner — download the original PNGs below for
-            upload.
-          </p>
-
-          <div className="space-y-10">
-            {/* Twitter */}
-            <div>
-              <h3 className="text-lg font-semibold mb-4">X (Twitter)</h3>
-              <div className="rounded-xl border border-border overflow-hidden mb-3">
-                <TwitterBanner />
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {socialMediaAssets
-                  .find((p) => p.platform === "X (Twitter)")
-                  ?.assets.map((asset) => (
-                    <div
-                      key={asset.file}
-                      className="rounded-xl border border-border overflow-hidden"
-                    >
-                      <Image
-                        src={asset.file}
-                        alt={`X (Twitter) ${asset.label}`}
-                        width={640}
-                        height={400}
-                        className="w-full h-auto"
-                      />
-                      <div className="p-3 bg-card flex items-center justify-between">
-                        <div>
-                          <p className="text-xs font-medium">{asset.label}</p>
-                          <p className="text-xs text-muted-foreground">{asset.dims} px</p>
-                        </div>
-                        <a href={asset.file} download>
-                          <Button variant="ghost" size="sm" className="h-7 text-xs gap-1">
-                            <Download className="h-3 w-3" /> PNG
-                          </Button>
-                        </a>
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            </div>
-
-            {/* LinkedIn */}
-            <div>
-              <h3 className="text-lg font-semibold mb-4">LinkedIn</h3>
-              <div className="rounded-xl border border-border overflow-hidden mb-3">
-                <LinkedInBanner />
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {socialMediaAssets
-                  .find((p) => p.platform === "LinkedIn")
-                  ?.assets.map((asset) => (
-                    <div
-                      key={asset.file}
-                      className="rounded-xl border border-border overflow-hidden"
-                    >
-                      <Image
-                        src={asset.file}
-                        alt={`LinkedIn ${asset.label}`}
-                        width={640}
-                        height={400}
-                        className="w-full h-auto"
-                      />
-                      <div className="p-3 bg-card flex items-center justify-between">
-                        <div>
-                          <p className="text-xs font-medium">{asset.label}</p>
-                          <p className="text-xs text-muted-foreground">{asset.dims} px</p>
-                        </div>
-                        <a href={asset.file} download>
-                          <Button variant="ghost" size="sm" className="h-7 text-xs gap-1">
-                            <Download className="h-3 w-3" /> PNG
-                          </Button>
-                        </a>
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            </div>
-
-            {/* Facebook */}
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Facebook</h3>
-              <div className="rounded-xl border border-border overflow-hidden mb-3">
-                <FacebookCover />
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {socialMediaAssets
-                  .find((p) => p.platform === "Facebook")
-                  ?.assets.map((asset) => (
-                    <div
-                      key={asset.file}
-                      className="rounded-xl border border-border overflow-hidden"
-                    >
-                      <Image
-                        src={asset.file}
-                        alt={`Facebook ${asset.label}`}
-                        width={640}
-                        height={400}
-                        className="w-full h-auto"
-                      />
-                      <div className="p-3 bg-card flex items-center justify-between">
-                        <div>
-                          <p className="text-xs font-medium">{asset.label}</p>
-                          <p className="text-xs text-muted-foreground">{asset.dims} px</p>
-                        </div>
-                        <a href={asset.file} download>
-                          <Button variant="ghost" size="sm" className="h-7 text-xs gap-1">
-                            <Download className="h-3 w-3" /> PNG
-                          </Button>
-                        </a>
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            </div>
-
-            {/* YouTube */}
-            <div>
-              <h3 className="text-lg font-semibold mb-4">YouTube</h3>
-              <div className="rounded-xl border border-border overflow-hidden mb-3">
-                <YouTubeBanner />
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {socialMediaAssets
-                  .find((p) => p.platform === "YouTube")
-                  ?.assets.map((asset) => (
-                    <div
-                      key={asset.file}
-                      className="rounded-xl border border-border overflow-hidden"
-                    >
-                      <Image
-                        src={asset.file}
-                        alt={`YouTube ${asset.label}`}
-                        width={640}
-                        height={400}
-                        className="w-full h-auto"
-                      />
-                      <div className="p-3 bg-card flex items-center justify-between">
-                        <div>
-                          <p className="text-xs font-medium">{asset.label}</p>
-                          <p className="text-xs text-muted-foreground">{asset.dims} px</p>
-                        </div>
-                        <a href={asset.file} download>
-                          <Button variant="ghost" size="sm" className="h-7 text-xs gap-1">
-                            <Download className="h-3 w-3" /> PNG
-                          </Button>
-                        </a>
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            </div>
-
-            {/* Instagram (profile only, no banner) */}
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Instagram</h3>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {socialMediaAssets
-                  .find((p) => p.platform === "Instagram")
-                  ?.assets.map((asset) => (
-                    <div
-                      key={asset.file}
-                      className="rounded-xl border border-border overflow-hidden"
-                    >
-                      <Image
-                        src={asset.file}
-                        alt={`Instagram ${asset.label}`}
-                        width={640}
-                        height={400}
-                        className="w-full h-auto"
-                      />
-                      <div className="p-3 bg-card flex items-center justify-between">
-                        <div>
-                          <p className="text-xs font-medium">{asset.label}</p>
-                          <p className="text-xs text-muted-foreground">{asset.dims} px</p>
-                        </div>
-                        <a href={asset.file} download>
-                          <Button variant="ghost" size="sm" className="h-7 text-xs gap-1">
-                            <Download className="h-3 w-3" /> PNG
-                          </Button>
-                        </a>
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            </div>
-
-            {/* OG / Social Share Card */}
-            <div>
-              <h3 className="text-lg font-semibold mb-4">OG / Social Share Card</h3>
-              <div className="rounded-xl border border-border overflow-hidden">
-                <OGBanner />
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ── Store Listing Copy ──────────────────────────── */}
+        {/* ── 8. Store Listing Copy ──────────────────────────── */}
         <section className="mb-24">
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3">
             Store Listing Copy
@@ -932,7 +802,7 @@ export default function MediaPage() {
           </div>
         </section>
 
-        {/* ── Contact ──────────────────────────── */}
+        {/* ── 9. Contact ──────────────────────────── */}
         <section>
           <div className="rounded-2xl border border-border bg-muted/30 p-8 text-center max-w-2xl mx-auto">
             <h2 className="text-xl font-bold mb-2">Need something else?</h2>
@@ -965,4 +835,3 @@ function CopyableField({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
-

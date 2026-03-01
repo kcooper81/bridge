@@ -82,6 +82,7 @@ export interface Profile {
   avatar_url: string | null;
   shield_disabled: boolean;
   is_super_admin: boolean;
+  super_admin_role: "super_admin" | "support" | null;
   extension_version: string | null;
   last_extension_active: string | null;
   extension_status: string;

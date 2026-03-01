@@ -51,7 +51,7 @@ const plans: PlanData[] = [
       "Version History & Diff": true,
       "Priority Support": false,
       "SLA Guarantee": false,
-      "Chrome Extension": true,
+      "Browser Extension": true,
     },
   },
   {
@@ -82,7 +82,7 @@ const plans: PlanData[] = [
       "Version History & Diff": true,
       "Priority Support": false,
       "SLA Guarantee": false,
-      "Chrome Extension": true,
+      "Browser Extension": true,
     },
   },
   {
@@ -114,7 +114,7 @@ const plans: PlanData[] = [
       "Version History & Diff": true,
       "Priority Support": false,
       "SLA Guarantee": false,
-      "Chrome Extension": true,
+      "Browser Extension": true,
     },
   },
   {
@@ -146,7 +146,7 @@ const plans: PlanData[] = [
       "Version History & Diff": true,
       "Priority Support": true,
       "SLA Guarantee": true,
-      "Chrome Extension": true,
+      "Browser Extension": true,
     },
   },
 ];

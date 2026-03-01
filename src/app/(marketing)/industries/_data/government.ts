@@ -52,26 +52,10 @@ export const industryData: IndustryPageData = {
   ],
   mockupVariant: "vault",
   mockupItems: [
-    {
-      title: "Policy Brief Generator",
-      badge: "Approved",
-      stat: "Used 267 times",
-    },
-    {
-      title: "Constituent Response Draft",
-      badge: "Approved",
-      stat: "Used 341 times",
-    },
-    {
-      title: "FOIA Request Summary",
-      badge: "Approved",
-      stat: "Used 189 times",
-    },
-    {
-      title: "Internal Memo Template",
-      badge: "Approved",
-      stat: "Used 214 times",
-    },
+    { title: "Policy Brief Generator", badge: "Approved", stat: "267 uses", iconColor: "green", subtitle: "Executive · 4.8★" },
+    { title: "Constituent Response Draft", badge: "Approved", stat: "341 uses", iconColor: "blue", subtitle: "Public Affairs · 4.6★", highlight: "shared" },
+    { title: "FOIA Request Summary", badge: "Approved", stat: "189 uses", iconColor: "amber", subtitle: "Legal" },
+    { title: "Internal Memo Template", badge: "Approved", stat: "214 uses", iconColor: "purple", subtitle: "Admin · 4.5★" },
   ],
   mockupUser: { name: "S. Rivera", initials: "SR" },
   stats: [

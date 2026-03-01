@@ -52,10 +52,10 @@ export const industryData: IndustryPageData = {
   ],
   mockupVariant: "vault",
   mockupItems: [
-    { title: "Lesson Plan Generator", badge: "FERPA Safe", stat: "Used 287 times" },
-    { title: "Assignment Rubric Builder", badge: "FERPA Safe", stat: "Used 198 times" },
-    { title: "Student Feedback Template", badge: "FERPA Safe", stat: "Used 156 times" },
-    { title: "Research Summary Prompt", badge: "FERPA Safe", stat: "Used 134 times" },
+    { title: "Lesson Plan Generator", badge: "FERPA Safe", stat: "287 uses", iconColor: "green", subtitle: "K-12 · 4.8★" },
+    { title: "Assignment Rubric Builder", badge: "FERPA Safe", stat: "198 uses", iconColor: "blue", subtitle: "Assessment · 4.7★", highlight: "shared" },
+    { title: "Student Feedback Template", badge: "FERPA Safe", stat: "156 uses", iconColor: "green", subtitle: "Advisory" },
+    { title: "Research Summary Prompt", badge: "FERPA Safe", stat: "134 uses", iconColor: "purple", subtitle: "Higher Ed · new", highlight: "new" },
   ],
   mockupUser: { name: "Prof. Chen", initials: "PC" },
   stats: [

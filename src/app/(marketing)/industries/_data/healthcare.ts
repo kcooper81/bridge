@@ -52,11 +52,12 @@ export const industryData: IndustryPageData = {
   ],
   mockupVariant: "vault",
   mockupItems: [
-    { title: "Patient Intake Summary", badge: "HIPAA Safe", stat: "Used 342 times" },
-    { title: "Discharge Summary Generator", badge: "HIPAA Safe", stat: "Used 289 times" },
-    { title: "Referral Letter Template", badge: "HIPAA Safe", stat: "Used 178 times" },
-    { title: "Lab Results Review", badge: "HIPAA Safe", stat: "Used 215 times" },
+    { title: "Patient Intake Summary", badge: "HIPAA Safe", stat: "342 uses", iconColor: "green", subtitle: "Emergency Dept · 4.9★" },
+    { title: "Discharge Summary Generator", badge: "HIPAA Safe", stat: "289 uses", iconColor: "green", subtitle: "Inpatient · 4.7★", highlight: "shared" },
+    { title: "Referral Letter Template", badge: "HIPAA Safe", stat: "178 uses", iconColor: "blue", subtitle: "Primary Care" },
+    { title: "Lab Results Review", badge: "HIPAA Safe", stat: "215 uses", iconColor: "blue", subtitle: "Diagnostics · 4.8★" },
   ],
+  mockupToasts: [{ message: "PHI auto-redacted from lab report", type: "success", position: "bottom-right" }],
   mockupUser: { name: "Dr. Smith", initials: "DS" },
   stats: [
     { value: "15+", label: "Built-in detection patterns" },

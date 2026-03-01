@@ -191,6 +191,8 @@ export function IndustryPage({ data }: { data: IndustryPageData }) {
             items={data.mockupItems}
             sidebarUser={data.mockupUser}
             alertBanner={data.mockupAlert}
+            toasts={data.mockupToasts}
+            navBadges={data.mockupNavBadges}
           />
         </div>
       </section>

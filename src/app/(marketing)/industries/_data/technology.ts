@@ -52,15 +52,17 @@ export const industryData: IndustryPageData = {
   ],
   mockupVariant: "guardrails",
   mockupItems: [
-    { title: "AWS Access Key (AKIA...)", badge: "Blocked" },
-    { title: "GitHub Token (ghp_...)", badge: "Blocked" },
-    { title: "Database Connection String", badge: "Blocked" },
-    { title: "Internal Project Name", badge: "Warning" },
+    { title: "AWS Access Key (AKIA...)", badge: "Blocked", iconColor: "red", highlight: "block", subtitle: "Credentials policy · ChatGPT" },
+    { title: "GitHub Token (ghp_...)", badge: "Blocked", iconColor: "red", highlight: "block", subtitle: "Credentials policy · Claude" },
+    { title: "Database Connection String", badge: "Blocked", iconColor: "red", highlight: "block", subtitle: "Secrets policy · Copilot" },
+    { title: "Internal Project Name", badge: "Warning", iconColor: "amber", highlight: "warn", subtitle: "IP policy · Gemini" },
   ],
   mockupAlert: {
     type: "block",
     message: "3 secrets detected — submission blocked",
   },
+  mockupToasts: [{ message: "API key blocked — logged to audit", type: "block", position: "bottom-right" }],
+  mockupNavBadges: { Guardrails: 3 },
   mockupUser: { name: "Alex Dev", initials: "AD" },
   stats: [
     { value: "15+", label: "Built-in secret patterns" },

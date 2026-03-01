@@ -52,10 +52,10 @@ export const industryData: IndustryPageData = {
   ],
   mockupVariant: "vault",
   mockupItems: [
-    { title: "Case Brief Generator", badge: "Privilege Safe", stat: "Used 256 times" },
-    { title: "Contract Clause Review", badge: "Privilege Safe", stat: "Used 198 times" },
-    { title: "Legal Research Prompt", badge: "Privilege Safe", stat: "Used 312 times" },
-    { title: "Deposition Prep", badge: "Privilege Safe", stat: "Used 145 times" },
+    { title: "Case Brief Generator", badge: "Privilege Safe", stat: "256 uses", iconColor: "green", subtitle: "Litigation · 4.7★" },
+    { title: "Contract Clause Review", badge: "Privilege Safe", stat: "198 uses", iconColor: "green", subtitle: "Corporate · 4.6★", highlight: "shared" },
+    { title: "Legal Research Prompt", badge: "Privilege Safe", stat: "312 uses", iconColor: "blue", subtitle: "Research · 4.9★" },
+    { title: "Deposition Prep", badge: "Privilege Safe", stat: "145 uses", iconColor: "purple", subtitle: "Trial Prep" },
   ],
   mockupUser: { name: "J. Parker", initials: "JP" },
   stats: [

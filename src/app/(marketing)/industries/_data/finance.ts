@@ -52,27 +52,12 @@ export const industryData: IndustryPageData = {
   ],
   mockupVariant: "vault",
   mockupItems: [
-    {
-      title: "Quarterly Analysis Prompt",
-      badge: "Compliant",
-      stat: "Used 187 times",
-    },
-    {
-      title: "Risk Assessment Template",
-      badge: "Compliant",
-      stat: "Used 243 times",
-    },
-    {
-      title: "Client Portfolio Review",
-      badge: "Compliant",
-      stat: "Used 156 times",
-    },
-    {
-      title: "Regulatory Filing Draft",
-      badge: "Compliant",
-      stat: "Used 98 times",
-    },
+    { title: "Quarterly Analysis Prompt", badge: "Compliant", stat: "187 uses", iconColor: "green", subtitle: "Equities · 4.8★" },
+    { title: "Risk Assessment Template", badge: "Compliant", stat: "243 uses", iconColor: "amber", subtitle: "Risk Mgmt · 4.6★", highlight: "shared" },
+    { title: "Client Portfolio Review", badge: "Compliant", stat: "156 uses", iconColor: "blue", subtitle: "Wealth Mgmt" },
+    { title: "Regulatory Filing Draft", badge: "Compliant", stat: "98 uses", iconColor: "purple", subtitle: "Compliance · new", highlight: "new" },
   ],
+  mockupToasts: [{ message: "Account number auto-redacted", type: "success", position: "bottom-right" }],
   mockupUser: { name: "M. Chen", initials: "MC" },
   stats: [
     { value: "15+", label: "Built-in detection patterns" },

@@ -1,153 +1,548 @@
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { Check } from "lucide-react";
+import {
+  Check,
+  Shield,
+  Zap,
+  BarChart3,
+  Users,
+  Send,
+  AlertTriangle,
+  Heart,
+  Star,
+  Search,
+  MoreHorizontal,
+  StickyNote,
+  Share2,
+  BookOpen,
+  Activity,
+} from "lucide-react";
 
-/* ── Shared sub-components ──────────────────────── */
+/* ══════════════════════════════════════════════════
+   SCENE MOCKUPS — contextual, feature-rich previews
+   ══════════════════════════════════════════════════ */
 
-function FeaturePill({ label }: { label: string }) {
+/**
+ * Scene 1: Prompt Vault — matches features page VaultMockup style
+ * Stats, tabs, search, table with icons (Heart, Star, Template badges)
+ */
+function VaultScene({ className, compact }: { className?: string; compact?: boolean }) {
+  const prompts = [
+    { title: "Customer Onboarding Email", desc: "marketing, email, outreach", uses: 142, rating: 4.8, fav: true, template: false, updated: "2d ago" },
+    { title: "Code Review Feedback", desc: "Review code and provide constructive fe...", uses: 89, rating: 4.0, fav: false, template: true, updated: "5d ago" },
+    { title: "Weekly Status Update", desc: "Summarize progress this week in a clear...", uses: 67, rating: 0, fav: true, template: true, updated: "1w ago" },
+    { title: "Sales Outreach Drafter", desc: "sales, outreach", uses: 34, rating: 3.0, fav: false, template: false, updated: "2w ago" },
+  ];
+
   return (
-    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white/10 text-[9px] sm:text-[10px] font-medium text-white/90 whitespace-nowrap">
-      <Check className="h-2.5 w-2.5 text-blue-400" />
+    <div className={cn("relative", className)}>
+      <div className="rounded-lg bg-white border border-zinc-200 overflow-hidden shadow-2xl">
+        {/* Browser chrome */}
+        <div className="flex items-center gap-1.5 px-3 py-1.5 border-b border-zinc-100 bg-zinc-50">
+          <div className="w-1.5 h-1.5 rounded-full bg-red-400/70" />
+          <div className="w-1.5 h-1.5 rounded-full bg-yellow-400/70" />
+          <div className="w-1.5 h-1.5 rounded-full bg-green-400/70" />
+          <div className="ml-2 flex-1 h-3.5 rounded bg-zinc-100 flex items-center px-2">
+            <span className="text-[5px] text-zinc-400 font-medium">app.teamprompt.app</span>
+          </div>
+        </div>
+        <div className="flex">
+          {/* Sidebar */}
+          {!compact && (
+            <div className="w-14 border-r border-zinc-100 p-1.5 bg-white">
+              <div className="flex items-center gap-1 mb-2 px-0.5">
+                <div className="w-2.5 h-2.5 rounded bg-blue-500" />
+                <span className="text-[4px] font-bold text-zinc-700">TeamPrompt</span>
+              </div>
+              <p className="text-[3px] font-bold uppercase text-zinc-300 px-0.5 mb-0.5">Workspace</p>
+              {["Prompts", "Templates", "Guidelines", "Team"].map((n, i) => (
+                <div key={n} className={cn("h-3 rounded px-1 flex items-center mb-0.5", i === 0 ? "bg-blue-50 border-l border-blue-500" : "")}>
+                  <span className={cn("text-[4px] font-medium", i === 0 ? "text-blue-600" : "text-zinc-400")}>{n}</span>
+                </div>
+              ))}
+              <p className="text-[3px] font-bold uppercase text-zinc-300 px-0.5 mt-1 mb-0.5">Intelligence</p>
+              {["Analytics", "Guardrails"].map((n) => (
+                <div key={n} className="h-3 rounded px-1 flex items-center mb-0.5">
+                  <span className="text-[4px] font-medium text-zinc-400">{n}</span>
+                </div>
+              ))}
+            </div>
+          )}
+          {/* Content */}
+          <div className="flex-1 p-1.5">
+            {/* Stats row — icon + value + label like features page StatCard */}
+            <div className="flex gap-1 mb-1">
+              {[
+                { icon: StickyNote, v: "8", l: "Prompts" },
+                { icon: BarChart3, v: "142", l: "Uses" },
+                { icon: Share2, v: "7", l: "Shared" },
+                { icon: BookOpen, v: "1", l: "Guidelines" },
+              ].map((s) => (
+                <div key={s.l} className="flex-1 rounded border border-zinc-100 p-0.5 flex items-center gap-0.5">
+                  <div className="w-3 h-3 rounded bg-blue-50 flex items-center justify-center shrink-0">
+                    <s.icon className="w-1.5 h-1.5 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="text-[5px] font-bold text-zinc-800 leading-none">{s.v}</p>
+                    <p className="text-[3px] text-zinc-400">{s.l}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {/* Tabs */}
+            {!compact && (
+              <div className="flex items-center gap-1.5 mb-1 border-b border-zinc-100 pb-0.5">
+                {["All", "Draft", "Pending", "Approved", "Archived"].map((t, i) => (
+                  <span key={t} className={cn("text-[4px] font-medium", i === 0 ? "text-blue-600 border-b border-blue-600 pb-0.5" : "text-zinc-400")}>{t}</span>
+                ))}
+              </div>
+            )}
+            {/* Search + filters */}
+            {!compact && (
+              <div className="flex items-center gap-1 mb-1">
+                <div className="flex-1 h-3 rounded border border-zinc-100 bg-white px-1 flex items-center gap-0.5">
+                  <Search className="h-1.5 w-1.5 text-zinc-300" />
+                  <span className="text-[4px] text-zinc-400">Search prompts...</span>
+                </div>
+                <span className="text-[4px] text-zinc-400">All Categories</span>
+              </div>
+            )}
+            {/* Table header */}
+            <div className="flex items-center gap-0.5 py-0.5 text-[3px] font-bold uppercase tracking-wider text-zinc-400 border-b border-zinc-100 mb-0.5">
+              <span className="w-2" />
+              <span className="flex-1">Prompt</span>
+              <span className="w-5 text-center">Uses</span>
+              <span className="w-8 text-center">Rating</span>
+              {!compact && <span className="w-6 text-right">Updated</span>}
+              <span className="w-2" />
+            </div>
+            {/* Rows */}
+            {(compact ? prompts.slice(0, 3) : prompts).map((p, i) => (
+              <div key={i} className="flex items-center gap-0.5 py-0.5 border-b border-zinc-50 last:border-0">
+                <Heart className={cn("w-1.5 h-1.5 shrink-0", p.fav ? "text-red-500 fill-red-500" : "text-zinc-200")} />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-0.5">
+                    <p className="text-[5px] text-zinc-700 font-medium truncate">{p.title}</p>
+                    {p.template && <span className="text-[3px] bg-blue-50 text-blue-600 px-0.5 rounded font-bold">{"{}"} Template</span>}
+                  </div>
+                  {!compact && <p className="text-[3px] text-zinc-400 truncate">{p.desc}</p>}
+                </div>
+                <span className="w-5 text-center text-[4px] text-zinc-400 tabular-nums shrink-0">{p.uses}</span>
+                <div className="w-8 flex items-center justify-center gap-[1px] shrink-0">
+                  {[1, 2, 3, 4, 5].map((s) => (
+                    <Star key={s} className={cn("w-1.5 h-1.5", s <= Math.floor(p.rating) ? "text-amber-400 fill-amber-400" : "text-zinc-200")} />
+                  ))}
+                </div>
+                {!compact && <span className="w-6 text-right text-[3px] text-zinc-400 shrink-0">{p.updated}</span>}
+                <MoreHorizontal className="w-1.5 h-1.5 text-zinc-300 shrink-0" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Floating badges */}
+      <div className="absolute -top-2 -right-1 sm:-right-2 bg-blue-500 text-white rounded-full px-1.5 sm:px-2 py-0.5 shadow-lg shadow-blue-500/30 flex items-center gap-1">
+        <Users className="h-2 w-2 sm:h-2.5 sm:w-2.5" />
+        <span className="text-[5px] sm:text-[6px] font-bold whitespace-nowrap">Shared with 8 teams</span>
+      </div>
+      {!compact && (
+        <div className="absolute -bottom-2 -left-1 sm:-left-2 bg-emerald-500 text-white rounded-full px-1.5 sm:px-2 py-0.5 shadow-lg shadow-emerald-500/30 flex items-center gap-1">
+          <BarChart3 className="h-2 w-2 sm:h-2.5 sm:w-2.5" />
+          <span className="text-[5px] sm:text-[6px] font-bold whitespace-nowrap">2,847 inserts this month</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Scene 2: DLP Block in action
+ * Shows a sensitive data warning being caught in real time
+ */
+function DLPBlockScene({ className, compact }: { className?: string; compact?: boolean }) {
+  return (
+    <div className={cn("relative", className)}>
+      {/* Extension popup — dark theme matching real app */}
+      <div className="rounded-lg bg-zinc-900 border border-zinc-700 overflow-hidden shadow-2xl">
+        {/* Extension header */}
+        <div className="flex items-center justify-between px-2 py-1 border-b border-zinc-800">
+          <div className="flex items-center gap-1">
+            <div className="w-2.5 h-2.5 rounded bg-blue-500" />
+            <span className="text-[5px] font-bold text-white">TeamPrompt</span>
+          </div>
+        </div>
+        <div className="p-2 space-y-1.5">
+          {/* Protected status */}
+          <div className="flex items-center gap-1.5 bg-emerald-500/10 rounded p-1.5">
+            <Shield className="h-2.5 w-2.5 text-emerald-400" />
+            <div>
+              <p className="text-[5px] text-white font-bold">Protected</p>
+              <p className="text-[4px] text-zinc-400">17 active rules monitoring</p>
+            </div>
+          </div>
+          {/* Stats */}
+          <div className="flex gap-1">
+            <div className="flex-1 rounded bg-zinc-800 p-1 text-center">
+              <p className="text-[7px] font-bold text-red-400">15</p>
+              <p className="text-[3px] uppercase text-zinc-500 font-bold">Blocked</p>
+            </div>
+            <div className="flex-1 rounded bg-zinc-800 p-1 text-center">
+              <p className="text-[7px] font-bold text-amber-400">0</p>
+              <p className="text-[3px] uppercase text-zinc-500 font-bold">Warned</p>
+            </div>
+            <div className="flex-1 rounded bg-zinc-800 p-1 text-center">
+              <p className="text-[7px] font-bold text-blue-400">15</p>
+              <p className="text-[3px] uppercase text-zinc-500 font-bold">This Week</p>
+            </div>
+          </div>
+          {/* Recent violations */}
+          {!compact && (
+            <>
+              <p className="text-[4px] font-bold uppercase text-zinc-500 tracking-wider">Recent Activity</p>
+              {["SSN detected — blocked", "API key found — blocked", "Patient name — blocked"].map((v, i) => (
+                <div key={i} className="flex items-center justify-between py-0.5 border-b border-zinc-800 last:border-0">
+                  <span className="text-[4px] text-zinc-300 truncate">{v}</span>
+                  <span className="text-[4px] text-red-400 font-bold shrink-0">Blocked</span>
+                </div>
+              ))}
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Floating: Shield badge */}
+      <div className="absolute -top-2 -right-1 sm:-right-2 bg-red-500 text-white rounded-full px-1.5 sm:px-2 py-0.5 shadow-lg shadow-red-500/30 flex items-center gap-1">
+        <Shield className="h-2 w-2 sm:h-2.5 sm:w-2.5" />
+        <span className="text-[5px] sm:text-[6px] font-bold whitespace-nowrap">DLP Active</span>
+      </div>
+      {!compact && (
+        <div className="absolute -bottom-2 -left-1 sm:-left-2 bg-amber-500 text-white rounded-full px-1.5 sm:px-2 py-0.5 shadow-lg shadow-amber-500/30 flex items-center gap-1">
+          <AlertTriangle className="h-2 w-2 sm:h-2.5 sm:w-2.5" />
+          <span className="text-[5px] sm:text-[6px] font-bold whitespace-nowrap">100% block rate</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Scene 3: Extension popup — matches features page ExtensionMockup style
+ * Dark theme with search, tabs, filters, prompt cards with Hearts & Template labels
+ */
+function InsertScene({ className }: { className?: string }) {
+  const prompts = [
+    { title: "Code Review Feedback", desc: "Get thorough, constructive code review feedback f...", tags: ["development", "code-review"], template: true, inserting: true },
+    { title: "Weekly Status Update", desc: "A template for writing weekly status updates...", tags: ["productivity", "template"], template: true, inserting: false },
+  ];
+
+  return (
+    <div className={cn("relative", className)}>
+      {/* Extension popup — dark theme matching features page ExtensionMockup */}
+      <div className="rounded-lg bg-zinc-900 border border-zinc-700 overflow-hidden shadow-2xl">
+        {/* Extension header */}
+        <div className="flex items-center justify-between px-2 py-1 border-b border-zinc-800">
+          <div className="flex items-center gap-1">
+            <div className="w-2.5 h-2.5 rounded bg-blue-500" />
+            <span className="text-[5px] font-bold text-white">TeamPrompt</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Share2 className="w-1.5 h-1.5 text-zinc-500" />
+          </div>
+        </div>
+        <div className="p-1.5 space-y-1">
+          {/* Search */}
+          <div className="bg-zinc-800 rounded-md px-1.5 py-0.5 flex items-center gap-1">
+            <Search className="h-1.5 w-1.5 text-zinc-500" />
+            <span className="text-[4px] text-zinc-500">Search prompts...</span>
+          </div>
+          {/* Tabs */}
+          <div className="flex gap-1.5 px-0.5">
+            {["Faves", "Recent", "Prompts", "Guardrails"].map((t, i) => (
+              <span key={t} className={cn("text-[4px] font-medium pb-0.5", i === 0 ? "text-blue-400" : "text-zinc-500")}>{t}</span>
+            ))}
+          </div>
+          {/* Filter row */}
+          <div className="flex items-center gap-1">
+            <span className="text-[3px] text-zinc-500 bg-zinc-800 px-1 py-0.5 rounded">All categories</span>
+            <span className="text-[3px] text-zinc-500 bg-zinc-800 px-1 py-0.5 rounded">All tags</span>
+          </div>
+          {/* Prompt cards — matching features page style */}
+          {prompts.map((p, i) => (
+            <div key={i} className={cn(
+              "rounded-md p-1 border",
+              p.inserting ? "bg-emerald-500/10 border-emerald-500/30" : "bg-zinc-800/60 border-zinc-700/50"
+            )}>
+              <div className="flex items-center justify-between mb-0.5">
+                <p className="text-[5px] text-white font-medium truncate">{p.title}</p>
+                <Heart className="w-1.5 h-1.5 text-zinc-500 shrink-0" />
+              </div>
+              {p.template && <span className="text-[3px] font-bold text-rose-400 mb-0.5 inline-block">Template</span>}
+              <p className="text-[3px] text-zinc-400 leading-relaxed mb-0.5 truncate">{p.desc}</p>
+              <div className="flex items-center gap-0.5">
+                {p.tags.map((tag) => (
+                  <span key={tag} className="text-[3px] bg-zinc-700/50 text-zinc-400 px-0.5 py-[1px] rounded">{tag}</span>
+                ))}
+                {p.inserting && (
+                  <span className="text-[3px] text-emerald-400 font-bold ml-auto flex items-center gap-0.5">
+                    <Send className="h-1.5 w-1.5" /> Inserted!
+                  </span>
+                )}
+              </div>
+            </div>
+          ))}
+          {/* Status bar */}
+          <div className="flex items-center justify-between pt-0.5 border-t border-zinc-800">
+            <div className="flex items-center gap-0.5">
+              <Shield className="h-1.5 w-1.5 text-emerald-400" />
+              <span className="text-[3px] text-emerald-400 font-medium">Guardrails</span>
+            </div>
+            <span className="text-[3px] text-zinc-500">2 prompts</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Floating: Insert success */}
+      <div className="absolute -top-2 -right-1 sm:-right-2 bg-emerald-500 text-white rounded-full px-1.5 sm:px-2 py-0.5 shadow-lg shadow-emerald-500/30 flex items-center gap-1">
+        <Send className="h-2 w-2 sm:h-2.5 sm:w-2.5" />
+        <span className="text-[5px] sm:text-[6px] font-bold whitespace-nowrap">One-click insert</span>
+      </div>
+
+      {/* Floating: template variables */}
+      <div className="absolute -bottom-2 -left-1 sm:-left-2 bg-purple-500 text-white rounded-full px-1.5 sm:px-2 py-0.5 shadow-lg shadow-purple-500/30 flex items-center gap-1">
+        <Zap className="h-2 w-2 sm:h-2.5 sm:w-2.5" />
+        <span className="text-[5px] sm:text-[6px] font-bold whitespace-nowrap">Variables auto-filled</span>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Scene 4: Analytics dashboard — matches features page AnalyticsMockup style
+ * Icon stat cards, secondary stats, chart with date labels, dual panels
+ */
+function AnalyticsScene({ className, compact }: { className?: string; compact?: boolean }) {
+  const bars = [20, 35, 25, 40, 55, 30, 45, 60, 40, 50, 35, 65, 45, 55, 70, 50, 60, 75, 55, 65, 45, 70, 80, 60, 70, 50, 75, 85, 65, 80];
+  return (
+    <div className={cn("relative", className)}>
+      <div className="rounded-lg bg-white border border-zinc-200 overflow-hidden shadow-2xl">
+        {/* Browser chrome */}
+        <div className="flex items-center gap-1.5 px-3 py-1.5 border-b border-zinc-100 bg-zinc-50">
+          <div className="w-1.5 h-1.5 rounded-full bg-red-400/70" />
+          <div className="w-1.5 h-1.5 rounded-full bg-yellow-400/70" />
+          <div className="w-1.5 h-1.5 rounded-full bg-green-400/70" />
+          <div className="ml-2 flex-1 h-3.5 rounded bg-zinc-100 flex items-center px-2">
+            <span className="text-[5px] text-zinc-400 font-medium">app.teamprompt.app/analytics</span>
+          </div>
+        </div>
+        <div className="flex">
+          {/* Sidebar */}
+          {!compact && (
+            <div className="w-14 border-r border-zinc-100 p-1.5 bg-white">
+              <div className="flex items-center gap-1 mb-2 px-0.5">
+                <div className="w-2.5 h-2.5 rounded bg-blue-500" />
+                <span className="text-[4px] font-bold text-zinc-700">TeamPrompt</span>
+              </div>
+              <p className="text-[3px] font-bold uppercase text-zinc-300 px-0.5 mb-0.5">Workspace</p>
+              {["Prompts", "Templates", "Team"].map((n) => (
+                <div key={n} className="h-3 rounded px-1 flex items-center mb-0.5">
+                  <span className="text-[4px] font-medium text-zinc-400">{n}</span>
+                </div>
+              ))}
+              <p className="text-[3px] font-bold uppercase text-zinc-300 px-0.5 mt-1 mb-0.5">Intelligence</p>
+              {["Analytics", "Activity Log", "Guardrails"].map((n, i) => (
+                <div key={n} className={cn("h-3 rounded px-1 flex items-center mb-0.5", i === 0 ? "bg-blue-50 border-l border-blue-500" : "")}>
+                  <span className={cn("text-[4px] font-medium", i === 0 ? "text-blue-600" : "text-zinc-400")}>{n}</span>
+                </div>
+              ))}
+            </div>
+          )}
+          {/* Content */}
+          <div className="flex-1 p-1.5">
+            {/* Primary stats — icon + value + label like features page StatCard */}
+            <div className="flex gap-1 mb-1">
+              {[
+                { icon: StickyNote, v: "142", l: "Total Prompts" },
+                { icon: BarChart3, v: "89", l: "Total Uses" },
+                { icon: Star, v: "4.2", l: "Avg Rating" },
+                { icon: Activity, v: "12", l: "This Week" },
+              ].map((s) => (
+                <div key={s.l} className="flex-1 rounded border border-zinc-100 p-0.5 flex items-center gap-0.5">
+                  <div className="w-3 h-3 rounded bg-blue-50 flex items-center justify-center shrink-0">
+                    <s.icon className="w-1.5 h-1.5 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="text-[5px] font-bold text-zinc-800 leading-none">{s.v}</p>
+                    <p className="text-[3px] text-zinc-400">{s.l}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {/* Secondary stats */}
+            {!compact && (
+              <div className="flex gap-1 mb-1">
+                {[
+                  { l: "Week Trend", v: "+8%", icon: "↗" },
+                  { l: "Members", v: "5", icon: "👥" },
+                  { l: "Templates", v: "6", icon: "{}" },
+                  { l: "Blocks", v: "15", icon: "🛡" },
+                ].map((s) => (
+                  <div key={s.l} className="flex-1 rounded border border-zinc-100 p-0.5">
+                    <div className="flex items-center justify-between">
+                      <p className="text-[3px] text-zinc-400">{s.l}</p>
+                      <span className="text-[3px]">{s.icon}</span>
+                    </div>
+                    <p className="text-[5px] font-bold text-zinc-800">{s.v}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+            {/* Bar chart */}
+            <div className="rounded border border-zinc-100 p-1 mb-1">
+              <p className="text-[4px] text-zinc-500 mb-0.5 font-medium">Daily Usage — Last 30 Days</p>
+              <div className="flex items-end gap-[1px] h-6">
+                {(compact ? bars.slice(0, 12) : bars).map((h, i) => (
+                  <div
+                    key={i}
+                    className="flex-1 rounded-t bg-blue-500/40"
+                    style={{ height: `${h}%` }}
+                  />
+                ))}
+              </div>
+              <div className="flex justify-between mt-0.5">
+                <span className="text-[3px] text-zinc-400">Jan 29</span>
+                <span className="text-[3px] text-zinc-400">Feb 28</span>
+              </div>
+            </div>
+            {/* Dual panels — Top Prompts + Usage by Member */}
+            {!compact && (
+              <div className="flex gap-1">
+                <div className="flex-1 rounded border border-zinc-100 p-1">
+                  <p className="text-[4px] text-zinc-700 font-semibold mb-0.5">Top Prompts</p>
+                  {["Customer Email Reply", "Meeting Summary", "Code Review"].map((p, i) => (
+                    <div key={i} className="flex items-center justify-between py-0.5 text-[4px]">
+                      <span className="text-zinc-500">{i + 1}. {p}</span>
+                      <span className="font-medium text-zinc-700 tabular-nums">{[42, 31, 18][i]}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex-1 rounded border border-zinc-100 p-1">
+                  <p className="text-[4px] text-zinc-700 font-semibold mb-0.5">Usage by Member</p>
+                  {["Alex J.", "Kate P.", "Sam R."].map((p, i) => (
+                    <div key={i} className="flex items-center justify-between py-0.5 text-[4px]">
+                      <span className="text-zinc-500">{p}</span>
+                      <span className="font-medium text-zinc-700 tabular-nums">{[34, 28, 15][i]}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Floating: growth badge */}
+      <div className="absolute -top-2 -right-1 sm:-right-2 bg-blue-500 text-white rounded-full px-1.5 sm:px-2 py-0.5 shadow-lg shadow-blue-500/30 flex items-center gap-1">
+        <BarChart3 className="h-2 w-2 sm:h-2.5 sm:w-2.5" />
+        <span className="text-[5px] sm:text-[6px] font-bold whitespace-nowrap">+23% this month</span>
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════
+   SHARED COMPONENTS
+   ══════════════════════════════════════════════════ */
+
+function FeaturePill({ label, dark }: { label: string; dark?: boolean }) {
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] sm:text-[10px] font-medium whitespace-nowrap",
+        dark
+          ? "bg-zinc-100 text-zinc-700 border border-zinc-200"
+          : "bg-white/10 text-white/90"
+      )}
+    >
+      <Check className={cn("h-2.5 w-2.5", dark ? "text-blue-600" : "text-blue-400")} />
       {label}
     </span>
   );
 }
 
-function MiniVaultMockup({ className }: { className?: string }) {
-  const categories = [
-    { color: "bg-blue-400", label: "Sales outreach", count: 142, width: 85 },
-    { color: "bg-emerald-400", label: "Customer support", count: 89, width: 70 },
-    { color: "bg-amber-400", label: "Marketing copy", count: 67, width: 60 },
-    { color: "bg-purple-400", label: "Legal review", count: 34, width: 50 },
-  ];
-
+function FeaturePills({ dark }: { dark?: boolean }) {
   return (
-    <div
-      className={cn(
-        "rounded-lg bg-white/[0.07] backdrop-blur-sm border border-white/10 overflow-hidden shadow-2xl",
-        className
-      )}
-    >
-      {/* Browser chrome */}
-      <div className="flex items-center gap-1.5 px-3 py-2 border-b border-white/10 bg-white/[0.03]">
-        <div className="w-2 h-2 rounded-full bg-red-400/60" />
-        <div className="w-2 h-2 rounded-full bg-yellow-400/60" />
-        <div className="w-2 h-2 rounded-full bg-green-400/60" />
-        <div className="ml-2 flex-1 h-4 rounded-md bg-white/[0.06] flex items-center px-2">
-          <span className="text-[6px] text-white/30 font-medium">teamprompt.app/vault</span>
-        </div>
-      </div>
-      <div className="flex">
-        {/* Sidebar */}
-        <div className="w-14 border-r border-white/10 p-2 space-y-2 bg-white/[0.02]">
-          <div className="w-full h-5 rounded bg-blue-500/20 flex items-center justify-center">
-            <span className="text-[5px] text-blue-300 font-bold">Vault</span>
-          </div>
-          <div className="w-full h-4 rounded bg-white/5" />
-          <div className="w-full h-4 rounded bg-white/5" />
-          <div className="w-full h-4 rounded bg-white/5" />
-        </div>
-        {/* Prompt rows */}
-        <div className="flex-1 p-2 space-y-1.5">
-          {categories.map((item, i) => (
-            <div key={i} className="flex items-center gap-1.5 rounded-md bg-white/[0.03] px-1.5 py-1">
-              <div className={cn("w-1.5 h-1.5 rounded-full shrink-0", item.color)} />
-              <div className="flex-1 space-y-0.5">
-                <div
-                  className="h-1.5 rounded bg-white/15"
-                  style={{ width: `${item.width}%` }}
-                />
-                <div
-                  className="h-1 rounded bg-white/[0.06]"
-                  style={{ width: `${item.width - 20}%` }}
-                />
-              </div>
-              <div className="h-3.5 w-9 rounded-full bg-blue-400/15 flex items-center justify-center">
-                <span className="text-[6px] text-blue-300 font-medium">
-                  {item.count}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+    <div className="flex flex-wrap gap-1.5">
+      <FeaturePill label="Shared Prompt Vault" dark={dark} />
+      <FeaturePill label="DLP Guardrails" dark={dark} />
+      <FeaturePill label="Usage Analytics" dark={dark} />
+      <FeaturePill label="One-Click Insert" dark={dark} />
     </div>
   );
 }
 
-function LogoWordmark() {
-  return (
-    <div className="flex items-center gap-2">
-      <Image
-        src="/brand/logo-wordmark-white.svg"
-        alt="TeamPrompt"
-        width={160}
-        height={32}
-        className="h-6 sm:h-7 w-auto"
-      />
-    </div>
-  );
-}
-
-function Tagline({ className }: { className?: string }) {
+function CompatibilityLine({ dark, className }: { dark?: boolean; className?: string }) {
+  const tools = ["ChatGPT", "Claude", "Gemini", "Copilot", "Perplexity"];
   return (
     <p
       className={cn(
-        "text-white/80 text-[11px] sm:text-xs font-semibold tracking-wide",
+        "text-[7px] sm:text-[8px] font-medium",
+        dark ? "text-zinc-400" : "text-white/40",
         className
       )}
     >
-      Your team&apos;s AI prompt library — with built-in guardrails
+      Works with {tools.join(" · ")}
     </p>
   );
 }
 
-function FeaturePills() {
+function FeatureIconRow({ className }: { className?: string }) {
+  const features = [
+    { icon: Users, label: "Team Library" },
+    { icon: Shield, label: "DLP Shield" },
+    { icon: BarChart3, label: "Analytics" },
+    { icon: Zap, label: "One-Click" },
+  ];
   return (
-    <div className="flex flex-wrap gap-1.5">
-      <FeaturePill label="Shared Prompt Vault" />
-      <FeaturePill label="DLP Guardrails" />
-      <FeaturePill label="Usage Analytics" />
-      <FeaturePill label="One-Click Insert" />
-    </div>
-  );
-}
-
-const aiToolLogos = [
-  { name: "ChatGPT", initial: "G", color: "bg-emerald-500/20 text-emerald-300" },
-  { name: "Claude", initial: "C", color: "bg-amber-500/20 text-amber-300" },
-  { name: "Gemini", initial: "G", color: "bg-blue-500/20 text-blue-300" },
-  { name: "Copilot", initial: "C", color: "bg-cyan-500/20 text-cyan-300" },
-  { name: "Perplexity", initial: "P", color: "bg-purple-500/20 text-purple-300" },
-];
-
-function CompatibilityLine({ className }: { className?: string }) {
-  return (
-    <div className={cn("flex items-center gap-2", className)}>
-      <span className="text-white/30 text-[7px] sm:text-[8px] font-medium uppercase tracking-wider">
-        Works with
-      </span>
-      <div className="flex items-center gap-1">
-        {aiToolLogos.map((tool) => (
-          <div
-            key={tool.name}
-            className={cn(
-              "w-4 h-4 rounded-full flex items-center justify-center",
-              tool.color
-            )}
-            title={tool.name}
-          >
-            <span className="text-[6px] font-bold">{tool.initial}</span>
+    <div className={cn("flex items-center gap-3", className)}>
+      {features.map((f) => (
+        <div key={f.label} className="flex items-center gap-1.5">
+          <div className="w-5 h-5 rounded-md bg-blue-500/15 flex items-center justify-center">
+            <f.icon className="h-3 w-3 text-blue-400" />
           </div>
-        ))}
-      </div>
+          <span className="text-[8px] sm:text-[9px] font-medium text-white/70">{f.label}</span>
+        </div>
+      ))}
     </div>
   );
 }
 
-/* ── Banner shell ───────────────────────────────── */
+function FeatureIconRowDark({ className }: { className?: string }) {
+  const features = [
+    { icon: Users, label: "Team Library" },
+    { icon: Shield, label: "DLP Shield" },
+    { icon: BarChart3, label: "Analytics" },
+    { icon: Zap, label: "One-Click" },
+  ];
+  return (
+    <div className={cn("flex items-center gap-3", className)}>
+      {features.map((f) => (
+        <div key={f.label} className="flex items-center gap-1.5">
+          <div className="w-5 h-5 rounded-md bg-blue-500/10 flex items-center justify-center">
+            <f.icon className="h-3 w-3 text-blue-600" />
+          </div>
+          <span className="text-[8px] sm:text-[9px] font-medium text-zinc-500">{f.label}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
 
-function BannerShell({
+/* ══════════════════════════════════════════════════
+   BANNER SHELLS
+   ══════════════════════════════════════════════════ */
+
+function DarkBannerShell({
   aspectRatio,
   children,
   className,
@@ -158,28 +553,16 @@ function BannerShell({
 }) {
   return (
     <div
-      className={cn(
-        "w-full rounded-xl overflow-hidden bg-[#0F1117]",
-        className
-      )}
+      className={cn("w-full rounded-xl overflow-hidden bg-[#0F1117]", className)}
       style={{ aspectRatio }}
     >
-      <div className="w-full h-full relative p-4 sm:p-6 flex flex-col justify-between">
-        {/* Subtle radial blue glow */}
+      <div className="w-full h-full relative p-4 sm:p-6 flex flex-col justify-between overflow-hidden">
+        {/* Soft ambient glow behind mockup area */}
         <div
-          className="absolute inset-0 opacity-30"
+          className="absolute inset-0"
           style={{
             background:
-              "radial-gradient(ellipse 60% 50% at 70% 50%, rgba(37, 99, 235, 0.15) 0%, transparent 70%)",
-          }}
-        />
-        {/* Subtle grid overlay */}
-        <div
-          className="absolute inset-0 opacity-[0.03]"
-          style={{
-            backgroundImage:
-              "linear-gradient(white 1px, transparent 1px), linear-gradient(90deg, white 1px, transparent 1px)",
-            backgroundSize: "32px 32px",
+              "radial-gradient(ellipse 40% 50% at 72% 50%, rgba(37,99,235,0.06) 0%, transparent 70%)",
           }}
         />
         <div className="relative z-10 flex flex-col h-full">{children}</div>
@@ -188,116 +571,244 @@ function BannerShell({
   );
 }
 
-/* ── Twitter Banner (1500 x 500) ────────────────── */
+function WhiteBannerShell({
+  aspectRatio,
+  children,
+  className,
+}: {
+  aspectRatio: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn("w-full rounded-xl overflow-hidden bg-white border border-zinc-200", className)}
+      style={{ aspectRatio }}
+    >
+      <div className="w-full h-full relative p-4 sm:p-6 flex flex-col justify-between overflow-hidden">
+        <div
+          className="absolute top-0 left-0 right-0 h-1"
+          style={{
+            background: "linear-gradient(90deg, #2563EB 0%, #60A5FA 50%, #2563EB 100%)",
+          }}
+        />
+        <div className="relative z-10 flex flex-col h-full">{children}</div>
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════
+   BANNERS — each uses a different scene
+   ══════════════════════════════════════════════════ */
+
+/* ── Twitter (1500 x 500) — Vault + DLP side by side ── */
 
 export function TwitterBanner() {
   return (
-    <BannerShell aspectRatio="1500/500">
-      <div className="flex items-center h-full gap-6">
-        {/* Left content */}
-        <div className="flex-1 space-y-3">
-          <LogoWordmark />
-          <Tagline />
-          <FeaturePills />
+    <DarkBannerShell aspectRatio="1500/500">
+      <div className="flex items-center h-full gap-4 sm:gap-6">
+        <div className="flex-1 space-y-2.5 sm:space-y-3 shrink-0">
+          <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={160} height={32} className="h-5 sm:h-7 w-auto" />
+          <p className="text-white/90 text-[10px] sm:text-sm font-semibold leading-snug max-w-[220px] sm:max-w-[260px]">
+            Your team&apos;s AI prompt library — with built-in guardrails
+          </p>
+          <FeatureIconRow />
           <CompatibilityLine />
         </div>
-        {/* Right mockup */}
-        <div className="hidden sm:block w-1/3">
-          <MiniVaultMockup />
+        <div className="hidden sm:flex w-[50%] gap-3 items-start">
+          <VaultScene className="flex-1" compact />
+          <DLPBlockScene className="flex-1" compact />
         </div>
       </div>
-    </BannerShell>
+    </DarkBannerShell>
   );
 }
 
-/* ── LinkedIn Banner (1584 x 396) ───────────────── */
+export function TwitterBannerWhite() {
+  return (
+    <WhiteBannerShell aspectRatio="1500/500">
+      <div className="flex items-center h-full gap-4 sm:gap-6">
+        <div className="flex-1 space-y-2.5 sm:space-y-3 shrink-0">
+          <Image src="/brand/logo-wordmark.svg" alt="TeamPrompt" width={160} height={32} className="h-5 sm:h-7 w-auto" />
+          <p className="text-zinc-900 text-[10px] sm:text-sm font-semibold leading-snug max-w-[220px] sm:max-w-[260px]">
+            Your team&apos;s AI prompt library — with built-in guardrails
+          </p>
+          <FeatureIconRowDark />
+          <CompatibilityLine dark />
+        </div>
+        <div className="hidden sm:flex w-[50%] gap-3 items-start">
+          <VaultScene className="flex-1" compact />
+          <DLPBlockScene className="flex-1" compact />
+        </div>
+      </div>
+    </WhiteBannerShell>
+  );
+}
+
+/* ── LinkedIn (1584 x 396) — Vault scene ───────────── */
 
 export function LinkedInBanner() {
   return (
-    <BannerShell aspectRatio="1584/396">
-      <div className="flex items-center h-full gap-6">
-        <div className="flex-1 space-y-2.5">
-          <LogoWordmark />
-          <Tagline />
-          <FeaturePills />
+    <DarkBannerShell aspectRatio="1584/396">
+      <div className="flex items-center h-full gap-4 sm:gap-6">
+        <div className="flex-1 space-y-2 sm:space-y-2.5">
+          <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={150} height={30} className="h-5 sm:h-6 w-auto" />
+          <p className="text-white/90 text-[10px] sm:text-xs font-semibold leading-snug">
+            AI prompt management for teams that need guardrails
+          </p>
+          <FeatureIconRow />
           <CompatibilityLine />
         </div>
-        <div className="hidden sm:block w-1/3">
-          <MiniVaultMockup />
+        <div className="hidden sm:block w-[38%]">
+          <VaultScene />
         </div>
       </div>
-    </BannerShell>
+    </DarkBannerShell>
   );
 }
 
-/* ── Facebook Cover (851 x 315) ─────────────────── */
+export function LinkedInBannerWhite() {
+  return (
+    <WhiteBannerShell aspectRatio="1584/396">
+      <div className="flex items-center h-full gap-4 sm:gap-6">
+        <div className="flex-1 space-y-2 sm:space-y-2.5">
+          <Image src="/brand/logo-wordmark.svg" alt="TeamPrompt" width={150} height={30} className="h-5 sm:h-6 w-auto" />
+          <p className="text-zinc-900 text-[10px] sm:text-xs font-semibold leading-snug">
+            AI prompt management for teams that need guardrails
+          </p>
+          <FeatureIconRowDark />
+          <CompatibilityLine dark />
+        </div>
+        <div className="hidden sm:block w-[38%]">
+          <VaultScene />
+        </div>
+      </div>
+    </WhiteBannerShell>
+  );
+}
+
+/* ── Facebook (851 x 315) — Insert scene ───────────── */
 
 export function FacebookCover() {
   return (
-    <BannerShell aspectRatio="851/315">
-      <div className="flex items-center h-full gap-4">
+    <DarkBannerShell aspectRatio="851/315">
+      <div className="flex items-center h-full gap-3 sm:gap-4">
         <div className="flex-1 space-y-2">
-          <LogoWordmark />
-          <Tagline />
-          <FeaturePills />
+          <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={130} height={26} className="h-4 sm:h-5 w-auto" />
+          <p className="text-white/90 text-[9px] sm:text-xs font-semibold leading-snug">
+            Shared prompts · DLP guardrails · Usage analytics
+          </p>
+          <CompatibilityLine />
         </div>
-        <div className="hidden sm:block w-1/4">
-          <MiniVaultMockup />
+        <div className="hidden sm:block w-[30%]">
+          <InsertScene />
         </div>
       </div>
-      <CompatibilityLine className="mt-auto" />
-    </BannerShell>
+    </DarkBannerShell>
   );
 }
 
-/* ── YouTube Banner (2560 x 1440) ───────────────── */
+export function FacebookCoverWhite() {
+  return (
+    <WhiteBannerShell aspectRatio="851/315">
+      <div className="flex items-center h-full gap-3 sm:gap-4">
+        <div className="flex-1 space-y-2">
+          <Image src="/brand/logo-wordmark.svg" alt="TeamPrompt" width={130} height={26} className="h-4 sm:h-5 w-auto" />
+          <p className="text-zinc-900 text-[9px] sm:text-xs font-semibold leading-snug">
+            Shared prompts · DLP guardrails · Usage analytics
+          </p>
+          <CompatibilityLine dark />
+        </div>
+        <div className="hidden sm:block w-[30%]">
+          <InsertScene />
+        </div>
+      </div>
+    </WhiteBannerShell>
+  );
+}
+
+/* ── YouTube (2560 x 1440) — All 4 scenes ──────────── */
 
 export function YouTubeBanner() {
   return (
-    <BannerShell aspectRatio="2560/1440">
-      <div className="flex flex-col items-center justify-center h-full text-center gap-4">
-        <LogoWordmark />
-        <p className="text-white/80 text-sm sm:text-base font-semibold max-w-md">
+    <DarkBannerShell aspectRatio="2560/1440">
+      <div className="flex flex-col items-center justify-center h-full text-center gap-3 sm:gap-4">
+        <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={200} height={40} className="h-6 sm:h-8 w-auto" />
+        <p className="text-white/90 text-xs sm:text-base font-semibold max-w-md">
           Your team&apos;s AI prompt library — with built-in guardrails
         </p>
         <FeaturePills />
-        <MiniVaultMockup className="w-full max-w-xs" />
+        <div className="grid grid-cols-2 gap-3 w-full max-w-md">
+          <VaultScene compact />
+          <DLPBlockScene compact />
+          <InsertScene />
+          <AnalyticsScene />
+        </div>
         <CompatibilityLine />
       </div>
-    </BannerShell>
+    </DarkBannerShell>
   );
 }
 
-/* ── OG Banner (1200 x 630) ─────────────────────── */
+/* ── OG (1200 x 630) — Vault + DLP layered ─────────── */
 
 export function OGBanner() {
   return (
-    <BannerShell aspectRatio="1200/630">
-      <div className="flex items-center h-full gap-6">
-        <div className="flex-1 space-y-3">
-          <LogoWordmark />
-          <p className="text-white/90 text-sm sm:text-base font-semibold leading-snug">
+    <DarkBannerShell aspectRatio="1200/630">
+      <div className="flex items-center h-full gap-4 sm:gap-6">
+        <div className="flex-1 space-y-2.5 sm:space-y-3">
+          <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={180} height={36} className="h-5 sm:h-7 w-auto" />
+          <p className="text-white/90 text-xs sm:text-base font-bold leading-snug">
             AI Prompt Management
             <br />
             for Teams
           </p>
-          <FeaturePills />
+          <FeatureIconRow />
           <CompatibilityLine />
         </div>
-        <div className="w-2/5">
-          <MiniVaultMockup />
+        <div className="w-[45%] space-y-2">
+          <VaultScene compact />
+          <DLPBlockScene compact />
         </div>
       </div>
-    </BannerShell>
+    </DarkBannerShell>
   );
 }
 
-/* ── Export map for media page ───────────────────── */
+export function OGBannerWhite() {
+  return (
+    <WhiteBannerShell aspectRatio="1200/630">
+      <div className="flex items-center h-full gap-4 sm:gap-6">
+        <div className="flex-1 space-y-2.5 sm:space-y-3">
+          <Image src="/brand/logo-wordmark.svg" alt="TeamPrompt" width={180} height={36} className="h-5 sm:h-7 w-auto" />
+          <p className="text-zinc-900 text-xs sm:text-base font-bold leading-snug">
+            AI Prompt Management
+            <br />
+            for Teams
+          </p>
+          <FeatureIconRowDark />
+          <CompatibilityLine dark />
+        </div>
+        <div className="w-[45%] space-y-2">
+          <VaultScene compact />
+          <DLPBlockScene compact />
+        </div>
+      </div>
+    </WhiteBannerShell>
+  );
+}
+
+/* ── Export map ──────────────────────────────────── */
 
 export const socialBannerComponents = {
-  twitter: { Component: TwitterBanner, label: "X (Twitter) Header", dims: "1500 x 500" },
-  linkedin: { Component: LinkedInBanner, label: "LinkedIn Cover", dims: "1584 x 396" },
-  facebook: { Component: FacebookCover, label: "Facebook Cover", dims: "851 x 315" },
+  twitter: { Component: TwitterBanner, label: "X (Twitter) Header — Dark", dims: "1500 x 500" },
+  twitterWhite: { Component: TwitterBannerWhite, label: "X (Twitter) Header — White", dims: "1500 x 500" },
+  linkedin: { Component: LinkedInBanner, label: "LinkedIn Cover — Dark", dims: "1584 x 396" },
+  linkedinWhite: { Component: LinkedInBannerWhite, label: "LinkedIn Cover — White", dims: "1584 x 396" },
+  facebook: { Component: FacebookCover, label: "Facebook Cover — Dark", dims: "851 x 315" },
+  facebookWhite: { Component: FacebookCoverWhite, label: "Facebook Cover — White", dims: "851 x 315" },
   youtube: { Component: YouTubeBanner, label: "YouTube Channel Art", dims: "2560 x 1440" },
-  og: { Component: OGBanner, label: "OG / Social Share Card", dims: "1200 x 630" },
+  og: { Component: OGBanner, label: "OG / Social Share Card — Dark", dims: "1200 x 630" },
+  ogWhite: { Component: OGBannerWhite, label: "OG / Social Share Card — White", dims: "1200 x 630" },
 } as const;

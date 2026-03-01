@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate type
-    const validTypes = ["feedback", "bug", "feature"];
+    const validTypes = ["feedback", "bug", "feature", "sales"];
     const ticketType = validTypes.includes(type) ? type : "feedback";
 
     const db = createServiceClient();

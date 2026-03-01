@@ -153,6 +153,18 @@
   50% { transform: translateY(-6px); }
 }
 
+/* Mockup toast slide-in */
+@keyframes mockup-toast-in {
+  0% { opacity: 0; transform: translateX(8px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+/* Mockup notification pulse */
+@keyframes mockup-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.5); }
+}
+
 /* Scrollbar utilities */
 .scrollbar-hide {
   -ms-overflow-style: none;

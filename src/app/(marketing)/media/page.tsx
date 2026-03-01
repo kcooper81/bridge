@@ -8,10 +8,14 @@ import { DarkSection } from "@/components/marketing/dark-section";
 import { CopyButton } from "./_components/copy-button";
 import {
   TwitterBanner,
+  TwitterBannerWhite,
   LinkedInBanner,
+  LinkedInBannerWhite,
   FacebookCover,
+  FacebookCoverWhite,
   YouTubeBanner,
   OGBanner,
+  OGBannerWhite,
 } from "./_components/social-banners";
 
 export const metadata: Metadata = generatePageMetadata({
@@ -148,7 +152,10 @@ const storePromos = [
 const socialMediaAssets = [
   {
     platform: "X (Twitter)",
-    BannerComponent: TwitterBanner,
+    banners: [
+      { Component: TwitterBanner, variant: "Dark" },
+      { Component: TwitterBannerWhite, variant: "White" },
+    ],
     assets: [
       { file: "/store-assets/social-profile-400.png", label: "Profile picture", dims: "400 x 400" },
       { file: "/store-assets/twitter-banner.png", label: "Header banner", dims: "1500 x 500" },
@@ -156,7 +163,10 @@ const socialMediaAssets = [
   },
   {
     platform: "LinkedIn",
-    BannerComponent: LinkedInBanner,
+    banners: [
+      { Component: LinkedInBanner, variant: "Dark" },
+      { Component: LinkedInBannerWhite, variant: "White" },
+    ],
     assets: [
       { file: "/store-assets/social-profile-400.png", label: "Profile picture", dims: "400 x 400" },
       { file: "/store-assets/social-profile-300.png", label: "Company logo", dims: "300 x 300" },
@@ -165,7 +175,10 @@ const socialMediaAssets = [
   },
   {
     platform: "Facebook",
-    BannerComponent: FacebookCover,
+    banners: [
+      { Component: FacebookCover, variant: "Dark" },
+      { Component: FacebookCoverWhite, variant: "White" },
+    ],
     assets: [
       { file: "/store-assets/social-profile-800.png", label: "Profile picture", dims: "720 x 720 (use 800px)" },
       { file: "/store-assets/facebook-cover.png", label: "Cover photo", dims: "851 x 315" },
@@ -173,7 +186,9 @@ const socialMediaAssets = [
   },
   {
     platform: "YouTube",
-    BannerComponent: YouTubeBanner,
+    banners: [
+      { Component: YouTubeBanner, variant: "Dark" },
+    ],
     assets: [
       { file: "/store-assets/social-profile-800.png", label: "Profile picture", dims: "800 x 800" },
       { file: "/store-assets/youtube-channel-art.png", label: "Channel art / banner", dims: "2560 x 1440" },
@@ -181,7 +196,7 @@ const socialMediaAssets = [
   },
   {
     platform: "Instagram",
-    BannerComponent: null,
+    banners: [],
     assets: [
       { file: "/store-assets/social-profile-800.png", label: "Profile picture", dims: "720 x 720 (use 800px)" },
     ],
@@ -496,15 +511,24 @@ export default function MediaPage() {
             upload.
           </p>
 
-          <div className="space-y-10">
+          <div className="space-y-12">
             {socialMediaAssets.map((platform) => (
               <div key={platform.platform}>
                 <h3 className="text-lg font-semibold mb-4">{platform.platform}</h3>
 
-                {/* Rendered banner preview */}
-                {platform.BannerComponent && (
-                  <div className="rounded-xl border border-border overflow-hidden mb-4">
-                    <platform.BannerComponent />
+                {/* Rendered banner previews — dark & white variants */}
+                {platform.banners.length > 0 && (
+                  <div className="space-y-3 mb-4">
+                    {platform.banners.map((banner) => (
+                      <div key={banner.variant}>
+                        <p className="text-xs text-muted-foreground font-medium mb-1.5">
+                          {banner.variant} variant
+                        </p>
+                        <div className="rounded-xl border border-border overflow-hidden">
+                          <banner.Component />
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 )}
 
@@ -549,8 +573,19 @@ export default function MediaPage() {
           <p className="text-muted-foreground mb-8 max-w-2xl">
             The default Open Graph image used when sharing any TeamPrompt page on social media.
           </p>
-          <div className="rounded-xl border border-border overflow-hidden">
-            <OGBanner />
+          <div className="space-y-3">
+            <div>
+              <p className="text-xs text-muted-foreground font-medium mb-1.5">Dark variant</p>
+              <div className="rounded-xl border border-border overflow-hidden">
+                <OGBanner />
+              </div>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground font-medium mb-1.5">White variant</p>
+              <div className="rounded-xl border border-border overflow-hidden">
+                <OGBannerWhite />
+              </div>
+            </div>
           </div>
         </section>
 

@@ -7,6 +7,7 @@ import { FAQSection } from "@/components/marketing/faq-section";
 import { StatsRow } from "@/components/marketing/stats-row";
 import { BenefitsGrid } from "@/components/marketing/benefits-grid";
 import { AppMockup } from "@/components/marketing/app-mockup";
+import { ContactSalesModal } from "@/components/marketing/contact-sales-modal";
 import { generatePageMetadata } from "@/lib/seo/metadata";
 import {
   ArrowRight,
@@ -223,15 +224,7 @@ export default function EnterprisePage() {
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
-              <a href="mailto:sales@teamprompt.app">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="text-base px-8 h-12 rounded-full border-white/20 text-white hover:bg-white/10 hover:text-white font-semibold bg-transparent"
-                >
-                  Talk to sales
-                </Button>
-              </a>
+              <ContactSalesModal buttonVariant="outline-dark" />
             </div>
           </div>
         </div>
@@ -301,16 +294,52 @@ export default function EnterprisePage() {
           <AppMockup
             variant="guardrails"
             items={[
-              { title: "SSN detected in ChatGPT prompt", badge: "Blocked", stat: "2m ago" },
-              { title: "API key found in Claude conversation", badge: "Blocked", stat: "15m ago" },
-              { title: "Patient name in Gemini query", badge: "Blocked", stat: "1h ago" },
-              { title: "Financial report shared safely", badge: "Warning", stat: "2h ago" },
+              {
+                title: "SSN detected in ChatGPT prompt",
+                badge: "Blocked",
+                stat: "2m ago",
+                iconColor: "red",
+                highlight: "block",
+                subtitle: "HIPAA policy · ChatGPT",
+              },
+              {
+                title: "API key found in Claude conversation",
+                badge: "Blocked",
+                stat: "15m ago",
+                iconColor: "red",
+                highlight: "block",
+                subtitle: "Credentials policy · Claude",
+              },
+              {
+                title: "Patient name in Gemini query",
+                badge: "Blocked",
+                stat: "1h ago",
+                iconColor: "red",
+                highlight: "block",
+                subtitle: "PHI policy · Gemini",
+              },
+              {
+                title: "Financial report shared safely",
+                badge: "Warning",
+                stat: "2h ago",
+                iconColor: "amber",
+                highlight: "warn",
+                subtitle: "PCI-DSS policy · Copilot",
+              },
             ]}
             sidebarUser={{ name: "IT Admin", initials: "IA" }}
+            navBadges={{ Guardrails: 4 }}
             alertBanner={{
               type: "block",
               message: "3 violations blocked in the last 24 hours",
             }}
+            toasts={[
+              {
+                message: "SSN auto-redacted in outbound prompt",
+                type: "success",
+                position: "bottom-right",
+              },
+            ]}
           />
         </div>
       </section>
@@ -357,7 +386,7 @@ export default function EnterprisePage() {
           <BenefitsGrid
             benefits={[
               "Unlimited users and teams",
-              "Force-install Chrome extension via MDM",
+              "Force-install browser extension via MDM",
               "Custom guardrail rules per team",
               "6 one-click compliance packs (HIPAA, GDPR, PCI-DSS, CCPA, SOC 2, PII)",
               "Auto-sanitization with safe placeholder tokens",
@@ -372,7 +401,7 @@ export default function EnterprisePage() {
           />
 
           <div className="text-center mt-10">
-            <a href="mailto:sales@teamprompt.app">
+            <ContactSalesModal>
               <Button
                 size="lg"
                 className="text-base px-8 h-12 rounded-full font-semibold"
@@ -380,7 +409,7 @@ export default function EnterprisePage() {
                 Contact sales for pricing
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
-            </a>
+            </ContactSalesModal>
           </div>
         </div>
       </section>

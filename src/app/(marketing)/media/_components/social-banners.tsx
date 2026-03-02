@@ -1078,21 +1078,322 @@ export function OGBannerGradient() {
   );
 }
 
+/* ══════════════════════════════════════════════════
+   LIFESTYLE VARIANTS — contained stock photo + app mockup + snippet chips
+   QuickBooks-style: photo as a design element, not a background
+   ══════════════════════════════════════════════════ */
+
+/** Lifestyle banner shell — dark bg with radial glow and blue accent */
+function LifestyleBannerShell({
+  aspectRatio,
+  children,
+  className,
+}: {
+  aspectRatio: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn("w-full rounded-xl overflow-hidden relative bg-[#0A0E1A]", className)}
+      style={{ aspectRatio }}
+    >
+      {/* Radial glow */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: [
+            "radial-gradient(ellipse 50% 60% at 65% 50%, rgba(37,99,235,0.10) 0%, transparent 70%)",
+            "radial-gradient(ellipse 30% 40% at 35% 60%, rgba(139,92,246,0.05) 0%, transparent 60%)",
+          ].join(", "),
+        }}
+      />
+      {/* Blue accent bottom edge */}
+      <div
+        className="absolute bottom-0 left-0 right-0 h-1 z-20"
+        style={{ background: "linear-gradient(90deg, #2563EB 0%, #60A5FA 50%, #2563EB 100%)" }}
+      />
+      {/* Content */}
+      <div className="absolute inset-0 p-4 sm:p-6 flex flex-col justify-between z-10">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+/** Contained lifestyle photo — rounded, shadowed, with dark-edge overlay */
+function LifestylePhoto({
+  src,
+  alt,
+  className,
+  rotate = 0,
+}: {
+  src: string;
+  alt: string;
+  className?: string;
+  rotate?: number;
+}) {
+  return (
+    <div
+      className={cn("relative rounded-2xl overflow-hidden shadow-2xl shadow-black/40", className)}
+      style={{ transform: rotate ? `rotate(${rotate}deg)` : undefined }}
+    >
+      <Image
+        src={src}
+        alt={alt}
+        width={800}
+        height={534}
+        className="w-full h-full object-cover"
+      />
+      {/* Dark edge overlay for blending */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: [
+            "linear-gradient(to right, rgba(10,14,26,0.4) 0%, transparent 30%)",
+            "linear-gradient(to left, rgba(10,14,26,0.3) 0%, transparent 25%)",
+            "linear-gradient(to bottom, rgba(10,14,26,0.2) 0%, transparent 20%)",
+            "linear-gradient(to top, rgba(10,14,26,0.3) 0%, transparent 25%)",
+          ].join(", "),
+        }}
+      />
+    </div>
+  );
+}
+
+/** Floating snippet chip — pill badge with icon + text */
+function SnippetChip({
+  icon: Icon,
+  label,
+  color,
+  className,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  color: "red" | "blue" | "amber" | "emerald";
+  className?: string;
+}) {
+  const colorMap = {
+    red: "bg-red-500 shadow-red-500/30",
+    blue: "bg-blue-500 shadow-blue-500/30",
+    amber: "bg-amber-500 shadow-amber-500/30",
+    emerald: "bg-emerald-500 shadow-emerald-500/30",
+  };
+  return (
+    <div
+      className={cn(
+        "absolute text-white rounded-full px-1.5 sm:px-2 py-0.5 shadow-lg flex items-center gap-1 whitespace-nowrap",
+        colorMap[color],
+        className
+      )}
+    >
+      <Icon className="h-2 w-2 sm:h-2.5 sm:w-2.5" />
+      <span className="text-[5px] sm:text-[6px] font-bold">{label}</span>
+    </div>
+  );
+}
+
+/* ── Unsplash photo URLs (free license) ── */
+const lifestylePhotos = {
+  twitter: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80&auto=format&fit=crop",
+  linkedin: "https://images.unsplash.com/photo-1553877522-43269d4ea984?w=800&q=80&auto=format&fit=crop",
+  facebook: "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=800&q=80&auto=format&fit=crop",
+  youtube: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80&auto=format&fit=crop",
+  og: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&q=80&auto=format&fit=crop",
+};
+
+/* ── Twitter Lifestyle (1500 x 500) ── */
+
+export function TwitterBannerLifestyle() {
+  return (
+    <LifestyleBannerShell aspectRatio="1500/500">
+      <div className="flex items-center h-full gap-4 sm:gap-6">
+        <div className="flex-1 space-y-2 sm:space-y-2.5 shrink-0 max-w-[40%]">
+          <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={160} height={32} className="h-5 sm:h-7 w-auto" />
+          <p className="text-white text-[10px] sm:text-sm font-bold leading-snug">
+            Your team&apos;s AI prompt library — with built-in guardrails
+          </p>
+          <FeaturePills />
+          <CompatibilityLine />
+        </div>
+        <div className="hidden sm:flex w-[55%] items-center gap-3 relative">
+          <LifestylePhoto
+            src={lifestylePhotos.twitter}
+            alt="Team collaborating at laptops"
+            className="w-[55%] aspect-[4/3]"
+            rotate={-1}
+          />
+          <div className="w-[50%] -ml-4">
+            <VaultScene compact />
+          </div>
+          <SnippetChip icon={Shield} label="3 blocked" color="red" className="-top-2 right-[30%]" />
+          <SnippetChip icon={Users} label="Shared with team" color="blue" className="bottom-0 left-[10%]" />
+          <SnippetChip icon={Zap} label="142 prompts used" color="emerald" className="-bottom-2 right-[5%]" />
+        </div>
+      </div>
+    </LifestyleBannerShell>
+  );
+}
+
+/* ── LinkedIn Lifestyle (1584 x 396) ── */
+
+export function LinkedInBannerLifestyle() {
+  return (
+    <LifestyleBannerShell aspectRatio="1584/396">
+      <div className="flex items-center h-full gap-4 sm:gap-6">
+        <div className="flex-1 space-y-2 sm:space-y-2.5 max-w-[38%]">
+          <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={150} height={30} className="h-5 sm:h-6 w-auto" />
+          <p className="text-white text-[10px] sm:text-xs font-bold leading-snug">
+            AI prompt management for teams that need guardrails
+          </p>
+          <FeaturePills />
+          <CompatibilityLine />
+        </div>
+        <div className="hidden sm:flex w-[55%] items-center gap-3 relative">
+          <LifestylePhoto
+            src={lifestylePhotos.linkedin}
+            alt="Professional at desk with laptop"
+            className="w-[50%] aspect-[4/3]"
+            rotate={1}
+          />
+          <div className="w-[50%] -ml-3">
+            <DLPBlockScene compact />
+          </div>
+          <SnippetChip icon={AlertTriangle} label="Warning: PII detected" color="amber" className="-top-2 right-[25%]" />
+          <SnippetChip icon={Shield} label="DLP Active" color="red" className="bottom-0 left-[5%]" />
+          <SnippetChip icon={Zap} label="142 prompts used" color="emerald" className="-bottom-2 right-[10%]" />
+        </div>
+      </div>
+    </LifestyleBannerShell>
+  );
+}
+
+/* ── Facebook Lifestyle (851 x 315) ── */
+
+export function FacebookCoverLifestyle() {
+  return (
+    <LifestyleBannerShell aspectRatio="851/315">
+      <div className="flex items-center h-full gap-3 sm:gap-4">
+        <div className="flex-1 space-y-1.5 sm:space-y-2 max-w-[38%]">
+          <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={130} height={26} className="h-4 sm:h-5 w-auto" />
+          <p className="text-white text-[9px] sm:text-xs font-bold leading-snug">
+            Shared prompts · DLP guardrails · Usage analytics
+          </p>
+          <FeaturePills />
+        </div>
+        <div className="hidden sm:flex w-[55%] items-center gap-2 relative">
+          <LifestylePhoto
+            src={lifestylePhotos.facebook}
+            alt="Team collaboration session"
+            className="w-[50%] aspect-[4/3]"
+            rotate={-1}
+          />
+          <div className="w-[50%] -ml-3">
+            <InsertScene />
+          </div>
+          <SnippetChip icon={Shield} label="3 blocked" color="red" className="-top-2 right-[20%]" />
+          <SnippetChip icon={Users} label="Shared with team" color="blue" className="-bottom-1 left-[8%]" />
+          <SnippetChip icon={Zap} label="142 prompts used" color="emerald" className="-bottom-2 right-[5%]" />
+        </div>
+      </div>
+    </LifestyleBannerShell>
+  );
+}
+
+/* ── YouTube Lifestyle (2560 x 1440) ── */
+
+export function YouTubeBannerLifestyle() {
+  return (
+    <LifestyleBannerShell aspectRatio="2560/1440">
+      <div className="flex flex-col items-center justify-center h-full text-center gap-3 sm:gap-4">
+        <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={200} height={40} className="h-6 sm:h-8 w-auto" />
+        <p className="text-white text-xs sm:text-base font-bold max-w-md">
+          Your team&apos;s AI prompt library — with built-in guardrails
+        </p>
+        <FeaturePills />
+        <div className="w-full max-w-lg mt-1 relative">
+          <div className="flex items-start gap-3">
+            <LifestylePhoto
+              src={lifestylePhotos.youtube}
+              alt="Modern office environment"
+              className="w-[45%] aspect-[4/3]"
+              rotate={-2}
+            />
+            <div className="w-[55%] space-y-2">
+              <VaultScene compact />
+              <DLPBlockScene compact />
+            </div>
+          </div>
+          <SnippetChip icon={Shield} label="3 blocked" color="red" className="-top-2 right-[15%]" />
+          <SnippetChip icon={Users} label="Shared with team" color="blue" className="top-[40%] -left-3" />
+          <SnippetChip icon={AlertTriangle} label="Warning: PII detected" color="amber" className="bottom-[30%] -right-2" />
+          <SnippetChip icon={Zap} label="142 prompts used" color="emerald" className="-bottom-2 left-[30%]" />
+        </div>
+        <CompatibilityLine className="mt-2" />
+      </div>
+    </LifestyleBannerShell>
+  );
+}
+
+/* ── OG Lifestyle (1200 x 630) ── */
+
+export function OGBannerLifestyle() {
+  return (
+    <LifestyleBannerShell aspectRatio="1200/630">
+      <div className="flex items-center h-full gap-4 sm:gap-6">
+        <div className="flex-1 space-y-2.5 sm:space-y-3 max-w-[38%]">
+          <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={180} height={36} className="h-5 sm:h-7 w-auto" />
+          <p className="text-white text-xs sm:text-base font-bold leading-snug">
+            AI Prompt Management
+            <br />
+            for Teams
+          </p>
+          <FeaturePills />
+          <CompatibilityLine />
+        </div>
+        <div className="w-[55%] relative">
+          <div className="flex items-start gap-3">
+            <LifestylePhoto
+              src={lifestylePhotos.og}
+              alt="Person typing on laptop"
+              className="w-[50%] aspect-[4/3]"
+              rotate={1}
+            />
+            <div className="w-[50%] space-y-2 -ml-2">
+              <VaultScene compact />
+              <DLPBlockScene compact />
+            </div>
+          </div>
+          <SnippetChip icon={Shield} label="DLP Active" color="red" className="-top-2 right-[20%]" />
+          <SnippetChip icon={Users} label="Shared with team" color="blue" className="top-[35%] -left-2" />
+          <SnippetChip icon={AlertTriangle} label="Warning: PII detected" color="amber" className="-bottom-1 right-[10%]" />
+          <SnippetChip icon={Zap} label="142 prompts used" color="emerald" className="-bottom-2 left-[25%]" />
+        </div>
+      </div>
+    </LifestyleBannerShell>
+  );
+}
+
 /* ── Export map ──────────────────────────────────── */
 
 export const socialBannerComponents = {
   twitter: { Component: TwitterBanner, label: "X (Twitter) Header — Dark", dims: "1500 x 500" },
   twitterWhite: { Component: TwitterBannerWhite, label: "X (Twitter) Header — White", dims: "1500 x 500" },
   twitterGradient: { Component: TwitterBannerGradient, label: "X (Twitter) Header — Gradient", dims: "1500 x 500" },
+  twitterLifestyle: { Component: TwitterBannerLifestyle, label: "X (Twitter) Header — Lifestyle", dims: "1500 x 500" },
   linkedin: { Component: LinkedInBanner, label: "LinkedIn Cover — Dark", dims: "1584 x 396" },
   linkedinWhite: { Component: LinkedInBannerWhite, label: "LinkedIn Cover — White", dims: "1584 x 396" },
   linkedinGradient: { Component: LinkedInBannerGradient, label: "LinkedIn Cover — Gradient", dims: "1584 x 396" },
+  linkedinLifestyle: { Component: LinkedInBannerLifestyle, label: "LinkedIn Cover — Lifestyle", dims: "1584 x 396" },
   facebook: { Component: FacebookCover, label: "Facebook Cover — Dark", dims: "851 x 315" },
   facebookWhite: { Component: FacebookCoverWhite, label: "Facebook Cover — White", dims: "851 x 315" },
   facebookGradient: { Component: FacebookCoverGradient, label: "Facebook Cover — Gradient", dims: "851 x 315" },
+  facebookLifestyle: { Component: FacebookCoverLifestyle, label: "Facebook Cover — Lifestyle", dims: "851 x 315" },
   youtube: { Component: YouTubeBanner, label: "YouTube Channel Art — Dark", dims: "2560 x 1440" },
   youtubeGradient: { Component: YouTubeBannerGradient, label: "YouTube Channel Art — Gradient", dims: "2560 x 1440" },
+  youtubeLifestyle: { Component: YouTubeBannerLifestyle, label: "YouTube Channel Art — Lifestyle", dims: "2560 x 1440" },
   og: { Component: OGBanner, label: "OG / Social Share Card — Dark", dims: "1200 x 630" },
   ogWhite: { Component: OGBannerWhite, label: "OG / Social Share Card — White", dims: "1200 x 630" },
   ogGradient: { Component: OGBannerGradient, label: "OG / Social Share Card — Gradient", dims: "1200 x 630" },
+  ogLifestyle: { Component: OGBannerLifestyle, label: "OG / Social Share Card — Lifestyle", dims: "1200 x 630" },
 } as const;

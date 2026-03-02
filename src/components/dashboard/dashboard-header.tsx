@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useAuth } from "@/components/providers/auth-provider";
 import { useOrg } from "@/components/providers/org-provider";
 import { useTheme } from "@/components/providers/theme-provider";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -121,6 +121,9 @@ export function DashboardHeader() {
               className="h-9 w-9 rounded-xl hover:bg-muted/50 transition-all duration-200"
             >
               <Avatar className="h-7 w-7">
+                {currentMember?.avatar_url && (
+                  <AvatarImage src={currentMember.avatar_url} alt={currentMember.name || "Avatar"} />
+                )}
                 <AvatarFallback className="bg-gradient-to-br from-primary/30 to-primary/10 text-primary text-xs font-semibold">
                   {initials}
                 </AvatarFallback>

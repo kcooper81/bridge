@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/components/providers/auth-provider";
+import { useOrg } from "@/components/providers/org-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -53,6 +54,7 @@ function getProviderLabel(provider: string) {
 
 export function ProfileTab() {
   const { user } = useAuth();
+  const { refresh } = useOrg();
   const { theme, setTheme } = useTheme();
   const [displayName, setDisplayName] = useState(user?.user_metadata?.name || user?.user_metadata?.full_name || "");
   const [saving, setSaving] = useState(false);
@@ -119,6 +121,7 @@ export function ProfileTab() {
         setLocalAvatarUrl(avatar_url);
         setAvatarRemoved(false);
         toast.success("Avatar updated");
+        refresh();
       } else {
         const data = await res.json();
         toast.error(data.error || "Failed to upload avatar");
@@ -148,6 +151,7 @@ export function ProfileTab() {
         setLocalAvatarUrl(null);
         setAvatarRemoved(true);
         toast.success("Avatar removed");
+        refresh();
       } else {
         const data = await res.json();
         toast.error(data.error || "Failed to remove avatar");
@@ -260,8 +264,11 @@ export function ProfileTab() {
             <div>
               <p className="font-medium">{displayName || user?.email}</p>
               <p className="text-sm text-muted-foreground">{user?.email}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">
+              <p className="text-xs text-muted-foreground mt-1">
                 Hover avatar to change
+              </p>
+              <p className="text-[11px] text-muted-foreground/70 mt-0.5">
+                Square 1:1 ratio recommended · Max 2 MB · JPEG, PNG, WebP, or GIF
               </p>
             </div>
           </div>

@@ -10,17 +10,22 @@ import {
   TwitterBanner,
   TwitterBannerWhite,
   TwitterBannerGradient,
+  TwitterBannerLifestyle,
   LinkedInBanner,
   LinkedInBannerWhite,
   LinkedInBannerGradient,
+  LinkedInBannerLifestyle,
   FacebookCover,
   FacebookCoverWhite,
   FacebookCoverGradient,
+  FacebookCoverLifestyle,
   YouTubeBanner,
   YouTubeBannerGradient,
+  YouTubeBannerLifestyle,
   OGBanner,
   OGBannerWhite,
   OGBannerGradient,
+  OGBannerLifestyle,
 } from "./_components/social-banners";
 
 export const metadata: Metadata = generatePageMetadata({
@@ -161,6 +166,7 @@ const socialMediaAssets = [
       { Component: TwitterBanner, variant: "Dark", downloadFile: "/store-assets/twitter-banner.png" },
       { Component: TwitterBannerWhite, variant: "White", downloadFile: null },
       { Component: TwitterBannerGradient, variant: "Gradient", downloadFile: null },
+      { Component: TwitterBannerLifestyle, variant: "Lifestyle", downloadFile: null },
     ],
     assets: [
       { file: "/store-assets/social-profile-400.png", label: "Profile picture", dims: "400 x 400" },
@@ -173,6 +179,7 @@ const socialMediaAssets = [
       { Component: LinkedInBanner, variant: "Dark", downloadFile: "/store-assets/linkedin-banner.png" },
       { Component: LinkedInBannerWhite, variant: "White", downloadFile: null },
       { Component: LinkedInBannerGradient, variant: "Gradient", downloadFile: null },
+      { Component: LinkedInBannerLifestyle, variant: "Lifestyle", downloadFile: null },
     ],
     assets: [
       { file: "/store-assets/social-profile-400.png", label: "Profile picture", dims: "400 x 400" },
@@ -186,6 +193,7 @@ const socialMediaAssets = [
       { Component: FacebookCover, variant: "Dark", downloadFile: "/store-assets/facebook-cover.png" },
       { Component: FacebookCoverWhite, variant: "White", downloadFile: null },
       { Component: FacebookCoverGradient, variant: "Gradient", downloadFile: null },
+      { Component: FacebookCoverLifestyle, variant: "Lifestyle", downloadFile: null },
     ],
     assets: [
       { file: "/store-assets/social-profile-800.png", label: "Profile picture", dims: "720 x 720 (use 800px)" },
@@ -197,6 +205,7 @@ const socialMediaAssets = [
     banners: [
       { Component: YouTubeBanner, variant: "Dark", downloadFile: "/store-assets/youtube-channel-art.png" },
       { Component: YouTubeBannerGradient, variant: "Gradient", downloadFile: null },
+      { Component: YouTubeBannerLifestyle, variant: "Lifestyle", downloadFile: null },
     ],
     assets: [
       { file: "/store-assets/social-profile-800.png", label: "Profile picture", dims: "800 x 800" },
@@ -623,6 +632,15 @@ export default function MediaPage() {
               </div>
               <div className="rounded-xl border border-border overflow-hidden">
                 <OGBannerGradient />
+              </div>
+            </div>
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <p className="text-xs text-muted-foreground font-medium">Lifestyle variant</p>
+                <span className="text-[10px] text-muted-foreground/60">CSS preview</span>
+              </div>
+              <div className="rounded-xl border border-border overflow-hidden">
+                <OGBannerLifestyle />
               </div>
             </div>
           </div>

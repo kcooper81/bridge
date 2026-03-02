@@ -8,7 +8,7 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
   Dialog,
   DialogContent,
@@ -531,6 +531,7 @@ export default function TeamPage() {
               return (
                 <div key={member.id} className="flex items-center gap-3 rounded-lg border border-border p-3 group">
                   <Avatar className="h-9 w-9">
+                    {member.avatar_url && <AvatarImage src={member.avatar_url} alt={member.name || "Avatar"} />}
                     <AvatarFallback className="bg-primary/20 text-primary text-xs">{initials}</AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
@@ -845,6 +846,7 @@ export default function TeamPage() {
                         <td className="p-3">
                           <div className="flex items-center gap-3">
                             <Avatar className="h-8 w-8">
+                              {member.avatar_url && <AvatarImage src={member.avatar_url} alt={member.name || "Avatar"} />}
                               <AvatarFallback className="bg-primary/20 text-primary text-xs">{initials}</AvatarFallback>
                             </Avatar>
                             <div className="min-w-0">

@@ -206,7 +206,17 @@
   - Completion summary shows pass-all vs failures-found
   - Browser-specific extension testing steps added
   - /extensions page test step added
+- [ ] Chrome Web Store API integration for extension updates
+  - Set up Chrome Web Store Developer API credentials
+  - API endpoint to upload new extension zip (`chromewebstore.v1.1` API)
+  - Automate publish flow (upload → publish to testers → publish to public)
+  - Version bump script (sync wxt.config.ts version with package.json)
+  - Consider CI/CD pipeline trigger on extension changes
 - [ ] Microsoft Entra ID (Azure AD) directory sync
 - [ ] SCIM 2.0 provisioning endpoint (for Okta, OneLogin, JumpCloud)
 - [ ] SAML SSO
 - [ ] Auto-deprovisioning (remove access when employee leaves directory)
+- [ ] How to handle desktop AI clients (Claude Desktop, ChatGPT Desktop, etc.)
+  - Evaluate options: desktop companion app, system-level proxy, clipboard monitoring
+  - Consider DLP coverage gap — extension only covers browser-based AI tools
+  - Research OS-level APIs for input interception on Windows/macOS

@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { AuthProvider } from "@/components/providers/auth-provider";
 import { AdminNav } from "@/components/admin/nav";
 import { AdminHeader } from "@/components/admin/header";
 import { SUPER_ADMIN_EMAILS } from "@/lib/constants";
@@ -18,6 +19,10 @@ export default async function AdminLayout({
   if (!user) {
     redirect("/login");
   }
+
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -51,14 +56,16 @@ export default async function AdminLayout({
       : null;
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      <AdminHeader user={user} />
-      <div className="flex">
-        <AdminNav superAdminRole={superAdminRole} />
-        <main className="flex-1 p-3 sm:p-4 md:p-6 min-w-0 overflow-x-hidden">
-          {children}
-        </main>
+    <AuthProvider initialUser={user} initialSession={session}>
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
+        <AdminHeader user={user} />
+        <div className="flex">
+          <AdminNav superAdminRole={superAdminRole} />
+          <main className="flex-1 p-3 sm:p-4 md:p-6 min-w-0 overflow-x-hidden">
+            {children}
+          </main>
+        </div>
       </div>
-    </div>
+    </AuthProvider>
   );
 }

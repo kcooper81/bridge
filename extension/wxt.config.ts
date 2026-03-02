@@ -76,7 +76,7 @@ export default defineConfig({
                 strict_min_version: "140.0",
                 data_collection_permissions: {
                   is_data_collected: false,
-                  required: false,
+                  required: [],
                 },
               },
             },

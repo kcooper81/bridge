@@ -163,47 +163,47 @@ function VaultScene({ className, compact }: { className?: string; compact?: bool
 function DLPBlockScene({ className, compact }: { className?: string; compact?: boolean }) {
   return (
     <div className={cn("relative", className)}>
-      {/* Extension popup — dark theme matching real app */}
-      <div className="rounded-lg bg-zinc-900 border border-zinc-700 overflow-hidden shadow-2xl">
+      {/* Extension popup — light theme */}
+      <div className="rounded-lg bg-white border border-zinc-200 overflow-hidden shadow-2xl">
         {/* Extension header */}
-        <div className="flex items-center justify-between px-2 py-1 border-b border-zinc-800">
+        <div className="flex items-center justify-between px-2 py-1 border-b border-zinc-100">
           <div className="flex items-center gap-1">
             <div className="w-2.5 h-2.5 rounded bg-blue-500" />
-            <span className="text-[5px] font-bold text-white">TeamPrompt</span>
+            <span className="text-[5px] font-bold text-zinc-900">TeamPrompt</span>
           </div>
         </div>
         <div className="p-2 space-y-1.5">
           {/* Protected status */}
-          <div className="flex items-center gap-1.5 bg-emerald-500/10 rounded p-1.5">
-            <Shield className="h-2.5 w-2.5 text-emerald-400" />
+          <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200/50 rounded p-1.5">
+            <Shield className="h-2.5 w-2.5 text-emerald-600" />
             <div>
-              <p className="text-[5px] text-white font-bold">Protected</p>
-              <p className="text-[4px] text-zinc-400">17 active rules monitoring</p>
+              <p className="text-[5px] text-zinc-900 font-bold">Protected</p>
+              <p className="text-[4px] text-zinc-500">17 active rules monitoring</p>
             </div>
           </div>
           {/* Stats */}
           <div className="flex gap-1">
-            <div className="flex-1 rounded bg-zinc-800 p-1 text-center">
-              <p className="text-[7px] font-bold text-red-400">15</p>
-              <p className="text-[3px] uppercase text-zinc-500 font-bold">Blocked</p>
+            <div className="flex-1 rounded bg-zinc-50 border border-zinc-100 p-1 text-center">
+              <p className="text-[7px] font-bold text-red-600">15</p>
+              <p className="text-[3px] uppercase text-zinc-400 font-bold">Blocked</p>
             </div>
-            <div className="flex-1 rounded bg-zinc-800 p-1 text-center">
-              <p className="text-[7px] font-bold text-amber-400">0</p>
-              <p className="text-[3px] uppercase text-zinc-500 font-bold">Warned</p>
+            <div className="flex-1 rounded bg-zinc-50 border border-zinc-100 p-1 text-center">
+              <p className="text-[7px] font-bold text-amber-600">0</p>
+              <p className="text-[3px] uppercase text-zinc-400 font-bold">Warned</p>
             </div>
-            <div className="flex-1 rounded bg-zinc-800 p-1 text-center">
-              <p className="text-[7px] font-bold text-blue-400">15</p>
-              <p className="text-[3px] uppercase text-zinc-500 font-bold">This Week</p>
+            <div className="flex-1 rounded bg-zinc-50 border border-zinc-100 p-1 text-center">
+              <p className="text-[7px] font-bold text-blue-600">15</p>
+              <p className="text-[3px] uppercase text-zinc-400 font-bold">This Week</p>
             </div>
           </div>
           {/* Recent violations */}
           {!compact && (
             <>
-              <p className="text-[4px] font-bold uppercase text-zinc-500 tracking-wider">Recent Activity</p>
+              <p className="text-[4px] font-bold uppercase text-zinc-400 tracking-wider">Recent Activity</p>
               {["SSN detected — blocked", "API key found — blocked", "Patient name — blocked"].map((v, i) => (
-                <div key={i} className="flex items-center justify-between py-0.5 border-b border-zinc-800 last:border-0">
-                  <span className="text-[4px] text-zinc-300 truncate">{v}</span>
-                  <span className="text-[4px] text-red-400 font-bold shrink-0">Blocked</span>
+                <div key={i} className="flex items-center justify-between py-0.5 border-b border-zinc-100 last:border-0">
+                  <span className="text-[4px] text-zinc-600 truncate">{v}</span>
+                  <span className="text-[4px] text-red-600 font-bold shrink-0">Blocked</span>
                 </div>
               ))}
             </>
@@ -238,53 +238,53 @@ function InsertScene({ className }: { className?: string }) {
 
   return (
     <div className={cn("relative", className)}>
-      {/* Extension popup — dark theme matching features page ExtensionMockup */}
-      <div className="rounded-lg bg-zinc-900 border border-zinc-700 overflow-hidden shadow-2xl">
+      {/* Extension popup — light theme */}
+      <div className="rounded-lg bg-white border border-zinc-200 overflow-hidden shadow-2xl">
         {/* Extension header */}
-        <div className="flex items-center justify-between px-2 py-1 border-b border-zinc-800">
+        <div className="flex items-center justify-between px-2 py-1 border-b border-zinc-100">
           <div className="flex items-center gap-1">
             <div className="w-2.5 h-2.5 rounded bg-blue-500" />
-            <span className="text-[5px] font-bold text-white">TeamPrompt</span>
+            <span className="text-[5px] font-bold text-zinc-900">TeamPrompt</span>
           </div>
           <div className="flex items-center gap-1">
-            <Share2 className="w-1.5 h-1.5 text-zinc-500" />
+            <Share2 className="w-1.5 h-1.5 text-zinc-400" />
           </div>
         </div>
         <div className="p-1.5 space-y-1">
           {/* Search */}
-          <div className="bg-zinc-800 rounded-md px-1.5 py-0.5 flex items-center gap-1">
-            <Search className="h-1.5 w-1.5 text-zinc-500" />
-            <span className="text-[4px] text-zinc-500">Search prompts...</span>
+          <div className="bg-zinc-50 border border-zinc-100 rounded-md px-1.5 py-0.5 flex items-center gap-1">
+            <Search className="h-1.5 w-1.5 text-zinc-400" />
+            <span className="text-[4px] text-zinc-400">Search prompts...</span>
           </div>
           {/* Tabs */}
           <div className="flex gap-1.5 px-0.5">
             {["Faves", "Recent", "Prompts", "Guardrails"].map((t, i) => (
-              <span key={t} className={cn("text-[4px] font-medium pb-0.5", i === 0 ? "text-blue-400" : "text-zinc-500")}>{t}</span>
+              <span key={t} className={cn("text-[4px] font-medium pb-0.5", i === 0 ? "text-blue-600" : "text-zinc-400")}>{t}</span>
             ))}
           </div>
           {/* Filter row */}
           <div className="flex items-center gap-1">
-            <span className="text-[3px] text-zinc-500 bg-zinc-800 px-1 py-0.5 rounded">All categories</span>
-            <span className="text-[3px] text-zinc-500 bg-zinc-800 px-1 py-0.5 rounded">All tags</span>
+            <span className="text-[3px] text-zinc-500 bg-zinc-50 border border-zinc-100 px-1 py-0.5 rounded">All categories</span>
+            <span className="text-[3px] text-zinc-500 bg-zinc-50 border border-zinc-100 px-1 py-0.5 rounded">All tags</span>
           </div>
-          {/* Prompt cards — matching features page style */}
+          {/* Prompt cards */}
           {prompts.map((p, i) => (
             <div key={i} className={cn(
               "rounded-md p-1 border",
-              p.inserting ? "bg-emerald-500/10 border-emerald-500/30" : "bg-zinc-800/60 border-zinc-700/50"
+              p.inserting ? "bg-emerald-50 border-emerald-200/60" : "bg-zinc-50 border-zinc-100"
             )}>
               <div className="flex items-center justify-between mb-0.5">
-                <p className="text-[5px] text-white font-medium truncate">{p.title}</p>
-                <Heart className="w-1.5 h-1.5 text-zinc-500 shrink-0" />
+                <p className="text-[5px] text-zinc-900 font-medium truncate">{p.title}</p>
+                <Heart className="w-1.5 h-1.5 text-zinc-300 shrink-0" />
               </div>
-              {p.template && <span className="text-[3px] font-bold text-rose-400 mb-0.5 inline-block">Template</span>}
-              <p className="text-[3px] text-zinc-400 leading-relaxed mb-0.5 truncate">{p.desc}</p>
+              {p.template && <span className="text-[3px] font-bold text-rose-500 mb-0.5 inline-block">Template</span>}
+              <p className="text-[3px] text-zinc-500 leading-relaxed mb-0.5 truncate">{p.desc}</p>
               <div className="flex items-center gap-0.5">
                 {p.tags.map((tag) => (
-                  <span key={tag} className="text-[3px] bg-zinc-700/50 text-zinc-400 px-0.5 py-[1px] rounded">{tag}</span>
+                  <span key={tag} className="text-[3px] bg-zinc-100 text-zinc-500 px-0.5 py-[1px] rounded">{tag}</span>
                 ))}
                 {p.inserting && (
-                  <span className="text-[3px] text-emerald-400 font-bold ml-auto flex items-center gap-0.5">
+                  <span className="text-[3px] text-emerald-600 font-bold ml-auto flex items-center gap-0.5">
                     <Send className="h-1.5 w-1.5" /> Inserted!
                   </span>
                 )}
@@ -292,12 +292,12 @@ function InsertScene({ className }: { className?: string }) {
             </div>
           ))}
           {/* Status bar */}
-          <div className="flex items-center justify-between pt-0.5 border-t border-zinc-800">
+          <div className="flex items-center justify-between pt-0.5 border-t border-zinc-100">
             <div className="flex items-center gap-0.5">
-              <Shield className="h-1.5 w-1.5 text-emerald-400" />
-              <span className="text-[3px] text-emerald-400 font-medium">Guardrails</span>
+              <Shield className="h-1.5 w-1.5 text-emerald-600" />
+              <span className="text-[3px] text-emerald-600 font-medium">Guardrails</span>
             </div>
-            <span className="text-[3px] text-zinc-500">2 prompts</span>
+            <span className="text-[3px] text-zinc-400">2 prompts</span>
           </div>
         </div>
       </div>

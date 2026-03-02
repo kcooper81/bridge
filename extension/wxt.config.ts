@@ -67,9 +67,16 @@ export default defineConfig({
         "https://teamprompt.app/*",
         "https://www.teamprompt.app/*",
       ],
-      // Firefox doesn't support externally_connectable
+      // Firefox-specific settings
       ...(isFirefox
-        ? {}
+        ? {
+            browser_specific_settings: {
+              gecko: {
+                id: "extension@teamprompt.app",
+                strict_min_version: "109.0",
+              },
+            },
+          }
         : {
             externally_connectable: {
               matches: [

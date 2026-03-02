@@ -9,7 +9,7 @@ import { generateFAQSchema } from "@/lib/seo/schemas";
 export const metadata: Metadata = generatePageMetadata({
   title: "Pricing",
   description:
-    "Pick the plan that fits your team. Start free, no credit card required. Pro and Team plans include a 14-day trial.",
+    "Start free, no credit card required. Pro and Team plans include a 14-day trial. Upgrade when your team grows.",
   path: "/pricing",
   keywords: ["TeamPrompt pricing", "AI tool pricing", "prompt management plans"],
 });
@@ -62,10 +62,10 @@ export default function PricingPage() {
         <div className="text-center mb-16 sm:mb-20">
           <SectionLabel className="text-center">Pricing</SectionLabel>
           <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">
-            Pick the plan that fits your team
+            Start free. Upgrade when your team grows.
           </h1>
           <p className="mt-5 text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            Start free, no credit card required. Pro and Team plans include a
+            No credit card required. Pro and Team plans include a
             14-day trial.
           </p>
         </div>
@@ -99,7 +99,7 @@ export default function PricingPage() {
         <div className="mt-24">
           <CTASection
             headline="Ready to give your team"
-            gradientText="a proper prompt system?"
+            gradientText="a shared prompt library?"
             subtitle="Set up your workspace in under two minutes. No credit card needed."
           />
         </div>

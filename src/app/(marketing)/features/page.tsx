@@ -33,13 +33,14 @@ import { generatePageMetadata } from "@/lib/seo/metadata";
 import { cn } from "@/lib/utils";
 import { SectionLabel } from "@/components/marketing/section-label";
 import { CTASection } from "@/components/marketing/cta-section";
+import { HeroImage } from "@/components/marketing/hero-image";
 
 export const metadata: Metadata = generatePageMetadata({
   title: "Features",
   description:
-    "Explore TeamPrompt's features: prompt vault, AI guardrails, quality guidelines, team management, browser extension, and analytics.",
+    "Explore TeamPrompt's features: shared prompt library, data protection, quality guidelines, team management, browser extension, and analytics.",
   path: "/features",
-  keywords: ["prompt vault", "AI guardrails", "browser extension", "prompt templates", "compliance packs", "auto-sanitization", "approval queue", "version diff"],
+  keywords: ["prompt library", "AI data protection", "browser extension", "prompt templates", "compliance rules", "auto-sanitization", "approval queue", "version diff"],
 });
 
 /* ── CSS-only app preview mockups ────────────────────────── */
@@ -321,7 +322,7 @@ function ExtensionMockup() {
       </div>
       {/* Tabs */}
       <div className="flex items-center gap-3 px-3 pb-2">
-        {[{ name: "Faves", active: true }, { name: "Recent" }, { name: "Prompts" }, { name: "Guardrails" }].map((t) => (
+        {[{ name: "Faves", active: true }, { name: "Recent" }, { name: "Prompts" }, { name: "Security" }].map((t) => (
           <span key={t.name} className={cn("text-[10px] font-medium", t.active ? "text-primary" : "text-zinc-500")}>{t.name}</span>
         ))}
       </div>
@@ -355,7 +356,7 @@ function ExtensionMockup() {
       <div className="flex items-center justify-between px-3 py-2 border-t border-zinc-800 bg-zinc-900">
         <div className="flex items-center gap-1.5">
           <ShieldCheck className="w-3 h-3 text-emerald-500" />
-          <span className="text-[9px] text-emerald-400 font-medium">Guardrails</span>
+          <span className="text-[9px] text-emerald-400 font-medium">Protected</span>
         </div>
         <span className="text-[9px] text-zinc-500">2 prompts</span>
       </div>
@@ -379,7 +380,7 @@ function AnalyticsMockup() {
           { label: "Week Trend", val: "+8%", icon: "↗" },
           { label: "Active Members", val: "5", icon: "👥" },
           { label: "Templates", val: "6", icon: "{}" },
-          { label: "Guardrail Blocks", val: "15", icon: "🛡" },
+          { label: "Data Blocks", val: "15", icon: "🛡" },
         ].map((s) => (
           <div key={s.label} className="rounded-lg border border-border p-2">
             <div className="flex items-center justify-between">
@@ -644,7 +645,7 @@ function VersionDiffMockup() {
 
 function AdminSecurityMockup() {
   const toggles = [
-    { label: "DLP Guardrails", desc: "Scan outbound text for sensitive data", on: true },
+    { label: "Data Protection", desc: "Scan outbound text for sensitive data", on: true },
     { label: "Block override", desc: "Prevent users from bypassing warnings", on: true },
     { label: "Auto-redact PII", desc: "Replace sensitive data with placeholders", on: false },
     { label: "Activity logging", desc: "Log all prompt activity for audit", on: true },
@@ -739,18 +740,18 @@ function BulkOperationsMockup() {
 }
 
 const mockups: Record<string, () => React.JSX.Element> = {
-  "Prompt Vault": VaultMockup,
-  "AI Guardrails": GuardrailsMockup,
+  "Prompt Library": VaultMockup,
+  "Sensitive Data Blocking": GuardrailsMockup,
   "Quality Guidelines": GuidelinesMockup,
   "Team Management": TeamsMockup,
   "Browser Extension": ExtensionMockup,
   "Analytics & Insights": AnalyticsMockup,
   "Import / Export": ImportMockup,
-  "Compliance Policy Packs": CompliancePacksMockup,
+  "Compliance Rule Packs": CompliancePacksMockup,
   "Auto-Sanitization": AutoSanitizationMockup,
   "Approval Queue": ApprovalQueueMockup,
   "Version Diff": VersionDiffMockup,
-  "Admin Security Controls": AdminSecurityMockup,
+  "Admin Security Settings": AdminSecurityMockup,
   "Bulk Operations": BulkOperationsMockup,
 };
 
@@ -759,9 +760,9 @@ const mockups: Record<string, () => React.JSX.Element> = {
 const features = [
   {
     icon: Archive,
-    title: "Prompt Vault",
+    title: "Prompt Library",
     description:
-      "Stop digging through documents, shared drives, and bookmarks. Your vault is a single searchable home for every prompt your org writes.",
+      "Stop digging through docs, Slack messages, and bookmarks. Your library is one searchable place for every prompt your team writes.",
     details: [
       "Full-text search across titles, content, and tags",
       "Filter by folder, department, or favorites",
@@ -771,22 +772,22 @@ const features = [
   },
   {
     icon: Shield,
-    title: "AI Guardrails",
+    title: "Sensitive Data Blocking",
     badge: "NEW",
     description:
-      "Your team pastes confidential data, client details, and internal context into AI tools every day. Guardrails catch sensitive information before it leaves.",
+      "Your team pastes confidential data, client details, and internal context into AI tools every day. TeamPrompt catches sensitive information before it leaves.",
     details: [
-      "15 built-in policies for PII, financial data, credentials, and more",
+      "15 built-in rules for personal data, financial info, passwords, and more",
       "Custom rules with keyword, pattern, and exact matching",
-      "Block or warn severity levels",
-      "Full audit log of violations for compliance",
+      "Choose to block or just warn for each rule",
+      "Full activity log of violations for compliance",
     ],
   },
   {
     icon: BookOpen,
     title: "Quality Guidelines",
     description:
-      "Without structure, prompts vary wildly in quality. Guidelines enforce the basics so every prompt meets a bar.",
+      "Without structure, prompts vary wildly in quality. Guidelines enforce the basics — like requiring a clear role and output format — so every prompt meets a bar.",
     details: [
       "Do/don't lists, banned words, length constraints",
       "Required fields and tags per guideline",
@@ -798,7 +799,7 @@ const features = [
     icon: Users,
     title: "Team Management",
     description:
-      "Different people need different access. Admins manage policies, managers curate libraries, members use what's there.",
+      "Different people need different access. Admins manage security rules, managers curate the library, members use what's shared.",
     details: [
       "Admin, Manager, and Member roles",
       "Bulk CSV import and bulk role assignment",
@@ -810,11 +811,11 @@ const features = [
     icon: Globe,
     title: "Browser Extension",
     description:
-      "Your prompts live in TeamPrompt. Your team works in ChatGPT, Claude, Gemini, and a dozen other tools. The extension bridges the gap.",
+      "Your prompts live in TeamPrompt. Your team works in ChatGPT, Claude, and Gemini. The extension lets them use saved prompts without leaving the AI tool.",
     details: [
       "ChatGPT, Claude, Gemini, Perplexity, Copilot support",
-      "One-click prompt injection into AI tools",
-      "Template variable fill-in before sending",
+      "One-click to paste a prompt into any AI tool",
+      "Fill in template variables before sending",
       "Real-time sensitive data scanning on outbound text",
     ],
   },
@@ -835,24 +836,24 @@ const features = [
     icon: Import,
     title: "Import / Export",
     description:
-      "Moving between orgs or onboarding a new team? Export prompt packs as JSON and import them anywhere.",
+      "Bring existing prompts in or share them with another team. Export prompt packs as JSON and import them anywhere.",
     details: [
       "Select specific prompts to export",
       "Named prompt packs with metadata",
       "Drag-and-drop import from JSON",
-      "Cross-organization portability",
+      "Move prompts between organizations",
     ],
   },
   {
     icon: FileCheck,
-    title: "Compliance Policy Packs",
+    title: "Compliance Rule Packs",
     badge: "NEW",
     description:
-      "Pre-built security policy bundles for regulated industries. Install HIPAA, GDPR, PCI-DSS, CCPA, SOC 2, or General PII rules with one click.",
+      "Pre-built security rules for regulated industries. Install rules for healthcare (HIPAA), EU privacy (GDPR), payment cards (PCI-DSS), and more with one click.",
     details: [
       "6 compliance frameworks ready to deploy",
       "One-click install activates all relevant rules",
-      "Covers PHI, PII, financial data, and credentials",
+      "Covers patient records, personal data, financial info, and passwords",
       "Customize or extend any pack after installation",
     ],
   },
@@ -861,12 +862,12 @@ const features = [
     title: "Auto-Sanitization",
     badge: "NEW",
     description:
-      "Automatically replace sensitive data with safe placeholder tokens before prompts reach AI tools. Keep the context, remove the risk.",
+      "Automatically replace sensitive data with safe placeholders before prompts reach AI tools. Keep the context, remove the risk.",
     details: [
-      "Replaces detected data with {{PLACEHOLDER}} tokens",
+      "Replaces detected data with safe placeholders like {{PATIENT_NAME}}",
       "Works with all built-in and custom security rules",
       "Preserves prompt structure and intent",
-      "Sanitized version logged for audit trail",
+      "Sanitized version logged for the activity log",
     ],
   },
   {
@@ -874,7 +875,7 @@ const features = [
     title: "Approval Queue",
     badge: "NEW",
     description:
-      "A dedicated dashboard for reviewing pending prompts and rule suggestions. Approve, reject, or request changes — all in one place.",
+      "Managers review and approve prompts before the team can use them. Approve, reject, or request changes — all in one place.",
     details: [
       "Unified queue for prompts and rule suggestions",
       "Approve or reject with one click",
@@ -897,14 +898,14 @@ const features = [
   },
   {
     icon: Settings,
-    title: "Admin Security Controls",
+    title: "Admin Security Settings",
     badge: "NEW",
     description:
-      "Fine-tune how the extension behaves across your organization. Control guardrails, sign-in requirements, activity logging, and more from a dedicated Security settings tab.",
+      "Fine-tune how the extension behaves across your organization. Control data protection, sign-in requirements, and activity logging from a dedicated settings tab.",
     details: [
-      "Toggle DLP guardrails on/off at the org level",
+      "Toggle data protection on/off at the org level",
       "Disable warning overrides to enforce hard blocks",
-      "Auto-redact sensitive data with placeholder tokens",
+      "Auto-replace sensitive data with safe placeholders",
       "Control activity logging and extension sign-in requirements",
     ],
   },
@@ -928,15 +929,28 @@ export default function FeaturesPage() {
     <div className="py-20 sm:py-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         {/* Hero */}
-        <div className="max-w-3xl mb-20">
-          <SectionLabel>Features</SectionLabel>
-          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight leading-tight">
-            Everything your team needs to manage prompts
-          </h1>
-          <p className="mt-6 text-lg text-muted-foreground leading-relaxed max-w-2xl">
-            From shared libraries to security guardrails, TeamPrompt replaces
-            scattered documents and shared drives with a proper system.
-          </p>
+        <div className="grid lg:grid-cols-2 gap-12 items-center mb-20">
+          <div>
+            <SectionLabel>Features</SectionLabel>
+            <h1 className="text-4xl sm:text-5xl font-bold tracking-tight leading-tight">
+              One place for your team&apos;s prompts, security, and quality standards
+            </h1>
+            <p className="mt-6 text-lg text-muted-foreground leading-relaxed max-w-2xl">
+              TeamPrompt replaces scattered docs and shared drives with a
+              shared library, data protection, and quality rules your whole
+              team can use.
+            </p>
+          </div>
+
+          <HeroImage
+            src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=640&q=80&auto=format&fit=crop"
+            alt="Team working together at laptops"
+            badge={{
+              icon: <Zap className="h-4 w-4" />,
+              headline: "5 AI tools supported",
+              subtitle: "ChatGPT, Claude, Gemini & more",
+            }}
+          />
         </div>
 
         {/* Feature blocks */}

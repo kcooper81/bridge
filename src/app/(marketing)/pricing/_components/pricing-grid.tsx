@@ -7,149 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { CheckCircle2, X } from "lucide-react";
-
-interface PlanData {
-  name: string;
-  monthlyPrice: string;
-  annualMonthlyPrice: string;
-  annualPrice: string;
-  period: string;
-  annualPeriod: string;
-  description: string;
-  cta: string;
-  href: string;
-  popular?: boolean;
-  features: Record<string, string | boolean>;
-}
-
-const plans: PlanData[] = [
-  {
-    name: "Free",
-    monthlyPrice: "$0",
-    annualMonthlyPrice: "$0",
-    annualPrice: "$0",
-    period: "forever",
-    annualPeriod: "forever",
-    description: "For trying it out",
-    cta: "Start Free",
-    href: "/signup",
-    features: {
-      Prompts: "25",
-      Members: "1",
-      Guidelines: "5",
-      "Basic Security Patterns": true,
-      "Custom Security Rules": false,
-      "Admin Security Controls": false,
-      "Security Audit Log": false,
-      Analytics: false,
-      "Import/Export": false,
-      "Bulk CSV Import": false,
-      "Domain Auto-Join": false,
-      "Compliance Packs": false,
-      "Auto-Sanitization": false,
-      "Approval Queue": false,
-      "Version History & Diff": true,
-      "Priority Support": false,
-      "SLA Guarantee": false,
-      "Browser Extension": true,
-    },
-  },
-  {
-    name: "Pro",
-    monthlyPrice: "$9",
-    annualMonthlyPrice: "$7",
-    annualPrice: "$86",
-    period: "/month",
-    annualPeriod: "/month",
-    description: "For solo power users",
-    cta: "Start 14-Day Trial",
-    href: "/signup?plan=pro",
-    features: {
-      Prompts: "Unlimited",
-      Members: "1",
-      Guidelines: "All 14",
-      "Basic Security Patterns": true,
-      "Custom Security Rules": false,
-      "Admin Security Controls": false,
-      "Security Audit Log": false,
-      Analytics: true,
-      "Import/Export": true,
-      "Bulk CSV Import": false,
-      "Domain Auto-Join": false,
-      "Compliance Packs": false,
-      "Auto-Sanitization": false,
-      "Approval Queue": false,
-      "Version History & Diff": true,
-      "Priority Support": false,
-      "SLA Guarantee": false,
-      "Browser Extension": true,
-    },
-  },
-  {
-    name: "Team",
-    monthlyPrice: "$7",
-    annualMonthlyPrice: "$5.60",
-    annualPrice: "$67",
-    period: "/user/month",
-    annualPeriod: "/user/month",
-    description: "For growing teams",
-    cta: "Start 14-Day Trial",
-    href: "/signup?plan=team",
-    popular: true,
-    features: {
-      Prompts: "Unlimited",
-      Members: "Up to 50",
-      Guidelines: "All 14",
-      "Basic Security Patterns": true,
-      "Custom Security Rules": true,
-      "Admin Security Controls": true,
-      "Security Audit Log": true,
-      Analytics: true,
-      "Import/Export": true,
-      "Bulk CSV Import": true,
-      "Domain Auto-Join": true,
-      "Compliance Packs": true,
-      "Auto-Sanitization": true,
-      "Approval Queue": true,
-      "Version History & Diff": true,
-      "Priority Support": false,
-      "SLA Guarantee": false,
-      "Browser Extension": true,
-    },
-  },
-  {
-    name: "Business",
-    monthlyPrice: "$12",
-    annualMonthlyPrice: "$9.60",
-    annualPrice: "$115",
-    period: "/user/month",
-    annualPeriod: "/user/month",
-    description: "For large organizations",
-    cta: "Get Started",
-    href: "/signup?plan=business",
-    features: {
-      Prompts: "Unlimited",
-      Members: "Up to 500",
-      Guidelines: "Unlimited",
-      "Basic Security Patterns": true,
-      "Custom Security Rules": true,
-      "Admin Security Controls": true,
-      "Security Audit Log": true,
-      Analytics: true,
-      "Import/Export": true,
-      "Bulk CSV Import": true,
-      "Domain Auto-Join": true,
-      "Google Workspace Sync": true,
-      "Compliance Packs": true,
-      "Auto-Sanitization": true,
-      "Approval Queue": true,
-      "Version History & Diff": true,
-      "Priority Support": true,
-      "SLA Guarantee": true,
-      "Browser Extension": true,
-    },
-  },
-];
+import { PLAN_DISPLAY, PLAN_ORDER } from "@/lib/constants";
 
 export function PricingGrid() {
   const [annual, setAnnual] = useState(false);
@@ -177,7 +35,8 @@ export function PricingGrid() {
 
       {/* Plan grid */}
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 max-w-6xl mx-auto">
-        {plans.map((plan) => {
+        {PLAN_ORDER.map((tier) => {
+          const plan = PLAN_DISPLAY[tier];
           const price = annual ? plan.annualMonthlyPrice : plan.monthlyPrice;
           const period = annual ? plan.annualPeriod : plan.period;
           return (
@@ -206,7 +65,7 @@ export function PricingGrid() {
                 </div>
                 {annual && plan.name !== "Free" && (
                   <p className="mt-1 text-xs text-muted-foreground">
-                    billed as {plan.annualPrice}{plan.period.includes("/user") ? "/user" : ""}/year
+                    billed as {plan.annualPrice}
                   </p>
                 )}
                 <p className="mt-3 text-sm text-muted-foreground leading-relaxed">

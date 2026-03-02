@@ -17,13 +17,14 @@ import { DarkSection } from "@/components/marketing/dark-section";
 import { SectionLabel } from "@/components/marketing/section-label";
 import { BenefitsGrid } from "@/components/marketing/benefits-grid";
 import { CTASection } from "@/components/marketing/cta-section";
+import { HeroImage } from "@/components/marketing/hero-image";
 
 export const metadata: Metadata = generatePageMetadata({
-  title: "AI Guardrails",
+  title: "Sensitive Data Protection for AI Tools",
   description:
-    "Protect your organization from data leaks in AI prompts. Detect patient records, financial data, credentials, and confidential information automatically.",
+    "Protect your organization from data leaks in AI prompts. Detect patient records, financial data, passwords, and confidential information automatically.",
   path: "/security",
-  keywords: ["AI guardrails", "DLP scanning", "data loss prevention", "AI security"],
+  keywords: ["AI data protection", "sensitive data blocking", "data loss prevention", "AI security"],
 });
 
 const categories = [
@@ -53,21 +54,21 @@ const categories = [
     title: "Custom Rules",
     description:
       "Create organization-specific rules for internal terms, project names, proprietary processes, and industry-specific data patterns.",
-    patterns: ["Exact match", "Pattern matching", "Custom keywords"],
+    patterns: ["Project Falcon", "/internal/", "@company.com", "Custom keywords"],
   },
 ];
 
 const benefits = [
-  "Automatic scanning on every prompt save",
-  "Block or warn severity levels",
-  "Auto-sanitization replaces sensitive data with {{PLACEHOLDER}} tokens",
-  "Pattern tester built into rule editor",
-  "Full audit trail of all violations",
-  "15 pre-built policies covering common data types",
-  "6 one-click compliance packs (HIPAA, GDPR, PCI-DSS, CCPA, SOC 2, PII)",
-  "Custom policies for your industry's requirements",
-  "Role-based access for policy management",
-  "Browser extension scans outbound text in real-time",
+  "Automatic scanning on every prompt",
+  "Choose to block or just warn for each rule",
+  "Automatically replace sensitive data with safe placeholders",
+  "Pattern tester built into the rule editor",
+  "Full activity log of all violations",
+  "15 pre-built rules covering common data types",
+  "6 one-click compliance rule packs for healthcare, finance, and privacy",
+  "Custom rules for your industry's requirements",
+  "Role-based access for managing security rules",
+  "Browser extension scans text before it reaches AI tools",
 ];
 
 export default function SecurityPage() {
@@ -75,27 +76,39 @@ export default function SecurityPage() {
     <div className="py-20 sm:py-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         {/* Hero */}
-        <div className="max-w-3xl mb-20">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm text-primary mb-6">
-            <Shield className="h-3.5 w-3.5" />
-            <span className="font-medium">AI Guardrails</span>
+        <div className="grid lg:grid-cols-2 gap-12 items-center mb-20">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm text-primary mb-6">
+              <Shield className="h-3.5 w-3.5" />
+              <span className="font-medium">Data Protection</span>
+            </div>
+            <h1 className="text-4xl sm:text-5xl font-bold tracking-tight leading-tight">
+              Stop sensitive data from leaking into AI tools
+            </h1>
+            <p className="mt-6 text-lg text-muted-foreground leading-relaxed max-w-2xl">
+              TeamPrompt automatically detects and blocks sensitive information
+              — patient records, financial data, passwords, and more — before
+              it reaches AI tools like ChatGPT, Claude, and Gemini.
+            </p>
+            <div className="mt-8">
+              <Link href="/signup">
+                <Button size="lg" className="text-base px-8 h-12 rounded-full font-semibold">
+                  Get Protected
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
           </div>
-          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight leading-tight">
-            Stop sensitive data from leaking into AI tools
-          </h1>
-          <p className="mt-6 text-lg text-muted-foreground leading-relaxed max-w-2xl">
-            TeamPrompt&apos;s AI Guardrails automatically detect and block
-            sensitive information — patient records, financial data, client
-            details, credentials, and more — before they reach AI tools.
-          </p>
-          <div className="mt-8">
-            <Link href="/signup">
-              <Button size="lg" className="text-base px-8 h-12 rounded-full font-semibold">
-                Get Protected
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
-          </div>
+
+          <HeroImage
+            src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=640&q=80&auto=format&fit=crop"
+            alt="Person working at laptop"
+            badge={{
+              icon: <ShieldCheck className="h-4 w-4" />,
+              headline: "Real-time scanning",
+              subtitle: "Block data before it leaks",
+            }}
+          />
         </div>
 
         {/* Categories — bento layout */}
@@ -136,10 +149,10 @@ export default function SecurityPage() {
               <span className="font-medium">New</span>
             </div>
             <h2 className="text-2xl sm:text-3xl font-bold">
-              One-click compliance policy packs
+              One-click compliance rule packs
             </h2>
             <p className="mt-3 text-muted-foreground max-w-xl mx-auto">
-              Pre-built security rule bundles for regulated industries. Install an entire compliance framework in seconds.
+              Pre-built security rules for regulated industries. Install an entire set of protections in seconds.
             </p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 max-w-4xl mx-auto">
@@ -175,14 +188,14 @@ export default function SecurityPage() {
               {
                 step: "01",
                 icon: ShieldCheck,
-                title: "Install Policies",
-                desc: "Start with 15 built-in patterns or create your own custom policies using keyword matching, pattern rules, or exact match.",
+                title: "Turn On Security Rules",
+                desc: "Start with 15 built-in rules or create your own using keyword matching, pattern rules, or exact match.",
               },
               {
                 step: "02",
                 icon: ShieldAlert,
                 title: "Auto-Scan & Sanitize",
-                desc: "Every prompt is automatically scanned against active policies before saving. Detected data is blocked, warned, or auto-sanitized with safe {{PLACEHOLDER}} tokens.",
+                desc: "Every prompt is automatically scanned against your active rules. Detected data is blocked, warned, or auto-replaced with safe placeholders like {{PATIENT_NAME}}.",
               },
               {
                 step: "03",
@@ -208,7 +221,7 @@ export default function SecurityPage() {
         {/* Benefits */}
         <div className="max-w-3xl mx-auto mb-24">
           <h2 className="text-2xl sm:text-3xl font-bold mb-8 text-center">
-            Security features included
+            What&apos;s included
           </h2>
           <BenefitsGrid benefits={benefits} />
         </div>
@@ -217,7 +230,7 @@ export default function SecurityPage() {
         <CTASection
           headline="Your team is already pasting sensitive data into AI."
           gradientText="Fix that today."
-          subtitle="Free tier includes basic security patterns. Upgrade for custom rules and full audit logging."
+          subtitle="Free tier includes basic data protection. Upgrade for custom rules and full activity logging."
           buttonText="Start Free"
         />
       </div>

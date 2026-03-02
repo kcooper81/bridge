@@ -107,41 +107,63 @@ export const PLAN_LIMITS: Record<PlanTier, PlanLimits> = {
   },
 };
 
-export const PLAN_DISPLAY: Record<
-  PlanTier,
-  {
-    name: string;
-    price: string;
-    annualPrice: string;
-    annualMonthly: string;
-    description: string;
-    popular?: boolean;
-    features: Record<string, string | boolean>;
-  }
-> = {
+export interface PlanDisplayInfo {
+  name: string;
+  /** e.g. "$0", "$9/mo", "$7/user/mo" — used for display & price parsing */
+  price: string;
+  annualPrice: string;
+  annualMonthly: string;
+  /** Short marketing-friendly tagline */
+  description: string;
+  popular?: boolean;
+  /** Numeric price for monthly billing (e.g. "$9") */
+  monthlyPrice: string;
+  /** Numeric price for annual billing shown monthly (e.g. "$7") */
+  annualMonthlyPrice: string;
+  /** Price period label for monthly (e.g. "/month", "/user/month", "forever") */
+  period: string;
+  /** Price period label for annual */
+  annualPeriod: string;
+  /** CTA button text */
+  cta: string;
+  /** Signup link */
+  href: string;
+  /** Feature comparison — string values show as "Feature: value", booleans show check/x */
+  features: Record<string, string | boolean>;
+}
+
+export const PLAN_DISPLAY: Record<PlanTier, PlanDisplayInfo> = {
   free: {
     name: "Free",
     price: "$0",
     annualPrice: "$0",
     annualMonthly: "$0",
-    description: "For individuals getting started",
+    monthlyPrice: "$0",
+    annualMonthlyPrice: "$0",
+    period: "forever",
+    annualPeriod: "forever",
+    description: "For trying it out",
+    cta: "Start Free",
+    href: "/signup",
     features: {
       Prompts: "25",
       Members: "1",
       Guidelines: "5",
-      "Basic Security Patterns": true,
+      "Basic Data Protection": true,
       "Custom Security Rules": false,
-      "Security Audit Log": false,
+      "Admin Security Settings": false,
+      "Security Activity Log": false,
       Analytics: false,
       "Import/Export": false,
       "Bulk CSV Import": false,
-      "Bulk Role Assignment": false,
-      "Custom Welcome Email": false,
       "Domain Auto-Join": false,
-      "Google Workspace Sync": false,
+      "Compliance Rule Packs": false,
+      "Auto-Replace Sensitive Data": false,
+      "Approval Queue": false,
+      "Version History & Diff": true,
       "Priority Support": false,
       "SLA Guarantee": false,
-      "Chrome Extension": true,
+      "Browser Extension": true,
     },
   },
   pro: {
@@ -149,24 +171,32 @@ export const PLAN_DISPLAY: Record<
     price: "$9/mo",
     annualPrice: "$86/yr",
     annualMonthly: "$7/mo",
+    monthlyPrice: "$9",
+    annualMonthlyPrice: "$7",
+    period: "/month",
+    annualPeriod: "/month",
     description: "For solo power users",
+    cta: "Start 14-Day Trial",
+    href: "/signup?plan=pro",
     features: {
       Prompts: "Unlimited",
       Members: "1",
       Guidelines: "All 14",
-      "Basic Security Patterns": true,
+      "Basic Data Protection": true,
       "Custom Security Rules": false,
-      "Security Audit Log": false,
+      "Admin Security Settings": false,
+      "Security Activity Log": false,
       Analytics: true,
       "Import/Export": true,
       "Bulk CSV Import": false,
-      "Bulk Role Assignment": false,
-      "Custom Welcome Email": false,
       "Domain Auto-Join": false,
-      "Google Workspace Sync": false,
+      "Compliance Rule Packs": false,
+      "Auto-Replace Sensitive Data": false,
+      "Approval Queue": false,
+      "Version History & Diff": true,
       "Priority Support": false,
       "SLA Guarantee": false,
-      "Chrome Extension": true,
+      "Browser Extension": true,
     },
   },
   team: {
@@ -174,25 +204,33 @@ export const PLAN_DISPLAY: Record<
     price: "$7/user/mo",
     annualPrice: "$67/user/yr",
     annualMonthly: "$5.60/user/mo",
+    monthlyPrice: "$7",
+    annualMonthlyPrice: "$5.60",
+    period: "/user/month",
+    annualPeriod: "/user/month",
     description: "For growing teams",
     popular: true,
+    cta: "Start 14-Day Trial",
+    href: "/signup?plan=team",
     features: {
       Prompts: "Unlimited",
       Members: "Up to 50",
       Guidelines: "All 14",
-      "Basic Security Patterns": true,
+      "Basic Data Protection": true,
       "Custom Security Rules": true,
-      "Security Audit Log": true,
+      "Admin Security Settings": true,
+      "Security Activity Log": true,
       Analytics: true,
       "Import/Export": true,
       "Bulk CSV Import": true,
-      "Bulk Role Assignment": true,
-      "Custom Welcome Email": true,
       "Domain Auto-Join": true,
-      "Google Workspace Sync": false,
+      "Compliance Rule Packs": true,
+      "Auto-Replace Sensitive Data": true,
+      "Approval Queue": true,
+      "Version History & Diff": true,
       "Priority Support": false,
       "SLA Guarantee": false,
-      "Chrome Extension": true,
+      "Browser Extension": true,
     },
   },
   business: {
@@ -200,27 +238,39 @@ export const PLAN_DISPLAY: Record<
     price: "$12/user/mo",
     annualPrice: "$115/user/yr",
     annualMonthly: "$9.60/user/mo",
+    monthlyPrice: "$12",
+    annualMonthlyPrice: "$9.60",
+    period: "/user/month",
+    annualPeriod: "/user/month",
     description: "For large organizations",
+    cta: "Get Started",
+    href: "/signup?plan=business",
     features: {
       Prompts: "Unlimited",
       Members: "Up to 500",
       Guidelines: "Unlimited",
-      "Basic Security Patterns": true,
+      "Basic Data Protection": true,
       "Custom Security Rules": true,
-      "Security Audit Log": true,
+      "Admin Security Settings": true,
+      "Security Activity Log": true,
       Analytics: true,
       "Import/Export": true,
       "Bulk CSV Import": true,
-      "Bulk Role Assignment": true,
-      "Custom Welcome Email": true,
       "Domain Auto-Join": true,
       "Google Workspace Sync": true,
+      "Compliance Rule Packs": true,
+      "Auto-Replace Sensitive Data": true,
+      "Approval Queue": true,
+      "Version History & Diff": true,
       "Priority Support": true,
       "SLA Guarantee": true,
-      "Chrome Extension": true,
+      "Browser Extension": true,
     },
   },
 };
+
+/** Plan order for pricing displays */
+export const PLAN_ORDER: PlanTier[] = ["free", "pro", "team", "business"];
 
 export const GUIDELINE_CATEGORIES = [
   { value: "writing",     label: "Writing" },

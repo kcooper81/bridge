@@ -16,6 +16,9 @@ const PUBLIC_ROUTES = [
   "/solutions",
   "/integrations",
   "/help",
+  "/contact",
+  "/changelog",
+  "/extensions",
 ];
 
 function isPublicRoute(pathname: string) {

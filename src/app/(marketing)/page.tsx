@@ -20,6 +20,7 @@ import {
   MockupShieldCheck,
   MockupCheckIcon,
 } from "@/components/marketing/app-mockup";
+import { HeroImage } from "@/components/marketing/hero-image";
 import {
   Archive,
   ArrowRight,
@@ -38,13 +39,14 @@ import {
   Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { PLAN_DISPLAY, PLAN_ORDER } from "@/lib/constants";
 
 export const metadata: Metadata = generatePageMetadata({
-  title: "AI Prompt Management for Teams",
+  title: "Stop Rewriting the Same AI Prompts — TeamPrompt",
   description:
-    "TeamPrompt gives your team a shared prompt library, quality guidelines, and security guardrails — so the best prompts get reused, not reinvented.",
+    "Your team writes the same AI prompts every week. TeamPrompt gives everyone one shared library, quality standards, and data protection — so the best prompts get reused, not reinvented.",
   path: "/",
-  keywords: ["AI prompt management", "team prompts", "prompt library", "AI governance"],
+  keywords: ["AI prompt management", "team prompts", "prompt library", "shared prompts"],
 });
 
 const supportedTools = [
@@ -98,22 +100,22 @@ export default function LandingPage() {
             <div>
               <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-zinc-300 mb-8 backdrop-blur-sm">
                 <Shield className="h-3.5 w-3.5 text-blue-400" />
-                <span>AI Guardrails — now built in</span>
+                <span>Sensitive data protection — built in</span>
                 <ArrowRight className="h-3 w-3 text-zinc-500" />
               </div>
 
               <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.05]">
-                Your team&apos;s prompts
+                Your team writes the
                 <br />
-                deserve{" "}
+                same prompts{" "}
                 <span className="bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
-                  a system
+                  every week
                 </span>
               </h1>
 
               <p className="mt-6 text-lg sm:text-xl text-zinc-400 max-w-xl leading-relaxed">
-                A shared library, quality guidelines, and security guardrails
-                — so the best prompts get reused, not reinvented.
+                TeamPrompt gives everyone one shared library for AI prompts
+                — with quality standards and data protection built in. The best prompts get reused, not reinvented.
               </p>
 
               <div className="mt-10 flex flex-col sm:flex-row gap-4">
@@ -151,7 +153,17 @@ export default function LandingPage() {
             </div>
 
             {/* Hero mockup */}
-            <div className="relative hidden lg:block">
+            <div className="relative hidden lg:block space-y-8">
+              <HeroImage
+                src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=640&q=80&auto=format&fit=crop"
+                alt="Team collaborating at laptops"
+                badge={{
+                  icon: <Users className="h-4 w-4" />,
+                  headline: "Teams using AI daily",
+                  subtitle: "Shared prompt workflows",
+                }}
+                dark
+              />
               <AppMockup
                 variant="vault"
                 items={[
@@ -186,7 +198,7 @@ export default function LandingPage() {
                   },
                 ]}
                 sidebarUser={{ name: "Alex J.", initials: "AJ" }}
-                navBadges={{ Guardrails: 3 }}
+                navBadges={{ Security: 3 }}
                 toasts={[
                   {
                     message: "API key blocked in Claude",
@@ -220,7 +232,7 @@ export default function LandingPage() {
                 position="bottom-left"
               />
               <FloatingCard
-                label="PII auto-redacted"
+                label="Sensitive data removed"
                 icon={<MockupSparklesIcon className="h-3 w-3" />}
                 color="cyan"
                 position="mid-right"
@@ -264,8 +276,8 @@ export default function LandingPage() {
               Built for how teams actually use AI
             </h2>
             <p className="mt-4 text-lg text-muted-foreground">
-              Purpose-built infrastructure for prompt management, security,
-              and collaboration — across every department.
+              Tools for sharing prompts, catching data leaks, and keeping
+              quality consistent — across every department.
             </p>
           </div>
 
@@ -273,13 +285,13 @@ export default function LandingPage() {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <FeatureCard
               icon={Archive}
-              title="Shared Prompt Vault"
-              description="Your team writes the same prompts over and over — in documents, shared drives, and personal notes. The vault gives everyone one searchable place to find what already works."
+              title="Shared Prompt Library"
+              description="Your team writes the same prompts over and over — in docs, Slack, and personal notes. The library gives everyone one searchable place to find what already works."
               large
-              href="/features#prompt-vault"
+              href="/features#prompt-library"
               iconBg="bg-blue-500/10"
             >
-              {/* Mini table mockup matching features page VaultMockup style */}
+              {/* Mini table mockup matching features page library style */}
               <div className="mt-6 rounded-xl border border-border bg-background/50 p-4">
                 <div className="flex items-center gap-2 mb-3">
                   <div className="h-7 flex-1 rounded-md border border-border bg-background px-3 flex items-center gap-2">
@@ -321,8 +333,8 @@ export default function LandingPage() {
 
             <FeatureCard
               icon={Shield}
-              title="AI Guardrails"
-              description="Catch patient records, financial data, credentials, and confidential info before they leak into AI tools. Block or warn in real-time."
+              title="Sensitive Data Blocking"
+              description="Catch patient records, financial data, passwords, and confidential info before they get pasted into AI tools. Block or warn automatically."
               badge="New"
               href="/security"
               iconBg="bg-red-500/10"
@@ -347,7 +359,7 @@ export default function LandingPage() {
             <FeatureCard
               icon={BookOpen}
               title="Quality Guidelines"
-              description="Enforce structure, tone, and completeness so every prompt meets a quality bar before it goes out."
+              description="Set rules like &quot;every prompt needs a clear role and output format&quot; — prompts get flagged if they don&apos;t meet the bar."
               href="/features#quality-guidelines"
               iconBg="bg-emerald-500/10"
             >
@@ -373,7 +385,7 @@ export default function LandingPage() {
               icon={Braces}
               title="Prompt Templates"
               description="Create reusable templates with fill-in-the-blank variables that your team completes each time. Consistent output, every time."
-              href="/features#prompt-vault"
+              href="/features#prompt-library"
               iconBg="bg-amber-500/10"
             >
               {/* Mini template preview */}
@@ -395,7 +407,7 @@ export default function LandingPage() {
             <FeatureCard
               icon={Globe}
               title="Browser Extension"
-              description="Inject prompts directly into ChatGPT, Claude, Gemini, Copilot, and more — without leaving the AI tool."
+              description="Use your saved prompts directly inside ChatGPT, Claude, Gemini, and Copilot — no copy-paste needed."
               href="/features#browser-extension"
               iconBg="bg-violet-500/10"
             >
@@ -427,10 +439,10 @@ export default function LandingPage() {
           <div className="mt-4 grid gap-4 sm:grid-cols-3 lg:grid-cols-5">
             {[
               { icon: Users, title: "Teams & Roles", desc: "Admin, Manager, Member — the right access for the right people.", href: "/features#team-management", bg: "bg-sky-500/10" },
-              { icon: BarChart3, title: "Usage Analytics", desc: "See which prompts get reused, track effectiveness ratings, and find gaps in your library.", href: "/features#analytics-insights", bg: "bg-indigo-500/10" },
-              { icon: Zap, title: "Import / Export", desc: "Move prompt packs between orgs. No copy-pasting required.", href: "/features#import-export", bg: "bg-yellow-500/10" },
-              { icon: FileCheck, title: "Compliance Packs", desc: "One-click HIPAA, GDPR, PCI-DSS, CCPA, SOC 2, and PII policy packs.", href: "/features#compliance-policy-packs", bg: "bg-teal-500/10" },
-              { icon: CheckSquare, title: "Approval Queue", desc: "Review pending prompts and rule suggestions in a dedicated queue.", href: "/features#approval-queue", bg: "bg-violet-500/10" },
+              { icon: BarChart3, title: "Usage Analytics", desc: "See which prompts actually get reused and which sit unused.", href: "/features#analytics-insights", bg: "bg-indigo-500/10" },
+              { icon: Zap, title: "Import / Export", desc: "Bring existing prompts in or share them with another team.", href: "/features#import-export", bg: "bg-yellow-500/10" },
+              { icon: FileCheck, title: "Compliance Rules", desc: "One-click security rules for healthcare, finance, and regulated industries.", href: "/features#compliance-policy-packs", bg: "bg-teal-500/10" },
+              { icon: CheckSquare, title: "Approval Queue", desc: "Managers review and approve prompts before the team can use them.", href: "/features#approval-queue", bg: "bg-violet-500/10" },
             ].map((f) => (
               <Link key={f.title} href={f.href} className="group rounded-2xl border border-border bg-card p-6 hover:border-primary/30 transition-all duration-300 block">
                 <div className="flex items-center justify-between">
@@ -466,10 +478,10 @@ export default function LandingPage() {
               How it works
             </SectionLabel>
             <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-              From scattered prompts to a managed system
+              From scattered prompts to one shared library
             </h2>
             <p className="mt-4 text-lg text-zinc-400 max-w-2xl mx-auto">
-              Three steps to give your team a prompt management workflow.
+              Three steps to get your team on the same page.
             </p>
           </div>
 
@@ -482,13 +494,13 @@ export default function LandingPage() {
               },
               {
                 step: "02",
-                title: "Add prompts and guardrails",
-                desc: "Import existing prompts or write new ones. Turn on security policies to protect sensitive data.",
+                title: "Add prompts and security rules",
+                desc: "Import existing prompts or write new ones. Turn on data protection to block sensitive info from reaching AI tools.",
               },
               {
                 step: "03",
                 title: "Your team starts reusing",
-                desc: "Members search the vault, use the browser extension, and your best prompts get adopted across the org.",
+                desc: "Members search the library, use the browser extension, and your best prompts get adopted across the org.",
               },
             ].map((item) => (
               <div key={item.step} className="relative">
@@ -519,108 +531,55 @@ export default function LandingPage() {
           </div>
 
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 max-w-6xl mx-auto">
-            {[
-              {
-                name: "Free",
-                price: "$0",
-                period: "forever",
-                desc: "For trying it out",
-                features: [
-                  "25 prompts",
-                  "1 member",
-                  "5 guidelines",
-                  "Basic guardrails",
-                  "Browser extension",
-                  "Version history",
-                ],
-              },
-              {
-                name: "Pro",
-                price: "$9",
-                period: "/month",
-                desc: "For solo power users",
-                features: [
-                  "Unlimited prompts",
-                  "All 14 guidelines",
-                  "Custom guardrails",
-                  "Analytics",
-                  "Browser extension",
-                  "Import / export",
-                ],
-              },
-              {
-                name: "Team",
-                price: "$7",
-                period: "/user/mo",
-                desc: "For teams up to 50",
-                features: [
-                  "Up to 50 members",
-                  "Custom guardrails",
-                  "Security audit log",
-                  "Compliance packs",
-                  "Approval queue",
-                  "Bulk CSV import",
-                ],
-                popular: true,
-              },
-              {
-                name: "Business",
-                price: "$12",
-                period: "/user/mo",
-                desc: "For large organizations",
-                features: [
-                  "Up to 500 members",
-                  "Unlimited guidelines",
-                  "Priority support",
-                  "SLA guarantee",
-                  "Google Workspace sync",
-                  "Full audit log",
-                ],
-              },
-            ].map((plan) => (
-              <div
-                key={plan.name}
-                className={cn(
-                  "relative rounded-2xl border p-8 flex flex-col transition-all duration-300",
-                  plan.popular
-                    ? "border-primary bg-card shadow-lg shadow-primary/5"
-                    : "border-border bg-card hover:border-primary/20 hover:shadow-md"
-                )}
-              >
-                {plan.popular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full">
-                    Most Popular
-                  </div>
-                )}
-                <div className="mb-6">
-                  <h3 className="text-lg font-bold">{plan.name}</h3>
-                  <div className="mt-3 flex items-baseline gap-1">
-                    <span className="text-4xl font-bold tracking-tight">{plan.price}</span>
-                    <span className="text-sm text-muted-foreground">{plan.period}</span>
-                  </div>
-                  <p className="mt-2 text-sm text-muted-foreground">{plan.desc}</p>
-                </div>
-                <ul className="space-y-3 flex-1">
-                  {plan.features.map((f) => (
-                    <li key={f} className="flex items-center gap-2.5 text-sm">
-                      <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-                <Link
-                  href={plan.name === "Free" ? "/signup" : `/signup?plan=${plan.name.toLowerCase()}`}
-                  className="mt-8 block"
+            {PLAN_ORDER.map((tier) => {
+              const plan = PLAN_DISPLAY[tier];
+              // Show first 6 included features for the homepage preview
+              const highlights = Object.entries(plan.features)
+                .filter(([, v]) => v !== false)
+                .slice(0, 6)
+                .map(([k, v]) => (typeof v === "string" ? `${k}: ${v}` : k));
+              return (
+                <div
+                  key={plan.name}
+                  className={cn(
+                    "relative rounded-2xl border p-8 flex flex-col transition-all duration-300",
+                    plan.popular
+                      ? "border-primary bg-card shadow-lg shadow-primary/5"
+                      : "border-border bg-card hover:border-primary/20 hover:shadow-md"
+                  )}
                 >
-                  <Button
-                    variant={plan.popular ? "default" : "outline"}
-                    className="w-full rounded-full font-semibold"
-                  >
-                    {plan.name === "Free" ? "Start Free" : "Start 14-Day Trial"}
-                  </Button>
-                </Link>
-              </div>
-            ))}
+                  {plan.popular && (
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full">
+                      Most Popular
+                    </div>
+                  )}
+                  <div className="mb-6">
+                    <h3 className="text-lg font-bold">{plan.name}</h3>
+                    <div className="mt-3 flex items-baseline gap-1">
+                      <span className="text-4xl font-bold tracking-tight">{plan.monthlyPrice}</span>
+                      <span className="text-sm text-muted-foreground">{plan.period}</span>
+                    </div>
+                    <p className="mt-2 text-sm text-muted-foreground">{plan.description}</p>
+                  </div>
+                  <ul className="space-y-3 flex-1">
+                    {highlights.map((f) => (
+                      <li key={f} className="flex items-center gap-2.5 text-sm">
+                        <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+                  <Link href={plan.href} className="mt-8 block">
+                    <Button
+                      variant={plan.popular ? "default" : "outline"}
+                      className="w-full rounded-full font-semibold"
+                    >
+                      {plan.cta}
+                    </Button>
+                  </Link>
+                </div>
+              );
+            })}
           </div>
 
           <p className="text-center mt-8 text-sm text-muted-foreground">
@@ -637,7 +596,7 @@ export default function LandingPage() {
         <div className="max-w-3xl mx-auto px-4 sm:px-6">
           <CTASection
             headline="Your team is already using AI."
-            gradientText="Now give them a system."
+            gradientText="Now make it consistent."
             subtitle="Set up your workspace in under two minutes. No credit card needed."
           />
         </div>

@@ -27,7 +27,7 @@ export const industryData: IndustryPageData = {
   features: [
     {
       icon: "ShieldAlert",
-      title: "Privilege & Confidentiality Guardrails",
+      title: "Privilege & Confidentiality Protection",
       description:
         "Detect client names, case numbers, opposing party details, and privileged strategy language before prompts reach any AI model. Protect work product and attorney-client privilege automatically.",
     },
@@ -77,7 +77,7 @@ export const industryData: IndustryPageData = {
     {
       question: "What happens if an associate tries to paste a client name into an AI prompt?",
       answer:
-        "TeamPrompt's guardrails will detect the client name and block the prompt from being submitted. The associate sees a clear explanation of what was flagged and instructions for redacting the information. The blocked attempt is logged for compliance review, but the sensitive content is never sent to the AI provider.",
+        "TeamPrompt's security rules will detect the client name and block the prompt from being submitted. The associate sees a clear explanation of what was flagged and instructions for redacting the information. The blocked attempt is logged for compliance review, but the sensitive content is never sent to the AI provider.",
     },
     {
       question: "Does TeamPrompt help with ABA Model Rule 1.6 compliance?",

@@ -130,7 +130,7 @@ export default function IntegrationsPage() {
             </h1>
             <p className="mt-6 text-lg sm:text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed">
               The TeamPrompt browser extension works wherever your team uses AI.
-              Search prompts, insert with one click, and enforce guardrails —
+              Search prompts, insert with one click, and block sensitive data —
               across ChatGPT, Claude, Gemini, Copilot, and Perplexity.
             </p>
             <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">

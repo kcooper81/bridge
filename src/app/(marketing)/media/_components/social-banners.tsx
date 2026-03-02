@@ -61,7 +61,7 @@ function VaultScene({ className, compact }: { className?: string; compact?: bool
                 </div>
               ))}
               <p className="text-[3px] font-bold uppercase text-zinc-300 px-0.5 mt-1 mb-0.5">Intelligence</p>
-              {["Analytics", "Guardrails"].map((n) => (
+              {["Analytics", "Security"].map((n) => (
                 <div key={n} className="h-3 rounded px-1 flex items-center mb-0.5">
                   <span className="text-[4px] font-medium text-zinc-400">{n}</span>
                 </div>
@@ -258,7 +258,7 @@ function InsertScene({ className }: { className?: string }) {
           </div>
           {/* Tabs */}
           <div className="flex gap-1.5 px-0.5">
-            {["Faves", "Recent", "Prompts", "Guardrails"].map((t, i) => (
+            {["Faves", "Recent", "Prompts", "Security"].map((t, i) => (
               <span key={t} className={cn("text-[4px] font-medium pb-0.5", i === 0 ? "text-blue-600" : "text-zinc-400")}>{t}</span>
             ))}
           </div>
@@ -295,7 +295,7 @@ function InsertScene({ className }: { className?: string }) {
           <div className="flex items-center justify-between pt-0.5 border-t border-zinc-100">
             <div className="flex items-center gap-0.5">
               <Shield className="h-1.5 w-1.5 text-emerald-600" />
-              <span className="text-[3px] text-emerald-600 font-medium">Guardrails</span>
+              <span className="text-[3px] text-emerald-600 font-medium">Security</span>
             </div>
             <span className="text-[3px] text-zinc-400">2 prompts</span>
           </div>
@@ -350,7 +350,7 @@ function AnalyticsScene({ className, compact }: { className?: string; compact?: 
                 </div>
               ))}
               <p className="text-[3px] font-bold uppercase text-zinc-300 px-0.5 mt-1 mb-0.5">Intelligence</p>
-              {["Analytics", "Activity Log", "Guardrails"].map((n, i) => (
+              {["Analytics", "Activity Log", "Security"].map((n, i) => (
                 <div key={n} className={cn("h-3 rounded px-1 flex items-center mb-0.5", i === 0 ? "bg-blue-50 border-l border-blue-500" : "")}>
                   <span className={cn("text-[4px] font-medium", i === 0 ? "text-blue-600" : "text-zinc-400")}>{n}</span>
                 </div>
@@ -473,8 +473,8 @@ function FeaturePill({ label, dark }: { label: string; dark?: boolean }) {
 function FeaturePills({ dark }: { dark?: boolean }) {
   return (
     <div className="flex flex-wrap gap-1.5">
-      <FeaturePill label="Shared Prompt Vault" dark={dark} />
-      <FeaturePill label="DLP Guardrails" dark={dark} />
+      <FeaturePill label="Shared Prompt Library" dark={dark} />
+      <FeaturePill label="Data Protection" dark={dark} />
       <FeaturePill label="Usage Analytics" dark={dark} />
       <FeaturePill label="One-Click Insert" dark={dark} />
     </div>
@@ -611,7 +611,7 @@ export function TwitterBanner() {
         <div className="flex-1 space-y-2.5 sm:space-y-3 shrink-0">
           <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={160} height={32} className="h-5 sm:h-7 w-auto" />
           <p className="text-white/90 text-[10px] sm:text-sm font-semibold leading-snug max-w-[220px] sm:max-w-[260px]">
-            Your team&apos;s AI prompt library — with built-in guardrails
+            Your team&apos;s AI prompt library — with built-in data protection
           </p>
           <FeatureIconRow />
           <CompatibilityLine />
@@ -632,7 +632,7 @@ export function TwitterBannerWhite() {
         <div className="flex-1 space-y-2.5 sm:space-y-3 shrink-0">
           <Image src="/brand/logo-wordmark.svg" alt="TeamPrompt" width={160} height={32} className="h-5 sm:h-7 w-auto" />
           <p className="text-zinc-900 text-[10px] sm:text-sm font-semibold leading-snug max-w-[220px] sm:max-w-[260px]">
-            Your team&apos;s AI prompt library — with built-in guardrails
+            Your team&apos;s AI prompt library — with built-in data protection
           </p>
           <FeatureIconRowDark />
           <CompatibilityLine dark />
@@ -655,7 +655,7 @@ export function LinkedInBanner() {
         <div className="flex-1 space-y-2 sm:space-y-2.5">
           <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={150} height={30} className="h-5 sm:h-6 w-auto" />
           <p className="text-white/90 text-[10px] sm:text-xs font-semibold leading-snug">
-            AI prompt management for teams that need guardrails
+            AI prompt management for teams that need data protection
           </p>
           <FeatureIconRow />
           <CompatibilityLine />
@@ -675,7 +675,7 @@ export function LinkedInBannerWhite() {
         <div className="flex-1 space-y-2 sm:space-y-2.5">
           <Image src="/brand/logo-wordmark.svg" alt="TeamPrompt" width={150} height={30} className="h-5 sm:h-6 w-auto" />
           <p className="text-zinc-900 text-[10px] sm:text-xs font-semibold leading-snug">
-            AI prompt management for teams that need guardrails
+            AI prompt management for teams that need data protection
           </p>
           <FeatureIconRowDark />
           <CompatibilityLine dark />
@@ -697,7 +697,7 @@ export function FacebookCover() {
         <div className="flex-1 space-y-2">
           <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={130} height={26} className="h-4 sm:h-5 w-auto" />
           <p className="text-white/90 text-[9px] sm:text-xs font-semibold leading-snug">
-            Shared prompts · DLP guardrails · Usage analytics
+            Shared prompts · Data protection · Usage analytics
           </p>
           <CompatibilityLine />
         </div>
@@ -716,7 +716,7 @@ export function FacebookCoverWhite() {
         <div className="flex-1 space-y-2">
           <Image src="/brand/logo-wordmark.svg" alt="TeamPrompt" width={130} height={26} className="h-4 sm:h-5 w-auto" />
           <p className="text-zinc-900 text-[9px] sm:text-xs font-semibold leading-snug">
-            Shared prompts · DLP guardrails · Usage analytics
+            Shared prompts · Data protection · Usage analytics
           </p>
           <CompatibilityLine dark />
         </div>
@@ -736,7 +736,7 @@ export function YouTubeBanner() {
       <div className="flex flex-col items-center justify-center h-full text-center gap-3 sm:gap-4">
         <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={200} height={40} className="h-6 sm:h-8 w-auto" />
         <p className="text-white/90 text-xs sm:text-base font-semibold max-w-md">
-          Your team&apos;s AI prompt library — with built-in guardrails
+          Your team&apos;s AI prompt library — with built-in data protection
         </p>
         <FeaturePills />
         <div className="grid grid-cols-2 gap-3 w-full max-w-md">
@@ -952,7 +952,7 @@ export function TwitterBannerGradient() {
         <div className="flex-1 space-y-2 sm:space-y-2.5 shrink-0 max-w-[45%]">
           <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={160} height={32} className="h-5 sm:h-7 w-auto" />
           <p className="text-white text-[10px] sm:text-sm font-bold leading-snug">
-            Your team&apos;s AI prompt library — with built-in guardrails
+            Your team&apos;s AI prompt library — with built-in data protection
           </p>
           <FeaturePills />
           <CompatibilityLine />
@@ -979,7 +979,7 @@ export function LinkedInBannerGradient() {
         <div className="flex-1 space-y-2 sm:space-y-2.5 max-w-[40%]">
           <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={150} height={30} className="h-5 sm:h-6 w-auto" />
           <p className="text-white text-[10px] sm:text-xs font-bold leading-snug">
-            AI prompt management for teams that need guardrails
+            AI prompt management for teams that need data protection
           </p>
           <FeaturePills />
           <CompatibilityLine />
@@ -987,7 +987,7 @@ export function LinkedInBannerGradient() {
         <div className="hidden sm:block w-[50%]">
           <StaggeredMockup
             screenshots={[
-              { src: "/store-assets/screenshot-light-3-dlp-block.png", alt: "DLP guardrails" },
+              { src: "/store-assets/screenshot-light-3-dlp-block.png", alt: "Data protection" },
               { src: "/store-assets/screenshot-light-1-prompts.png", alt: "Prompt library" },
             ]}
           />
@@ -1006,7 +1006,7 @@ export function FacebookCoverGradient() {
         <div className="flex-1 space-y-1.5 sm:space-y-2 max-w-[40%]">
           <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={130} height={26} className="h-4 sm:h-5 w-auto" />
           <p className="text-white text-[9px] sm:text-xs font-bold leading-snug">
-            Shared prompts · DLP guardrails · Usage analytics
+            Shared prompts · Data protection · Usage analytics
           </p>
           <FeaturePills />
         </div>
@@ -1031,14 +1031,14 @@ export function YouTubeBannerGradient() {
       <div className="flex flex-col items-center justify-center h-full text-center gap-3 sm:gap-4">
         <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={200} height={40} className="h-6 sm:h-8 w-auto" />
         <p className="text-white text-xs sm:text-base font-bold max-w-md">
-          Your team&apos;s AI prompt library — with built-in guardrails
+          Your team&apos;s AI prompt library — with built-in data protection
         </p>
         <FeaturePills />
         <div className="w-full max-w-lg mt-1">
           <StaggeredMockup
             screenshots={[
               { src: "/store-assets/screenshot-light-1-prompts.png", alt: "Prompt library" },
-              { src: "/store-assets/screenshot-light-3-dlp-block.png", alt: "DLP guardrails" },
+              { src: "/store-assets/screenshot-light-3-dlp-block.png", alt: "Data protection" },
               { src: "/store-assets/screenshot-light-6-insert.png", alt: "Insert prompt" },
             ]}
           />
@@ -1069,7 +1069,7 @@ export function OGBannerGradient() {
           <StaggeredMockup
             screenshots={[
               { src: "/store-assets/screenshot-light-1-prompts.png", alt: "Prompt library" },
-              { src: "/store-assets/screenshot-light-3-dlp-block.png", alt: "DLP guardrails" },
+              { src: "/store-assets/screenshot-light-3-dlp-block.png", alt: "Data protection" },
             ]}
           />
         </div>
@@ -1211,7 +1211,7 @@ export function TwitterBannerLifestyle() {
         <div className="flex-1 space-y-2 sm:space-y-2.5 shrink-0 max-w-[40%]">
           <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={160} height={32} className="h-5 sm:h-7 w-auto" />
           <p className="text-white text-[10px] sm:text-sm font-bold leading-snug">
-            Your team&apos;s AI prompt library — with built-in guardrails
+            Your team&apos;s AI prompt library — with built-in data protection
           </p>
           <FeaturePills />
           <CompatibilityLine />
@@ -1244,7 +1244,7 @@ export function LinkedInBannerLifestyle() {
         <div className="flex-1 space-y-2 sm:space-y-2.5 max-w-[38%]">
           <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={150} height={30} className="h-5 sm:h-6 w-auto" />
           <p className="text-white text-[10px] sm:text-xs font-bold leading-snug">
-            AI prompt management for teams that need guardrails
+            AI prompt management for teams that need data protection
           </p>
           <FeaturePills />
           <CompatibilityLine />
@@ -1277,7 +1277,7 @@ export function FacebookCoverLifestyle() {
         <div className="flex-1 space-y-1.5 sm:space-y-2 max-w-[38%]">
           <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={130} height={26} className="h-4 sm:h-5 w-auto" />
           <p className="text-white text-[9px] sm:text-xs font-bold leading-snug">
-            Shared prompts · DLP guardrails · Usage analytics
+            Shared prompts · Data protection · Usage analytics
           </p>
           <FeaturePills />
         </div>
@@ -1308,7 +1308,7 @@ export function YouTubeBannerLifestyle() {
       <div className="flex flex-col items-center justify-center h-full text-center gap-3 sm:gap-4">
         <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={200} height={40} className="h-6 sm:h-8 w-auto" />
         <p className="text-white text-xs sm:text-base font-bold max-w-md">
-          Your team&apos;s AI prompt library — with built-in guardrails
+          Your team&apos;s AI prompt library — with built-in data protection
         </p>
         <FeaturePills />
         <div className="w-full max-w-lg mt-1 relative">

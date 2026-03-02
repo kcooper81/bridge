@@ -62,7 +62,7 @@ const workspaceNav = [
 const intelligenceNav = [
   { label: "Analytics", icon: BarChart3 },
   { label: "Activity Log", icon: Activity },
-  { label: "Guardrails", icon: Shield },
+  { label: "Security", icon: Shield },
 ];
 
 const highlightStyles = {
@@ -181,7 +181,7 @@ function ToastNotification({ toast }: { toast: ToastOverlay }) {
 /* Maps variant → active sidebar label */
 const variantNavMap: Record<string, string> = {
   vault: "Prompts",
-  guardrails: "Guardrails",
+  guardrails: "Security",
   guidelines: "Guidelines",
 };
 

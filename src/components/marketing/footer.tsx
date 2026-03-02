@@ -6,7 +6,7 @@ const footerLinks = {
     { label: "Features", href: "/features" },
     { label: "Pricing", href: "/pricing" },
     { label: "Integrations", href: "/integrations" },
-    { label: "Guardrails", href: "/security" },
+    { label: "Data Protection", href: "/security" },
     { label: "Enterprise", href: "/enterprise" },
   ],
   Solutions: [
@@ -48,7 +48,7 @@ export function MarketingFooter() {
             </div>
             <p className="text-sm leading-relaxed max-w-xs">
               Prompt management for teams that use AI. Shared libraries,
-              quality guidelines, and security guardrails.
+              quality guidelines, and data protection.
             </p>
           </div>
 

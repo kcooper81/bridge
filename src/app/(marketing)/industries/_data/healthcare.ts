@@ -5,13 +5,13 @@ export const industryData: IndustryPageData = {
   industry: "Healthcare",
   headline: "Secure AI adoption for healthcare teams",
   subtitle:
-    "Give clinicians a managed prompt library with guardrails that detect patient data — so your team can use AI with confidence.",
+    "Give clinicians a managed prompt library with data protection that detects patient info — so your team can use AI with confidence.",
   compliance: ["PHI Detection", "Audit Logging", "Access Control"],
   painPoints: [
     {
       title: "Clinicians paste patient data into ChatGPT",
       description:
-        "Without guardrails, protected health information ends up in AI tools with no audit trail.",
+        "Without data protection, protected health information ends up in AI tools with no audit trail.",
     },
     {
       title: "Inconsistent clinical prompts across departments",
@@ -27,7 +27,7 @@ export const industryData: IndustryPageData = {
   features: [
     {
       icon: "ShieldCheck",
-      title: "PHI Detection Guardrails",
+      title: "PHI Detection & Blocking",
       description:
         "Scan every prompt for protected health information patterns — patient names, medical record numbers, diagnoses, and other PHI indicators — before it reaches an AI model.",
     },
@@ -68,7 +68,7 @@ export const industryData: IndustryPageData = {
     {
       question: "Can TeamPrompt help with HIPAA compliance?",
       answer:
-        "TeamPrompt's guardrails can detect protected health information (PHI) and block it before it reaches AI tools. All data is encrypted at rest and in transit. While we are working toward formal HIPAA compliance and BAA availability, our DLP features provide a strong technical safeguard for healthcare teams using AI.",
+        "TeamPrompt's security rules can detect protected health information (PHI) and block it before it reaches AI tools. All data is encrypted at rest and in transit. While we are working toward formal HIPAA compliance and BAA availability, our DLP features provide a strong technical safeguard for healthcare teams using AI.",
     },
     {
       question: "How does TeamPrompt detect protected health information?",
@@ -76,7 +76,7 @@ export const industryData: IndustryPageData = {
         "Our PHI detection engine scans for 18 HIPAA-defined identifiers including patient names, medical record numbers, dates of birth, Social Security numbers, and diagnosis codes. When PHI is detected, the prompt is blocked and the user is guided to redact sensitive data before resubmitting.",
     },
     {
-      question: "Can we customize guardrails for our specific compliance requirements?",
+      question: "Can we customize security rules for our specific compliance requirements?",
       answer:
         "Absolutely. Admins can configure detection sensitivity, add custom patterns (e.g., internal patient ID formats), set department-level policies, and choose between block, warn, or log-only modes depending on risk tolerance.",
     },

@@ -20,7 +20,6 @@ import {
   MockupShieldCheck,
   MockupCheckIcon,
 } from "@/components/marketing/app-mockup";
-import { HeroImage } from "@/components/marketing/hero-image";
 import {
   Archive,
   ArrowRight,
@@ -153,17 +152,7 @@ export default function LandingPage() {
             </div>
 
             {/* Hero mockup */}
-            <div className="relative hidden lg:block space-y-8">
-              <HeroImage
-                src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=640&q=80&auto=format&fit=crop"
-                alt="Team collaborating at laptops"
-                badge={{
-                  icon: <Users className="h-4 w-4" />,
-                  headline: "Teams using AI daily",
-                  subtitle: "Shared prompt workflows",
-                }}
-                dark
-              />
+            <div className="relative hidden lg:block">
               <AppMockup
                 variant="vault"
                 items={[

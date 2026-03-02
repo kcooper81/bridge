@@ -25,7 +25,7 @@ export function HeroImage({ src, alt, badge, dark, className }: HeroImageProps) 
           width={640}
           height={480}
           className="object-cover w-full h-auto"
-          sizes="(min-width: 1024px) 50vw, 0px"
+          sizes="(min-width: 1024px) 50vw, 100vw"
           priority
         />
         {/* Dark-edge gradient overlay for blending with dark hero backgrounds */}

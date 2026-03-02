@@ -33,7 +33,6 @@ import { generatePageMetadata } from "@/lib/seo/metadata";
 import { cn } from "@/lib/utils";
 import { SectionLabel } from "@/components/marketing/section-label";
 import { CTASection } from "@/components/marketing/cta-section";
-import { HeroImage } from "@/components/marketing/hero-image";
 
 export const metadata: Metadata = generatePageMetadata({
   title: "Features",
@@ -929,28 +928,16 @@ export default function FeaturesPage() {
     <div className="py-20 sm:py-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         {/* Hero */}
-        <div className="grid lg:grid-cols-2 gap-12 items-center mb-20">
-          <div>
-            <SectionLabel>Features</SectionLabel>
-            <h1 className="text-4xl sm:text-5xl font-bold tracking-tight leading-tight">
-              One place for your team&apos;s prompts, security, and quality standards
-            </h1>
-            <p className="mt-6 text-lg text-muted-foreground leading-relaxed max-w-2xl">
-              TeamPrompt replaces scattered docs and shared drives with a
-              shared library, data protection, and quality rules your whole
-              team can use.
-            </p>
-          </div>
-
-          <HeroImage
-            src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=640&q=80&auto=format&fit=crop"
-            alt="Team working together at laptops"
-            badge={{
-              icon: <Zap className="h-4 w-4" />,
-              headline: "5 AI tools supported",
-              subtitle: "ChatGPT, Claude, Gemini & more",
-            }}
-          />
+        <div className="max-w-3xl mb-20">
+          <SectionLabel>Features</SectionLabel>
+          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight leading-tight">
+            One place for your team&apos;s prompts, security, and quality standards
+          </h1>
+          <p className="mt-6 text-lg text-muted-foreground leading-relaxed max-w-2xl">
+            TeamPrompt replaces scattered docs and shared drives with a
+            shared library, data protection, and quality rules your whole
+            team can use.
+          </p>
         </div>
 
         {/* Feature blocks */}

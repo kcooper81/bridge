@@ -62,7 +62,7 @@ export const industryData: IndustryPageData = {
     message: "3 secrets detected — submission blocked",
   },
   mockupToasts: [{ message: "API key blocked — logged to audit", type: "block", position: "bottom-right" }],
-  mockupNavBadges: { Guardrails: 3 },
+  mockupNavBadges: { Security: 3 },
   mockupUser: { name: "Alex Dev", initials: "AD" },
   stats: [
     { value: "15+", label: "Built-in secret patterns" },
@@ -81,7 +81,7 @@ export const industryData: IndustryPageData = {
         "TeamPrompt's Chrome extension works with browser-based AI tools including ChatGPT, Claude, Gemini, Microsoft Copilot, and Perplexity. It scans prompts and inserts from your team's library directly in these interfaces.",
     },
     {
-      question: "Can we set different guardrail policies for different engineering teams?",
+      question: "Can we set different security policies for different engineering teams?",
       answer:
         "Absolutely. Admins can create team-specific policies. For example, your DevOps team might have stricter rules around infrastructure credentials, while your frontend team has different patterns for client-side API keys. Each policy can be set to block, warn, or log-only depending on your security posture.",
     },

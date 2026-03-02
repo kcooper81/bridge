@@ -267,13 +267,13 @@ Instead of sharing prompts in Slack threads, Google Docs, or spreadsheets, your 
 Key features:
 • Shared Prompt Library — Browse, search, and insert team prompts in one click
 • Template Variables — Fill in dynamic fields like {{client_name}} before inserting
-• DLP Guardrails — Automatically scan outbound text for sensitive data (SSNs, API keys, patient records, financial data)
+• Data Protection — Automatically scan outbound text for sensitive data (SSNs, API keys, patient records, financial data)
 • Quality Guidelines — Set organization-wide standards for prompt quality and consistency
 • Usage Analytics — See which prompts get used, by whom, and where
 • Side Panel & Popup — Access prompts from a persistent side panel or quick popup overlay
 • Works Everywhere — ChatGPT, Claude, Gemini, Microsoft Copilot, and Perplexity
 
-Built for healthcare, legal, finance, government, and technology teams that need guardrails around AI usage.
+Built for healthcare, legal, finance, government, and technology teams that need data protection around AI usage.
 
 Free plan available. No credit card required.`,
   singlePurpose:
@@ -507,7 +507,7 @@ export default function MediaPage() {
               </p>
               <p className="text-sm text-muted-foreground leading-relaxed">
                 TeamPrompt is a prompt management platform that gives teams a
-                shared library, quality guidelines, and security guardrails for
+                shared library, quality guidelines, and data protection for
                 AI. It works with ChatGPT, Claude, Gemini, Copilot, and
                 Perplexity through a browser extension, and helps organizations
                 across healthcare, legal, finance, government, and technology

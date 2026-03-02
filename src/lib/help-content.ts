@@ -56,10 +56,10 @@ export function generateSlug(question: string): string {
 export const HELP_OVERVIEW = {
   title: "Help & Documentation",
   subtitle:
-    "Everything you need to get the most out of TeamPrompt — from first setup to advanced guardrails.",
+    "Everything you need to get the most out of TeamPrompt — from first setup to advanced security rules.",
   description: [
     "TeamPrompt is a collaborative prompt management platform that helps teams standardize, secure, and scale their AI usage. Your workspace is the central hub where prompts are created, reviewed, and shared across your organization.",
-    "The browser extension connects TeamPrompt to the AI tools your team already uses — ChatGPT, Claude, Gemini, Copilot, and Perplexity — so prompts are always one click away. Guardrails run in real-time, scanning outbound messages for sensitive data before they reach any AI model.",
+    "The browser extension connects TeamPrompt to the AI tools your team already uses — ChatGPT, Claude, Gemini, Copilot, and Perplexity — so prompts are always one click away. Security rules run in real-time, scanning outbound messages for sensitive data before they reach any AI model.",
     "Use the categories below to find answers, or search for a specific topic.",
   ],
 };
@@ -87,17 +87,17 @@ const _RAW_CATEGORIES: RawCategory[] = [
       },
       {
         q: "How do I install the browser extension?",
-        a: "Visit the Chrome Web Store and search for \"TeamPrompt,\" or click the install banner in your dashboard. After installing, click the TeamPrompt icon in your toolbar and sign in with your account. Your prompts, settings, and guardrails sync automatically.",
+        a: "Visit the Chrome Web Store and search for \"TeamPrompt,\" or click the install banner in your dashboard. After installing, click the TeamPrompt icon in your toolbar and sign in with your account. Your prompts, settings, and security rules sync automatically.",
         keywords: ["chrome", "extension", "install", "browser", "addon"],
       },
       {
         q: "How do I create my first prompt?",
-        a: "Click \"New Prompt\" from the Prompt Vault. Give it a title, write your prompt content (use {{variables}} for dynamic fields), add optional tags and a description, then save. It's immediately available to your team and in the extension.",
+        a: "Click \"New Prompt\" from the Prompt Library. Give it a title, write your prompt content (use {{variables}} for dynamic fields), add optional tags and a description, then save. It's immediately available to your team and in the extension.",
         keywords: ["new prompt", "create", "write", "template"],
       },
       {
         q: "What are the user roles?",
-        a: "Admin: full access including billing, settings, team management, and guardrails configuration. Manager: can manage prompts, approve content, and view the activity log. Member: can use approved prompts, create drafts, and view shared content. All roles can use the browser extension.",
+        a: "Admin: full access including billing, settings, team management, and security rule configuration. Manager: can manage prompts, approve content, and view the activity log. Member: can use approved prompts, create drafts, and view shared content. All roles can use the browser extension.",
         keywords: ["roles", "permissions", "admin", "manager", "member", "access"],
       },
       {
@@ -113,14 +113,14 @@ const _RAW_CATEGORIES: RawCategory[] = [
     ],
   },
   {
-    id: "prompt-vault",
+    id: "prompt-library",
     icon: Archive,
-    title: "Prompt Vault",
+    title: "Prompt Library",
     description: "Create, organize, and manage your team's prompt library.",
     articles: [
       {
         q: "How do I create and edit prompts?",
-        a: "Click \"New Prompt\" in the vault. Fill in the title, content, description, and optional tags. To edit an existing prompt, click it to open the detail view, make your changes, and save. Version history is maintained automatically so you can track changes over time.",
+        a: "Click \"New Prompt\" in the library. Fill in the title, content, description, and optional tags. To edit an existing prompt, click it to open the detail view, make your changes, and save. Version history is maintained automatically so you can track changes over time.",
         keywords: ["create", "edit", "modify", "update", "prompt"],
       },
       {
@@ -177,16 +177,16 @@ const _RAW_CATEGORIES: RawCategory[] = [
         keywords: ["default", "pre-built", "install", "library", "template"],
       },
       {
-        q: "What's the difference between guidelines and guardrails?",
-        a: "Guidelines define quality standards (tone, format, best practices) and are advisory. Guardrails are security rules that detect sensitive data and can block or warn in real-time. Guidelines live on the Guidelines page; guardrails live on the Guardrails page under Intelligence.",
-        keywords: ["difference", "guidelines", "guardrails", "security", "quality"],
+        q: "What's the difference between guidelines and security rules?",
+        a: "Guidelines define quality standards (tone, format, best practices) and are advisory. Security rules detect sensitive data and can block or warn in real-time. Guidelines live on the Guidelines page; security rules live on the Security page under Intelligence.",
+        keywords: ["difference", "guidelines", "security rules", "security", "quality"],
       },
     ],
   },
   {
-    id: "guardrails",
+    id: "security-rules",
     icon: Shield,
-    title: "AI Guardrails & DLP",
+    title: "AI Security Rules & DLP",
     description: "Protect sensitive data with real-time scanning before it reaches AI tools.",
     articles: [
       {
@@ -196,12 +196,12 @@ const _RAW_CATEGORIES: RawCategory[] = [
       },
       {
         q: "What patterns are detected by default?",
-        a: "Built-in rules detect AWS keys, GitHub tokens, Stripe keys, OpenAI API keys, database connection strings, OAuth tokens, Slack tokens, and common credentials like passwords. These rules use regex patterns and are active out of the box when guardrails are enabled.",
+        a: "Built-in rules detect AWS keys, GitHub tokens, Stripe keys, OpenAI API keys, database connection strings, OAuth tokens, Slack tokens, and common credentials like passwords. These rules use regex patterns and are active out of the box when security rules are enabled.",
         keywords: ["patterns", "default rules", "api keys", "credentials", "built-in"],
       },
       {
         q: "How do I create custom security rules?",
-        a: "Go to the Guardrails page (under Intelligence in the sidebar). Click \"New Rule\" and define a name, description, pattern (regex, exact match, or glob), category, and severity level (block or warn). Custom rules run alongside the built-in detections.",
+        a: "Go to the Security Rules page (under Intelligence in the sidebar). Click \"New Rule\" and define a name, description, pattern (regex, exact match, or glob), category, and severity level (block or warn). Custom rules run alongside the built-in detections.",
         keywords: ["custom rule", "create", "regex", "pattern", "new rule"],
       },
       {
@@ -210,28 +210,28 @@ const _RAW_CATEGORIES: RawCategory[] = [
         keywords: ["block", "warn", "severity", "action", "prevent"],
       },
       {
-        q: "How does the extension enforce guardrails?",
+        q: "How does the extension enforce security rules?",
         a: "When you press Enter in a supported AI tool, the extension intercepts the submission, sends the message text to your workspace's scan API, and waits for the result. If a block-level violation is found, the message is prevented from sending. If a warning is found, a banner appears. The floating shield indicator shows scanning status in real-time.",
         keywords: ["extension", "enforce", "intercept", "real-time", "shield"],
       },
       {
         q: "Where can I see violation history?",
-        a: "All violations are logged automatically. View them on the Activity Log page (under Intelligence in the sidebar), in the Guardrails page's recent violations section, or in the extension's Shield tab. Each entry shows the rule that triggered, the redacted matched text, and the action taken.",
+        a: "All violations are logged automatically. View them on the Activity Log page (under Intelligence in the sidebar), in the Security Rules page's recent violations section, or in the extension's Shield tab. Each entry shows the rule that triggered, the redacted matched text, and the action taken.",
         keywords: ["violations", "history", "log", "audit", "activity"],
       },
       {
-        q: "How do I enable guardrails for the first time?",
-        a: "Go to the Guardrails page and click \"Enable Default Rules\" to install the built-in security patterns. They're active immediately. You can also open the extension's Shield tab and enable them from there. Once active, the extension's shield indicator turns green on AI pages.",
+        q: "How do I enable security rules for the first time?",
+        a: "Go to the Security Rules page and click \"Enable Default Rules\" to install the built-in security patterns. They're active immediately. You can also open the extension's Shield tab and enable them from there. Once active, the extension's shield indicator turns green on AI pages.",
         keywords: ["enable", "setup", "first time", "activate", "default rules"],
       },
       {
         q: "What are admin security settings?",
-        a: "Admin security settings are org-level controls that govern how the browser extension behaves for all members. Admins can configure these from Settings → Security. The 6 settings are:\n\n• **Require Sign-in for Extension** (default: on) — Users must sign in before the extension activates.\n• **Allow All AI Tools** (default: on, Team+) — When disabled, the extension only works on approved AI platforms.\n• **Enable DLP Guardrails** (default: on) — Master switch for all guardrail scanning. Turning this off disables all DLP checks org-wide.\n• **Allow Warning Override** (default: on, Team+) — When disabled, warning-level detections are treated as hard blocks. Users cannot proceed past any guardrail detection.\n• **Auto-Redact Sensitive Data** (default: off, Team+) — Automatically replaces detected sensitive data with {{PLACEHOLDER}} tokens instead of blocking.\n• **Activity Logging** (default: on, Team+) — Logs all AI interactions to the Activity Log. Disabling stops recording but still tracks usage counts.\n\nSome settings are plan-gated and require a Team or Business plan. Changes take effect immediately for all members.",
-        keywords: ["admin security", "security settings", "extension controls", "org settings", "guardrails toggle", "activity logging", "auto-redact", "override"],
+        a: "Admin security settings are org-level controls that govern how the browser extension behaves for all members. Admins can configure these from Settings → Security. The 6 settings are:\n\n• **Require Sign-in for Extension** (default: on) — Users must sign in before the extension activates.\n• **Allow All AI Tools** (default: on, Team+) — When disabled, the extension only works on approved AI platforms.\n• **Enable DLP Security Rules** (default: on) — Master switch for all guardrail scanning. Turning this off disables all DLP checks org-wide.\n• **Allow Warning Override** (default: on, Team+) — When disabled, warning-level detections are treated as hard blocks. Users cannot proceed past any guardrail detection.\n• **Auto-Redact Sensitive Data** (default: off, Team+) — Automatically replaces detected sensitive data with {{PLACEHOLDER}} tokens instead of blocking.\n• **Activity Logging** (default: on, Team+) — Logs all AI interactions to the Activity Log. Disabling stops recording but still tracks usage counts.\n\nSome settings are plan-gated and require a Team or Business plan. Changes take effect immediately for all members.",
+        keywords: ["admin security", "security settings", "extension controls", "org settings", "security rules toggle", "activity logging", "auto-redact", "override"],
       },
       {
         q: "What are compliance policy packs?",
-        a: "Compliance policy packs are pre-built bundles of security rules designed for specific regulatory frameworks. TeamPrompt includes 6 packs: HIPAA (protected health information), GDPR (EU personal data), PCI-DSS (payment card data), CCPA (California consumer privacy), SOC 2 (service organization controls), and General PII (common personally identifiable information). Install any pack with one click from the Guardrails page — all relevant rules activate immediately. You can customize or extend any pack after installation.",
+        a: "Compliance policy packs are pre-built bundles of security rules designed for specific regulatory frameworks. TeamPrompt includes 6 packs: HIPAA (protected health information), GDPR (EU personal data), PCI-DSS (payment card data), CCPA (California consumer privacy), SOC 2 (service organization controls), and General PII (common personally identifiable information). Install any pack with one click from the Security Rules page — all relevant rules activate immediately. You can customize or extend any pack after installation.",
         keywords: ["compliance", "policy packs", "hipaa", "gdpr", "pci-dss", "ccpa", "soc2", "regulatory"],
       },
       {
@@ -241,7 +241,7 @@ const _RAW_CATEGORIES: RawCategory[] = [
       },
       {
         q: "How do I suggest a security rule?",
-        a: "Members can suggest new security rules from the Guardrails page by clicking \"Suggest Rule.\" Fill in the rule name, description, pattern, and category. The suggestion is submitted to the approval queue where admins and managers can review, approve, or reject it. Approved suggestions become active security rules. You'll be notified when your suggestion is reviewed.",
+        a: "Members can suggest new security rules from the Security Rules page by clicking \"Suggest Rule.\" Fill in the rule name, description, pattern, and category. The suggestion is submitted to the approval queue where admins and managers can review, approve, or reject it. Approved suggestions become active security rules. You'll be notified when your suggestion is reviewed.",
         keywords: ["suggest", "rule suggestion", "propose", "new rule", "request"],
       },
     ],
@@ -250,7 +250,7 @@ const _RAW_CATEGORIES: RawCategory[] = [
     id: "extension",
     icon: Chrome,
     title: "Browser Extension",
-    description: "Insert prompts and enforce guardrails directly in ChatGPT, Claude, and more.",
+    description: "Insert prompts and enforce security rules directly in ChatGPT, Claude, and more.",
     articles: [
       {
         q: "Which AI tools are supported?",
@@ -269,7 +269,7 @@ const _RAW_CATEGORIES: RawCategory[] = [
       },
       {
         q: "What does the shield indicator mean?",
-        a: "The floating shield in the bottom-left corner of AI pages shows TeamPrompt's monitoring status. Green shield = guardrails are active with rules enabled. Amber shield = no rules configured yet. Gray = not signed in. When you send a message, the shield briefly shows \"Scanning...\" while checking for violations.",
+        a: "The floating shield in the bottom-left corner of AI pages shows TeamPrompt's monitoring status. Green shield = security rules are active with rules enabled. Amber shield = no rules configured yet. Gray = not signed in. When you send a message, the shield briefly shows \"Scanning...\" while checking for violations.",
         keywords: ["shield", "indicator", "status", "monitoring", "green", "amber"],
       },
       {
@@ -396,7 +396,7 @@ const _RAW_CATEGORIES: RawCategory[] = [
     articles: [
       {
         q: "What plans are available?",
-        a: "Free: 1 member and 25 prompts with core features. Pro ($9/mo): unlimited prompts, 1 member, analytics, and all 14 guidelines. Team ($7/user/mo): up to 50 members, custom guardrails, audit log, and import/export. Business ($12/user/mo): up to 500 members, unlimited guidelines, priority support, and SLA guarantee. See the pricing page for full details.",
+        a: "Free: 1 member and 25 prompts with core features. Pro ($9/mo): unlimited prompts, 1 member, analytics, and all 14 guidelines. Team ($7/user/mo): up to 50 members, custom security rules, audit log, and import/export. Business ($12/user/mo): up to 500 members, unlimited guidelines, priority support, and SLA guarantee. See the pricing page for full details.",
         keywords: ["plans", "pricing", "free", "team", "business", "cost"],
       },
       {
@@ -444,7 +444,7 @@ const _RAW_CATEGORIES: RawCategory[] = [
       },
       {
         q: "Does TeamPrompt store the text I send to AI tools?",
-        a: "Only if your workspace has activity logging enabled. Logged interactions are stored in your workspace's database and are visible only to admins and managers via the Activity Log. You can disable logging or configure retention policies from the Guardrails settings.",
+        a: "Only if your workspace has activity logging enabled. Logged interactions are stored in your workspace's database and are visible only to admins and managers via the Activity Log. You can disable logging or configure retention policies from the Security Rules settings.",
         keywords: ["logging", "store", "text", "privacy", "retention", "interactions"],
       },
     ],
@@ -483,7 +483,7 @@ export const HELP_FAQS: FAQ[] = [
   {
     question: "Is TeamPrompt free to use?",
     answer:
-      "Yes. The free plan includes 1 member, 25 prompts, and core features like the browser extension. Paid plans unlock higher limits and advanced features like DLP guardrails, analytics, and compliance packs.",
+      "Yes. The free plan includes 1 member, 25 prompts, and core features like the browser extension. Paid plans unlock higher limits and advanced features like data protection, analytics, and compliance packs.",
   },
   {
     question: "Which AI tools does the browser extension support?",

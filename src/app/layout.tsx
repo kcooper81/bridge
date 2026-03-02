@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     template: "%s | TeamPrompt",
   },
   description:
-    "TeamPrompt gives your team a shared prompt library, quality guidelines, and security guardrails — so the best prompts get reused, not reinvented.",
+    "TeamPrompt gives your team a shared prompt library, quality guidelines, and data protection — so the best prompts get reused, not reinvented.",
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL || "https://teamprompt.app"
   ),
@@ -28,13 +28,13 @@ export const metadata: Metadata = {
     siteName: "TeamPrompt",
     title: "TeamPrompt - AI Prompt Management for Teams",
     description:
-      "TeamPrompt gives your team a shared prompt library, quality guidelines, and security guardrails — so the best prompts get reused, not reinvented.",
+      "TeamPrompt gives your team a shared prompt library, quality guidelines, and data protection — so the best prompts get reused, not reinvented.",
   },
   twitter: {
     card: "summary_large_image",
     title: "TeamPrompt - AI Prompt Management for Teams",
     description:
-      "TeamPrompt gives your team a shared prompt library, quality guidelines, and security guardrails.",
+      "TeamPrompt gives your team a shared prompt library, quality guidelines, and data protection.",
   },
   robots: {
     index: true,

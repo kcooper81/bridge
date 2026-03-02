@@ -80,7 +80,7 @@ export default function TermsPage() {
                 role-based access, and activity tracking
               </li>
               <li>
-                AI Guardrails &mdash; data loss prevention (DLP) scanning that
+                Data Protection &mdash; data loss prevention (DLP) scanning that
                 detects and blocks sensitive information in prompts before they
                 reach AI tools
               </li>
@@ -380,7 +380,7 @@ export default function TermsPage() {
               strive to maintain reliable service.
             </p>
             <p className="text-muted-foreground leading-relaxed mb-3">
-              Our AI Guardrails (DLP scanning) feature is designed to help
+              Our Data Protection (DLP scanning) feature is designed to help
               detect sensitive information, but it is not a guarantee against
               data leaks. No automated scanning system is perfect. You remain
               responsible for reviewing content before sharing it with AI tools.

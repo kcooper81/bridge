@@ -140,7 +140,7 @@ export function IndustryPage({ data }: { data: IndustryPageData }) {
                   size="lg"
                   className="text-base px-8 h-12 rounded-full border-white/20 text-white hover:bg-white/10 hover:text-white font-semibold bg-transparent"
                 >
-                  See guardrails
+                  See data protection
                 </Button>
               </Link>
             </div>

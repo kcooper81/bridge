@@ -91,7 +91,7 @@ export default function Image() {
             lineHeight: 1.5,
           }}
         >
-          Shared libraries, quality guidelines, and security guardrails
+          Shared libraries, quality guidelines, and data protection
         </p>
 
         {/* Bottom bar */}

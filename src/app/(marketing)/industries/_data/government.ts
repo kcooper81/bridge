@@ -5,7 +5,7 @@ export const industryData: IndustryPageData = {
   industry: "Government",
   headline: "Secure AI prompt management for government agencies",
   subtitle:
-    "Give your teams a managed AI workflow with guardrails that protect citizen data, classified information, and internal policy.",
+    "Give your teams a managed AI workflow with data protection that catches citizen data, classified information, and internal policy.",
   compliance: ["PII Detection", "Audit Logging", "Access Control"],
   painPoints: [
     {
@@ -27,7 +27,7 @@ export const industryData: IndustryPageData = {
   features: [
     {
       icon: "ShieldCheck",
-      title: "PII & Classified Data Guardrails",
+      title: "PII & Classified Data Protection",
       description:
         "Automatically detect Social Security numbers, case file references, law enforcement identifiers, and sensitive government terminology before any prompt reaches an AI model.",
     },
@@ -67,18 +67,18 @@ export const industryData: IndustryPageData = {
     {
       question: "Is TeamPrompt suitable for government agencies?",
       answer:
-        "TeamPrompt provides guardrails that detect PII, sensitive terminology, and classification markings before they reach AI tools. All data is encrypted at rest and in transit. We are working toward FedRAMP authorization and other federal compliance certifications. Contact our team to discuss your agency's specific requirements.",
+        "TeamPrompt provides security rules that detect PII, sensitive terminology, and classification markings before they reach AI tools. All data is encrypted at rest and in transit. We are working toward FedRAMP authorization and other federal compliance certifications. Contact our team to discuss your agency's specific requirements.",
     },
     {
       question:
         "How does TeamPrompt prevent classified information from reaching AI models?",
       answer:
-        "TeamPrompt's guardrails detect classification markings (CUI, FOUO, SBU, etc.), sensitive government terminology, and patterns associated with classified data. Prompts containing detected content are blocked before submission. Agencies can add custom detection patterns for internal classification schemes and sensitive program names.",
+        "TeamPrompt's security rules detect classification markings (CUI, FOUO, SBU, etc.), sensitive government terminology, and patterns associated with classified data. Prompts containing detected content are blocked before submission. Agencies can add custom detection patterns for internal classification schemes and sensitive program names.",
     },
     {
       question: "Can we deploy TeamPrompt within our agency's existing IT environment?",
       answer:
-        "TeamPrompt's Chrome extension can be force-installed via Google Admin Console, Microsoft Intune, or GPO — ensuring every managed browser has guardrails from day one. SSO and SCIM provisioning are on our roadmap. Contact our team to discuss your deployment requirements.",
+        "TeamPrompt's Chrome extension can be force-installed via Google Admin Console, Microsoft Intune, or GPO — ensuring every managed browser has data protection from day one. SSO and SCIM provisioning are on our roadmap. Contact our team to discuss your deployment requirements.",
     },
     {
       question: "Can we export audit logs for records retention?",

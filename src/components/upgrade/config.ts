@@ -112,7 +112,7 @@ export const FEATURE_CONFIG: Record<BooleanFeature, FeatureMeta> = {
   custom_security: {
     icon: Shield,
     title: "Custom Security Policies",
-    description: "Create and manage custom guardrail rules to protect sensitive data.",
+    description: "Create and manage custom security rules to protect sensitive data.",
     benefits: [
       "Custom regex and pattern-based rules",
       "Category-based policy management",

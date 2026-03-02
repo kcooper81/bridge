@@ -86,10 +86,10 @@ export default function PrivacyPage() {
             </p>
 
             <h3 className="text-base font-medium mb-2">
-              DLP &amp; Guardrails Data
+              DLP &amp; Security Rules Data
             </h3>
             <p className="text-muted-foreground leading-relaxed mb-3">
-              If your organization uses our AI Guardrails feature, we log
+              If your organization uses our Data Protection feature, we log
               violation events. These logs include what type of sensitive data
               was detected, the severity level, and the action taken (blocked or
               warned). This data is used for your organization&apos;s audit
@@ -142,7 +142,7 @@ export default function PrivacyPage() {
                 prompts are most popular, how adoption is trending)
               </li>
               <li>
-                Enforce DLP/Guardrails policies your organization has configured
+                Enforce DLP/security policies your organization has configured
                 and maintain audit logs of violations
               </li>
               <li>
@@ -198,7 +198,7 @@ export default function PrivacyPage() {
               </li>
               <li>
                 Communicates with the TeamPrompt API at teamprompt.app to fetch
-                your prompts, log usage, and check guardrail policies
+                your prompts, log usage, and check security policies
               </li>
             </ul>
 
@@ -319,7 +319,7 @@ export default function PrivacyPage() {
               </li>
               <li>
                 <strong className="text-foreground">
-                  DLP/Guardrails violation logs
+                  DLP/security violation logs
                 </strong>{" "}
                 are retained for the lifetime of the organization for audit
                 purposes

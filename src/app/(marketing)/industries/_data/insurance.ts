@@ -5,13 +5,13 @@ export const industryData: IndustryPageData = {
   industry: "Insurance",
   headline: "Secure AI adoption for insurance teams",
   subtitle:
-    "Give underwriters and claims teams a managed prompt library with guardrails that protect PII and PHI — so your organization can use AI with confidence.",
+    "Give underwriters and claims teams a managed prompt library with data protection that catches PII and PHI — so your organization can use AI with confidence.",
   compliance: ["PII/PHI Protection", "Claims Data Safety", "Audit Logging"],
   painPoints: [
     {
       title: "Claims adjusters paste policyholder data into AI tools",
       description:
-        "Without guardrails, policyholder PII, PHI, and claims details end up in AI tools with no oversight.",
+        "Without data protection, policyholder PII, PHI, and claims details end up in AI tools with no oversight.",
     },
     {
       title: "Inconsistent underwriting prompts across teams",
@@ -60,7 +60,7 @@ export const industryData: IndustryPageData = {
   mockupUser: { name: "Claims Mgr", initials: "CM" },
   mockupAlert: { type: "block", message: "3 violations blocked in the last 24 hours" },
   mockupToasts: [{ message: "Claims data auto-redacted", type: "success", position: "bottom-right" }],
-  mockupNavBadges: { Guardrails: 4 },
+  mockupNavBadges: { Security: 4 },
   stats: [
     { value: "15+", label: "Built-in detection patterns" },
     { value: "3x", label: "Faster prompt reuse" },
@@ -70,7 +70,7 @@ export const industryData: IndustryPageData = {
     {
       question: "Can TeamPrompt help with insurance compliance?",
       answer:
-        "TeamPrompt's guardrails detect PII, PHI, and financial data and block it before reaching AI tools. Compliance packs for HIPAA (health claims), PCI-DSS (payment data), and CCPA (consumer privacy) can be installed with one click. All interactions are logged for audit.",
+        "TeamPrompt's security rules detect PII, PHI, and financial data and block it before reaching AI tools. Compliance packs for HIPAA (health claims), PCI-DSS (payment data), and CCPA (consumer privacy) can be installed with one click. All interactions are logged for audit.",
     },
     {
       question: "What insurance-specific data does TeamPrompt detect?",
@@ -78,7 +78,7 @@ export const industryData: IndustryPageData = {
         "Our detection engine scans for policyholder names, policy numbers, Social Security numbers, medical records, claims amounts, bank account numbers, and other sensitive insurance data. Custom patterns let you add company-specific formats.",
     },
     {
-      question: "Can different departments have different guardrails?",
+      question: "Can different departments have different security rules?",
       answer:
         "Yes. Admins configure detection rules at the organization level and customize them per department. Claims might have stricter PHI rules while the marketing team has lighter restrictions.",
     },

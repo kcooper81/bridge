@@ -5,13 +5,13 @@ export const industryData: IndustryPageData = {
   industry: "Education",
   headline: "Secure AI adoption for schools and universities",
   subtitle:
-    "Give educators a managed prompt library with guardrails that protect student data — so your institution can embrace AI responsibly.",
+    "Give educators a managed prompt library with data protection that catches student data — so your institution can embrace AI responsibly.",
   compliance: ["FERPA Protection", "Student Data Safety", "Audit Logging"],
   painPoints: [
     {
       title: "Faculty paste student data into AI tools",
       description:
-        "Without guardrails, student names, grades, and IDs end up in AI tools with no oversight or audit trail.",
+        "Without data protection, student names, grades, and IDs end up in AI tools with no oversight or audit trail.",
     },
     {
       title: "No standard AI curriculum templates",
@@ -67,7 +67,7 @@ export const industryData: IndustryPageData = {
     {
       question: "Can TeamPrompt help with FERPA compliance?",
       answer:
-        "TeamPrompt's guardrails detect student personally identifiable information (PII) and block it before it reaches AI tools. All data is encrypted at rest and in transit. Our DLP features provide strong technical safeguards for educational institutions using AI.",
+        "TeamPrompt's security rules detect student personally identifiable information (PII) and block it before it reaches AI tools. All data is encrypted at rest and in transit. Our DLP features provide strong technical safeguards for educational institutions using AI.",
     },
     {
       question: "What student data does TeamPrompt detect?",
@@ -75,14 +75,14 @@ export const industryData: IndustryPageData = {
         "Our detection engine scans for student names, student IDs, grades, Social Security numbers, dates of birth, disciplinary records, and other education-record identifiers. Custom patterns let you add institution-specific formats like internal student ID numbers.",
     },
     {
-      question: "Can different departments have different guardrails?",
+      question: "Can different departments have different security rules?",
       answer:
         "Yes. Admins configure detection rules at the institution level and customize them per department. For example, the registrar's office might have stricter rules around transcript data while the English department has lighter restrictions.",
     },
     {
       question: "How does TeamPrompt support responsible AI in the classroom?",
       answer:
-        "TeamPrompt provides approved prompt templates that guide appropriate AI use, quality guidelines that set standards for AI interactions, and guardrails that protect student data — giving institutions the framework for responsible AI adoption.",
+        "TeamPrompt provides approved prompt templates that guide appropriate AI use, quality guidelines that set standards for AI interactions, and security rules that protect student data — giving institutions the framework for responsible AI adoption.",
     },
   ],
   cta: {

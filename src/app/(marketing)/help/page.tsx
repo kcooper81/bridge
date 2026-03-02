@@ -13,7 +13,7 @@ import Link from "next/link";
 export const metadata: Metadata = generatePageMetadata({
   title: "Help & Documentation",
   description:
-    "Complete documentation for TeamPrompt — setup guides, prompt management, guardrails, team administration, billing, and more.",
+    "Complete documentation for TeamPrompt — setup guides, prompt management, data protection, team administration, billing, and more.",
   path: "/help",
   keywords: ["TeamPrompt documentation", "help center", "getting started guide"],
 });

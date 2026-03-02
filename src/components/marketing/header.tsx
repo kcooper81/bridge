@@ -102,7 +102,7 @@ export function MarketingHeader() {
               pathname === "/security" ? activeTextClass : textClass
             )}
           >
-            Guardrails
+            Data Protection
           </Link>
 
           <HelpDropdown
@@ -174,7 +174,7 @@ export function MarketingHeader() {
                   onClick={() => setMobileOpen(false)}
                   className="text-lg font-medium hover:text-primary transition-colors"
                 >
-                  Guardrails
+                  Data Protection
                 </Link>
                 <MobileHelpMenu onNavigate={() => setMobileOpen(false)} />
                 <div className="border-t border-border pt-4 mt-4 flex flex-col gap-3">

@@ -100,7 +100,7 @@ const faqs = [
   {
     question: "Do I need a TeamPrompt account?",
     answer:
-      "Yes, you need a free or paid TeamPrompt account. The extension uses your account to sync your team's prompt library, guardrails, and preferences.",
+      "Yes, you need a free or paid TeamPrompt account. The extension uses your account to sync your team's prompt library, security rules, and preferences.",
   },
   {
     question: "Can I use the extension without the web dashboard?",

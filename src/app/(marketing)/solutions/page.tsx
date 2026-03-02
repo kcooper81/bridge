@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, Layers, Plug, GitCompareArrows } from "lucide-react";
+import { ArrowRight, Layers, Plug, GitCompareArrows, Replace, BookOpen, Workflow, UserCircle, FileText } from "lucide-react";
 import { generatePageMetadata } from "@/lib/seo/metadata";
 import { SectionLabel } from "@/components/marketing/section-label";
 import { CTASection } from "@/components/marketing/cta-section";
@@ -10,7 +10,7 @@ import type { SeoPageData } from "@/lib/seo-pages/types";
 export const metadata: Metadata = generatePageMetadata({
   title: "Solutions",
   description:
-    "Explore TeamPrompt solutions: use cases for prompt management, integrations with ChatGPT, Claude, Gemini & more, and comparisons with alternative tools.",
+    "Explore TeamPrompt solutions: use cases, integrations, comparisons, guides, workflows, role-based solutions, and ready-to-use prompt templates.",
   path: "/solutions",
   keywords: [
     "AI prompt management",
@@ -55,6 +55,51 @@ const categories: {
     description:
       "See how a purpose-built prompt manager compares to general-purpose tools.",
     icon: GitCompareArrows,
+  },
+  {
+    key: "alternative",
+    label: "Alternatives",
+    sectionLabel: "Alternatives",
+    heading: "Compare TeamPrompt to other tools",
+    description:
+      "Compare TeamPrompt to other tools for managing AI prompts.",
+    icon: Replace,
+  },
+  {
+    key: "guide",
+    label: "Guides",
+    sectionLabel: "Guides",
+    heading: "Best practices and how-tos",
+    description:
+      "Learn best practices for prompt management, AI governance, and more.",
+    icon: BookOpen,
+  },
+  {
+    key: "workflow",
+    label: "Workflows",
+    sectionLabel: "Workflows",
+    heading: "AI-powered workflows for every department",
+    description:
+      "AI-powered workflows for every department.",
+    icon: Workflow,
+  },
+  {
+    key: "role",
+    label: "Roles",
+    sectionLabel: "By Role",
+    heading: "TeamPrompt for your role",
+    description:
+      "See how TeamPrompt helps your specific role.",
+    icon: UserCircle,
+  },
+  {
+    key: "template",
+    label: "Templates",
+    sectionLabel: "Templates",
+    heading: "Ready-to-use prompt templates",
+    description:
+      "Ready-to-use prompt templates for common tasks.",
+    icon: FileText,
   },
 ];
 

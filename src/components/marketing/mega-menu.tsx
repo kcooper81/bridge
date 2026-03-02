@@ -13,7 +13,6 @@ import {
   PiggyBank,
   Shield,
   ShieldCheck,
-  Users,
   Zap,
 } from "lucide-react";
 
@@ -28,10 +27,10 @@ const industries = [
 ];
 
 const useCases = [
-  { label: "Prompt Management", description: "Organize and version prompts", href: "/features", icon: Zap, bg: "bg-yellow-500/10" },
-  { label: "Security & Compliance", description: "Guardrails and audit trails", href: "/security", icon: Shield, bg: "bg-red-500/10" },
-  { label: "Team Collaboration", description: "Share prompts across teams", href: "/features#teams", icon: Users, bg: "bg-sky-500/10" },
-  { label: "Enterprise", description: "SSO, roles, and analytics", href: "/enterprise", icon: Landmark, bg: "bg-indigo-500/10" },
+  { label: "Prompt Library", description: "Organize and share prompt collections", href: "/solutions/prompt-library", icon: Zap, bg: "bg-yellow-500/10" },
+  { label: "AI Governance", description: "Guardrails, policies, and audit trails", href: "/solutions/ai-governance", icon: Shield, bg: "bg-red-500/10" },
+  { label: "DLP & Compliance", description: "Prevent data leaks in AI tools", href: "/solutions/ai-dlp", icon: ShieldCheck, bg: "bg-sky-500/10" },
+  { label: "Prompt Templates", description: "Ready-to-use templates for teams", href: "/solutions/prompt-templates", icon: Zap, bg: "bg-indigo-500/10" },
 ];
 
 const iconClass = "text-foreground/70";
@@ -143,11 +142,11 @@ export function SolutionsDropdown({
             {/* Bottom CTA */}
             <div className="mt-4 pt-4 border-t border-border/50">
               <Link
-                href="/features"
+                href="/solutions"
                 onClick={() => setOpen(false)}
                 className="flex items-center justify-center gap-1 text-sm font-medium text-primary hover:text-primary/80 transition-colors py-1"
               >
-                See all features
+                Browse all solutions
                 <span aria-hidden="true">&rarr;</span>
               </Link>
             </div>

@@ -27,6 +27,7 @@ import {
   generateBreadcrumbSchema,
 } from "@/lib/seo/schemas";
 import type { SeoPageData, SeoCategory, SeoContentSection } from "@/lib/seo-pages/types";
+import { getRelatedPages } from "@/lib/seo-pages/data";
 import { CheckCircle2 } from "lucide-react";
 
 const SITE_URL =
@@ -226,6 +227,9 @@ export function SeoLandingPage({ data }: { data: SeoPageData }) {
         </section>
       )}
 
+      {/* ━━━ RELATED SOLUTIONS ━━━ */}
+      <RelatedSolutions slug={data.slug} />
+
       {/* ━━━ CTA ━━━ */}
       <section className="py-20 sm:py-28 border-t border-border">
         <div className="max-w-3xl mx-auto px-4 sm:px-6">
@@ -237,6 +241,44 @@ export function SeoLandingPage({ data }: { data: SeoPageData }) {
         </div>
       </section>
     </>
+  );
+}
+
+function RelatedSolutions({ slug }: { slug: string }) {
+  const related = getRelatedPages(slug, 6);
+  if (related.length === 0) return null;
+
+  return (
+    <section className="py-20 sm:py-28 border-t border-border">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="text-center mb-14">
+          <SectionLabel>Related Solutions</SectionLabel>
+          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
+            Explore more solutions
+          </h2>
+        </div>
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto">
+          {related.map((page) => (
+            <Link
+              key={page.slug}
+              href={`/solutions/${page.slug}`}
+              className="group rounded-2xl border border-border bg-card p-6 hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 flex flex-col"
+            >
+              <h3 className="text-lg font-semibold group-hover:text-primary transition-colors">
+                {page.meta.title.split("—")[0].split("for")[0].trim()}
+              </h3>
+              <p className="mt-2 text-sm text-muted-foreground leading-relaxed flex-1">
+                {page.meta.description}
+              </p>
+              <span className="mt-4 inline-flex items-center text-sm font-medium text-primary">
+                Learn more
+                <ArrowRight className="ml-1.5 h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
+              </span>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
 

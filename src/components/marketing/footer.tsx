@@ -9,6 +9,13 @@ const footerLinks = {
     { label: "Guardrails", href: "/security" },
     { label: "Enterprise", href: "/enterprise" },
   ],
+  Solutions: [
+    { label: "All Solutions", href: "/solutions" },
+    { label: "Guides", href: "/solutions#guide" },
+    { label: "Comparisons", href: "/solutions#comparison" },
+    { label: "Templates", href: "/solutions#template" },
+    { label: "Integrations", href: "/solutions#integration" },
+  ],
   Industries: [
     { label: "Healthcare", href: "/industries/healthcare" },
     { label: "Legal", href: "/industries/legal" },
@@ -32,7 +39,7 @@ export function MarketingFooter() {
   return (
     <footer className="border-t border-border bg-zinc-950 text-zinc-400">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-8 mb-12">
           {/* Brand */}
           <div className="col-span-2">
             <div className="flex items-center gap-2.5 mb-4">

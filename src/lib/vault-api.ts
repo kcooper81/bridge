@@ -1244,7 +1244,7 @@ export async function getEffectivenessMetrics(): Promise<EffectivenessMetrics | 
   if (!prompts) return null;
 
   // Fetch owner names
-  const ownerIds = Array.from(new Set(prompts.map((p) => p.owner_id)));
+  const ownerIds = Array.from(new Set(prompts.map((p) => p.owner_id).filter(Boolean)));
   const { data: profiles } = await db
     .from("profiles")
     .select("id, name, email")

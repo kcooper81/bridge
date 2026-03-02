@@ -93,7 +93,7 @@ export interface Profile {
 export interface Prompt {
   id: string;
   org_id: string;
-  owner_id: string;
+  owner_id: string | null;
   title: string;
   content: string;
   description: string | null;
@@ -144,7 +144,7 @@ export interface Folder {
   name: string;
   icon: string | null;
   color: string | null;
-  created_by: string;
+  created_by: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -178,7 +178,7 @@ export interface Guideline {
   scope: "personal" | "team" | "org";
   rules: GuidelineRules;
   enforced: boolean;
-  created_by: string;
+  created_by: string | null;
   created_at: string;
   updated_at: string;
 }

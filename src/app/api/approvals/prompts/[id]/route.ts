@@ -72,7 +72,7 @@ export async function PATCH(
     }
 
     // If rejecting with a reason, create a notification for the prompt owner
-    if (action === "reject" && reason) {
+    if (action === "reject" && reason && prompt.owner_id) {
       await db.from("notifications").insert({
         user_id: prompt.owner_id,
         org_id: auth.orgId,

@@ -9,13 +9,18 @@ import { CopyButton } from "./_components/copy-button";
 import {
   TwitterBanner,
   TwitterBannerWhite,
+  TwitterBannerGradient,
   LinkedInBanner,
   LinkedInBannerWhite,
+  LinkedInBannerGradient,
   FacebookCover,
   FacebookCoverWhite,
+  FacebookCoverGradient,
   YouTubeBanner,
+  YouTubeBannerGradient,
   OGBanner,
   OGBannerWhite,
+  OGBannerGradient,
 } from "./_components/social-banners";
 
 export const metadata: Metadata = generatePageMetadata({
@@ -153,8 +158,9 @@ const socialMediaAssets = [
   {
     platform: "X (Twitter)",
     banners: [
-      { Component: TwitterBanner, variant: "Dark" },
-      { Component: TwitterBannerWhite, variant: "White" },
+      { Component: TwitterBanner, variant: "Dark", downloadFile: "/store-assets/twitter-banner.png" },
+      { Component: TwitterBannerWhite, variant: "White", downloadFile: null },
+      { Component: TwitterBannerGradient, variant: "Gradient", downloadFile: null },
     ],
     assets: [
       { file: "/store-assets/social-profile-400.png", label: "Profile picture", dims: "400 x 400" },
@@ -164,8 +170,9 @@ const socialMediaAssets = [
   {
     platform: "LinkedIn",
     banners: [
-      { Component: LinkedInBanner, variant: "Dark" },
-      { Component: LinkedInBannerWhite, variant: "White" },
+      { Component: LinkedInBanner, variant: "Dark", downloadFile: "/store-assets/linkedin-banner.png" },
+      { Component: LinkedInBannerWhite, variant: "White", downloadFile: null },
+      { Component: LinkedInBannerGradient, variant: "Gradient", downloadFile: null },
     ],
     assets: [
       { file: "/store-assets/social-profile-400.png", label: "Profile picture", dims: "400 x 400" },
@@ -176,8 +183,9 @@ const socialMediaAssets = [
   {
     platform: "Facebook",
     banners: [
-      { Component: FacebookCover, variant: "Dark" },
-      { Component: FacebookCoverWhite, variant: "White" },
+      { Component: FacebookCover, variant: "Dark", downloadFile: "/store-assets/facebook-cover.png" },
+      { Component: FacebookCoverWhite, variant: "White", downloadFile: null },
+      { Component: FacebookCoverGradient, variant: "Gradient", downloadFile: null },
     ],
     assets: [
       { file: "/store-assets/social-profile-800.png", label: "Profile picture", dims: "720 x 720 (use 800px)" },
@@ -187,7 +195,8 @@ const socialMediaAssets = [
   {
     platform: "YouTube",
     banners: [
-      { Component: YouTubeBanner, variant: "Dark" },
+      { Component: YouTubeBanner, variant: "Dark", downloadFile: "/store-assets/youtube-channel-art.png" },
+      { Component: YouTubeBannerGradient, variant: "Gradient", downloadFile: null },
     ],
     assets: [
       { file: "/store-assets/social-profile-800.png", label: "Profile picture", dims: "800 x 800" },
@@ -516,14 +525,25 @@ export default function MediaPage() {
               <div key={platform.platform}>
                 <h3 className="text-lg font-semibold mb-4">{platform.platform}</h3>
 
-                {/* Rendered banner previews — dark & white variants */}
+                {/* Rendered banner previews — dark, white & gradient variants */}
                 {platform.banners.length > 0 && (
                   <div className="space-y-3 mb-4">
                     {platform.banners.map((banner) => (
                       <div key={banner.variant}>
-                        <p className="text-xs text-muted-foreground font-medium mb-1.5">
-                          {banner.variant} variant
-                        </p>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <p className="text-xs text-muted-foreground font-medium">
+                            {banner.variant} variant
+                          </p>
+                          {banner.downloadFile ? (
+                            <a href={banner.downloadFile} download>
+                              <Button variant="ghost" size="sm" className="h-7 text-xs gap-1">
+                                <Download className="h-3 w-3" /> PNG
+                              </Button>
+                            </a>
+                          ) : (
+                            <span className="text-[10px] text-muted-foreground/60">CSS preview</span>
+                          )}
+                        </div>
                         <div className="rounded-xl border border-border overflow-hidden">
                           <banner.Component />
                         </div>
@@ -575,15 +595,34 @@ export default function MediaPage() {
           </p>
           <div className="space-y-3">
             <div>
-              <p className="text-xs text-muted-foreground font-medium mb-1.5">Dark variant</p>
+              <div className="flex items-center justify-between mb-1.5">
+                <p className="text-xs text-muted-foreground font-medium">Dark variant</p>
+                <a href="/store-assets/social-hero.png" download>
+                  <Button variant="ghost" size="sm" className="h-7 text-xs gap-1">
+                    <Download className="h-3 w-3" /> PNG
+                  </Button>
+                </a>
+              </div>
               <div className="rounded-xl border border-border overflow-hidden">
                 <OGBanner />
               </div>
             </div>
             <div>
-              <p className="text-xs text-muted-foreground font-medium mb-1.5">White variant</p>
+              <div className="flex items-center justify-between mb-1.5">
+                <p className="text-xs text-muted-foreground font-medium">White variant</p>
+                <span className="text-[10px] text-muted-foreground/60">CSS preview</span>
+              </div>
               <div className="rounded-xl border border-border overflow-hidden">
                 <OGBannerWhite />
+              </div>
+            </div>
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <p className="text-xs text-muted-foreground font-medium">Gradient variant</p>
+                <span className="text-[10px] text-muted-foreground/60">CSS preview</span>
+              </div>
+              <div className="rounded-xl border border-border overflow-hidden">
+                <OGBannerGradient />
               </div>
             </div>
           </div>

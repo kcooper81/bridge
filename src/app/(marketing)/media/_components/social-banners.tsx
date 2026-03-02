@@ -598,6 +598,70 @@ function WhiteBannerShell({
   );
 }
 
+function GradientBannerShell({
+  aspectRatio,
+  children,
+  className,
+  variant = "blue",
+}: {
+  aspectRatio: string;
+  children: React.ReactNode;
+  className?: string;
+  variant?: "blue" | "purple" | "teal";
+}) {
+  const gradients = {
+    blue: {
+      bg: "linear-gradient(135deg, #0F172A 0%, #1E293B 30%, #0F172A 100%)",
+      orb1: "radial-gradient(ellipse 60% 50% at 20% 50%, rgba(59,130,246,0.25) 0%, transparent 70%)",
+      orb2: "radial-gradient(ellipse 40% 60% at 80% 30%, rgba(139,92,246,0.2) 0%, transparent 70%)",
+      orb3: "radial-gradient(ellipse 50% 40% at 60% 80%, rgba(6,182,212,0.15) 0%, transparent 70%)",
+    },
+    purple: {
+      bg: "linear-gradient(135deg, #1E1033 0%, #2D1B4E 30%, #1A0F2E 100%)",
+      orb1: "radial-gradient(ellipse 60% 50% at 25% 40%, rgba(168,85,247,0.3) 0%, transparent 70%)",
+      orb2: "radial-gradient(ellipse 40% 60% at 75% 60%, rgba(236,72,153,0.2) 0%, transparent 70%)",
+      orb3: "radial-gradient(ellipse 50% 40% at 50% 20%, rgba(59,130,246,0.15) 0%, transparent 70%)",
+    },
+    teal: {
+      bg: "linear-gradient(135deg, #0F1A2E 0%, #0D2137 30%, #0B1929 100%)",
+      orb1: "radial-gradient(ellipse 60% 50% at 30% 60%, rgba(6,182,212,0.25) 0%, transparent 70%)",
+      orb2: "radial-gradient(ellipse 40% 60% at 70% 30%, rgba(59,130,246,0.2) 0%, transparent 70%)",
+      orb3: "radial-gradient(ellipse 50% 40% at 50% 80%, rgba(16,185,129,0.15) 0%, transparent 70%)",
+    },
+  };
+  const g = gradients[variant];
+
+  return (
+    <div
+      className={cn("w-full rounded-xl overflow-hidden", className)}
+      style={{ aspectRatio, background: g.bg }}
+    >
+      <div className="w-full h-full relative p-4 sm:p-6 flex flex-col justify-between overflow-hidden">
+        {/* Mesh gradient orbs */}
+        <div className="absolute inset-0" style={{ background: g.orb1 }} />
+        <div className="absolute inset-0" style={{ background: g.orb2 }} />
+        <div className="absolute inset-0" style={{ background: g.orb3 }} />
+        {/* Subtle grid pattern */}
+        <div
+          className="absolute inset-0 opacity-[0.03]"
+          style={{
+            backgroundImage: "linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)",
+            backgroundSize: "24px 24px",
+          }}
+        />
+        {/* Top edge highlight */}
+        <div
+          className="absolute top-0 left-0 right-0 h-px"
+          style={{
+            background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.1) 30%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.1) 70%, transparent)",
+          }}
+        />
+        <div className="relative z-10 flex flex-col h-full">{children}</div>
+      </div>
+    </div>
+  );
+}
+
 /* ══════════════════════════════════════════════════
    BANNERS — each uses a different scene
    ══════════════════════════════════════════════════ */
@@ -799,16 +863,140 @@ export function OGBannerWhite() {
   );
 }
 
+/* ══════════════════════════════════════════════════
+   GRADIENT VARIANTS — rich mesh gradient backgrounds
+   ══════════════════════════════════════════════════ */
+
+/* ── Twitter Gradient (1500 x 500) ──────────────── */
+
+export function TwitterBannerGradient() {
+  return (
+    <GradientBannerShell aspectRatio="1500/500" variant="blue">
+      <div className="flex items-center h-full gap-4 sm:gap-6">
+        <div className="flex-1 space-y-2.5 sm:space-y-3 shrink-0">
+          <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={160} height={32} className="h-5 sm:h-7 w-auto" />
+          <p className="text-white text-[10px] sm:text-sm font-bold leading-snug max-w-[220px] sm:max-w-[280px]">
+            Your team&apos;s AI prompt library — with built-in guardrails
+          </p>
+          <FeaturePills />
+          <CompatibilityLine />
+        </div>
+        <div className="hidden sm:flex w-[50%] gap-3 items-start">
+          <VaultScene className="flex-1" compact />
+          <DLPBlockScene className="flex-1" compact />
+        </div>
+      </div>
+    </GradientBannerShell>
+  );
+}
+
+/* ── LinkedIn Gradient (1584 x 396) ─────────────── */
+
+export function LinkedInBannerGradient() {
+  return (
+    <GradientBannerShell aspectRatio="1584/396" variant="purple">
+      <div className="flex items-center h-full gap-4 sm:gap-6">
+        <div className="flex-1 space-y-2 sm:space-y-2.5">
+          <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={150} height={30} className="h-5 sm:h-6 w-auto" />
+          <p className="text-white text-[10px] sm:text-xs font-bold leading-snug">
+            AI prompt management for teams that need guardrails
+          </p>
+          <FeaturePills />
+          <CompatibilityLine />
+        </div>
+        <div className="hidden sm:block w-[38%]">
+          <VaultScene />
+        </div>
+      </div>
+    </GradientBannerShell>
+  );
+}
+
+/* ── Facebook Gradient (851 x 315) ──────────────── */
+
+export function FacebookCoverGradient() {
+  return (
+    <GradientBannerShell aspectRatio="851/315" variant="teal">
+      <div className="flex items-center h-full gap-3 sm:gap-4">
+        <div className="flex-1 space-y-2">
+          <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={130} height={26} className="h-4 sm:h-5 w-auto" />
+          <p className="text-white text-[9px] sm:text-xs font-bold leading-snug">
+            Shared prompts · DLP guardrails · Usage analytics
+          </p>
+          <FeaturePills />
+          <CompatibilityLine />
+        </div>
+        <div className="hidden sm:block w-[30%]">
+          <InsertScene />
+        </div>
+      </div>
+    </GradientBannerShell>
+  );
+}
+
+/* ── YouTube Gradient (2560 x 1440) ─────────────── */
+
+export function YouTubeBannerGradient() {
+  return (
+    <GradientBannerShell aspectRatio="2560/1440" variant="purple">
+      <div className="flex flex-col items-center justify-center h-full text-center gap-3 sm:gap-4">
+        <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={200} height={40} className="h-6 sm:h-8 w-auto" />
+        <p className="text-white text-xs sm:text-base font-bold max-w-md">
+          Your team&apos;s AI prompt library — with built-in guardrails
+        </p>
+        <FeaturePills />
+        <div className="grid grid-cols-2 gap-3 w-full max-w-md">
+          <VaultScene compact />
+          <DLPBlockScene compact />
+          <InsertScene />
+          <AnalyticsScene />
+        </div>
+        <CompatibilityLine />
+      </div>
+    </GradientBannerShell>
+  );
+}
+
+/* ── OG Gradient (1200 x 630) ───────────────────── */
+
+export function OGBannerGradient() {
+  return (
+    <GradientBannerShell aspectRatio="1200/630" variant="blue">
+      <div className="flex items-center h-full gap-4 sm:gap-6">
+        <div className="flex-1 space-y-2.5 sm:space-y-3">
+          <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={180} height={36} className="h-5 sm:h-7 w-auto" />
+          <p className="text-white text-xs sm:text-base font-bold leading-snug">
+            AI Prompt Management
+            <br />
+            for Teams
+          </p>
+          <FeaturePills />
+          <CompatibilityLine />
+        </div>
+        <div className="w-[45%] space-y-2">
+          <VaultScene compact />
+          <DLPBlockScene compact />
+        </div>
+      </div>
+    </GradientBannerShell>
+  );
+}
+
 /* ── Export map ──────────────────────────────────── */
 
 export const socialBannerComponents = {
   twitter: { Component: TwitterBanner, label: "X (Twitter) Header — Dark", dims: "1500 x 500" },
   twitterWhite: { Component: TwitterBannerWhite, label: "X (Twitter) Header — White", dims: "1500 x 500" },
+  twitterGradient: { Component: TwitterBannerGradient, label: "X (Twitter) Header — Gradient", dims: "1500 x 500" },
   linkedin: { Component: LinkedInBanner, label: "LinkedIn Cover — Dark", dims: "1584 x 396" },
   linkedinWhite: { Component: LinkedInBannerWhite, label: "LinkedIn Cover — White", dims: "1584 x 396" },
+  linkedinGradient: { Component: LinkedInBannerGradient, label: "LinkedIn Cover — Gradient", dims: "1584 x 396" },
   facebook: { Component: FacebookCover, label: "Facebook Cover — Dark", dims: "851 x 315" },
   facebookWhite: { Component: FacebookCoverWhite, label: "Facebook Cover — White", dims: "851 x 315" },
-  youtube: { Component: YouTubeBanner, label: "YouTube Channel Art", dims: "2560 x 1440" },
+  facebookGradient: { Component: FacebookCoverGradient, label: "Facebook Cover — Gradient", dims: "851 x 315" },
+  youtube: { Component: YouTubeBanner, label: "YouTube Channel Art — Dark", dims: "2560 x 1440" },
+  youtubeGradient: { Component: YouTubeBannerGradient, label: "YouTube Channel Art — Gradient", dims: "2560 x 1440" },
   og: { Component: OGBanner, label: "OG / Social Share Card — Dark", dims: "1200 x 630" },
   ogWhite: { Component: OGBannerWhite, label: "OG / Social Share Card — White", dims: "1200 x 630" },
+  ogGradient: { Component: OGBannerGradient, label: "OG / Social Share Card — Gradient", dims: "1200 x 630" },
 } as const;

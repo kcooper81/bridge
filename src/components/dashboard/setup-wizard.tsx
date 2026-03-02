@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useOrg } from "@/components/providers/org-provider";
 import { useExtensionDetection } from "@/hooks/use-extension-detection";
@@ -9,15 +9,16 @@ import { Button } from "@/components/ui/button";
 import {
   Building,
   Check,
-  Chrome,
   ExternalLink,
   FileText,
+  Globe,
   Rocket,
   UserPlus,
   Users,
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { detectBrowser, getStoreForBrowser } from "@/lib/browser-detect";
 
 const DISMISS_KEY = "teamprompt-setup-wizard-dismissed";
 
@@ -36,6 +37,9 @@ export function SetupWizard() {
   const { org, members, teams, prompts, currentUserRole } = useOrg();
   const { detected: extensionDetected } = useExtensionDetection();
   const [dismissed, setDismissed] = useState(true);
+
+  const browser = useMemo(() => detectBrowser(), []);
+  const store = useMemo(() => getStoreForBrowser(browser), [browser]);
 
   useEffect(() => {
     setDismissed(localStorage.getItem(DISMISS_KEY) === "true");
@@ -74,12 +78,12 @@ export function SetupWizard() {
     },
     {
       id: "install-extension",
-      title: "Install Chrome extension",
+      title: "Install browser extension",
       description: "The browser extension lets your team use prompts directly inside AI tools.",
       done: extensionDetected,
-      href: "https://chromewebstore.google.com/detail/teamprompt",
-      actionLabel: "Install Extension",
-      icon: Chrome,
+      href: store.url,
+      actionLabel: store.buttonLabel,
+      icon: Globe,
       external: true,
     },
     {

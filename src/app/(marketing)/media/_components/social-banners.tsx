@@ -800,40 +800,76 @@ export function OGBannerWhite() {
 }
 
 /* ══════════════════════════════════════════════════
-   HERO VARIANTS — real photos + product screenshots
-   Combines lifestyle photography with app mockups
+   MOCKUP VARIANTS — decorative shapes + staggered app screenshots
+   Rounded rectangle "lifestyle" shapes with overlapping product mockups
    ══════════════════════════════════════════════════ */
 
-/** Photo banner shell — stock photo background with dark overlay + gradient accent */
-function PhotoBannerShell({
+/**
+ * Decorative rounded squares — abstract background shapes that give a
+ * lifestyle feel without using stock photography.
+ */
+function DecoShapes({ variant = "default" }: { variant?: "default" | "alt" | "center" }) {
+  if (variant === "center") {
+    return (
+      <>
+        <div className="absolute top-[5%] left-[50%] w-[30%] h-[60%] rounded-3xl bg-blue-500/[0.06] -rotate-6" />
+        <div className="absolute bottom-[8%] right-[15%] w-[25%] h-[50%] rounded-3xl bg-purple-500/[0.05] rotate-3" />
+        <div className="absolute top-[15%] left-[20%] w-[20%] h-[40%] rounded-3xl bg-blue-400/[0.04] rotate-12" />
+        <div className="absolute bottom-[5%] left-[40%] w-[18%] h-[35%] rounded-2xl bg-indigo-500/[0.04] -rotate-3" />
+      </>
+    );
+  }
+  if (variant === "alt") {
+    return (
+      <>
+        <div className="absolute top-[8%] right-[5%] w-[28%] h-[55%] rounded-3xl bg-blue-500/[0.06] rotate-6" />
+        <div className="absolute bottom-[5%] right-[20%] w-[22%] h-[45%] rounded-3xl bg-purple-500/[0.05] -rotate-3" />
+        <div className="absolute top-[20%] right-[30%] w-[15%] h-[35%] rounded-2xl bg-indigo-400/[0.04] rotate-12" />
+      </>
+    );
+  }
+  return (
+    <>
+      <div className="absolute top-[5%] right-[3%] w-[30%] h-[65%] rounded-3xl bg-blue-500/[0.06] -rotate-3" />
+      <div className="absolute bottom-[3%] right-[15%] w-[25%] h-[50%] rounded-3xl bg-purple-500/[0.05] rotate-6" />
+      <div className="absolute top-[15%] right-[25%] w-[18%] h-[40%] rounded-2xl bg-blue-400/[0.04] rotate-12" />
+      <div className="absolute bottom-[10%] right-[40%] w-[12%] h-[30%] rounded-2xl bg-indigo-500/[0.03] -rotate-6" />
+    </>
+  );
+}
+
+/** Mockup banner shell — gradient background with decorative shapes */
+function MockupBannerShell({
   aspectRatio,
-  photo,
   children,
   className,
+  shapeVariant = "default",
 }: {
   aspectRatio: string;
-  photo: string;
   children: React.ReactNode;
   className?: string;
+  shapeVariant?: "default" | "alt" | "center";
 }) {
   return (
     <div
-      className={cn("w-full rounded-xl overflow-hidden relative", className)}
+      className={cn("w-full rounded-xl overflow-hidden relative bg-[#0A0E1A]", className)}
       style={{ aspectRatio }}
     >
-      {/* Background photo */}
-      <Image
-        src={photo}
-        alt=""
-        fill
-        className="object-cover"
-        sizes="100vw"
+      {/* Subtle radial gradient */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: [
+            "radial-gradient(ellipse 60% 50% at 70% 40%, rgba(37,99,235,0.08) 0%, transparent 70%)",
+            "radial-gradient(ellipse 40% 40% at 30% 70%, rgba(139,92,246,0.05) 0%, transparent 60%)",
+          ].join(", "),
+        }}
       />
-      {/* Dark overlay */}
-      <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/40" />
+      {/* Decorative rounded shapes */}
+      <DecoShapes variant={shapeVariant} />
       {/* Blue accent edge */}
       <div
-        className="absolute bottom-0 left-0 right-0 h-1"
+        className="absolute bottom-0 left-0 right-0 h-1 z-20"
         style={{ background: "linear-gradient(90deg, #2563EB 0%, #60A5FA 50%, #2563EB 100%)" }}
       />
       {/* Content */}
@@ -844,148 +880,184 @@ function PhotoBannerShell({
   );
 }
 
-/** Shared hero screenshot frame — perspective tilt + glow */
-function HeroScreenshot({
-  src,
-  alt,
+/** Staggered screenshot mockup — overlapping, slightly offset with shadow */
+function StaggeredMockup({
+  screenshots,
   className,
-  tilt = "right",
 }: {
-  src: string;
-  alt: string;
+  screenshots: { src: string; alt: string }[];
   className?: string;
-  tilt?: "right" | "left" | "none";
 }) {
-  const transforms = {
-    right: "perspective(1200px) rotateY(-8deg) rotateX(2deg)",
-    left: "perspective(1200px) rotateY(8deg) rotateX(2deg)",
-    none: "perspective(1200px) rotateX(2deg)",
-  };
-  return (
-    <div
-      className={cn("relative", className)}
-      style={{ transform: transforms[tilt] }}
-    >
-      <div className="rounded-lg overflow-hidden shadow-2xl shadow-black/40 border border-white/10">
-        <Image src={src} alt={alt} width={1280} height={800} className="w-full h-auto" />
+  if (screenshots.length === 1) {
+    return (
+      <div className={cn("relative", className)}>
+        <div className="rounded-xl overflow-hidden shadow-2xl shadow-black/50 border border-white/10">
+          <Image src={screenshots[0].src} alt={screenshots[0].alt} width={1280} height={800} className="w-full h-auto" />
+        </div>
       </div>
-      <div
-        className="absolute -inset-4 -z-10 rounded-2xl opacity-30 blur-2xl"
-        style={{ background: "linear-gradient(135deg, rgba(59,130,246,0.4), rgba(139,92,246,0.2))" }}
-      />
+    );
+  }
+
+  if (screenshots.length === 2) {
+    return (
+      <div className={cn("relative", className)}>
+        {/* Back card — offset up-left */}
+        <div className="absolute top-0 left-0 w-[85%] rounded-xl overflow-hidden shadow-xl shadow-black/30 border border-white/[0.08]">
+          <Image src={screenshots[1].src} alt={screenshots[1].alt} width={1280} height={800} className="w-full h-auto" />
+        </div>
+        {/* Front card — offset down-right, on top */}
+        <div className="relative ml-[15%] mt-[10%] w-[85%] rounded-xl overflow-hidden shadow-2xl shadow-black/50 border border-white/10">
+          <Image src={screenshots[0].src} alt={screenshots[0].alt} width={1280} height={800} className="w-full h-auto" />
+        </div>
+      </div>
+    );
+  }
+
+  // 3+ screenshots — staggered stack
+  return (
+    <div className={cn("relative", className)}>
+      {screenshots.slice(0, 3).map((ss, i) => {
+        const offsets = [
+          "top-0 left-0 w-[75%]",
+          "absolute top-[8%] left-[12%] w-[78%]",
+          "absolute top-[16%] left-[24%] w-[76%]",
+        ];
+        const zIndex = (i + 1) * 10;
+        return (
+          <div
+            key={ss.src}
+            className={cn(
+              i > 0 ? offsets[i] : offsets[0],
+              "rounded-xl overflow-hidden border border-white/10",
+              i === screenshots.length - 1 || i === 2
+                ? "shadow-2xl shadow-black/50"
+                : "shadow-lg shadow-black/30"
+            )}
+            style={{ zIndex, position: i === 0 ? "relative" : "absolute" }}
+          >
+            <Image src={ss.src} alt={ss.alt} width={1280} height={800} className="w-full h-auto" />
+          </div>
+        );
+      })}
     </div>
   );
 }
 
-/* ── Twitter Hero (1500 x 500) — team photo + prompt library ── */
+/* ── Twitter Gradient (1500 x 500) — prompts + extension staggered ── */
 
 export function TwitterBannerGradient() {
   return (
-    <PhotoBannerShell aspectRatio="1500/500" photo="/stock/team-meeting.jpg">
+    <MockupBannerShell aspectRatio="1500/500">
       <div className="flex items-center h-full gap-4 sm:gap-6">
         <div className="flex-1 space-y-2 sm:space-y-2.5 shrink-0 max-w-[45%]">
           <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={160} height={32} className="h-5 sm:h-7 w-auto" />
-          <p className="text-white text-[10px] sm:text-sm font-bold leading-snug drop-shadow-lg">
+          <p className="text-white text-[10px] sm:text-sm font-bold leading-snug">
             Your team&apos;s AI prompt library — with built-in guardrails
           </p>
           <FeaturePills />
           <CompatibilityLine />
         </div>
         <div className="hidden sm:block w-[50%]">
-          <HeroScreenshot
-            src="/store-assets/screenshot-light-1-prompts.png"
-            alt="TeamPrompt prompt library"
-            tilt="right"
+          <StaggeredMockup
+            screenshots={[
+              { src: "/store-assets/screenshot-light-1-prompts.png", alt: "Prompt library" },
+              { src: "/store-assets/screenshot-light-4-popup.png", alt: "Extension popup" },
+            ]}
           />
         </div>
       </div>
-    </PhotoBannerShell>
+    </MockupBannerShell>
   );
 }
 
-/* ── LinkedIn Hero (1584 x 396) — laptop photo + dashboard ── */
+/* ── LinkedIn Gradient (1584 x 396) — guardrails + prompts staggered ── */
 
 export function LinkedInBannerGradient() {
   return (
-    <PhotoBannerShell aspectRatio="1584/396" photo="/stock/laptop-work.jpg">
+    <MockupBannerShell aspectRatio="1584/396" shapeVariant="alt">
       <div className="flex items-center h-full gap-4 sm:gap-6">
         <div className="flex-1 space-y-2 sm:space-y-2.5 max-w-[40%]">
           <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={150} height={30} className="h-5 sm:h-6 w-auto" />
-          <p className="text-white text-[10px] sm:text-xs font-bold leading-snug drop-shadow-lg">
+          <p className="text-white text-[10px] sm:text-xs font-bold leading-snug">
             AI prompt management for teams that need guardrails
           </p>
           <FeaturePills />
           <CompatibilityLine />
         </div>
         <div className="hidden sm:block w-[50%]">
-          <HeroScreenshot
-            src="/store-assets/screenshot-light-2-dashboard.png"
-            alt="TeamPrompt analytics dashboard"
-            tilt="right"
+          <StaggeredMockup
+            screenshots={[
+              { src: "/store-assets/screenshot-light-3-dlp-block.png", alt: "DLP guardrails" },
+              { src: "/store-assets/screenshot-light-1-prompts.png", alt: "Prompt library" },
+            ]}
           />
         </div>
       </div>
-    </PhotoBannerShell>
+    </MockupBannerShell>
   );
 }
 
-/* ── Facebook Hero (851 x 315) — office photo + DLP ── */
+/* ── Facebook Gradient (851 x 315) — extension insert ── */
 
 export function FacebookCoverGradient() {
   return (
-    <PhotoBannerShell aspectRatio="851/315" photo="/stock/modern-office.jpg">
+    <MockupBannerShell aspectRatio="851/315" shapeVariant="alt">
       <div className="flex items-center h-full gap-3 sm:gap-4">
         <div className="flex-1 space-y-1.5 sm:space-y-2 max-w-[40%]">
           <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={130} height={26} className="h-4 sm:h-5 w-auto" />
-          <p className="text-white text-[9px] sm:text-xs font-bold leading-snug drop-shadow-lg">
+          <p className="text-white text-[9px] sm:text-xs font-bold leading-snug">
             Shared prompts · DLP guardrails · Usage analytics
           </p>
           <FeaturePills />
         </div>
         <div className="hidden sm:block w-[50%]">
-          <HeroScreenshot
-            src="/store-assets/screenshot-light-3-dlp-block.png"
-            alt="TeamPrompt DLP protection"
-            tilt="right"
+          <StaggeredMockup
+            screenshots={[
+              { src: "/store-assets/screenshot-light-6-insert.png", alt: "Insert prompt" },
+              { src: "/store-assets/screenshot-light-5-template.png", alt: "Template variables" },
+            ]}
           />
         </div>
       </div>
-    </PhotoBannerShell>
+    </MockupBannerShell>
   );
 }
 
-/* ── YouTube Hero (2560 x 1440) — collab photo + 4 screenshots ── */
+/* ── YouTube Gradient (2560 x 1440) — 3 staggered product views ── */
 
 export function YouTubeBannerGradient() {
   return (
-    <PhotoBannerShell aspectRatio="2560/1440" photo="/stock/team-collab.jpg">
+    <MockupBannerShell aspectRatio="2560/1440" shapeVariant="center">
       <div className="flex flex-col items-center justify-center h-full text-center gap-3 sm:gap-4">
         <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={200} height={40} className="h-6 sm:h-8 w-auto" />
-        <p className="text-white text-xs sm:text-base font-bold max-w-md drop-shadow-lg">
+        <p className="text-white text-xs sm:text-base font-bold max-w-md">
           Your team&apos;s AI prompt library — with built-in guardrails
         </p>
         <FeaturePills />
-        <div className="grid grid-cols-2 gap-3 w-full max-w-lg mt-1">
-          <HeroScreenshot src="/store-assets/screenshot-light-1-prompts.png" alt="Prompt library" tilt="left" />
-          <HeroScreenshot src="/store-assets/screenshot-light-3-dlp-block.png" alt="DLP block" tilt="right" />
-          <HeroScreenshot src="/store-assets/screenshot-light-6-insert.png" alt="Insert prompt" tilt="left" />
-          <HeroScreenshot src="/store-assets/screenshot-light-2-dashboard.png" alt="Dashboard" tilt="right" />
+        <div className="w-full max-w-lg mt-1">
+          <StaggeredMockup
+            screenshots={[
+              { src: "/store-assets/screenshot-light-1-prompts.png", alt: "Prompt library" },
+              { src: "/store-assets/screenshot-light-3-dlp-block.png", alt: "DLP guardrails" },
+              { src: "/store-assets/screenshot-light-6-insert.png", alt: "Insert prompt" },
+            ]}
+          />
         </div>
-        <CompatibilityLine />
+        <CompatibilityLine className="mt-2" />
       </div>
-    </PhotoBannerShell>
+    </MockupBannerShell>
   );
 }
 
-/* ── OG Hero (1200 x 630) — team photo + prompt library ── */
+/* ── OG Gradient (1200 x 630) — prompts + guardrails staggered ── */
 
 export function OGBannerGradient() {
   return (
-    <PhotoBannerShell aspectRatio="1200/630" photo="/stock/team-meeting.jpg">
+    <MockupBannerShell aspectRatio="1200/630">
       <div className="flex items-center h-full gap-4 sm:gap-6">
         <div className="flex-1 space-y-2.5 sm:space-y-3 max-w-[40%]">
           <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={180} height={36} className="h-5 sm:h-7 w-auto" />
-          <p className="text-white text-xs sm:text-base font-bold leading-snug drop-shadow-lg">
+          <p className="text-white text-xs sm:text-base font-bold leading-snug">
             AI Prompt Management
             <br />
             for Teams
@@ -993,15 +1065,16 @@ export function OGBannerGradient() {
           <FeaturePills />
           <CompatibilityLine />
         </div>
-        <div className="w-[55%] space-y-3">
-          <HeroScreenshot
-            src="/store-assets/screenshot-light-1-prompts.png"
-            alt="TeamPrompt prompt library"
-            tilt="right"
+        <div className="w-[55%]">
+          <StaggeredMockup
+            screenshots={[
+              { src: "/store-assets/screenshot-light-1-prompts.png", alt: "Prompt library" },
+              { src: "/store-assets/screenshot-light-3-dlp-block.png", alt: "DLP guardrails" },
+            ]}
           />
         </div>
       </div>
-    </PhotoBannerShell>
+    </MockupBannerShell>
   );
 }
 

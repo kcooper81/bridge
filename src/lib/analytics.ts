@@ -144,8 +144,8 @@ export function trackGuardrailCreated() {
   trackEvent({ action: "guardrail_created", category: "security" });
 }
 
-export function trackExtensionInstallClick() {
-  trackEvent({ action: "extension_install_click", category: "engagement" });
+export function trackExtensionInstallClick(browser?: string) {
+  trackEvent({ action: "extension_install_click", category: "engagement", label: browser });
 }
 
 export function trackExport(count: number) {

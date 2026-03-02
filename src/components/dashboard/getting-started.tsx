@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useOrg } from "@/components/providers/org-provider";
 import { useExtensionDetection } from "@/hooks/use-extension-detection";
@@ -9,15 +9,16 @@ import { Button } from "@/components/ui/button";
 import {
   Building,
   CheckCircle2,
-  Chrome,
   Circle,
   FileText,
+  Globe,
   Rocket,
   Shield,
   UserPlus,
   Users,
   X,
 } from "lucide-react";
+import { detectBrowser, getStoreForBrowser } from "@/lib/browser-detect";
 
 const DISMISS_KEY = "teamprompt-getting-started-dismissed";
 
@@ -25,6 +26,9 @@ export function GettingStarted() {
   const { org, members, teams, guidelines, prompts, currentUserRole } = useOrg();
   const { detected: extensionDetected } = useExtensionDetection();
   const [dismissed, setDismissed] = useState(true);
+
+  const browser = useMemo(() => detectBrowser(), []);
+  const store = useMemo(() => getStoreForBrowser(browser), [browser]);
 
   useEffect(() => {
     setDismissed(localStorage.getItem(DISMISS_KEY) === "true");
@@ -58,10 +62,10 @@ export function GettingStarted() {
       icon: Shield,
     },
     {
-      label: "Install the Chrome extension",
+      label: store.buttonLabel.replace("Install for", "Install the") + " extension",
       done: extensionDetected,
-      href: "https://chromewebstore.google.com/detail/teamprompt",
-      icon: Chrome,
+      href: store.url,
+      icon: Globe,
       external: true,
     },
     {

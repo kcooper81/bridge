@@ -172,7 +172,40 @@
   - DLPBlockScene and InsertScene converted from dark theme to light theme (white bg, zinc borders)
   - Banners stay dark, mockups on top are now light — matches VaultScene and AnalyticsScene
 
+- [x] Fix Extension Install Flow — Browser Detection + /extensions Page
+  - `src/lib/browser-detect.ts`: detectBrowser(), EXTENSION_STORES, getStoreForBrowser()
+  - `/extensions` marketing page with browser-detected hero CTA, browser cards, features, FAQ
+  - Extension install banner: browser-detected store URL + icon + button text
+  - Setup wizard: "Install browser extension" with detected store URL
+  - Getting-started: browser-specific label + store URL
+
+- [x] Media page: redesign social banner gradient variants
+  - Replaced full-bleed stock photo backgrounds with decorative rounded squares
+  - Replaced admin/super-admin screenshots with prompt vault, guardrails, and extension views
+  - New MockupBannerShell with DecoShapes (rounded rectangles) background elements
+  - StaggeredMockup component: overlapping, offset app screenshots
+  - All gradient variants updated: Twitter, LinkedIn, Facebook, YouTube, OG
+
 ## Pending
+- [ ] Guardrail security hardening for sensitive pattern data (passwords, secrets)
+  - Evaluate encryption-at-rest for custom DLP patterns
+  - Assess if admin custom patterns could contain example sensitive data
+  - Consider pattern obfuscation in API responses
+- [x] Extension zip title — updated wxt.config.ts name to "TeamPrompt — AI Prompt Manager & DLP Shield"
+- [x] Testing guide improvements for QA specialists
+  - Pass/Fail/Skip status cycle per step (click to cycle)
+  - Priority tags (P0/P1/P2) on every step with color coding
+  - Preconditions listed per section
+  - Notes/comments field per step (expandable)
+  - Search across all steps
+  - Filter by status (all/untested/pass/fail/skip)
+  - Export results as .txt report with summary
+  - Copy results to clipboard
+  - Copy bug report template from failed steps
+  - Multi-color progress bar (green/red/amber)
+  - Completion summary shows pass-all vs failures-found
+  - Browser-specific extension testing steps added
+  - /extensions page test step added
 - [ ] Microsoft Entra ID (Azure AD) directory sync
 - [ ] SCIM 2.0 provisioning endpoint (for Okta, OneLogin, JumpCloud)
 - [ ] SAML SSO

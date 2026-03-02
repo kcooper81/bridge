@@ -157,6 +157,21 @@
   - `handleBulkRoleChange()`: guards last-admin, Promise.all updateMemberRole, clears selection
   - Selection clears after individual role changes and member removal
 
+- [x] SEO Internal Linking for 100 Solution Pages
+  - Solutions index (`/solutions`): shows all 8 categories (was 3) — added alternative, guide, workflow, role, template
+  - Related Solutions cross-links: 6-card "Related Solutions" section on every individual solution page (`getRelatedPages` helper)
+  - Mega-menu: "By Use Case" links now point to actual solution pages (Prompt Library, AI Governance, DLP & Compliance, Prompt Templates) + "Browse all solutions" CTA
+  - Footer: new "Solutions" column with links to /solutions and category anchors
+  - Sitemap: added `/solutions` to core pages (weekly, 0.8 priority)
+
+- [x] Fix admin panel crash (AuthProvider missing)
+  - Admin layout now wraps children with `AuthProvider` (fetches session server-side)
+  - Fixes "useAuth must be used within an AuthProvider" error on `/admin/admin-users`
+
+- [x] Media page: switch extension mockups to light mode
+  - DLPBlockScene and InsertScene converted from dark theme to light theme (white bg, zinc borders)
+  - Banners stay dark, mockups on top are now light — matches VaultScene and AnalyticsScene
+
 ## Pending
 - [ ] Microsoft Entra ID (Azure AD) directory sync
 - [ ] SCIM 2.0 provisioning endpoint (for Okta, OneLogin, JumpCloud)

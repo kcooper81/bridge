@@ -159,6 +159,20 @@ export default defineContentScript({
     // Guard: if context is already invalidated at startup, bail out silently
     if (!browser.runtime?.id) return;
 
+    // ─── Global Safety Net for Context Invalidation ───
+    // Catch unhandled promise rejections from browser.* APIs after extension
+    // update/reload so they don't spam the console.
+    window.addEventListener("unhandledrejection", (e) => {
+      if (
+        e.reason instanceof Error &&
+        (e.reason.message.includes("Extension context invalidated") ||
+         e.reason.message.includes("Receiving end does not exist"))
+      ) {
+        e.preventDefault(); // suppress console error
+        if (!_contextDead) killContentScript();
+      }
+    });
+
     // ─── Initialize Shield Indicator ───
     initShieldIndicator();
 
@@ -500,10 +514,8 @@ function performScan(text: string, onAllow: () => void) {
       });
       logInteraction(text, "blocked", result.violations);
       pulseShield("block");
-      try {
-        browser.runtime.sendMessage({ type: "SET_BADGE", text: "!", color: "#ef4444" });
-        setTimeout(() => { try { browser.runtime.sendMessage({ type: "SET_BADGE", text: "" }); } catch {} }, 10000);
-      } catch {}
+      safeSendMessage({ type: "SET_BADGE", text: "!", color: "#ef4444" });
+      setTimeout(() => safeSendMessage({ type: "SET_BADGE", text: "" }), 10000);
       return;
     }
 
@@ -511,10 +523,8 @@ function performScan(text: string, onAllow: () => void) {
       showWarningBanner(result.violations);
       logInteraction(text, "warned", result.violations);
       pulseShield("warn");
-      try {
-        browser.runtime.sendMessage({ type: "SET_BADGE", text: "!", color: "#f59e0b" });
-        setTimeout(() => { try { browser.runtime.sendMessage({ type: "SET_BADGE", text: "" }); } catch {} }, 10000);
-      } catch {}
+      safeSendMessage({ type: "SET_BADGE", text: "!", color: "#f59e0b" });
+      setTimeout(() => safeSendMessage({ type: "SET_BADGE", text: "" }), 10000);
     } else if (result === null) {
       // Fail-closed: scan returned null — determine reason and block
       const reason = _isAuthenticated ? "api-error" : "no-auth";
@@ -900,6 +910,18 @@ function showReloadBanner() {
   document.getElementById("tp-reload-btn")!.addEventListener("click", () => {
     location.reload();
   });
+}
+
+/** Fire-and-forget sendMessage that never throws or produces uncaught rejections. */
+function safeSendMessage(msg: Record<string, unknown>): void {
+  if (_contextDead) return;
+  try {
+    browser.runtime.sendMessage(msg).catch(() => {
+      if (!_contextDead) killContentScript();
+    });
+  } catch {
+    if (!_contextDead) killContentScript();
+  }
 }
 
 function escapeHtml(str: string): string {

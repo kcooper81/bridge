@@ -4,6 +4,30 @@ export default defineConfig({
   srcDir: "src",
   outDir: "dist",
   manifestVersion: 3,
+  hooks: {
+    "vite:build:extendConfig"(_entries, config) {
+      // Remove content hashes — Firefox Add-ons rejects hashed filenames
+      if (config.build?.rollupOptions?.output) {
+        const output = config.build.rollupOptions.output;
+        if (!Array.isArray(output)) {
+          if (typeof output.chunkFileNames === "string") {
+            output.chunkFileNames = output.chunkFileNames.replace("-[hash]", "");
+          }
+          if (typeof output.assetFileNames === "string") {
+            output.assetFileNames = output.assetFileNames.replace("-[hash]", "");
+          }
+          if (typeof output.entryFileNames === "function") {
+            const original = output.entryFileNames;
+            output.entryFileNames = (chunkInfo) => {
+              return (original(chunkInfo) as string).replace("-[hash]", "");
+            };
+          } else if (typeof output.entryFileNames === "string") {
+            output.entryFileNames = output.entryFileNames.replace("-[hash]", "");
+          }
+        }
+      }
+    },
+  },
   manifest: ({ browser }) => {
     const isFirefox = browser === "firefox";
 

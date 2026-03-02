@@ -598,70 +598,6 @@ function WhiteBannerShell({
   );
 }
 
-function GradientBannerShell({
-  aspectRatio,
-  children,
-  className,
-  variant = "blue",
-}: {
-  aspectRatio: string;
-  children: React.ReactNode;
-  className?: string;
-  variant?: "blue" | "purple" | "teal";
-}) {
-  const gradients = {
-    blue: {
-      bg: "linear-gradient(135deg, #0F172A 0%, #1E293B 30%, #0F172A 100%)",
-      orb1: "radial-gradient(ellipse 60% 50% at 20% 50%, rgba(59,130,246,0.25) 0%, transparent 70%)",
-      orb2: "radial-gradient(ellipse 40% 60% at 80% 30%, rgba(139,92,246,0.2) 0%, transparent 70%)",
-      orb3: "radial-gradient(ellipse 50% 40% at 60% 80%, rgba(6,182,212,0.15) 0%, transparent 70%)",
-    },
-    purple: {
-      bg: "linear-gradient(135deg, #1E1033 0%, #2D1B4E 30%, #1A0F2E 100%)",
-      orb1: "radial-gradient(ellipse 60% 50% at 25% 40%, rgba(168,85,247,0.3) 0%, transparent 70%)",
-      orb2: "radial-gradient(ellipse 40% 60% at 75% 60%, rgba(236,72,153,0.2) 0%, transparent 70%)",
-      orb3: "radial-gradient(ellipse 50% 40% at 50% 20%, rgba(59,130,246,0.15) 0%, transparent 70%)",
-    },
-    teal: {
-      bg: "linear-gradient(135deg, #0F1A2E 0%, #0D2137 30%, #0B1929 100%)",
-      orb1: "radial-gradient(ellipse 60% 50% at 30% 60%, rgba(6,182,212,0.25) 0%, transparent 70%)",
-      orb2: "radial-gradient(ellipse 40% 60% at 70% 30%, rgba(59,130,246,0.2) 0%, transparent 70%)",
-      orb3: "radial-gradient(ellipse 50% 40% at 50% 80%, rgba(16,185,129,0.15) 0%, transparent 70%)",
-    },
-  };
-  const g = gradients[variant];
-
-  return (
-    <div
-      className={cn("w-full rounded-xl overflow-hidden", className)}
-      style={{ aspectRatio, background: g.bg }}
-    >
-      <div className="w-full h-full relative p-4 sm:p-6 flex flex-col justify-between overflow-hidden">
-        {/* Mesh gradient orbs */}
-        <div className="absolute inset-0" style={{ background: g.orb1 }} />
-        <div className="absolute inset-0" style={{ background: g.orb2 }} />
-        <div className="absolute inset-0" style={{ background: g.orb3 }} />
-        {/* Subtle grid pattern */}
-        <div
-          className="absolute inset-0 opacity-[0.03]"
-          style={{
-            backgroundImage: "linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)",
-            backgroundSize: "24px 24px",
-          }}
-        />
-        {/* Top edge highlight */}
-        <div
-          className="absolute top-0 left-0 right-0 h-px"
-          style={{
-            background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.1) 30%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.1) 70%, transparent)",
-          }}
-        />
-        <div className="relative z-10 flex flex-col h-full">{children}</div>
-      </div>
-    </div>
-  );
-}
-
 /* ══════════════════════════════════════════════════
    BANNERS — each uses a different scene
    ══════════════════════════════════════════════════ */
@@ -864,108 +800,192 @@ export function OGBannerWhite() {
 }
 
 /* ══════════════════════════════════════════════════
-   GRADIENT VARIANTS — rich mesh gradient backgrounds
+   HERO VARIANTS — real photos + product screenshots
+   Combines lifestyle photography with app mockups
    ══════════════════════════════════════════════════ */
 
-/* ── Twitter Gradient (1500 x 500) ──────────────── */
+/** Photo banner shell — stock photo background with dark overlay + gradient accent */
+function PhotoBannerShell({
+  aspectRatio,
+  photo,
+  children,
+  className,
+}: {
+  aspectRatio: string;
+  photo: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn("w-full rounded-xl overflow-hidden relative", className)}
+      style={{ aspectRatio }}
+    >
+      {/* Background photo */}
+      <Image
+        src={photo}
+        alt=""
+        fill
+        className="object-cover"
+        sizes="100vw"
+      />
+      {/* Dark overlay */}
+      <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/40" />
+      {/* Blue accent edge */}
+      <div
+        className="absolute bottom-0 left-0 right-0 h-1"
+        style={{ background: "linear-gradient(90deg, #2563EB 0%, #60A5FA 50%, #2563EB 100%)" }}
+      />
+      {/* Content */}
+      <div className="absolute inset-0 p-4 sm:p-6 flex flex-col justify-between z-10">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+/** Shared hero screenshot frame — perspective tilt + glow */
+function HeroScreenshot({
+  src,
+  alt,
+  className,
+  tilt = "right",
+}: {
+  src: string;
+  alt: string;
+  className?: string;
+  tilt?: "right" | "left" | "none";
+}) {
+  const transforms = {
+    right: "perspective(1200px) rotateY(-8deg) rotateX(2deg)",
+    left: "perspective(1200px) rotateY(8deg) rotateX(2deg)",
+    none: "perspective(1200px) rotateX(2deg)",
+  };
+  return (
+    <div
+      className={cn("relative", className)}
+      style={{ transform: transforms[tilt] }}
+    >
+      <div className="rounded-lg overflow-hidden shadow-2xl shadow-black/40 border border-white/10">
+        <Image src={src} alt={alt} width={1280} height={800} className="w-full h-auto" />
+      </div>
+      <div
+        className="absolute -inset-4 -z-10 rounded-2xl opacity-30 blur-2xl"
+        style={{ background: "linear-gradient(135deg, rgba(59,130,246,0.4), rgba(139,92,246,0.2))" }}
+      />
+    </div>
+  );
+}
+
+/* ── Twitter Hero (1500 x 500) — team photo + prompt library ── */
 
 export function TwitterBannerGradient() {
   return (
-    <GradientBannerShell aspectRatio="1500/500" variant="blue">
+    <PhotoBannerShell aspectRatio="1500/500" photo="/stock/team-meeting.jpg">
       <div className="flex items-center h-full gap-4 sm:gap-6">
-        <div className="flex-1 space-y-2.5 sm:space-y-3 shrink-0">
+        <div className="flex-1 space-y-2 sm:space-y-2.5 shrink-0 max-w-[45%]">
           <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={160} height={32} className="h-5 sm:h-7 w-auto" />
-          <p className="text-white text-[10px] sm:text-sm font-bold leading-snug max-w-[220px] sm:max-w-[280px]">
+          <p className="text-white text-[10px] sm:text-sm font-bold leading-snug drop-shadow-lg">
             Your team&apos;s AI prompt library — with built-in guardrails
           </p>
           <FeaturePills />
           <CompatibilityLine />
         </div>
-        <div className="hidden sm:flex w-[50%] gap-3 items-start">
-          <VaultScene className="flex-1" compact />
-          <DLPBlockScene className="flex-1" compact />
+        <div className="hidden sm:block w-[50%]">
+          <HeroScreenshot
+            src="/store-assets/screenshot-light-1-prompts.png"
+            alt="TeamPrompt prompt library"
+            tilt="right"
+          />
         </div>
       </div>
-    </GradientBannerShell>
+    </PhotoBannerShell>
   );
 }
 
-/* ── LinkedIn Gradient (1584 x 396) ─────────────── */
+/* ── LinkedIn Hero (1584 x 396) — laptop photo + dashboard ── */
 
 export function LinkedInBannerGradient() {
   return (
-    <GradientBannerShell aspectRatio="1584/396" variant="purple">
+    <PhotoBannerShell aspectRatio="1584/396" photo="/stock/laptop-work.jpg">
       <div className="flex items-center h-full gap-4 sm:gap-6">
-        <div className="flex-1 space-y-2 sm:space-y-2.5">
+        <div className="flex-1 space-y-2 sm:space-y-2.5 max-w-[40%]">
           <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={150} height={30} className="h-5 sm:h-6 w-auto" />
-          <p className="text-white text-[10px] sm:text-xs font-bold leading-snug">
+          <p className="text-white text-[10px] sm:text-xs font-bold leading-snug drop-shadow-lg">
             AI prompt management for teams that need guardrails
           </p>
           <FeaturePills />
           <CompatibilityLine />
         </div>
-        <div className="hidden sm:block w-[38%]">
-          <VaultScene />
+        <div className="hidden sm:block w-[50%]">
+          <HeroScreenshot
+            src="/store-assets/screenshot-light-2-dashboard.png"
+            alt="TeamPrompt analytics dashboard"
+            tilt="right"
+          />
         </div>
       </div>
-    </GradientBannerShell>
+    </PhotoBannerShell>
   );
 }
 
-/* ── Facebook Gradient (851 x 315) ──────────────── */
+/* ── Facebook Hero (851 x 315) — office photo + DLP ── */
 
 export function FacebookCoverGradient() {
   return (
-    <GradientBannerShell aspectRatio="851/315" variant="teal">
+    <PhotoBannerShell aspectRatio="851/315" photo="/stock/modern-office.jpg">
       <div className="flex items-center h-full gap-3 sm:gap-4">
-        <div className="flex-1 space-y-2">
+        <div className="flex-1 space-y-1.5 sm:space-y-2 max-w-[40%]">
           <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={130} height={26} className="h-4 sm:h-5 w-auto" />
-          <p className="text-white text-[9px] sm:text-xs font-bold leading-snug">
+          <p className="text-white text-[9px] sm:text-xs font-bold leading-snug drop-shadow-lg">
             Shared prompts · DLP guardrails · Usage analytics
           </p>
           <FeaturePills />
-          <CompatibilityLine />
         </div>
-        <div className="hidden sm:block w-[30%]">
-          <InsertScene />
+        <div className="hidden sm:block w-[50%]">
+          <HeroScreenshot
+            src="/store-assets/screenshot-light-3-dlp-block.png"
+            alt="TeamPrompt DLP protection"
+            tilt="right"
+          />
         </div>
       </div>
-    </GradientBannerShell>
+    </PhotoBannerShell>
   );
 }
 
-/* ── YouTube Gradient (2560 x 1440) ─────────────── */
+/* ── YouTube Hero (2560 x 1440) — collab photo + 4 screenshots ── */
 
 export function YouTubeBannerGradient() {
   return (
-    <GradientBannerShell aspectRatio="2560/1440" variant="purple">
+    <PhotoBannerShell aspectRatio="2560/1440" photo="/stock/team-collab.jpg">
       <div className="flex flex-col items-center justify-center h-full text-center gap-3 sm:gap-4">
         <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={200} height={40} className="h-6 sm:h-8 w-auto" />
-        <p className="text-white text-xs sm:text-base font-bold max-w-md">
+        <p className="text-white text-xs sm:text-base font-bold max-w-md drop-shadow-lg">
           Your team&apos;s AI prompt library — with built-in guardrails
         </p>
         <FeaturePills />
-        <div className="grid grid-cols-2 gap-3 w-full max-w-md">
-          <VaultScene compact />
-          <DLPBlockScene compact />
-          <InsertScene />
-          <AnalyticsScene />
+        <div className="grid grid-cols-2 gap-3 w-full max-w-lg mt-1">
+          <HeroScreenshot src="/store-assets/screenshot-light-1-prompts.png" alt="Prompt library" tilt="left" />
+          <HeroScreenshot src="/store-assets/screenshot-light-3-dlp-block.png" alt="DLP block" tilt="right" />
+          <HeroScreenshot src="/store-assets/screenshot-light-6-insert.png" alt="Insert prompt" tilt="left" />
+          <HeroScreenshot src="/store-assets/screenshot-light-2-dashboard.png" alt="Dashboard" tilt="right" />
         </div>
         <CompatibilityLine />
       </div>
-    </GradientBannerShell>
+    </PhotoBannerShell>
   );
 }
 
-/* ── OG Gradient (1200 x 630) ───────────────────── */
+/* ── OG Hero (1200 x 630) — team photo + prompt library ── */
 
 export function OGBannerGradient() {
   return (
-    <GradientBannerShell aspectRatio="1200/630" variant="blue">
+    <PhotoBannerShell aspectRatio="1200/630" photo="/stock/team-meeting.jpg">
       <div className="flex items-center h-full gap-4 sm:gap-6">
-        <div className="flex-1 space-y-2.5 sm:space-y-3">
+        <div className="flex-1 space-y-2.5 sm:space-y-3 max-w-[40%]">
           <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={180} height={36} className="h-5 sm:h-7 w-auto" />
-          <p className="text-white text-xs sm:text-base font-bold leading-snug">
+          <p className="text-white text-xs sm:text-base font-bold leading-snug drop-shadow-lg">
             AI Prompt Management
             <br />
             for Teams
@@ -973,12 +993,15 @@ export function OGBannerGradient() {
           <FeaturePills />
           <CompatibilityLine />
         </div>
-        <div className="w-[45%] space-y-2">
-          <VaultScene compact />
-          <DLPBlockScene compact />
+        <div className="w-[55%] space-y-3">
+          <HeroScreenshot
+            src="/store-assets/screenshot-light-1-prompts.png"
+            alt="TeamPrompt prompt library"
+            tilt="right"
+          />
         </div>
       </div>
-    </GradientBannerShell>
+    </PhotoBannerShell>
   );
 }
 

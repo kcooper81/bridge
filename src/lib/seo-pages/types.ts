@@ -1,6 +1,28 @@
+export type SeoCategory =
+  | "comparison"
+  | "use-case"
+  | "integration"
+  | "alternative"
+  | "guide"
+  | "workflow"
+  | "role"
+  | "template"
+  | "platform";
+
+export interface SeoContentSection {
+  type:
+    | "checklist"
+    | "comparison-table"
+    | "how-it-works"
+    | "prose"
+    | "use-cases-grid";
+  heading: string;
+  content: Record<string, unknown>;
+}
+
 export interface SeoPageData {
   slug: string;
-  category: "use-case" | "integration" | "comparison";
+  category: SeoCategory;
   meta: {
     title: string;
     description: string;
@@ -20,6 +42,7 @@ export interface SeoPageData {
     heading: string;
     items: string[];
   };
+  sections?: SeoContentSection[];
   stats?: { value: string; label: string }[];
   faqs?: { question: string; answer: string }[];
   cta: {

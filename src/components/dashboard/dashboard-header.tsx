@@ -32,7 +32,7 @@ import { NotificationBell } from "@/components/dashboard/notification-bell";
 import { MobileSidebarSheet } from "@/components/dashboard/sidebar";
 
 export function DashboardHeader() {
-  const { user, signOut, isSuperAdmin } = useAuth();
+  const { user, signOut, isSuperAdmin, isSupportStaff } = useAuth();
   const { currentUserRole, members } = useOrg();
   const { theme, setTheme } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -159,7 +159,7 @@ export function DashboardHeader() {
                 {theme === "dark" ? "On" : "Off"}
               </span>
             </DropdownMenuItem>
-            {isSuperAdmin && (
+            {(isSuperAdmin || isSupportStaff) && (
               <>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>

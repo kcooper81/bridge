@@ -3,11 +3,13 @@ import Link from "next/link";
 import { generatePageMetadata } from "@/lib/seo/metadata";
 import { SectionLabel } from "@/components/marketing/section-label";
 import { CTASection } from "@/components/marketing/cta-section";
+import { HeroImage } from "@/components/marketing/hero-image";
 import { Button } from "@/components/ui/button";
 import {
   ArrowRight,
   Chrome,
   CheckCircle2,
+  Globe,
   MessageSquare,
   Shield,
   Zap,
@@ -118,32 +120,45 @@ export default function IntegrationsPage() {
           }}
         />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-32 pb-20 sm:pt-40 sm:pb-28">
-          <div className="max-w-3xl mx-auto text-center">
-            <SectionLabel dark className="text-center">
-              Integrations
-            </SectionLabel>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-tight">
-              One extension,{" "}
-              <span className="bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
-                every AI tool
-              </span>
-            </h1>
-            <p className="mt-6 text-lg sm:text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed">
-              The TeamPrompt browser extension works wherever your team uses AI.
-              Search prompts, insert with one click, and block sensitive data —
-              across ChatGPT, Claude, Gemini, Copilot, and Perplexity.
-            </p>
-            <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/signup">
-                <Button
-                  size="lg"
-                  className="text-base px-8 h-12 rounded-full bg-white text-zinc-900 hover:bg-zinc-200 font-semibold"
-                >
-                  Get Started Free
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <SectionLabel dark>
+                Integrations
+              </SectionLabel>
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-tight">
+                One extension,{" "}
+                <span className="bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
+                  every AI tool
+                </span>
+              </h1>
+              <p className="mt-6 text-lg sm:text-xl text-zinc-400 max-w-xl leading-relaxed">
+                The TeamPrompt browser extension works wherever your team uses AI.
+                Search prompts, insert with one click, and block sensitive data —
+                across ChatGPT, Claude, Gemini, Copilot, and Perplexity.
+              </p>
+              <div className="mt-10 flex flex-col sm:flex-row gap-4">
+                <Link href="/signup">
+                  <Button
+                    size="lg"
+                    className="text-base px-8 h-12 rounded-full bg-white text-zinc-900 hover:bg-zinc-200 font-semibold"
+                  >
+                    Get Started Free
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+              </div>
             </div>
+
+            <HeroImage
+              src="https://images.unsplash.com/photo-1551434678-e076c223a692?w=640&q=80&auto=format&fit=crop"
+              alt="Developer working with multiple tools"
+              badge={{
+                icon: <Globe className="h-4 w-4" />,
+                headline: "5 AI tools supported",
+                subtitle: "One extension, everywhere",
+              }}
+              dark
+            />
           </div>
         </div>
       </section>

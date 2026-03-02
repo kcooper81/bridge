@@ -6,6 +6,7 @@ import { CTASection } from "@/components/marketing/cta-section";
 import { FAQSection } from "@/components/marketing/faq-section";
 import { StatsRow } from "@/components/marketing/stats-row";
 import { AppMockup } from "@/components/marketing/app-mockup";
+import { HeroImage } from "@/components/marketing/hero-image";
 import { ArrowRight, Shield, X } from "lucide-react";
 import {
   Archive,
@@ -60,7 +61,18 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   UserX,
 };
 
+const industryHeroImages: Record<string, { src: string; alt: string; badgeIcon: string; badgeHeadline: string; badgeSubtitle: string }> = {
+  healthcare: { src: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=640&q=80&auto=format&fit=crop", alt: "Healthcare professional reviewing patient information", badgeIcon: "ShieldCheck", badgeHeadline: "PHI detection", badgeSubtitle: "HIPAA-ready scanning" },
+  legal: { src: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=640&q=80&auto=format&fit=crop", alt: "Legal professional reviewing documents", badgeIcon: "Scale", badgeHeadline: "Client data protected", badgeSubtitle: "Privileged info secured" },
+  technology: { src: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=640&q=80&auto=format&fit=crop", alt: "Software team collaborating on code", badgeIcon: "Key", badgeHeadline: "Secrets detected", badgeSubtitle: "API keys & tokens caught" },
+  finance: { src: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=640&q=80&auto=format&fit=crop", alt: "Finance team analyzing data", badgeIcon: "Lock", badgeHeadline: "PII protected", badgeSubtitle: "Financial data secured" },
+  government: { src: "https://images.unsplash.com/photo-1541872703-74c5e44368f9?w=640&q=80&auto=format&fit=crop", alt: "Government office building", badgeIcon: "Shield", badgeHeadline: "CUI compliant", badgeSubtitle: "Controlled info blocked" },
+  education: { src: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=640&q=80&auto=format&fit=crop", alt: "Students collaborating in classroom", badgeIcon: "Users", badgeHeadline: "Student data safe", badgeSubtitle: "FERPA-ready protection" },
+  insurance: { src: "https://images.unsplash.com/photo-1450101499163-c8848e968ad7?w=640&q=80&auto=format&fit=crop", alt: "Insurance professional at desk", badgeIcon: "ShieldAlert", badgeHeadline: "Claims secured", badgeSubtitle: "PII auto-detected" },
+};
+
 export function IndustryPage({ data }: { data: IndustryPageData }) {
+  const heroImg = industryHeroImages[data.slug];
   return (
     <>
       {/* Structured Data */}
@@ -102,48 +114,66 @@ export function IndustryPage({ data }: { data: IndustryPageData }) {
         />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-32 pb-20 sm:pt-40 sm:pb-28">
-          <div className="max-w-3xl">
-            {/* Compliance badges */}
-            <div className="flex flex-wrap gap-2 mb-8">
-              {data.compliance.map((badge) => (
-                <span
-                  key={badge}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-zinc-300 backdrop-blur-sm"
-                >
-                  <Shield className="h-3 w-3 text-blue-400" />
-                  {badge}
-                </span>
-              ))}
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+              {/* Compliance badges */}
+              <div className="flex flex-wrap gap-2 mb-8">
+                {data.compliance.map((badge) => (
+                  <span
+                    key={badge}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-zinc-300 backdrop-blur-sm"
+                  >
+                    <Shield className="h-3 w-3 text-blue-400" />
+                    {badge}
+                  </span>
+                ))}
+              </div>
+
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.08]">
+                {data.headline}
+              </h1>
+
+              <p className="mt-6 text-lg sm:text-xl text-zinc-400 max-w-xl leading-relaxed">
+                {data.subtitle}
+              </p>
+
+              <div className="mt-10 flex flex-col sm:flex-row gap-4">
+                <Link href="/signup">
+                  <Button
+                    size="lg"
+                    className="text-base px-8 h-12 rounded-full bg-white text-zinc-900 hover:bg-zinc-200 font-semibold"
+                  >
+                    Start for free
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+                <Link href="/security">
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="text-base px-8 h-12 rounded-full border-white/20 text-white hover:bg-white/10 hover:text-white font-semibold bg-transparent"
+                  >
+                    See data protection
+                  </Button>
+                </Link>
+              </div>
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.08]">
-              {data.headline}
-            </h1>
-
-            <p className="mt-6 text-lg sm:text-xl text-zinc-400 max-w-xl leading-relaxed">
-              {data.subtitle}
-            </p>
-
-            <div className="mt-10 flex flex-col sm:flex-row gap-4">
-              <Link href="/signup">
-                <Button
-                  size="lg"
-                  className="text-base px-8 h-12 rounded-full bg-white text-zinc-900 hover:bg-zinc-200 font-semibold"
-                >
-                  Start for free
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
-              <Link href="/security">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="text-base px-8 h-12 rounded-full border-white/20 text-white hover:bg-white/10 hover:text-white font-semibold bg-transparent"
-                >
-                  See data protection
-                </Button>
-              </Link>
-            </div>
+            {heroImg && (() => {
+              const BadgeIcon = iconMap[heroImg.badgeIcon] || Shield;
+              return (
+                <HeroImage
+                  src={heroImg.src}
+                  alt={heroImg.alt}
+                  badge={{
+                    icon: <BadgeIcon className="h-4 w-4" />,
+                    headline: heroImg.badgeHeadline,
+                    subtitle: heroImg.badgeSubtitle,
+                  }}
+                  dark
+                />
+              );
+            })()}
           </div>
         </div>
       </section>

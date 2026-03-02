@@ -6,6 +6,7 @@ import { CTASection } from "@/components/marketing/cta-section";
 import { FAQSection } from "@/components/marketing/faq-section";
 import { BenefitsGrid } from "@/components/marketing/benefits-grid";
 import { StatsRow } from "@/components/marketing/stats-row";
+import { HeroImage } from "@/components/marketing/hero-image";
 import { ArrowRight, Shield } from "lucide-react";
 import {
   Archive,
@@ -62,7 +63,20 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Zap,
 };
 
+const categoryHeroImages: Record<SeoCategory, { src: string; alt: string; badgeIcon: string; badgeHeadline: string; badgeSubtitle: string }> = {
+  "use-case": { src: "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=640&q=80&auto=format&fit=crop", alt: "Team collaborating on AI workflows", badgeIcon: "Users", badgeHeadline: "Built for teams", badgeSubtitle: "Shared prompt library" },
+  integration: { src: "https://images.unsplash.com/photo-1551434678-e076c223a692?w=640&q=80&auto=format&fit=crop", alt: "Developer working with multiple tools", badgeIcon: "Globe", badgeHeadline: "5 AI tools", badgeSubtitle: "One extension, everywhere" },
+  comparison: { src: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=640&q=80&auto=format&fit=crop", alt: "Team evaluating software options", badgeIcon: "BarChart3", badgeHeadline: "Side-by-side", badgeSubtitle: "See the difference" },
+  alternative: { src: "https://images.unsplash.com/photo-1553877522-43269d4ea984?w=640&q=80&auto=format&fit=crop", alt: "Professional switching to better tools", badgeIcon: "Zap", badgeHeadline: "Better alternative", badgeSubtitle: "Purpose-built for prompts" },
+  guide: { src: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=640&q=80&auto=format&fit=crop", alt: "Person learning best practices", badgeIcon: "BookOpen", badgeHeadline: "Best practices", badgeSubtitle: "Step-by-step guides" },
+  workflow: { src: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=640&q=80&auto=format&fit=crop", alt: "Team streamlining their workflow", badgeIcon: "Zap", badgeHeadline: "Streamlined", badgeSubtitle: "Faster AI workflows" },
+  role: { src: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=640&q=80&auto=format&fit=crop", alt: "Professional using AI at work", badgeIcon: "Users", badgeHeadline: "Role-specific", badgeSubtitle: "Tailored for your job" },
+  template: { src: "https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=640&q=80&auto=format&fit=crop", alt: "Ready-to-use templates on screen", badgeIcon: "Archive", badgeHeadline: "Ready to use", badgeSubtitle: "Copy and customize" },
+  platform: { src: "https://images.unsplash.com/photo-1551434678-e076c223a692?w=640&q=80&auto=format&fit=crop", alt: "Cross-platform AI usage", badgeIcon: "Globe", badgeHeadline: "Any platform", badgeSubtitle: "Works everywhere" },
+};
+
 export function SeoLandingPage({ data }: { data: SeoPageData }) {
+  const heroImg = categoryHeroImages[data.category];
   return (
     <>
       {/* Structured Data */}
@@ -104,49 +118,67 @@ export function SeoLandingPage({ data }: { data: SeoPageData }) {
         />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-32 pb-20 sm:pt-40 sm:pb-28">
-          <div className="max-w-3xl">
-            {data.hero.badges && data.hero.badges.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-8">
-                {data.hero.badges.map((badge) => (
-                  <span
-                    key={badge}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-zinc-300 backdrop-blur-sm"
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+              {data.hero.badges && data.hero.badges.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-8">
+                  {data.hero.badges.map((badge) => (
+                    <span
+                      key={badge}
+                      className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-zinc-300 backdrop-blur-sm"
+                    >
+                      <Shield className={`h-3 w-3 ${categoryBadgeColors[data.category] || "text-blue-400"}`} />
+                      {badge}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.08]">
+                {data.hero.headline}
+              </h1>
+
+              <p className="mt-6 text-lg sm:text-xl text-zinc-400 max-w-xl leading-relaxed">
+                {data.hero.subtitle}
+              </p>
+
+              <div className="mt-10 flex flex-col sm:flex-row gap-4">
+                <Link href="/signup">
+                  <Button
+                    size="lg"
+                    className="text-base px-8 h-12 rounded-full bg-white text-zinc-900 hover:bg-zinc-200 font-semibold"
                   >
-                    <Shield className={`h-3 w-3 ${categoryBadgeColors[data.category] || "text-blue-400"}`} />
-                    {badge}
-                  </span>
-                ))}
+                    Start for free
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+                <Link href="/features">
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="text-base px-8 h-12 rounded-full border-white/20 text-white hover:bg-white/10 hover:text-white font-semibold bg-transparent"
+                  >
+                    See all features
+                  </Button>
+                </Link>
               </div>
-            )}
-
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.08]">
-              {data.hero.headline}
-            </h1>
-
-            <p className="mt-6 text-lg sm:text-xl text-zinc-400 max-w-xl leading-relaxed">
-              {data.hero.subtitle}
-            </p>
-
-            <div className="mt-10 flex flex-col sm:flex-row gap-4">
-              <Link href="/signup">
-                <Button
-                  size="lg"
-                  className="text-base px-8 h-12 rounded-full bg-white text-zinc-900 hover:bg-zinc-200 font-semibold"
-                >
-                  Start for free
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
-              <Link href="/features">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="text-base px-8 h-12 rounded-full border-white/20 text-white hover:bg-white/10 hover:text-white font-semibold bg-transparent"
-                >
-                  See all features
-                </Button>
-              </Link>
             </div>
+
+            {heroImg && (() => {
+              const BadgeIcon = iconMap[heroImg.badgeIcon] || Shield;
+              return (
+                <HeroImage
+                  src={heroImg.src}
+                  alt={heroImg.alt}
+                  badge={{
+                    icon: <BadgeIcon className="h-4 w-4" />,
+                    headline: heroImg.badgeHeadline,
+                    subtitle: heroImg.badgeSubtitle,
+                  }}
+                  dark
+                />
+              );
+            })()}
           </div>
         </div>
       </section>

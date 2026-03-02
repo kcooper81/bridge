@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, Layers, Plug, GitCompareArrows, Replace, BookOpen, Workflow, UserCircle, FileText } from "lucide-react";
+import { ArrowRight, Layers, Plug, GitCompareArrows, Replace, BookOpen, Workflow, UserCircle, FileText, Users } from "lucide-react";
 import { generatePageMetadata } from "@/lib/seo/metadata";
 import { SectionLabel } from "@/components/marketing/section-label";
 import { CTASection } from "@/components/marketing/cta-section";
+import { HeroImage } from "@/components/marketing/hero-image";
 import { allSeoPages } from "@/lib/seo-pages/data";
 import type { SeoPageData } from "@/lib/seo-pages/types";
 
@@ -146,13 +147,28 @@ export default function SolutionsPage() {
           }}
         />
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-32 pb-20 sm:pt-40 sm:pb-28 text-center">
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.08]">
-            Solutions for every team
-          </h1>
-          <p className="mt-6 text-lg sm:text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed">
-            Explore how TeamPrompt helps teams manage prompts, secure AI usage, and integrate with the tools you already use.
-          </p>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-32 pb-20 sm:pt-40 sm:pb-28">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.08]">
+                Solutions for every team
+              </h1>
+              <p className="mt-6 text-lg sm:text-xl text-zinc-400 max-w-xl leading-relaxed">
+                Explore how TeamPrompt helps teams manage prompts, secure AI usage, and integrate with the tools you already use.
+              </p>
+            </div>
+
+            <HeroImage
+              src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=640&q=80&auto=format&fit=crop"
+              alt="Team collaborating on AI projects"
+              badge={{
+                icon: <Users className="h-4 w-4" />,
+                headline: "Teams using AI daily",
+                subtitle: "Prompts, protection, insights",
+              }}
+              dark
+            />
+          </div>
         </div>
       </section>
 

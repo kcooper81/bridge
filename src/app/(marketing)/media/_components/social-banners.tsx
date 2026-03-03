@@ -1121,7 +1121,7 @@ function LifestyleBannerShell({
   );
 }
 
-/** Contained lifestyle photo — rounded, shadowed, with dark-edge overlay */
+/** Contained lifestyle photo — rounded, shadowed, with ambient glow + edge overlays */
 function LifestylePhoto({
   src,
   alt,
@@ -1135,28 +1135,25 @@ function LifestylePhoto({
 }) {
   return (
     <div
-      className={cn("relative rounded-2xl overflow-hidden shadow-2xl shadow-black/40", className)}
+      className={cn("relative", className)}
       style={{ transform: rotate ? `rotate(${rotate}deg)` : undefined }}
     >
-      <Image
-        src={src}
-        alt={alt}
-        width={800}
-        height={534}
-        className="w-full h-full object-cover"
-      />
-      {/* Dark edge overlay for blending */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background: [
-            "linear-gradient(to right, rgba(10,14,26,0.4) 0%, transparent 30%)",
-            "linear-gradient(to left, rgba(10,14,26,0.3) 0%, transparent 25%)",
-            "linear-gradient(to bottom, rgba(10,14,26,0.2) 0%, transparent 20%)",
-            "linear-gradient(to top, rgba(10,14,26,0.3) 0%, transparent 25%)",
-          ].join(", "),
-        }}
-      />
+      {/* Ambient glow behind the photo */}
+      <div className="absolute -inset-2 rounded-3xl bg-gradient-to-br from-blue-500/20 via-purple-500/10 to-transparent blur-xl opacity-50" />
+      <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-black/40 ring-1 ring-white/10">
+        <Image
+          src={src}
+          alt={alt}
+          width={800}
+          height={534}
+          className="w-full h-full object-cover"
+          unoptimized
+        />
+        {/* Multi-layer dark edge overlay for blending */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0A0E1A]/50 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0A0E1A]/35 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,transparent_50%,rgba(10,14,26,0.25)_100%)]" />
+      </div>
     </div>
   );
 }
@@ -1193,13 +1190,13 @@ function SnippetChip({
   );
 }
 
-/* ── Unsplash photo URLs (free license) ── */
+/* ── Unsplash photo URLs (free license) — vibrant, energetic lifestyle shots ── */
 const lifestylePhotos = {
-  twitter: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80&auto=format&fit=crop",
-  linkedin: "https://images.unsplash.com/photo-1553877522-43269d4ea984?w=800&q=80&auto=format&fit=crop",
-  facebook: "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=800&q=80&auto=format&fit=crop",
-  youtube: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80&auto=format&fit=crop",
-  og: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&q=80&auto=format&fit=crop",
+  twitter: "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&q=80&auto=format&fit=crop",   // diverse team animated brainstorm
+  linkedin: "https://images.unsplash.com/photo-1521737852567-6949f3f9f2b5?w=800&q=80&auto=format&fit=crop",  // team high-fiving, energetic
+  facebook: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&q=80&auto=format&fit=crop",   // group laughing at laptop, casual
+  youtube: "https://images.unsplash.com/photo-1543269865-cbf427effbad?w=800&q=80&auto=format&fit=crop",       // young professionals colorful setting
+  og: "https://images.unsplash.com/photo-1552581234-26160f608093?w=800&q=80&auto=format&fit=crop",            // person at laptop, warm light
 };
 
 /* ── Twitter Lifestyle (1500 x 500) ── */
@@ -1219,7 +1216,7 @@ export function TwitterBannerLifestyle() {
         <div className="hidden sm:flex w-[55%] items-center gap-3 relative">
           <LifestylePhoto
             src={lifestylePhotos.twitter}
-            alt="Team collaborating at laptops"
+            alt="Diverse team in animated brainstorm session"
             className="w-[55%] aspect-[4/3]"
             rotate={-1}
           />
@@ -1252,7 +1249,7 @@ export function LinkedInBannerLifestyle() {
         <div className="hidden sm:flex w-[55%] items-center gap-3 relative">
           <LifestylePhoto
             src={lifestylePhotos.linkedin}
-            alt="Professional at desk with laptop"
+            alt="Energetic team celebrating a win"
             className="w-[50%] aspect-[4/3]"
             rotate={1}
           />
@@ -1284,7 +1281,7 @@ export function FacebookCoverLifestyle() {
         <div className="hidden sm:flex w-[55%] items-center gap-2 relative">
           <LifestylePhoto
             src={lifestylePhotos.facebook}
-            alt="Team collaboration session"
+            alt="Group of colleagues laughing at laptop"
             className="w-[50%] aspect-[4/3]"
             rotate={-1}
           />
@@ -1315,7 +1312,7 @@ export function YouTubeBannerLifestyle() {
           <div className="flex items-start gap-3">
             <LifestylePhoto
               src={lifestylePhotos.youtube}
-              alt="Modern office environment"
+              alt="Young professionals in a colorful workspace"
               className="w-[45%] aspect-[4/3]"
               rotate={-2}
             />
@@ -1355,7 +1352,7 @@ export function OGBannerLifestyle() {
           <div className="flex items-start gap-3">
             <LifestylePhoto
               src={lifestylePhotos.og}
-              alt="Person typing on laptop"
+              alt="Person working at laptop in warm light"
               className="w-[50%] aspect-[4/3]"
               rotate={1}
             />

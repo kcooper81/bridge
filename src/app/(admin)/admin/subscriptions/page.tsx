@@ -49,6 +49,7 @@ type SortKey = "org_name" | "plan" | "status" | "seats" | "current_period_end" |
 export default function SubscriptionsPage() {
   const [subs, setSubs] = useState<SubRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [page, setPage] = useState(0);
@@ -69,6 +70,16 @@ export default function SubscriptionsPage() {
         .order("created_at", { ascending: false }),
       supabase.from("organizations").select("id, name"),
     ]);
+
+    if (subsRes.error) {
+      console.error("[admin/subscriptions] subscriptions query error:", subsRes.error);
+      setError(`Subscriptions query failed: ${subsRes.error.message}`);
+      setLoading(false);
+      return;
+    }
+    if (orgsRes.error) {
+      console.error("[admin/subscriptions] organizations query error:", orgsRes.error);
+    }
 
     const orgMap = new Map(
       (orgsRes.data || []).map((o: { id: string; name: string }) => [o.id, o.name])
@@ -170,6 +181,23 @@ export default function SubscriptionsPage() {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-3xl font-bold tracking-tight">Subscriptions</h1>
+        <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-6">
+          <p className="text-sm text-destructive font-medium">{error}</p>
+          <p className="text-xs text-muted-foreground mt-2">
+            Check the browser console for details. This may be an RLS policy issue — verify your profile has <code className="bg-muted px-1 rounded">is_super_admin = true</code> in the database.
+          </p>
+          <Button variant="outline" size="sm" className="mt-4" onClick={() => { setError(null); setLoading(true); loadSubs(); }}>
+            Retry
+          </Button>
+        </div>
       </div>
     );
   }

@@ -94,6 +94,7 @@ export default function AdminDashboardPage() {
       usersResult,
       promptsResult,
       subsResult,
+      allOrgsPlansResult,
       orgsThisWeekResult,
       orgsLastWeekResult,
       orgsThisMonthResult,
@@ -106,12 +107,13 @@ export default function AdminDashboardPage() {
       supabase.from("profiles").select("*", { count: "exact", head: true }),
       supabase.from("prompts").select("*", { count: "exact", head: true }),
       supabase.from("subscriptions").select("plan, status, org_id, seats"),
+      supabase.from("organizations").select("id, plan"),
       supabase.from("organizations").select("*", { count: "exact", head: true }).gte("created_at", startOfWeek.toISOString()),
       supabase.from("organizations").select("*", { count: "exact", head: true }).gte("created_at", startOfLastWeek.toISOString()).lt("created_at", startOfWeek.toISOString()),
       supabase.from("organizations").select("*", { count: "exact", head: true }).gte("created_at", startOfMonth.toISOString()),
       supabase.from("feedback").select("*", { count: "exact", head: true }).eq("status", "new"),
       supabase.from("error_logs").select("*", { count: "exact", head: true }).eq("resolved", false),
-      supabase.from("organizations").select("id, name, created_at").order("created_at", { ascending: false }).limit(5),
+      supabase.from("organizations").select("id, name, plan, created_at").order("created_at", { ascending: false }).limit(5),
       supabase.from("profiles").select("extension_status, last_extension_active"),
     ]);
 
@@ -121,7 +123,10 @@ export default function AdminDashboardPage() {
 
     const planPrices: Record<string, number> = { free: 0, pro: 9, team: 7, business: 12 };
 
-    (subsResult.data || []).forEach((sub: { plan: string; status: string; seats?: number }) => {
+    // Build set of org_ids that have a subscription row
+    const orgsWithSub = new Set<string>();
+    (subsResult.data || []).forEach((sub: { plan: string; status: string; org_id: string; seats?: number }) => {
+      orgsWithSub.add(sub.org_id);
       const plan = sub.plan || "free";
       if (plan in planDistribution) {
         planDistribution[plan as keyof typeof planDistribution]++;
@@ -130,6 +135,16 @@ export default function AdminDashboardPage() {
       if (sub.status === "active" || sub.status === "trialing") {
         const seats = sub.seats || 1;
         totalMrr += (planPrices[plan] || 0) * seats;
+      }
+    });
+
+    // Count orgs that have NO subscription row (fallback to organizations.plan)
+    (allOrgsPlansResult.data || []).forEach((org: { id: string; plan: string }) => {
+      if (!orgsWithSub.has(org.id)) {
+        const plan = org.plan || "free";
+        if (plan in planDistribution) {
+          planDistribution[plan as keyof typeof planDistribution]++;
+        }
       }
     });
 
@@ -207,11 +222,11 @@ export default function AdminDashboardPage() {
     setAlerts(alertItems);
 
     setRecentSignups(
-      (recentOrgsResult.data || []).map((org: { id: string; name: string; created_at: string }) => ({
+      (recentOrgsResult.data || []).map((org: { id: string; name: string; plan: string; created_at: string }) => ({
         id: org.id,
         name: org.name,
         createdAt: org.created_at,
-        plan: recentSubMap.get(org.id) || "free",
+        plan: recentSubMap.get(org.id) || org.plan || "free",
       }))
     );
 

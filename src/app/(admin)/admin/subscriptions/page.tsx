@@ -39,9 +39,10 @@ const STATUS_COLORS: Record<string, string> = {
   past_due: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
   canceled: "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300",
   paused: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",
+  no_subscription: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300",
 };
 
-const STATUS_FILTERS = ["all", "active", "trialing", "past_due", "canceled", "paused"] as const;
+const STATUS_FILTERS = ["all", "active", "trialing", "past_due", "canceled", "paused", "no_subscription"] as const;
 const PLAN_PRICES: Record<string, number> = { free: 0, pro: 9, team: 7, business: 12 };
 
 type SortKey = "org_name" | "plan" | "status" | "seats" | "current_period_end" | "mrr" | "created_at";
@@ -63,34 +64,54 @@ export default function SubscriptionsPage() {
   const loadSubs = async () => {
     const supabase = createClient();
 
-    const [subsRes, orgsRes] = await Promise.all([
+    // Fetch ALL organizations and ALL subscriptions, then merge.
+    // Orgs without a subscriptions row still appear (using organizations.plan as fallback).
+    const [orgsRes, subsRes] = await Promise.all([
+      supabase
+        .from("organizations")
+        .select("id, name, plan, created_at")
+        .order("created_at", { ascending: false }),
       supabase
         .from("subscriptions")
-        .select("id, org_id, plan, status, seats, current_period_end, stripe_customer_id, stripe_subscription_id, created_at")
-        .order("created_at", { ascending: false }),
-      supabase.from("organizations").select("id, name"),
+        .select("id, org_id, plan, status, seats, current_period_end, stripe_customer_id, stripe_subscription_id, created_at"),
     ]);
 
-    if (subsRes.error) {
-      console.error("[admin/subscriptions] subscriptions query error:", subsRes.error);
-      setError(`Subscriptions query failed: ${subsRes.error.message}`);
+    if (orgsRes.error) {
+      console.error("[admin/subscriptions] organizations query error:", orgsRes.error);
+      setError(`Organizations query failed: ${orgsRes.error.message}`);
       setLoading(false);
       return;
     }
-    if (orgsRes.error) {
-      console.error("[admin/subscriptions] organizations query error:", orgsRes.error);
+    if (subsRes.error) {
+      console.error("[admin/subscriptions] subscriptions query error:", subsRes.error);
     }
 
-    const orgMap = new Map(
-      (orgsRes.data || []).map((o: { id: string; name: string }) => [o.id, o.name])
+    // Build a map of org_id → subscription row
+    const subMap = new Map(
+      (subsRes.data || []).map((s) => [s.org_id, s])
     );
 
-    const rows: SubRow[] = (subsRes.data || []).map(
-      (s: Omit<SubRow, "org_name" | "mrr">) => ({
-        ...s,
-        org_name: orgMap.get(s.org_id) || "Unknown",
-        mrr: (PLAN_PRICES[s.plan] || 0) * (s.seats || 1),
-      })
+    // Merge: every org gets a row; subscription data overlays when present
+    const rows: SubRow[] = (orgsRes.data || []).map(
+      (org: { id: string; name: string; plan: string; created_at: string }) => {
+        const sub = subMap.get(org.id);
+        const plan = sub?.plan || org.plan || "free";
+        const status = sub ? sub.status : "no_subscription";
+        const seats = sub?.seats || 1;
+        return {
+          id: sub?.id || org.id,
+          org_id: org.id,
+          org_name: org.name || "Unknown",
+          plan,
+          status,
+          seats,
+          current_period_end: sub?.current_period_end || null,
+          stripe_customer_id: sub?.stripe_customer_id || null,
+          stripe_subscription_id: sub?.stripe_subscription_id || null,
+          created_at: sub?.created_at || org.created_at,
+          mrr: (PLAN_PRICES[plan] || 0) * seats,
+        };
+      }
     );
 
     setSubs(rows);
@@ -208,7 +229,7 @@ export default function SubscriptionsPage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Subscriptions</h1>
           <p className="text-muted-foreground">
-            {subs.length} subscriptions &middot; ${totalMrr.toFixed(0)} MRR
+            {subs.length} organizations &middot; {subs.filter(s => s.status !== "no_subscription").length} with subscriptions &middot; ${totalMrr.toFixed(0)} MRR
           </p>
         </div>
         <Button variant="outline" onClick={exportCsv}>
@@ -244,7 +265,7 @@ export default function SubscriptionsPage() {
               }}
               className="capitalize"
             >
-              {f === "past_due" ? "Past Due" : f}
+              {f === "past_due" ? "Past Due" : f === "no_subscription" ? "No Sub" : f}
             </Button>
           ))}
         </div>
@@ -318,7 +339,7 @@ export default function SubscriptionsPage() {
                         <span
                           className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_COLORS[sub.status] || ""}`}
                         >
-                          {sub.status === "past_due" ? "past due" : sub.status}
+                          {sub.status === "past_due" ? "past due" : sub.status === "no_subscription" ? "no sub" : sub.status}
                         </span>
                       </td>
                       <td className="p-3 text-right hidden sm:table-cell">

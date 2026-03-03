@@ -1181,7 +1181,7 @@ function FrostedBadge({
   return (
     <div
       className={cn(
-        "absolute rounded-xl bg-white/80 backdrop-blur-xl shadow-xl shadow-black/10 border border-white/60 px-2 sm:px-3 py-1.5 sm:py-2 flex items-center gap-2 whitespace-nowrap",
+        "absolute z-20 rounded-xl bg-white/95 backdrop-blur-xl shadow-xl shadow-black/15 border border-white/80 px-3 sm:px-4 py-1.5 sm:py-2 flex items-center gap-2 whitespace-nowrap min-w-[90px] sm:min-w-[110px]",
         className
       )}
     >
@@ -1189,20 +1189,20 @@ function FrostedBadge({
         <Icon className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
       </div>
       <div>
-        <p className="text-[6px] sm:text-[7px] font-bold text-zinc-900 leading-none">{headline}</p>
+        <p className="text-[6px] sm:text-[8px] font-bold text-zinc-900 leading-none">{headline}</p>
         <p className="text-[4px] sm:text-[5px] text-zinc-500 mt-0.5">{subtitle}</p>
       </div>
     </div>
   );
 }
 
-/* ── Unsplash photo URLs (free license) — workplace / employee shots ── */
+/* ── Unsplash photo URLs (free license) — people working at computers ── */
 const lifestylePhotos = {
-  twitter: "https://images.unsplash.com/photo-1497215842964-222b430dc094?w=800&q=80&auto=format&fit=crop",   // modern open office with employees
-  linkedin: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=800&q=80&auto=format&fit=crop",  // team meeting in glass conference room
-  facebook: "https://images.unsplash.com/photo-1553028826-f4804a6dba3b?w=800&q=80&auto=format&fit=crop",     // coworkers at desk collaborating
-  youtube: "https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=800&q=80&auto=format&fit=crop",   // team around conference table
-  og: "https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?w=800&q=80&auto=format&fit=crop",        // professional woman at workstation
+  twitter: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80&auto=format&fit=crop",   // team collaborating at laptops
+  linkedin: "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&q=80&auto=format&fit=crop",  // diverse team working at computers
+  facebook: "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=800&q=80&auto=format&fit=crop",  // coworkers at laptops together
+  youtube: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&q=80&auto=format&fit=crop",   // multiple people at laptop screens
+  og: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&q=80&auto=format&fit=crop",        // person typing on laptop close-up
 };
 
 /* ── Twitter Lifestyle (1500 x 500) ── */
@@ -1222,14 +1222,16 @@ export function TwitterBannerLifestyle() {
         <div className="hidden sm:flex w-[55%] items-center relative">
           <LifestylePhoto
             src={lifestylePhotos.twitter}
-            alt="Employees in modern open office"
+            alt="Team collaborating at laptops"
             className="w-[60%] aspect-[4/3]"
           />
           <div className="w-[50%] -ml-10 relative z-10">
             <VaultScene compact />
           </div>
-          <FrostedBadge icon={Shield} headline="DLP Active" subtitle="3 threats blocked" color="red" className="-bottom-3 left-[5%]" />
-          <FrostedBadge icon={Users} headline="8 teams" subtitle="Sharing prompts" color="blue" className="-top-3 right-[25%]" />
+          {/* Badge overlaps bottom-right of photo */}
+          <FrostedBadge icon={Shield} headline="DLP Active" subtitle="3 threats blocked" color="red" className="bottom-0 left-[38%]" />
+          {/* Badge overlaps top of mockup */}
+          <FrostedBadge icon={Users} headline="8 teams sharing" subtitle="Prompts in sync" color="blue" className="-top-2 right-[5%]" />
         </div>
       </div>
     </LifestyleBannerShell>
@@ -1253,14 +1255,16 @@ export function LinkedInBannerLifestyle() {
         <div className="hidden sm:flex w-[55%] items-center relative">
           <LifestylePhoto
             src={lifestylePhotos.linkedin}
-            alt="Team meeting in glass conference room"
+            alt="Diverse team working at computers"
             className="w-[55%] aspect-[4/3]"
           />
           <div className="w-[50%] -ml-10 relative z-10">
             <DLPBlockScene compact />
           </div>
-          <FrostedBadge icon={Shield} headline="PII detected" subtitle="Auto-blocked in real time" color="red" className="-bottom-3 left-[8%]" />
-          <FrostedBadge icon={BarChart3} headline="+23% adoption" subtitle="This month" color="blue" className="-top-3 right-[20%]" />
+          {/* Badge overlaps bottom edge between photo and mockup */}
+          <FrostedBadge icon={Shield} headline="PII detected" subtitle="Auto-blocked in real time" color="red" className="bottom-0 left-[35%]" />
+          {/* Badge overlaps top of mockup */}
+          <FrostedBadge icon={BarChart3} headline="+23% adoption" subtitle="This month" color="blue" className="-top-2 right-[5%]" />
         </div>
       </div>
     </LifestyleBannerShell>
@@ -1283,14 +1287,16 @@ export function FacebookCoverLifestyle() {
         <div className="hidden sm:flex w-[55%] items-center relative">
           <LifestylePhoto
             src={lifestylePhotos.facebook}
-            alt="Coworkers collaborating at desk"
+            alt="Coworkers at laptops together"
             className="w-[55%] aspect-[4/3]"
           />
           <div className="w-[50%] -ml-10 relative z-10">
             <InsertScene />
           </div>
-          <FrostedBadge icon={Zap} headline="One-click insert" subtitle="Paste into any AI tool" color="emerald" className="-bottom-3 left-[5%]" />
-          <FrostedBadge icon={Users} headline="5 AI tools" subtitle="Connected" color="blue" className="-top-3 right-[15%]" />
+          {/* Badge overlaps bottom edge between photo and mockup */}
+          <FrostedBadge icon={Zap} headline="One-click insert" subtitle="Paste into any AI tool" color="emerald" className="bottom-0 left-[35%]" />
+          {/* Badge overlaps top of mockup */}
+          <FrostedBadge icon={Users} headline="5 AI tools" subtitle="Connected" color="blue" className="-top-2 right-[5%]" />
         </div>
       </div>
     </LifestyleBannerShell>
@@ -1312,7 +1318,7 @@ export function YouTubeBannerLifestyle() {
           <div className="flex items-start">
             <LifestylePhoto
               src={lifestylePhotos.youtube}
-              alt="Team around conference table"
+              alt="Multiple people at laptop screens"
               className="w-[50%] aspect-[4/3]"
             />
             <div className="w-[55%] space-y-2 -ml-8 relative z-10">
@@ -1320,8 +1326,10 @@ export function YouTubeBannerLifestyle() {
               <DLPBlockScene compact />
             </div>
           </div>
-          <FrostedBadge icon={Shield} headline="DLP Active" subtitle="Real-time scanning" color="red" className="-top-3 right-[10%]" />
-          <FrostedBadge icon={Zap} headline="142 prompts" subtitle="Used this month" color="emerald" className="-bottom-3 left-[10%]" />
+          {/* Badge overlaps boundary between photo and mockup */}
+          <FrostedBadge icon={Shield} headline="DLP Active" subtitle="Real-time scanning" color="red" className="top-[40%] left-[32%]" />
+          {/* Badge overlaps bottom of photo */}
+          <FrostedBadge icon={Zap} headline="142 prompts" subtitle="Used this month" color="emerald" className="-bottom-3 left-[5%]" />
         </div>
         <CompatibilityLine className="mt-2" />
       </div>
@@ -1349,7 +1357,7 @@ export function OGBannerLifestyle() {
           <div className="flex items-start">
             <LifestylePhoto
               src={lifestylePhotos.og}
-              alt="Professional woman at workstation"
+              alt="Person typing on laptop close-up"
               className="w-[50%] aspect-[4/3]"
             />
             <div className="w-[55%] space-y-2 -ml-8 relative z-10">
@@ -1357,7 +1365,9 @@ export function OGBannerLifestyle() {
               <DLPBlockScene compact />
             </div>
           </div>
-          <FrostedBadge icon={Shield} headline="Data protected" subtitle="Real-time scanning" color="red" className="-top-3 right-[15%]" />
+          {/* Badge overlaps boundary between photo and mockup */}
+          <FrostedBadge icon={Shield} headline="Data protected" subtitle="Real-time scanning" color="red" className="top-[35%] left-[32%]" />
+          {/* Badge overlaps bottom of photo */}
           <FrostedBadge icon={Users} headline="Team library" subtitle="Shared prompts" color="blue" className="-bottom-3 left-[5%]" />
         </div>
       </div>

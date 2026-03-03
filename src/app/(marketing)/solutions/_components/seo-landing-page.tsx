@@ -261,33 +261,44 @@ export function SeoLandingPage({ data }: { data: SeoPageData }) {
       {data.features && (
         <section className="py-20 sm:py-28 border-t border-border">
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
-            <div className="max-w-2xl mb-14">
+            <div className="text-center mb-16">
               <SectionLabel>{data.features.sectionLabel}</SectionLabel>
               <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
                 {data.features.heading}
               </h2>
-              <p className="mt-4 text-lg text-muted-foreground">
+              <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
                 Every feature designed to help your team work smarter with AI.
               </p>
             </div>
 
-            <div className="grid gap-px sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto rounded-2xl border border-border overflow-hidden bg-border">
-              {data.features.items.map((feature) => {
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto">
+              {data.features.items.map((feature, i) => {
                 const Icon = iconMap[feature.icon] || Shield;
                 return (
                   <div
                     key={feature.title}
-                    className="group bg-card p-8 hover:bg-primary/[0.02] transition-colors duration-300"
+                    className="group relative rounded-2xl p-px bg-gradient-to-b from-border via-border/50 to-transparent hover:from-primary/40 hover:via-primary/20 hover:to-transparent transition-all duration-500"
                   >
-                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 text-primary">
-                      <Icon className="h-5 w-5" />
+                    <div className="rounded-[15px] bg-card h-full p-7 relative overflow-hidden">
+                      {/* Subtle gradient accent on hover */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.03] via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                      <div className="relative">
+                        <div className="flex items-start justify-between mb-5">
+                          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 text-primary ring-1 ring-primary/10 group-hover:ring-primary/20 group-hover:shadow-lg group-hover:shadow-primary/5 transition-all duration-500">
+                            <Icon className="h-5 w-5" />
+                          </div>
+                          <span className="text-[10px] font-bold text-muted-foreground/40 tabular-nums mt-1">
+                            {String(i + 1).padStart(2, "0")}
+                          </span>
+                        </div>
+                        <h3 className="text-lg font-semibold leading-snug">
+                          {feature.title}
+                        </h3>
+                        <p className="mt-2.5 text-sm text-muted-foreground leading-relaxed">
+                          {feature.description}
+                        </p>
+                      </div>
                     </div>
-                    <h3 className="mt-5 text-lg font-semibold">
-                      {feature.title}
-                    </h3>
-                    <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                      {feature.description}
-                    </p>
                   </div>
                 );
               })}

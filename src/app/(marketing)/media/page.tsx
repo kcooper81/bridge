@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { DarkSection } from "@/components/marketing/dark-section";
 import { CopyButton } from "./_components/copy-button";
 import { BannerDownloadWrapper } from "./_components/banner-download";
+import { DownloadAllButton } from "./_components/download-all-button";
 import {
   TwitterBanner,
   TwitterBannerWhite,
@@ -337,6 +338,16 @@ export default function MediaPage() {
             around the logo.
           </p>
 
+          <div className="flex justify-end mb-4">
+            <DownloadAllButton
+              files={logos.map((l) => ({
+                url: l.file,
+                filename: l.file.split("/").pop()!,
+              }))}
+              zipName="teamprompt-logos"
+            />
+          </div>
+
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {logos.map((logo) => (
               <div
@@ -554,6 +565,18 @@ export default function MediaPage() {
                 )}
 
                 {/* Downloadable assets grid */}
+                {platform.assets.length > 1 && (
+                  <div className="flex justify-end mb-3">
+                    <DownloadAllButton
+                      files={platform.assets.map((a) => ({
+                        url: a.file,
+                        filename: a.file.split("/").pop()!,
+                      }))}
+                      zipName={`teamprompt-${platform.platform.toLowerCase().replace(/[^a-z]/g, "")}-assets`}
+                      label="Download All Assets"
+                    />
+                  </div>
+                )}
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   {platform.assets.map((asset) => (
                     <div
@@ -663,7 +686,17 @@ export default function MediaPage() {
 
           {/* Store icons */}
           <div className="mb-12">
-            <h3 className="text-lg font-semibold mb-4">Store Icons</h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Store Icons</h3>
+              <DownloadAllButton
+                files={[
+                  { url: "/store-assets/store-icon-128.png", filename: "store-icon-128.png" },
+                  { url: "/store-assets/edge-store-icon-300.png", filename: "edge-store-icon-300.png" },
+                ]}
+                zipName="teamprompt-store-icons"
+                dark
+              />
+            </div>
             <div className="flex flex-wrap gap-4">
               <div className="inline-flex items-center gap-4 rounded-xl border border-zinc-800 bg-zinc-900/60 p-4">
                 <Image
@@ -704,7 +737,17 @@ export default function MediaPage() {
 
           {/* Promo images */}
           <div className="mb-12">
-            <h3 className="text-lg font-semibold mb-4">Promotional Images</h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Promotional Images</h3>
+              <DownloadAllButton
+                files={storePromos.map((p) => ({
+                  url: p.file,
+                  filename: p.file.split("/").pop()!,
+                }))}
+                zipName="teamprompt-promo-images"
+                dark
+              />
+            </div>
             <div className="grid gap-4 sm:grid-cols-2">
               {storePromos.map((promo) => (
                 <div key={promo.file} className="rounded-xl border border-zinc-800 overflow-hidden">
@@ -734,7 +777,17 @@ export default function MediaPage() {
 
           {/* Screenshots */}
           <div className="mb-12">
-            <h3 className="text-lg font-semibold mb-4">Store Screenshots</h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Store Screenshots</h3>
+              <DownloadAllButton
+                files={storeScreenshots.map((ss) => ({
+                  url: ss.file,
+                  filename: ss.file.split("/").pop()!,
+                }))}
+                zipName="teamprompt-store-screenshots"
+                dark
+              />
+            </div>
             <div className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-4 mb-6 text-xs text-zinc-400 space-y-1">
               <p><strong className="text-zinc-300">Chrome Web Store:</strong> Upload screenshots 1–5 (max 5 allowed)</p>
               <p><strong className="text-zinc-300">Edge Add-ons:</strong> Upload screenshots 1–10 (max 10 allowed)</p>

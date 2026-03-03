@@ -11,11 +11,13 @@ import {
   ClipboardCopy,
   Download,
   Filter,
+  Lock,
   MinusCircle,
   Puzzle,
   RotateCcw,
   Search,
   Shield,
+  ShieldAlert,
   Users,
   UserCheck,
   XCircle,
@@ -645,6 +647,474 @@ const sections: Section[] = [
         action: "Test extension in Edge browser",
         expected:
           "All features work. Extension install banner links to Edge Add-ons store.",
+        priority: "P1",
+      },
+    ],
+  },
+  {
+    id: "guardrails",
+    title: "Guardrails & Compliance Packs",
+    icon: ShieldAlert,
+    description:
+      "Test every compliance pack and built-in security rule with real sample data. Copy-paste the test strings into an AI tool with the extension active.",
+    preconditions: [
+      "Logged in as Admin or Manager role",
+      "Extension is installed and active on a supported AI tool",
+      "DLP Guardrails enabled in Settings → Security",
+      "At least one compliance pack installed OR default rules active",
+    ],
+    steps: [
+      // ── HIPAA ──
+      {
+        action:
+          'Install the HIPAA compliance pack from Guardrails → Policies → "Install Compliance Pack"',
+        expected:
+          "4 rules are created: Medical Record Number (block), Health Insurance ID (block), Diagnosis Code ICD-10 (warn), Drug/Prescription Names (warn).",
+        priority: "P0",
+      },
+      {
+        action:
+          'Paste into AI tool: "Patient MRN: A12345678 was admitted on Monday"',
+        expected:
+          "BLOCK fires — Medical Record Number detected. Block overlay appears.",
+        priority: "P0",
+      },
+      {
+        action:
+          'Paste into AI tool: "Member ID: XYZ123456789 for Blue Cross plan"',
+        expected:
+          "BLOCK fires — Health Insurance ID detected.",
+        priority: "P0",
+      },
+      {
+        action:
+          'Paste into AI tool: "Diagnosis code J45.20 indicates moderate asthma"',
+        expected:
+          "WARN fires — ICD-10 Diagnosis Code detected. Warning banner appears (user can override if allowed).",
+        priority: "P0",
+      },
+      {
+        action:
+          'Paste into AI tool: "Patient is taking Metformin 500 mg twice daily"',
+        expected:
+          "WARN fires — Drug/Prescription Name detected.",
+        priority: "P0",
+      },
+      // ── PCI-DSS ──
+      {
+        action:
+          'Install the PCI-DSS compliance pack',
+        expected:
+          "5 rules are created: Visa CC (block), Mastercard CC (block), Amex CC (block), CVV/CVC (block), Card Expiration (warn).",
+        priority: "P0",
+      },
+      {
+        action:
+          'Paste into AI tool: "Please charge card 4111111111111111 for the order"',
+        expected:
+          "BLOCK fires — Visa credit card number detected.",
+        priority: "P0",
+      },
+      {
+        action:
+          'Paste into AI tool: "Customer\'s Mastercard is 5425233430109903"',
+        expected:
+          "BLOCK fires — Mastercard number detected.",
+        priority: "P0",
+      },
+      {
+        action:
+          'Paste into AI tool: "Amex card ending 378282246310005 was declined"',
+        expected:
+          "BLOCK fires — Amex card number detected.",
+        priority: "P0",
+      },
+      {
+        action:
+          'Paste into AI tool: "The CVV is 742 on the back of the card"',
+        expected:
+          "BLOCK fires — CVV/CVC code detected.",
+        priority: "P0",
+      },
+      {
+        action:
+          'Paste into AI tool: "Card expiry 09/2027, please update before then"',
+        expected:
+          "WARN fires — Card expiration date detected.",
+        priority: "P1",
+      },
+      // ── GDPR ──
+      {
+        action:
+          'Install the GDPR compliance pack',
+        expected:
+          "5 rules are created: EU National ID (block), EU Passport (block), IBAN (block), EU VAT Number (warn), Date of Birth (warn).",
+        priority: "P0",
+      },
+      {
+        action:
+          'Paste into AI tool: "Her national ID: AB12345678 is on file"',
+        expected:
+          "BLOCK fires — EU National ID detected.",
+        priority: "P0",
+      },
+      {
+        action:
+          'Paste into AI tool: "Passport #L987654321 expires next year"',
+        expected:
+          "BLOCK fires — EU Passport Number detected.",
+        priority: "P0",
+      },
+      {
+        action:
+          'Paste into AI tool: "Wire to IBAN DE89370400440532013000 by Friday"',
+        expected:
+          "BLOCK fires — IBAN detected.",
+        priority: "P0",
+      },
+      {
+        action:
+          'Paste into AI tool: "Invoice VAT: DE123456789 for Acme GmbH"',
+        expected:
+          "WARN fires — EU VAT Number detected.",
+        priority: "P1",
+      },
+      {
+        action:
+          'Paste into AI tool: "Date of birth: 15/03/1990, verified in system"',
+        expected:
+          "WARN fires — Date of Birth detected.",
+        priority: "P1",
+      },
+      // ── CCPA ──
+      {
+        action:
+          'Install the CCPA compliance pack',
+        expected:
+          "4 rules are created: CA Driver License (block), Social Security Number (block), US Phone Number (warn), Physical Address (warn).",
+        priority: "P0",
+      },
+      {
+        action:
+          'Paste into AI tool: "License number B1234567 was used for verification"',
+        expected:
+          "BLOCK fires — California Driver License detected.",
+        priority: "P0",
+      },
+      {
+        action:
+          'Paste into AI tool: "SSN on file is 123-45-6789 for this applicant"',
+        expected:
+          "BLOCK fires — Social Security Number detected.",
+        priority: "P0",
+      },
+      {
+        action:
+          'Paste into AI tool: "Contact the client at (415) 555-0198 for follow-up"',
+        expected:
+          "WARN fires — US Phone Number detected.",
+        priority: "P1",
+      },
+      {
+        action:
+          'Paste into AI tool: "Ship to 742 Evergreen Ave, Springfield IL 62704"',
+        expected:
+          "WARN fires — Physical Address detected.",
+        priority: "P1",
+      },
+      // ── SOC 2 ──
+      {
+        action:
+          'Install the SOC 2 compliance pack',
+        expected:
+          "6 rules are created: Access Log Entry (warn), Encryption Key Reference (block), Audit Trail Data (warn), System Configuration (block), Internal IP/Hostname (warn), Service Account Credentials (block).",
+        priority: "P0",
+      },
+      {
+        action:
+          'Paste into AI tool: "AES key: dGhpcyBpcyBhIHNlY3JldCBrZXkgZm9yIGVuYw=="',
+        expected:
+          "BLOCK fires — Encryption Key Reference detected.",
+        priority: "P0",
+      },
+      {
+        action:
+          'Paste into AI tool: "DATABASE_URL=postgres://admin:s3cret@db.internal:5432/prod"',
+        expected:
+          "BLOCK fires — System Configuration detected. May also trigger Connection String from default rules.",
+        priority: "P0",
+      },
+      {
+        action:
+          'Paste into AI tool: "client_secret=aB3dEfGhIjKlMnOpQrStUv_xYz012345"',
+        expected:
+          "BLOCK fires — Service Account Credentials detected.",
+        priority: "P0",
+      },
+      {
+        action:
+          'Paste into AI tool: "Connect to api-gateway.internal.corp on 10.0.3.55"',
+        expected:
+          "WARN fires — Internal IP/Hostname detected.",
+        priority: "P1",
+      },
+      {
+        action:
+          'Paste into AI tool: "audit: action=delete_record by user=jsmith at 14:32"',
+        expected:
+          "WARN fires — Audit Trail Data detected.",
+        priority: "P1",
+      },
+      // ── General PII ──
+      {
+        action:
+          'Install the General PII compliance pack',
+        expected:
+          "4 rules are created: Email Address (warn), Phone Number International (warn), IP Address (warn), Geolocation Coordinates (warn).",
+        priority: "P0",
+      },
+      {
+        action:
+          'Paste into AI tool: "Send the report to jane.doe@acmecorp.com today"',
+        expected:
+          "WARN fires — Email Address detected.",
+        priority: "P1",
+      },
+      {
+        action:
+          'Paste into AI tool: "Call the vendor at +442071234567 for pricing"',
+        expected:
+          "WARN fires — International Phone Number detected.",
+        priority: "P1",
+      },
+      {
+        action:
+          'Paste into AI tool: "The production server is running on 192.168.1.42"',
+        expected:
+          "WARN fires — IP Address detected.",
+        priority: "P1",
+      },
+      {
+        action:
+          'Paste into AI tool: "Office is located at 37.7749, -122.4194 in SF"',
+        expected:
+          "WARN fires — Geolocation Coordinates detected.",
+        priority: "P1",
+      },
+      // ── Default Built-in Rules (API Keys & Credentials) ──
+      {
+        action:
+          'Paste into AI tool: "AKIAIOSFODNN7EXAMPLE is the AWS access key"',
+        expected:
+          "BLOCK fires — AWS Access Key detected (built-in default rule, active by default).",
+        priority: "P0",
+      },
+      {
+        action:
+          'Paste into AI tool: "ghp_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdef1234"',
+        expected:
+          "BLOCK fires — GitHub Token detected.",
+        priority: "P0",
+      },
+      {
+        action:
+          'Paste into AI tool: "sk_test_" followed by 24 random chars (e.g. sk_test_xxxx…)',
+        expected:
+          "BLOCK fires — Stripe Secret Key detected.",
+        priority: "P0",
+      },
+      {
+        action:
+          'Paste into AI tool: "sk-proj-ABCDEFGHIJKLMNOPqrst"',
+        expected:
+          "BLOCK fires — OpenAI API Key detected.",
+        priority: "P0",
+      },
+      {
+        action:
+          'Paste into AI tool: "xoxb-" followed by number-token-string format (e.g. xoxb-xxxx…)',
+        expected:
+          "BLOCK fires — Slack Token detected.",
+        priority: "P0",
+      },
+      {
+        action:
+          'Paste into AI tool: "password=MyS3cretP@ss! in the config file"',
+        expected:
+          "BLOCK fires — Password in Text detected.",
+        priority: "P0",
+      },
+      {
+        action:
+          'Paste into AI tool: "mongodb://admin:password123@db.example.com:27017/production"',
+        expected:
+          "BLOCK fires — Connection String detected.",
+        priority: "P0",
+      },
+      {
+        action:
+          'Paste into AI tool: "-----BEGIN RSA PRIVATE KEY-----\\nMIIEpAIBAAKCAQ..."',
+        expected:
+          "BLOCK fires — Private Key Block detected.",
+        priority: "P0",
+      },
+      {
+        action:
+          'Paste into AI tool: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"',
+        expected:
+          "BLOCK fires — JWT Token detected.",
+        priority: "P0",
+      },
+      // ── Sanitization / Auto-Redact ──
+      {
+        action:
+          'Enable Auto-Redact in Settings → Security, then paste: "SSN 123-45-6789 and card 4111111111111111"',
+        expected:
+          'Auto-redact replaces with placeholders like "SSN {{PII_1}} and card {{PII_2}}". Scan returns action: "auto_redact" with sanitized content.',
+        priority: "P0",
+      },
+      {
+        action:
+          'With a block-level violation, click "Send Sanitized Version" on the block overlay',
+        expected:
+          "Preview shows sanitized text with {{CATEGORY_N}} placeholders. Confirm inserts the sanitized version into the AI chat input.",
+        priority: "P0",
+      },
+      // ── Pattern Tester ──
+      {
+        action:
+          'Go to Guardrails → create or edit a rule. Use Pattern Tester with regex: \\b\\d{3}-\\d{2}-\\d{4}\\b and test text: "My SSN is 123-45-6789"',
+        expected:
+          "Pattern tester highlights the match. Shows 1 match found.",
+        priority: "P1",
+      },
+      {
+        action:
+          'In Pattern Tester, try a keyword rule with keywords: "confidential, internal only, secret" and test: "This is a confidential document for internal only use"',
+        expected:
+          "Pattern tester shows 2 matches: 'confidential' and 'internal only'.",
+        priority: "P1",
+      },
+      // ── Sensitive Terms ──
+      {
+        action:
+          'Go to Guardrails → Sensitive Terms. Add terms: "Project Phoenix", "Operation Sunrise", "Q4 acquisition target"',
+        expected:
+          "Terms appear in list. Pasting any of these into an AI tool triggers detection.",
+        priority: "P1",
+      },
+      {
+        action:
+          'Paste into AI tool: "The Q4 acquisition target is Company XYZ"',
+        expected:
+          "Detection fires for sensitive term match.",
+        priority: "P1",
+      },
+      // ── Custom Rules ──
+      {
+        action:
+          'Create a custom regex rule for internal project codes: pattern = "PROJ-\\d{4,6}" with category "internal_terms" and severity "warn"',
+        expected:
+          "Rule saves. Pattern tester validates. Pasting 'Update PROJ-12345 status' triggers a warn.",
+        priority: "P1",
+      },
+      {
+        action:
+          'Create an exact-match rule for a client name: pattern = "Acme Corp Confidential" with severity "block"',
+        expected:
+          'Rule saves. Pasting "This is Acme Corp Confidential information" triggers a block.',
+        priority: "P1",
+      },
+      // ── Edge Cases ──
+      {
+        action:
+          "Paste a message with multiple violations: \"Patient MRN: A12345678, SSN 123-45-6789, card 4111111111111111\"",
+        expected:
+          "All violations detected and listed. Highest severity (block) takes priority.",
+        priority: "P0",
+      },
+      {
+        action:
+          "Paste clean text with no sensitive data: \"Please summarize our Q3 marketing strategy for the team meeting\"",
+        expected:
+          "No detection fires. Message passes through without any guardrails banner.",
+        priority: "P0",
+      },
+      {
+        action:
+          "Toggle a compliance pack rule to inactive, then test with its sample data",
+        expected:
+          "No detection fires for the inactive rule. Re-enabling the rule restores detection.",
+        priority: "P1",
+      },
+    ],
+  },
+  {
+    id: "security-settings",
+    title: "Security Settings & Org Policies",
+    icon: Lock,
+    description:
+      "Test org-level security toggles and their effect on guardrail behavior.",
+    preconditions: [
+      "Logged in as Admin",
+      "Extension installed and active",
+      "At least one block-level and one warn-level rule active",
+    ],
+    steps: [
+      {
+        action:
+          "Go to Settings → Security. Toggle 'Enable DLP Guardrails' OFF",
+        expected:
+          "Warning banner appears: 'DLP guardrails are disabled.' All guardrail detection stops in the extension. Override and Auto-Redact toggles become disabled.",
+        priority: "P0",
+      },
+      {
+        action:
+          "With DLP disabled, paste: \"AKIAIOSFODNN7EXAMPLE\" into an AI tool",
+        expected:
+          "No block fires. Message goes through undetected.",
+        priority: "P0",
+      },
+      {
+        action:
+          "Re-enable DLP Guardrails, then toggle 'Allow Warning Override' OFF",
+        expected:
+          "Setting saves. Warn-level rules now behave as blocks — user cannot proceed past detection.",
+        priority: "P0",
+      },
+      {
+        action:
+          'With Override OFF, paste: "Send the report to jane.doe@acmecorp.com"',
+        expected:
+          "BLOCK fires (email is a warn-level rule, but override is disabled so it becomes a block). No override button shown.",
+        priority: "P0",
+      },
+      {
+        action:
+          "Toggle 'Allow Warning Override' back ON",
+        expected:
+          "Warn-level rules show warning banner with override option again.",
+        priority: "P1",
+      },
+      {
+        action:
+          "Toggle 'Auto-Redact Sensitive Data' ON",
+        expected:
+          "Setting saves. Violations now auto-replace with {{PLACEHOLDER}} tokens instead of blocking.",
+        priority: "P0",
+      },
+      {
+        action:
+          "Toggle 'Activity Logging' OFF, then trigger a guardrail violation",
+        expected:
+          "Violation is still caught (block/warn fires), but no new entry appears in the Activity Log.",
+        priority: "P1",
+      },
+      {
+        action:
+          "On a Free plan org, check that gated toggles show Lock icon + 'Team' badge",
+        expected:
+          "Allow All AI Tools, Allow Warning Override, Auto-Redact, and Activity Logging show as locked/disabled for Free plan.",
         priority: "P1",
       },
     ],

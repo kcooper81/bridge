@@ -11,11 +11,12 @@ interface HeroImageProps {
   src: string;
   alt: string;
   badge?: HeroImageBadge;
+  topBadge?: HeroImageBadge;
   dark?: boolean;
   className?: string;
 }
 
-export function HeroImage({ src, alt, badge, dark, className }: HeroImageProps) {
+export function HeroImage({ src, alt, badge, topBadge, dark, className }: HeroImageProps) {
   return (
     <div className={cn("relative hidden lg:block", className)}>
       {/* Ambient glow behind the image */}
@@ -62,6 +63,19 @@ export function HeroImage({ src, alt, badge, dark, className }: HeroImageProps) 
           <div>
             <p className="text-sm font-bold text-zinc-900 leading-none">{badge.headline}</p>
             <p className="text-xs text-zinc-500 mt-1">{badge.subtitle}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Top-right frosted glass badge */}
+      {topBadge && (
+        <div className="absolute -top-4 -right-4 rounded-2xl bg-white/80 backdrop-blur-xl shadow-xl shadow-black/10 border border-white/60 px-4 py-2.5 flex items-center gap-3">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 text-white shadow-md shadow-emerald-500/25 shrink-0">
+            {topBadge.icon}
+          </div>
+          <div>
+            <p className="text-xs font-bold text-zinc-900 leading-none">{topBadge.headline}</p>
+            <p className="text-[10px] text-zinc-500 mt-0.5">{topBadge.subtitle}</p>
           </div>
         </div>
       )}

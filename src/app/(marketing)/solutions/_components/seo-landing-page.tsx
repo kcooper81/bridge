@@ -63,58 +63,72 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Zap,
 };
 
-type HeroImgData = { src: string; alt: string; badgeIcon: string; badgeHeadline: string; badgeSubtitle: string };
+type HeroImgData = { src: string; alt: string; badgeIcon: string; badgeHeadline: string; badgeSubtitle: string; topBadgeIcon?: string; topBadgeHeadline?: string; topBadgeSubtitle?: string };
 const u = (id: string) => `https://images.unsplash.com/${id}?w=640&q=80&auto=format&fit=crop`;
 
 const slugHeroImages: Record<string, HeroImgData> = {
   // ── use-case ──
-  "prompt-library":         { src: u("photo-1552664730-d307ca884978"), alt: "Team organizing shared documents", badgeIcon: "Archive", badgeHeadline: "Shared library", badgeSubtitle: "All prompts, one place" },
-  "prompt-governance":      { src: u("photo-1557804506-669a67965ba0"), alt: "Office strategy meeting", badgeIcon: "ShieldCheck", badgeHeadline: "Full visibility", badgeSubtitle: "Every prompt approved" },
-  "team-collaboration":     { src: u("photo-1600880292203-757bb62b4baf"), alt: "Team collaborating at whiteboard", badgeIcon: "Users", badgeHeadline: "Real-time sharing", badgeSubtitle: "Teams stay in sync" },
-  "ai-security-compliance": { src: u("photo-1555949963-ff9fe0c870eb"), alt: "Secure office environment", badgeIcon: "Shield", badgeHeadline: "Protected by default", badgeSubtitle: "Data stays safe" },
-  "knowledge-management":   { src: u("photo-1434030216411-0b793f4b4173"), alt: "Person studying with notes", badgeIcon: "BookOpen", badgeHeadline: "Organized knowledge", badgeSubtitle: "Find any prompt" },
-  "training-onboarding":    { src: u("photo-1522202176988-66273c2fd55f"), alt: "Training session in progress", badgeIcon: "Zap", badgeHeadline: "Quick onboarding", badgeSubtitle: "Up and running fast" },
-  "quality-assurance":      { src: u("photo-1556761175-b413da4baf72"), alt: "Quality review process", badgeIcon: "ShieldCheck", badgeHeadline: "Quality enforced", badgeSubtitle: "Every prompt checked" },
-  "ai-standards":           { src: u("photo-1556742031-c6961e8560b0"), alt: "Corporate standards meeting", badgeIcon: "BookOpen", badgeHeadline: "Standards set", badgeSubtitle: "Consistent AI usage" },
+  "prompt-library":         { src: u("photo-1552664730-d307ca884978"), alt: "Team organizing shared documents", badgeIcon: "Archive", badgeHeadline: "Shared library", badgeSubtitle: "All prompts, one place", topBadgeIcon: "Users", topBadgeHeadline: "8 teams", topBadgeSubtitle: "Sharing prompts" },
+  "prompt-governance":      { src: u("photo-1557804506-669a67965ba0"), alt: "Office strategy meeting", badgeIcon: "ShieldCheck", badgeHeadline: "Full visibility", badgeSubtitle: "Every prompt approved", topBadgeIcon: "Eye", topBadgeHeadline: "Audit trail", topBadgeSubtitle: "Complete history" },
+  "team-collaboration":     { src: u("photo-1600880292203-757bb62b4baf"), alt: "Team collaborating at whiteboard", badgeIcon: "Users", badgeHeadline: "Real-time sharing", badgeSubtitle: "Teams stay in sync", topBadgeIcon: "Zap", topBadgeHeadline: "Instant sync", topBadgeSubtitle: "Share in one click" },
+  "ai-security-compliance": { src: u("photo-1555949963-ff9fe0c870eb"), alt: "Secure office environment", badgeIcon: "Shield", badgeHeadline: "Protected by default", badgeSubtitle: "Data stays safe", topBadgeIcon: "Lock", topBadgeHeadline: "17 rules", topBadgeSubtitle: "Active scanning" },
+  "knowledge-management":   { src: u("photo-1434030216411-0b793f4b4173"), alt: "Person studying with notes", badgeIcon: "BookOpen", badgeHeadline: "Organized knowledge", badgeSubtitle: "Find any prompt", topBadgeIcon: "Archive", topBadgeHeadline: "142 prompts", topBadgeSubtitle: "Searchable library" },
+  "training-onboarding":    { src: u("photo-1522202176988-66273c2fd55f"), alt: "Training session in progress", badgeIcon: "Zap", badgeHeadline: "Quick onboarding", badgeSubtitle: "Up and running fast", topBadgeIcon: "Users", topBadgeHeadline: "New hires", topBadgeSubtitle: "Day-one ready" },
+  "quality-assurance":      { src: u("photo-1556761175-b413da4baf72"), alt: "Quality review process", badgeIcon: "ShieldCheck", badgeHeadline: "Quality enforced", badgeSubtitle: "Every prompt checked", topBadgeIcon: "Eye", topBadgeHeadline: "100% reviewed", topBadgeSubtitle: "Before publishing" },
+  "ai-standards":           { src: u("photo-1556742031-c6961e8560b0"), alt: "Corporate standards meeting", badgeIcon: "BookOpen", badgeHeadline: "Standards set", badgeSubtitle: "Consistent AI usage", topBadgeIcon: "ShieldCheck", topBadgeHeadline: "Policy enforced", topBadgeSubtitle: "Company-wide" },
+  "prompt-templates":       { src: u("photo-1600880292089-90a7e086ee0c"), alt: "Employee working with templates on screen", badgeIcon: "Archive", badgeHeadline: "Ready-made", badgeSubtitle: "Templates for any task", topBadgeIcon: "Zap", topBadgeHeadline: "One-click", topBadgeSubtitle: "Fill and insert" },
+  "ai-governance":          { src: u("photo-1521737604893-d14cc237f11d"), alt: "Team in glass conference room", badgeIcon: "ShieldCheck", badgeHeadline: "AI governed", badgeSubtitle: "Full control", topBadgeIcon: "Eye", topBadgeHeadline: "Audit ready", topBadgeSubtitle: "Complete visibility" },
+  "ai-compliance":          { src: u("photo-1504384308090-c894fdcc538d"), alt: "Professional reviewing compliance docs", badgeIcon: "Shield", badgeHeadline: "Compliant", badgeSubtitle: "Meet every standard", topBadgeIcon: "Lock", topBadgeHeadline: "Data secured", topBadgeSubtitle: "Auto-detected" },
+  "prompt-sharing":         { src: u("photo-1527192491265-7e15c55b1ed2"), alt: "Colleagues sharing work on screens", badgeIcon: "Users", badgeHeadline: "Share instantly", badgeSubtitle: "With your whole team", topBadgeIcon: "Zap", topBadgeHeadline: "142 shared", topBadgeSubtitle: "This month" },
+  "ai-dlp":                 { src: u("photo-1573164713714-d95e436ab8d6"), alt: "Security professional at workstation", badgeIcon: "ShieldAlert", badgeHeadline: "DLP active", badgeSubtitle: "Real-time scanning", topBadgeIcon: "Lock", topBadgeHeadline: "15 blocked", topBadgeSubtitle: "This week" },
+  "prompt-management":      { src: u("photo-1497215842964-222b430dc094"), alt: "Modern open-plan office", badgeIcon: "Archive", badgeHeadline: "Organized", badgeSubtitle: "Every prompt managed", topBadgeIcon: "BarChart3", topBadgeHeadline: "+23% usage", topBadgeSubtitle: "This month" },
+  "ai-audit-trail":         { src: u("photo-1551434678-e076c223a692"), alt: "Developer reviewing logs on screen", badgeIcon: "Eye", badgeHeadline: "Full history", badgeSubtitle: "Every action logged", topBadgeIcon: "ShieldCheck", topBadgeHeadline: "Audit ready", topBadgeSubtitle: "Export anytime" },
+  "ai-code-review-prompts": { src: u("photo-1553028826-f4804a6dba3b"), alt: "Engineers reviewing code together", badgeIcon: "Key", badgeHeadline: "Code reviews", badgeSubtitle: "Consistent feedback", topBadgeIcon: "Zap", topBadgeHeadline: "89 reviews", topBadgeSubtitle: "This sprint" },
+  "ai-onboarding-playbooks":{ src: u("photo-1560439514-4e9645039924"), alt: "Onboarding session with new employees", badgeIcon: "Users", badgeHeadline: "Playbooks ready", badgeSubtitle: "Day-one success", topBadgeIcon: "BookOpen", topBadgeHeadline: "12 guides", topBadgeSubtitle: "Pre-built" },
+  "ai-meeting-summaries":   { src: u("photo-1517048676732-d65bc937f952"), alt: "Team in productive meeting", badgeIcon: "BookOpen", badgeHeadline: "Auto-summaries", badgeSubtitle: "Capture every detail", topBadgeIcon: "Zap", topBadgeHeadline: "5 min saved", topBadgeSubtitle: "Per meeting" },
+  "ai-data-analysis":       { src: u("photo-1551288049-bebda4e38f71"), alt: "Analyst reviewing data charts", badgeIcon: "BarChart3", badgeHeadline: "Data insights", badgeSubtitle: "Analyze faster", topBadgeIcon: "Zap", topBadgeHeadline: "10x faster", topBadgeSubtitle: "Analysis time" },
+  "ai-content-localization":{ src: u("photo-1559136555-9303baea8ebd"), alt: "Content team working on translations", badgeIcon: "Globe", badgeHeadline: "Go global", badgeSubtitle: "Localize content", topBadgeIcon: "Zap", topBadgeHeadline: "12 languages", topBadgeSubtitle: "Supported" },
+  "ai-compliance-reporting": { src: u("photo-1460925895917-afdab827c52f"), alt: "Compliance reports on dashboard", badgeIcon: "ShieldCheck", badgeHeadline: "Reports ready", badgeSubtitle: "One-click export", topBadgeIcon: "BarChart3", topBadgeHeadline: "100% covered", topBadgeSubtitle: "All activities" },
+  "ai-incident-response":   { src: u("photo-1555949963-ff9fe0c870eb"), alt: "Security team responding to alert", badgeIcon: "ShieldAlert", badgeHeadline: "Fast response", badgeSubtitle: "Contain threats", topBadgeIcon: "Shield", topBadgeHeadline: "< 5 min", topBadgeSubtitle: "Response time" },
   // ── integration ──
-  "chatgpt":    { src: u("photo-1517694712202-14dd9538aa97"), alt: "Developer at screen with code", badgeIcon: "Zap", badgeHeadline: "ChatGPT ready", badgeSubtitle: "Insert prompts instantly" },
-  "claude":     { src: u("photo-1556745757-8d76bdb6984b"), alt: "Modern creative workspace", badgeIcon: "Zap", badgeHeadline: "Claude supported", badgeSubtitle: "One-click insertion" },
-  "gemini":     { src: u("photo-1519389950473-47ba0277781c"), alt: "Tech workspace with monitors", badgeIcon: "Globe", badgeHeadline: "Gemini connected", badgeSubtitle: "Search and insert" },
-  "copilot":    { src: u("photo-1515378960530-7c0da6231fb1"), alt: "Coding session on laptop", badgeIcon: "Zap", badgeHeadline: "Copilot enabled", badgeSubtitle: "Prompts in your browser" },
-  "perplexity": { src: u("photo-1504868584819-f8e8b4b6d7e3"), alt: "Research and discovery", badgeIcon: "Eye", badgeHeadline: "Perplexity linked", badgeSubtitle: "Research prompts ready" },
-  "slack":      { src: u("photo-1556761175-4b46a572b786"), alt: "Team chat and messaging", badgeIcon: "Users", badgeHeadline: "Slack integrated", badgeSubtitle: "Share from chat" },
+  "chatgpt":    { src: u("photo-1517694712202-14dd9538aa97"), alt: "Developer at screen with code", badgeIcon: "Zap", badgeHeadline: "ChatGPT ready", badgeSubtitle: "Insert prompts instantly", topBadgeIcon: "Shield", topBadgeHeadline: "DLP active", topBadgeSubtitle: "Data protected" },
+  "claude":     { src: u("photo-1556745757-8d76bdb6984b"), alt: "Modern creative workspace", badgeIcon: "Zap", badgeHeadline: "Claude supported", badgeSubtitle: "One-click insertion", topBadgeIcon: "Users", topBadgeHeadline: "Team access", topBadgeSubtitle: "Shared library" },
+  "gemini":     { src: u("photo-1519389950473-47ba0277781c"), alt: "Tech workspace with monitors", badgeIcon: "Globe", badgeHeadline: "Gemini connected", badgeSubtitle: "Search and insert", topBadgeIcon: "Zap", topBadgeHeadline: "One-click", topBadgeSubtitle: "Insert prompts" },
+  "copilot":    { src: u("photo-1515378960530-7c0da6231fb1"), alt: "Coding session on laptop", badgeIcon: "Zap", badgeHeadline: "Copilot enabled", badgeSubtitle: "Prompts in your browser", topBadgeIcon: "Key", topBadgeHeadline: "Secrets safe", topBadgeSubtitle: "Keys detected" },
+  "perplexity": { src: u("photo-1504868584819-f8e8b4b6d7e3"), alt: "Research and discovery", badgeIcon: "Eye", badgeHeadline: "Perplexity linked", badgeSubtitle: "Research prompts ready", topBadgeIcon: "Archive", topBadgeHeadline: "Prompt vault", topBadgeSubtitle: "Organized" },
+  "slack":      { src: u("photo-1556761175-4b46a572b786"), alt: "Team chat and messaging", badgeIcon: "Users", badgeHeadline: "Slack integrated", badgeSubtitle: "Share from chat", topBadgeIcon: "Zap", topBadgeHeadline: "Instant share", topBadgeSubtitle: "From any channel" },
   // ── role ──
-  "for-engineering-teams": { src: u("photo-1498050108023-c5249f4df085"), alt: "Engineers coding at workstation", badgeIcon: "Key", badgeHeadline: "Built for devs", badgeSubtitle: "Code prompts ready" },
-  "for-product-teams":     { src: u("photo-1552581234-26160f608093"), alt: "Product team planning session", badgeIcon: "BarChart3", badgeHeadline: "Product focus", badgeSubtitle: "Specs and planning" },
-  "for-sales-teams":       { src: u("photo-1556742049-0cfed4f6a45d"), alt: "Sales team in action", badgeIcon: "Zap", badgeHeadline: "Close faster", badgeSubtitle: "Sales prompts ready" },
-  "for-marketing-teams":   { src: u("photo-1542626991-cbc4e32524cc"), alt: "Creative marketing workspace", badgeIcon: "Eye", badgeHeadline: "Creative edge", badgeSubtitle: "Content prompts" },
-  "for-support-teams":     { src: u("photo-1553028826-f4804a6dba3b"), alt: "Support agent helping customer", badgeIcon: "Users", badgeHeadline: "Faster replies", badgeSubtitle: "Response templates" },
-  "for-operations-teams":  { src: u("photo-1454165804606-c3d57bc86b40"), alt: "Operations team at work", badgeIcon: "BarChart3", badgeHeadline: "Ops streamlined", badgeSubtitle: "Process prompts" },
+  "for-engineering-teams": { src: u("photo-1498050108023-c5249f4df085"), alt: "Engineers coding at workstation", badgeIcon: "Key", badgeHeadline: "Built for devs", badgeSubtitle: "Code prompts ready", topBadgeIcon: "Shield", topBadgeHeadline: "No leaks", topBadgeSubtitle: "API keys caught" },
+  "for-product-teams":     { src: u("photo-1552581234-26160f608093"), alt: "Product team planning session", badgeIcon: "BarChart3", badgeHeadline: "Product focus", badgeSubtitle: "Specs and planning", topBadgeIcon: "Users", topBadgeHeadline: "Cross-team", topBadgeSubtitle: "Shared prompts" },
+  "for-sales-teams":       { src: u("photo-1556742049-0cfed4f6a45d"), alt: "Sales team in action", badgeIcon: "Zap", badgeHeadline: "Close faster", badgeSubtitle: "Sales prompts ready", topBadgeIcon: "BarChart3", topBadgeHeadline: "+34% speed", topBadgeSubtitle: "Outreach time" },
+  "for-marketing-teams":   { src: u("photo-1542626991-cbc4e32524cc"), alt: "Creative marketing workspace", badgeIcon: "Eye", badgeHeadline: "Creative edge", badgeSubtitle: "Content prompts", topBadgeIcon: "Globe", topBadgeHeadline: "Multi-channel", topBadgeSubtitle: "Blog to social" },
+  "for-support-teams":     { src: u("photo-1553028826-f4804a6dba3b"), alt: "Support agent helping customer", badgeIcon: "Users", badgeHeadline: "Faster replies", badgeSubtitle: "Response templates", topBadgeIcon: "Zap", topBadgeHeadline: "< 2 min", topBadgeSubtitle: "Avg response" },
+  "for-operations-teams":  { src: u("photo-1454165804606-c3d57bc86b40"), alt: "Operations team at work", badgeIcon: "BarChart3", badgeHeadline: "Ops streamlined", badgeSubtitle: "Process prompts", topBadgeIcon: "Archive", topBadgeHeadline: "SOPs ready", topBadgeSubtitle: "Standardized" },
   // ── workflow ──
-  "customer-support-ai-workflow":    { src: u("photo-1556742111-a301076d9d18"), alt: "Support desk with headset", badgeIcon: "Users", badgeHeadline: "Support flow", badgeSubtitle: "Resolve tickets faster" },
-  "sales-workflow":                  { src: u("photo-1560472354-b33ff0c44a43"), alt: "Sales pipeline and deals", badgeIcon: "Zap", badgeHeadline: "Sales pipeline", badgeSubtitle: "Close more deals" },
-  "content-marketing-workflow":      { src: u("photo-1542744094-3a31f272c490"), alt: "Content creation process", badgeIcon: "Eye", badgeHeadline: "Content engine", badgeSubtitle: "Create at scale" },
-  "code-review-workflow":            { src: u("photo-1581091226825-a6a2a5aee158"), alt: "Code review on screen", badgeIcon: "Key", badgeHeadline: "Review flow", badgeSubtitle: "Better code reviews" },
-  "hiring-workflow":                 { src: u("photo-1573496359142-b8d87734a5a2"), alt: "Interview and hiring process", badgeIcon: "Users", badgeHeadline: "Hiring pipeline", badgeSubtitle: "Screen candidates" },
-  "product-documentation-workflow":  { src: u("photo-1586281380349-632531db7ed4"), alt: "Documentation writing session", badgeIcon: "BookOpen", badgeHeadline: "Doc workflow", badgeSubtitle: "Ship docs faster" },
+  "customer-support-ai-workflow":    { src: u("photo-1556742111-a301076d9d18"), alt: "Support desk with headset", badgeIcon: "Users", badgeHeadline: "Support flow", badgeSubtitle: "Resolve tickets faster", topBadgeIcon: "Zap", topBadgeHeadline: "Auto-reply", topBadgeSubtitle: "Template ready" },
+  "sales-workflow":                  { src: u("photo-1560472354-b33ff0c44a43"), alt: "Sales pipeline and deals", badgeIcon: "Zap", badgeHeadline: "Sales pipeline", badgeSubtitle: "Close more deals", topBadgeIcon: "BarChart3", topBadgeHeadline: "+28% close", topBadgeSubtitle: "Rate increase" },
+  "content-marketing-workflow":      { src: u("photo-1542744094-3a31f272c490"), alt: "Content creation process", badgeIcon: "Eye", badgeHeadline: "Content engine", badgeSubtitle: "Create at scale", topBadgeIcon: "Globe", topBadgeHeadline: "5 channels", topBadgeSubtitle: "One workflow" },
+  "code-review-workflow":            { src: u("photo-1581091226825-a6a2a5aee158"), alt: "Code review on screen", badgeIcon: "Key", badgeHeadline: "Review flow", badgeSubtitle: "Better code reviews", topBadgeIcon: "ShieldCheck", topBadgeHeadline: "Standards met", topBadgeSubtitle: "Every PR" },
+  "hiring-workflow":                 { src: u("photo-1573496359142-b8d87734a5a2"), alt: "Interview and hiring process", badgeIcon: "Users", badgeHeadline: "Hiring pipeline", badgeSubtitle: "Screen candidates", topBadgeIcon: "Zap", topBadgeHeadline: "3x faster", topBadgeSubtitle: "Screening time" },
+  "product-documentation-workflow":  { src: u("photo-1586281380349-632531db7ed4"), alt: "Documentation writing session", badgeIcon: "BookOpen", badgeHeadline: "Doc workflow", badgeSubtitle: "Ship docs faster", topBadgeIcon: "Archive", topBadgeHeadline: "Templates", topBadgeSubtitle: "Pre-built" },
   // ── template ──
-  "email-prompt-templates":        { src: u("photo-1557426272-fc759fdf7a8d"), alt: "Email communication workflow", badgeIcon: "Archive", badgeHeadline: "Email ready", badgeSubtitle: "Send better emails" },
-  "code-review-templates":         { src: u("photo-1516321318423-f06f85e504b3"), alt: "Code displayed on monitor", badgeIcon: "Key", badgeHeadline: "Code reviews", badgeSubtitle: "Thorough feedback" },
-  "meeting-notes-templates":       { src: u("photo-1517048676732-d65bc937f952"), alt: "Team meeting in progress", badgeIcon: "BookOpen", badgeHeadline: "Meeting notes", badgeSubtitle: "Capture action items" },
-  "report-writing-templates":      { src: u("photo-1460925895917-afdab827c52f"), alt: "Data dashboard and reporting", badgeIcon: "BarChart3", badgeHeadline: "Reports ready", badgeSubtitle: "Professional outputs" },
-  "social-media-templates":        { src: u("photo-1556761175-5973dc0f32e7"), alt: "Social media content creation", badgeIcon: "Globe", badgeHeadline: "Social ready", badgeSubtitle: "Post everywhere" },
-  "customer-response-templates":   { src: u("photo-1559028012-481c04fa702d"), alt: "Customer support interaction", badgeIcon: "Users", badgeHeadline: "Responses ready", badgeSubtitle: "Fast and consistent" },
-  "data-analysis-templates":       { src: u("photo-1551288049-bebda4e38f71"), alt: "Data analysis and charts", badgeIcon: "BarChart3", badgeHeadline: "Data insights", badgeSubtitle: "Analyze anything" },
-  "project-planning-templates":    { src: u("photo-1531482615713-2afd69097998"), alt: "Project planning whiteboard", badgeIcon: "Archive", badgeHeadline: "Plans ready", badgeSubtitle: "Project kickstart" },
-  "interview-prep-templates":      { src: u("photo-1560439514-4e9645039924"), alt: "Interview preparation", badgeIcon: "Users", badgeHeadline: "Interview prep", badgeSubtitle: "Be prepared" },
-  "documentation-templates":       { src: u("photo-1504384764586-bb4cdc1707b0"), alt: "Technical documentation", badgeIcon: "BookOpen", badgeHeadline: "Docs ready", badgeSubtitle: "Technical writing" },
-  "content-marketing-templates":   { src: u("photo-1559136555-9303baea8ebd"), alt: "Content strategy session", badgeIcon: "Eye", badgeHeadline: "Content ready", badgeSubtitle: "Blog to social" },
-  "hiring-templates":              { src: u("photo-1556155092-490a1ba16284"), alt: "Hiring and recruitment", badgeIcon: "Users", badgeHeadline: "Hiring ready", badgeSubtitle: "Screen and assess" },
-  "brainstorm-templates":          { src: u("photo-1542744173-05336fcc7ad4"), alt: "Creative brainstorming session", badgeIcon: "Zap", badgeHeadline: "Ideas flowing", badgeSubtitle: "Creative sessions" },
+  "email-prompt-templates":        { src: u("photo-1557426272-fc759fdf7a8d"), alt: "Email communication workflow", badgeIcon: "Archive", badgeHeadline: "Email ready", badgeSubtitle: "Send better emails", topBadgeIcon: "Zap", topBadgeHeadline: "One-click", topBadgeSubtitle: "Fill and send" },
+  "code-review-templates":         { src: u("photo-1516321318423-f06f85e504b3"), alt: "Code displayed on monitor", badgeIcon: "Key", badgeHeadline: "Code reviews", badgeSubtitle: "Thorough feedback", topBadgeIcon: "ShieldCheck", topBadgeHeadline: "Consistent", topBadgeSubtitle: "Every review" },
+  "meeting-notes-templates":       { src: u("photo-1517048676732-d65bc937f952"), alt: "Team meeting in progress", badgeIcon: "BookOpen", badgeHeadline: "Meeting notes", badgeSubtitle: "Capture action items", topBadgeIcon: "Zap", topBadgeHeadline: "Auto-fill", topBadgeSubtitle: "Template ready" },
+  "report-writing-templates":      { src: u("photo-1460925895917-afdab827c52f"), alt: "Data dashboard and reporting", badgeIcon: "BarChart3", badgeHeadline: "Reports ready", badgeSubtitle: "Professional outputs", topBadgeIcon: "Archive", topBadgeHeadline: "6 formats", topBadgeSubtitle: "Pre-built" },
+  "social-media-templates":        { src: u("photo-1556761175-5973dc0f32e7"), alt: "Social media content creation", badgeIcon: "Globe", badgeHeadline: "Social ready", badgeSubtitle: "Post everywhere", topBadgeIcon: "Zap", topBadgeHeadline: "5 platforms", topBadgeSubtitle: "One template" },
+  "customer-response-templates":   { src: u("photo-1559028012-481c04fa702d"), alt: "Customer support interaction", badgeIcon: "Users", badgeHeadline: "Responses ready", badgeSubtitle: "Fast and consistent", topBadgeIcon: "Zap", topBadgeHeadline: "< 2 min", topBadgeSubtitle: "Avg reply" },
+  "data-analysis-templates":       { src: u("photo-1551288049-bebda4e38f71"), alt: "Data analysis and charts", badgeIcon: "BarChart3", badgeHeadline: "Data insights", badgeSubtitle: "Analyze anything", topBadgeIcon: "Zap", topBadgeHeadline: "10x faster", topBadgeSubtitle: "Analysis time" },
+  "project-planning-templates":    { src: u("photo-1531482615713-2afd69097998"), alt: "Project planning whiteboard", badgeIcon: "Archive", badgeHeadline: "Plans ready", badgeSubtitle: "Project kickstart", topBadgeIcon: "Users", topBadgeHeadline: "Team aligned", topBadgeSubtitle: "Shared plans" },
+  "interview-prep-templates":      { src: u("photo-1560439514-4e9645039924"), alt: "Interview preparation", badgeIcon: "Users", badgeHeadline: "Interview prep", badgeSubtitle: "Be prepared", topBadgeIcon: "BookOpen", topBadgeHeadline: "12 questions", topBadgeSubtitle: "Pre-built" },
+  "documentation-templates":       { src: u("photo-1504384764586-bb4cdc1707b0"), alt: "Technical documentation", badgeIcon: "BookOpen", badgeHeadline: "Docs ready", badgeSubtitle: "Technical writing", topBadgeIcon: "Archive", topBadgeHeadline: "8 formats", topBadgeSubtitle: "API to guides" },
+  "content-marketing-templates":   { src: u("photo-1559136555-9303baea8ebd"), alt: "Content strategy session", badgeIcon: "Eye", badgeHeadline: "Content ready", badgeSubtitle: "Blog to social", topBadgeIcon: "Globe", topBadgeHeadline: "Multi-format", topBadgeSubtitle: "One template" },
+  "hiring-templates":              { src: u("photo-1556155092-490a1ba16284"), alt: "Hiring and recruitment", badgeIcon: "Users", badgeHeadline: "Hiring ready", badgeSubtitle: "Screen and assess", topBadgeIcon: "Zap", topBadgeHeadline: "3x faster", topBadgeSubtitle: "Screening" },
+  "brainstorm-templates":          { src: u("photo-1542744173-05336fcc7ad4"), alt: "Creative brainstorming session", badgeIcon: "Zap", badgeHeadline: "Ideas flowing", badgeSubtitle: "Creative sessions", topBadgeIcon: "Users", topBadgeHeadline: "Team ideation", topBadgeSubtitle: "Collaborate" },
   // ── comparison / alternative / guide ──
-  "vs-notion":             { src: u("photo-1460925895917-afdab827c52f"), alt: "Comparing software tools", badgeIcon: "BarChart3", badgeHeadline: "Side-by-side", badgeSubtitle: "See the difference" },
-  "notion-alternative":    { src: u("photo-1553877522-43269d4ea984"), alt: "Professional switching tools", badgeIcon: "Zap", badgeHeadline: "Better alternative", badgeSubtitle: "Purpose-built for prompts" },
-  "prompt-management-101": { src: u("photo-1434030216411-0b793f4b4173"), alt: "Learning prompt management", badgeIcon: "BookOpen", badgeHeadline: "Best practices", badgeSubtitle: "Step-by-step guide" },
+  "vs-notion":             { src: u("photo-1460925895917-afdab827c52f"), alt: "Comparing software tools", badgeIcon: "BarChart3", badgeHeadline: "Side-by-side", badgeSubtitle: "See the difference", topBadgeIcon: "ShieldCheck", topBadgeHeadline: "DLP included", topBadgeSubtitle: "Built-in security" },
+  "notion-alternative":    { src: u("photo-1553877522-43269d4ea984"), alt: "Professional switching tools", badgeIcon: "Zap", badgeHeadline: "Better alternative", badgeSubtitle: "Purpose-built for prompts", topBadgeIcon: "Shield", topBadgeHeadline: "Data safe", topBadgeSubtitle: "DLP built-in" },
+  "prompt-management-101": { src: u("photo-1434030216411-0b793f4b4173"), alt: "Learning prompt management", badgeIcon: "BookOpen", badgeHeadline: "Best practices", badgeSubtitle: "Step-by-step guide", topBadgeIcon: "Zap", topBadgeHeadline: "Quick start", topBadgeSubtitle: "15 min read" },
 };
 
 const categoryFallback: Record<SeoCategory, HeroImgData> = {
@@ -126,7 +140,7 @@ const categoryFallback: Record<SeoCategory, HeroImgData> = {
   workflow:      slugHeroImages["customer-support-ai-workflow"],
   role:          slugHeroImages["for-engineering-teams"],
   template:      slugHeroImages["email-prompt-templates"],
-  platform:      { src: u("photo-1551434678-e076c223a692"), alt: "Cross-platform AI usage", badgeIcon: "Globe", badgeHeadline: "Any platform", badgeSubtitle: "Works everywhere" },
+  platform:      { src: u("photo-1551434678-e076c223a692"), alt: "Cross-platform AI usage", badgeIcon: "Globe", badgeHeadline: "Any platform", badgeSubtitle: "Works everywhere", topBadgeIcon: "Zap", topBadgeHeadline: "5 AI tools", topBadgeSubtitle: "Connected" },
 };
 
 export function SeoLandingPage({ data }: { data: SeoPageData }) {
@@ -220,6 +234,7 @@ export function SeoLandingPage({ data }: { data: SeoPageData }) {
 
             {heroImg && (() => {
               const BadgeIcon = iconMap[heroImg.badgeIcon] || Shield;
+              const TopIcon = heroImg.topBadgeIcon ? (iconMap[heroImg.topBadgeIcon] || Shield) : null;
               return (
                 <HeroImage
                   src={heroImg.src}
@@ -229,6 +244,11 @@ export function SeoLandingPage({ data }: { data: SeoPageData }) {
                     headline: heroImg.badgeHeadline,
                     subtitle: heroImg.badgeSubtitle,
                   }}
+                  topBadge={TopIcon && heroImg.topBadgeHeadline ? {
+                    icon: <TopIcon className="h-3.5 w-3.5" />,
+                    headline: heroImg.topBadgeHeadline,
+                    subtitle: heroImg.topBadgeSubtitle || "",
+                  } : undefined}
                   dark
                 />
               );
@@ -239,24 +259,27 @@ export function SeoLandingPage({ data }: { data: SeoPageData }) {
 
       {/* ━━━ FEATURES ━━━ */}
       {data.features && (
-        <section className="py-20 sm:py-28">
+        <section className="py-20 sm:py-28 border-t border-border">
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
-            <div className="text-center mb-14">
+            <div className="max-w-2xl mb-14">
               <SectionLabel>{data.features.sectionLabel}</SectionLabel>
               <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
                 {data.features.heading}
               </h2>
+              <p className="mt-4 text-lg text-muted-foreground">
+                Every feature designed to help your team work smarter with AI.
+              </p>
             </div>
 
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto">
+            <div className="grid gap-px sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto rounded-2xl border border-border overflow-hidden bg-border">
               {data.features.items.map((feature) => {
                 const Icon = iconMap[feature.icon] || Shield;
                 return (
                   <div
                     key={feature.title}
-                    className="group rounded-2xl border border-border bg-card p-8 hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5"
+                    className="group bg-card p-8 hover:bg-primary/[0.02] transition-colors duration-300"
                   >
-                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 text-primary">
                       <Icon className="h-5 w-5" />
                     </div>
                     <h3 className="mt-5 text-lg font-semibold">

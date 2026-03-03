@@ -61,14 +61,14 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   UserX,
 };
 
-const industryHeroImages: Record<string, { src: string; alt: string; badgeIcon: string; badgeHeadline: string; badgeSubtitle: string }> = {
-  healthcare: { src: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=640&q=80&auto=format&fit=crop", alt: "Healthcare professional reviewing patient information", badgeIcon: "ShieldCheck", badgeHeadline: "PHI detection", badgeSubtitle: "HIPAA-ready scanning" },
-  legal: { src: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=640&q=80&auto=format&fit=crop", alt: "Legal professional reviewing documents", badgeIcon: "Scale", badgeHeadline: "Client data protected", badgeSubtitle: "Privileged info secured" },
-  technology: { src: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=640&q=80&auto=format&fit=crop", alt: "Software team collaborating on code", badgeIcon: "Key", badgeHeadline: "Secrets detected", badgeSubtitle: "API keys & tokens caught" },
-  finance: { src: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=640&q=80&auto=format&fit=crop", alt: "Finance team analyzing data", badgeIcon: "Lock", badgeHeadline: "PII protected", badgeSubtitle: "Financial data secured" },
-  government: { src: "https://images.unsplash.com/photo-1541872703-74c5e44368f9?w=640&q=80&auto=format&fit=crop", alt: "Government office building", badgeIcon: "Shield", badgeHeadline: "CUI compliant", badgeSubtitle: "Controlled info blocked" },
-  education: { src: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=640&q=80&auto=format&fit=crop", alt: "Students collaborating in classroom", badgeIcon: "Users", badgeHeadline: "Student data safe", badgeSubtitle: "FERPA-ready protection" },
-  insurance: { src: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=640&q=80&auto=format&fit=crop", alt: "Insurance professional at desk", badgeIcon: "ShieldAlert", badgeHeadline: "Claims secured", badgeSubtitle: "PII auto-detected" },
+const industryHeroImages: Record<string, { src: string; alt: string; badgeIcon: string; badgeHeadline: string; badgeSubtitle: string; topBadgeIcon: string; topBadgeHeadline: string; topBadgeSubtitle: string }> = {
+  healthcare: { src: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=640&q=80&auto=format&fit=crop", alt: "Healthcare professional reviewing patient information", badgeIcon: "ShieldCheck", badgeHeadline: "PHI detection", badgeSubtitle: "HIPAA-ready scanning", topBadgeIcon: "Eye", topBadgeHeadline: "17 rules active", topBadgeSubtitle: "Real-time monitoring" },
+  legal: { src: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=640&q=80&auto=format&fit=crop", alt: "Legal professional reviewing documents", badgeIcon: "Scale", badgeHeadline: "Client data protected", badgeSubtitle: "Privileged info secured", topBadgeIcon: "Lock", topBadgeHeadline: "100% blocked", topBadgeSubtitle: "Sensitive data caught" },
+  technology: { src: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=640&q=80&auto=format&fit=crop", alt: "Software team collaborating on code", badgeIcon: "Key", badgeHeadline: "Secrets detected", badgeSubtitle: "API keys & tokens caught", topBadgeIcon: "Shield", topBadgeHeadline: "DLP active", topBadgeSubtitle: "Code protected" },
+  finance: { src: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=640&q=80&auto=format&fit=crop", alt: "Finance team analyzing data", badgeIcon: "Lock", badgeHeadline: "PII protected", badgeSubtitle: "Financial data secured", topBadgeIcon: "BarChart3", topBadgeHeadline: "SOX ready", topBadgeSubtitle: "Audit trail active" },
+  government: { src: "https://images.unsplash.com/photo-1541872703-74c5e44368f9?w=640&q=80&auto=format&fit=crop", alt: "Government office building", badgeIcon: "Shield", badgeHeadline: "CUI compliant", badgeSubtitle: "Controlled info blocked", topBadgeIcon: "Lock", topBadgeHeadline: "FedRAMP aligned", topBadgeSubtitle: "Security controls" },
+  education: { src: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=640&q=80&auto=format&fit=crop", alt: "Students collaborating in classroom", badgeIcon: "Users", badgeHeadline: "Student data safe", badgeSubtitle: "FERPA-ready protection", topBadgeIcon: "ShieldCheck", topBadgeHeadline: "PII blocked", topBadgeSubtitle: "Auto-detected" },
+  insurance: { src: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=640&q=80&auto=format&fit=crop", alt: "Insurance professional at desk", badgeIcon: "ShieldAlert", badgeHeadline: "Claims secured", badgeSubtitle: "PII auto-detected", topBadgeIcon: "Eye", topBadgeHeadline: "15 blocked", topBadgeSubtitle: "This week" },
 };
 
 export function IndustryPage({ data }: { data: IndustryPageData }) {
@@ -161,6 +161,7 @@ export function IndustryPage({ data }: { data: IndustryPageData }) {
 
             {heroImg && (() => {
               const BadgeIcon = iconMap[heroImg.badgeIcon] || Shield;
+              const TopIcon = iconMap[heroImg.topBadgeIcon] || Shield;
               return (
                 <HeroImage
                   src={heroImg.src}
@@ -169,6 +170,11 @@ export function IndustryPage({ data }: { data: IndustryPageData }) {
                     icon: <BadgeIcon className="h-4 w-4" />,
                     headline: heroImg.badgeHeadline,
                     subtitle: heroImg.badgeSubtitle,
+                  }}
+                  topBadge={{
+                    icon: <TopIcon className="h-3.5 w-3.5" />,
+                    headline: heroImg.topBadgeHeadline,
+                    subtitle: heroImg.topBadgeSubtitle,
                   }}
                   dark
                 />

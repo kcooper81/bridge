@@ -6,6 +6,7 @@ import { Download, Chrome, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DarkSection } from "@/components/marketing/dark-section";
 import { CopyButton } from "./_components/copy-button";
+import { BannerDownloadWrapper } from "./_components/banner-download";
 import {
   TwitterBanner,
   TwitterBannerWhite,
@@ -534,28 +535,19 @@ export default function MediaPage() {
               <div key={platform.platform}>
                 <h3 className="text-lg font-semibold mb-4">{platform.platform}</h3>
 
-                {/* Rendered banner previews — dark, white & gradient variants */}
+                {/* Rendered banner previews — every variant is downloadable */}
                 {platform.banners.length > 0 && (
                   <div className="space-y-3 mb-4">
                     {platform.banners.map((banner) => (
                       <div key={banner.variant}>
-                        <div className="flex items-center justify-between mb-1.5">
-                          <p className="text-xs text-muted-foreground font-medium">
-                            {banner.variant} variant
-                          </p>
-                          {banner.downloadFile ? (
-                            <a href={banner.downloadFile} download>
-                              <Button variant="ghost" size="sm" className="h-7 text-xs gap-1">
-                                <Download className="h-3 w-3" /> PNG
-                              </Button>
-                            </a>
-                          ) : (
-                            <span className="text-[10px] text-muted-foreground/60">CSS preview</span>
-                          )}
-                        </div>
-                        <div className="rounded-xl border border-border overflow-hidden">
+                        <p className="text-xs text-muted-foreground font-medium mb-1.5">
+                          {banner.variant} variant
+                        </p>
+                        <BannerDownloadWrapper
+                          filename={`teamprompt-${platform.platform.toLowerCase().replace(/[^a-z]/g, "")}-${banner.variant.toLowerCase()}`}
+                        >
                           <banner.Component />
-                        </div>
+                        </BannerDownloadWrapper>
                       </div>
                     ))}
                   </div>
@@ -603,46 +595,21 @@ export default function MediaPage() {
             The default Open Graph image used when sharing any TeamPrompt page on social media.
           </p>
           <div className="space-y-3">
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <p className="text-xs text-muted-foreground font-medium">Dark variant</p>
-                <a href="/store-assets/social-hero.png" download>
-                  <Button variant="ghost" size="sm" className="h-7 text-xs gap-1">
-                    <Download className="h-3 w-3" /> PNG
-                  </Button>
-                </a>
+            {[
+              { label: "Dark", Component: OGBanner, name: "og-dark" },
+              { label: "White", Component: OGBannerWhite, name: "og-white" },
+              { label: "Gradient", Component: OGBannerGradient, name: "og-gradient" },
+              { label: "Lifestyle", Component: OGBannerLifestyle, name: "og-lifestyle" },
+            ].map((variant) => (
+              <div key={variant.name}>
+                <p className="text-xs text-muted-foreground font-medium mb-1.5">
+                  {variant.label} variant
+                </p>
+                <BannerDownloadWrapper filename={`teamprompt-${variant.name}`}>
+                  <variant.Component />
+                </BannerDownloadWrapper>
               </div>
-              <div className="rounded-xl border border-border overflow-hidden">
-                <OGBanner />
-              </div>
-            </div>
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <p className="text-xs text-muted-foreground font-medium">White variant</p>
-                <span className="text-[10px] text-muted-foreground/60">CSS preview</span>
-              </div>
-              <div className="rounded-xl border border-border overflow-hidden">
-                <OGBannerWhite />
-              </div>
-            </div>
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <p className="text-xs text-muted-foreground font-medium">Gradient variant</p>
-                <span className="text-[10px] text-muted-foreground/60">CSS preview</span>
-              </div>
-              <div className="rounded-xl border border-border overflow-hidden">
-                <OGBannerGradient />
-              </div>
-            </div>
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <p className="text-xs text-muted-foreground font-medium">Lifestyle variant</p>
-                <span className="text-[10px] text-muted-foreground/60">CSS preview</span>
-              </div>
-              <div className="rounded-xl border border-border overflow-hidden">
-                <OGBannerLifestyle />
-              </div>
-            </div>
+            ))}
           </div>
         </section>
 

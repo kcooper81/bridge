@@ -68,7 +68,7 @@ const industryHeroImages: Record<string, { src: string; alt: string; badgeIcon: 
   finance: { src: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=640&q=80&auto=format&fit=crop", alt: "Finance team analyzing data", badgeIcon: "Lock", badgeHeadline: "PII protected", badgeSubtitle: "Financial data secured" },
   government: { src: "https://images.unsplash.com/photo-1541872703-74c5e44368f9?w=640&q=80&auto=format&fit=crop", alt: "Government office building", badgeIcon: "Shield", badgeHeadline: "CUI compliant", badgeSubtitle: "Controlled info blocked" },
   education: { src: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=640&q=80&auto=format&fit=crop", alt: "Students collaborating in classroom", badgeIcon: "Users", badgeHeadline: "Student data safe", badgeSubtitle: "FERPA-ready protection" },
-  insurance: { src: "https://images.unsplash.com/photo-1450101499163-c8848e968ad7?w=640&q=80&auto=format&fit=crop", alt: "Insurance professional at desk", badgeIcon: "ShieldAlert", badgeHeadline: "Claims secured", badgeSubtitle: "PII auto-detected" },
+  insurance: { src: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=640&q=80&auto=format&fit=crop", alt: "Insurance professional at desk", badgeIcon: "ShieldAlert", badgeHeadline: "Claims secured", badgeSubtitle: "PII auto-detected" },
 };
 
 export function IndustryPage({ data }: { data: IndustryPageData }) {

@@ -1158,45 +1158,51 @@ function LifestylePhoto({
   );
 }
 
-/** Floating snippet chip — pill badge with icon + text */
-function SnippetChip({
+/** Frosted glass floating badge — matches HeroImage industry page style */
+function FrostedBadge({
   icon: Icon,
-  label,
-  color,
+  headline,
+  subtitle,
+  color = "blue",
   className,
 }: {
   icon: React.ComponentType<{ className?: string }>;
-  label: string;
-  color: "red" | "blue" | "amber" | "emerald";
+  headline: string;
+  subtitle: string;
+  color?: "blue" | "red" | "emerald" | "amber";
   className?: string;
 }) {
-  const colorMap = {
-    red: "bg-red-500 shadow-red-500/30",
-    blue: "bg-blue-500 shadow-blue-500/30",
-    amber: "bg-amber-500 shadow-amber-500/30",
-    emerald: "bg-emerald-500 shadow-emerald-500/30",
+  const gradientMap = {
+    blue: "from-blue-500 to-blue-600 shadow-blue-500/25",
+    red: "from-red-500 to-red-600 shadow-red-500/25",
+    emerald: "from-emerald-500 to-emerald-600 shadow-emerald-500/25",
+    amber: "from-amber-500 to-amber-600 shadow-amber-500/25",
   };
   return (
     <div
       className={cn(
-        "absolute text-white rounded-full px-1.5 sm:px-2 py-0.5 shadow-lg flex items-center gap-1 whitespace-nowrap",
-        colorMap[color],
+        "absolute rounded-xl bg-white/80 backdrop-blur-xl shadow-xl shadow-black/10 border border-white/60 px-2 sm:px-3 py-1.5 sm:py-2 flex items-center gap-2 whitespace-nowrap",
         className
       )}
     >
-      <Icon className="h-2 w-2 sm:h-2.5 sm:w-2.5" />
-      <span className="text-[5px] sm:text-[6px] font-bold">{label}</span>
+      <div className={cn("flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center rounded-lg bg-gradient-to-br text-white shadow-md shrink-0", gradientMap[color])}>
+        <Icon className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
+      </div>
+      <div>
+        <p className="text-[6px] sm:text-[7px] font-bold text-zinc-900 leading-none">{headline}</p>
+        <p className="text-[4px] sm:text-[5px] text-zinc-500 mt-0.5">{subtitle}</p>
+      </div>
     </div>
   );
 }
 
-/* ── Unsplash photo URLs (free license) — vibrant, energetic lifestyle shots ── */
+/* ── Unsplash photo URLs (free license) — workplace / employee shots ── */
 const lifestylePhotos = {
-  twitter: "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&q=80&auto=format&fit=crop",   // diverse team animated brainstorm
-  linkedin: "https://images.unsplash.com/photo-1521737852567-6949f3f9f2b5?w=800&q=80&auto=format&fit=crop",  // team high-fiving, energetic
-  facebook: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&q=80&auto=format&fit=crop",   // group laughing at laptop, casual
-  youtube: "https://images.unsplash.com/photo-1543269865-cbf427effbad?w=800&q=80&auto=format&fit=crop",       // young professionals colorful setting
-  og: "https://images.unsplash.com/photo-1552581234-26160f608093?w=800&q=80&auto=format&fit=crop",            // person at laptop, warm light
+  twitter: "https://images.unsplash.com/photo-1497215842964-222b430dc094?w=800&q=80&auto=format&fit=crop",   // modern open office with employees
+  linkedin: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=800&q=80&auto=format&fit=crop",  // team meeting in glass conference room
+  facebook: "https://images.unsplash.com/photo-1553028826-f4804a6dba3b?w=800&q=80&auto=format&fit=crop",     // coworkers at desk collaborating
+  youtube: "https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=800&q=80&auto=format&fit=crop",   // team around conference table
+  og: "https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?w=800&q=80&auto=format&fit=crop",        // professional woman at workstation
 };
 
 /* ── Twitter Lifestyle (1500 x 500) ── */
@@ -1213,19 +1219,17 @@ export function TwitterBannerLifestyle() {
           <FeaturePills />
           <CompatibilityLine />
         </div>
-        <div className="hidden sm:flex w-[55%] items-center gap-3 relative">
+        <div className="hidden sm:flex w-[55%] items-center relative">
           <LifestylePhoto
             src={lifestylePhotos.twitter}
-            alt="Diverse team in animated brainstorm session"
-            className="w-[55%] aspect-[4/3]"
-            rotate={-1}
+            alt="Employees in modern open office"
+            className="w-[60%] aspect-[4/3]"
           />
-          <div className="w-[50%] -ml-4">
+          <div className="w-[50%] -ml-10 relative z-10">
             <VaultScene compact />
           </div>
-          <SnippetChip icon={Shield} label="3 blocked" color="red" className="-top-2 right-[30%]" />
-          <SnippetChip icon={Users} label="Shared with team" color="blue" className="bottom-0 left-[10%]" />
-          <SnippetChip icon={Zap} label="142 prompts used" color="emerald" className="-bottom-2 right-[5%]" />
+          <FrostedBadge icon={Shield} headline="DLP Active" subtitle="3 threats blocked" color="red" className="-bottom-3 left-[5%]" />
+          <FrostedBadge icon={Users} headline="8 teams" subtitle="Sharing prompts" color="blue" className="-top-3 right-[25%]" />
         </div>
       </div>
     </LifestyleBannerShell>
@@ -1246,19 +1250,17 @@ export function LinkedInBannerLifestyle() {
           <FeaturePills />
           <CompatibilityLine />
         </div>
-        <div className="hidden sm:flex w-[55%] items-center gap-3 relative">
+        <div className="hidden sm:flex w-[55%] items-center relative">
           <LifestylePhoto
             src={lifestylePhotos.linkedin}
-            alt="Energetic team celebrating a win"
-            className="w-[50%] aspect-[4/3]"
-            rotate={1}
+            alt="Team meeting in glass conference room"
+            className="w-[55%] aspect-[4/3]"
           />
-          <div className="w-[50%] -ml-3">
+          <div className="w-[50%] -ml-10 relative z-10">
             <DLPBlockScene compact />
           </div>
-          <SnippetChip icon={AlertTriangle} label="Warning: PII detected" color="amber" className="-top-2 right-[25%]" />
-          <SnippetChip icon={Shield} label="DLP Active" color="red" className="bottom-0 left-[5%]" />
-          <SnippetChip icon={Zap} label="142 prompts used" color="emerald" className="-bottom-2 right-[10%]" />
+          <FrostedBadge icon={Shield} headline="PII detected" subtitle="Auto-blocked in real time" color="red" className="-bottom-3 left-[8%]" />
+          <FrostedBadge icon={BarChart3} headline="+23% adoption" subtitle="This month" color="blue" className="-top-3 right-[20%]" />
         </div>
       </div>
     </LifestyleBannerShell>
@@ -1278,19 +1280,17 @@ export function FacebookCoverLifestyle() {
           </p>
           <FeaturePills />
         </div>
-        <div className="hidden sm:flex w-[55%] items-center gap-2 relative">
+        <div className="hidden sm:flex w-[55%] items-center relative">
           <LifestylePhoto
             src={lifestylePhotos.facebook}
-            alt="Group of colleagues laughing at laptop"
-            className="w-[50%] aspect-[4/3]"
-            rotate={-1}
+            alt="Coworkers collaborating at desk"
+            className="w-[55%] aspect-[4/3]"
           />
-          <div className="w-[50%] -ml-3">
+          <div className="w-[50%] -ml-10 relative z-10">
             <InsertScene />
           </div>
-          <SnippetChip icon={Shield} label="3 blocked" color="red" className="-top-2 right-[20%]" />
-          <SnippetChip icon={Users} label="Shared with team" color="blue" className="-bottom-1 left-[8%]" />
-          <SnippetChip icon={Zap} label="142 prompts used" color="emerald" className="-bottom-2 right-[5%]" />
+          <FrostedBadge icon={Zap} headline="One-click insert" subtitle="Paste into any AI tool" color="emerald" className="-bottom-3 left-[5%]" />
+          <FrostedBadge icon={Users} headline="5 AI tools" subtitle="Connected" color="blue" className="-top-3 right-[15%]" />
         </div>
       </div>
     </LifestyleBannerShell>
@@ -1309,22 +1309,19 @@ export function YouTubeBannerLifestyle() {
         </p>
         <FeaturePills />
         <div className="w-full max-w-lg mt-1 relative">
-          <div className="flex items-start gap-3">
+          <div className="flex items-start">
             <LifestylePhoto
               src={lifestylePhotos.youtube}
-              alt="Young professionals in a colorful workspace"
-              className="w-[45%] aspect-[4/3]"
-              rotate={-2}
+              alt="Team around conference table"
+              className="w-[50%] aspect-[4/3]"
             />
-            <div className="w-[55%] space-y-2">
+            <div className="w-[55%] space-y-2 -ml-8 relative z-10">
               <VaultScene compact />
               <DLPBlockScene compact />
             </div>
           </div>
-          <SnippetChip icon={Shield} label="3 blocked" color="red" className="-top-2 right-[15%]" />
-          <SnippetChip icon={Users} label="Shared with team" color="blue" className="top-[40%] -left-3" />
-          <SnippetChip icon={AlertTriangle} label="Warning: PII detected" color="amber" className="bottom-[30%] -right-2" />
-          <SnippetChip icon={Zap} label="142 prompts used" color="emerald" className="-bottom-2 left-[30%]" />
+          <FrostedBadge icon={Shield} headline="DLP Active" subtitle="Real-time scanning" color="red" className="-top-3 right-[10%]" />
+          <FrostedBadge icon={Zap} headline="142 prompts" subtitle="Used this month" color="emerald" className="-bottom-3 left-[10%]" />
         </div>
         <CompatibilityLine className="mt-2" />
       </div>
@@ -1349,22 +1346,19 @@ export function OGBannerLifestyle() {
           <CompatibilityLine />
         </div>
         <div className="w-[55%] relative">
-          <div className="flex items-start gap-3">
+          <div className="flex items-start">
             <LifestylePhoto
               src={lifestylePhotos.og}
-              alt="Person working at laptop in warm light"
+              alt="Professional woman at workstation"
               className="w-[50%] aspect-[4/3]"
-              rotate={1}
             />
-            <div className="w-[50%] space-y-2 -ml-2">
+            <div className="w-[55%] space-y-2 -ml-8 relative z-10">
               <VaultScene compact />
               <DLPBlockScene compact />
             </div>
           </div>
-          <SnippetChip icon={Shield} label="DLP Active" color="red" className="-top-2 right-[20%]" />
-          <SnippetChip icon={Users} label="Shared with team" color="blue" className="top-[35%] -left-2" />
-          <SnippetChip icon={AlertTriangle} label="Warning: PII detected" color="amber" className="-bottom-1 right-[10%]" />
-          <SnippetChip icon={Zap} label="142 prompts used" color="emerald" className="-bottom-2 left-[25%]" />
+          <FrostedBadge icon={Shield} headline="Data protected" subtitle="Real-time scanning" color="red" className="-top-3 right-[15%]" />
+          <FrostedBadge icon={Users} headline="Team library" subtitle="Shared prompts" color="blue" className="-bottom-3 left-[5%]" />
         </div>
       </div>
     </LifestyleBannerShell>

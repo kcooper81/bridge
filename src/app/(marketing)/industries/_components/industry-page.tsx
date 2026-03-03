@@ -7,7 +7,7 @@ import { FAQSection } from "@/components/marketing/faq-section";
 import { StatsRow } from "@/components/marketing/stats-row";
 import { AppMockup } from "@/components/marketing/app-mockup";
 import { HeroImage } from "@/components/marketing/hero-image";
-import { ArrowRight, Shield, X } from "lucide-react";
+import { ArrowRight, Shield } from "lucide-react";
 import {
   Archive,
   ArrowDownUp,
@@ -179,25 +179,29 @@ export function IndustryPage({ data }: { data: IndustryPageData }) {
       </section>
 
       {/* ━━━ PAIN POINTS ━━━ */}
-      <section className="py-20 sm:py-28">
+      <section className="py-20 sm:py-28 bg-muted/30 border-y border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-14">
+          <div className="max-w-2xl mb-14">
             <SectionLabel>The Problem</SectionLabel>
             <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
               Without TeamPrompt
             </h2>
+            <p className="mt-4 text-lg text-muted-foreground">
+              Teams across {data.industry.toLowerCase()} face the same risks when AI tools go unmanaged.
+            </p>
           </div>
 
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto">
-            {data.painPoints.map((point) => (
+            {data.painPoints.map((point, i) => (
               <div
                 key={point.title}
-                className="rounded-2xl border border-destructive/20 bg-destructive/[0.02] p-6"
+                className="relative rounded-2xl border border-destructive/20 bg-card p-6 pl-8 overflow-hidden"
               >
-                <div className="flex items-center gap-2 mb-3">
-                  <X className="h-5 w-5 text-destructive shrink-0" />
-                  <h3 className="font-semibold">{point.title}</h3>
-                </div>
+                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-destructive/60 to-destructive/20" />
+                <span className="text-[10px] font-bold uppercase tracking-wider text-destructive/60 mb-3 block">
+                  Risk {i + 1}
+                </span>
+                <h3 className="font-semibold mb-2">{point.title}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   {point.description}
                 </p>
@@ -208,13 +212,16 @@ export function IndustryPage({ data }: { data: IndustryPageData }) {
       </section>
 
       {/* ━━━ APP MOCKUP ━━━ */}
-      <section className="py-10 sm:py-16">
+      <section className="py-20 sm:py-28">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-10">
             <SectionLabel>With TeamPrompt</SectionLabel>
             <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
               Purpose-built for {data.industry.toLowerCase()} teams
             </h2>
+            <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
+              See how the dashboard looks for your team — complete with industry-specific security rules and prompts.
+            </p>
           </div>
           <AppMockup
             variant={data.mockupVariant}
@@ -228,24 +235,27 @@ export function IndustryPage({ data }: { data: IndustryPageData }) {
       </section>
 
       {/* ━━━ KEY FEATURES ━━━ */}
-      <section className="py-20 sm:py-28">
+      <section className="py-20 sm:py-28 border-t border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-14">
+          <div className="max-w-2xl mb-14">
             <SectionLabel>Key Features</SectionLabel>
             <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
               Built for {data.industry.toLowerCase()} compliance
             </h2>
+            <p className="mt-4 text-lg text-muted-foreground">
+              Every feature designed with your industry&apos;s requirements in mind.
+            </p>
           </div>
 
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto">
+          <div className="grid gap-px sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto rounded-2xl border border-border overflow-hidden bg-border">
             {data.features.map((feature) => {
               const Icon = iconMap[feature.icon] || Shield;
               return (
                 <div
                   key={feature.title}
-                  className="group rounded-2xl border border-border bg-card p-8 hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5"
+                  className="group bg-card p-8 hover:bg-primary/[0.02] transition-colors duration-300"
                 >
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 text-primary">
                     <Icon className="h-5 w-5" />
                   </div>
                   <h3 className="mt-5 text-lg font-semibold">{feature.title}</h3>

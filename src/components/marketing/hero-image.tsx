@@ -18,7 +18,11 @@ interface HeroImageProps {
 export function HeroImage({ src, alt, badge, dark, className }: HeroImageProps) {
   return (
     <div className={cn("relative hidden lg:block", className)}>
-      <div className="relative rounded-2xl overflow-hidden shadow-2xl">
+      {/* Ambient glow behind the image */}
+      <div className="absolute -inset-4 rounded-3xl bg-gradient-to-br from-blue-500/20 via-purple-500/10 to-transparent blur-2xl opacity-60" />
+
+      {/* Main image container */}
+      <div className="relative rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10">
         <Image
           src={src}
           alt={alt}
@@ -28,24 +32,42 @@ export function HeroImage({ src, alt, badge, dark, className }: HeroImageProps) 
           unoptimized
           priority
         />
-        {/* Dark-edge gradient overlay for blending with dark hero backgrounds */}
+
+        {/* Multi-layer gradient overlays */}
         {dark && (
-          <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/40 via-transparent to-transparent" />
+          <>
+            {/* Bottom fade for blending */}
+            <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/60 via-zinc-950/10 to-transparent" />
+            {/* Side fade for depth */}
+            <div className="absolute inset-0 bg-gradient-to-r from-zinc-950/30 via-transparent to-transparent" />
+            {/* Top-corner vignette */}
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,transparent_50%,rgba(0,0,0,0.3)_100%)]" />
+          </>
+        )}
+
+        {!dark && (
+          <>
+            <div className="absolute inset-0 bg-gradient-to-t from-white/20 via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,transparent_60%,rgba(0,0,0,0.15)_100%)]" />
+          </>
         )}
       </div>
 
-      {/* Floating stat badge */}
+      {/* Frosted glass floating badge */}
       {badge && (
-        <div className="absolute -bottom-4 -left-4 rounded-xl bg-white shadow-lg shadow-black/10 px-4 py-3 flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-500/10 text-blue-600 shrink-0">
+        <div className="absolute -bottom-5 -left-5 rounded-2xl bg-white/80 backdrop-blur-xl shadow-xl shadow-black/10 border border-white/60 px-5 py-3.5 flex items-center gap-3.5">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/25 shrink-0">
             {badge.icon}
           </div>
           <div>
             <p className="text-sm font-bold text-zinc-900 leading-none">{badge.headline}</p>
-            <p className="text-xs text-zinc-500 mt-0.5">{badge.subtitle}</p>
+            <p className="text-xs text-zinc-500 mt-1">{badge.subtitle}</p>
           </div>
         </div>
       )}
+
+      {/* Secondary decorative blur orb */}
+      <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full bg-blue-400/15 blur-2xl pointer-events-none" />
     </div>
   );
 }

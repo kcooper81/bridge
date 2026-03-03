@@ -63,20 +63,74 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Zap,
 };
 
-const categoryHeroImages: Record<SeoCategory, { src: string; alt: string; badgeIcon: string; badgeHeadline: string; badgeSubtitle: string }> = {
-  "use-case": { src: "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=640&q=80&auto=format&fit=crop", alt: "Team collaborating on AI workflows", badgeIcon: "Users", badgeHeadline: "Built for teams", badgeSubtitle: "Shared prompt library" },
-  integration: { src: "https://images.unsplash.com/photo-1551434678-e076c223a692?w=640&q=80&auto=format&fit=crop", alt: "Developer working with multiple tools", badgeIcon: "Globe", badgeHeadline: "5 AI tools", badgeSubtitle: "One extension, everywhere" },
-  comparison: { src: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=640&q=80&auto=format&fit=crop", alt: "Team evaluating software options", badgeIcon: "BarChart3", badgeHeadline: "Side-by-side", badgeSubtitle: "See the difference" },
-  alternative: { src: "https://images.unsplash.com/photo-1553877522-43269d4ea984?w=640&q=80&auto=format&fit=crop", alt: "Professional switching to better tools", badgeIcon: "Zap", badgeHeadline: "Better alternative", badgeSubtitle: "Purpose-built for prompts" },
-  guide: { src: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=640&q=80&auto=format&fit=crop", alt: "Person learning best practices", badgeIcon: "BookOpen", badgeHeadline: "Best practices", badgeSubtitle: "Step-by-step guides" },
-  workflow: { src: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=640&q=80&auto=format&fit=crop", alt: "Team streamlining their workflow", badgeIcon: "Zap", badgeHeadline: "Streamlined", badgeSubtitle: "Faster AI workflows" },
-  role: { src: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=640&q=80&auto=format&fit=crop", alt: "Professional using AI at work", badgeIcon: "Users", badgeHeadline: "Role-specific", badgeSubtitle: "Tailored for your job" },
-  template: { src: "https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=640&q=80&auto=format&fit=crop", alt: "Ready-to-use templates on screen", badgeIcon: "Archive", badgeHeadline: "Ready to use", badgeSubtitle: "Copy and customize" },
-  platform: { src: "https://images.unsplash.com/photo-1551434678-e076c223a692?w=640&q=80&auto=format&fit=crop", alt: "Cross-platform AI usage", badgeIcon: "Globe", badgeHeadline: "Any platform", badgeSubtitle: "Works everywhere" },
+type HeroImgData = { src: string; alt: string; badgeIcon: string; badgeHeadline: string; badgeSubtitle: string };
+const u = (id: string) => `https://images.unsplash.com/${id}?w=640&q=80&auto=format&fit=crop`;
+
+const slugHeroImages: Record<string, HeroImgData> = {
+  // ── use-case ──
+  "prompt-library":         { src: u("photo-1552664730-d307ca884978"), alt: "Team organizing shared documents", badgeIcon: "Archive", badgeHeadline: "Shared library", badgeSubtitle: "All prompts, one place" },
+  "prompt-governance":      { src: u("photo-1557804506-669a67965ba0"), alt: "Office strategy meeting", badgeIcon: "ShieldCheck", badgeHeadline: "Full visibility", badgeSubtitle: "Every prompt approved" },
+  "team-collaboration":     { src: u("photo-1600880292203-757bb62b4baf"), alt: "Team collaborating at whiteboard", badgeIcon: "Users", badgeHeadline: "Real-time sharing", badgeSubtitle: "Teams stay in sync" },
+  "ai-security-compliance": { src: u("photo-1555949963-ff9fe0c870eb"), alt: "Secure office environment", badgeIcon: "Shield", badgeHeadline: "Protected by default", badgeSubtitle: "Data stays safe" },
+  "knowledge-management":   { src: u("photo-1434030216411-0b793f4b4173"), alt: "Person studying with notes", badgeIcon: "BookOpen", badgeHeadline: "Organized knowledge", badgeSubtitle: "Find any prompt" },
+  "training-onboarding":    { src: u("photo-1522202176988-66273c2fd55f"), alt: "Training session in progress", badgeIcon: "Zap", badgeHeadline: "Quick onboarding", badgeSubtitle: "Up and running fast" },
+  "quality-assurance":      { src: u("photo-1556761175-b413da4baf72"), alt: "Quality review process", badgeIcon: "ShieldCheck", badgeHeadline: "Quality enforced", badgeSubtitle: "Every prompt checked" },
+  "ai-standards":           { src: u("photo-1556742031-c6961e8560b0"), alt: "Corporate standards meeting", badgeIcon: "BookOpen", badgeHeadline: "Standards set", badgeSubtitle: "Consistent AI usage" },
+  // ── integration ──
+  "chatgpt":    { src: u("photo-1517694712202-14dd9538aa97"), alt: "Developer at screen with code", badgeIcon: "Zap", badgeHeadline: "ChatGPT ready", badgeSubtitle: "Insert prompts instantly" },
+  "claude":     { src: u("photo-1556745757-8d76bdb6984b"), alt: "Modern creative workspace", badgeIcon: "Zap", badgeHeadline: "Claude supported", badgeSubtitle: "One-click insertion" },
+  "gemini":     { src: u("photo-1519389950473-47ba0277781c"), alt: "Tech workspace with monitors", badgeIcon: "Globe", badgeHeadline: "Gemini connected", badgeSubtitle: "Search and insert" },
+  "copilot":    { src: u("photo-1515378960530-7c0da6231fb1"), alt: "Coding session on laptop", badgeIcon: "Zap", badgeHeadline: "Copilot enabled", badgeSubtitle: "Prompts in your browser" },
+  "perplexity": { src: u("photo-1504868584819-f8e8b4b6d7e3"), alt: "Research and discovery", badgeIcon: "Eye", badgeHeadline: "Perplexity linked", badgeSubtitle: "Research prompts ready" },
+  "slack":      { src: u("photo-1556761175-4b46a572b786"), alt: "Team chat and messaging", badgeIcon: "Users", badgeHeadline: "Slack integrated", badgeSubtitle: "Share from chat" },
+  // ── role ──
+  "for-engineering-teams": { src: u("photo-1498050108023-c5249f4df085"), alt: "Engineers coding at workstation", badgeIcon: "Key", badgeHeadline: "Built for devs", badgeSubtitle: "Code prompts ready" },
+  "for-product-teams":     { src: u("photo-1552581234-26160f608093"), alt: "Product team planning session", badgeIcon: "BarChart3", badgeHeadline: "Product focus", badgeSubtitle: "Specs and planning" },
+  "for-sales-teams":       { src: u("photo-1556742049-0cfed4f6a45d"), alt: "Sales team in action", badgeIcon: "Zap", badgeHeadline: "Close faster", badgeSubtitle: "Sales prompts ready" },
+  "for-marketing-teams":   { src: u("photo-1542626991-cbc4e32524cc"), alt: "Creative marketing workspace", badgeIcon: "Eye", badgeHeadline: "Creative edge", badgeSubtitle: "Content prompts" },
+  "for-support-teams":     { src: u("photo-1553028826-f4804a6dba3b"), alt: "Support agent helping customer", badgeIcon: "Users", badgeHeadline: "Faster replies", badgeSubtitle: "Response templates" },
+  "for-operations-teams":  { src: u("photo-1454165804606-c3d57bc86b40"), alt: "Operations team at work", badgeIcon: "BarChart3", badgeHeadline: "Ops streamlined", badgeSubtitle: "Process prompts" },
+  // ── workflow ──
+  "customer-support-ai-workflow":    { src: u("photo-1556742111-a301076d9d18"), alt: "Support desk with headset", badgeIcon: "Users", badgeHeadline: "Support flow", badgeSubtitle: "Resolve tickets faster" },
+  "sales-workflow":                  { src: u("photo-1560472354-b33ff0c44a43"), alt: "Sales pipeline and deals", badgeIcon: "Zap", badgeHeadline: "Sales pipeline", badgeSubtitle: "Close more deals" },
+  "content-marketing-workflow":      { src: u("photo-1542744094-3a31f272c490"), alt: "Content creation process", badgeIcon: "Eye", badgeHeadline: "Content engine", badgeSubtitle: "Create at scale" },
+  "code-review-workflow":            { src: u("photo-1581091226825-a6a2a5aee158"), alt: "Code review on screen", badgeIcon: "Key", badgeHeadline: "Review flow", badgeSubtitle: "Better code reviews" },
+  "hiring-workflow":                 { src: u("photo-1573496359142-b8d87734a5a2"), alt: "Interview and hiring process", badgeIcon: "Users", badgeHeadline: "Hiring pipeline", badgeSubtitle: "Screen candidates" },
+  "product-documentation-workflow":  { src: u("photo-1586281380349-632531db7ed4"), alt: "Documentation writing session", badgeIcon: "BookOpen", badgeHeadline: "Doc workflow", badgeSubtitle: "Ship docs faster" },
+  // ── template ──
+  "email-prompt-templates":        { src: u("photo-1557426272-fc759fdf7a8d"), alt: "Email communication workflow", badgeIcon: "Archive", badgeHeadline: "Email ready", badgeSubtitle: "Send better emails" },
+  "code-review-templates":         { src: u("photo-1516321318423-f06f85e504b3"), alt: "Code displayed on monitor", badgeIcon: "Key", badgeHeadline: "Code reviews", badgeSubtitle: "Thorough feedback" },
+  "meeting-notes-templates":       { src: u("photo-1517048676732-d65bc937f952"), alt: "Team meeting in progress", badgeIcon: "BookOpen", badgeHeadline: "Meeting notes", badgeSubtitle: "Capture action items" },
+  "report-writing-templates":      { src: u("photo-1460925895917-afdab827c52f"), alt: "Data dashboard and reporting", badgeIcon: "BarChart3", badgeHeadline: "Reports ready", badgeSubtitle: "Professional outputs" },
+  "social-media-templates":        { src: u("photo-1556761175-5973dc0f32e7"), alt: "Social media content creation", badgeIcon: "Globe", badgeHeadline: "Social ready", badgeSubtitle: "Post everywhere" },
+  "customer-response-templates":   { src: u("photo-1559028012-481c04fa702d"), alt: "Customer support interaction", badgeIcon: "Users", badgeHeadline: "Responses ready", badgeSubtitle: "Fast and consistent" },
+  "data-analysis-templates":       { src: u("photo-1551288049-bebda4e38f71"), alt: "Data analysis and charts", badgeIcon: "BarChart3", badgeHeadline: "Data insights", badgeSubtitle: "Analyze anything" },
+  "project-planning-templates":    { src: u("photo-1531482615713-2afd69097998"), alt: "Project planning whiteboard", badgeIcon: "Archive", badgeHeadline: "Plans ready", badgeSubtitle: "Project kickstart" },
+  "interview-prep-templates":      { src: u("photo-1560439514-4e9645039924"), alt: "Interview preparation", badgeIcon: "Users", badgeHeadline: "Interview prep", badgeSubtitle: "Be prepared" },
+  "documentation-templates":       { src: u("photo-1504384764586-bb4cdc1707b0"), alt: "Technical documentation", badgeIcon: "BookOpen", badgeHeadline: "Docs ready", badgeSubtitle: "Technical writing" },
+  "content-marketing-templates":   { src: u("photo-1559136555-9303baea8ebd"), alt: "Content strategy session", badgeIcon: "Eye", badgeHeadline: "Content ready", badgeSubtitle: "Blog to social" },
+  "hiring-templates":              { src: u("photo-1556155092-490a1ba16284"), alt: "Hiring and recruitment", badgeIcon: "Users", badgeHeadline: "Hiring ready", badgeSubtitle: "Screen and assess" },
+  "brainstorm-templates":          { src: u("photo-1542744173-05336fcc7ad4"), alt: "Creative brainstorming session", badgeIcon: "Zap", badgeHeadline: "Ideas flowing", badgeSubtitle: "Creative sessions" },
+  // ── comparison / alternative / guide ──
+  "vs-notion":             { src: u("photo-1460925895917-afdab827c52f"), alt: "Comparing software tools", badgeIcon: "BarChart3", badgeHeadline: "Side-by-side", badgeSubtitle: "See the difference" },
+  "notion-alternative":    { src: u("photo-1553877522-43269d4ea984"), alt: "Professional switching tools", badgeIcon: "Zap", badgeHeadline: "Better alternative", badgeSubtitle: "Purpose-built for prompts" },
+  "prompt-management-101": { src: u("photo-1434030216411-0b793f4b4173"), alt: "Learning prompt management", badgeIcon: "BookOpen", badgeHeadline: "Best practices", badgeSubtitle: "Step-by-step guide" },
+};
+
+const categoryFallback: Record<SeoCategory, HeroImgData> = {
+  "use-case":    slugHeroImages["prompt-library"],
+  integration:   slugHeroImages["chatgpt"],
+  comparison:    slugHeroImages["vs-notion"],
+  alternative:   slugHeroImages["notion-alternative"],
+  guide:         slugHeroImages["prompt-management-101"],
+  workflow:      slugHeroImages["customer-support-ai-workflow"],
+  role:          slugHeroImages["for-engineering-teams"],
+  template:      slugHeroImages["email-prompt-templates"],
+  platform:      { src: u("photo-1551434678-e076c223a692"), alt: "Cross-platform AI usage", badgeIcon: "Globe", badgeHeadline: "Any platform", badgeSubtitle: "Works everywhere" },
 };
 
 export function SeoLandingPage({ data }: { data: SeoPageData }) {
-  const heroImg = categoryHeroImages[data.category];
+  const heroImg = slugHeroImages[data.slug] || categoryFallback[data.category];
   return (
     <>
       {/* Structured Data */}
@@ -335,21 +389,28 @@ function ContentSection({ section }: { section: SeoContentSection }) {
 
 function ChecklistSection({ section }: { section: SeoContentSection }) {
   const items = (section.content.items as string[]) || [];
+  const half = Math.ceil(items.length / 2);
   return (
-    <section className="py-20 sm:py-28 border-t border-border">
+    <section className="py-20 sm:py-28 bg-muted/30 border-y border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="text-center mb-14">
+        <div className="max-w-2xl mb-14">
           <SectionLabel>Checklist</SectionLabel>
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">{section.heading}</h2>
         </div>
-        <ul className="max-w-2xl mx-auto space-y-4">
-          {items.map((item, i) => (
-            <li key={i} className="flex items-start gap-3 text-muted-foreground">
-              <CheckCircle2 className="h-5 w-5 text-emerald-500 mt-0.5 shrink-0" />
-              <span>{item}</span>
-            </li>
+        <div className="grid sm:grid-cols-2 gap-4 max-w-4xl mx-auto">
+          {[items.slice(0, half), items.slice(half)].map((col, colIdx) => (
+            <div key={colIdx} className="space-y-3">
+              {col.map((item, i) => (
+                <div key={i} className="flex items-start gap-3 rounded-xl bg-card border border-border p-4">
+                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 mt-0.5">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                  </div>
+                  <span className="text-sm text-muted-foreground leading-relaxed">{item}</span>
+                </div>
+              ))}
+            </div>
           ))}
-        </ul>
+        </div>
       </div>
     </section>
   );
@@ -365,22 +426,28 @@ function ComparisonTableSection({ section }: { section: SeoContentSection }) {
           <SectionLabel>Comparison</SectionLabel>
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">{section.heading}</h2>
         </div>
-        <div className="max-w-3xl mx-auto overflow-x-auto">
-          <table className="w-full text-sm border-collapse">
+        <div className="max-w-3xl mx-auto rounded-2xl border border-border overflow-hidden bg-card">
+          <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-border">
-                <th className="text-left py-3 px-4 font-semibold">Feature</th>
+              <tr className="bg-muted/50">
+                <th className="text-left py-4 px-6 font-semibold">Feature</th>
                 {headers.map((h) => (
-                  <th key={h} className="text-center py-3 px-4 font-semibold">{h}</th>
+                  <th key={h} className="text-center py-4 px-6 font-semibold">{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {rows.map((row) => (
-                <tr key={row.label} className="border-b border-border/50">
-                  <td className="py-3 px-4 text-muted-foreground">{row.label}</td>
+              {rows.map((row, rIdx) => (
+                <tr key={row.label} className={rIdx % 2 === 1 ? "bg-muted/20" : ""}>
+                  <td className="py-3.5 px-6 font-medium">{row.label}</td>
                   {row.values.map((val, i) => (
-                    <td key={i} className="text-center py-3 px-4 text-muted-foreground">{val}</td>
+                    <td key={i} className="text-center py-3.5 px-6 text-muted-foreground">
+                      {val === "✓" ? (
+                        <CheckCircle2 className="h-4 w-4 text-emerald-500 mx-auto" />
+                      ) : val === "✗" ? (
+                        <span className="text-destructive/50">—</span>
+                      ) : val}
+                    </td>
                   ))}
                 </tr>
               ))}
@@ -395,24 +462,28 @@ function ComparisonTableSection({ section }: { section: SeoContentSection }) {
 function HowItWorksSection({ section }: { section: SeoContentSection }) {
   const steps = (section.content.steps as { title: string; description: string }[]) || [];
   return (
-    <section className="py-20 sm:py-28 border-t border-border">
+    <section className="py-20 sm:py-28 bg-muted/30 border-y border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-14">
           <SectionLabel>How it works</SectionLabel>
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">{section.heading}</h2>
         </div>
-        <div className="max-w-3xl mx-auto space-y-8">
-          {steps.map((step, i) => (
-            <div key={i} className="flex gap-6">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm">
-                {i + 1}
+        <div className="max-w-4xl mx-auto">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {steps.map((step, i) => (
+              <div key={i} className="relative text-center">
+                {/* Connector line */}
+                {i < steps.length - 1 && (
+                  <div className="hidden lg:block absolute top-5 left-[calc(50%+28px)] right-[calc(-50%+28px)] h-px bg-border" />
+                )}
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold text-sm mx-auto mb-4 relative z-10 shadow-md shadow-primary/20">
+                  {i + 1}
+                </div>
+                <h3 className="font-semibold mb-2">{step.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{step.description}</p>
               </div>
-              <div>
-                <h3 className="text-lg font-semibold">{step.title}</h3>
-                <p className="mt-1 text-sm text-muted-foreground leading-relaxed">{step.description}</p>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </section>
@@ -425,8 +496,10 @@ function ProseSection({ section }: { section: SeoContentSection }) {
     <section className="py-20 sm:py-28 border-t border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="max-w-3xl mx-auto">
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-6">{section.heading}</h2>
-          <div className="prose prose-zinc dark:prose-invert max-w-none text-muted-foreground leading-relaxed whitespace-pre-line">
+          <div className="border-l-4 border-primary/30 pl-6 mb-8">
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">{section.heading}</h2>
+          </div>
+          <div className="prose prose-zinc dark:prose-invert max-w-none text-muted-foreground leading-relaxed whitespace-pre-line text-[15px]">
             {body}
           </div>
         </div>
@@ -440,13 +513,16 @@ function UseCasesGridSection({ section }: { section: SeoContentSection }) {
   return (
     <section className="py-20 sm:py-28 border-t border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="text-center mb-14">
+        <div className="max-w-2xl mb-14">
           <SectionLabel>Use cases</SectionLabel>
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">{section.heading}</h2>
         </div>
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto">
-          {cases.map((c) => (
-            <div key={c.title} className="rounded-2xl border border-border bg-card p-6">
+        <div className="grid gap-px sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto rounded-2xl border border-border overflow-hidden bg-border">
+          {cases.map((c, i) => (
+            <div key={c.title} className="bg-card p-7 hover:bg-primary/[0.02] transition-colors">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-primary/50 mb-3 block">
+                {String(i + 1).padStart(2, "0")}
+              </span>
               <h3 className="text-lg font-semibold">{c.title}</h3>
               <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{c.description}</p>
             </div>

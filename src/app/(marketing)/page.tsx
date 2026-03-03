@@ -43,7 +43,7 @@ import { PLAN_DISPLAY, PLAN_ORDER } from "@/lib/constants";
 export const metadata: Metadata = generatePageMetadata({
   title: "Stop Rewriting the Same AI Prompts — TeamPrompt",
   description:
-    "Your team writes the same AI prompts every week. TeamPrompt gives everyone one shared library, quality standards, and data protection — so the best prompts get reused, not reinvented.",
+    "TeamPrompt gives your team a shared prompt library, quality standards, and data protection — so the best AI prompts get reused, not reinvented.",
   path: "/",
   keywords: ["AI prompt management", "team prompts", "prompt library", "shared prompts"],
 });

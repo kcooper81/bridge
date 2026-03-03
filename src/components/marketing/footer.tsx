@@ -6,6 +6,7 @@ const footerLinks = {
     { label: "Features", href: "/features" },
     { label: "Pricing", href: "/pricing" },
     { label: "Integrations", href: "/integrations" },
+    { label: "Extensions", href: "/extensions" },
     { label: "Data Protection", href: "/security" },
     { label: "Enterprise", href: "/enterprise" },
   ],
@@ -27,7 +28,7 @@ const footerLinks = {
   ],
   Resources: [
     { label: "Help & Support", href: "/help" },
-    { label: "Security", href: "/security" },
+    { label: "Contact", href: "/contact" },
     { label: "Changelog", href: "/changelog" },
     { label: "Media Kit", href: "/media" },
     { label: "Privacy Policy", href: "/privacy" },

@@ -13,6 +13,7 @@ import {
   UserX,
 } from "lucide-react";
 import { generatePageMetadata } from "@/lib/seo/metadata";
+import { generateBreadcrumbSchema } from "@/lib/seo/schemas";
 import { DarkSection } from "@/components/marketing/dark-section";
 import { SectionLabel } from "@/components/marketing/section-label";
 import { BenefitsGrid } from "@/components/marketing/benefits-grid";
@@ -71,8 +72,18 @@ const benefits = [
   "Browser extension scans text before it reaches AI tools",
 ];
 
+const breadcrumbs = generateBreadcrumbSchema([
+  { name: "Home", url: "https://teamprompt.app" },
+  { name: "Data Protection", url: "https://teamprompt.app/security" },
+]);
+
 export default function SecurityPage() {
   return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbs) }}
+      />
     <div className="py-20 sm:py-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         {/* Hero */}
@@ -235,5 +246,6 @@ export default function SecurityPage() {
         />
       </div>
     </div>
+    </>
   );
 }

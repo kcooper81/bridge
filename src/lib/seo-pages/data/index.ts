@@ -6,6 +6,10 @@ import { guidePages } from "./guides";
 import { workflowPages } from "./workflows";
 import { rolePages } from "./roles";
 import { templatePages } from "./templates";
+import { dataProtectionPages } from "./data-protection";
+import { compliancePages } from "./compliance";
+import { policyPages } from "./policies";
+import { featureDeepPages } from "./features-deep";
 import type { SeoPageData } from "../types";
 
 export const allSeoPages: SeoPageData[] = [
@@ -17,6 +21,10 @@ export const allSeoPages: SeoPageData[] = [
   ...workflowPages,
   ...rolePages,
   ...templatePages,
+  ...dataProtectionPages,
+  ...compliancePages,
+  ...policyPages,
+  ...featureDeepPages,
 ];
 
 export function getSeoPageBySlug(slug: string): SeoPageData | undefined {

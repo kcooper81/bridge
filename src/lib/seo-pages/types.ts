@@ -7,7 +7,12 @@ export type SeoCategory =
   | "workflow"
   | "role"
   | "template"
-  | "platform";
+  | "platform"
+  | "glossary"
+  | "compliance"
+  | "data-protection"
+  | "feature"
+  | "policy";
 
 export interface SeoContentSection {
   type:

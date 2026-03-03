@@ -30,6 +30,7 @@ import {
   Zap,
 } from "lucide-react";
 import { generatePageMetadata } from "@/lib/seo/metadata";
+import { generateBreadcrumbSchema } from "@/lib/seo/schemas";
 import { cn } from "@/lib/utils";
 import { SectionLabel } from "@/components/marketing/section-label";
 import { CTASection } from "@/components/marketing/cta-section";
@@ -923,8 +924,18 @@ const features = [
   },
 ];
 
+const breadcrumbs = generateBreadcrumbSchema([
+  { name: "Home", url: "https://teamprompt.app" },
+  { name: "Features", url: "https://teamprompt.app/features" },
+]);
+
 export default function FeaturesPage() {
   return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbs) }}
+      />
     <div className="py-20 sm:py-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         {/* Hero */}
@@ -999,5 +1010,6 @@ export default function FeaturesPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }

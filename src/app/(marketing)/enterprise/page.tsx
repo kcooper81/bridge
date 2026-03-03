@@ -10,6 +10,7 @@ import { AppMockup } from "@/components/marketing/app-mockup";
 import { ContactSalesModal } from "@/components/marketing/contact-sales-modal";
 import { HeroImage } from "@/components/marketing/hero-image";
 import { generatePageMetadata } from "@/lib/seo/metadata";
+import { generateBreadcrumbSchema, generateFAQSchema } from "@/lib/seo/schemas";
 import {
   ArrowRight,
   Shield,
@@ -166,9 +167,23 @@ const faqs = [
   },
 ];
 
+const breadcrumbs = generateBreadcrumbSchema([
+  { name: "Home", url: "https://teamprompt.app" },
+  { name: "Enterprise", url: "https://teamprompt.app/enterprise" },
+]);
+const faqSchema = generateFAQSchema(faqs);
+
 export default function EnterprisePage() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbs) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
       {/* ━━━ HERO ━━━ */}
       <section className="relative overflow-hidden bg-zinc-950 text-white">
         <div

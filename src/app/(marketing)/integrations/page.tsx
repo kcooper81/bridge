@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { generatePageMetadata } from "@/lib/seo/metadata";
+import { generateBreadcrumbSchema } from "@/lib/seo/schemas";
 import { SectionLabel } from "@/components/marketing/section-label";
 import { CTASection } from "@/components/marketing/cta-section";
 import { HeroImage } from "@/components/marketing/hero-image";
@@ -20,7 +21,7 @@ import {
 export const metadata: Metadata = generatePageMetadata({
   title: "Integrations — Works With Every Major AI Tool",
   description:
-    "TeamPrompt's browser extension works with ChatGPT, Claude, Gemini, Microsoft Copilot, and Perplexity. Insert prompts, scan for sensitive data, and log usage — across all your AI tools.",
+    "TeamPrompt works with ChatGPT, Claude, Gemini, Copilot, and Perplexity. Insert prompts, scan for sensitive data, and log usage across all AI tools.",
   path: "/integrations",
   keywords: ["ChatGPT extension", "Claude extension", "Gemini extension", "AI tool integration"],
 });
@@ -105,9 +106,18 @@ const features = [
   },
 ];
 
+const breadcrumbs = generateBreadcrumbSchema([
+  { name: "Home", url: "https://teamprompt.app" },
+  { name: "Integrations", url: "https://teamprompt.app/integrations" },
+]);
+
 export default function IntegrationsPage() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbs) }}
+      />
       {/* Hero */}
       <section className="relative overflow-hidden bg-zinc-950 text-white">
         <div

@@ -1,38 +1,42 @@
 # TeamPrompt
 
-> AI Prompt Management for Teams
+> TeamPrompt is an AI prompt management platform with built-in data loss prevention (DLP) for teams using ChatGPT, Claude, Gemini, Copilot, and Perplexity. It provides shared prompt libraries, quality guidelines, security scanning, and usage analytics through a browser extension and web dashboard.
 
-TeamPrompt is a SaaS platform that helps organizations manage, share, and secure their AI prompts across tools like ChatGPT, Claude, Gemini, Microsoft Copilot, and Perplexity.
+TeamPrompt helps organizations manage how their teams use AI tools. It combines a centralized prompt library with enterprise-grade security features including real-time DLP scanning, audit logging, and compliance controls for healthcare, legal, finance, government, and technology teams.
 
-## Core Features
+## Product
+- [Features](https://teamprompt.app/features): Core product features and capabilities
+- [Pricing](https://teamprompt.app/pricing): Plans — Free, Pro ($9/mo), Team ($7/user/mo), Business ($12/user/mo)
+- [Security](https://teamprompt.app/security): Data protection, DLP scanning, and compliance
+- [Enterprise](https://teamprompt.app/enterprise): Enterprise features, SSO, and deployment
+- [Integrations](https://teamprompt.app/integrations): Supported AI tools — ChatGPT, Claude, Gemini, Copilot, Perplexity
+- [Extensions](https://teamprompt.app/extensions): Browser extension for Chrome, Edge, and Firefox
 
-- **Shared Prompt Library**: Create, organize, and share approved prompts across your team with folders, tags, and departments.
-- **Template System**: Prompts with fill-in variables that adapt to any context.
-- **Quality Standards**: Set writing guidelines and tone controls to ensure consistent AI outputs.
-- **DLP Security Scanning**: Real-time data loss prevention catches sensitive content before it reaches AI tools.
-- **Conversation Logging**: Full audit trail of every AI interaction across your organization.
-- **Browser Extension**: Insert prompts directly into ChatGPT, Claude, Gemini, Copilot, and Perplexity.
-- **Collections**: Curate prompt collections for specific workflows, teams, or use cases.
-- **Analytics**: Track prompt usage, team adoption, and AI interaction patterns.
+## Industries
+- [Healthcare](https://teamprompt.app/industries/healthcare): HIPAA-ready AI prompt management
+- [Legal](https://teamprompt.app/industries/legal): Client data protection for law firms
+- [Technology](https://teamprompt.app/industries/technology): Source code and API key protection
+- [Finance](https://teamprompt.app/industries/finance): Financial data compliance
+- [Government](https://teamprompt.app/industries/government): CUI and FedRAMP-aligned controls
+- [Education](https://teamprompt.app/industries/education): FERPA-ready student data protection
+- [Insurance](https://teamprompt.app/industries/insurance): Claims and PII protection
 
-## Key Pages
+## Documentation
+- [Help Center](https://teamprompt.app/help): Getting started guides and documentation
+- [Getting Started](https://teamprompt.app/help/getting-started): Create workspace, invite team, install extension
+- [Prompt Library](https://teamprompt.app/help/prompt-library): Create, edit, share, and version prompts
+- [Security Rules](https://teamprompt.app/help/security-rules): DLP scanning, custom rules, compliance packs
+- [Team Management](https://teamprompt.app/help/team-management): Roles, permissions, directory sync
 
-- Homepage: https://teamprompt.app
-- Features: https://teamprompt.app/features
-- Pricing: https://teamprompt.app/pricing
-- Security: https://teamprompt.app/security
-- Enterprise: https://teamprompt.app/enterprise
-- Help & Support: https://teamprompt.app/help
+## Solutions
+- [Solutions Hub](https://teamprompt.app/solutions): Use cases, comparisons, guides, and templates
+- [AI Governance](https://teamprompt.app/solutions/ai-governance): Enterprise AI governance platform
+- [DLP for AI](https://teamprompt.app/solutions/dlp-for-ai-tools): Data loss prevention for AI tools
+- [Prompt Management](https://teamprompt.app/solutions/prompt-management-101): Guide to prompt management
 
-## Industry Solutions
-
-- Healthcare: https://teamprompt.app/industries/healthcare
-- Legal: https://teamprompt.app/industries/legal
-- Technology: https://teamprompt.app/industries/technology
-- Finance: https://teamprompt.app/industries/finance
-- Government: https://teamprompt.app/industries/government
-
-## Contact
-
-- Website: https://teamprompt.app
-- Support: support@teamprompt.app
+## Optional
+- [Changelog](https://teamprompt.app/changelog): Release history and product updates
+- [Media Kit](https://teamprompt.app/media): Brand assets, logos, and press resources
+- [Contact](https://teamprompt.app/contact): Support and sales inquiries
+- [Privacy Policy](https://teamprompt.app/privacy): Privacy policy
+- [Terms of Service](https://teamprompt.app/terms): Terms of service

@@ -44,6 +44,11 @@ const categoryBadgeColors: Record<SeoCategory, string> = {
   role: "text-rose-400",
   template: "text-orange-400",
   platform: "text-indigo-400",
+  glossary: "text-teal-400",
+  compliance: "text-red-400",
+  "data-protection": "text-red-400",
+  feature: "text-sky-400",
+  policy: "text-amber-400",
 };
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -141,6 +146,11 @@ const categoryFallback: Record<SeoCategory, HeroImgData> = {
   role:          slugHeroImages["for-engineering-teams"],
   template:      slugHeroImages["email-prompt-templates"],
   platform:      { src: u("photo-1551434678-e076c223a692"), alt: "Cross-platform AI usage", badgeIcon: "Globe", badgeHeadline: "Any platform", badgeSubtitle: "Works everywhere", topBadgeIcon: "Zap", topBadgeHeadline: "5 AI tools", topBadgeSubtitle: "Connected" },
+  glossary:      { src: u("photo-1434030216411-0b793f4b4173"), alt: "AI terminology reference", badgeIcon: "BookOpen", badgeHeadline: "Glossary", badgeSubtitle: "AI terms explained", topBadgeIcon: "Archive", topBadgeHeadline: "50+ terms", topBadgeSubtitle: "Defined" },
+  compliance:    { src: u("photo-1555949963-ff9fe0c870eb"), alt: "Compliance and security", badgeIcon: "Shield", badgeHeadline: "Compliant", badgeSubtitle: "Meet every standard", topBadgeIcon: "ShieldCheck", topBadgeHeadline: "6 frameworks", topBadgeSubtitle: "Supported" },
+  "data-protection": { src: u("photo-1573164713714-d95e436ab8d6"), alt: "Data protection measures", badgeIcon: "ShieldAlert", badgeHeadline: "Data protected", badgeSubtitle: "Real-time scanning", topBadgeIcon: "Lock", topBadgeHeadline: "Auto-block", topBadgeSubtitle: "Sensitive data" },
+  feature:       { src: u("photo-1498050108023-c5249f4df085"), alt: "Feature deep dive", badgeIcon: "Zap", badgeHeadline: "Deep dive", badgeSubtitle: "Feature details", topBadgeIcon: "Eye", topBadgeHeadline: "Full details", topBadgeSubtitle: "How it works" },
+  policy:        { src: u("photo-1557804506-669a67965ba0"), alt: "Policy management", badgeIcon: "ShieldCheck", badgeHeadline: "Policy set", badgeSubtitle: "Enforce standards", topBadgeIcon: "Shield", topBadgeHeadline: "Auto-enforce", topBadgeSubtitle: "Company-wide" },
 };
 
 export function SeoLandingPage({ data }: { data: SeoPageData }) {

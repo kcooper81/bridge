@@ -72,7 +72,12 @@ export function generateOrganizationSchema() {
     description:
       "AI prompt management platform for teams. Shared libraries, quality standards, DLP security, and usage analytics.",
     email: "support@teamprompt.app",
-    sameAs: [],
+    sameAs: [
+      "https://x.com/teampromptapp",
+      "https://www.linkedin.com/company/teamprompt",
+      "https://github.com/kcooper81",
+      "https://chromewebstore.google.com/detail/teamprompt",
+    ],
   };
 }
 

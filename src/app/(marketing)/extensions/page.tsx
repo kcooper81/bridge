@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { generatePageMetadata } from "@/lib/seo/metadata";
+import { generateBreadcrumbSchema, generateFAQSchema } from "@/lib/seo/schemas";
 import { SectionLabel } from "@/components/marketing/section-label";
 import { CTASection } from "@/components/marketing/cta-section";
 import { FAQSection } from "@/components/marketing/faq-section";
@@ -16,7 +17,7 @@ import { ExtensionHero } from "./_components/extension-hero";
 export const metadata: Metadata = generatePageMetadata({
   title: "Browser Extension — Chrome, Firefox & Edge | TeamPrompt",
   description:
-    "Install the TeamPrompt browser extension for Chrome, Firefox, or Edge. Use your team's prompts directly in ChatGPT, Claude, Gemini, and more — with DLP scanning and usage analytics.",
+    "Install TeamPrompt for Chrome, Firefox, or Edge. Use your team's prompts in ChatGPT, Claude, Gemini, and more — with DLP scanning and analytics.",
   path: "/extensions",
   keywords: [
     "browser extension",
@@ -139,9 +140,23 @@ const browsers = [
   },
 ];
 
+const breadcrumbs = generateBreadcrumbSchema([
+  { name: "Home", url: "https://teamprompt.app" },
+  { name: "Extensions", url: "https://teamprompt.app/extensions" },
+]);
+const faqSchema = generateFAQSchema(faqs);
+
 export default function ExtensionsPage() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbs) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
       {/* Hero — client component for browser detection */}
       <ExtensionHero />
 

@@ -1,5 +1,10 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 import { AuthProvider } from "@/components/providers/auth-provider";
 import { OrgProvider } from "@/components/providers/org-provider";
 import { SubscriptionProvider } from "@/components/providers/subscription-provider";

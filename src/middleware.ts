@@ -34,6 +34,14 @@ function isAuthRoute(pathname: string) {
 }
 
 export async function middleware(request: NextRequest) {
+  // www → non-www 301 redirect (SEO canonical)
+  const host = request.headers.get("host") || "";
+  if (host.startsWith("www.")) {
+    const url = request.nextUrl.clone();
+    url.host = host.replace("www.", "");
+    return NextResponse.redirect(url, 301);
+  }
+
   // AUTH-DEBUG: init server-side logging
   authDebug.initServer(request);
   authDebug.log("middleware", `processing ${request.method} ${request.nextUrl.pathname}`);
@@ -152,6 +160,6 @@ function setSecurityHeaders(response: NextResponse) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|sitemap\\.xml|robots\\.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|sitemap\\.xml|robots\\.txt|llms(?:-full)?\\.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
   ],
 };

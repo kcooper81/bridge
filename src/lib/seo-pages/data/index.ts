@@ -10,6 +10,7 @@ import { dataProtectionPages } from "./data-protection";
 import { compliancePages } from "./compliance";
 import { policyPages } from "./policies";
 import { featureDeepPages } from "./features-deep";
+import { glossaryPages } from "./glossary";
 import type { SeoPageData } from "../types";
 
 export const allSeoPages: SeoPageData[] = [
@@ -25,6 +26,7 @@ export const allSeoPages: SeoPageData[] = [
   ...compliancePages,
   ...policyPages,
   ...featureDeepPages,
+  ...glossaryPages,
 ];
 
 export function getSeoPageBySlug(slug: string): SeoPageData | undefined {

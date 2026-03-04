@@ -34,9 +34,6 @@ export function BannerDownloadWrapper({
     try {
       const html2canvas = (await import("html2canvas")).default;
 
-      // Ensure web fonts (Inter) are fully loaded before capture
-      await document.fonts.ready;
-
       let target: HTMLElement = captureRef.current;
       let clone: HTMLElement | null = null;
 
@@ -54,29 +51,16 @@ export function BannerDownloadWrapper({
         clone.style.borderRadius = "0";
         clone.style.overflow = "visible";
         document.body.appendChild(clone);
-
-        // Strip decorative rounding from the banner shell for clean edges
+        // Only strip rounded corners + overflow from the outermost banner
+        // shell (first child) so the PNG has rectangular edges, but keep
+        // internal element styling (rounded photos, badges, pills) intact.
         const bannerShell = clone.firstElementChild as HTMLElement | null;
         if (bannerShell) {
           bannerShell.style.borderRadius = "0";
-          bannerShell.style.overflow = "hidden";
+          bannerShell.style.overflow = "visible";
         }
-
-        // Wait for all images in the clone to load
-        const images = clone.querySelectorAll("img");
-        await Promise.all(
-          Array.from(images).map((img) =>
-            img.complete
-              ? Promise.resolve()
-              : new Promise<void>((resolve) => {
-                  img.onload = () => resolve();
-                  img.onerror = () => resolve();
-                })
-          )
-        );
-
-        // Let layout + fonts settle after images load
-        await new Promise((r) => setTimeout(r, 300));
+        // Let layout settle
+        await new Promise((r) => setTimeout(r, 150));
         target = clone;
       }
 

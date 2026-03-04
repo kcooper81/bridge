@@ -471,10 +471,11 @@ function FeaturePill({ label, dark }: { label: string; dark?: boolean }) {
 }
 
 /**
- * HTML-based logo wordmark for banners — html2canvas can't render SVG <text>
- * inside <img> tags, so we use icon SVG (shapes only) + HTML <span>.
+ * HTML-based logo wordmark for banners — html2canvas can't render SVG elements
+ * inside <img> tags, so we inline the icon as React SVG + use HTML <span> for text.
  */
 function BannerWordmark({ size = "lg", dark }: { size?: "xs" | "sm" | "md" | "lg"; dark?: boolean }) {
+  const fill = dark ? "#0f1d2d" : "#FFFFFF";
   const sizes = {
     xs: { h: "h-4 sm:h-5", text: "text-[9px] sm:text-[11px]", icon: "h-3 sm:h-3.5" },
     sm: { h: "h-5 sm:h-6", text: "text-[11px] sm:text-[13px]", icon: "h-3.5 sm:h-4" },
@@ -484,14 +485,11 @@ function BannerWordmark({ size = "lg", dark }: { size?: "xs" | "sm" | "md" | "lg
   const s = sizes[size];
   return (
     <div className={cn("flex items-center gap-1 sm:gap-1.5", s.h)}>
-      <Image
-        src={dark ? "/brand/logo-icon.svg" : "/brand/logo-icon-dark.svg"}
-        alt=""
-        width={40}
-        height={30}
-        className={cn(s.icon, "w-auto")}
-        unoptimized
-      />
+      <svg viewBox="0 0 432 320.9" fill="none" className={cn(s.icon, "w-auto shrink-0")}>
+        <circle cx="157.7" cy="167.7" r="23.2" fill={fill} />
+        <circle cx="279.7" cy="167.7" r="23.2" fill={fill} />
+        <path fill={fill} d="M351.4,68.2c-21.3-10.5-52.4-13.8-77.1-23.6-33-13-46.9-25.1-55.8-25.1s-16.8,8.2-49.1,21.6c-25.9,10.8-49.8,16.2-68,21.1C51.1,72.3,13.2,116.6,13.2,169.8v17.8c0,60.6,49.1,109.7,109.7,109.7h221.8s-12.9-51.6-56.3-51.6h-150c-38.5,0-69.8-31.8-69.8-71.1v-.5c0-39.3,31.2-71.1,69.8-71.1h150.2c38.5,0,69.8,31.8,69.8,71.1v.5c0,1.5,0,2.9-.1,4.3-.9,16-1.4,84.7-1.5,107.8,37.2-17.6,62.9-55.3,62.9-99.1v-17.8c0-46-28.3-85.4-68.5-101.7Z" />
+      </svg>
       <span className={cn("font-bold leading-none whitespace-nowrap", s.text, dark ? "text-zinc-900" : "text-white")}>
         TeamPrompt
       </span>

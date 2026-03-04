@@ -1568,6 +1568,152 @@ export function ExtensionScreenshotLifestyle3() {
   );
 }
 
+/* ── Extension Screenshot Dark (1280 x 800) — app screenshots on dark bg ── */
+
+export function ExtensionScreenshotDark() {
+  return (
+    <DarkBannerShell aspectRatio="1280/800">
+      <div className="flex flex-col justify-center h-full gap-3 sm:gap-5">
+        <div className="space-y-2 sm:space-y-3">
+          <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={200} height={40} className="h-6 sm:h-8 w-auto" />
+          <p className="text-white/90 text-sm sm:text-xl font-semibold leading-snug max-w-[50%]">
+            Your team&apos;s AI prompt library — with built-in data protection
+          </p>
+          <FeatureIconRow />
+          <CompatibilityLine />
+        </div>
+        <div className="flex gap-3 items-start mt-1">
+          <VaultScene className="flex-1" compact />
+          <DLPBlockScene className="flex-1" compact />
+          <InsertScene className="flex-1" />
+        </div>
+      </div>
+    </DarkBannerShell>
+  );
+}
+
+/* ── Extension Screenshot White (1280 x 800) — clean white bg ── */
+
+export function ExtensionScreenshotWhite() {
+  return (
+    <WhiteBannerShell aspectRatio="1280/800">
+      <div className="flex flex-col justify-center h-full gap-3 sm:gap-5">
+        <div className="space-y-2 sm:space-y-3">
+          <Image src="/brand/logo-wordmark.svg" alt="TeamPrompt" width={200} height={40} className="h-6 sm:h-8 w-auto" />
+          <p className="text-zinc-900 text-sm sm:text-xl font-semibold leading-snug max-w-[50%]">
+            Your team&apos;s AI prompt library — with built-in data protection
+          </p>
+          <FeatureIconRowDark />
+          <CompatibilityLine dark />
+        </div>
+        <div className="flex gap-3 items-start mt-1">
+          <VaultScene className="flex-1" compact />
+          <DLPBlockScene className="flex-1" compact />
+          <InsertScene className="flex-1" />
+        </div>
+      </div>
+    </WhiteBannerShell>
+  );
+}
+
+/* ── Extension Screenshot Gradient (1280 x 800) — staggered real screenshots ── */
+
+export function ExtensionScreenshotGradient() {
+  return (
+    <MockupBannerShell aspectRatio="1280/800">
+      <div className="flex flex-col justify-center h-full gap-3 sm:gap-5">
+        <div className="space-y-2 sm:space-y-3">
+          <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={200} height={40} className="h-6 sm:h-8 w-auto" />
+          <p className="text-white text-sm sm:text-xl font-bold leading-snug max-w-[50%]">
+            Shared prompts · Data protection · Usage analytics
+          </p>
+          <FeaturePills />
+          <CompatibilityLine />
+        </div>
+        <div className="flex gap-4 items-start mt-1">
+          <StaggeredMockup
+            className="w-[55%]"
+            screenshots={[
+              { src: "/store-assets/screenshot-light-1-prompts.png", alt: "Prompt library" },
+              { src: "/store-assets/screenshot-light-3-dlp-block.png", alt: "DLP block" },
+            ]}
+          />
+          <StaggeredMockup
+            className="w-[45%] mt-4"
+            screenshots={[
+              { src: "/store-assets/screenshot-light-4-popup.png", alt: "Extension popup" },
+            ]}
+          />
+        </div>
+      </div>
+    </MockupBannerShell>
+  );
+}
+
+/* ── Extension Screenshot Lifestyle 4 — Analytics (1280 x 800) ── */
+
+export function ExtensionScreenshotLifestyle4() {
+  return (
+    <LifestyleBannerShell aspectRatio="1280/800">
+      <div className="flex flex-col justify-center h-full gap-3 sm:gap-5">
+        <div className="space-y-2 sm:space-y-3 max-w-[50%]">
+          <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={200} height={40} className="h-6 sm:h-8 w-auto" />
+          <p className="text-white text-sm sm:text-xl font-bold leading-snug">
+            See how your team uses AI — usage analytics built in
+          </p>
+          <FeaturePills />
+          <CompatibilityLine />
+        </div>
+        <div className="flex items-start gap-4 mt-1">
+          <LifestylePhoto
+            src={lifestylePhotos.og}
+            alt="Person typing on laptop"
+            className="w-[40%] aspect-[4/3]"
+          />
+          <div className="w-[35%] space-y-2 -ml-6 relative z-10">
+            <VaultScene compact />
+            <InsertScene />
+          </div>
+          <FrostedBadge icon={BarChart3} headline="142 prompts" subtitle="Used this month" color="blue" className="top-[40%] left-[28%]" />
+          <FrostedBadge icon={Zap} headline="+23% adoption" subtitle="Team-wide" color="emerald" className="-top-2 right-[25%]" />
+        </div>
+      </div>
+    </LifestyleBannerShell>
+  );
+}
+
+/* ── Extension Screenshot Lifestyle 5 — Multi-AI (1280 x 800) ── */
+
+export function ExtensionScreenshotLifestyle5() {
+  return (
+    <LifestyleBannerShell aspectRatio="1280/800">
+      <div className="flex flex-col justify-center h-full gap-3 sm:gap-5">
+        <div className="space-y-2 sm:space-y-3 max-w-[50%]">
+          <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={200} height={40} className="h-6 sm:h-8 w-auto" />
+          <p className="text-white text-sm sm:text-xl font-bold leading-snug">
+            Works with ChatGPT, Claude, Gemini, Copilot & Perplexity
+          </p>
+          <FeaturePills />
+          <CompatibilityLine />
+        </div>
+        <div className="flex items-start gap-4 mt-1">
+          <LifestylePhoto
+            src={lifestylePhotos.youtube}
+            alt="Multiple people at laptop screens"
+            className="w-[40%] aspect-[4/3]"
+          />
+          <div className="w-[35%] space-y-2 -ml-6 relative z-10">
+            <DLPBlockScene compact />
+            <VaultScene compact />
+          </div>
+          <FrostedBadge icon={Users} headline="5 AI tools" subtitle="One extension" color="blue" className="top-[40%] left-[28%]" />
+          <FrostedBadge icon={Shield} headline="DLP active" subtitle="On every tool" color="red" className="-top-2 right-[25%]" />
+        </div>
+      </div>
+    </LifestyleBannerShell>
+  );
+}
+
 /* ── Extension Small Promo Lifestyle (440 x 280) ── */
 
 export function ExtensionSmallPromoLifestyle() {
@@ -1614,9 +1760,14 @@ export const socialBannerComponents = {
   ogWhite: { Component: OGBannerWhite, label: "OG / Social Share Card — White", dims: "1200 x 630" },
   ogGradient: { Component: OGBannerGradient, label: "OG / Social Share Card — Gradient", dims: "1200 x 630" },
   ogLifestyle: { Component: OGBannerLifestyle, label: "OG / Social Share Card — Lifestyle", dims: "1200 x 630" },
-  extScreenshot1: { Component: ExtensionScreenshotLifestyle1, label: "Extension Screenshot — Team + Vault", dims: "1280 x 800" },
-  extScreenshot2: { Component: ExtensionScreenshotLifestyle2, label: "Extension Screenshot — DLP Shield", dims: "1280 x 800" },
-  extScreenshot3: { Component: ExtensionScreenshotLifestyle3, label: "Extension Screenshot — Insert Flow", dims: "1280 x 800" },
+  extScreenshotDark: { Component: ExtensionScreenshotDark, label: "Extension Screenshot — Dark", dims: "1280 x 800" },
+  extScreenshotWhite: { Component: ExtensionScreenshotWhite, label: "Extension Screenshot — White", dims: "1280 x 800" },
+  extScreenshotGradient: { Component: ExtensionScreenshotGradient, label: "Extension Screenshot — Gradient", dims: "1280 x 800" },
+  extScreenshot1: { Component: ExtensionScreenshotLifestyle1, label: "Extension Screenshot — Lifestyle: Team + Vault", dims: "1280 x 800" },
+  extScreenshot2: { Component: ExtensionScreenshotLifestyle2, label: "Extension Screenshot — Lifestyle: DLP Shield", dims: "1280 x 800" },
+  extScreenshot3: { Component: ExtensionScreenshotLifestyle3, label: "Extension Screenshot — Lifestyle: Insert Flow", dims: "1280 x 800" },
+  extScreenshot4: { Component: ExtensionScreenshotLifestyle4, label: "Extension Screenshot — Lifestyle: Analytics", dims: "1280 x 800" },
+  extScreenshot5: { Component: ExtensionScreenshotLifestyle5, label: "Extension Screenshot — Lifestyle: Multi-AI", dims: "1280 x 800" },
   extMarquee1: { Component: ExtensionMarqueeLifestyle1, label: "Extension Marquee — Team + Vault", dims: "1400 x 560" },
   extMarquee2: { Component: ExtensionMarqueeLifestyle2, label: "Extension Marquee — DLP Shield", dims: "1400 x 560" },
   extMarquee3: { Component: ExtensionMarqueeLifestyle3, label: "Extension Marquee — Insert Flow", dims: "1400 x 560" },

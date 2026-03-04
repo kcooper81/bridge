@@ -28,9 +28,14 @@ import {
   OGBannerWhite,
   OGBannerGradient,
   OGBannerLifestyle,
+  ExtensionScreenshotDark,
+  ExtensionScreenshotWhite,
+  ExtensionScreenshotGradient,
   ExtensionScreenshotLifestyle1,
   ExtensionScreenshotLifestyle2,
   ExtensionScreenshotLifestyle3,
+  ExtensionScreenshotLifestyle4,
+  ExtensionScreenshotLifestyle5,
   ExtensionMarqueeLifestyle1,
   ExtensionMarqueeLifestyle2,
   ExtensionMarqueeLifestyle3,
@@ -782,50 +787,65 @@ export default function MediaPage() {
             </div>
           </div>
 
-          {/* Lifestyle Store Banners */}
+          {/* Store-Ready Banners */}
           <div className="mb-12">
-            <h3 className="text-lg font-semibold mb-2">Lifestyle Banners</h3>
-            <p className="text-xs text-zinc-400 mb-6">
-              CSS-rendered lifestyle banners for extension store pages. Click any banner to download as PNG.
+            <h3 className="text-lg font-semibold mb-2">Store-Ready Banners</h3>
+            <p className="text-xs text-zinc-400 mb-8">
+              CSS-rendered banners sized for extension stores. Each downloads at exact pixel dimensions.
             </p>
 
-            <h4 className="text-sm font-medium text-zinc-300 mb-3">Screenshots (1280 x 800)</h4>
-            <div className="space-y-3 mb-8">
-              {[
-                { Component: ExtensionScreenshotLifestyle1, variant: "Team + Vault", name: "ext-screenshot-lifestyle-1" },
-                { Component: ExtensionScreenshotLifestyle2, variant: "DLP Shield", name: "ext-screenshot-lifestyle-2" },
-                { Component: ExtensionScreenshotLifestyle3, variant: "Insert Flow", name: "ext-screenshot-lifestyle-3" },
-              ].map((b) => (
+            <h4 className="text-sm font-medium text-zinc-300 mb-4">Screenshots — 1280 &times; 800 px</h4>
+            <div className="grid gap-4 sm:grid-cols-2 mb-10">
+              {([
+                { Component: ExtensionScreenshotDark, variant: "Dark", name: "ext-screenshot-dark" },
+                { Component: ExtensionScreenshotWhite, variant: "White", name: "ext-screenshot-white" },
+                { Component: ExtensionScreenshotGradient, variant: "Gradient", name: "ext-screenshot-gradient" },
+                { Component: ExtensionScreenshotLifestyle1, variant: "Lifestyle — Team + Vault", name: "ext-screenshot-lifestyle-1" },
+                { Component: ExtensionScreenshotLifestyle2, variant: "Lifestyle — DLP Shield", name: "ext-screenshot-lifestyle-2" },
+                { Component: ExtensionScreenshotLifestyle3, variant: "Lifestyle — Insert Flow", name: "ext-screenshot-lifestyle-3" },
+                { Component: ExtensionScreenshotLifestyle4, variant: "Lifestyle — Analytics", name: "ext-screenshot-lifestyle-4" },
+                { Component: ExtensionScreenshotLifestyle5, variant: "Lifestyle — Multi-AI", name: "ext-screenshot-lifestyle-5" },
+              ] as const).map((b) => (
                 <div key={b.name}>
-                  <p className="text-xs text-zinc-500 font-medium mb-1.5">{b.variant}</p>
                   <BannerDownloadWrapper filename={`teamprompt-${b.name}`} downloadWidth={1280}>
                     <b.Component />
                   </BannerDownloadWrapper>
+                  <div className="flex items-center justify-between mt-1.5 px-1">
+                    <p className="text-xs font-medium text-zinc-300">{b.variant}</p>
+                    <p className="text-[10px] text-zinc-500">1280 &times; 800 px</p>
+                  </div>
                 </div>
               ))}
             </div>
 
-            <h4 className="text-sm font-medium text-zinc-300 mb-3">Marquee Promo (1400 x 560)</h4>
-            <div className="space-y-3 mb-8">
-              {[
+            <h4 className="text-sm font-medium text-zinc-300 mb-4">Marquee Promo — 1400 &times; 560 px</h4>
+            <div className="grid gap-4 sm:grid-cols-2 mb-10">
+              {([
                 { Component: ExtensionMarqueeLifestyle1, variant: "Team + Vault", name: "ext-marquee-lifestyle-1" },
                 { Component: ExtensionMarqueeLifestyle2, variant: "DLP Shield", name: "ext-marquee-lifestyle-2" },
                 { Component: ExtensionMarqueeLifestyle3, variant: "Insert Flow", name: "ext-marquee-lifestyle-3" },
-              ].map((b) => (
+              ] as const).map((b) => (
                 <div key={b.name}>
-                  <p className="text-xs text-zinc-500 font-medium mb-1.5">{b.variant}</p>
                   <BannerDownloadWrapper filename={`teamprompt-${b.name}`} downloadWidth={1400}>
                     <b.Component />
                   </BannerDownloadWrapper>
+                  <div className="flex items-center justify-between mt-1.5 px-1">
+                    <p className="text-xs font-medium text-zinc-300">{b.variant}</p>
+                    <p className="text-[10px] text-zinc-500">1400 &times; 560 px</p>
+                  </div>
                 </div>
               ))}
             </div>
 
-            <h4 className="text-sm font-medium text-zinc-300 mb-3">Small Promo Tile (440 x 280)</h4>
-            <div className="space-y-3">
+            <h4 className="text-sm font-medium text-zinc-300 mb-4">Small Promo Tile — 440 &times; 280 px</h4>
+            <div className="max-w-sm">
               <BannerDownloadWrapper filename="teamprompt-ext-small-promo-lifestyle" downloadWidth={440}>
                 <ExtensionSmallPromoLifestyle />
               </BannerDownloadWrapper>
+              <div className="flex items-center justify-between mt-1.5 px-1">
+                <p className="text-xs font-medium text-zinc-300">Lifestyle</p>
+                <p className="text-[10px] text-zinc-500">440 &times; 280 px</p>
+              </div>
             </div>
           </div>
 

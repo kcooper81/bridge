@@ -8,16 +8,30 @@ interface BannerDownloadWrapperProps {
   children: React.ReactNode;
   filename: string;
   label?: string;
-  /** Target download width in pixels. When set, the banner content is
-   *  cloned off-screen at this exact width (height derived from aspectRatio)
-   *  and captured without borders or rounded corners so the downloaded PNG
-   *  is pixel-perfect for store uploads. */
+  /** Target download width in pixels. The rendered banner is scaled so
+   *  the output PNG has exactly this width (height follows aspect-ratio). */
   downloadWidth?: number;
 }
 
+/** Fetch an image URL and return a data: URI (bypasses SVG foreignObject CORS) */
+async function toDataUri(url: string): Promise<string> {
+  const res = await fetch(url, { mode: "cors" });
+  const blob = await res.blob();
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
 /**
- * Wraps a CSS-rendered banner and provides a "Download PNG" button
- * that captures the rendered DOM as a PNG using html2canvas.
+ * Wraps a CSS-rendered banner and provides a "Download PNG" button.
+ *
+ * Uses html-to-image (foreignObject SVG) for pixel-perfect CSS fidelity
+ * — supports backdrop-filter, aspect-ratio, gradients, inline SVG, etc.
+ * External images are pre-converted to data URIs to avoid CORS issues
+ * inside the SVG foreignObject context.
  */
 export function BannerDownloadWrapper({
   children,
@@ -31,58 +45,78 @@ export function BannerDownloadWrapper({
   const handleDownload = useCallback(async () => {
     if (!captureRef.current || loading) return;
     setLoading(true);
+
+    const node = captureRef.current;
+    const originals = new Map<
+      HTMLImageElement,
+      { src: string; srcset: string }
+    >();
+    let shell: HTMLElement | null = null;
+    let savedBr = "";
+    let savedOf = "";
+
     try {
-      const html2canvas = (await import("html2canvas")).default;
+      const { toPng } = await import("html-to-image");
 
-      let target: HTMLElement = captureRef.current;
-      let clone: HTMLElement | null = null;
+      // ── 1. Pre-convert external images to data URIs ──
+      // html-to-image serialises the DOM into an SVG foreignObject.
+      // Browsers enforce strict CORS inside foreignObject — even images
+      // with Access-Control-Allow-Origin:* can taint the canvas.
+      // Converting to data URIs BEFORE capture avoids the issue entirely.
+      const imgs = node.querySelectorAll("img");
+      await Promise.all(
+        Array.from(imgs).map(async (img) => {
+          const src = img.currentSrc || img.src;
+          if (
+            src &&
+            /^https?:\/\//.test(src) &&
+            !src.startsWith(window.location.origin)
+          ) {
+            try {
+              originals.set(img, { src: img.src, srcset: img.srcset });
+              img.src = await toDataUri(src);
+              img.srcset = "";
+            } catch {
+              /* leave original if fetch fails */
+            }
+          }
+        })
+      );
 
-      if (downloadWidth) {
-        // Clone just the banner content off-screen at exact pixel width.
-        // aspectRatio on the inner banner component determines the height.
-        clone = captureRef.current.cloneNode(true) as HTMLElement;
-        clone.style.position = "fixed";
-        clone.style.left = "-9999px";
-        clone.style.top = "0";
-        clone.style.width = `${downloadWidth}px`;
-        clone.style.minWidth = `${downloadWidth}px`;
-        clone.style.maxWidth = `${downloadWidth}px`;
-        clone.style.border = "none";
-        clone.style.borderRadius = "0";
-        clone.style.overflow = "visible";
-        document.body.appendChild(clone);
-        // Only strip rounded corners + overflow from the outermost banner
-        // shell (first child) so the PNG has rectangular edges, but keep
-        // internal element styling (rounded photos, badges, pills) intact.
-        const bannerShell = clone.firstElementChild as HTMLElement | null;
-        if (bannerShell) {
-          bannerShell.style.borderRadius = "0";
-          bannerShell.style.overflow = "visible";
-        }
-        // Let layout settle
-        await new Promise((r) => setTimeout(r, 150));
-        target = clone;
+      // ── 2. Strip rounded corners on the banner shell for clean edges ──
+      shell = node.firstElementChild as HTMLElement | null;
+      if (shell) {
+        savedBr = shell.style.borderRadius;
+        savedOf = shell.style.overflow;
+        shell.style.borderRadius = "0";
+        shell.style.overflow = "visible";
       }
 
-      const canvas = await html2canvas(target, {
-        scale: downloadWidth ? 1 : 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: null,
+      // ── 3. Capture ──
+      const ratio = downloadWidth ? downloadWidth / node.offsetWidth : 2;
+
+      const dataUrl = await toPng(node, {
+        pixelRatio: ratio,
+        cacheBust: true,
       });
 
-      if (clone) {
-        document.body.removeChild(clone);
-      }
-
-      const url = canvas.toDataURL("image/png");
+      // ── 4. Trigger download ──
       const a = document.createElement("a");
-      a.href = url;
+      a.href = dataUrl;
       a.download = filename.endsWith(".png") ? filename : `${filename}.png`;
       a.click();
     } catch (err) {
       console.error("Banner download failed:", err);
     } finally {
+      // ── Always restore DOM state ──
+      if (shell) {
+        shell.style.borderRadius = savedBr;
+        shell.style.overflow = savedOf;
+      }
+      originals.forEach(({ src, srcset }, img) => {
+        img.src = src;
+        img.srcset = srcset;
+      });
       setLoading(false);
     }
   }, [filename, loading, downloadWidth]);
@@ -108,9 +142,7 @@ export function BannerDownloadWrapper({
       {/* Outer div: decorative border for preview on /media page */}
       <div className="rounded-xl border border-border overflow-hidden">
         {/* Inner div: capture target — no border, no rounding in the download */}
-        <div ref={captureRef}>
-          {children}
-        </div>
+        <div ref={captureRef}>{children}</div>
       </div>
     </div>
   );

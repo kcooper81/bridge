@@ -16,10 +16,8 @@ interface BannerDownloadWrapperProps {
 }
 
 /**
- * Wraps a CSS-rendered banner and provides a "Download PNG" button.
- * Uses html-to-image (foreignObject approach) for pixel-perfect capture
- * that preserves the browser's own CSS rendering — fonts, gradients,
- * aspect-ratio, backdrop-blur, and SVG icons all render correctly.
+ * Wraps a CSS-rendered banner and provides a "Download PNG" button
+ * that captures the rendered DOM as a PNG using html2canvas.
  */
 export function BannerDownloadWrapper({
   children,
@@ -34,17 +32,17 @@ export function BannerDownloadWrapper({
     if (!captureRef.current || loading) return;
     setLoading(true);
     try {
-      const { toPng } = await import("html-to-image");
+      const html2canvas = (await import("html2canvas")).default;
 
-      // Ensure web fonts are fully loaded before capture
+      // Ensure web fonts (Inter) are fully loaded before capture
       await document.fonts.ready;
 
       let target: HTMLElement = captureRef.current;
       let clone: HTMLElement | null = null;
 
       if (downloadWidth) {
-        // Clone the banner off-screen at the exact target pixel width.
-        // The CSS aspect-ratio on the banner shell determines the height.
+        // Clone just the banner content off-screen at exact pixel width.
+        // aspectRatio on the inner banner component determines the height.
         clone = captureRef.current.cloneNode(true) as HTMLElement;
         clone.style.position = "fixed";
         clone.style.left = "-9999px";
@@ -77,23 +75,25 @@ export function BannerDownloadWrapper({
           )
         );
 
-        // Let layout settle
+        // Let layout + fonts settle after images load
         await new Promise((r) => setTimeout(r, 300));
         target = clone;
       }
 
-      const dataUrl = await toPng(target, {
-        pixelRatio: downloadWidth ? 1 : 2,
-        cacheBust: true,
-        fetchRequestInit: { mode: "cors" },
+      const canvas = await html2canvas(target, {
+        scale: downloadWidth ? 1 : 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: null,
       });
 
       if (clone) {
         document.body.removeChild(clone);
       }
 
+      const url = canvas.toDataURL("image/png");
       const a = document.createElement("a");
-      a.href = dataUrl;
+      a.href = url;
       a.download = filename.endsWith(".png") ? filename : `${filename}.png`;
       a.click();
     } catch (err) {

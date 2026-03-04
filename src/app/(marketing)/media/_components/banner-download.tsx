@@ -35,6 +35,9 @@ export function BannerDownloadWrapper({
     try {
       const html2canvas = (await import("html2canvas")).default;
 
+      // Ensure web fonts (Inter) are fully loaded before capture
+      await document.fonts.ready;
+
       let target: HTMLElement = captureRef.current;
       let clone: HTMLElement | null = null;
 
@@ -60,8 +63,20 @@ export function BannerDownloadWrapper({
           bannerShell.style.borderRadius = "0";
           bannerShell.style.overflow = "visible";
         }
-        // Let layout settle
-        await new Promise((r) => setTimeout(r, 150));
+        // Wait for all images in the clone to load
+        const images = clone.querySelectorAll("img");
+        await Promise.all(
+          Array.from(images).map((img) =>
+            img.complete
+              ? Promise.resolve()
+              : new Promise<void>((resolve) => {
+                  img.onload = () => resolve();
+                  img.onerror = () => resolve();
+                })
+          )
+        );
+        // Let layout + fonts settle after images load
+        await new Promise((r) => setTimeout(r, 300));
         target = clone;
       }
 
@@ -70,6 +85,8 @@ export function BannerDownloadWrapper({
         useCORS: true,
         allowTaint: true,
         backgroundColor: null,
+        // Evaluate responsive CSS (sm: breakpoints) at the target width
+        ...(downloadWidth ? { windowWidth: downloadWidth } : {}),
       });
 
       if (clone) {

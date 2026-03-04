@@ -8,9 +8,10 @@ interface BannerDownloadWrapperProps {
   children: React.ReactNode;
   filename: string;
   label?: string;
-  /** Target download width in pixels. When set, the banner is temporarily
-   *  rendered off-screen at this exact width (height from aspectRatio)
-   *  so the downloaded PNG matches the intended store dimensions. */
+  /** Target download width in pixels. When set, the banner content is
+   *  cloned off-screen at this exact width (height derived from aspectRatio)
+   *  and captured without borders or rounded corners so the downloaded PNG
+   *  is pixel-perfect for store uploads. */
   downloadWidth?: number;
 }
 
@@ -24,32 +25,43 @@ export function BannerDownloadWrapper({
   label = "PNG",
   downloadWidth,
 }: BannerDownloadWrapperProps) {
-  const ref = useRef<HTMLDivElement>(null);
+  // captureRef wraps ONLY the banner content (no border/rounding)
+  const captureRef = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState(false);
 
   const handleDownload = useCallback(async () => {
-    if (!ref.current || loading) return;
+    if (!captureRef.current || loading) return;
     setLoading(true);
     try {
       const html2canvas = (await import("html2canvas")).default;
 
-      let target: HTMLElement = ref.current;
+      let target: HTMLElement = captureRef.current;
       let clone: HTMLElement | null = null;
 
-      // If downloadWidth is specified, clone the element off-screen at exact
-      // pixel dimensions so the captured PNG is store-ready.
       if (downloadWidth) {
-        clone = ref.current.cloneNode(true) as HTMLElement;
+        // Clone just the banner content off-screen at exact pixel width.
+        // aspectRatio on the inner banner component determines the height.
+        clone = captureRef.current.cloneNode(true) as HTMLElement;
         clone.style.position = "fixed";
         clone.style.left = "-9999px";
         clone.style.top = "0";
         clone.style.width = `${downloadWidth}px`;
         clone.style.minWidth = `${downloadWidth}px`;
         clone.style.maxWidth = `${downloadWidth}px`;
+        clone.style.border = "none";
+        clone.style.borderRadius = "0";
         clone.style.overflow = "visible";
         document.body.appendChild(clone);
+        // Only strip rounded corners + overflow from the outermost banner
+        // shell (first child) so the PNG has rectangular edges, but keep
+        // internal element styling (rounded photos, badges, pills) intact.
+        const bannerShell = clone.firstElementChild as HTMLElement | null;
+        if (bannerShell) {
+          bannerShell.style.borderRadius = "0";
+          bannerShell.style.overflow = "visible";
+        }
         // Let layout settle
-        await new Promise((r) => setTimeout(r, 100));
+        await new Promise((r) => setTimeout(r, 150));
         target = clone;
       }
 
@@ -94,8 +106,12 @@ export function BannerDownloadWrapper({
           {label}
         </Button>
       </div>
-      <div ref={ref} className="rounded-xl border border-border overflow-hidden">
-        {children}
+      {/* Outer div: decorative border for preview on /media page */}
+      <div className="rounded-xl border border-border overflow-hidden">
+        {/* Inner div: capture target — no border, no rounding in the download */}
+        <div ref={captureRef}>
+          {children}
+        </div>
       </div>
     </div>
   );

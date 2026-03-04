@@ -13,11 +13,7 @@ export function detectAiTool(url: string): AiToolName {
     return "chatgpt";
   if (url.includes("claude.ai")) return "claude";
   if (url.includes("gemini.google.com")) return "gemini";
-  if (
-    url.includes("copilot.microsoft.com") ||
-    url.includes("github.com/copilot")
-  )
-    return "copilot";
+  if (url.includes("copilot.microsoft.com")) return "copilot";
   if (url.includes("perplexity.ai")) return "perplexity";
   return "other";
 }

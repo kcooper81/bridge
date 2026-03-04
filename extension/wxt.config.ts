@@ -57,13 +57,14 @@ export default defineConfig({
         },
       },
       host_permissions: [
+        // AI tool domains - specific and limited
         "https://chat.openai.com/*",
         "https://chatgpt.com/*",
         "https://claude.ai/*",
         "https://gemini.google.com/*",
-        "https://github.com/copilot/*",
         "https://copilot.microsoft.com/*",
         "https://www.perplexity.ai/*",
+        // Our own domains - for authentication and API
         "https://teamprompt.app/*",
         "https://www.teamprompt.app/*",
       ],
@@ -86,6 +87,9 @@ export default defineConfig({
                 "https://teamprompt.app/*",
                 "https://www.teamprompt.app/*",
               ],
+            },
+            content_security_policy: {
+              extension_pages: "script-src 'self'; object-src 'self'; connect-src 'self' https://teamprompt.app https://www.teamprompt.app https://vafybxyxmpehrpqbztrc.supabase.co;",
             },
           }),
     };

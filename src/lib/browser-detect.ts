@@ -20,7 +20,7 @@ export const EXTENSION_STORES: Record<
 > = {
   chrome: {
     name: "Chrome Web Store",
-    url: "https://chromewebstore.google.com/detail/teamprompt",
+    url: "https://chromewebstore.google.com/detail/teamprompt/hpdekjimndbhdkebpedfgaceohplbpil",
     buttonLabel: "Install for Chrome",
   },
   firefox: {

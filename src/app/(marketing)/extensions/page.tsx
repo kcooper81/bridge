@@ -114,7 +114,7 @@ const browsers = [
   {
     name: "Chrome",
     storeName: "Chrome Web Store",
-    url: "https://chromewebstore.google.com/detail/teamprompt",
+    url: "https://chromewebstore.google.com/detail/teamprompt/hpdekjimndbhdkebpedfgaceohplbpil",
     note: "Also works with Brave, Arc, and Vivaldi",
     color: "from-yellow-500/20 to-green-500/10",
     borderColor: "border-yellow-500/20",

@@ -149,7 +149,6 @@ export default defineContentScript({
     "https://chatgpt.com/*",
     "https://claude.ai/*",
     "https://gemini.google.com/*",
-    "https://github.com/copilot/*",
     "https://copilot.microsoft.com/*",
     "https://www.perplexity.ai/*",
   ],

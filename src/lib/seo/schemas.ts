@@ -76,7 +76,7 @@ export function generateOrganizationSchema() {
       "https://x.com/teampromptapp",
       "https://www.linkedin.com/company/teamprompt",
       "https://github.com/kcooper81",
-      "https://chromewebstore.google.com/detail/teamprompt",
+      "https://chromewebstore.google.com/detail/teamprompt/hpdekjimndbhdkebpedfgaceohplbpil",
     ],
   };
 }

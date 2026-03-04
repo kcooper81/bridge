@@ -40,9 +40,9 @@ export const templatePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "90%", label: "Faster email drafting" },
-      { value: "100%", label: "Brand consistency" },
-      { value: "0", label: "Sensitive data leaks" },
+      { value: "5", label: "AI tools supported" },
+      { value: "15", label: "Built-in DLP rules" },
+      { value: "$9/mo", label: "Starting price" },
     ],
     faqs: [
       { question: "What variables can I use in email templates?", answer: "Any text in double curly braces becomes a fill-in field — {{recipient_name}}, {{company}}, {{product}}, {{deadline}}, or anything else your template needs. There is no limit on the number of variables per template." },
@@ -95,9 +95,9 @@ export const templatePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "3x", label: "More issues caught" },
-      { value: "60%", label: "Faster reviews" },
-      { value: "100%", label: "Review consistency" },
+      { value: "31", label: "Total available detection rules" },
+      { value: "5", label: "AI tools supported" },
+      { value: "< 2 min", label: "Setup time" },
     ],
     faqs: [
       { question: "What programming languages are supported?", answer: "Templates work with any language. The {{language}} variable lets you specify Python, TypeScript, Go, Java, Rust, C#, or any other language, and the review criteria adjust accordingly." },
@@ -150,9 +150,9 @@ export const templatePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "5 min", label: "Per meeting saved" },
-      { value: "100%", label: "Action items captured" },
-      { value: "0", label: "Missed follow-ups" },
+      { value: "2-click", label: "From sidebar to AI tool" },
+      { value: "25", label: "Free prompts/month" },
+      { value: "5", label: "AI tools supported" },
     ],
     faqs: [
       { question: "What meeting types are covered?", answer: "TeamPrompt includes templates for daily standups, sprint retrospectives, one-on-ones, client calls, executive briefings, board meetings, brainstorm sessions, and project kickoffs. You can also create custom templates for any meeting format." },
@@ -204,9 +204,9 @@ export const templatePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "80%", label: "Faster report writing" },
-      { value: "100%", label: "Format consistency" },
-      { value: "0", label: "Formatting rework" },
+      { value: "16", label: "Smart detection patterns" },
+      { value: "6", label: "One-click compliance packs" },
+      { value: "< 2 min", label: "Setup time" },
     ],
     faqs: [
       { question: "What types of reports can I template?", answer: "Any report with a repeatable structure — weekly status updates, monthly business reviews, quarterly OKR reports, executive summaries, incident post-mortems, competitive analyses, and more. If you write it regularly, you can template it." },
@@ -259,9 +259,9 @@ export const templatePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "10x", label: "Faster content creation" },
-      { value: "100%", label: "Brand consistency" },
-      { value: "5+", label: "Platforms supported" },
+      { value: "2-click", label: "From sidebar to AI tool" },
+      { value: "6", label: "One-click compliance packs" },
+      { value: "5", label: "AI tools supported" },
     ],
     faqs: [
       { question: "Which social platforms are covered?", answer: "TeamPrompt includes templates optimized for LinkedIn, Twitter/X, Instagram, Facebook, and general social content. Each template accounts for platform-specific formatting, character limits, and audience expectations." },
@@ -314,9 +314,9 @@ export const templatePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "70%", label: "Faster response time" },
-      { value: "100%", label: "Reply consistency" },
-      { value: "0", label: "Data leaks" },
+      { value: "15", label: "Built-in DLP rules" },
+      { value: "31", label: "Total available detection rules" },
+      { value: "< 2 min", label: "Setup time" },
     ],
     faqs: [
       { question: "Can I customize the tone of customer responses?", answer: "Yes. Templates include a {{tone}} variable that can be set to empathetic, professional, casual, or any other style. Your team lead can set default tones per template category." },
@@ -369,9 +369,9 @@ export const templatePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "5x", label: "Faster query writing" },
-      { value: "100%", label: "Methodology consistency" },
-      { value: "0", label: "Data exposure risk" },
+      { value: "16", label: "Smart detection patterns" },
+      { value: "25", label: "Free prompts/month" },
+      { value: "$9/mo", label: "Starting price" },
     ],
     faqs: [
       { question: "What databases do SQL templates support?", answer: "SQL templates work with any database. The {{database_type}} variable lets you specify PostgreSQL, MySQL, BigQuery, Snowflake, Redshift, or any other SQL dialect, and the generated queries use the correct syntax." },
@@ -424,9 +424,9 @@ export const templatePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "75%", label: "Faster planning" },
-      { value: "100%", label: "Risk coverage" },
-      { value: "0", label: "Missed stakeholder updates" },
+      { value: "6", label: "One-click compliance packs" },
+      { value: "5", label: "AI tools supported" },
+      { value: "25", label: "Free prompts/month" },
     ],
     faqs: [
       { question: "What project methodologies are supported?", answer: "Templates are available for Agile, Scrum, Kanban, Waterfall, and hybrid methodologies. The {{methodology}} variable adjusts the plan structure, terminology, and deliverables to match your team's approach." },
@@ -479,9 +479,9 @@ export const templatePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "50%", label: "Faster interview prep" },
-      { value: "100%", label: "Rubric consistency" },
-      { value: "0", label: "Missed competencies" },
+      { value: "2-click", label: "From sidebar to AI tool" },
+      { value: "15", label: "Built-in DLP rules" },
+      { value: "$9/mo", label: "Starting price" },
     ],
     faqs: [
       { question: "Can I generate questions for any role?", answer: "Yes. Fill in {{role}}, {{level}}, and {{competencies}} and the template generates tailored interview questions. Works for engineering, product, design, sales, marketing, operations, and any other function." },
@@ -534,9 +534,9 @@ export const templatePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "10x", label: "Faster doc writing" },
-      { value: "100%", label: "Format consistency" },
-      { value: "0", label: "Credential leaks" },
+      { value: "31", label: "Total available detection rules" },
+      { value: "< 2 min", label: "Setup time" },
+      { value: "16", label: "Smart detection patterns" },
     ],
     faqs: [
       { question: "What types of documentation can I template?", answer: "Any documentation with a repeatable structure — technical architecture docs, API references, user guides, READMEs, changelogs, onboarding guides, runbooks, and incident response procedures. If you write it more than once, template it." },

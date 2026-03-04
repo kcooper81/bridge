@@ -20,6 +20,7 @@ export interface SeoContentSection {
     | "comparison-table"
     | "how-it-works"
     | "prose"
+    | "scenario"
     | "use-cases-grid";
   heading: string;
   content: Record<string, unknown>;

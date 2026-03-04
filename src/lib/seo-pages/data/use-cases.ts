@@ -28,21 +28,22 @@ export const useCasePages: SeoPageData[] = [
         { icon: "BarChart3", title: "Usage analytics", description: "See which prompts are most popular, who uses them, and how they perform over time." },
       ],
     },
-    benefits: {
-      heading: "Why teams choose a dedicated prompt library",
-      items: [
-        "Stop losing great prompts in Slack threads and Google Docs",
-        "Ensure consistent quality across your team's AI interactions",
-        "Onboard new team members faster with proven prompt templates",
-        "Track which prompts deliver the best results",
-        "Reduce time spent writing prompts from scratch",
-        "Maintain a single source of truth for AI best practices",
-      ],
-    },
     stats: [
-      { value: "10x", label: "Faster prompt access" },
-      { value: "100%", label: "Team visibility" },
-      { value: "0", label: "Lost prompts" },
+      { value: "5", label: "AI tools supported" },
+      { value: "2-click", label: "From sidebar to AI tool" },
+      { value: "25", label: "Free prompts/month" },
+    ],
+    sections: [
+      {
+        type: "scenario" as const,
+        heading: "Real-world scenario",
+        content: {
+          persona: "Jess, marketing manager",
+          setup: "Jess's team keeps re-writing the same prompts in ChatGPT every week — social copy prompts, blog outline prompts, ad variation prompts. Everyone has their own version saved in random docs and Slack threads, and half of them are outdated.",
+          trigger: "Jess saves her best-performing prompts to TeamPrompt, organizes them into a Marketing category, and shares access with her team. Each prompt has template variables like {{campaign_name}} and {{target_audience}} so teammates fill in the blanks and insert with two clicks.",
+          resolution: "The whole team uses the same tested, up-to-date prompts via 2-click insert directly into ChatGPT, Claude, and Gemini. No more re-writing from scratch, no more outdated versions floating around in docs.",
+        },
+      },
     ],
     faqs: [
       { question: "How is this different from saving prompts in a doc?", answer: "A document becomes stale fast. TeamPrompt keeps prompts searchable, version-controlled, and insertable directly into AI tools — no copy-paste needed." },
@@ -132,21 +133,22 @@ export const useCasePages: SeoPageData[] = [
         { icon: "Lock", title: "Policy enforcement", description: "Block or warn on prompts that violate your data protection policies. Configurable severity levels." },
       ],
     },
-    benefits: {
-      heading: "Why organizations need AI governance",
-      items: [
-        "Prevent accidental data leaks through AI prompts",
-        "Ensure consistent, high-quality AI interactions across teams",
-        "Maintain compliance with industry regulations (HIPAA, SOX, GDPR)",
-        "Get full visibility into your organization's AI usage patterns",
-        "Set guardrails without blocking productivity",
-        "Demonstrate AI oversight to auditors and stakeholders",
-      ],
-    },
     stats: [
-      { value: "100%", label: "Prompt visibility" },
-      { value: "Real-time", label: "DLP scanning" },
-      { value: "Full", label: "Audit trail" },
+      { value: "15", label: "Built-in DLP rules" },
+      { value: "6", label: "One-click compliance packs" },
+      { value: "< 2 min", label: "Setup time" },
+    ],
+    sections: [
+      {
+        type: "scenario" as const,
+        heading: "Real-world scenario",
+        content: {
+          persona: "David, compliance officer",
+          setup: "David has no visibility into what employees are pasting into ChatGPT, Claude, and other AI tools. Customer names, internal financials, even API keys could be leaking — and he has no way to know.",
+          trigger: "David enables TeamPrompt's built-in DLP rules for PII, financial data, and credentials. Every outbound prompt is scanned before it reaches any AI tool, and every blocked attempt is logged in the audit trail.",
+          resolution: "In the first week, the audit log shows 12 blocked PII attempts across three teams — proof the policy works. David exports the report for the next compliance review.",
+        },
+      },
     ],
     faqs: [
       { question: "Does this block my team from using AI?", answer: "No. TeamPrompt adds guardrails without blocking access. Teams can still use ChatGPT, Claude, Gemini, and other tools — with protection in place." },
@@ -187,17 +189,23 @@ export const useCasePages: SeoPageData[] = [
         { icon: "BarChart3", title: "Compliance dashboards", description: "See violation trends, most-triggered rules, and team compliance scores at a glance." },
       ],
     },
-    benefits: {
-      heading: "Stay compliant across every AI tool",
-      items: [
-        "Prevent PHI, PII, and financial data from reaching AI models",
-        "Generate audit reports for HIPAA, SOX, and GDPR reviews",
-        "Prove AI oversight to regulators with timestamped logs",
-        "Reduce compliance risk without restricting AI tool access",
-        "Custom DLP rules for your organization's specific data types",
-        "Real-time alerts when sensitive data is detected",
-      ],
-    },
+    stats: [
+      { value: "31", label: "Total available detection rules" },
+      { value: "6", label: "One-click compliance packs" },
+      { value: "$9/mo", label: "Starting price" },
+    ],
+    sections: [
+      {
+        type: "scenario" as const,
+        heading: "Real-world scenario",
+        content: {
+          persona: "Nina, CISO",
+          setup: "The board asks Nina for evidence that AI tools aren't leaking sensitive company data. Employees across every department use ChatGPT, Claude, and Gemini daily — but there's no record of what data goes in.",
+          trigger: "Nina installs TeamPrompt and activates all 6 compliance packs (HIPAA, GDPR, PCI-DSS, CCPA, SOC 2, and PII). Every AI interaction is now scanned against 31 detection rules before data reaches any AI tool.",
+          resolution: "Nina generates an audit report showing every AI interaction across the organization with DLP status — blocked, sanitized, or clean. She presents the report to the board as evidence of AI governance.",
+        },
+      },
+    ],
     faqs: [
       { question: "What regulations does this help with?", answer: "TeamPrompt helps with HIPAA (healthcare), SOX (finance), GDPR (data protection), and any regulation requiring data loss prevention and audit trails for AI usage." },
       { question: "Does scanning slow down the user experience?", answer: "No. DLP scanning happens in milliseconds before the prompt is inserted. Users don't notice any delay." },
@@ -297,9 +305,9 @@ export const useCasePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "6", label: "Compliance packs" },
-      { value: "Real-time", label: "DLP scanning" },
-      { value: "Full", label: "Audit trail" },
+      { value: "6", label: "One-click compliance packs" },
+      { value: "16", label: "Smart detection patterns" },
+      { value: "5", label: "AI tools supported" },
     ],
     faqs: [
       { question: "What types of sensitive data are detected?", answer: "Built-in rules detect SSNs, credit card numbers, API keys, patient identifiers (PHI), financial data, credentials, and common PII. Compliance packs add framework-specific patterns. You can also define custom patterns." },
@@ -352,9 +360,9 @@ export const useCasePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "10x", label: "Faster prompt access" },
-      { value: "0", label: "Lost versions" },
-      { value: "100%", label: "Review coverage" },
+      { value: "2-click", label: "From sidebar to AI tool" },
+      { value: "5", label: "AI tools supported" },
+      { value: "$9/mo", label: "Starting price" },
     ],
     faqs: [
       { question: "How is this different from a shared doc?", answer: "TeamPrompt offers one-click insertion into AI tools, version history with diff, approval workflows, DLP scanning, and usage analytics — none of which a shared document provides." },
@@ -407,9 +415,9 @@ export const useCasePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "100%", label: "Interaction visibility" },
-      { value: "Full", label: "Violation history" },
-      { value: "CSV/JSON", label: "Export formats" },
+      { value: "31", label: "Total available detection rules" },
+      { value: "5", label: "AI tools supported" },
+      { value: "< 2 min", label: "Setup time" },
     ],
     faqs: [
       { question: "What is logged in the audit trail?", answer: "Every prompt insertion, DLP scan result, violation event, and user action. Each log entry includes timestamp, user, AI tool, action type, and relevant details." },
@@ -462,9 +470,9 @@ export const useCasePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "60%", label: "Faster review cycles" },
-      { value: "5x", label: "More issues caught" },
-      { value: "100%", label: "Reviewer consistency" },
+      { value: "5", label: "AI tools supported" },
+      { value: "2-click", label: "From sidebar to AI tool" },
+      { value: "25", label: "Free prompts/month" },
     ],
     faqs: [
       { question: "What languages and frameworks are supported?", answer: "TeamPrompt code review templates use dynamic variables, so you can customize them for any language or framework. Pre-built examples cover TypeScript, Python, Go, and Rust, but you can create your own for any stack." },
@@ -517,9 +525,9 @@ export const useCasePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "70%", label: "Faster ramp-up" },
-      { value: "3x", label: "Fewer interruptions" },
-      { value: "100%", label: "Onboarding consistency" },
+      { value: "< 2 min", label: "Setup time" },
+      { value: "25", label: "Free prompts/month" },
+      { value: "5", label: "AI tools supported" },
     ],
     faqs: [
       { question: "What roles do the onboarding playbooks cover?", answer: "You can create playbooks for any role. Common starting points include engineering, product management, design, marketing, and customer support. Each playbook is a category of prompts you customize for your organization." },
@@ -571,9 +579,9 @@ export const useCasePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "90%", label: "Less summary writing time" },
-      { value: "0", label: "Missed action items" },
-      { value: "100%", label: "Meetings documented" },
+      { value: "2-click", label: "From sidebar to AI tool" },
+      { value: "5", label: "AI tools supported" },
+      { value: "$9/mo", label: "Starting price" },
     ],
     faqs: [
       { question: "What meeting formats are supported?", answer: "TeamPrompt includes prompt presets for standups, sprint reviews, retrospectives, all-hands, 1-on-1s, client calls, and board meetings. You can also create custom templates for any meeting type your team runs." },
@@ -626,9 +634,9 @@ export const useCasePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "50%", label: "Faster analysis cycles" },
-      { value: "100%", label: "Methodology consistency" },
-      { value: "0", label: "Data leaks" },
+      { value: "15", label: "Built-in DLP rules" },
+      { value: "25", label: "Free prompts/month" },
+      { value: "5", label: "AI tools supported" },
     ],
     faqs: [
       { question: "What types of analysis prompts are included?", answer: "The library covers exploratory data analysis, statistical testing, regression modeling, A/B test interpretation, SQL query generation, Python/pandas operations, visualization creation, and executive reporting templates." },
@@ -681,9 +689,9 @@ export const useCasePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "80%", label: "Faster first drafts" },
-      { value: "40+", label: "Languages supported" },
-      { value: "100%", label: "Brand consistency" },
+      { value: "5", label: "AI tools supported" },
+      { value: "< 2 min", label: "Setup time" },
+      { value: "2-click", label: "From sidebar to AI tool" },
     ],
     faqs: [
       { question: "Can AI really handle professional translation?", answer: "AI produces excellent first drafts that significantly speed up the localization process. Most teams use AI prompts to generate initial translations, then have native speakers review and refine. This hybrid approach is faster and more cost-effective than starting from scratch." },
@@ -735,9 +743,9 @@ export const useCasePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "75%", label: "Less report writing time" },
-      { value: "100%", label: "Format consistency" },
-      { value: "0", label: "Missed deadlines" },
+      { value: "6", label: "One-click compliance packs" },
+      { value: "31", label: "Total available detection rules" },
+      { value: "$9/mo", label: "Starting price" },
     ],
     faqs: [
       { question: "Can AI generate accurate compliance reports?", answer: "AI excels at structuring information, ensuring consistent formatting, and drafting narrative sections. Compliance teams use these prompts to generate thorough first drafts, then review and validate the content against actual evidence and controls." },
@@ -790,9 +798,9 @@ export const useCasePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "40%", label: "Faster MTTR" },
-      { value: "100%", label: "Post-mortem coverage" },
-      { value: "3x", label: "More actionable items" },
+      { value: "16", label: "Smart detection patterns" },
+      { value: "< 2 min", label: "Setup time" },
+      { value: "25", label: "Free prompts/month" },
     ],
     faqs: [
       { question: "When should we use these prompts during an incident?", answer: "Start with triage prompts the moment an incident is declared. Use communication templates throughout the incident for status updates. After resolution, use root cause analysis and post-mortem templates to document learnings. The prompts cover the full incident lifecycle." },

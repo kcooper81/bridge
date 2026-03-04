@@ -40,9 +40,35 @@ export const comparisonPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "1 click", label: "vs copy-paste" },
-      { value: "Built-in", label: "DLP scanning" },
-      { value: "Real-time", label: "Usage analytics" },
+      { value: "15", label: "Built-in DLP rules" },
+      { value: "5", label: "AI tools supported" },
+      { value: "2-click", label: "From sidebar to AI tool" },
+    ],
+    sections: [
+      {
+        type: "comparison-table",
+        heading: "Feature-by-feature comparison",
+        content: {
+          headers: ["Feature", "TeamPrompt", "Notion"],
+          rows: [
+            { label: "DLP scanning", values: ["15 built-in rules + 16 smart patterns", "Not available"] },
+            { label: "Compliance packs", values: ["6 one-click packs (HIPAA, GDPR, etc.)", "Not available"] },
+            { label: "Browser extension", values: ["Inserts prompts into 5 AI tools", "Not available"] },
+            { label: "Audit trail", values: ["Full prompt insertion logging", "Page view history only"] },
+            { label: "AI tool integration", values: ["ChatGPT, Claude, Gemini, Copilot, Perplexity", "Notion AI only"] },
+          ],
+        },
+      },
+      {
+        type: "scenario",
+        heading: "Real-world scenario",
+        content: {
+          persona: "Alex, content manager",
+          setup: "Alex pastes meeting notes containing client names and project budgets into Notion AI to generate a summary. The text includes personally identifiable information mixed with business-sensitive figures.",
+          trigger: "With TeamPrompt, the DLP scanner catches the PII before the prompt reaches any AI tool. Alex sees a clear warning highlighting the detected client names and financial data.",
+          resolution: "Alex removes the client names and replaces budget figures with placeholders using a template variable. The sanitized prompt generates the summary safely, and the audit log records the interaction for compliance.",
+        },
+      },
     ],
     faqs: [
       { question: "Can I still use Notion for other things?", answer: "Absolutely. TeamPrompt replaces Notion only for prompt management. Keep using Notion for docs, wikis, and project management." },
@@ -193,8 +219,23 @@ export const comparisonPages: SeoPageData[] = [
     },
     stats: [
       { value: "5", label: "AI tools supported" },
-      { value: "Built-in", label: "DLP & compliance" },
-      { value: "Full", label: "Team controls" },
+      { value: "6", label: "One-click compliance packs" },
+      { value: "31", label: "Total available detection rules" },
+    ],
+    sections: [
+      {
+        type: "prose",
+        heading: "Custom GPTs vs. a managed prompt library",
+        content: {
+          body: `Custom GPTs let you configure a version of ChatGPT with a specific system prompt, knowledge files, and actions. They are powerful for individual use cases, but they lock your team into a single vendor. Every Custom GPT only works inside ChatGPT — you cannot use the same configuration in Claude, Gemini, or Copilot.
+
+A managed prompt library takes a fundamentally different approach. Instead of embedding instructions into a single AI tool, you store prompts centrally and insert them into whichever AI tool the situation calls for. Your marketing team might prefer Claude for long-form content while your engineering team uses Copilot for code review — both draw from the same governed prompt library.
+
+The governance gap is equally important. Custom GPTs have no DLP scanning, no approval workflows, and no audit trail. Anyone with access can create a Custom GPT that accepts sensitive data without any safeguards. A managed prompt library with TeamPrompt scans every prompt for PII, API keys, and confidential data before it reaches any AI model, logs every interaction for compliance, and routes new prompts through approval workflows before they go live.
+
+For teams that need cross-platform flexibility, data protection, and visibility into how prompts are used, a managed library replaces the fragmented Custom GPT approach with a single, governed system.`,
+        },
+      },
     ],
     faqs: [
       { question: "Can I still use Custom GPTs?", answer: "Yes. TeamPrompt complements Custom GPTs by adding cross-platform access, DLP, and team management. Use both together or switch fully to TeamPrompt." },
@@ -247,8 +288,22 @@ export const comparisonPages: SeoPageData[] = [
     },
     stats: [
       { value: "6", label: "Compliance packs" },
-      { value: "Built-in", label: "DLP + audit" },
-      { value: "Full", label: "Approval workflow" },
+      { value: "15", label: "Built-in DLP rules" },
+      { value: "< 2 min", label: "Setup time" },
+    ],
+    sections: [
+      {
+        type: "how-it-works",
+        heading: "How TeamPrompt works",
+        content: {
+          steps: [
+            { title: "Install the browser extension", description: "Add the TeamPrompt Chrome extension in under two minutes. It detects ChatGPT, Claude, Gemini, Copilot, and Perplexity automatically." },
+            { title: "Build your prompt library", description: "Create prompts with template variables, organize them into team categories, and set role-based permissions. Import existing prompts via CSV or paste." },
+            { title: "Insert prompts with DLP protection", description: "Open the sidebar inside any AI tool, search for a prompt, fill in the variables, and insert with one click. All 31 detection rules scan for sensitive data before anything reaches the AI model." },
+            { title: "Monitor usage and enforce governance", description: "Track which prompts are used, by whom, and in which AI tool. Enable approval workflows for new prompts and review the full audit trail for compliance." },
+          ],
+        },
+      },
     ],
     faqs: [
       { question: "How is TeamPrompt different from AIPRM?", answer: "AIPRM focuses on prompt discovery and templates for individual ChatGPT users. TeamPrompt is built for teams with governance: DLP scanning, compliance packs, approval workflows, audit trails, and team management." },
@@ -300,9 +355,21 @@ export const comparisonPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "5+", label: "AI tools supported" },
-      { value: "Built-in", label: "DLP scanning" },
-      { value: "Real-time", label: "Usage analytics" },
+      { value: "5", label: "AI tools protected" },
+      { value: "16", label: "Smart detection patterns" },
+      { value: "$9/mo", label: "Starting price" },
+    ],
+    sections: [
+      {
+        type: "scenario",
+        heading: "Real-world scenario",
+        content: {
+          persona: "Jamie, customer support agent",
+          setup: "Jamie uses TextExpander snippets to paste canned responses into emails. When a customer asks a nuanced question, Jamie wants to use Claude to draft a personalized reply — but TextExpander just expands static text with no AI tool awareness.",
+          trigger: "Jamie switches to TeamPrompt's browser extension, which detects Claude is open. Jamie searches for the 'empathetic support reply' prompt, fills in the template variables for customer name, issue summary, and desired tone, then inserts the prompt directly into Claude with one click.",
+          resolution: "Claude generates a tailored response in seconds. The DLP scanner confirms no customer PII leaked into the prompt, and the usage analytics log the interaction so the support lead can see which prompts the team relies on most.",
+        },
+      },
     ],
     faqs: [
       { question: "Can I use TeamPrompt and TextExpander together?", answer: "Yes. TextExpander handles general text expansion for email and support tickets. TeamPrompt manages your AI prompt library with governance, DLP, and analytics. They serve different purposes." },
@@ -354,9 +421,21 @@ export const comparisonPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "1 click", label: "Prompt insertion" },
-      { value: "Built-in", label: "DLP + compliance" },
-      { value: "Real-time", label: "Usage tracking" },
+      { value: "< 2 min", label: "Setup time" },
+      { value: "31", label: "Total available detection rules" },
+      { value: "25", label: "Free prompts/month" },
+    ],
+    sections: [
+      {
+        type: "scenario",
+        heading: "Real-world scenario",
+        content: {
+          persona: "Priya, product manager",
+          setup: "Priya's team stores AI prompts on a Confluence wiki page titled 'AI Prompt Playbook.' Every time someone needs a prompt, they navigate to Confluence, scroll through the page, copy the text, switch tabs to ChatGPT, and paste it in. Half the team has bookmarked the wrong version of the page.",
+          trigger: "After migrating to TeamPrompt, Priya imports the prompts via CSV in under two minutes. Each prompt becomes a searchable, categorized entry with template variables for project name, audience, and tone.",
+          resolution: "Now the team opens the TeamPrompt sidebar inside ChatGPT, searches for the prompt they need, fills in the variables, and inserts it in two clicks. Usage analytics show Priya which prompts the team actually relies on, so she can retire outdated ones and promote top performers.",
+        },
+      },
     ],
     faqs: [
       { question: "Can I keep using Confluence for documentation?", answer: "Absolutely. TeamPrompt replaces Confluence only for AI prompt management. Continue using Confluence for your knowledge base, documentation, and project pages." },
@@ -409,9 +488,9 @@ export const comparisonPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "0 min", label: "Setup time" },
-      { value: "Built-in", label: "DLP scanning" },
-      { value: "1 click", label: "AI tool insertion" },
+      { value: "< 2 min", label: "Setup time" },
+      { value: "15", label: "Built-in DLP rules" },
+      { value: "5", label: "AI tools supported" },
     ],
     faqs: [
       { question: "Can I import my Airtable prompt library?", answer: "Yes. Export your Airtable base to CSV and import it into TeamPrompt. The import wizard maps your columns to TeamPrompt fields automatically." },
@@ -843,9 +922,9 @@ export const comparisonPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "90%", label: "Faster prompt insertion vs. copy-paste" },
-      { value: "Built-in", label: "DLP scanning on every prompt" },
-      { value: "Real-time", label: "Usage analytics dashboard" },
+      { value: "2-click", label: "From sidebar to AI tool" },
+      { value: "31", label: "Total available detection rules" },
+      { value: "6", label: "One-click compliance packs" },
     ],
     faqs: [
       { question: "Can I migrate prompts from Slite to TeamPrompt?", answer: "Yes. Copy your prompt text from Slite and paste it into TeamPrompt. Each prompt becomes a searchable, insertable entry with template variable support and DLP scanning." },
@@ -895,9 +974,9 @@ export const comparisonPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "90%", label: "Faster prompt insertion" },
-      { value: "Built-in", label: "DLP and compliance" },
-      { value: "Complete", label: "Prompt version history" },
+      { value: "5", label: "AI tools supported" },
+      { value: "16", label: "Smart detection patterns" },
+      { value: "$9/mo", label: "Starting price" },
     ],
     faqs: [
       { question: "Can I keep using Coda for other things?", answer: "Yes. TeamPrompt focuses exclusively on prompt management. Use Coda for project docs, databases, and automations — and TeamPrompt for your AI prompt library." },
@@ -999,9 +1078,9 @@ export const comparisonPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "90%", label: "Faster prompt insertion" },
-      { value: "Built-in", label: "DLP scanning" },
-      { value: "Complete", label: "Usage analytics" },
+      { value: "15", label: "Built-in DLP rules" },
+      { value: "< 2 min", label: "Setup time" },
+      { value: "25", label: "Free prompts/month" },
     ],
     faqs: [
       { question: "Can I import prompts from Dropbox Paper?", answer: "Yes. Copy your prompt text from Paper and paste it into TeamPrompt. Each prompt gets template variable support, DLP scanning, and one-click insertion automatically." },
@@ -1051,9 +1130,9 @@ export const comparisonPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "90%", label: "Faster than copy-paste" },
-      { value: "Built-in", label: "DLP and compliance" },
-      { value: "Real-time", label: "Prompt analytics" },
+      { value: "31", label: "Total available detection rules" },
+      { value: "5", label: "AI tools protected" },
+      { value: "2-click", label: "From sidebar to AI tool" },
     ],
     faqs: [
       { question: "Can I keep Slab for documentation and use TeamPrompt for prompts?", answer: "Yes. Slab is excellent for team knowledge and documentation. Use TeamPrompt alongside it specifically for managing, sharing, and inserting AI prompts." },
@@ -1103,9 +1182,9 @@ export const comparisonPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "90%", label: "Faster prompt insertion" },
-      { value: "Built-in", label: "DLP and compliance" },
-      { value: "Team-wide", label: "Prompt sharing" },
+      { value: "6", label: "One-click compliance packs" },
+      { value: "16", label: "Smart detection patterns" },
+      { value: "< 2 min", label: "Setup time" },
     ],
     faqs: [
       { question: "Should I keep GitBook for API docs and use TeamPrompt for prompts?", answer: "Yes. GitBook excels at developer documentation. TeamPrompt handles the prompt management workflow — insertion, DLP, template variables, and analytics." },
@@ -2407,9 +2486,9 @@ export const comparisonPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "90%", label: "Faster than task-board workflow" },
-      { value: "Built-in", label: "DLP scanning" },
-      { value: "Real-time", label: "Prompt analytics" },
+      { value: "15", label: "Built-in DLP rules" },
+      { value: "5", label: "AI tools supported" },
+      { value: "$9/mo", label: "Starting price" },
     ],
     faqs: [
       { question: "Can I keep Asana for project management?", answer: "Absolutely. Asana is great for project management. Use TeamPrompt alongside it specifically for managing, sharing, and inserting AI prompts." },
@@ -2459,9 +2538,9 @@ export const comparisonPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "90%", label: "Faster prompt access" },
-      { value: "Built-in", label: "DLP and compliance" },
-      { value: "Real-time", label: "Usage analytics" },
+      { value: "31", label: "Total available detection rules" },
+      { value: "6", label: "One-click compliance packs" },
+      { value: "25", label: "Free prompts/month" },
     ],
     faqs: [
       { question: "Can I keep Monday.com for work management?", answer: "Yes. Monday.com excels at work management. Use TeamPrompt alongside it for AI prompt management, DLP, and one-click insertion." },

@@ -40,7 +40,7 @@ export const policyPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "78%", label: "Of companies lack AI policies" },
+      { value: "31", label: "Total available detection rules" },
       { value: "1 hour", label: "To customize" },
       { value: "Auto", label: "Enforcement via TeamPrompt" },
     ],
@@ -256,7 +256,7 @@ export const policyPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "90%", label: "Of leaks are preventable" },
+      { value: "6", label: "One-click compliance packs" },
       { value: "Annual", label: "Recertification" },
       { value: "Role-based", label: "Training paths" },
     ],

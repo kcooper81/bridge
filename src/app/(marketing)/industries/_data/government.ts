@@ -32,12 +32,6 @@ export const industryData: IndustryPageData = {
         "Automatically detect Social Security numbers, case file references, law enforcement identifiers, and sensitive government terminology before any prompt reaches an AI model.",
     },
     {
-      icon: "BookOpen",
-      title: "Government Writing Guidelines",
-      description:
-        "Embed plain language standards, agency style guides, and federal communication requirements directly into prompt templates. Ensure every AI-assisted document meets government writing standards.",
-    },
-    {
       icon: "ClipboardList",
       title: "Immutable Audit Log",
       description:
@@ -58,10 +52,20 @@ export const industryData: IndustryPageData = {
     { title: "Internal Memo Template", badge: "Approved", stat: "214 uses", iconColor: "purple", subtitle: "Admin · 4.5★" },
   ],
   mockupUser: { name: "S. Rivera", initials: "SR" },
+  scenario: {
+    title: "What this looks like in practice",
+    persona: "Maria, constituent services staffer",
+    setup:
+      "Maria is drafting a public response to a constituent inquiry and pastes an internal memo into an AI tool for help with the wording. The memo contains two citizen Social Security numbers.",
+    trigger:
+      "TeamPrompt catches the SSN patterns (XXX-XX-XXXX) before the prompt is submitted. The prompt is blocked and Maria sees which lines triggered the detection.",
+    resolution:
+      "Maria removes the SSNs, rewrites the prompt with anonymized details, and gets her response draft. The blocked event is logged for the agency's compliance review.",
+  },
   stats: [
-    { value: "15+", label: "Built-in detection patterns" },
-    { value: "100%", label: "Interaction audit coverage" },
-    { value: "5", label: "AI tools monitored" },
+    { value: "15", label: "Built-in DLP rules" },
+    { value: "5", label: "AI tools protected" },
+    { value: "6", label: "One-click compliance packs" },
   ],
   faqs: [
     {
@@ -87,9 +91,9 @@ export const industryData: IndustryPageData = {
     },
   ],
   cta: {
-    headline: "Your agency staff are already using AI.",
-    gradientText: "Secure it for government.",
+    headline: "Citizen data stays out of AI tools.",
+    gradientText: "Full audit trail, day one.",
     subtitle:
-      "Deploy TeamPrompt for your agency in under 5 minutes — no ATO bottleneck.",
+      "15 DLP rules active from install. Chrome extension deploys via GPO or Intune in minutes.",
   },
 };

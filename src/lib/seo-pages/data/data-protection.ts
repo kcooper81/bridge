@@ -41,9 +41,9 @@ export const dataProtectionPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "100%", label: "Prompts scanned" },
-      { value: "<1s", label: "Scan latency" },
-      { value: "Real-time", label: "Threat detection" },
+      { value: "15", label: "Built-in DLP rules" },
+      { value: "5", label: "AI tools supported" },
+      { value: "< 2 min", label: "Setup time" },
     ],
     faqs: [
       { question: "Does this block all ChatGPT usage?", answer: "No. TeamPrompt only blocks prompts that contain sensitive data. Your team continues using ChatGPT freely for all safe interactions. The goal is protection without productivity loss." },
@@ -95,9 +95,9 @@ export const dataProtectionPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "100%", label: "Prompt coverage" },
-      { value: "Zero", label: "Workflow disruption" },
-      { value: "Full", label: "Audit trail" },
+      { value: "16", label: "Smart detection patterns" },
+      { value: "< 2 min", label: "Setup time" },
+      { value: "31", label: "Total available detection rules" },
     ],
     faqs: [
       { question: "Does this work with Claude Pro and Claude for Work?", answer: "Yes. TeamPrompt operates via a Chrome extension at the browser level, so it works with every Claude subscription tier including Free, Pro, and Claude for Work plans." },
@@ -149,9 +149,9 @@ export const dataProtectionPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "100%", label: "Prompts intercepted" },
-      { value: "<1s", label: "Scan time" },
-      { value: "Zero", label: "Data sent unscanned" },
+      { value: "31", label: "Total available detection rules" },
+      { value: "6", label: "One-click compliance packs" },
+      { value: "5", label: "AI tools supported" },
     ],
     faqs: [
       { question: "Does TeamPrompt work with Gemini Advanced?", answer: "Yes. TeamPrompt works with all Gemini tiers — Free, Advanced, and Business — because it operates at the browser level rather than through Google's API." },
@@ -203,9 +203,9 @@ export const dataProtectionPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "100%", label: "Prompt inspection" },
-      { value: "Custom", label: "Policy rules" },
-      { value: "Complete", label: "Audit logging" },
+      { value: "6", label: "One-click compliance packs" },
+      { value: "15", label: "Built-in DLP rules" },
+      { value: "< 2 min", label: "Setup time" },
     ],
     faqs: [
       { question: "Does this work with Microsoft 365 Copilot?", answer: "TeamPrompt protects Copilot interactions through the browser. It works with the Copilot web interface and catches prompts before they are submitted to Microsoft's AI services." },
@@ -257,9 +257,9 @@ export const dataProtectionPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "100%", label: "Queries scanned" },
-      { value: "Real-time", label: "Protection" },
-      { value: "Full", label: "Activity logging" },
+      { value: "5", label: "AI tools supported" },
+      { value: "16", label: "Smart detection patterns" },
+      { value: "$9/mo", label: "Starting price" },
     ],
     faqs: [
       { question: "Does this work with Perplexity Pro?", answer: "Yes. TeamPrompt works with all Perplexity tiers because it operates at the browser level. Whether your team uses Perplexity Free or Pro, every query is scanned before submission." },
@@ -313,9 +313,9 @@ export const dataProtectionPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "50+", label: "Key patterns detected" },
-      { value: "<100ms", label: "Detection speed" },
-      { value: "100%", label: "Pre-submission blocking" },
+      { value: "16", label: "Smart detection patterns" },
+      { value: "31", label: "Total available detection rules" },
+      { value: "< 2 min", label: "Setup time" },
     ],
     faqs: [
       { question: "Which API key formats does TeamPrompt detect?", answer: "TeamPrompt detects key patterns for AWS, GCP, Azure, Stripe, Twilio, SendGrid, GitHub, GitLab, Slack, and dozens more. It also uses entropy analysis to catch non-standard key formats." },
@@ -367,9 +367,9 @@ export const dataProtectionPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "100%", label: "Code scanning" },
-      { value: "Real-time", label: "Detection" },
-      { value: "Zero", label: "IP exposure" },
+      { value: "15", label: "Built-in DLP rules" },
+      { value: "5", label: "AI tools supported" },
+      { value: "6", label: "One-click compliance packs" },
     ],
     faqs: [
       { question: "Can developers still use AI for generic coding help?", answer: "Absolutely. TeamPrompt only blocks prompts that contain proprietary code. Developers can freely ask AI tools about public libraries, general programming concepts, and open-source code." },
@@ -421,9 +421,9 @@ export const dataProtectionPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "20+", label: "PII types detected" },
-      { value: "100%", label: "Prompt coverage" },
-      { value: "Multi-region", label: "PII support" },
+      { value: "31", label: "Total available detection rules" },
+      { value: "16", label: "Smart detection patterns" },
+      { value: "< 2 min", label: "Setup time" },
     ],
     faqs: [
       { question: "What types of PII does TeamPrompt detect?", answer: "TeamPrompt detects names, email addresses, phone numbers, SSNs, credit card numbers, physical addresses, IP addresses, government IDs, passport numbers, and more — covering PII categories defined by GDPR, CCPA, and other major regulations." },
@@ -475,9 +475,9 @@ export const dataProtectionPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "18", label: "HIPAA identifiers detected" },
-      { value: "$1.5M", label: "Max penalty per category" },
-      { value: "100%", label: "PHI scanning coverage" },
+      { value: "6", label: "One-click compliance packs" },
+      { value: "15", label: "Built-in DLP rules" },
+      { value: "5", label: "AI tools supported" },
     ],
     faqs: [
       { question: "Does this make our AI usage HIPAA-compliant?", answer: "TeamPrompt is a critical technical safeguard that prevents PHI exposure through AI tools. Full HIPAA compliance also requires administrative and physical safeguards, policies, and training — but DLP scanning is an essential component." },
@@ -529,9 +529,9 @@ export const dataProtectionPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "100%", label: "Financial data scanning" },
-      { value: "Real-time", label: "Detection and blocking" },
-      { value: "Complete", label: "Audit trail" },
+      { value: "31", label: "Total available detection rules" },
+      { value: "6", label: "One-click compliance packs" },
+      { value: "< 2 min", label: "Setup time" },
     ],
     faqs: [
       { question: "What types of financial data does TeamPrompt detect?", answer: "TeamPrompt detects revenue figures, account numbers, credit card numbers, routing numbers, financial projections, earnings data, transaction records, and other financial identifiers." },
@@ -583,9 +583,9 @@ export const dataProtectionPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "100%", label: "Prompt scanning" },
-      { value: "Real-time", label: "Customer data detection" },
-      { value: "Zero", label: "Customer data exposed" },
+      { value: "16", label: "Smart detection patterns" },
+      { value: "5", label: "AI tools supported" },
+      { value: "25", label: "Free prompts/month" },
     ],
     faqs: [
       { question: "Can support teams still use AI for response drafting?", answer: "Yes. TeamPrompt blocks customer-identifying information while allowing teams to use AI for generic response templates, knowledge base articles, and other tasks that do not include specific customer data." },
@@ -637,9 +637,9 @@ export const dataProtectionPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "100%", label: "Prompt scanning" },
-      { value: "Real-time", label: "Trade secret detection" },
-      { value: "Legal", label: "Protection preserved" },
+      { value: "15", label: "Built-in DLP rules" },
+      { value: "31", label: "Total available detection rules" },
+      { value: "6", label: "One-click compliance packs" },
     ],
     faqs: [
       { question: "Can AI disclosure destroy trade secret protection?", answer: "Yes. Under the Defend Trade Secrets Act and similar laws, a trade secret loses legal protection if the owner fails to take reasonable measures to maintain secrecy. Submitting trade secrets to AI tools could be considered a failure to protect." },
@@ -691,9 +691,9 @@ export const dataProtectionPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "100%", label: "Credential types covered" },
-      { value: "<100ms", label: "Detection latency" },
-      { value: "Zero", label: "Credentials exposed" },
+      { value: "16", label: "Smart detection patterns" },
+      { value: "< 2 min", label: "Setup time" },
+      { value: "5", label: "AI tools supported" },
     ],
     faqs: [
       { question: "What credential types does TeamPrompt detect?", answer: "TeamPrompt detects passwords, API keys, bearer tokens, session cookies, service account keys, SSH keys, TLS certificates, OAuth tokens, JWT payloads, and database credentials across all major cloud providers and services." },
@@ -745,9 +745,9 @@ export const dataProtectionPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "100%", label: "Format coverage" },
-      { value: "Luhn", label: "Validation" },
-      { value: "PCI-ready", label: "Audit reports" },
+      { value: "31", label: "Total available detection rules" },
+      { value: "6", label: "One-click compliance packs" },
+      { value: "$9/mo", label: "Starting price" },
     ],
     faqs: [
       { question: "How accurate is SSN detection?", answer: "TeamPrompt uses format matching combined with Luhn checksum validation to detect real SSNs while minimizing false positives from random nine-digit numbers. The false positive rate is extremely low." },
@@ -799,9 +799,9 @@ export const dataProtectionPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "100%", label: "IP content scanning" },
-      { value: "Real-time", label: "Detection" },
-      { value: "Legal", label: "Protection maintained" },
+      { value: "15", label: "Built-in DLP rules" },
+      { value: "16", label: "Smart detection patterns" },
+      { value: "< 2 min", label: "Setup time" },
     ],
     faqs: [
       { question: "Can AI tool usage affect patent rights?", answer: "Yes. Disclosing an invention to a third party before filing a patent application can create prior art issues. AI tool submissions may constitute public disclosure depending on the provider's terms of service." },
@@ -855,9 +855,9 @@ export const dataProtectionPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "100%", label: "Remote coverage" },
-      { value: "Zero", label: "Infrastructure needed" },
-      { value: "Any", label: "Location protected" },
+      { value: "5", label: "AI tools supported" },
+      { value: "< 2 min", label: "Setup time" },
+      { value: "31", label: "Total available detection rules" },
     ],
     faqs: [
       { question: "Do remote workers need a VPN for TeamPrompt?", answer: "No. TeamPrompt operates entirely in the browser via a Chrome extension. No VPN, proxy, or network infrastructure is required. It works on any network, anywhere." },
@@ -909,9 +909,9 @@ export const dataProtectionPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "10,000+", label: "Users supported" },
-      { value: "Custom", label: "Policy rules" },
-      { value: "SOC 2", label: "Audit-ready" },
+      { value: "6", label: "One-click compliance packs" },
+      { value: "15", label: "Built-in DLP rules" },
+      { value: "16", label: "Smart detection patterns" },
     ],
     faqs: [
       { question: "How does TeamPrompt scale for enterprise deployments?", answer: "TeamPrompt is designed for enterprise scale. The browser extension runs locally, so there is no server bottleneck. Policies are managed centrally and cached locally, ensuring consistent performance regardless of user count." },
@@ -963,9 +963,9 @@ export const dataProtectionPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "5 min", label: "Setup time" },
-      { value: "Free", label: "Startup plan" },
-      { value: "Instant", label: "Protection" },
+      { value: "< 2 min", label: "Setup time" },
+      { value: "25", label: "Free prompts/month" },
+      { value: "$9/mo", label: "Starting price" },
     ],
     faqs: [
       { question: "Is TeamPrompt free for small startups?", answer: "Yes. TeamPrompt has a free plan that includes essential DLP features for small teams. As your team grows, you can upgrade to access advanced policies, analytics, and enterprise features." },
@@ -1017,9 +1017,9 @@ export const dataProtectionPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "10+", label: "Compliance frameworks" },
-      { value: "100%", label: "Regulated data coverage" },
-      { value: "Audit-ready", label: "Reporting" },
+      { value: "6", label: "One-click compliance packs" },
+      { value: "31", label: "Total available detection rules" },
+      { value: "5", label: "AI tools supported" },
     ],
     faqs: [
       { question: "Which compliance frameworks are supported?", answer: "TeamPrompt includes pre-built DLP policy packs for HIPAA, PCI DSS, SOC 2, GDPR, CCPA, SOX, FERPA, GLBA, and other major regulatory frameworks. Custom policies can be created for industry-specific requirements." },
@@ -1071,9 +1071,9 @@ export const dataProtectionPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "100%", label: "Contractor coverage" },
-      { value: "Zero", label: "MDM required" },
-      { value: "Instant", label: "Offboarding" },
+      { value: "15", label: "Built-in DLP rules" },
+      { value: "< 2 min", label: "Setup time" },
+      { value: "16", label: "Smart detection patterns" },
     ],
     faqs: [
       { question: "Do contractors need to install anything?", answer: "Contractors only need to install the TeamPrompt Chrome extension. No device management, VPN, or additional software is required. Installation takes under two minutes." },
@@ -1125,9 +1125,9 @@ export const dataProtectionPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "Day 1", label: "Protection active" },
-      { value: "Auto", label: "Enrollment" },
-      { value: "100%", label: "New hire coverage" },
+      { value: "31", label: "Total available detection rules" },
+      { value: "6", label: "One-click compliance packs" },
+      { value: "2-click", label: "From sidebar to AI tool" },
     ],
     faqs: [
       { question: "How do new hires get enrolled in DLP policies?", answer: "When a new employee is added to TeamPrompt, they are automatically assigned DLP policies based on their department and role. No manual configuration is needed — protection is active from their first login." },
@@ -1179,9 +1179,9 @@ export const dataProtectionPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "2 min", label: "Install time" },
-      { value: "<1s", label: "Scan latency" },
-      { value: "Local", label: "Processing" },
+      { value: "< 2 min", label: "Setup time" },
+      { value: "5", label: "AI tools supported" },
+      { value: "15", label: "Built-in DLP rules" },
     ],
     faqs: [
       { question: "Why is browser-level DLP better than network-based DLP?", answer: "Network-based DLP cannot inspect encrypted HTTPS traffic without SSL interception, which breaks many applications. Browser-level DLP scans content before encryption, at the point of entry, catching data that network tools miss entirely." },
@@ -1233,9 +1233,9 @@ export const dataProtectionPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "100%", label: "Paste scanning" },
-      { value: "Real-time", label: "Detection" },
-      { value: "Multi-format", label: "Content analysis" },
+      { value: "16", label: "Smart detection patterns" },
+      { value: "31", label: "Total available detection rules" },
+      { value: "$9/mo", label: "Starting price" },
     ],
     faqs: [
       { question: "Does TeamPrompt integrate directly with Slack?", answer: "TeamPrompt operates at the browser level, scanning content when it is pasted into AI tools. It does not require direct Slack integration or access to your Slack workspace." },
@@ -1287,9 +1287,9 @@ export const dataProtectionPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "100%", label: "Email content scanning" },
-      { value: "Real-time", label: "Protection" },
-      { value: "Multi-layer", label: "Detection" },
+      { value: "6", label: "One-click compliance packs" },
+      { value: "15", label: "Built-in DLP rules" },
+      { value: "25", label: "Free prompts/month" },
     ],
     faqs: [
       { question: "Does TeamPrompt read my emails directly?", answer: "No. TeamPrompt does not access your email account or inbox. It only scans content when you paste email text into an AI tool, protecting data at the point of entry." },
@@ -1341,9 +1341,9 @@ export const dataProtectionPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "100%", label: "Code context scanning" },
-      { value: "Real-time", label: "Detection" },
-      { value: "Dev-friendly", label: "Workflow integration" },
+      { value: "5", label: "AI tools supported" },
+      { value: "16", label: "Smart detection patterns" },
+      { value: "< 2 min", label: "Setup time" },
     ],
     faqs: [
       { question: "Does this work with VS Code and other IDEs?", answer: "TeamPrompt currently protects AI interactions through the browser — covering browser-based AI tools and web IDEs. IDE-native AI assistant protection is available through the browser extension for web-based coding tools." },

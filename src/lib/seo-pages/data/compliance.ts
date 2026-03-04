@@ -42,7 +42,7 @@ export const compliancePages: SeoPageData[] = [
     stats: [
       { value: "18", label: "PHI identifiers detected" },
       { value: "$1.5M", label: "Max penalty per category" },
-      { value: "100%", label: "Interaction logging" },
+      { value: "4", label: "HIPAA detection rules" },
     ],
     faqs: [
       { question: "Does TeamPrompt make us fully HIPAA-compliant?", answer: "TeamPrompt provides critical technical safeguards for AI tool usage, including PHI detection, access controls, and audit logging. Full HIPAA compliance also requires administrative safeguards, physical safeguards, policies, and training. TeamPrompt is an essential component of your overall compliance program." },
@@ -149,7 +149,7 @@ export const compliancePages: SeoPageData[] = [
     },
     stats: [
       { value: "€20M", label: "Max GDPR penalty" },
-      { value: "100%", label: "Personal data scanning" },
+      { value: "5", label: "GDPR detection rules" },
       { value: "Art. 30", label: "Record keeping" },
     ],
     faqs: [
@@ -204,7 +204,7 @@ export const compliancePages: SeoPageData[] = [
     stats: [
       { value: "$7,500", label: "Per-violation penalty" },
       { value: "11", label: "PI categories detected" },
-      { value: "100%", label: "Consumer data scanning" },
+      { value: "31", label: "Total available detection rules" },
     ],
     faqs: [
       { question: "Does CCPA apply to AI tool usage?", answer: "Yes. If your team submits California consumers' personal information to AI tools, this constitutes a sale or sharing of personal information under CCPA/CPRA, triggering disclosure requirements and potentially opt-out rights." },
@@ -526,7 +526,7 @@ export const compliancePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "100%", label: "PAN detection" },
+      { value: "5", label: "PCI-DSS detection rules" },
       { value: "Luhn", label: "Validated" },
       { value: "QSA-ready", label: "Evidence" },
     ],
@@ -634,7 +634,7 @@ export const compliancePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "100%", label: "Student record scanning" },
+      { value: "6", label: "One-click compliance packs" },
       { value: "Role-based", label: "Access policies" },
       { value: "FERPA", label: "Compliant reporting" },
     ],
@@ -688,7 +688,7 @@ export const compliancePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "100%", label: "NPI scanning" },
+      { value: "15", label: "Built-in DLP rules" },
       { value: "Safeguards", label: "Rule compliant" },
       { value: "Examiner", label: "Ready reports" },
     ],
@@ -742,7 +742,7 @@ export const compliancePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "100%", label: "MNPI scanning" },
+      { value: "16", label: "Smart detection patterns" },
       { value: "Real-time", label: "Compliance monitoring" },
       { value: "SEC", label: "Exam-ready" },
     ],
@@ -797,7 +797,7 @@ export const compliancePages: SeoPageData[] = [
     },
     stats: [
       { value: "Rule 3110", label: "Supervisory compliance" },
-      { value: "100%", label: "Interaction logging" },
+      { value: "5", label: "AI tools supported" },
       { value: "FINRA", label: "Exam-ready" },
     ],
     faqs: [
@@ -851,7 +851,7 @@ export const compliancePages: SeoPageData[] = [
     },
     stats: [
       { value: "$1M+", label: "Criminal penalty risk" },
-      { value: "100%", label: "Controlled data scanning" },
+      { value: "< 2 min", label: "Setup time" },
       { value: "DDTC", label: "Compliance-ready" },
     ],
     faqs: [
@@ -904,9 +904,9 @@ export const compliancePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "100%", label: "CJI scanning" },
+      { value: "31", label: "Total available detection rules" },
       { value: "CJIS", label: "Policy-compliant" },
-      { value: "Full", label: "Audit logging" },
+      { value: "< 2 min", label: "Setup time" },
     ],
     faqs: [
       { question: "Can law enforcement use AI tools under CJIS?", answer: "Law enforcement can use AI tools for tasks that do not involve CJI. TeamPrompt ensures that CJI is never submitted to unauthorized AI tools while allowing officers to use AI for non-CJI tasks like report writing and research." },
@@ -1066,9 +1066,9 @@ export const compliancePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "100%", label: "PI scanning" },
+      { value: "2-click", label: "From sidebar to AI tool" },
       { value: "Canadian", label: "Format support" },
-      { value: "PIPEDA", label: "Compliant controls" },
+      { value: "6", label: "One-click compliance packs" },
     ],
     faqs: [
       { question: "Does PIPEDA apply to AI tool usage?", answer: "Yes. Submitting personal information to an AI provider constitutes a use and potential disclosure of personal information under PIPEDA. Organizations must ensure this use is consistent with their stated purposes and consent processes." },

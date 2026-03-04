@@ -39,6 +39,35 @@ export const integrationPages: SeoPageData[] = [
         "Works with ChatGPT Plus, Team, and Enterprise plans",
       ],
     },
+    stats: [
+      { value: "5", label: "AI tools supported" },
+      { value: "31", label: "Total available detection rules" },
+      { value: "< 2 min", label: "Setup time" },
+    ],
+    sections: [
+      {
+        type: "how-it-works",
+        heading: "How to use TeamPrompt with ChatGPT",
+        content: {
+          steps: [
+            { title: "Install Chrome extension", description: "Add TeamPrompt from the Chrome Web Store in one click. No configuration needed." },
+            { title: "Open ChatGPT in browser", description: "Navigate to chat.openai.com and start a conversation as usual." },
+            { title: "Click TeamPrompt sidebar icon", description: "Open the TeamPrompt side panel to browse your team's prompt library." },
+            { title: "Select prompt and insert with one click", description: "Pick any prompt, fill in template variables if needed, and insert it directly into ChatGPT's input." },
+          ],
+        },
+      },
+      {
+        type: "scenario",
+        heading: "Real-world scenario",
+        content: {
+          persona: "Sam, account executive",
+          setup: "Sam needs to write a cold outreach email to a prospect and wants to use ChatGPT for the first draft.",
+          trigger: "Sam opens the TeamPrompt sidebar in ChatGPT and selects the team's \"Sales Outreach\" template, filling in the prospect's industry and pain point variables.",
+          resolution: "Instead of writing a prompt from scratch, Sam inserts a proven prompt in 2 clicks and gets a polished outreach email in seconds.",
+        },
+      },
+    ],
     faqs: [
       { question: "Does this work with ChatGPT Plus and Enterprise?", answer: "Yes. The extension works with all ChatGPT plans — Free, Plus, Team, and Enterprise. It works with every model including GPT-4o." },
       { question: "Does it read my ChatGPT conversations?", answer: "No. The extension only interacts with the input field to insert prompts and scan outbound text. It does not read or store your conversation history." },
@@ -88,6 +117,35 @@ export const integrationPages: SeoPageData[] = [
         "Track usage and identify your team's best Claude prompts",
       ],
     },
+    stats: [
+      { value: "2-click", label: "From sidebar to AI tool" },
+      { value: "6", label: "One-click compliance packs" },
+      { value: "16", label: "Smart detection patterns" },
+    ],
+    sections: [
+      {
+        type: "how-it-works",
+        heading: "How to use TeamPrompt with Claude",
+        content: {
+          steps: [
+            { title: "Install Chrome extension", description: "Add TeamPrompt from the Chrome Web Store. Works on Chrome, Edge, and Brave." },
+            { title: "Navigate to claude.ai", description: "Open Anthropic's Claude in your browser and start or continue a conversation." },
+            { title: "Open TeamPrompt sidebar", description: "Click the TeamPrompt icon to open the side panel alongside Claude." },
+            { title: "Browse library and insert into conversation", description: "Search or browse your team's prompts, fill in variables, and insert directly into Claude's input." },
+          ],
+        },
+      },
+      {
+        type: "scenario",
+        heading: "Real-world scenario",
+        content: {
+          persona: "Priya, UX researcher",
+          setup: "Priya is analyzing user interview transcripts in Claude and needs a consistent framework for each interview.",
+          trigger: "She uses TeamPrompt to insert a standardized analysis prompt that extracts key themes, pain points, and feature requests from each transcript.",
+          resolution: "Every interview is analyzed in the same structured format, making it easy to compare findings across interviews and share results with the product team.",
+        },
+      },
+    ],
     faqs: [
       { question: "Does this work with Claude Pro and Team?", answer: "Yes. The extension works with all Claude plans — Free, Pro, and Team. It works with every model including Claude 3.5 Sonnet." },
       { question: "Can I use the side panel with Claude?", answer: "Yes. Open TeamPrompt in the browser side panel for persistent, side-by-side access while chatting with Claude." },
@@ -136,6 +194,35 @@ export const integrationPages: SeoPageData[] = [
         "Works with Gemini and Gemini Advanced",
       ],
     },
+    stats: [
+      { value: "15", label: "Built-in DLP rules" },
+      { value: "25", label: "Free prompts/month" },
+      { value: "$9/mo", label: "Starting price" },
+    ],
+    sections: [
+      {
+        type: "how-it-works",
+        heading: "How to use TeamPrompt with Gemini",
+        content: {
+          steps: [
+            { title: "Install Chrome extension", description: "Add TeamPrompt from the Chrome Web Store. Takes less than a minute." },
+            { title: "Open Google Gemini", description: "Navigate to gemini.google.com and start a new conversation." },
+            { title: "Click TeamPrompt icon", description: "Open the TeamPrompt popup or side panel from the browser toolbar." },
+            { title: "Search prompts and insert directly", description: "Find the right prompt by searching or browsing categories, then insert it into Gemini with one click." },
+          ],
+        },
+      },
+      {
+        type: "scenario",
+        heading: "Real-world scenario",
+        content: {
+          persona: "Carlos, data analyst",
+          setup: "Carlos needs to write a SQL query for a monthly revenue report and wants to use Gemini to help generate it.",
+          trigger: "He opens the TeamPrompt sidebar in Gemini and finds his team's \"SQL Query Builder\" prompt, which includes variables for table names, date ranges, and aggregation type.",
+          resolution: "Carlos fills in the variables and inserts the prompt. Gemini generates the exact SQL query he needs in seconds, instead of spending 15 minutes writing the prompt from scratch.",
+        },
+      },
+    ],
     faqs: [
       { question: "Does this work with Gemini Advanced?", answer: "Yes. The extension works with both Gemini and Gemini Advanced, including all available models." },
       { question: "Can I use the same prompts in Gemini and ChatGPT?", answer: "Yes. Your prompt library is unified — the same prompts work across all supported AI tools." },
@@ -184,6 +271,11 @@ export const integrationPages: SeoPageData[] = [
         "Force-install the extension across your organization",
       ],
     },
+    stats: [
+      { value: "6", label: "One-click compliance packs" },
+      { value: "< 2 min", label: "Setup time" },
+      { value: "31", label: "Total available detection rules" },
+    ],
     faqs: [
       { question: "Can I deploy this via Microsoft Intune?", answer: "Yes. TeamPrompt supports managed deployment through Microsoft Intune, Google Admin Console, and any MDM that supports Chrome/Edge extension policies." },
       { question: "Does it work with Microsoft 365 Copilot?", answer: "TeamPrompt currently works with the browser-based Microsoft Copilot at copilot.microsoft.com. Microsoft 365 Copilot integration within Office apps is on our roadmap." },
@@ -232,6 +324,11 @@ export const integrationPages: SeoPageData[] = [
         "Works with Perplexity Free and Pro plans",
       ],
     },
+    stats: [
+      { value: "$9/mo", label: "Starting price" },
+      { value: "5", label: "AI tools supported" },
+      { value: "15", label: "Built-in DLP rules" },
+    ],
     faqs: [
       { question: "Does this work with Perplexity Pro?", answer: "Yes. The extension works with both Perplexity Free and Pro plans, including all available models and search modes." },
       { question: "Can I share research prompts with my team?", answer: "Yes. Create a category of research-focused prompts and share it with your team. Everyone gets the same proven queries." },
@@ -280,6 +377,11 @@ export const integrationPages: SeoPageData[] = [
         "Optimize prompts for Perplexity's unique source-citation and real-time search capabilities",
       ],
     },
+    stats: [
+      { value: "16", label: "Smart detection patterns" },
+      { value: "2-click", label: "From sidebar to AI tool" },
+      { value: "6", label: "One-click compliance packs" },
+    ],
     faqs: [
       { question: "How is this different from the basic Perplexity integration?", answer: "The basic integration provides one-click prompt insertion. This advanced integration adds multi-step research workflows, curated research collections, governance policies, and research-specific analytics designed for teams that rely heavily on Perplexity for systematic research." },
       { question: "Can I create research workflows that span multiple queries?", answer: "Yes. TeamPrompt lets you build multi-step templates that guide researchers through a structured process — starting with broad exploration, narrowing to specific questions, and concluding with synthesis prompts." },
@@ -329,6 +431,11 @@ export const integrationPages: SeoPageData[] = [
         "Usage intelligence helps leadership measure ROI and optimize AI investment",
       ],
     },
+    stats: [
+      { value: "31", label: "Total available detection rules" },
+      { value: "6", label: "One-click compliance packs" },
+      { value: "5", label: "AI tools supported" },
+    ],
     faqs: [
       { question: "How does the Intune deployment work?", answer: "TeamPrompt provides a pre-built Intune configuration package with policy templates. IT admins import the configuration, customize governance rules, and push the extension to all managed devices — no end-user action required." },
       { question: "What compliance standards does the audit trail support?", answer: "The audit trail captures every interaction with timestamps, user identity, and full prompt content. This data can be exported for SOC 2, HIPAA, GDPR, and other compliance frameworks." },
@@ -379,6 +486,11 @@ export const integrationPages: SeoPageData[] = [
         "Version and iterate on prompts so your team continuously improves its AI-assisted development workflow",
       ],
     },
+    stats: [
+      { value: "< 2 min", label: "Setup time" },
+      { value: "15", label: "Built-in DLP rules" },
+      { value: "2-click", label: "From sidebar to AI tool" },
+    ],
     faqs: [
       { question: "Does TeamPrompt work with DeepSeek Coder specifically?", answer: "Yes. TeamPrompt works with DeepSeek's web interface including DeepSeek Chat and DeepSeek Coder. Your coding-specific prompts are inserted directly into the input field with one click." },
       { question: "How does source code DLP scanning work?", answer: "TeamPrompt scans outbound prompts for patterns that match proprietary code, internal URLs, API keys, database connection strings, and other sensitive developer data. Flagged content is highlighted before the prompt is sent." },
@@ -428,6 +540,11 @@ export const integrationPages: SeoPageData[] = [
         "Share proven prompts organization-wide so everyone benefits from collective expertise",
       ],
     },
+    stats: [
+      { value: "25", label: "Free prompts/month" },
+      { value: "16", label: "Smart detection patterns" },
+      { value: "5", label: "AI tools supported" },
+    ],
     faqs: [
       { question: "Does TeamPrompt work with Mistral Le Chat?", answer: "Yes. TeamPrompt integrates directly with Mistral's Le Chat web interface. Your prompt library is accessible via popup or side panel while you chat with any Mistral model." },
       { question: "Can I create multilingual prompt templates?", answer: "Absolutely. TeamPrompt supports prompt templates in any language. You can create French, German, Spanish, or any other language variants to leverage Mistral's strong multilingual capabilities." },
@@ -477,6 +594,11 @@ export const integrationPages: SeoPageData[] = [
         "Track enterprise-wide Cohere adoption with dashboards that help leadership measure AI ROI",
       ],
     },
+    stats: [
+      { value: "6", label: "One-click compliance packs" },
+      { value: "31", label: "Total available detection rules" },
+      { value: "< 2 min", label: "Setup time" },
+    ],
     faqs: [
       { question: "Does TeamPrompt work with Cohere's web interface?", answer: "Yes. TeamPrompt integrates with Cohere's web-based chat interface, allowing your team to insert managed prompts, enforce DLP policies, and log all interactions directly from the browser." },
       { question: "Can different departments have different Cohere governance policies?", answer: "Absolutely. TeamPrompt's role-based access control lets you create department-specific prompt libraries and DLP rules. Your legal team can have stricter data scanning than your marketing team, for example." },
@@ -527,6 +649,11 @@ export const integrationPages: SeoPageData[] = [
         "Track model usage patterns to inform your organization's open-source AI evaluation and strategy",
       ],
     },
+    stats: [
+      { value: "15", label: "Built-in DLP rules" },
+      { value: "$9/mo", label: "Starting price" },
+      { value: "16", label: "Smart detection patterns" },
+    ],
     faqs: [
       { question: "Which HuggingFace Chat models does TeamPrompt support?", answer: "TeamPrompt works with HuggingFace Chat's web interface and supports all models available on the platform, including Llama, Mixtral, Falcon, and any newly added open-source models." },
       { question: "Can I compare prompt performance across different models?", answer: "Yes. TeamPrompt's analytics track prompt usage and outcomes across different HuggingFace Chat models, helping your team identify which open-source models perform best for specific tasks and prompt patterns." },
@@ -576,6 +703,11 @@ export const integrationPages: SeoPageData[] = [
         "Create optimized templates for Poe's custom bots alongside standard model prompts",
       ],
     },
+    stats: [
+      { value: "5", label: "AI tools supported" },
+      { value: "25", label: "Free prompts/month" },
+      { value: "31", label: "Total available detection rules" },
+    ],
     faqs: [
       { question: "Does TeamPrompt work with all models on Poe?", answer: "Yes. TeamPrompt inserts prompts into Poe's input field regardless of which model is selected. Your prompt library works with GPT-4, Claude, Gemini, Llama, and every other model available on Poe's platform." },
       { question: "Can I track which Poe models my team uses most?", answer: "Yes. TeamPrompt's analytics dashboard tracks usage across all AI tools including Poe. You can see which models your team selects most frequently and compare prompt performance across different AI assistants." },
@@ -625,6 +757,11 @@ export const integrationPages: SeoPageData[] = [
         "Structured analysis frameworks help your team conduct systematic, repeatable research with Grok",
       ],
     },
+    stats: [
+      { value: "2-click", label: "From sidebar to AI tool" },
+      { value: "< 2 min", label: "Setup time" },
+      { value: "15", label: "Built-in DLP rules" },
+    ],
     faqs: [
       { question: "Does TeamPrompt work with Grok's web interface?", answer: "Yes. TeamPrompt integrates with Grok's web-based chat interface, allowing your team to insert managed prompts, enforce DLP policies, and log interactions directly from the browser." },
       { question: "Can I create prompts that leverage Grok's real-time capabilities?", answer: "Absolutely. TeamPrompt's template system lets you build prompts with dynamic variables for dates, topics, and data sources that are specifically designed to take advantage of Grok's real-time knowledge and analysis capabilities." },
@@ -674,6 +811,11 @@ export const integrationPages: SeoPageData[] = [
         "Leverage You.com's source-citing capabilities with prompts designed for verifiable, referenced answers",
       ],
     },
+    stats: [
+      { value: "16", label: "Smart detection patterns" },
+      { value: "6", label: "One-click compliance packs" },
+      { value: "$9/mo", label: "Starting price" },
+    ],
     faqs: [
       { question: "Does TeamPrompt work with You.com's chat and search modes?", answer: "Yes. TeamPrompt integrates with You.com's web interface and works across all modes including YouChat, Smart search, and Research mode. Your prompt library is accessible regardless of which mode your team member selects." },
       { question: "Can I create search-specific prompt templates?", answer: "Absolutely. TeamPrompt's template system lets you build prompts with dynamic variables for topics, date ranges, and source preferences that are specifically designed for You.com's AI-powered search and research capabilities." },
@@ -723,6 +865,11 @@ export const integrationPages: SeoPageData[] = [
         "Maintain audit trails of AI-assisted creative work for compliance and content approval workflows",
       ],
     },
+    stats: [
+      { value: "$9/mo", label: "Starting price" },
+      { value: "2-click", label: "From sidebar to AI tool" },
+      { value: "25", label: "Free prompts/month" },
+    ],
     faqs: [
       { question: "Does TeamPrompt work with Meta AI's web interface?", answer: "Yes. TeamPrompt integrates with Meta AI's web-based chat interface, allowing your team to insert managed prompts, enforce brand governance, and log creative interactions directly from the browser." },
       { question: "Can I create brand-specific prompt templates for Meta AI?", answer: "Absolutely. TeamPrompt's template system lets you encode brand voice, tone guidelines, audience targeting, and content format preferences into reusable templates that ensure every Meta AI interaction produces brand-consistent output." },
@@ -749,6 +896,11 @@ export const integrationPages: SeoPageData[] = [
       { icon: "Shield", title: "DLP scanning", description: "Every prompt is scanned for sensitive data before reaching OpenAI's servers." },
     ] },
     benefits: { heading: "Why teams need a ChatGPT prompt manager", items: ["Find any ChatGPT prompt in seconds instead of searching through documents", "Share proven prompts so the whole team benefits from your best work", "Track which ChatGPT prompts produce the best results", "Protect sensitive data from reaching OpenAI with DLP scanning", "Version control ensures you never lose a working prompt", "One-click insertion makes using the library faster than typing from scratch"] },
+    stats: [
+      { value: "31", label: "Total available detection rules" },
+      { value: "5", label: "AI tools supported" },
+      { value: "2-click", label: "From sidebar to AI tool" },
+    ],
     faqs: [
       { question: "Does it work with all ChatGPT plans?", answer: "Yes. TeamPrompt works with ChatGPT Free, Plus, Team, and Enterprise. It works with every model including GPT-4o." },
       { question: "How do I insert prompts into ChatGPT?", answer: "Click any prompt in the TeamPrompt popup or side panel and it is automatically inserted into ChatGPT's input field. Fill in any template variables first." },
@@ -770,6 +922,11 @@ export const integrationPages: SeoPageData[] = [
       { icon: "FileText", title: "Compliance support", description: "Meet data protection requirements for GDPR, HIPAA, SOC 2, and other frameworks." },
     ] },
     benefits: { heading: "Why ChatGPT DLP scanning is essential", items: ["Catch sensitive data that employees accidentally paste into ChatGPT", "Prevent PII from reaching OpenAI's servers", "Protect API keys and credentials from leaking through prompts", "Meet compliance requirements for data protection", "Enable safe ChatGPT usage without blocking it entirely", "Maintain audit trails of all DLP detections"] },
+    stats: [
+      { value: "15", label: "Built-in DLP rules" },
+      { value: "16", label: "Smart detection patterns" },
+      { value: "6", label: "One-click compliance packs" },
+    ],
     faqs: [
       { question: "Does DLP scanning slow down ChatGPT?", answer: "No. Scanning happens in milliseconds before the prompt is sent. Users experience no noticeable delay." },
       { question: "What data patterns does it detect?", answer: "SSNs, credit card numbers, API keys, AWS credentials, email addresses, phone numbers, and custom patterns you define." },
@@ -791,6 +948,11 @@ export const integrationPages: SeoPageData[] = [
       { icon: "BarChart3", title: "Usage tracking", description: "See which team prompts are used most and by whom for adoption and optimization insights." },
     ] },
     benefits: { heading: "Why teams share ChatGPT prompts", items: ["Stop duplicated effort from team members writing the same prompts", "Ensure consistent AI output quality across the team", "Onboard new team members with ready-to-use ChatGPT prompts", "Track which prompts deliver the best results", "Keep everyone on the latest version automatically", "Build institutional knowledge that compounds over time"] },
+    stats: [
+      { value: "25", label: "Free prompts/month" },
+      { value: "< 2 min", label: "Setup time" },
+      { value: "5", label: "AI tools supported" },
+    ],
     faqs: [
       { question: "How do team members access shared prompts?", answer: "Click the TeamPrompt icon in the ChatGPT interface to open the popup or side panel. Browse categories, search, and insert any shared prompt with one click." },
       { question: "Can I control who sees which prompts?", answer: "Yes. Categories have their own permissions. Create department-specific and organization-wide categories with appropriate access levels." },
@@ -812,6 +974,11 @@ export const integrationPages: SeoPageData[] = [
       { icon: "Users", title: "Enterprise deployment", description: "Deploy through Chrome policies and MDM for consistent coverage across the organization." },
     ] },
     benefits: { heading: "Why enterprises need ChatGPT data protection", items: ["Prevent the most common AI data leak — sensitive data in ChatGPT prompts", "Maintain SOC 2 and compliance posture for ChatGPT usage", "Enable productive ChatGPT usage without security blind spots", "Demonstrate AI governance to auditors and leadership", "Scale protection across hundreds or thousands of ChatGPT users", "Add a security layer that OpenAI's platform does not provide"] },
+    stats: [
+      { value: "6", label: "One-click compliance packs" },
+      { value: "31", label: "Total available detection rules" },
+      { value: "$9/mo", label: "Starting price" },
+    ],
     faqs: [
       { question: "Is ChatGPT Enterprise enough for data protection?", answer: "ChatGPT Enterprise provides platform-level protections, but DLP scanning at the browser catches data before it is sent. Both layers together provide defense in depth." },
       { question: "Can I deploy this across the whole company?", answer: "Yes. Use Chrome enterprise policies or MDM to deploy TeamPrompt's extension organization-wide with centrally managed DLP rules." },
@@ -833,6 +1000,11 @@ export const integrationPages: SeoPageData[] = [
       { icon: "Zap", title: "ROI measurement", description: "Estimate time savings and productivity gains from managed ChatGPT prompt usage." },
     ] },
     benefits: { heading: "Why ChatGPT analytics matter", items: ["Understand which ChatGPT prompts drive the most value", "Identify adoption gaps and target training where needed", "Justify ChatGPT investments with concrete usage data", "Optimize your prompt library based on actual ChatGPT usage patterns", "Report on AI adoption to leadership with real metrics", "Track security metrics alongside productivity data"] },
+    stats: [
+      { value: "< 2 min", label: "Setup time" },
+      { value: "5", label: "AI tools supported" },
+      { value: "25", label: "Free prompts/month" },
+    ],
     faqs: [
       { question: "What metrics does TeamPrompt track for ChatGPT?", answer: "Prompt usage frequency, active users, top prompts by usage, category distribution, and DLP events. These metrics give you a complete picture of ChatGPT usage." },
       { question: "Can I see analytics by team or department?", answer: "Yes. Analytics can be viewed at the team and category level, showing how different groups use ChatGPT." },
@@ -854,6 +1026,11 @@ export const integrationPages: SeoPageData[] = [
       { icon: "Shield", title: "DLP protection", description: "Scan prompts for sensitive data before they reach Anthropic's servers." },
     ] },
     benefits: { heading: "Why teams need a Claude prompt library", items: ["Stop losing great Claude prompts in scattered documents", "Share Claude-optimized prompts across your entire team", "Insert prompts into Claude with one click", "Protect sensitive data from reaching Anthropic with DLP scanning", "Track which Claude prompts produce the best results", "Version control ensures the best prompt version is always available"] },
+    stats: [
+      { value: "2-click", label: "From sidebar to AI tool" },
+      { value: "16", label: "Smart detection patterns" },
+      { value: "< 2 min", label: "Setup time" },
+    ],
     faqs: [
       { question: "Does it work with Claude Pro and Team?", answer: "Yes. TeamPrompt works with all Claude plans — Free, Pro, and Team." },
       { question: "Can I use the side panel with Claude?", answer: "Yes. Open TeamPrompt in the browser side panel for persistent, side-by-side access while using Claude." },
@@ -875,6 +1052,11 @@ export const integrationPages: SeoPageData[] = [
       { icon: "Scale", title: "Compliance support", description: "Meet GDPR, HIPAA, and SOC 2 data protection requirements for Claude usage." },
     ] },
     benefits: { heading: "Why Claude data protection matters", items: ["Prevent sensitive data from reaching Anthropic's systems", "Meet compliance requirements for AI data protection", "Enable Claude usage without creating security blind spots", "Protect PII, credentials, and confidential information", "Maintain audit trails of all DLP detections", "Scale protection across your entire Claude-using team"] },
+    stats: [
+      { value: "15", label: "Built-in DLP rules" },
+      { value: "31", label: "Total available detection rules" },
+      { value: "6", label: "One-click compliance packs" },
+    ],
     faqs: [
       { question: "Does Anthropic train on my data?", answer: "Anthropic's data policies vary by plan. Regardless, DLP scanning prevents sensitive data from being sent in the first place — the strongest protection regardless of provider policy." },
       { question: "Does scanning work in Claude's side panel?", answer: "Yes. DLP scanning works wherever you interact with Claude through the browser — main chat, side panel, or any Claude interface." },
@@ -896,6 +1078,11 @@ export const integrationPages: SeoPageData[] = [
       { icon: "Shield", title: "DLP protection", description: "Every shared prompt is scanned for sensitive data before reaching Claude." },
     ] },
     benefits: { heading: "Why teams share Claude prompts", items: ["Share proven Claude prompts across the team instantly", "Ensure consistent AI quality across all Claude users", "Keep everyone on the latest prompt version automatically", "Protect shared prompts with DLP scanning", "Track which shared Claude prompts are most valued", "Build a team knowledge base that grows over time"] },
+    stats: [
+      { value: "$9/mo", label: "Starting price" },
+      { value: "5", label: "AI tools supported" },
+      { value: "25", label: "Free prompts/month" },
+    ],
     faqs: [
       { question: "Can I share prompts across Claude and ChatGPT?", answer: "Yes. The same prompt library works across all supported AI tools. Prompts shared in TeamPrompt are accessible in Claude, ChatGPT, Gemini, and more." },
       { question: "How do permissions work?", answer: "Create categories with view, edit, and admin permissions. Team members see only the categories they have access to." },
@@ -917,6 +1104,11 @@ export const integrationPages: SeoPageData[] = [
       { icon: "Shield", title: "DLP scanning", description: "Protect sensitive data from reaching Google's AI with real-time scanning." },
     ] },
     benefits: { heading: "Why teams manage Gemini prompts with TeamPrompt", items: ["Organize Gemini prompts in a searchable, shared library", "Share proven Gemini prompts across the team", "Protect data from reaching Google with DLP scanning", "One-click insertion saves time on every Gemini interaction", "Version control tracks prompt improvements over time", "Works alongside ChatGPT and Claude prompt management"] },
+    stats: [
+      { value: "16", label: "Smart detection patterns" },
+      { value: "2-click", label: "From sidebar to AI tool" },
+      { value: "31", label: "Total available detection rules" },
+    ],
     faqs: [
       { question: "Does it work with all Gemini models?", answer: "Yes. TeamPrompt works with Gemini Pro, Ultra, and all Google Gemini models through the browser extension." },
       { question: "Can I manage prompts for Gemini and ChatGPT together?", answer: "Yes. TeamPrompt provides a unified library that works across Gemini, ChatGPT, Claude, and all supported tools." },
@@ -938,6 +1130,11 @@ export const integrationPages: SeoPageData[] = [
       { icon: "Scale", title: "Compliance", description: "Support SOC 2, GDPR, and HIPAA requirements for Gemini data protection." },
     ] },
     benefits: { heading: "Why enterprises need Gemini security", items: ["Prevent sensitive data from reaching Google through Gemini prompts", "Maintain compliance posture for Gemini usage", "Enable productive Gemini usage with security guardrails", "Audit Gemini interactions for compliance and security", "Scale security across all Gemini users consistently", "Complement Google Workspace security with browser-level DLP"] },
+    stats: [
+      { value: "31", label: "Total available detection rules" },
+      { value: "6", label: "One-click compliance packs" },
+      { value: "15", label: "Built-in DLP rules" },
+    ],
     faqs: [
       { question: "Does this complement Google Workspace security?", answer: "Yes. TeamPrompt adds DLP scanning at the browser level, catching sensitive data before it reaches Google. This complements Workspace-level security controls." },
       { question: "Can I apply the same rules to Gemini and ChatGPT?", answer: "Yes. DLP rules apply consistently across all AI tools. Configure once and protect Gemini, ChatGPT, Claude, and all supported tools." },
@@ -959,6 +1156,11 @@ export const integrationPages: SeoPageData[] = [
       { icon: "Shield", title: "Protected", description: "DLP scanning on every shared prompt before it reaches Gemini." },
     ] },
     benefits: { heading: "Why teams share Gemini prompts", items: ["Proven Gemini prompts available to the whole team instantly", "Consistent quality across all Gemini users", "DLP protection on every shared prompt", "Automatic version updates keep everyone current", "Track which Gemini prompts drive the most value", "Works alongside ChatGPT and Claude team prompts"] },
+    stats: [
+      { value: "25", label: "Free prompts/month" },
+      { value: "$9/mo", label: "Starting price" },
+      { value: "5", label: "AI tools supported" },
+    ],
     faqs: [
       { question: "Do shared prompts work across Gemini and ChatGPT?", answer: "Yes. The same shared library is accessible in Gemini, ChatGPT, Claude, and all supported tools." },
       { question: "How do I organize Gemini-specific prompts?", answer: "Create categories for Gemini-optimized prompts alongside cross-platform categories that work with any AI tool." },
@@ -980,6 +1182,11 @@ export const integrationPages: SeoPageData[] = [
       { icon: "Shield", title: "DLP protection", description: "Scan templates and filled prompts for sensitive data before reaching Microsoft." },
     ] },
     benefits: { heading: "Why teams use Copilot prompt templates", items: ["Standardize Copilot usage with proven templates", "Share best practices across Copilot users", "Protect data with DLP scanning on every Copilot prompt", "Reduce time writing Copilot prompts from scratch", "Track which Copilot templates produce the best results", "Works alongside ChatGPT and Claude template management"] },
+    stats: [
+      { value: "< 2 min", label: "Setup time" },
+      { value: "15", label: "Built-in DLP rules" },
+      { value: "6", label: "One-click compliance packs" },
+    ],
     faqs: [
       { question: "Does this work with Microsoft 365 Copilot?", answer: "TeamPrompt works with the web-based Copilot interface through the browser extension. For Microsoft 365 Copilot within desktop apps, prompts can be prepared in TeamPrompt and used manually." },
       { question: "Can I share Copilot templates with the whole team?", answer: "Yes. Create shared categories with Copilot-optimized templates accessible to everyone through the browser extension." },
@@ -1001,6 +1208,11 @@ export const integrationPages: SeoPageData[] = [
       { icon: "ShieldAlert", title: "Custom detection", description: "Add organization-specific patterns to Copilot DLP scanning." },
     ] },
     benefits: { heading: "Why Copilot needs DLP and compliance", items: ["Prevent sensitive data from reaching Microsoft through Copilot", "Meet compliance requirements for AI tool usage", "Enable safe Copilot adoption with security guardrails", "Audit Copilot usage for compliance and governance", "Scale protection across all Copilot users", "Complement Microsoft security with browser-level DLP"] },
+    stats: [
+      { value: "16", label: "Smart detection patterns" },
+      { value: "31", label: "Total available detection rules" },
+      { value: "6", label: "One-click compliance packs" },
+    ],
     faqs: [
       { question: "Does Microsoft's own DLP cover Copilot?", answer: "Microsoft Purview provides some DLP capabilities. TeamPrompt adds browser-level scanning that catches data before it is submitted, providing an additional protection layer." },
       { question: "Can I use the same DLP rules for Copilot and ChatGPT?", answer: "Yes. DLP rules apply consistently across all AI tools, including Copilot, ChatGPT, Claude, and Gemini." },
@@ -1022,6 +1234,11 @@ export const integrationPages: SeoPageData[] = [
       { icon: "Shield", title: "DLP on every prompt", description: "Automatic scanning protects every shared Copilot prompt." },
     ] },
     benefits: { heading: "Why teams share Copilot prompts", items: ["Share proven Copilot prompts across your Microsoft-using team", "Consistent quality across all Copilot interactions", "DLP protection on every shared prompt", "Track which Copilot prompts are most valued", "Works alongside other AI tool prompt sharing", "Automatic updates keep everyone current"] },
+    stats: [
+      { value: "5", label: "AI tools supported" },
+      { value: "2-click", label: "From sidebar to AI tool" },
+      { value: "$9/mo", label: "Starting price" },
+    ],
     faqs: [
       { question: "Can I share prompts across Copilot and ChatGPT?", answer: "Yes. The same library works across all supported AI tools. Share prompts that work in any tool or create model-specific categories." },
       { question: "How do team members access shared Copilot prompts?", answer: "Click the TeamPrompt icon while in Copilot to browse, search, and insert shared prompts with one click." },
@@ -1043,6 +1260,11 @@ export const integrationPages: SeoPageData[] = [
       { icon: "Shield", title: "DLP scanning", description: "Protect sensitive research queries from reaching Perplexity." },
     ] },
     benefits: { heading: "Why teams manage Perplexity prompts", items: ["Organize research prompts for consistent methodology", "Share proven research approaches across the team", "Protect sensitive queries with DLP scanning", "One-click insertion speeds up research workflows", "Track which research prompts are most effective", "Works alongside ChatGPT and Claude prompt management"] },
+    stats: [
+      { value: "< 2 min", label: "Setup time" },
+      { value: "25", label: "Free prompts/month" },
+      { value: "15", label: "Built-in DLP rules" },
+    ],
     faqs: [
       { question: "Does TeamPrompt work with Perplexity?", answer: "Yes. The browser extension works with Perplexity AI, allowing prompt insertion, team sharing, and DLP scanning." },
       { question: "Can I share research prompts across teams?", answer: "Yes. Create shared research categories accessible to analysts, researchers, and other teams that use Perplexity." },
@@ -1064,6 +1286,11 @@ export const integrationPages: SeoPageData[] = [
       { icon: "Scale", title: "Compliance", description: "Support regulatory requirements for Perplexity data handling." },
     ] },
     benefits: { heading: "Why Perplexity needs data protection", items: ["Prevent sensitive data from reaching Perplexity's servers", "Protect research queries that may contain confidential information", "Meet compliance requirements for AI tool data protection", "Enable safe Perplexity usage across the organization", "Maintain audit trails of Perplexity DLP events", "Consistent protection across Perplexity and all other AI tools"] },
+    stats: [
+      { value: "31", label: "Total available detection rules" },
+      { value: "16", label: "Smart detection patterns" },
+      { value: "6", label: "One-click compliance packs" },
+    ],
     faqs: [
       { question: "Why does Perplexity need DLP?", answer: "Research queries can inadvertently include sensitive data like customer names, internal metrics, or confidential project details. DLP catches these before they reach Perplexity." },
       { question: "Does the same scanning work for Perplexity and ChatGPT?", answer: "Yes. DLP rules apply consistently across all AI tools, including Perplexity." },
@@ -1085,6 +1312,11 @@ export const integrationPages: SeoPageData[] = [
       { icon: "Shield", title: "DLP protection", description: "Every shared research prompt scanned before use." },
     ] },
     benefits: { heading: "Why research teams share Perplexity prompts", items: ["Share proven research methodologies across the team", "Consistent research quality from shared prompt templates", "DLP protection on every research query", "One-click access to research prompts inside Perplexity", "Track which research prompts are most effective", "Build institutional research knowledge over time"] },
+    stats: [
+      { value: "2-click", label: "From sidebar to AI tool" },
+      { value: "5", label: "AI tools supported" },
+      { value: "< 2 min", label: "Setup time" },
+    ],
     faqs: [
       { question: "Can researchers share prompts across Perplexity and Claude?", answer: "Yes. The same shared library is accessible across all supported AI tools." },
       { question: "How do research template variables work?", answer: "Define variables like research topic, methodology, and scope. Researchers fill these in before inserting the prompt into Perplexity." },
@@ -1106,6 +1338,11 @@ export const integrationPages: SeoPageData[] = [
       { icon: "Shield", title: "DLP protection", description: "Every prompt scanned before use, unlike prompts shared directly in Slack." },
     ] },
     benefits: { heading: "Why Slack teams need a prompt library", items: ["Stop losing great prompts in Slack message history", "Organize prompts that match your Slack team structure", "Find prompts in seconds instead of searching Slack", "Version control that Slack messages cannot provide", "DLP scanning adds security that Slack sharing lacks", "Maintain prompt quality with a curated library"] },
+    stats: [
+      { value: "25", label: "Free prompts/month" },
+      { value: "$9/mo", label: "Starting price" },
+      { value: "5", label: "AI tools supported" },
+    ],
     faqs: [
       { question: "Does TeamPrompt integrate directly with Slack?", answer: "TeamPrompt works as a browser extension inside AI tools. It replaces the pattern of sharing prompts through Slack with a proper prompt library that is accessible inside ChatGPT, Claude, and other AI tools." },
       { question: "Can I organize prompts like Slack channels?", answer: "Yes. Create categories that match your team structure. Organize by team, project, or function just like your Slack workspace." },
@@ -1127,6 +1364,11 @@ export const integrationPages: SeoPageData[] = [
       { icon: "BarChart3", title: "Usage analytics", description: "Track AI prompt usage across your Teams-based organization." },
     ] },
     benefits: { heading: "Why Teams organizations need prompt management", items: ["Organize AI prompts that are currently scattered in Teams chats", "Complement Microsoft 365 security with browser-level DLP", "Share proven prompts across the organization with proper governance", "Track AI adoption and usage across Teams-based teams", "Enable AI productivity with security guardrails", "Works alongside Microsoft Copilot and all other AI tools"] },
+    stats: [
+      { value: "6", label: "One-click compliance packs" },
+      { value: "< 2 min", label: "Setup time" },
+      { value: "31", label: "Total available detection rules" },
+    ],
     faqs: [
       { question: "Does this integrate with Microsoft Teams?", answer: "TeamPrompt works as a browser extension inside AI tools. It provides prompt management for Teams-based organizations, complementing your Microsoft 365 environment." },
       { question: "How does it work with Microsoft Copilot?", answer: "TeamPrompt manages prompts across all AI tools including web-based Copilot. It provides the shared library and DLP scanning that enhance your Copilot usage." },
@@ -1148,6 +1390,11 @@ export const integrationPages: SeoPageData[] = [
       { icon: "BookOpen", title: "Template variables", description: "Fill in template variables through the extension before insertion." },
     ] },
     benefits: { heading: "Why a Chrome extension is the best approach", items: ["Access prompts inside every AI tool from one extension", "No tab switching or copy-paste — prompts go directly into the AI tool", "DLP scanning at the browser level catches data before it leaves", "Works with every AI tool in your browser, not just one", "Team features are accessible wherever you use AI", "Lightweight extension that does not slow down your browser"] },
+    stats: [
+      { value: "5", label: "AI tools supported" },
+      { value: "2-click", label: "From sidebar to AI tool" },
+      { value: "< 2 min", label: "Setup time" },
+    ],
     faqs: [
       { question: "Which AI tools does the extension support?", answer: "ChatGPT, Claude, Gemini, Copilot, Perplexity, and many more. The extension works with any web-based AI tool where you type prompts." },
       { question: "Is there a popup and a side panel?", answer: "Yes. Use the popup for quick access or the side panel for persistent, side-by-side prompt browsing while you work." },
@@ -1169,6 +1416,11 @@ export const integrationPages: SeoPageData[] = [
       { icon: "GitBranch", title: "Cross-model versioning", description: "Version control works the same across all models and tools." },
     ] },
     benefits: { heading: "Why multi-model management matters", items: ["Eliminate separate prompt collections for each AI tool", "Apply consistent security across ChatGPT, Claude, Gemini, and all tools", "Share prompts once, use them everywhere", "Avoid vendor lock-in with portable prompt libraries", "Track AI usage across all models in one dashboard", "Simplify governance with unified controls"] },
+    stats: [
+      { value: "5", label: "AI tools supported" },
+      { value: "15", label: "Built-in DLP rules" },
+      { value: "25", label: "Free prompts/month" },
+    ],
     faqs: [
       { question: "Do I need different prompts for each model?", answer: "Most prompts work well across models. Create universal prompts for the shared library and model-specific variants only when performance differs significantly." },
       { question: "Which AI tools are supported?", answer: "ChatGPT, Claude, Gemini, Copilot, Perplexity, and many more. New tools are added regularly." },
@@ -1190,6 +1442,11 @@ export const integrationPages: SeoPageData[] = [
       { icon: "Eye", title: "One audit trail", description: "Complete logging across all AI interactions for compliance." },
     ] },
     benefits: { heading: "Why consolidation simplifies AI management", items: ["Reduce complexity from managing multiple AI tool configurations", "Apply security consistently across all AI interactions", "Simplify governance with one set of policies and controls", "Give teams one place to find and share prompts", "Track AI adoption holistically instead of per-tool", "Reduce costs from managing redundant AI tool subscriptions"] },
+    stats: [
+      { value: "$9/mo", label: "Starting price" },
+      { value: "31", label: "Total available detection rules" },
+      { value: "< 2 min", label: "Setup time" },
+    ],
     faqs: [
       { question: "How many AI tools does TeamPrompt support?", answer: "TeamPrompt supports ChatGPT, Claude, Gemini, Copilot, Perplexity, and many more. The browser extension works with any web-based AI tool." },
       { question: "Do I still need individual AI tool subscriptions?", answer: "Yes. TeamPrompt manages your prompts and security across AI tools. You still need accounts with each AI provider for model access." },
@@ -1211,6 +1468,11 @@ export const integrationPages: SeoPageData[] = [
       { icon: "BookOpen", title: "Variable filling", description: "Fill in template variables through the extension before inserting prompts." },
     ] },
     benefits: { heading: "Why the browser extension is essential", items: ["Access your prompt library where you use AI — inside the tools", "DLP scanning works automatically without any user action required", "One extension provides access to all features across all AI tools", "Team features are available wherever any team member uses AI", "No separate app to remember — prompts are in your workflow", "Enterprise deployment through Chrome policies for IT admins"] },
+    stats: [
+      { value: "< 2 min", label: "Setup time" },
+      { value: "5", label: "AI tools supported" },
+      { value: "2-click", label: "From sidebar to AI tool" },
+    ],
     faqs: [
       { question: "Which browsers are supported?", answer: "The TeamPrompt extension is available for Chrome and Chromium-based browsers including Edge and Brave." },
       { question: "Does the extension affect browser performance?", answer: "No. The extension is lightweight and only activates on supported AI tool websites. It does not run in the background or affect other browsing." },
@@ -1232,6 +1494,11 @@ export const integrationPages: SeoPageData[] = [
       { icon: "Lock", title: "Security controls", description: "Enterprise-grade security including access management, encryption, and incident response capabilities." },
     ] },
     benefits: { heading: "Why enterprises choose TeamPrompt", items: ["Scale AI governance from hundreds to thousands of users", "Deploy and manage centrally through enterprise IT tools", "Meet compliance requirements with built-in governance features", "Protect enterprise data across every AI tool with unified DLP", "Track AI adoption and ROI across the entire organization", "Enable safe AI innovation with enterprise-grade guardrails"] },
+    stats: [
+      { value: "6", label: "One-click compliance packs" },
+      { value: "31", label: "Total available detection rules" },
+      { value: "5", label: "AI tools supported" },
+    ],
     faqs: [
       { question: "How does enterprise deployment work?", answer: "Deploy the TeamPrompt extension through Chrome enterprise policies, Intune, or your MDM solution. Configure DLP rules and policies centrally." },
       { question: "What enterprise compliance features are available?", answer: "Audit trails, DLP scanning, access controls, and usage analytics support SOC 2, GDPR, HIPAA, and other frameworks." },
@@ -1253,6 +1520,11 @@ export const integrationPages: SeoPageData[] = [
       { icon: "Users", title: "Same permissions", description: "API access respects the same role-based permissions as the browser extension and web dashboard." },
     ] },
     benefits: { heading: "Why development teams need API prompt management", items: ["Integrate prompt management into existing development workflows", "Automate prompt testing and deployment through CI/CD pipelines", "Manage prompts as versioned assets alongside code", "Apply consistent DLP scanning to programmatic AI interactions", "Unified analytics across API and browser extension usage", "Enable both technical and non-technical users with one platform"] },
+    stats: [
+      { value: "15", label: "Built-in DLP rules" },
+      { value: "16", label: "Smart detection patterns" },
+      { value: "$9/mo", label: "Starting price" },
+    ],
     faqs: [
       { question: "Does TeamPrompt have an API?", answer: "TeamPrompt provides a web dashboard and browser extension for prompt management. For API integration needs, contact the TeamPrompt team to discuss your specific requirements." },
       { question: "Can I manage prompts through code?", answer: "TeamPrompt's primary interfaces are the web dashboard and browser extension. The platform is designed to make prompt management accessible to both technical and non-technical users." },

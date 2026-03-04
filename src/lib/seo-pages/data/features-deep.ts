@@ -324,7 +324,7 @@ export const featureDeepPages: SeoPageData[] = [
     hero: {
       headline: "One-click prompt insertion via browser extension",
       subtitle: "The TeamPrompt browser extension puts your entire prompt library inside ChatGPT, Claude, Gemini, Copilot, and Perplexity. Search, fill in variables, and insert — all without leaving the AI tool you're working in.",
-      badges: ["Chrome extension", "5+ AI tools", "One-click insert"],
+      badges: ["Chrome extension", "5 AI tools", "One-click insert"],
     },
     features: {
       sectionLabel: "How it works",
@@ -350,7 +350,7 @@ export const featureDeepPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "5+", label: "Supported AI tools" },
+      { value: "5", label: "AI tools supported" },
       { value: "One click", label: "Prompt insertion" },
       { value: "Built-in", label: "DLP in the extension" },
     ],

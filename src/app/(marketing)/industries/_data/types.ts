@@ -7,6 +7,14 @@ export interface IndustryMockupItem {
   subtitle?: string;
 }
 
+export interface IndustryScenario {
+  title: string;
+  persona: string;
+  setup: string;
+  trigger: string;
+  resolution: string;
+}
+
 export interface IndustryPageData {
   slug: string;
   industry: string;
@@ -21,6 +29,7 @@ export interface IndustryPageData {
   mockupAlert?: { type: "block" | "warn"; message: string };
   mockupToasts?: { message: string; type: "block" | "warn" | "shared" | "success"; position?: "bottom-right" | "top-right" }[];
   mockupNavBadges?: Record<string, number>;
+  scenario?: IndustryScenario;
   stats: { value: string; label: string }[];
   faqs: { question: string; answer: string }[];
   cta: { headline: string; gradientText: string; subtitle: string };

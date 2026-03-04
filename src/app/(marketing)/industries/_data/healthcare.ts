@@ -59,10 +59,20 @@ export const industryData: IndustryPageData = {
   ],
   mockupToasts: [{ message: "PHI auto-redacted from lab report", type: "success", position: "bottom-right" }],
   mockupUser: { name: "Dr. Smith", initials: "DS" },
+  scenario: {
+    title: "What this looks like in practice",
+    persona: "Dr. Patel, ER attending",
+    setup:
+      "Dr. Patel is writing a discharge summary and pastes the patient's full record — including their medical record number (MRN) — into ChatGPT to draft the document faster.",
+    trigger:
+      "TeamPrompt's HIPAA compliance pack catches the MRN pattern before the prompt leaves the browser. The submission is blocked, and Dr. Patel sees exactly what was flagged.",
+    resolution:
+      "Dr. Patel removes the MRN, replaces it with a placeholder, and resubmits. She gets her discharge summary draft in seconds — with zero patient data exposed to the AI provider.",
+  },
   stats: [
-    { value: "15+", label: "Built-in detection patterns" },
-    { value: "3x", label: "Faster prompt reuse" },
-    { value: "100%", label: "Interaction audit coverage" },
+    { value: "15", label: "Built-in DLP rules" },
+    { value: "4", label: "HIPAA-specific detection rules" },
+    { value: "6", label: "One-click compliance packs" },
   ],
   faqs: [
     {
@@ -87,8 +97,8 @@ export const industryData: IndustryPageData = {
     },
   ],
   cta: {
-    headline: "Your clinicians are already using AI.",
-    gradientText: "Make it safe.",
-    subtitle: "Deploy TeamPrompt for your healthcare org in under 5 minutes.",
+    headline: "PHI doesn't belong in AI prompts.",
+    gradientText: "TeamPrompt catches it.",
+    subtitle: "Set up in under 2 minutes. 4 HIPAA-specific rules active from day one.",
   },
 };

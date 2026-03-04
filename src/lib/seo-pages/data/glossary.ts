@@ -45,7 +45,7 @@ export const glossaryPages: SeoPageData[] = [
     cta: {
       headline: "Start managing prompts",
       gradientText: "the right way.",
-      subtitle: "Free plan available. Set up in under 5 minutes.",
+      subtitle: "Free plan available. Set up in under 2 minutes.",
     },
   },
   {

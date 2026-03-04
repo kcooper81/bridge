@@ -28,21 +28,22 @@ export const alternativePages: SeoPageData[] = [
         { icon: "Lock", title: "Guardrails and compliance packs", description: "Enforce quality guidelines and deploy compliance policy packs for HIPAA, GDPR, and PCI-DSS. Notion's general-purpose editor has no way to enforce AI-specific governance rules." },
       ],
     },
-    benefits: {
-      heading: "Why teams switch from Notion to TeamPrompt for prompts",
-      items: [
-        "Insert prompts in one click instead of copy-pasting from Notion pages",
-        "Automatic DLP scanning catches sensitive data that Notion ignores entirely",
-        "Template variables make prompts reusable instead of static text blocks",
-        "Usage analytics reveal which prompts actually drive results for your team",
-        "Browser extension puts your library inside the AI tools you already use",
-        "Purpose-built prompt management replaces a general-purpose workaround",
-      ],
-    },
+    sections: [
+      {
+        type: "scenario",
+        heading: "Real-world scenario",
+        content: {
+          persona: "Lisa, team lead at a 40-person marketing agency",
+          setup: "Lisa's team stored all their AI prompts in a shared Notion workspace. It worked at first, but as the team scaled to 40 people and five AI tools, she noticed prompts were being copy-pasted with client names, project codes, and sometimes even API keys left in the text. Notion had no way to catch this before the data reached ChatGPT or Claude.",
+          trigger: "TeamPrompt's built-in DLP scans every prompt for sensitive data like PII, credentials, and API keys before it leaves the browser. Lisa set up 6 compliance packs in a single click and the browser extension gave her team one-click insertion into all 5 AI tools they use.",
+          resolution: "Within a week, the team fully migrated their prompt library from Notion to TeamPrompt. Lisa now has usage analytics showing which prompts drive results, DLP scanning catches sensitive data automatically, and her team inserts prompts in two clicks instead of switching tabs to copy from Notion pages.",
+        },
+      },
+    ],
     stats: [
-      { value: "1 click", label: "vs copy-paste" },
-      { value: "Built-in", label: "DLP scanning" },
-      { value: "Real-time", label: "Usage analytics" },
+      { value: "5", label: "AI tools supported" },
+      { value: "31", label: "Total available detection rules" },
+      { value: "< 2 min", label: "Setup time" },
     ],
     faqs: [
       { question: "Can I still use Notion for other things?", answer: "Absolutely. TeamPrompt replaces Notion only for prompt management. Keep using Notion for your wikis, project docs, and knowledge bases. TeamPrompt handles the prompt-specific workflow that Notion was never designed for." },
@@ -83,21 +84,24 @@ export const alternativePages: SeoPageData[] = [
         { icon: "Users", title: "Role-based prompt permissions", description: "Control who can view, edit, or manage prompts at the category level. Google Docs only offers document-level sharing, which is far too coarse for managing a prompt library." },
       ],
     },
-    benefits: {
-      heading: "Why AI teams move from Google Docs to TeamPrompt",
-      items: [
-        "Prompts are searchable and insertable, not buried in long documents",
-        "DLP scanning prevents accidental data leaks that Google Docs can't catch",
-        "Template variables eliminate tedious manual find-and-replace workflows",
-        "Usage analytics reveal which prompts your AI team actually relies on",
-        "Organized categories replace scattered documents and shared drives",
-        "Browser extension puts prompts where teams actually interact with AI",
-      ],
-    },
+    sections: [
+      {
+        type: "how-it-works",
+        heading: "How to switch from Google Docs in 4 steps",
+        content: {
+          steps: [
+            { title: "Install the extension", description: "Add the TeamPrompt Chrome extension in under a minute. It surfaces a sidebar panel inside ChatGPT, Claude, Gemini, Copilot, and Perplexity." },
+            { title: "Create your prompt library", description: "Paste prompts from your Google Docs or import via CSV. Add {{variables}} for fields your team customizes each time, like audience or tone." },
+            { title: "Share with your team", description: "Invite team members and organize prompts into categories with role-based permissions. Everyone sees the latest version instantly." },
+            { title: "Insert into any AI tool", description: "Open the sidebar in any supported AI tool, search for a prompt, fill in variables, and click insert. Two clicks from sidebar to AI tool." },
+          ],
+        },
+      },
+    ],
     stats: [
-      { value: "0", label: "Tab switching" },
-      { value: "Built-in", label: "Data protection" },
-      { value: "Per-prompt", label: "Analytics" },
+      { value: "2-click", label: "From sidebar to AI tool" },
+      { value: "15", label: "Built-in DLP rules" },
+      { value: "6", label: "One-click compliance packs" },
     ],
     faqs: [
       { question: "Can I import prompts from Google Docs?", answer: "Yes. Copy your prompts from any Google Doc and paste them directly into TeamPrompt, or export to CSV and use the bulk import wizard. Most teams complete their migration in a single session." },
@@ -137,21 +141,22 @@ export const alternativePages: SeoPageData[] = [
         { icon: "Key", title: "Zero IT overhead", description: "TeamPrompt is ready to use in minutes with no IT infrastructure, no site provisioning, and no content type configuration. SharePoint prompt libraries require significant IT involvement to set up and maintain." },
       ],
     },
-    benefits: {
-      heading: "Why teams choose TeamPrompt over SharePoint for prompts",
-      items: [
-        "Set up in minutes instead of waiting for SharePoint site provisioning",
-        "One-click prompt insertion replaces multi-step copy-paste from SharePoint",
-        "AI-specific DLP scanning works in real-time, not just at the document level",
-        "No IT overhead to create, configure, or maintain prompt libraries",
-        "Browser extension puts prompts inside AI tools instead of behind a portal",
-        "Prompt-specific analytics go beyond SharePoint page view counts",
-      ],
-    },
+    sections: [
+      {
+        type: "scenario",
+        heading: "Real-world scenario",
+        content: {
+          persona: "Tom, IT admin at a 200-person financial services firm",
+          setup: "Tom's company published AI usage policies on SharePoint and stored approved prompts in a document library. But SharePoint had no way to enforce those policies when employees actually used AI tools. People bookmarked the policy page, then went to ChatGPT and typed whatever they wanted — including client account numbers and internal financial data.",
+          trigger: "TeamPrompt's browser extension runs 16 smart detection patterns in real-time as prompts are submitted. It scans for PII, financial data, API keys, and credentials before anything reaches the AI model. Tom deployed 6 compliance packs covering PCI-DSS and SOC 2 in a single click.",
+          resolution: "Tom rolled out TeamPrompt's extension via Chrome Enterprise policies in an afternoon — no SharePoint site provisioning, no IT tickets, no waiting. Employees now use approved prompts from the sidebar with built-in DLP scanning, and Tom has a full audit trail of every prompt submission across all 5 supported AI tools.",
+        },
+      },
+    ],
     stats: [
-      { value: "2 min", label: "Setup time" },
-      { value: "0", label: "IT tickets needed" },
-      { value: "5+", label: "AI tools supported" },
+      { value: "< 2 min", label: "Setup time" },
+      { value: "16", label: "Smart detection patterns" },
+      { value: "5", label: "AI tools supported" },
     ],
     faqs: [
       { question: "Can I use TeamPrompt alongside SharePoint?", answer: "Yes. Many enterprise teams use TeamPrompt specifically for AI prompt management while keeping SharePoint for document management, intranets, and other content. The two tools complement each other." },
@@ -203,9 +208,9 @@ export const alternativePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "0", label: "Config required" },
-      { value: "Built-in", label: "AI integration" },
-      { value: "1 click", label: "Compliance setup" },
+      { value: "25", label: "Free prompts/month" },
+      { value: "5", label: "AI tools supported" },
+      { value: "6", label: "One-click compliance packs" },
     ],
     faqs: [
       { question: "Can I import my Airtable prompt base?", answer: "Yes. Export your Airtable base as CSV and import it into TeamPrompt using the bulk import wizard. Column mapping handles different field names automatically, so migration is straightforward." },
@@ -258,7 +263,7 @@ export const alternativePages: SeoPageData[] = [
     },
     stats: [
       { value: "Built-in", label: "DLP scanning" },
-      { value: "5+", label: "AI tools supported" },
+      { value: "5", label: "AI tools supported" },
       { value: "Full", label: "Audit trail" },
     ],
     faqs: [
@@ -312,9 +317,9 @@ export const alternativePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "5+", label: "AI tools supported" },
-      { value: "6", label: "Compliance packs" },
-      { value: "#1", label: "Rated prompt tool" },
+      { value: "5", label: "AI tools supported" },
+      { value: "6", label: "One-click compliance packs" },
+      { value: "$9/mo", label: "Starting price" },
     ],
     faqs: [
       { question: "Why not just use Notion or Google Docs for prompts?", answer: "General-purpose tools like Notion and Google Docs lack AI tool integration, DLP scanning, template variables with forms, and usage analytics. They work for small teams with a few prompts, but break down quickly as AI usage scales across an organization." },
@@ -366,9 +371,9 @@ export const alternativePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "10x", label: "Faster access" },
-      { value: "0", label: "Lost prompts" },
-      { value: "100%", label: "Team visibility" },
+      { value: "2-click", label: "From sidebar to AI tool" },
+      { value: "31", label: "Total available detection rules" },
+      { value: "25", label: "Free prompts/month" },
     ],
     faqs: [
       { question: "How is prompt library software different from a shared folder?", answer: "Prompt library software offers one-click insertion into AI tools, DLP scanning, template variables, usage analytics, and version history. A shared folder is just storage — it does not help you use, protect, or measure your prompts." },
@@ -475,7 +480,7 @@ export const alternativePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "5+", label: "AI tools in one toolkit" },
+      { value: "5", label: "AI tools in one toolkit" },
       { value: "Built-in", label: "Guardrails & DLP" },
       { value: "Real-time", label: "Team analytics" },
     ],
@@ -582,9 +587,9 @@ export const alternativePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "90%", label: "Faster prompt insertion vs. wiki copy-paste" },
-      { value: "Built-in", label: "DLP scanning on every prompt" },
-      { value: "Real-time", label: "Usage analytics dashboard" },
+      { value: "15", label: "Built-in DLP rules" },
+      { value: "6", label: "One-click compliance packs" },
+      { value: "< 2 min", label: "Setup time" },
     ],
     faqs: [
       { question: "Can I migrate prompts from Confluence to TeamPrompt?", answer: "Yes. Copy your prompt content from Confluence pages and paste it into TeamPrompt. Each prompt gets one-click insertion, template variable support, DLP scanning, and usage analytics automatically." },
@@ -622,21 +627,19 @@ export const alternativePages: SeoPageData[] = [
         { icon: "Lock", title: "Version control and governance", description: "Prompt versioning, approval workflows, and role-based access. Slack messages can't be versioned or governed." },
       ],
     },
-    benefits: {
-      heading: "Benefits of moving prompts from Slack to TeamPrompt",
-      items: [
-        "Prompts live in a searchable library instead of buried Slack threads",
-        "One-click insertion into AI tools instead of copy-pasting from messages",
-        "DLP scanning protects against sensitive data leaks automatically",
-        "Template variables make prompts reusable across different contexts",
-        "Usage analytics show which prompts actually get used by the team",
-        "Version control and approval workflows maintain prompt quality over time",
-      ],
-    },
+    sections: [
+      {
+        type: "prose",
+        heading: "Why Slack channels are the wrong place for prompt management",
+        content: {
+          body: "It starts innocently enough. Someone on the team writes a great prompt for ChatGPT and drops it in the #ai-prompts channel. A few people react with thumbs up, maybe someone replies with a variation. Within a week, there are dozens of prompts scattered across threads, and within a month, nobody can find anything.\n\nSlack is a messaging tool. It was built for conversations that flow forward, not for content that needs to be found, reused, and governed. When you store prompts in Slack, you lose them to the scroll. They get buried under meeting recaps, memes, and project updates. Free-tier Slack deletes message history entirely after a retention window.\n\nWorse, Slack has zero awareness of what is in those prompts. When someone pastes a prompt containing a client name, an API key, or a social security number, Slack sends it through happily. There is no DLP scanning, no sensitive data detection, and no audit trail of what data is being fed into AI tools.\n\nPrompts also need structure that messages cannot provide. A good prompt template has variables — fields like {{company_name}} or {{target_audience}} that change with each use. Slack messages are flat text. You cannot parameterize them, version them, or track which ones actually get used.\n\nTeamPrompt solves every one of these problems. Prompts live in a persistent, searchable library organized by categories. Every prompt is scanned by 31 detection rules before it reaches any AI tool. Template variables present a clean fill-in form at insertion time. And usage analytics show which prompts your team actually relies on — not just which messages got emoji reactions.\n\nKeep using Slack for conversations. Move your prompts to a tool that was built for them.",
+        },
+      },
+    ],
     stats: [
-      { value: "Persistent", label: "Searchable prompt library" },
-      { value: "Built-in", label: "DLP scanning on every prompt" },
-      { value: "One click", label: "AI tool insertion" },
+      { value: "25", label: "Free prompts/month" },
+      { value: "16", label: "Smart detection patterns" },
+      { value: "$9/mo", label: "Starting price" },
     ],
     faqs: [
       { question: "Can I still share prompts in Slack?", answer: "You can share TeamPrompt links in Slack to direct team members to specific prompts. But the prompts themselves live in TeamPrompt's persistent, searchable library with DLP and one-click insertion." },
@@ -674,21 +677,30 @@ export const alternativePages: SeoPageData[] = [
         { icon: "Archive", title: "Prompt versioning", description: "Full version history with diffs for every prompt edit. Spreadsheet version history is file-level, not prompt-level." },
       ],
     },
-    benefits: {
-      heading: "Benefits of switching from spreadsheets to TeamPrompt",
-      items: [
-        "Insert prompts with one click instead of copying from spreadsheet cells",
-        "Automatic DLP scanning prevents sensitive data from reaching AI models",
-        "Template variables customize prompts at insertion time without editing the source",
-        "Real-time usage analytics show prompt adoption across the team",
-        "Organized library with categories, tags, and search instead of endless rows",
-        "Prompt-specific governance with approval workflows and access control",
-      ],
-    },
+    sections: [
+      {
+        type: "checklist",
+        heading: "What you lose tracking prompts in spreadsheets",
+        content: {
+          items: [
+            "No one-click insertion — every use requires copying from a cell and pasting into an AI tool",
+            "No DLP scanning — sensitive data like API keys and PII goes to AI models unchecked",
+            "No template variables — reusing a prompt means manual find-and-replace every time",
+            "No usage analytics — you cannot tell which prompts are used or by whom",
+            "No version history per prompt — spreadsheet versioning is file-level, not cell-level",
+            "No approval workflows — anyone can edit a prompt with no review process",
+            "No browser extension — prompts live in a separate tab, not inside the AI tool",
+            "No compliance packs — no way to enforce HIPAA, GDPR, or PCI-DSS rules on prompt content",
+            "No role-based access — sharing is all-or-nothing at the file level",
+            "No search across prompt content — finding the right row means scrolling or filtering manually",
+          ],
+        },
+      },
+    ],
     stats: [
-      { value: "90%", label: "Faster prompt insertion" },
-      { value: "Built-in", label: "DLP scanning" },
-      { value: "Real-time", label: "Usage analytics" },
+      { value: "31", label: "Total available detection rules" },
+      { value: "5", label: "AI tools supported" },
+      { value: "2-click", label: "From sidebar to AI tool" },
     ],
     faqs: [
       { question: "Can I import prompts from a spreadsheet?", answer: "Yes. Copy your prompt text from spreadsheet cells and paste them into TeamPrompt. Each prompt gets one-click insertion, template variables, DLP scanning, and analytics automatically." },
@@ -738,7 +750,7 @@ export const alternativePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "5+", label: "Supported AI tools" },
+      { value: "5", label: "Supported AI tools" },
       { value: "Private", label: "Team-only prompt library" },
       { value: "Built-in", label: "DLP and compliance" },
     ],
@@ -790,7 +802,7 @@ export const alternativePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "5+", label: "Supported AI tools" },
+      { value: "5", label: "Supported AI tools" },
       { value: "Built-in", label: "DLP scanning" },
       { value: "Cross-tool", label: "Usage analytics" },
     ],
@@ -842,7 +854,7 @@ export const alternativePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "5+", label: "AI tools supported" },
+      { value: "5", label: "AI tools supported" },
       { value: "Built-in", label: "DLP and compliance" },
       { value: "One click", label: "Browser extension insertion" },
     ],
@@ -947,7 +959,7 @@ export const alternativePages: SeoPageData[] = [
     },
     stats: [
       { value: "Private", label: "Team-only access" },
-      { value: "5+", label: "Supported AI tools" },
+      { value: "5", label: "Supported AI tools" },
       { value: "Built-in", label: "DLP and governance" },
     ],
     faqs: [
@@ -1414,9 +1426,9 @@ export const alternativePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "90%", label: "Faster prompt insertion" },
-      { value: "Built-in", label: "DLP and compliance" },
-      { value: "Complete", label: "Version history" },
+      { value: "< 2 min", label: "Setup time" },
+      { value: "15", label: "Built-in DLP rules" },
+      { value: "$9/mo", label: "Starting price" },
     ],
     faqs: [
       { question: "Can I keep Coda for other things?", answer: "Yes. Use Coda for project docs and automations. Use TeamPrompt specifically for AI prompt management." },
@@ -1466,9 +1478,9 @@ export const alternativePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "90%", label: "Faster than copy-paste" },
-      { value: "Built-in", label: "DLP and compliance" },
-      { value: "Real-time", label: "Prompt analytics" },
+      { value: "16", label: "Smart detection patterns" },
+      { value: "6", label: "One-click compliance packs" },
+      { value: "25", label: "Free prompts/month" },
     ],
     faqs: [
       { question: "Can I keep Slite for documentation?", answer: "Yes. Use Slite for team knowledge. Use TeamPrompt for prompt management." },
@@ -1622,9 +1634,9 @@ export const alternativePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "90%", label: "Faster prompt insertion" },
-      { value: "Built-in", label: "DLP and compliance" },
-      { value: "Team-wide", label: "Prompt sharing" },
+      { value: "5", label: "AI tools supported" },
+      { value: "31", label: "Total available detection rules" },
+      { value: "< 2 min", label: "Setup time" },
     ],
     faqs: [
       { question: "Should I keep GitBook for API docs?", answer: "Yes. Use GitBook for documentation. Use TeamPrompt for AI prompt management." },
@@ -1674,9 +1686,9 @@ export const alternativePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "90%", label: "Faster than copy-paste" },
-      { value: "Built-in", label: "DLP and compliance" },
-      { value: "Real-time", label: "Prompt analytics" },
+      { value: "2-click", label: "From sidebar to AI tool" },
+      { value: "15", label: "Built-in DLP rules" },
+      { value: "$9/mo", label: "Starting price" },
     ],
     faqs: [
       { question: "Can I keep Slab for documentation?", answer: "Yes. Use Slab for knowledge management. Use TeamPrompt for prompt workflows." },
@@ -1778,9 +1790,9 @@ export const alternativePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "90%", label: "Faster prompt access" },
-      { value: "Built-in", label: "DLP and compliance" },
-      { value: "Real-time", label: "Usage analytics" },
+      { value: "< 2 min", label: "Setup time" },
+      { value: "31", label: "Total available detection rules" },
+      { value: "6", label: "One-click compliance packs" },
     ],
     faqs: [
       { question: "Can I keep Monday.com for work management?", answer: "Yes. Use Monday.com for work management. Use TeamPrompt for prompt management." },
@@ -1830,9 +1842,9 @@ export const alternativePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "90%", label: "Faster than task-board workflow" },
-      { value: "Built-in", label: "DLP scanning" },
-      { value: "Real-time", label: "Prompt analytics" },
+      { value: "25", label: "Free prompts/month" },
+      { value: "16", label: "Smart detection patterns" },
+      { value: "5", label: "AI tools supported" },
     ],
     faqs: [
       { question: "Can I keep Asana for projects?", answer: "Yes. Use Asana for project management. Use TeamPrompt for prompt management." },
@@ -1882,9 +1894,9 @@ export const alternativePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "90%", label: "Faster prompt access" },
-      { value: "Built-in", label: "DLP scanning" },
-      { value: "Real-time", label: "Usage analytics" },
+      { value: "15", label: "Built-in DLP rules" },
+      { value: "$9/mo", label: "Starting price" },
+      { value: "2-click", label: "From sidebar to AI tool" },
     ],
     faqs: [
       { question: "Can I keep Trello for task management?", answer: "Yes. Use Trello for visual task management. Use TeamPrompt for prompt management." },
@@ -1934,9 +1946,9 @@ export const alternativePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "90%", label: "Faster prompt access" },
-      { value: "Built-in", label: "DLP scanning" },
-      { value: "Real-time", label: "Usage analytics" },
+      { value: "6", label: "One-click compliance packs" },
+      { value: "31", label: "Total available detection rules" },
+      { value: "< 2 min", label: "Setup time" },
     ],
     faqs: [
       { question: "Can I keep ClickUp for project management?", answer: "Yes. Use ClickUp for projects. Use TeamPrompt for prompt management." },

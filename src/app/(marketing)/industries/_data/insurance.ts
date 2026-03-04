@@ -49,6 +49,12 @@ export const industryData: IndustryPageData = {
       description:
         "Organize prompts by department — claims, underwriting, actuarial, customer service — with role-based access so each team sees only what they need.",
     },
+    {
+      icon: "Scale",
+      title: "HIPAA + PCI-DSS Compliance Packs",
+      description:
+        "One-click install of HIPAA rules (MRN, health insurance ID, ICD codes, prescriptions) and PCI-DSS rules (card numbers, CVV, expiration). Cover both health claims and payment data in seconds.",
+    },
   ],
   mockupVariant: "guardrails",
   mockupItems: [
@@ -61,10 +67,20 @@ export const industryData: IndustryPageData = {
   mockupAlert: { type: "block", message: "3 violations blocked in the last 24 hours" },
   mockupToasts: [{ message: "Claims data auto-redacted", type: "success", position: "bottom-right" }],
   mockupNavBadges: { Security: 4 },
+  scenario: {
+    title: "What this looks like in practice",
+    persona: "Karen, claims adjuster",
+    setup:
+      "Karen is drafting a denial letter and pastes the policyholder's SSN, medical records from the attending physician, and the full claims history into Claude to help write a compliant response.",
+    trigger:
+      "TeamPrompt catches the SSN pattern, the PHI indicators from the medical records, and the policyholder PII. The prompt is blocked — and Karen sees each flagged element highlighted.",
+    resolution:
+      "Karen strips the identifiable data, replaces it with claim reference numbers, and resubmits. She gets her denial draft, and the compliance team has a logged record of the blocked attempt.",
+  },
   stats: [
-    { value: "15+", label: "Built-in detection patterns" },
-    { value: "3x", label: "Faster prompt reuse" },
-    { value: "100%", label: "Interaction audit coverage" },
+    { value: "15", label: "Built-in DLP rules" },
+    { value: "6", label: "One-click compliance packs" },
+    { value: "5", label: "AI tools protected" },
   ],
   faqs: [
     {
@@ -89,8 +105,9 @@ export const industryData: IndustryPageData = {
     },
   ],
   cta: {
-    headline: "Your insurance team is already using AI.",
-    gradientText: "Make it compliant.",
-    subtitle: "Deploy TeamPrompt for your organization in under 5 minutes.",
+    headline: "Claims data, medical records, SSNs.",
+    gradientText: "None of it reaches the AI.",
+    subtitle:
+      "HIPAA + PCI-DSS compliance packs installed in one click. Audit trail from minute one.",
   },
 };

@@ -43,12 +43,6 @@ export const industryData: IndustryPageData = {
       description:
         "Every prompt, every user, every timestamp. Give administration a complete record of AI usage to support FERPA compliance reviews.",
     },
-    {
-      icon: "Users",
-      title: "Department Management",
-      description:
-        "Organize prompts by department — humanities, STEM, administration — with role-based access so each group sees only what they need.",
-    },
   ],
   mockupVariant: "vault",
   mockupItems: [
@@ -58,10 +52,20 @@ export const industryData: IndustryPageData = {
     { title: "Research Summary Prompt", badge: "FERPA Safe", stat: "134 uses", iconColor: "purple", subtitle: "Higher Ed · new", highlight: "new" },
   ],
   mockupUser: { name: "Prof. Chen", initials: "PC" },
+  scenario: {
+    title: "What this looks like in practice",
+    persona: "Prof. Williams, biology department",
+    setup:
+      "Prof. Williams is creating study materials for next week's exam and pastes a student roster — names, student IDs, and current grades — into ChatGPT to help generate personalized study guides.",
+    trigger:
+      "TeamPrompt catches the FERPA-protected student PII patterns: the student IDs and the association of names with grades. The prompt is blocked before submission.",
+    resolution:
+      "Prof. Williams removes the student identifiers, asks ChatGPT for a generic study guide template instead, and personalizes each one manually. Student data never left the browser.",
+  },
   stats: [
-    { value: "15+", label: "Built-in detection patterns" },
-    { value: "3x", label: "Faster prompt reuse" },
-    { value: "100%", label: "Interaction audit coverage" },
+    { value: "31", label: "Total available detection rules" },
+    { value: "2-click", label: "From sidebar to AI tool" },
+    { value: "5", label: "AI tools protected" },
   ],
   faqs: [
     {
@@ -86,8 +90,9 @@ export const industryData: IndustryPageData = {
     },
   ],
   cta: {
-    headline: "Your educators are already using AI.",
-    gradientText: "Make it safe.",
-    subtitle: "Deploy TeamPrompt for your institution in under 5 minutes.",
+    headline: "Student data stays in the classroom.",
+    gradientText: "AI stays useful.",
+    subtitle:
+      "31 detection rules protect FERPA data from day one. Free plan starts at 25 prompts/month.",
   },
 };

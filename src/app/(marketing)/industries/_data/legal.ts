@@ -9,14 +9,9 @@ export const industryData: IndustryPageData = {
   compliance: ["Privilege Detection", "Audit Logging", "Access Control"],
   painPoints: [
     {
-      title: "Associates paste case details into AI tools",
+      title: "Associates paste privileged information into AI tools",
       description:
-        "Without safeguards, confidential case facts, client names, and privileged strategy end up in third-party AI systems — creating malpractice exposure.",
-    },
-    {
-      title: "No quality control over AI-assisted drafting",
-      description:
-        "Each attorney crafts prompts differently. Some produce hallucinated citations, others miss key issues. There is no firm-wide standard for AI-assisted work product.",
+        "Without safeguards, confidential case facts, client names, and privileged strategy end up in third-party AI systems — creating malpractice exposure and ABA Rule 1.6 violations.",
     },
     {
       title: "Zero audit trail for AI usage",
@@ -58,10 +53,20 @@ export const industryData: IndustryPageData = {
     { title: "Deposition Prep", badge: "Privilege Safe", stat: "145 uses", iconColor: "purple", subtitle: "Trial Prep" },
   ],
   mockupUser: { name: "J. Parker", initials: "JP" },
+  scenario: {
+    title: "What this looks like in practice",
+    persona: "Sarah, litigation associate",
+    setup:
+      "Sarah is researching case law and pastes a privileged client email into Claude to get a quick summary of the key arguments. The email contains the client's name, case strategy, and internal assessments.",
+    trigger:
+      "TeamPrompt detects the client name pattern and privilege markers in the text. The prompt is blocked before it ever reaches Claude, and Sarah sees exactly which phrases triggered the block.",
+    resolution:
+      "Sarah strips out the client-identifying details, replaces them with generic placeholders, and resubmits. She gets her summary — and the firm has a logged record showing privilege was protected.",
+  },
   stats: [
-    { value: "15+", label: "Built-in detection patterns" },
-    { value: "4x", label: "Faster legal research" },
-    { value: "100%", label: "Interaction audit coverage" },
+    { value: "15", label: "Built-in DLP rules" },
+    { value: "31", label: "Total available detection rules" },
+    { value: "5", label: "AI tools protected" },
   ],
   faqs: [
     {
@@ -86,9 +91,9 @@ export const industryData: IndustryPageData = {
     },
   ],
   cta: {
-    headline: "Your attorneys are already using AI.",
-    gradientText: "Protect the privilege.",
+    headline: "Privileged data and AI don't mix.",
+    gradientText: "TeamPrompt keeps them apart.",
     subtitle:
-      "Deploy TeamPrompt for your firm in under 5 minutes — no IT department required.",
+      "31 detection rules, full audit trail, deployed in under 2 minutes — no IT department required.",
   },
 };

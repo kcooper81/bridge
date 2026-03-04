@@ -20,7 +20,7 @@ export default function TermsPage() {
             Terms of Use
           </h1>
           <p className="mt-4 text-muted-foreground">
-            Last updated: February 27, 2026
+            Last updated: March 4, 2026
           </p>
         </div>
 
@@ -245,10 +245,43 @@ export default function TermsPage() {
             </p>
           </section>
 
-          {/* 6. Browser Extension Terms */}
+          {/* 6. Google Workspace Integration */}
           <section>
             <h2 className="text-xl font-semibold mb-4">
-              6. Browser Extension Terms
+              6. Google Workspace Integration
+            </h2>
+            <p className="text-muted-foreground leading-relaxed mb-3">
+              TeamPrompt offers optional integration with Google Workspace for organizational user management. By using this integration, you acknowledge and agree to the following:
+            </p>
+            <ul className="list-disc list-inside text-muted-foreground leading-relaxed space-y-2 mb-3 pl-2">
+              <li>
+                <span className="font-medium text-foreground">Administrator consent required:</span> Only Google Workspace administrators can authorize this integration. The admin must consent to specific API scopes during the OAuth process.
+              </li>
+              <li>
+                <span className="font-medium text-foreground">Read-only access:</span> TeamPrompt only requests read-only access to user directory and group information. We never modify, create, or delete data in your Google Workspace.
+              </li>
+              <li>
+                <span className="font-medium text-foreground">Manual synchronization:</span> All data synchronization is manually triggered by administrators. TeamPrompt does not perform automatic or scheduled syncing of Google Workspace data.
+              </li>
+              <li>
+                <span className="font-medium text-foreground">Limited data collection:</span> We collect only the minimum data necessary for user onboarding: user names, email addresses, group names, and group memberships.
+              </li>
+              <li>
+                <span className="font-medium text-foreground">Data security:</span> Google Workspace data is stored with the same security measures as other TeamPrompt data, including encryption at rest and in transit.
+              </li>
+              <li>
+                <span className="font-medium text-foreground">Revocation:</span> Administrators can revoke TeamPrompt&apos;s access at any time through the Google Workspace admin console or by disconnecting the integration in TeamPrompt settings.
+              </li>
+            </ul>
+            <p className="text-muted-foreground leading-relaxed">
+              You are responsible for complying with Google&apos;s terms of service and any applicable laws when using this integration. TeamPrompt is not responsible for Google&apos;s service availability or changes to Google&apos;s API policies.
+            </p>
+          </section>
+
+          {/* 7. Browser Extension Terms */}
+          <section>
+            <h2 className="text-xl font-semibold mb-4">
+              7. Browser Extension Terms
             </h2>
             <p className="text-muted-foreground leading-relaxed mb-3">
               The TeamPrompt Browser Extension is an optional component of the
@@ -293,10 +326,10 @@ export default function TermsPage() {
             </p>
           </section>
 
-          {/* 7. Plans & Billing */}
+          {/* 8. Plans & Billing */}
           <section>
             <h2 className="text-xl font-semibold mb-4">
-              7. Plans &amp; Billing
+              8. Plans &amp; Billing
             </h2>
             <p className="text-muted-foreground leading-relaxed mb-3">
               TeamPrompt offers both free and paid plans:
@@ -336,9 +369,9 @@ export default function TermsPage() {
             </p>
           </section>
 
-          {/* 8. Termination */}
+          {/* 9. Termination */}
           <section>
-            <h2 className="text-xl font-semibold mb-4">8. Termination</h2>
+            <h2 className="text-xl font-semibold mb-4">9. Termination</h2>
             <p className="text-muted-foreground leading-relaxed mb-3">
               <span className="font-medium text-foreground">By you:</span>{" "}
               You may stop using the Service at any time. You can delete your
@@ -363,9 +396,9 @@ export default function TermsPage() {
             </p>
           </section>
 
-          {/* 9. Disclaimers */}
+          {/* 10. Disclaimers */}
           <section>
-            <h2 className="text-xl font-semibold mb-4">9. Disclaimers</h2>
+            <h2 className="text-xl font-semibold mb-4">10. Disclaimers</h2>
             <p className="text-muted-foreground leading-relaxed mb-3">
               The Service is provided on an &ldquo;as is&rdquo; and &ldquo;as
               available&rdquo; basis, without warranties of any kind, either
@@ -404,10 +437,10 @@ export default function TermsPage() {
             </p>
           </section>
 
-          {/* 10. Limitation of Liability */}
+          {/* 11. Limitation of Liability */}
           <section>
             <h2 className="text-xl font-semibold mb-4">
-              10. Limitation of Liability
+              11. Limitation of Liability
             </h2>
             <p className="text-muted-foreground leading-relaxed mb-3">
               To the maximum extent permitted by applicable law, TeamPrompt and
@@ -440,10 +473,10 @@ export default function TermsPage() {
             </p>
           </section>
 
-          {/* 11. Changes to Terms */}
+          {/* 12. Changes to Terms */}
           <section>
             <h2 className="text-xl font-semibold mb-4">
-              11. Changes to Terms
+              12. Changes to Terms
             </h2>
             <p className="text-muted-foreground leading-relaxed mb-3">
               We reserve the right to modify these Terms at any time. When we
@@ -463,10 +496,10 @@ export default function TermsPage() {
             </p>
           </section>
 
-          {/* 12. Governing Law */}
+          {/* 13. Governing Law */}
           <section>
             <h2 className="text-xl font-semibold mb-4">
-              12. Governing Law
+              13. Governing Law
             </h2>
             <p className="text-muted-foreground leading-relaxed mb-3">
               These Terms shall be governed by and construed in accordance with
@@ -489,9 +522,9 @@ export default function TermsPage() {
             </p>
           </section>
 
-          {/* 13. Contact */}
+          {/* 14. Contact */}
           <section>
-            <h2 className="text-xl font-semibold mb-4">13. Contact</h2>
+            <h2 className="text-xl font-semibold mb-4">14. Contact</h2>
             <p className="text-muted-foreground leading-relaxed mb-3">
               If you have any questions about these Terms, please contact us:
             </p>

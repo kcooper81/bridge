@@ -7,7 +7,7 @@ import { FAQSection } from "@/components/marketing/faq-section";
 import { StatsRow } from "@/components/marketing/stats-row";
 import { AppMockup } from "@/components/marketing/app-mockup";
 import { HeroImage } from "@/components/marketing/hero-image";
-import { ArrowRight, Shield } from "lucide-react";
+import { ArrowRight, Shield, MessageCircle } from "lucide-react";
 import {
   Archive,
   ArrowDownUp,
@@ -285,6 +285,55 @@ export function IndustryPage({ data }: { data: IndustryPageData }) {
           </div>
         </div>
       </section>
+
+      {/* ━━━ SCENARIO ━━━ */}
+      {data.scenario && (
+        <section className="py-20 sm:py-28 bg-muted/30 border-y border-border">
+          <div className="max-w-3xl mx-auto px-4 sm:px-6">
+            <div className="flex items-center gap-3 mb-10">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <MessageCircle className="h-5 w-5" />
+              </div>
+              <div>
+                <SectionLabel className="mb-0">{data.scenario.title}</SectionLabel>
+                <p className="text-sm text-muted-foreground">{data.scenario.persona}</p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {/* Step 1: Setup */}
+              <div className="rounded-xl border border-border bg-card p-5">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60 mb-2 block">
+                  1 · Situation
+                </span>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {data.scenario.setup}
+                </p>
+              </div>
+
+              {/* Step 2: Trigger — highlighted */}
+              <div className="rounded-xl border border-primary/20 bg-card p-5 border-l-4 border-l-primary/40">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-primary/60 mb-2 block">
+                  2 · What TeamPrompt does
+                </span>
+                <p className="text-sm text-foreground leading-relaxed font-medium">
+                  {data.scenario.trigger}
+                </p>
+              </div>
+
+              {/* Step 3: Resolution */}
+              <div className="rounded-xl border border-border bg-card p-5">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-500/60 mb-2 block">
+                  3 · Result
+                </span>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {data.scenario.resolution}
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ━━━ STATS ━━━ */}
       <DarkSection className="mx-4 sm:mx-6 lg:mx-auto max-w-5xl">

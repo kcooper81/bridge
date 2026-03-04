@@ -7,7 +7,7 @@ import { FAQSection } from "@/components/marketing/faq-section";
 import { BenefitsGrid } from "@/components/marketing/benefits-grid";
 import { StatsRow } from "@/components/marketing/stats-row";
 import { HeroImage } from "@/components/marketing/hero-image";
-import { ArrowRight, Shield } from "lucide-react";
+import { ArrowRight, Shield, MessageCircle } from "lucide-react";
 import {
   Archive,
   BarChart3,
@@ -424,6 +424,8 @@ function ContentSection({ section }: { section: SeoContentSection }) {
       return <HowItWorksSection section={section} />;
     case "prose":
       return <ProseSection section={section} />;
+    case "scenario":
+      return <ScenarioSection section={section} />;
     case "use-cases-grid":
       return <UseCasesGridSection section={section} />;
     default:
@@ -545,6 +547,51 @@ function ProseSection({ section }: { section: SeoContentSection }) {
           </div>
           <div className="prose prose-zinc dark:prose-invert max-w-none text-muted-foreground leading-relaxed whitespace-pre-line text-[15px]">
             {body}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ScenarioSection({ section }: { section: SeoContentSection }) {
+  const persona = (section.content.persona as string) || "";
+  const setup = (section.content.setup as string) || "";
+  const trigger = (section.content.trigger as string) || "";
+  const resolution = (section.content.resolution as string) || "";
+  return (
+    <section className="py-20 sm:py-28 bg-muted/30 border-y border-border">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6">
+        <div className="flex items-center gap-3 mb-10">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+            <MessageCircle className="h-5 w-5" />
+          </div>
+          <div>
+            <SectionLabel className="mb-0">{section.heading}</SectionLabel>
+            <p className="text-sm text-muted-foreground">{persona}</p>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <div className="rounded-xl border border-border bg-card p-5">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60 mb-2 block">
+              Situation
+            </span>
+            <p className="text-sm text-muted-foreground leading-relaxed">{setup}</p>
+          </div>
+
+          <div className="rounded-xl border border-primary/20 bg-card p-5 border-l-4 border-l-primary/40">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-primary/60 mb-2 block">
+              What TeamPrompt does
+            </span>
+            <p className="text-sm text-foreground leading-relaxed font-medium">{trigger}</p>
+          </div>
+
+          <div className="rounded-xl border border-border bg-card p-5">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-500/60 mb-2 block">
+              Result
+            </span>
+            <p className="text-sm text-muted-foreground leading-relaxed">{resolution}</p>
           </div>
         </div>
       </div>

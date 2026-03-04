@@ -49,6 +49,12 @@ export const industryData: IndustryPageData = {
       description:
         "Organize prompts by team (backend, frontend, DevOps, SRE) with role-based access. Each team maintains their own library while admins keep global oversight.",
     },
+    {
+      icon: "Users",
+      title: "Shared Debugging & Review Prompts",
+      description:
+        "Stop every engineer from reinventing the same code review and debugging prompts. Build a shared library of proven prompts that new hires can use from day one.",
+    },
   ],
   mockupVariant: "guardrails",
   mockupItems: [
@@ -64,9 +70,19 @@ export const industryData: IndustryPageData = {
   mockupToasts: [{ message: "API key blocked — logged to audit", type: "block", position: "bottom-right" }],
   mockupNavBadges: { Security: 3 },
   mockupUser: { name: "Alex Dev", initials: "AD" },
+  scenario: {
+    title: "What this looks like in practice",
+    persona: "Marcus, backend engineer",
+    setup:
+      "Marcus is debugging a production outage and pastes a stack trace into Gemini for analysis. Buried in the trace is an AWS access key (AKIA...) from the environment config.",
+    trigger:
+      "TeamPrompt's credential detection catches the AKIA pattern instantly. The prompt is blocked before it reaches Gemini, and Marcus sees the flagged key highlighted in the preview.",
+    resolution:
+      "Marcus removes the access key, pastes the sanitized stack trace, and gets the debugging help he needs. The blocked attempt is logged — and the key was never exposed to a third-party AI.",
+  },
   stats: [
-    { value: "15+", label: "Built-in secret patterns" },
-    { value: "5", label: "AI tools monitored" },
+    { value: "16", label: "Smart detection patterns" },
+    { value: "5", label: "AI tools protected" },
     { value: "< 200ms", label: "Scan latency per prompt" },
   ],
   faqs: [
@@ -92,9 +108,9 @@ export const industryData: IndustryPageData = {
     },
   ],
   cta: {
-    headline: "Your developers are pasting secrets into AI right now.",
-    gradientText: "Catch them before it's too late.",
+    headline: "16 detection patterns.",
+    gradientText: "Zero secrets leaked.",
     subtitle:
-      "Deploy TeamPrompt across your engineering org in under 5 minutes.",
+      "Install the Chrome extension. Enable credential scanning. Done in under 2 minutes.",
   },
 };

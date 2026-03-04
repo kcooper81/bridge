@@ -40,9 +40,9 @@ export const guidePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "73%", label: "Of teams lack prompt standards" },
-      { value: "10x", label: "Faster prompt reuse" },
-      { value: "100%", label: "Prompt visibility" },
+      { value: "15", label: "Built-in DLP rules" },
+      { value: "5", label: "AI tools supported" },
+      { value: "< 2 min", label: "Setup time" },
     ],
     faqs: [
       { question: "What exactly is prompt management?", answer: "Prompt management is the practice of organizing, sharing, versioning, and governing the AI prompts your team writes. It turns ad-hoc prompt writing into a structured, scalable system — similar to how code repositories replaced emailing scripts around." },
@@ -95,9 +95,9 @@ export const guidePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "3x", label: "Better output consistency" },
-      { value: "60%", label: "Less prompt writing time" },
-      { value: "100%", label: "Team alignment" },
+      { value: "31", label: "Total available detection rules" },
+      { value: "2-click", label: "From sidebar to AI tool" },
+      { value: "5", label: "AI tools supported" },
     ],
     faqs: [
       { question: "What is the best prompt format for teams?", answer: "We recommend a structured format with five sections: role, context, task, constraints, and output format. This ensures every prompt provides enough information for reliable results while remaining easy for anyone on the team to follow." },
@@ -150,9 +150,9 @@ export const guidePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "5 min", label: "Setup time" },
-      { value: "10x", label: "Prompt reuse rate" },
-      { value: "Zero", label: "Lost prompts" },
+      { value: "< 2 min", label: "Setup time" },
+      { value: "25", label: "Free prompts/month" },
+      { value: "5", label: "AI tools supported" },
     ],
     faqs: [
       { question: "How many prompts should we start with?", answer: "Start with 10 to 20 high-quality prompts that cover your team's most common tasks. A small, well-curated library is more valuable than a large, unorganized one. You can always grow from there." },
@@ -205,9 +205,9 @@ export const guidePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "82%", label: "Of enterprises lack AI policies" },
-      { value: "6", label: "Compliance packs available" },
-      { value: "100%", label: "Interaction visibility" },
+      { value: "31", label: "Total available detection rules" },
+      { value: "6", label: "One-click compliance packs" },
+      { value: "15", label: "Built-in DLP rules" },
     ],
     faqs: [
       { question: "Where should we start with AI governance?", answer: "Start with three things: an acceptable use policy, a DLP guardrail on your most-used AI tools, and basic usage logging. TeamPrompt provides all three out of the box, so you can be operational in a single afternoon." },
@@ -260,9 +260,9 @@ export const guidePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "60%+", label: "Of employees paste sensitive data into AI" },
-      { value: "< 50ms", label: "Scan time per prompt" },
-      { value: "6", label: "Compliance packs" },
+      { value: "16", label: "Smart detection patterns" },
+      { value: "15", label: "Built-in DLP rules" },
+      { value: "6", label: "One-click compliance packs" },
     ],
     faqs: [
       { question: "What types of data should we scan for?", answer: "At minimum, scan for Social Security numbers, credit card numbers, API keys, and personal health information. TeamPrompt's compliance packs add framework-specific patterns for HIPAA, GDPR, PCI-DSS, and more." },
@@ -315,9 +315,9 @@ export const guidePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "80%", label: "Less prompt writing time" },
-      { value: "3x", label: "More consistent outputs" },
-      { value: "Unlimited", label: "Variables per template" },
+      { value: "2-click", label: "From sidebar to AI tool" },
+      { value: "25", label: "Free prompts/month" },
+      { value: "$9/mo", label: "Starting price" },
     ],
     faqs: [
       { question: "How many variables should a template have?", answer: "Most effective templates use three to seven variables. Too few and the template is not flexible enough. Too many and it becomes a chore to fill out. Focus on the fields that actually change between uses." },
@@ -369,9 +369,9 @@ export const guidePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "6", label: "Adoption phases" },
-      { value: "2 weeks", label: "Pilot to rollout" },
-      { value: "100%", label: "Team coverage" },
+      { value: "5", label: "AI tools supported" },
+      { value: "< 2 min", label: "Setup time" },
+      { value: "25", label: "Free prompts/month" },
     ],
     faqs: [
       { question: "How long does a full rollout take?", answer: "Most teams complete the pilot phase in one to two weeks and roll out organization-wide within a month. The phased approach means you are getting value from day one, not waiting for a big-bang launch." },
@@ -424,9 +424,9 @@ export const guidePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "0", label: "Lost versions" },
-      { value: "1-click", label: "Rollback" },
-      { value: "Full", label: "Change history" },
+      { value: "31", label: "Total available detection rules" },
+      { value: "2-click", label: "From sidebar to AI tool" },
+      { value: "6", label: "One-click compliance packs" },
     ],
     faqs: [
       { question: "How is prompt version control different from document history?", answer: "Document history stores snapshots. Prompt version control adds side-by-side diffs, author attribution, rollback, and integration with usage analytics — purpose-built for the iterative nature of prompt development." },
@@ -479,9 +479,9 @@ export const guidePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "Real-time", label: "Threat detection" },
-      { value: "6", label: "Compliance frameworks" },
-      { value: "100%", label: "Prompt visibility" },
+      { value: "16", label: "Smart detection patterns" },
+      { value: "6", label: "One-click compliance packs" },
+      { value: "15", label: "Built-in DLP rules" },
     ],
     faqs: [
       { question: "What is the biggest AI security risk for teams?", answer: "Unintentional data exposure. Employees paste sensitive data into AI tools without realizing it leaves their organization's control. Automated DLP scanning catches these incidents before they become breaches." },
@@ -534,9 +534,9 @@ export const guidePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "40%", label: "Average time savings" },
-      { value: "Real-time", label: "Usage dashboards" },
-      { value: "CSV/JSON", label: "Export options" },
+      { value: "$9/mo", label: "Starting price" },
+      { value: "25", label: "Free prompts/month" },
+      { value: "5", label: "AI tools supported" },
     ],
     faqs: [
       { question: "What metrics should we track first?", answer: "Start with three metrics: active users per week, prompt insertions per user, and library utilization rate. These give you a clear picture of adoption, engagement, and the value of your prompt library." },
@@ -589,9 +589,9 @@ export const guidePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "6", label: "Compliance packs" },
-      { value: "1-click", label: "Pack deployment" },
-      { value: "Full", label: "Audit trail" },
+      { value: "6", label: "One-click compliance packs" },
+      { value: "31", label: "Total available detection rules" },
+      { value: "16", label: "Smart detection patterns" },
     ],
     faqs: [
       { question: "Which compliance framework should we start with?", answer: "Start with the framework that governs your industry — HIPAA for healthcare, PCI-DSS for payments, GDPR for EU data. If you are unsure, start with the General PII pack which covers the most common sensitive data patterns." },
@@ -644,9 +644,9 @@ export const guidePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "2x", label: "Higher prompt quality" },
-      { value: "100%", label: "Team visibility" },
-      { value: "Real-time", label: "Updates" },
+      { value: "5", label: "AI tools supported" },
+      { value: "2-click", label: "From sidebar to AI tool" },
+      { value: "$9/mo", label: "Starting price" },
     ],
     faqs: [
       { question: "How do we start collaborating on prompts?", answer: "Create shared categories for each team, migrate your best individual prompts into them, and establish a lightweight review process. TeamPrompt makes this easy with built-in categories, permissions, and approval workflows." },
@@ -699,9 +699,9 @@ export const guidePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "3x", label: "Faster adoption" },
-      { value: "Zero", label: "Shadow AI risk" },
-      { value: "100%", label: "Team coverage" },
+      { value: "< 2 min", label: "Setup time" },
+      { value: "6", label: "One-click compliance packs" },
+      { value: "5", label: "AI tools supported" },
     ],
     faqs: [
       { question: "How long does an organization-wide rollout take?", answer: "Most organizations complete their rollout in four to six weeks. The first week covers governance and pilot setup. Weeks two through four expand to additional departments. Weeks five and six focus on full coverage and optimization." },
@@ -754,9 +754,9 @@ export const guidePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "50%+", label: "Fewer hallucinations" },
-      { value: "3x", label: "More verifiable outputs" },
-      { value: "100%", label: "Team consistency" },
+      { value: "31", label: "Total available detection rules" },
+      { value: "15", label: "Built-in DLP rules" },
+      { value: "16", label: "Smart detection patterns" },
     ],
     faqs: [
       { question: "Can prompts really reduce hallucinations?", answer: "Yes. Research shows that well-structured prompts with explicit instructions, output constraints, and uncertainty acknowledgments significantly reduce hallucination rates compared to unstructured, open-ended prompts." },
@@ -809,9 +809,9 @@ export const guidePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "5x", label: "Faster improvement cycles" },
-      { value: "0", label: "Lost iterations" },
-      { value: "Full", label: "Version comparison" },
+      { value: "25", label: "Free prompts/month" },
+      { value: "5", label: "AI tools supported" },
+      { value: "2-click", label: "From sidebar to AI tool" },
     ],
     faqs: [
       { question: "How many iterations does a prompt typically need?", answer: "Most prompts reach a good state in three to five iterations. Complex prompts for specialized tasks may need more. The key is keeping each iteration small and focused so you learn from every change." },

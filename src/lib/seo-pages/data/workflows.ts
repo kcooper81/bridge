@@ -77,9 +77,9 @@ export const workflowPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "60%", label: "Faster first response" },
-      { value: "100%", label: "DLP coverage" },
-      { value: "3x", label: "Agent onboarding speed" },
+      { value: "15", label: "Built-in DLP rules" },
+      { value: "5", label: "AI tools supported" },
+      { value: "< 2 min", label: "Setup time" },
     ],
     faqs: [
       {
@@ -186,9 +186,9 @@ export const workflowPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "3x", label: "Content output" },
-      { value: "50%", label: "Faster drafting" },
-      { value: "100%", label: "Brand consistency" },
+      { value: "31", label: "Total available detection rules" },
+      { value: "2-click", label: "From sidebar to AI tool" },
+      { value: "$9/mo", label: "Starting price" },
     ],
     faqs: [
       {
@@ -295,9 +295,9 @@ export const workflowPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "40%", label: "Faster proposal turnaround" },
-      { value: "2x", label: "Outreach personalization" },
-      { value: "5x", label: "Faster rep onboarding" },
+      { value: "16", label: "Smart detection patterns" },
+      { value: "25", label: "Free prompts/month" },
+      { value: "5", label: "AI tools supported" },
     ],
     faqs: [
       {
@@ -399,9 +399,9 @@ export const workflowPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "70%", label: "Faster JD creation" },
-      { value: "100%", label: "PII protection" },
-      { value: "50%", label: "Faster onboarding" },
+      { value: "6", label: "One-click compliance packs" },
+      { value: "15", label: "Built-in DLP rules" },
+      { value: "< 2 min", label: "Setup time" },
     ],
     faqs: [
       {
@@ -508,9 +508,9 @@ export const workflowPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "5x", label: "Faster PRD creation" },
-      { value: "80%", label: "Less blank-page time" },
-      { value: "100%", label: "IP protection" },
+      { value: "2-click", label: "From sidebar to AI tool" },
+      { value: "31", label: "Total available detection rules" },
+      { value: "$9/mo", label: "Starting price" },
     ],
     faqs: [
       {
@@ -617,9 +617,9 @@ export const workflowPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "4x", label: "Faster copy production" },
-      { value: "100%", label: "Brand consistency" },
-      { value: "60%", label: "Less revision cycles" },
+      { value: "25", label: "Free prompts/month" },
+      { value: "16", label: "Smart detection patterns" },
+      { value: "6", label: "One-click compliance packs" },
     ],
     faqs: [
       {
@@ -726,9 +726,9 @@ export const workflowPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "3x", label: "Faster contract review" },
-      { value: "100%", label: "Privilege protection" },
-      { value: "Full", label: "Audit trail" },
+      { value: "31", label: "Total available detection rules" },
+      { value: "5", label: "AI tools supported" },
+      { value: "6", label: "One-click compliance packs" },
     ],
     faqs: [
       {
@@ -835,9 +835,9 @@ export const workflowPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "60%", label: "Faster report drafting" },
-      { value: "100%", label: "MNPI protection" },
-      { value: "SOX", label: "Compliant audit trails" },
+      { value: "15", label: "Built-in DLP rules" },
+      { value: "$9/mo", label: "Starting price" },
+      { value: "< 2 min", label: "Setup time" },
     ],
     faqs: [
       {
@@ -944,9 +944,9 @@ export const workflowPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "3x", label: "Faster literature reviews" },
-      { value: "50%", label: "Less report drafting time" },
-      { value: "100%", label: "Data protection" },
+      { value: "16", label: "Smart detection patterns" },
+      { value: "2-click", label: "From sidebar to AI tool" },
+      { value: "25", label: "Free prompts/month" },
     ],
     faqs: [
       {
@@ -1053,9 +1053,9 @@ export const workflowPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "5x", label: "Faster test case creation" },
-      { value: "80%", label: "More edge cases covered" },
-      { value: "100%", label: "Data protection" },
+      { value: "5", label: "AI tools supported" },
+      { value: "6", label: "One-click compliance packs" },
+      { value: "$9/mo", label: "Starting price" },
     ],
     faqs: [
       {

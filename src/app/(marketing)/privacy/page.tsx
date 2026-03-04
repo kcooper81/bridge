@@ -21,7 +21,7 @@ export default function PrivacyPage() {
             Privacy Policy
           </h1>
           <p className="mt-4 text-muted-foreground">
-            Last updated: February 27, 2026
+            Last updated: March 4, 2026
           </p>
         </div>
 
@@ -68,6 +68,34 @@ export default function PrivacyPage() {
               If you create or join an organization, we store the organization
               name, member list, and each member&apos;s role (owner, admin, or
               member).
+            </p>
+
+            <h3 className="text-base font-medium mb-2">
+              Google Workspace Integration Data
+            </h3>
+            <p className="text-muted-foreground leading-relaxed mb-3">
+              When a Google Workspace administrator connects their organization to TeamPrompt, we make read-only API calls to access:
+            </p>
+            <ul className="list-disc list-inside space-y-2 text-muted-foreground leading-relaxed mb-3">
+              <li>
+                <strong className="text-foreground">User Directory:</strong> Basic user information including names and email addresses. This is used to display a preview of available users for invitation to TeamPrompt. We do not modify, create, or delete users in your Google Workspace.
+              </li>
+              <li>
+                <strong className="text-foreground">Google Groups:</strong> Group names and member email addresses. This information is used to suggest team assignments based on existing Google Groups structure. We do not modify, create, or delete groups in your Google Workspace.
+              </li>
+            </ul>
+            <p className="text-muted-foreground leading-relaxed mb-3">
+              All Google Workspace API calls are:
+            </p>
+            <ul className="list-disc list-inside space-y-2 text-muted-foreground leading-relaxed mb-3">
+              <li>Read-only and never modify your Google Workspace data</li>
+              <li>Manually triggered by administrators (no automatic or scheduled syncing)</li>
+              <li>Limited to the minimum data necessary for user onboarding</li>
+              <li>Stored securely with the same security measures as other TeamPrompt data</li>
+              <li>Retained only as long as your organization uses TeamPrompt</li>
+            </ul>
+            <p className="text-muted-foreground leading-relaxed">
+              Google Workspace administrators must explicitly consent to these API accesses during the OAuth consent process. You can revoke TeamPrompt&apos;s access at any time through your Google Workspace admin console.
             </p>
 
             <h3 className="text-base font-medium mb-2">Prompt Content</h3>

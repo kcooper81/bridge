@@ -77,9 +77,9 @@ export const rolePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "10x", label: "Faster prompt reuse" },
-      { value: "0", label: "Leaked secrets" },
-      { value: "100%", label: "Team consistency" },
+      { value: "31", label: "Total available detection rules" },
+      { value: "5", label: "AI tools supported" },
+      { value: "2-click", label: "From sidebar to AI tool" },
     ],
     faqs: [
       {
@@ -186,9 +186,9 @@ export const rolePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "50%", label: "Faster PRD writing" },
-      { value: "100%", label: "PM team alignment" },
-      { value: "0", label: "Roadmap data leaks" },
+      { value: "25", label: "Free prompts/month" },
+      { value: "6", label: "One-click compliance packs" },
+      { value: "5", label: "AI tools supported" },
     ],
     faqs: [
       {
@@ -295,9 +295,9 @@ export const rolePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "3x", label: "Faster content production" },
-      { value: "100%", label: "Brand consistency" },
-      { value: "0", label: "Campaign data leaks" },
+      { value: "5", label: "AI tools supported" },
+      { value: "< 2 min", label: "Setup time" },
+      { value: "25", label: "Free prompts/month" },
     ],
     faqs: [
       {
@@ -404,9 +404,9 @@ export const rolePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "60%", label: "Faster QBR prep" },
-      { value: "100%", label: "CSM alignment" },
-      { value: "0", label: "Customer data leaks" },
+      { value: "16", label: "Smart detection patterns" },
+      { value: "5", label: "AI tools supported" },
+      { value: "$9/mo", label: "Starting price" },
     ],
     faqs: [
       {
@@ -513,9 +513,9 @@ export const rolePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "5x", label: "Faster email writing" },
-      { value: "50%", label: "Faster rep ramp-up" },
-      { value: "0", label: "Deal data leaks" },
+      { value: "2-click", label: "From sidebar to AI tool" },
+      { value: "25", label: "Free prompts/month" },
+      { value: "15", label: "Built-in DLP rules" },
     ],
     faqs: [
       {
@@ -622,9 +622,9 @@ export const rolePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "70%", label: "Faster JD writing" },
-      { value: "100%", label: "Data protection" },
-      { value: "0", label: "Employee data leaks" },
+      { value: "15", label: "Built-in DLP rules" },
+      { value: "16", label: "Smart detection patterns" },
+      { value: "< 2 min", label: "Setup time" },
     ],
     faqs: [
       {
@@ -731,9 +731,9 @@ export const rolePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "3x", label: "Faster documentation" },
-      { value: "100%", label: "Research consistency" },
-      { value: "WCAG", label: "A11y compliance" },
+      { value: "5", label: "AI tools supported" },
+      { value: "2-click", label: "From sidebar to AI tool" },
+      { value: "6", label: "One-click compliance packs" },
     ],
     faqs: [
       {
@@ -840,9 +840,9 @@ export const rolePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "100%", label: "AI visibility" },
-      { value: "Full", label: "Governance controls" },
-      { value: "Board-ready", label: "Compliance reports" },
+      { value: "31", label: "Total available detection rules" },
+      { value: "6", label: "One-click compliance packs" },
+      { value: "15", label: "Built-in DLP rules" },
     ],
     faqs: [
       {
@@ -949,9 +949,9 @@ export const rolePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "40%", label: "Faster deliverables" },
-      { value: "100%", label: "Client confidentiality" },
-      { value: "10x", label: "Knowledge reuse" },
+      { value: "$9/mo", label: "Starting price" },
+      { value: "15", label: "Built-in DLP rules" },
+      { value: "5", label: "AI tools supported" },
     ],
     faqs: [
       {
@@ -1058,9 +1058,9 @@ export const rolePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "60%", label: "Faster lesson planning" },
-      { value: "100%", label: "FERPA compliance" },
-      { value: "3x", label: "More personalized feedback" },
+      { value: "25", label: "Free prompts/month" },
+      { value: "< 2 min", label: "Setup time" },
+      { value: "16", label: "Smart detection patterns" },
     ],
     faqs: [
       {

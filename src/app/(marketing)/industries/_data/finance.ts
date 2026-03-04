@@ -9,11 +9,6 @@ export const industryData: IndustryPageData = {
   compliance: ["Financial Data Detection", "Audit Logging", "Access Control"],
   painPoints: [
     {
-      title: "Analysts paste proprietary strategies into AI tools",
-      description:
-        "Trading algorithms, investment theses, and market models end up in third-party AI systems — creating regulatory risk and competitive exposure.",
-    },
-    {
       title: "Customer financial data leaks into prompts",
       description:
         "Account numbers, SSNs, portfolio details, and transaction histories get pasted into AI without any detection or blocking in place.",
@@ -49,6 +44,12 @@ export const industryData: IndustryPageData = {
       description:
         "Tag prompts and templates by data classification level — public, internal, confidential, restricted. Security rules automatically escalate based on the sensitivity of detected content.",
     },
+    {
+      icon: "Eye",
+      title: "PCI-DSS Compliance Pack",
+      description:
+        "One-click install of 5 PCI-DSS-specific rules: Visa, Mastercard, Amex card patterns, CVV detection, and expiration date matching. Activate card number protection in seconds.",
+    },
   ],
   mockupVariant: "vault",
   mockupItems: [
@@ -59,10 +60,20 @@ export const industryData: IndustryPageData = {
   ],
   mockupToasts: [{ message: "Account number auto-redacted", type: "success", position: "bottom-right" }],
   mockupUser: { name: "M. Chen", initials: "MC" },
+  scenario: {
+    title: "What this looks like in practice",
+    persona: "Raj, financial analyst",
+    setup:
+      "Raj is building a quarterly model and pastes a spreadsheet extract into ChatGPT for formatting help. The extract includes customer account numbers and two full credit card numbers.",
+    trigger:
+      "TeamPrompt's PCI-DSS compliance pack catches the Visa and Mastercard patterns. The prompt is blocked, and the attempt is logged for Raj's compliance officer to review.",
+    resolution:
+      "Raj removes the real account data, substitutes placeholder values, and resubmits. The compliance team can see the blocked event in the audit log — proof the controls work.",
+  },
   stats: [
-    { value: "15+", label: "Built-in detection patterns" },
-    { value: "100%", label: "Interaction audit coverage" },
-    { value: "2.4x", label: "Faster report generation" },
+    { value: "5", label: "PCI-DSS detection rules" },
+    { value: "6", label: "One-click compliance packs" },
+    { value: "2-click", label: "From sidebar to AI tool" },
   ],
   faqs: [
     {
@@ -88,9 +99,9 @@ export const industryData: IndustryPageData = {
     },
   ],
   cta: {
-    headline: "Your analysts are already using AI.",
-    gradientText: "Make it compliant.",
+    headline: "5 PCI-DSS rules. 6 compliance packs.",
+    gradientText: "Audit trail from day one.",
     subtitle:
-      "Deploy TeamPrompt for your financial team in under 5 minutes — full audit trail from day one.",
+      "Install, activate a compliance pack, and start protecting financial data — all in under 2 minutes.",
   },
 };

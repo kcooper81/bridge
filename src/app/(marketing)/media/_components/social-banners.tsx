@@ -470,6 +470,35 @@ function FeaturePill({ label, dark }: { label: string; dark?: boolean }) {
   );
 }
 
+/**
+ * HTML-based logo wordmark for banners — html2canvas can't render SVG <text>
+ * inside <img> tags, so we use icon SVG (shapes only) + HTML <span>.
+ */
+function BannerWordmark({ size = "lg", dark }: { size?: "xs" | "sm" | "md" | "lg"; dark?: boolean }) {
+  const sizes = {
+    xs: { h: "h-4 sm:h-5", text: "text-[9px] sm:text-[11px]", icon: "h-3 sm:h-3.5" },
+    sm: { h: "h-5 sm:h-6", text: "text-[11px] sm:text-[13px]", icon: "h-3.5 sm:h-4" },
+    md: { h: "h-5 sm:h-7", text: "text-[11px] sm:text-[15px]", icon: "h-3.5 sm:h-5" },
+    lg: { h: "h-6 sm:h-8", text: "text-[13px] sm:text-lg", icon: "h-4 sm:h-5" },
+  };
+  const s = sizes[size];
+  return (
+    <div className={cn("flex items-center gap-1 sm:gap-1.5", s.h)}>
+      <Image
+        src={dark ? "/brand/logo-icon.svg" : "/brand/logo-icon-dark.svg"}
+        alt=""
+        width={40}
+        height={30}
+        className={cn(s.icon, "w-auto")}
+        unoptimized
+      />
+      <span className={cn("font-bold leading-none whitespace-nowrap", s.text, dark ? "text-zinc-900" : "text-white")}>
+        TeamPrompt
+      </span>
+    </div>
+  );
+}
+
 function FeaturePills({ dark }: { dark?: boolean }) {
   return (
     <div className="flex flex-wrap gap-1.5">
@@ -609,7 +638,7 @@ export function TwitterBanner() {
     <DarkBannerShell aspectRatio="1500/500">
       <div className="flex items-center h-full gap-4 sm:gap-6">
         <div className="flex-1 space-y-2.5 sm:space-y-3 shrink-0">
-          <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={160} height={32} className="h-5 sm:h-7 w-auto" />
+          <BannerWordmark size="md" />
           <p className="text-white/90 text-[10px] sm:text-sm font-semibold leading-snug max-w-[220px] sm:max-w-[260px]">
             Your team&apos;s AI prompt library — with built-in data protection
           </p>
@@ -630,7 +659,7 @@ export function TwitterBannerWhite() {
     <WhiteBannerShell aspectRatio="1500/500">
       <div className="flex items-center h-full gap-4 sm:gap-6">
         <div className="flex-1 space-y-2.5 sm:space-y-3 shrink-0">
-          <Image src="/brand/logo-wordmark.svg" alt="TeamPrompt" width={160} height={32} className="h-5 sm:h-7 w-auto" />
+          <BannerWordmark size="md" dark />
           <p className="text-zinc-900 text-[10px] sm:text-sm font-semibold leading-snug max-w-[220px] sm:max-w-[260px]">
             Your team&apos;s AI prompt library — with built-in data protection
           </p>
@@ -653,7 +682,7 @@ export function LinkedInBanner() {
     <DarkBannerShell aspectRatio="1584/396">
       <div className="flex items-center h-full gap-4 sm:gap-6">
         <div className="flex-1 space-y-2 sm:space-y-2.5">
-          <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={150} height={30} className="h-5 sm:h-6 w-auto" />
+          <BannerWordmark size="sm" />
           <p className="text-white/90 text-[10px] sm:text-xs font-semibold leading-snug">
             AI prompt management for teams that need data protection
           </p>
@@ -673,7 +702,7 @@ export function LinkedInBannerWhite() {
     <WhiteBannerShell aspectRatio="1584/396">
       <div className="flex items-center h-full gap-4 sm:gap-6">
         <div className="flex-1 space-y-2 sm:space-y-2.5">
-          <Image src="/brand/logo-wordmark.svg" alt="TeamPrompt" width={150} height={30} className="h-5 sm:h-6 w-auto" />
+          <BannerWordmark size="sm" dark />
           <p className="text-zinc-900 text-[10px] sm:text-xs font-semibold leading-snug">
             AI prompt management for teams that need data protection
           </p>
@@ -695,7 +724,7 @@ export function FacebookCover() {
     <DarkBannerShell aspectRatio="851/315">
       <div className="flex items-center h-full gap-3 sm:gap-4">
         <div className="flex-1 space-y-2">
-          <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={130} height={26} className="h-4 sm:h-5 w-auto" />
+          <BannerWordmark size="xs" />
           <p className="text-white/90 text-[9px] sm:text-xs font-semibold leading-snug">
             Shared prompts · Data protection · Usage analytics
           </p>
@@ -714,7 +743,7 @@ export function FacebookCoverWhite() {
     <WhiteBannerShell aspectRatio="851/315">
       <div className="flex items-center h-full gap-3 sm:gap-4">
         <div className="flex-1 space-y-2">
-          <Image src="/brand/logo-wordmark.svg" alt="TeamPrompt" width={130} height={26} className="h-4 sm:h-5 w-auto" />
+          <BannerWordmark size="xs" dark />
           <p className="text-zinc-900 text-[9px] sm:text-xs font-semibold leading-snug">
             Shared prompts · Data protection · Usage analytics
           </p>
@@ -734,7 +763,7 @@ export function YouTubeBanner() {
   return (
     <DarkBannerShell aspectRatio="2560/1440">
       <div className="flex flex-col items-center justify-center h-full text-center gap-3 sm:gap-4">
-        <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={200} height={40} className="h-6 sm:h-8 w-auto" />
+        <BannerWordmark size="lg" />
         <p className="text-white/90 text-xs sm:text-base font-semibold max-w-md">
           Your team&apos;s AI prompt library — with built-in data protection
         </p>
@@ -758,7 +787,7 @@ export function OGBanner() {
     <DarkBannerShell aspectRatio="1200/630">
       <div className="flex items-center h-full gap-4 sm:gap-6">
         <div className="flex-1 space-y-2.5 sm:space-y-3">
-          <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={180} height={36} className="h-5 sm:h-7 w-auto" />
+          <BannerWordmark size="md" />
           <p className="text-white/90 text-xs sm:text-base font-bold leading-snug">
             AI Prompt Management
             <br />
@@ -781,7 +810,7 @@ export function OGBannerWhite() {
     <WhiteBannerShell aspectRatio="1200/630">
       <div className="flex items-center h-full gap-4 sm:gap-6">
         <div className="flex-1 space-y-2.5 sm:space-y-3">
-          <Image src="/brand/logo-wordmark.svg" alt="TeamPrompt" width={180} height={36} className="h-5 sm:h-7 w-auto" />
+          <BannerWordmark size="md" dark />
           <p className="text-zinc-900 text-xs sm:text-base font-bold leading-snug">
             AI Prompt Management
             <br />
@@ -950,7 +979,7 @@ export function TwitterBannerGradient() {
     <MockupBannerShell aspectRatio="1500/500">
       <div className="flex items-center h-full gap-4 sm:gap-6">
         <div className="flex-1 space-y-2 sm:space-y-2.5 shrink-0 max-w-[45%]">
-          <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={160} height={32} className="h-5 sm:h-7 w-auto" />
+          <BannerWordmark size="md" />
           <p className="text-white text-[10px] sm:text-sm font-bold leading-snug">
             Your team&apos;s AI prompt library — with built-in data protection
           </p>
@@ -977,7 +1006,7 @@ export function LinkedInBannerGradient() {
     <MockupBannerShell aspectRatio="1584/396" shapeVariant="alt">
       <div className="flex items-center h-full gap-4 sm:gap-6">
         <div className="flex-1 space-y-2 sm:space-y-2.5 max-w-[40%]">
-          <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={150} height={30} className="h-5 sm:h-6 w-auto" />
+          <BannerWordmark size="sm" />
           <p className="text-white text-[10px] sm:text-xs font-bold leading-snug">
             AI prompt management for teams that need data protection
           </p>
@@ -1004,7 +1033,7 @@ export function FacebookCoverGradient() {
     <MockupBannerShell aspectRatio="851/315" shapeVariant="alt">
       <div className="flex items-center h-full gap-3 sm:gap-4">
         <div className="flex-1 space-y-1.5 sm:space-y-2 max-w-[40%]">
-          <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={130} height={26} className="h-4 sm:h-5 w-auto" />
+          <BannerWordmark size="xs" />
           <p className="text-white text-[9px] sm:text-xs font-bold leading-snug">
             Shared prompts · Data protection · Usage analytics
           </p>
@@ -1029,7 +1058,7 @@ export function YouTubeBannerGradient() {
   return (
     <MockupBannerShell aspectRatio="2560/1440" shapeVariant="center">
       <div className="flex flex-col items-center justify-center h-full text-center gap-3 sm:gap-4">
-        <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={200} height={40} className="h-6 sm:h-8 w-auto" />
+        <BannerWordmark size="lg" />
         <p className="text-white text-xs sm:text-base font-bold max-w-md">
           Your team&apos;s AI prompt library — with built-in data protection
         </p>
@@ -1056,7 +1085,7 @@ export function OGBannerGradient() {
     <MockupBannerShell aspectRatio="1200/630">
       <div className="flex items-center h-full gap-4 sm:gap-6">
         <div className="flex-1 space-y-2.5 sm:space-y-3 max-w-[40%]">
-          <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={180} height={36} className="h-5 sm:h-7 w-auto" />
+          <BannerWordmark size="md" />
           <p className="text-white text-xs sm:text-base font-bold leading-snug">
             AI Prompt Management
             <br />
@@ -1212,7 +1241,7 @@ export function TwitterBannerLifestyle() {
     <LifestyleBannerShell aspectRatio="1500/500">
       <div className="flex items-center h-full gap-4 sm:gap-6">
         <div className="flex-1 space-y-2 sm:space-y-2.5 shrink-0 max-w-[40%]">
-          <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={160} height={32} className="h-5 sm:h-7 w-auto" />
+          <BannerWordmark size="md" />
           <p className="text-white text-[10px] sm:text-sm font-bold leading-snug">
             Your team&apos;s AI prompt library — with built-in data protection
           </p>
@@ -1245,7 +1274,7 @@ export function LinkedInBannerLifestyle() {
     <LifestyleBannerShell aspectRatio="1584/396">
       <div className="flex items-center h-full gap-4 sm:gap-6">
         <div className="flex-1 space-y-2 sm:space-y-2.5 max-w-[38%]">
-          <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={150} height={30} className="h-5 sm:h-6 w-auto" />
+          <BannerWordmark size="sm" />
           <p className="text-white text-[10px] sm:text-xs font-bold leading-snug">
             AI prompt management for teams that need data protection
           </p>
@@ -1278,7 +1307,7 @@ export function FacebookCoverLifestyle() {
     <LifestyleBannerShell aspectRatio="851/315">
       <div className="flex items-center h-full gap-3 sm:gap-4">
         <div className="flex-1 space-y-1.5 sm:space-y-2 max-w-[38%]">
-          <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={130} height={26} className="h-4 sm:h-5 w-auto" />
+          <BannerWordmark size="xs" />
           <p className="text-white text-[9px] sm:text-xs font-bold leading-snug">
             Shared prompts · Data protection · Usage analytics
           </p>
@@ -1309,7 +1338,7 @@ export function YouTubeBannerLifestyle() {
   return (
     <LifestyleBannerShell aspectRatio="2560/1440">
       <div className="flex flex-col items-center justify-center h-full text-center gap-3 sm:gap-4">
-        <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={200} height={40} className="h-6 sm:h-8 w-auto" />
+        <BannerWordmark size="lg" />
         <p className="text-white text-xs sm:text-base font-bold max-w-md">
           Your team&apos;s AI prompt library — with built-in data protection
         </p>
@@ -1344,7 +1373,7 @@ export function OGBannerLifestyle() {
     <LifestyleBannerShell aspectRatio="1200/630">
       <div className="flex items-center h-full gap-4 sm:gap-6">
         <div className="flex-1 space-y-2.5 sm:space-y-3 max-w-[38%]">
-          <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={180} height={36} className="h-5 sm:h-7 w-auto" />
+          <BannerWordmark size="md" />
           <p className="text-white text-xs sm:text-base font-bold leading-snug">
             AI Prompt Management
             <br />
@@ -1386,7 +1415,7 @@ export function ExtensionMarqueeLifestyle1() {
     <LifestyleBannerShell aspectRatio="1400/560">
       <div className="flex items-center h-full gap-4 sm:gap-8">
         <div className="flex-1 space-y-2 sm:space-y-3 max-w-[38%]">
-          <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={180} height={36} className="h-5 sm:h-7 w-auto" />
+          <BannerWordmark size="md" />
           <p className="text-white text-xs sm:text-base font-bold leading-snug">
             Your team&apos;s AI prompt library — with built-in data protection
           </p>
@@ -1417,7 +1446,7 @@ export function ExtensionMarqueeLifestyle2() {
     <LifestyleBannerShell aspectRatio="1400/560">
       <div className="flex items-center h-full gap-4 sm:gap-8">
         <div className="flex-1 space-y-2 sm:space-y-3 max-w-[38%]">
-          <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={180} height={36} className="h-5 sm:h-7 w-auto" />
+          <BannerWordmark size="md" />
           <p className="text-white text-xs sm:text-base font-bold leading-snug">
             Stop sensitive data from reaching AI tools
           </p>
@@ -1448,7 +1477,7 @@ export function ExtensionMarqueeLifestyle3() {
     <LifestyleBannerShell aspectRatio="1400/560">
       <div className="flex items-center h-full gap-4 sm:gap-8">
         <div className="flex-1 space-y-2 sm:space-y-3 max-w-[38%]">
-          <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={180} height={36} className="h-5 sm:h-7 w-auto" />
+          <BannerWordmark size="md" />
           <p className="text-white text-xs sm:text-base font-bold leading-snug">
             One click to insert team prompts into any AI tool
           </p>
@@ -1479,7 +1508,7 @@ export function ExtensionScreenshotLifestyle1() {
     <LifestyleBannerShell aspectRatio="1280/800">
       <div className="flex items-center h-full gap-4 sm:gap-6">
         <div className="flex-1 space-y-2.5 sm:space-y-3 max-w-[38%]">
-          <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={200} height={40} className="h-6 sm:h-8 w-auto" />
+          <BannerWordmark size="lg" />
           <p className="text-white text-sm sm:text-xl font-bold leading-snug">
             Your team&apos;s AI prompt library — with built-in data protection
           </p>
@@ -1512,7 +1541,7 @@ export function ExtensionScreenshotLifestyle2() {
     <LifestyleBannerShell aspectRatio="1280/800">
       <div className="flex items-center h-full gap-4 sm:gap-6">
         <div className="flex-1 space-y-2.5 sm:space-y-3 max-w-[38%]">
-          <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={200} height={40} className="h-6 sm:h-8 w-auto" />
+          <BannerWordmark size="lg" />
           <p className="text-white text-sm sm:text-xl font-bold leading-snug">
             Stop sensitive data from reaching AI tools
           </p>
@@ -1545,7 +1574,7 @@ export function ExtensionScreenshotLifestyle3() {
     <LifestyleBannerShell aspectRatio="1280/800">
       <div className="flex items-center h-full gap-4 sm:gap-6">
         <div className="flex-1 space-y-2.5 sm:space-y-3 max-w-[38%]">
-          <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={200} height={40} className="h-6 sm:h-8 w-auto" />
+          <BannerWordmark size="lg" />
           <p className="text-white text-sm sm:text-xl font-bold leading-snug">
             One click to insert team prompts into any AI tool
           </p>
@@ -1578,7 +1607,7 @@ export function ExtensionScreenshotDark() {
     <DarkBannerShell aspectRatio="1280/800">
       <div className="flex flex-col justify-center h-full gap-3 sm:gap-5">
         <div className="space-y-2 sm:space-y-3">
-          <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={200} height={40} className="h-6 sm:h-8 w-auto" />
+          <BannerWordmark size="lg" />
           <p className="text-white/90 text-sm sm:text-xl font-semibold leading-snug max-w-[50%]">
             Your team&apos;s AI prompt library — with built-in data protection
           </p>
@@ -1602,7 +1631,7 @@ export function ExtensionScreenshotWhite() {
     <WhiteBannerShell aspectRatio="1280/800">
       <div className="flex flex-col justify-center h-full gap-3 sm:gap-5">
         <div className="space-y-2 sm:space-y-3">
-          <Image src="/brand/logo-wordmark.svg" alt="TeamPrompt" width={200} height={40} className="h-6 sm:h-8 w-auto" />
+          <BannerWordmark size="lg" dark />
           <p className="text-zinc-900 text-sm sm:text-xl font-semibold leading-snug max-w-[50%]">
             Your team&apos;s AI prompt library — with built-in data protection
           </p>
@@ -1626,7 +1655,7 @@ export function ExtensionScreenshotGradient() {
     <MockupBannerShell aspectRatio="1280/800">
       <div className="flex flex-col justify-center h-full gap-3 sm:gap-5">
         <div className="space-y-2 sm:space-y-3">
-          <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={200} height={40} className="h-6 sm:h-8 w-auto" />
+          <BannerWordmark size="lg" />
           <p className="text-white text-sm sm:text-xl font-bold leading-snug max-w-[50%]">
             Shared prompts · Data protection · Usage analytics
           </p>
@@ -1660,7 +1689,7 @@ export function ExtensionScreenshotLifestyle4() {
     <LifestyleBannerShell aspectRatio="1280/800">
       <div className="flex items-center h-full gap-4 sm:gap-6">
         <div className="flex-1 space-y-2.5 sm:space-y-3 max-w-[38%]">
-          <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={200} height={40} className="h-6 sm:h-8 w-auto" />
+          <BannerWordmark size="lg" />
           <p className="text-white text-sm sm:text-xl font-bold leading-snug">
             See how your team uses AI — usage analytics built in
           </p>
@@ -1693,7 +1722,7 @@ export function ExtensionScreenshotLifestyle5() {
     <LifestyleBannerShell aspectRatio="1280/800">
       <div className="flex items-center h-full gap-4 sm:gap-6">
         <div className="flex-1 space-y-2.5 sm:space-y-3 max-w-[38%]">
-          <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={200} height={40} className="h-6 sm:h-8 w-auto" />
+          <BannerWordmark size="lg" />
           <p className="text-white text-sm sm:text-xl font-bold leading-snug">
             Works with ChatGPT, Claude, Gemini, Copilot & Perplexity
           </p>
@@ -1725,7 +1754,7 @@ export function ExtensionSmallPromoLifestyle() {
   return (
     <LifestyleBannerShell aspectRatio="440/280">
       <div className="flex flex-col justify-center h-full gap-2">
-        <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={120} height={24} className="h-4 sm:h-5 w-auto" />
+        <BannerWordmark size="xs" />
         <p className="text-white text-[8px] sm:text-[10px] font-bold leading-snug max-w-[70%]">
           Team prompt library with DLP protection for AI tools
         </p>

@@ -1477,8 +1477,8 @@ export function ExtensionMarqueeLifestyle3() {
 export function ExtensionScreenshotLifestyle1() {
   return (
     <LifestyleBannerShell aspectRatio="1280/800">
-      <div className="flex flex-col justify-center h-full gap-3 sm:gap-5">
-        <div className="space-y-2 sm:space-y-3 max-w-[50%]">
+      <div className="flex items-center h-full gap-4 sm:gap-6">
+        <div className="flex-1 space-y-2.5 sm:space-y-3 max-w-[38%]">
           <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={200} height={40} className="h-6 sm:h-8 w-auto" />
           <p className="text-white text-sm sm:text-xl font-bold leading-snug">
             Your team&apos;s AI prompt library — with built-in data protection
@@ -1486,18 +1486,19 @@ export function ExtensionScreenshotLifestyle1() {
           <FeaturePills />
           <CompatibilityLine />
         </div>
-        <div className="flex items-start gap-4 mt-1">
-          <LifestylePhoto
-            src={lifestylePhotos.twitter}
-            alt="Team collaborating at laptops"
-            className="w-[40%] aspect-[4/3]"
-          />
-          <div className="w-[35%] space-y-2 -ml-6 relative z-10">
-            <VaultScene compact />
-            <DLPBlockScene compact />
+        <div className="w-[55%] relative">
+          <div className="flex items-start">
+            <LifestylePhoto
+              src={lifestylePhotos.twitter}
+              alt="Team collaborating at laptops"
+              className="w-[50%] aspect-[4/3]"
+            />
+            <div className="w-[55%] -ml-8 relative z-10">
+              <VaultScene compact />
+            </div>
           </div>
-          <FrostedBadge icon={Shield} headline="DLP Active" subtitle="Real-time scanning" color="red" className="top-[40%] left-[28%]" />
-          <FrostedBadge icon={Users} headline="Team library" subtitle="Shared prompts" color="blue" className="-top-2 right-[25%]" />
+          <FrostedBadge icon={Shield} headline="DLP Active" subtitle="Real-time scanning" color="red" className="top-[35%] left-[32%]" />
+          <FrostedBadge icon={Users} headline="Team library" subtitle="Shared prompts" color="blue" className="-bottom-3 left-[5%]" />
         </div>
       </div>
     </LifestyleBannerShell>
@@ -1509,8 +1510,8 @@ export function ExtensionScreenshotLifestyle1() {
 export function ExtensionScreenshotLifestyle2() {
   return (
     <LifestyleBannerShell aspectRatio="1280/800">
-      <div className="flex flex-col justify-center h-full gap-3 sm:gap-5">
-        <div className="space-y-2 sm:space-y-3 max-w-[50%]">
+      <div className="flex items-center h-full gap-4 sm:gap-6">
+        <div className="flex-1 space-y-2.5 sm:space-y-3 max-w-[38%]">
           <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={200} height={40} className="h-6 sm:h-8 w-auto" />
           <p className="text-white text-sm sm:text-xl font-bold leading-snug">
             Stop sensitive data from reaching AI tools
@@ -1518,18 +1519,19 @@ export function ExtensionScreenshotLifestyle2() {
           <FeaturePills />
           <CompatibilityLine />
         </div>
-        <div className="flex items-start gap-4 mt-1">
-          <LifestylePhoto
-            src={lifestylePhotos.linkedin}
-            alt="Diverse team working at computers"
-            className="w-[40%] aspect-[4/3]"
-          />
-          <div className="w-[35%] space-y-2 -ml-6 relative z-10">
-            <DLPBlockScene compact />
-            <InsertScene />
+        <div className="w-[55%] relative">
+          <div className="flex items-start">
+            <LifestylePhoto
+              src={lifestylePhotos.linkedin}
+              alt="Diverse team working at computers"
+              className="w-[50%] aspect-[4/3]"
+            />
+            <div className="w-[55%] -ml-8 relative z-10">
+              <DLPBlockScene compact />
+            </div>
           </div>
-          <FrostedBadge icon={Shield} headline="PII detected" subtitle="Auto-blocked" color="red" className="top-[40%] left-[28%]" />
-          <FrostedBadge icon={BarChart3} headline="15 DLP rules" subtitle="Active" color="emerald" className="-top-2 right-[25%]" />
+          <FrostedBadge icon={Shield} headline="PII detected" subtitle="Auto-blocked" color="red" className="top-[35%] left-[32%]" />
+          <FrostedBadge icon={BarChart3} headline="15 DLP rules" subtitle="Active" color="emerald" className="-bottom-3 left-[5%]" />
         </div>
       </div>
     </LifestyleBannerShell>
@@ -1541,8 +1543,8 @@ export function ExtensionScreenshotLifestyle2() {
 export function ExtensionScreenshotLifestyle3() {
   return (
     <LifestyleBannerShell aspectRatio="1280/800">
-      <div className="flex flex-col justify-center h-full gap-3 sm:gap-5">
-        <div className="space-y-2 sm:space-y-3 max-w-[50%]">
+      <div className="flex items-center h-full gap-4 sm:gap-6">
+        <div className="flex-1 space-y-2.5 sm:space-y-3 max-w-[38%]">
           <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={200} height={40} className="h-6 sm:h-8 w-auto" />
           <p className="text-white text-sm sm:text-xl font-bold leading-snug">
             One click to insert team prompts into any AI tool
@@ -1550,18 +1552,19 @@ export function ExtensionScreenshotLifestyle3() {
           <FeaturePills />
           <CompatibilityLine />
         </div>
-        <div className="flex items-start gap-4 mt-1">
-          <LifestylePhoto
-            src={lifestylePhotos.facebook}
-            alt="Coworkers at laptops together"
-            className="w-[40%] aspect-[4/3]"
-          />
-          <div className="w-[35%] space-y-2 -ml-6 relative z-10">
-            <InsertScene />
-            <VaultScene compact />
+        <div className="w-[55%] relative">
+          <div className="flex items-start">
+            <LifestylePhoto
+              src={lifestylePhotos.facebook}
+              alt="Coworkers at laptops together"
+              className="w-[50%] aspect-[4/3]"
+            />
+            <div className="w-[55%] -ml-8 relative z-10">
+              <InsertScene />
+            </div>
           </div>
-          <FrostedBadge icon={Zap} headline="One-click insert" subtitle="Into any AI tool" color="emerald" className="top-[40%] left-[28%]" />
-          <FrostedBadge icon={Users} headline="5 AI tools" subtitle="Connected" color="blue" className="-top-2 right-[25%]" />
+          <FrostedBadge icon={Zap} headline="One-click insert" subtitle="Into any AI tool" color="emerald" className="top-[35%] left-[32%]" />
+          <FrostedBadge icon={Users} headline="5 AI tools" subtitle="Connected" color="blue" className="-bottom-3 left-[5%]" />
         </div>
       </div>
     </LifestyleBannerShell>
@@ -1655,8 +1658,8 @@ export function ExtensionScreenshotGradient() {
 export function ExtensionScreenshotLifestyle4() {
   return (
     <LifestyleBannerShell aspectRatio="1280/800">
-      <div className="flex flex-col justify-center h-full gap-3 sm:gap-5">
-        <div className="space-y-2 sm:space-y-3 max-w-[50%]">
+      <div className="flex items-center h-full gap-4 sm:gap-6">
+        <div className="flex-1 space-y-2.5 sm:space-y-3 max-w-[38%]">
           <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={200} height={40} className="h-6 sm:h-8 w-auto" />
           <p className="text-white text-sm sm:text-xl font-bold leading-snug">
             See how your team uses AI — usage analytics built in
@@ -1664,18 +1667,19 @@ export function ExtensionScreenshotLifestyle4() {
           <FeaturePills />
           <CompatibilityLine />
         </div>
-        <div className="flex items-start gap-4 mt-1">
-          <LifestylePhoto
-            src={lifestylePhotos.og}
-            alt="Person typing on laptop"
-            className="w-[40%] aspect-[4/3]"
-          />
-          <div className="w-[35%] space-y-2 -ml-6 relative z-10">
-            <VaultScene compact />
-            <InsertScene />
+        <div className="w-[55%] relative">
+          <div className="flex items-start">
+            <LifestylePhoto
+              src={lifestylePhotos.og}
+              alt="Person typing on laptop"
+              className="w-[50%] aspect-[4/3]"
+            />
+            <div className="w-[55%] -ml-8 relative z-10">
+              <VaultScene compact />
+            </div>
           </div>
-          <FrostedBadge icon={BarChart3} headline="142 prompts" subtitle="Used this month" color="blue" className="top-[40%] left-[28%]" />
-          <FrostedBadge icon={Zap} headline="+23% adoption" subtitle="Team-wide" color="emerald" className="-top-2 right-[25%]" />
+          <FrostedBadge icon={BarChart3} headline="142 prompts" subtitle="Used this month" color="blue" className="top-[35%] left-[32%]" />
+          <FrostedBadge icon={Zap} headline="+23% adoption" subtitle="Team-wide" color="emerald" className="-bottom-3 left-[5%]" />
         </div>
       </div>
     </LifestyleBannerShell>
@@ -1687,8 +1691,8 @@ export function ExtensionScreenshotLifestyle4() {
 export function ExtensionScreenshotLifestyle5() {
   return (
     <LifestyleBannerShell aspectRatio="1280/800">
-      <div className="flex flex-col justify-center h-full gap-3 sm:gap-5">
-        <div className="space-y-2 sm:space-y-3 max-w-[50%]">
+      <div className="flex items-center h-full gap-4 sm:gap-6">
+        <div className="flex-1 space-y-2.5 sm:space-y-3 max-w-[38%]">
           <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={200} height={40} className="h-6 sm:h-8 w-auto" />
           <p className="text-white text-sm sm:text-xl font-bold leading-snug">
             Works with ChatGPT, Claude, Gemini, Copilot & Perplexity
@@ -1696,18 +1700,19 @@ export function ExtensionScreenshotLifestyle5() {
           <FeaturePills />
           <CompatibilityLine />
         </div>
-        <div className="flex items-start gap-4 mt-1">
-          <LifestylePhoto
-            src={lifestylePhotos.youtube}
-            alt="Multiple people at laptop screens"
-            className="w-[40%] aspect-[4/3]"
-          />
-          <div className="w-[35%] space-y-2 -ml-6 relative z-10">
-            <DLPBlockScene compact />
-            <VaultScene compact />
+        <div className="w-[55%] relative">
+          <div className="flex items-start">
+            <LifestylePhoto
+              src={lifestylePhotos.youtube}
+              alt="Multiple people at laptop screens"
+              className="w-[50%] aspect-[4/3]"
+            />
+            <div className="w-[55%] -ml-8 relative z-10">
+              <DLPBlockScene compact />
+            </div>
           </div>
-          <FrostedBadge icon={Users} headline="5 AI tools" subtitle="One extension" color="blue" className="top-[40%] left-[28%]" />
-          <FrostedBadge icon={Shield} headline="DLP active" subtitle="On every tool" color="red" className="-top-2 right-[25%]" />
+          <FrostedBadge icon={Users} headline="5 AI tools" subtitle="One extension" color="blue" className="top-[35%] left-[32%]" />
+          <FrostedBadge icon={Shield} headline="DLP active" subtitle="On every tool" color="red" className="-bottom-3 left-[5%]" />
         </div>
       </div>
     </LifestyleBannerShell>

@@ -1375,6 +1375,223 @@ export function OGBannerLifestyle() {
   );
 }
 
+/* ══════════════════════════════════════════════════
+   EXTENSION STORE BANNERS — Chrome / Edge / Firefox promotional assets
+   ══════════════════════════════════════════════════ */
+
+/* ── Extension Marquee Lifestyle 1 — Team + Vault (1400 x 560) ── */
+
+export function ExtensionMarqueeLifestyle1() {
+  return (
+    <LifestyleBannerShell aspectRatio="1400/560">
+      <div className="flex items-center h-full gap-4 sm:gap-8">
+        <div className="flex-1 space-y-2 sm:space-y-3 max-w-[38%]">
+          <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={180} height={36} className="h-5 sm:h-7 w-auto" />
+          <p className="text-white text-xs sm:text-base font-bold leading-snug">
+            Your team&apos;s AI prompt library — with built-in data protection
+          </p>
+          <FeaturePills />
+          <CompatibilityLine />
+        </div>
+        <div className="hidden sm:flex w-[55%] items-center relative">
+          <LifestylePhoto
+            src={lifestylePhotos.twitter}
+            alt="Team collaborating at laptops"
+            className="w-[55%] aspect-[4/3]"
+          />
+          <div className="w-[50%] -ml-10 relative z-10">
+            <VaultScene compact />
+          </div>
+          <FrostedBadge icon={Shield} headline="DLP Active" subtitle="Real-time scanning" color="red" className="bottom-2 left-[35%]" />
+          <FrostedBadge icon={Users} headline="Team library" subtitle="Shared prompts" color="blue" className="-top-1 right-[5%]" />
+        </div>
+      </div>
+    </LifestyleBannerShell>
+  );
+}
+
+/* ── Extension Marquee Lifestyle 2 — DLP focused (1400 x 560) ── */
+
+export function ExtensionMarqueeLifestyle2() {
+  return (
+    <LifestyleBannerShell aspectRatio="1400/560">
+      <div className="flex items-center h-full gap-4 sm:gap-8">
+        <div className="flex-1 space-y-2 sm:space-y-3 max-w-[38%]">
+          <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={180} height={36} className="h-5 sm:h-7 w-auto" />
+          <p className="text-white text-xs sm:text-base font-bold leading-snug">
+            Stop sensitive data from reaching AI tools
+          </p>
+          <FeaturePills />
+          <CompatibilityLine />
+        </div>
+        <div className="hidden sm:flex w-[55%] items-center relative">
+          <LifestylePhoto
+            src={lifestylePhotos.linkedin}
+            alt="Diverse team working at computers"
+            className="w-[55%] aspect-[4/3]"
+          />
+          <div className="w-[50%] -ml-10 relative z-10">
+            <DLPBlockScene compact />
+          </div>
+          <FrostedBadge icon={Shield} headline="PII detected" subtitle="Auto-blocked" color="red" className="bottom-2 left-[35%]" />
+          <FrostedBadge icon={BarChart3} headline="15 DLP rules" subtitle="Active" color="emerald" className="-top-1 right-[5%]" />
+        </div>
+      </div>
+    </LifestyleBannerShell>
+  );
+}
+
+/* ── Extension Marquee Lifestyle 3 — Insert focused (1400 x 560) ── */
+
+export function ExtensionMarqueeLifestyle3() {
+  return (
+    <LifestyleBannerShell aspectRatio="1400/560">
+      <div className="flex items-center h-full gap-4 sm:gap-8">
+        <div className="flex-1 space-y-2 sm:space-y-3 max-w-[38%]">
+          <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={180} height={36} className="h-5 sm:h-7 w-auto" />
+          <p className="text-white text-xs sm:text-base font-bold leading-snug">
+            One click to insert team prompts into any AI tool
+          </p>
+          <FeaturePills />
+          <CompatibilityLine />
+        </div>
+        <div className="hidden sm:flex w-[55%] items-center relative">
+          <LifestylePhoto
+            src={lifestylePhotos.facebook}
+            alt="Coworkers at laptops together"
+            className="w-[55%] aspect-[4/3]"
+          />
+          <div className="w-[50%] -ml-10 relative z-10">
+            <InsertScene />
+          </div>
+          <FrostedBadge icon={Zap} headline="One-click insert" subtitle="Into any AI tool" color="emerald" className="bottom-2 left-[35%]" />
+          <FrostedBadge icon={Users} headline="5 AI tools" subtitle="Connected" color="blue" className="-top-1 right-[5%]" />
+        </div>
+      </div>
+    </LifestyleBannerShell>
+  );
+}
+
+/* ── Extension Screenshot Lifestyle 1 — Vault hero (1280 x 800) ── */
+
+export function ExtensionScreenshotLifestyle1() {
+  return (
+    <LifestyleBannerShell aspectRatio="1280/800">
+      <div className="flex flex-col justify-center h-full gap-3 sm:gap-5">
+        <div className="space-y-2 sm:space-y-3 max-w-[50%]">
+          <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={200} height={40} className="h-6 sm:h-8 w-auto" />
+          <p className="text-white text-sm sm:text-xl font-bold leading-snug">
+            Your team&apos;s AI prompt library — with built-in data protection
+          </p>
+          <FeaturePills />
+          <CompatibilityLine />
+        </div>
+        <div className="flex items-start gap-4 mt-1">
+          <LifestylePhoto
+            src={lifestylePhotos.twitter}
+            alt="Team collaborating at laptops"
+            className="w-[40%] aspect-[4/3]"
+          />
+          <div className="w-[35%] space-y-2 -ml-6 relative z-10">
+            <VaultScene compact />
+            <DLPBlockScene compact />
+          </div>
+          <FrostedBadge icon={Shield} headline="DLP Active" subtitle="Real-time scanning" color="red" className="top-[40%] left-[28%]" />
+          <FrostedBadge icon={Users} headline="Team library" subtitle="Shared prompts" color="blue" className="-top-2 right-[25%]" />
+        </div>
+      </div>
+    </LifestyleBannerShell>
+  );
+}
+
+/* ── Extension Screenshot Lifestyle 2 — DLP focus (1280 x 800) ── */
+
+export function ExtensionScreenshotLifestyle2() {
+  return (
+    <LifestyleBannerShell aspectRatio="1280/800">
+      <div className="flex flex-col justify-center h-full gap-3 sm:gap-5">
+        <div className="space-y-2 sm:space-y-3 max-w-[50%]">
+          <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={200} height={40} className="h-6 sm:h-8 w-auto" />
+          <p className="text-white text-sm sm:text-xl font-bold leading-snug">
+            Stop sensitive data from reaching AI tools
+          </p>
+          <FeaturePills />
+          <CompatibilityLine />
+        </div>
+        <div className="flex items-start gap-4 mt-1">
+          <LifestylePhoto
+            src={lifestylePhotos.linkedin}
+            alt="Diverse team working at computers"
+            className="w-[40%] aspect-[4/3]"
+          />
+          <div className="w-[35%] space-y-2 -ml-6 relative z-10">
+            <DLPBlockScene compact />
+            <InsertScene />
+          </div>
+          <FrostedBadge icon={Shield} headline="PII detected" subtitle="Auto-blocked" color="red" className="top-[40%] left-[28%]" />
+          <FrostedBadge icon={BarChart3} headline="15 DLP rules" subtitle="Active" color="emerald" className="-top-2 right-[25%]" />
+        </div>
+      </div>
+    </LifestyleBannerShell>
+  );
+}
+
+/* ── Extension Screenshot Lifestyle 3 — Insert focus (1280 x 800) ── */
+
+export function ExtensionScreenshotLifestyle3() {
+  return (
+    <LifestyleBannerShell aspectRatio="1280/800">
+      <div className="flex flex-col justify-center h-full gap-3 sm:gap-5">
+        <div className="space-y-2 sm:space-y-3 max-w-[50%]">
+          <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={200} height={40} className="h-6 sm:h-8 w-auto" />
+          <p className="text-white text-sm sm:text-xl font-bold leading-snug">
+            One click to insert team prompts into any AI tool
+          </p>
+          <FeaturePills />
+          <CompatibilityLine />
+        </div>
+        <div className="flex items-start gap-4 mt-1">
+          <LifestylePhoto
+            src={lifestylePhotos.facebook}
+            alt="Coworkers at laptops together"
+            className="w-[40%] aspect-[4/3]"
+          />
+          <div className="w-[35%] space-y-2 -ml-6 relative z-10">
+            <InsertScene />
+            <VaultScene compact />
+          </div>
+          <FrostedBadge icon={Zap} headline="One-click insert" subtitle="Into any AI tool" color="emerald" className="top-[40%] left-[28%]" />
+          <FrostedBadge icon={Users} headline="5 AI tools" subtitle="Connected" color="blue" className="-top-2 right-[25%]" />
+        </div>
+      </div>
+    </LifestyleBannerShell>
+  );
+}
+
+/* ── Extension Small Promo Lifestyle (440 x 280) ── */
+
+export function ExtensionSmallPromoLifestyle() {
+  return (
+    <LifestyleBannerShell aspectRatio="440/280">
+      <div className="flex flex-col justify-center h-full gap-2">
+        <Image src="/brand/logo-wordmark-white.svg" alt="TeamPrompt" width={120} height={24} className="h-4 sm:h-5 w-auto" />
+        <p className="text-white text-[8px] sm:text-[10px] font-bold leading-snug max-w-[70%]">
+          Team prompt library with DLP protection for AI tools
+        </p>
+        <FeaturePills />
+        <div className="absolute right-3 top-1/2 -translate-y-1/2 w-[40%]">
+          <LifestylePhoto
+            src={lifestylePhotos.og}
+            alt="Person typing on laptop"
+            className="w-full aspect-[4/3]"
+          />
+          <FrostedBadge icon={Shield} headline="Protected" subtitle="DLP active" color="red" className="-bottom-1 -left-4" />
+        </div>
+      </div>
+    </LifestyleBannerShell>
+  );
+}
+
 /* ── Export map ──────────────────────────────────── */
 
 export const socialBannerComponents = {
@@ -1397,4 +1614,11 @@ export const socialBannerComponents = {
   ogWhite: { Component: OGBannerWhite, label: "OG / Social Share Card — White", dims: "1200 x 630" },
   ogGradient: { Component: OGBannerGradient, label: "OG / Social Share Card — Gradient", dims: "1200 x 630" },
   ogLifestyle: { Component: OGBannerLifestyle, label: "OG / Social Share Card — Lifestyle", dims: "1200 x 630" },
+  extScreenshot1: { Component: ExtensionScreenshotLifestyle1, label: "Extension Screenshot — Team + Vault", dims: "1280 x 800" },
+  extScreenshot2: { Component: ExtensionScreenshotLifestyle2, label: "Extension Screenshot — DLP Shield", dims: "1280 x 800" },
+  extScreenshot3: { Component: ExtensionScreenshotLifestyle3, label: "Extension Screenshot — Insert Flow", dims: "1280 x 800" },
+  extMarquee1: { Component: ExtensionMarqueeLifestyle1, label: "Extension Marquee — Team + Vault", dims: "1400 x 560" },
+  extMarquee2: { Component: ExtensionMarqueeLifestyle2, label: "Extension Marquee — DLP Shield", dims: "1400 x 560" },
+  extMarquee3: { Component: ExtensionMarqueeLifestyle3, label: "Extension Marquee — Insert Flow", dims: "1400 x 560" },
+  extSmallPromo: { Component: ExtensionSmallPromoLifestyle, label: "Extension Small Promo — Lifestyle", dims: "440 x 280" },
 } as const;

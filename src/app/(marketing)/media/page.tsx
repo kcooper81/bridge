@@ -28,6 +28,13 @@ import {
   OGBannerWhite,
   OGBannerGradient,
   OGBannerLifestyle,
+  ExtensionScreenshotLifestyle1,
+  ExtensionScreenshotLifestyle2,
+  ExtensionScreenshotLifestyle3,
+  ExtensionMarqueeLifestyle1,
+  ExtensionMarqueeLifestyle2,
+  ExtensionMarqueeLifestyle3,
+  ExtensionSmallPromoLifestyle,
 } from "./_components/social-banners";
 
 export const metadata: Metadata = generatePageMetadata({
@@ -772,6 +779,53 @@ export default function MediaPage() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+
+          {/* Lifestyle Store Banners */}
+          <div className="mb-12">
+            <h3 className="text-lg font-semibold mb-2">Lifestyle Banners</h3>
+            <p className="text-xs text-zinc-400 mb-6">
+              CSS-rendered lifestyle banners for extension store pages. Click any banner to download as PNG.
+            </p>
+
+            <h4 className="text-sm font-medium text-zinc-300 mb-3">Screenshots (1280 x 800)</h4>
+            <div className="space-y-3 mb-8">
+              {[
+                { Component: ExtensionScreenshotLifestyle1, variant: "Team + Vault", name: "ext-screenshot-lifestyle-1" },
+                { Component: ExtensionScreenshotLifestyle2, variant: "DLP Shield", name: "ext-screenshot-lifestyle-2" },
+                { Component: ExtensionScreenshotLifestyle3, variant: "Insert Flow", name: "ext-screenshot-lifestyle-3" },
+              ].map((b) => (
+                <div key={b.name}>
+                  <p className="text-xs text-zinc-500 font-medium mb-1.5">{b.variant}</p>
+                  <BannerDownloadWrapper filename={`teamprompt-${b.name}`}>
+                    <b.Component />
+                  </BannerDownloadWrapper>
+                </div>
+              ))}
+            </div>
+
+            <h4 className="text-sm font-medium text-zinc-300 mb-3">Marquee Promo (1400 x 560)</h4>
+            <div className="space-y-3 mb-8">
+              {[
+                { Component: ExtensionMarqueeLifestyle1, variant: "Team + Vault", name: "ext-marquee-lifestyle-1" },
+                { Component: ExtensionMarqueeLifestyle2, variant: "DLP Shield", name: "ext-marquee-lifestyle-2" },
+                { Component: ExtensionMarqueeLifestyle3, variant: "Insert Flow", name: "ext-marquee-lifestyle-3" },
+              ].map((b) => (
+                <div key={b.name}>
+                  <p className="text-xs text-zinc-500 font-medium mb-1.5">{b.variant}</p>
+                  <BannerDownloadWrapper filename={`teamprompt-${b.name}`}>
+                    <b.Component />
+                  </BannerDownloadWrapper>
+                </div>
+              ))}
+            </div>
+
+            <h4 className="text-sm font-medium text-zinc-300 mb-3">Small Promo Tile (440 x 280)</h4>
+            <div className="space-y-3">
+              <BannerDownloadWrapper filename="teamprompt-ext-small-promo-lifestyle">
+                <ExtensionSmallPromoLifestyle />
+              </BannerDownloadWrapper>
             </div>
           </div>
 

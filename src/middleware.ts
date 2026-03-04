@@ -149,7 +149,7 @@ function setSecurityHeaders(response: NextResponse) {
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https:",
       "font-src 'self' data:",
-      "connect-src 'self' https://*.supabase.co https://api.stripe.com wss://*.supabase.co https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com",
+      "connect-src 'self' https://*.supabase.co https://api.stripe.com wss://*.supabase.co https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://images.unsplash.com",
       "frame-src https://js.stripe.com https://accounts.google.com",
       "object-src 'none'",
       "base-uri 'self'",

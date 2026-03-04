@@ -1166,8 +1166,8 @@ function LifestylePhoto({
       style={{ transform: rotate ? `rotate(${rotate}deg)` : undefined }}
     >
       {/* Ambient glow behind the photo */}
-      <div className="absolute -inset-2 rounded-3xl bg-gradient-to-br from-blue-500/20 via-purple-500/10 to-transparent blur-xl opacity-50" />
-      <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-black/40 ring-1 ring-white/10">
+      <div className="absolute -inset-3 rounded-3xl bg-gradient-to-br from-blue-500/15 via-purple-500/8 to-transparent blur-2xl opacity-40" />
+      <div className="relative rounded-xl overflow-hidden shadow-xl shadow-black/30 ring-1 ring-white/[0.06]">
         <Image
           src={src}
           alt={alt}
@@ -1177,9 +1177,9 @@ function LifestylePhoto({
           unoptimized
         />
         {/* Multi-layer dark edge overlay for blending */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0A0E1A]/50 via-transparent to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0A0E1A]/35 via-transparent to-transparent" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,transparent_50%,rgba(10,14,26,0.25)_100%)]" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0A0E1A]/60 via-[#0A0E1A]/10 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0A0E1A]/40 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(10,14,26,0.20)_100%)]" />
       </div>
     </div>
   );
@@ -1208,16 +1208,16 @@ function FrostedBadge({
   return (
     <div
       className={cn(
-        "absolute z-20 rounded-xl bg-white/95 backdrop-blur-xl shadow-xl shadow-black/15 border border-white/80 px-3 sm:px-4 py-1.5 sm:py-2 flex items-center gap-2 whitespace-nowrap min-w-[90px] sm:min-w-[110px]",
+        "absolute z-20 rounded-lg bg-white/90 backdrop-blur-xl shadow-lg shadow-black/10 border border-white/60 px-2 sm:px-3 py-1 sm:py-1.5 flex items-center gap-1.5 whitespace-nowrap min-w-[80px] sm:min-w-[100px]",
         className
       )}
     >
-      <div className={cn("flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center rounded-lg bg-gradient-to-br text-white shadow-md shrink-0", gradientMap[color])}>
-        <Icon className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
+      <div className={cn("flex h-4 w-4 sm:h-5 sm:w-5 items-center justify-center rounded-md bg-gradient-to-br text-white shadow-sm shrink-0", gradientMap[color])}>
+        <Icon className="h-2 w-2 sm:h-2.5 sm:w-2.5" />
       </div>
       <div>
-        <p className="text-[6px] sm:text-[8px] font-bold text-zinc-900 leading-none">{headline}</p>
-        <p className="text-[4px] sm:text-[5px] text-zinc-500 mt-0.5">{subtitle}</p>
+        <p className="text-[5px] sm:text-[7px] font-bold text-zinc-900 leading-none">{headline}</p>
+        <p className="text-[3.5px] sm:text-[4.5px] text-zinc-500 mt-0.5">{subtitle}</p>
       </div>
     </div>
   );
@@ -1505,9 +1505,9 @@ export function ExtensionScreenshotLifestyle1() {
   return (
     <LifestyleBannerShell aspectRatio="1280/800">
       <div className="flex items-center h-full gap-4 sm:gap-8">
-        <div className="flex-1 space-y-2 sm:space-y-3 max-w-[38%]">
-          <BannerWordmark size="lg" />
-          <p className="text-white text-sm sm:text-xl font-bold leading-snug">
+        <div className="flex-1 space-y-2 sm:space-y-2.5 max-w-[38%]">
+          <BannerWordmark size="md" />
+          <p className="text-white text-xs sm:text-base font-bold leading-snug">
             Your team&apos;s AI prompt library — with built-in data protection
           </p>
           <FeaturePills />
@@ -1536,9 +1536,9 @@ export function ExtensionScreenshotLifestyle2() {
   return (
     <LifestyleBannerShell aspectRatio="1280/800">
       <div className="flex items-center h-full gap-4 sm:gap-8">
-        <div className="flex-1 space-y-2 sm:space-y-3 max-w-[38%]">
-          <BannerWordmark size="lg" />
-          <p className="text-white text-sm sm:text-xl font-bold leading-snug">
+        <div className="flex-1 space-y-2 sm:space-y-2.5 max-w-[38%]">
+          <BannerWordmark size="md" />
+          <p className="text-white text-xs sm:text-base font-bold leading-snug">
             Stop sensitive data from reaching AI tools
           </p>
           <FeaturePills />
@@ -1567,9 +1567,9 @@ export function ExtensionScreenshotLifestyle3() {
   return (
     <LifestyleBannerShell aspectRatio="1280/800">
       <div className="flex items-center h-full gap-4 sm:gap-8">
-        <div className="flex-1 space-y-2 sm:space-y-3 max-w-[38%]">
-          <BannerWordmark size="lg" />
-          <p className="text-white text-sm sm:text-xl font-bold leading-snug">
+        <div className="flex-1 space-y-2 sm:space-y-2.5 max-w-[38%]">
+          <BannerWordmark size="md" />
+          <p className="text-white text-xs sm:text-base font-bold leading-snug">
             One click to insert team prompts into any AI tool
           </p>
           <FeaturePills />
@@ -1598,9 +1598,9 @@ export function ExtensionScreenshotDark() {
   return (
     <DarkBannerShell aspectRatio="1280/800">
       <div className="flex flex-col justify-center h-full gap-3 sm:gap-5">
-        <div className="space-y-2 sm:space-y-3">
-          <BannerWordmark size="lg" />
-          <p className="text-white/90 text-sm sm:text-xl font-semibold leading-snug max-w-[50%]">
+        <div className="space-y-2 sm:space-y-2.5">
+          <BannerWordmark size="md" />
+          <p className="text-white/90 text-xs sm:text-base font-semibold leading-snug max-w-[50%]">
             Your team&apos;s AI prompt library — with built-in data protection
           </p>
           <FeatureIconRow />
@@ -1622,9 +1622,9 @@ export function ExtensionScreenshotWhite() {
   return (
     <WhiteBannerShell aspectRatio="1280/800">
       <div className="flex flex-col justify-center h-full gap-3 sm:gap-5">
-        <div className="space-y-2 sm:space-y-3">
-          <BannerWordmark size="lg" dark />
-          <p className="text-zinc-900 text-sm sm:text-xl font-semibold leading-snug max-w-[50%]">
+        <div className="space-y-2 sm:space-y-2.5">
+          <BannerWordmark size="md" dark />
+          <p className="text-zinc-900 text-xs sm:text-base font-semibold leading-snug max-w-[50%]">
             Your team&apos;s AI prompt library — with built-in data protection
           </p>
           <FeatureIconRowDark />
@@ -1646,9 +1646,9 @@ export function ExtensionScreenshotGradient() {
   return (
     <MockupBannerShell aspectRatio="1280/800">
       <div className="flex flex-col justify-center h-full gap-3 sm:gap-5">
-        <div className="space-y-2 sm:space-y-3">
-          <BannerWordmark size="lg" />
-          <p className="text-white text-sm sm:text-xl font-bold leading-snug max-w-[50%]">
+        <div className="space-y-2 sm:space-y-2.5">
+          <BannerWordmark size="md" />
+          <p className="text-white text-xs sm:text-base font-bold leading-snug max-w-[50%]">
             Shared prompts · Data protection · Usage analytics
           </p>
           <FeaturePills />
@@ -1680,9 +1680,9 @@ export function ExtensionScreenshotLifestyle4() {
   return (
     <LifestyleBannerShell aspectRatio="1280/800">
       <div className="flex items-center h-full gap-4 sm:gap-8">
-        <div className="flex-1 space-y-2 sm:space-y-3 max-w-[38%]">
-          <BannerWordmark size="lg" />
-          <p className="text-white text-sm sm:text-xl font-bold leading-snug">
+        <div className="flex-1 space-y-2 sm:space-y-2.5 max-w-[38%]">
+          <BannerWordmark size="md" />
+          <p className="text-white text-xs sm:text-base font-bold leading-snug">
             See how your team uses AI — usage analytics built in
           </p>
           <FeaturePills />
@@ -1711,9 +1711,9 @@ export function ExtensionScreenshotLifestyle5() {
   return (
     <LifestyleBannerShell aspectRatio="1280/800">
       <div className="flex items-center h-full gap-4 sm:gap-8">
-        <div className="flex-1 space-y-2 sm:space-y-3 max-w-[38%]">
-          <BannerWordmark size="lg" />
-          <p className="text-white text-sm sm:text-xl font-bold leading-snug">
+        <div className="flex-1 space-y-2 sm:space-y-2.5 max-w-[38%]">
+          <BannerWordmark size="md" />
+          <p className="text-white text-xs sm:text-base font-bold leading-snug">
             Works with ChatGPT, Claude, Gemini, Copilot & Perplexity
           </p>
           <FeaturePills />

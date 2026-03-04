@@ -798,7 +798,7 @@ export default function MediaPage() {
               ].map((b) => (
                 <div key={b.name}>
                   <p className="text-xs text-zinc-500 font-medium mb-1.5">{b.variant}</p>
-                  <BannerDownloadWrapper filename={`teamprompt-${b.name}`}>
+                  <BannerDownloadWrapper filename={`teamprompt-${b.name}`} downloadWidth={1280}>
                     <b.Component />
                   </BannerDownloadWrapper>
                 </div>
@@ -814,7 +814,7 @@ export default function MediaPage() {
               ].map((b) => (
                 <div key={b.name}>
                   <p className="text-xs text-zinc-500 font-medium mb-1.5">{b.variant}</p>
-                  <BannerDownloadWrapper filename={`teamprompt-${b.name}`}>
+                  <BannerDownloadWrapper filename={`teamprompt-${b.name}`} downloadWidth={1400}>
                     <b.Component />
                   </BannerDownloadWrapper>
                 </div>
@@ -823,7 +823,7 @@ export default function MediaPage() {
 
             <h4 className="text-sm font-medium text-zinc-300 mb-3">Small Promo Tile (440 x 280)</h4>
             <div className="space-y-3">
-              <BannerDownloadWrapper filename="teamprompt-ext-small-promo-lifestyle">
+              <BannerDownloadWrapper filename="teamprompt-ext-small-promo-lifestyle" downloadWidth={440}>
                 <ExtensionSmallPromoLifestyle />
               </BannerDownloadWrapper>
             </div>

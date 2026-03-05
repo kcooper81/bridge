@@ -28,18 +28,63 @@ interface NavBadgeCounts {
   unresolvedErrors: number;
 }
 
-const allNavItems = [
-  { href: "/admin", label: "Dashboard", icon: LayoutDashboard, badgeKey: null, supportVisible: false },
-  { href: "/admin/organizations", label: "Organizations", icon: Building2, badgeKey: null, supportVisible: false },
-  { href: "/admin/users", label: "Users", icon: Users, badgeKey: null, supportVisible: false },
-  { href: "/admin/subscriptions", label: "Subscriptions", icon: CreditCard, badgeKey: null, supportVisible: false },
-  { href: "/admin/analytics", label: "Analytics", icon: BarChart3, badgeKey: null, supportVisible: false },
-  { href: "/admin/activity", label: "Activity Logs", icon: ScrollText, badgeKey: null, supportVisible: false },
-  { href: "/admin/tickets", label: "Tickets", icon: Ticket, badgeKey: "newTickets" as const, supportVisible: true },
-  { href: "/admin/errors", label: "Error Logs", icon: AlertTriangle, badgeKey: "unresolvedErrors" as const, supportVisible: false },
-  { href: "/admin/testing-guide", label: "Testing Guide", icon: ClipboardCheck, badgeKey: null, supportVisible: true },
-  { href: "/admin/settings", label: "Settings", icon: Settings, badgeKey: null, supportVisible: false },
-  { href: "/admin/admin-users", label: "Admin Users", icon: UserCog, badgeKey: null, supportVisible: false, superAdminOnly: true },
+interface NavItem {
+  href: string;
+  label: string;
+  icon: React.ElementType;
+  badgeKey: "newTickets" | "unresolvedErrors" | null;
+  supportVisible: boolean;
+  superAdminOnly?: boolean;
+}
+
+interface NavGroup {
+  label: string;
+  supportVisible: boolean;
+  items: NavItem[];
+}
+
+const navGroups: NavGroup[] = [
+  {
+    label: "Overview",
+    supportVisible: false,
+    items: [
+      { href: "/admin", label: "Dashboard", icon: LayoutDashboard, badgeKey: null, supportVisible: false },
+      { href: "/admin/analytics", label: "Analytics", icon: BarChart3, badgeKey: null, supportVisible: false },
+    ],
+  },
+  {
+    label: "Inbox",
+    supportVisible: true,
+    items: [
+      { href: "/admin/tickets", label: "Tickets & Email", icon: Ticket, badgeKey: "newTickets" as const, supportVisible: true },
+      { href: "/admin/errors", label: "Error Logs", icon: AlertTriangle, badgeKey: "unresolvedErrors" as const, supportVisible: false },
+    ],
+  },
+  {
+    label: "Manage",
+    supportVisible: false,
+    items: [
+      { href: "/admin/organizations", label: "Organizations", icon: Building2, badgeKey: null, supportVisible: false },
+      { href: "/admin/users", label: "Users", icon: Users, badgeKey: null, supportVisible: false },
+      { href: "/admin/subscriptions", label: "Subscriptions", icon: CreditCard, badgeKey: null, supportVisible: false },
+    ],
+  },
+  {
+    label: "Logs",
+    supportVisible: false,
+    items: [
+      { href: "/admin/activity", label: "Activity Logs", icon: ScrollText, badgeKey: null, supportVisible: false },
+    ],
+  },
+  {
+    label: "System",
+    supportVisible: true,
+    items: [
+      { href: "/admin/testing-guide", label: "Testing Guide", icon: ClipboardCheck, badgeKey: null, supportVisible: true },
+      { href: "/admin/settings", label: "Settings", icon: Settings, badgeKey: null, supportVisible: false },
+      { href: "/admin/admin-users", label: "Admin Users", icon: UserCog, badgeKey: null, supportVisible: false, superAdminOnly: true },
+    ],
+  },
 ];
 
 export function AdminNav({ superAdminRole }: { superAdminRole: SuperAdminRole | null }) {
@@ -53,11 +98,20 @@ export function AdminNav({ superAdminRole }: { superAdminRole: SuperAdminRole | 
 
   const isSupport = superAdminRole === "support";
 
-  const navItems = allNavItems.filter((item) => {
-    if (isSupport) return item.supportVisible;
-    if (item.superAdminOnly && isSupport) return false;
-    return true;
-  });
+  // Filter groups and items based on role
+  const filteredGroups = navGroups
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((item) => {
+        if (isSupport) return item.supportVisible;
+        if (item.superAdminOnly && isSupport) return false;
+        return true;
+      }),
+    }))
+    .filter((group) => {
+      if (isSupport && !group.supportVisible) return false;
+      return group.items.length > 0;
+    });
 
   const loadBadgeCounts = useCallback(async () => {
     const supabase = createClient();
@@ -138,7 +192,7 @@ export function AdminNav({ superAdminRole }: { superAdminRole: SuperAdminRole | 
     };
   }, [loadBadgeCounts]);
 
-  const renderNavItem = (item: (typeof allNavItems)[0], mobile?: boolean) => {
+  const renderNavItem = (item: NavItem, mobile?: boolean) => {
     const isActive =
       pathname === item.href ||
       (item.href !== "/admin" && pathname.startsWith(item.href));
@@ -199,15 +253,33 @@ export function AdminNav({ superAdminRole }: { superAdminRole: SuperAdminRole | 
           mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <div className="space-y-1">
-          {navItems.map((item) => renderNavItem(item, true))}
+        <div className="space-y-4">
+          {filteredGroups.map((group) => (
+            <div key={group.label}>
+              <p className="px-3 mb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                {group.label}
+              </p>
+              <div className="space-y-0.5">
+                {group.items.map((item) => renderNavItem(item, true))}
+              </div>
+            </div>
+          ))}
         </div>
       </nav>
 
       {/* Desktop Sidebar */}
       <nav className="hidden lg:block w-64 min-h-[calc(100vh-64px)] bg-slate-900 text-white p-4">
-        <div className="space-y-1">
-          {navItems.map((item) => renderNavItem(item))}
+        <div className="space-y-4">
+          {filteredGroups.map((group) => (
+            <div key={group.label}>
+              <p className="px-3 mb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                {group.label}
+              </p>
+              <div className="space-y-0.5">
+                {group.items.map((item) => renderNavItem(item))}
+              </div>
+            </div>
+          ))}
         </div>
       </nav>
     </>

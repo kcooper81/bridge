@@ -13,8 +13,8 @@ interface BannerDownloadWrapperProps {
   downloadWidth?: number;
 }
 
-/** Fetch an image URL and return a data: URI (bypasses SVG foreignObject CORS) */
-async function toDataUri(url: string): Promise<string> {
+/** Fetch an image URL and return a data: URI */
+async function fetchAsDataUri(url: string): Promise<string> {
   const res = await fetch(url, { mode: "cors" });
   const blob = await res.blob();
   return new Promise((resolve, reject) => {
@@ -28,10 +28,11 @@ async function toDataUri(url: string): Promise<string> {
 /**
  * Wraps a CSS-rendered banner and provides a "Download PNG" button.
  *
- * Uses html-to-image (foreignObject SVG) for pixel-perfect CSS fidelity
- * — supports backdrop-filter, aspect-ratio, gradients, inline SVG, etc.
- * External images are pre-converted to data URIs to avoid CORS issues
- * inside the SVG foreignObject context.
+ * Uses html-to-image (foreignObject SVG) with an off-screen clone so:
+ * 1. The live DOM is never modified (no flicker)
+ * 2. External images are converted to data URIs in the clone (no CORS)
+ * 3. backdrop-filter elements get solid fallback backgrounds
+ * 4. Explicit dimensions replace CSS aspect-ratio for reliable sizing
  */
 export function BannerDownloadWrapper({
   children,
@@ -46,26 +47,16 @@ export function BannerDownloadWrapper({
     if (!captureRef.current || loading) return;
     setLoading(true);
 
-    const node = captureRef.current;
-    const originals = new Map<
-      HTMLImageElement,
-      { src: string; srcset: string }
-    >();
-    let shell: HTMLElement | null = null;
-    let savedBr = "";
-    let savedOf = "";
-
     try {
       const { toPng } = await import("html-to-image");
+      const node = captureRef.current;
+      const rect = node.getBoundingClientRect();
 
-      // ── 1. Pre-convert external images to data URIs ──
-      // html-to-image serialises the DOM into an SVG foreignObject.
-      // Browsers enforce strict CORS inside foreignObject — even images
-      // with Access-Control-Allow-Origin:* can taint the canvas.
-      // Converting to data URIs BEFORE capture avoids the issue entirely.
-      const imgs = node.querySelectorAll("img");
+      // ── 1. Pre-fetch external images as data URIs ──
+      const imageCache = new Map<string, string>();
+      const liveImgs = node.querySelectorAll("img");
       await Promise.all(
-        Array.from(imgs).map(async (img) => {
+        Array.from(liveImgs).map(async (img) => {
           const src = img.currentSrc || img.src;
           if (
             src &&
@@ -73,34 +64,79 @@ export function BannerDownloadWrapper({
             !src.startsWith(window.location.origin)
           ) {
             try {
-              originals.set(img, { src: img.src, srcset: img.srcset });
-              img.src = await toDataUri(src);
-              img.srcset = "";
+              if (!imageCache.has(src)) {
+                imageCache.set(src, await fetchAsDataUri(src));
+              }
             } catch {
-              /* leave original if fetch fails */
+              /* skip if fetch fails */
             }
           }
         })
       );
 
-      // ── 2. Strip rounded corners on the banner shell for clean edges ──
-      shell = node.firstElementChild as HTMLElement | null;
+      // ── 2. Create off-screen clone (no live DOM changes) ──
+      const clone = node.cloneNode(true) as HTMLElement;
+      clone.style.position = "fixed";
+      clone.style.left = "-9999px";
+      clone.style.top = "0";
+      clone.style.width = `${rect.width}px`;
+      clone.style.height = `${rect.height}px`;
+
+      // Strip border-radius on banner shell for clean rectangular output
+      const shell = clone.firstElementChild as HTMLElement | null;
       if (shell) {
-        savedBr = shell.style.borderRadius;
-        savedOf = shell.style.overflow;
         shell.style.borderRadius = "0";
         shell.style.overflow = "visible";
       }
 
-      // ── 3. Capture ──
-      const ratio = downloadWidth ? downloadWidth / node.offsetWidth : 2;
+      document.body.appendChild(clone);
 
-      const dataUrl = await toPng(node, {
+      // ── 3. Replace external images with data URIs in clone ──
+      clone.querySelectorAll("img").forEach((img) => {
+        const src = img.src;
+        // Match against cache (try both raw src and decoded)
+        const dataUri = imageCache.get(src) || imageCache.get(decodeURI(src));
+        if (dataUri) {
+          img.src = dataUri;
+          img.srcset = "";
+        }
+      });
+
+      // ── 4. Fix CSS effects that don't render in foreignObject SVG ──
+      clone.querySelectorAll("*").forEach((el) => {
+        const htmlEl = el as HTMLElement;
+        const cs = window.getComputedStyle(htmlEl);
+
+        // backdrop-filter doesn't work inside SVG foreignObject
+        if (cs.backdropFilter && cs.backdropFilter !== "none") {
+          htmlEl.style.backdropFilter = "none";
+          htmlEl.style.setProperty("-webkit-backdrop-filter", "none");
+          // Replace translucent bg with near-opaque white
+          htmlEl.style.backgroundColor = "rgba(255,255,255,0.97)";
+        }
+
+        // CSS filter:blur() on ambient glow divs can clip weirdly —
+        // replace with a softer opacity-only effect
+        if (cs.filter && cs.filter.includes("blur")) {
+          htmlEl.style.filter = "none";
+          htmlEl.style.opacity = "0.3";
+        }
+      });
+
+      // Let layout settle
+      await new Promise((r) => setTimeout(r, 150));
+
+      // ── 5. Capture ──
+      const ratio = downloadWidth ? downloadWidth / rect.width : 2;
+      const dataUrl = await toPng(clone, {
         pixelRatio: ratio,
         cacheBust: true,
       });
 
-      // ── 4. Trigger download ──
+      // ── 6. Cleanup ──
+      document.body.removeChild(clone);
+
+      // ── 7. Trigger download ──
       const a = document.createElement("a");
       a.href = dataUrl;
       a.download = filename.endsWith(".png") ? filename : `${filename}.png`;
@@ -108,15 +144,6 @@ export function BannerDownloadWrapper({
     } catch (err) {
       console.error("Banner download failed:", err);
     } finally {
-      // ── Always restore DOM state ──
-      if (shell) {
-        shell.style.borderRadius = savedBr;
-        shell.style.overflow = savedOf;
-      }
-      originals.forEach(({ src, srcset }, img) => {
-        img.src = src;
-        img.srcset = srcset;
-      });
       setLoading(false);
     }
   }, [filename, loading, downloadWidth]);

@@ -131,21 +131,31 @@ export async function GET() {
     notesMap.set(note.ticket_id, arr);
   }
 
-  const enriched = (tickets || []).map((t) => ({
-    id: t.id,
-    type: t.type,
-    subject: t.subject,
-    message: t.message,
-    status: t.status,
-    priority: t.priority || "normal",
-    user_id: t.user_id || null,
-    user_email: t.user_id ? userMap.get(t.user_id) || null : null,
-    org_name: t.org_id ? orgMap.get(t.org_id) || null : null,
-    inbox_email: t.inbox_email || null,
-    notes: notesMap.get(t.id) || [],
-    notes_count: (notesMap.get(t.id) || []).length,
-    created_at: t.created_at,
-  }));
+  const enriched = (tickets || []).map((t) => {
+    // Resolve sender email: from profile or extracted from message
+    let senderEmail = t.user_id ? userMap.get(t.user_id) || null : null;
+    if (!senderEmail) {
+      const match = t.message.match(/From:.*?<([^>]+@[^>]+)>/i)
+        || t.message.match(/From:.*?([^\s<]+@[^\s>]+)/i);
+      if (match) senderEmail = match[1];
+    }
+
+    return {
+      id: t.id,
+      type: t.type,
+      subject: t.subject,
+      message: t.message,
+      status: t.status,
+      priority: t.priority || "normal",
+      user_id: t.user_id || null,
+      user_email: senderEmail,
+      org_name: t.org_id ? orgMap.get(t.org_id) || null : null,
+      inbox_email: t.inbox_email || null,
+      notes: notesMap.get(t.id) || [],
+      notes_count: (notesMap.get(t.id) || []).length,
+      created_at: t.created_at,
+    };
+  });
 
   return NextResponse.json({ tickets: enriched });
 }

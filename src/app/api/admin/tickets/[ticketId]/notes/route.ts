@@ -60,47 +60,57 @@ export async function POST(
 
   let emailSent = false;
 
-  // If public note and ticket has a user, send email
-  if (!is_internal && ticket.user_id) {
+  // Resolve the customer's email: profile lookup OR extract from message
+  let recipientEmail: string | null = null;
+  if (ticket.user_id) {
     const { data: ticketUser } = await db
       .from("profiles")
       .select("email")
       .eq("id", ticket.user_id)
       .single();
+    recipientEmail = ticketUser?.email || null;
+  }
+  if (!recipientEmail) {
+    // Extract email from "From: Name <email>" line in message body
+    const emailMatch = ticket.message.match(/From:.*?<([^>]+@[^>]+)>/i)
+      || ticket.message.match(/From:.*?([^\s<]+@[^\s>]+)/i);
+    if (emailMatch) recipientEmail = emailMatch[1];
+  }
 
-    if (ticketUser?.email && process.env.RESEND_API_KEY) {
-      try {
-        const resend = new Resend(process.env.RESEND_API_KEY);
+  // If public note and we have a recipient, send email
+  if (!is_internal && recipientEmail && process.env.RESEND_API_KEY) {
+    try {
+      const resend = new Resend(process.env.RESEND_API_KEY);
 
-        // Reply from the same inbox the customer originally emailed
-        const INBOX_LABELS: Record<string, string> = {
-          "support@teamprompt.app": "TeamPrompt Support",
-          "sales@teamprompt.app": "TeamPrompt Sales",
-          "help@teamprompt.app": "TeamPrompt Help",
-          "contact@teamprompt.app": "TeamPrompt",
-          "info@teamprompt.app": "TeamPrompt Info",
-          "team@teamprompt.app": "TeamPrompt Team",
-          "kade@teamprompt.app": "Kade at TeamPrompt",
-        };
-        const inbox = ticket.inbox_email || "support@teamprompt.app";
-        const label = INBOX_LABELS[inbox] || "TeamPrompt";
-        const fromEmail = `${label} <${inbox}>`;
+      // Reply from the same inbox the customer originally emailed
+      const INBOX_LABELS: Record<string, string> = {
+        "support@teamprompt.app": "TeamPrompt Support",
+        "sales@teamprompt.app": "TeamPrompt Sales",
+        "help@teamprompt.app": "TeamPrompt Help",
+        "contact@teamprompt.app": "TeamPrompt",
+        "info@teamprompt.app": "TeamPrompt Info",
+        "team@teamprompt.app": "TeamPrompt Team",
+        "kade@teamprompt.app": "Kade at TeamPrompt",
+      };
+      const inbox = ticket.inbox_email || "support@teamprompt.app";
+      const label = INBOX_LABELS[inbox] || "TeamPrompt";
+      const fromEmail = `${label} <${inbox}>`;
 
-        await resend.emails.send({
-          from: fromEmail,
-          to: ticketUser.email,
-          subject: `Re: ${ticket.subject || "Your support request"} [Ticket#${ticket.id}]`,
-          html: buildTicketResponseEmail({
-            ticketSubject: ticket.subject || "Your support request",
-            responseBody: content.trim(),
-            originalMessage: ticket.message,
-          }),
-        });
-        emailSent = true;
-      } catch (emailError) {
-        console.error("Failed to send ticket response email:", emailError);
-        // Non-blocking — note still gets created
-      }
+      await resend.emails.send({
+        from: fromEmail,
+        to: recipientEmail,
+        subject: `Re: ${ticket.subject || "Your support request"} [Ticket#${ticket.id}]`,
+        html: buildTicketResponseEmail({
+          ticketSubject: ticket.subject || "Your support request",
+          responseBody: content.trim(),
+          originalMessage: ticket.message,
+          senderLabel: label,
+          senderEmail: inbox,
+        }),
+      });
+      emailSent = true;
+    } catch (emailError) {
+      console.error("Failed to send ticket response email:", emailError);
     }
   }
 
@@ -130,5 +140,6 @@ export async function POST(
       ...note,
       author_email: user.email,
     },
+    recipient_email: recipientEmail,
   });
 }

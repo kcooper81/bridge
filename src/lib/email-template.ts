@@ -28,6 +28,10 @@ interface TicketResponseEmailOptions {
   responseBody: string;
   /** Original message from the user */
   originalMessage: string;
+  /** Display name for the sender (e.g. "TeamPrompt Support") */
+  senderLabel?: string;
+  /** The inbox email address replying from */
+  senderEmail?: string;
 }
 
 export function buildEmail(options: EmailOptions): string {
@@ -120,10 +124,18 @@ export function buildEmail(options: EmailOptions): string {
  * Includes the admin response and a quoted block of the original message.
  */
 export function buildTicketResponseEmail(options: TicketResponseEmailOptions): string {
-  const { ticketSubject, responseBody, originalMessage } = options;
+  const { ticketSubject, responseBody, originalMessage, senderLabel, senderEmail } = options;
 
   const escapedResponse = responseBody.replace(/\n/g, "<br />");
   const escapedOriginal = originalMessage.replace(/\n/g, "<br />");
+
+  const signatureHtml = senderLabel
+    ? `<div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #e4e4e7;">
+        <p style="margin: 0 0 2px; font-size: 14px; font-weight: 600; color: #18181b;">${senderLabel}</p>
+        ${senderEmail ? `<p style="margin: 0 0 2px; font-size: 13px; color: ${MUTED_TEXT};">${senderEmail}</p>` : ""}
+        <p style="margin: 4px 0 0; font-size: 13px;"><a href="https://teamprompt.app" style="color: ${BRAND_COLOR}; text-decoration: none;">teamprompt.app</a></p>
+      </div>`
+    : "";
 
   return `
 <!DOCTYPE html>
@@ -162,6 +174,8 @@ export function buildTicketResponseEmail(options: TicketResponseEmailOptions): s
               <div style="font-size: 15px; line-height: 1.6; color: #3f3f46;">
                 <p style="margin: 0 0 20px;">${escapedResponse}</p>
               </div>
+
+              ${signatureHtml}
 
               <!-- Quoted original message -->
               <div style="margin-top: 24px; padding: 16px; background-color: #f4f4f5; border-left: 3px solid ${BRAND_COLOR}; border-radius: 4px;">

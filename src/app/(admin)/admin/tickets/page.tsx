@@ -7,7 +7,6 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import {
   Select,
@@ -824,13 +823,63 @@ export default function TicketsPage() {
                 </div>
               </ScrollArea>
 
-              {/* Bottom pinned note form */}
+              {/* Bottom pinned reply/note form */}
               <div className="border-t p-4 space-y-3">
+                {/* Mode tabs */}
+                <div className="flex gap-1 bg-muted rounded-lg p-0.5">
+                  <button
+                    type="button"
+                    onClick={() => setIsInternal(false)}
+                    className={cn(
+                      "flex-1 flex items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
+                      !isInternal
+                        ? "bg-background text-blue-600 dark:text-blue-400 shadow-sm"
+                        : "text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    <Mail className="h-3.5 w-3.5" />
+                    Reply
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsInternal(true)}
+                    className={cn(
+                      "flex-1 flex items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
+                      isInternal
+                        ? "bg-background text-amber-600 dark:text-amber-400 shadow-sm"
+                        : "text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    <Lock className="h-3.5 w-3.5" />
+                    Internal Note
+                  </button>
+                </div>
+
+                {/* Reply context */}
+                {!isInternal && (
+                  <div className="rounded-md bg-blue-50 dark:bg-blue-950/30 px-3 py-2 text-xs space-y-0.5">
+                    <div className="flex items-center gap-1 text-muted-foreground">
+                      <span className="font-medium text-foreground">To:</span>
+                      {selectedTicket.user_email || (
+                        <span className="text-amber-600 dark:text-amber-400">
+                          No email found
+                        </span>
+                      )}
+                    </div>
+                    {selectedTicket.inbox_email && (
+                      <div className="flex items-center gap-1 text-muted-foreground">
+                        <span className="font-medium text-foreground">From:</span>
+                        {selectedTicket.inbox_email}
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 <Textarea
                   placeholder={
                     isInternal
-                      ? "Add an internal note..."
-                      : "Write a response to the user..."
+                      ? "Add an internal note (only visible to admins)..."
+                      : "Write your reply to the customer..."
                   }
                   value={noteContent}
                   onChange={(e) => setNoteContent(e.target.value)}
@@ -839,46 +888,31 @@ export default function TicketsPage() {
                 />
 
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Switch
-                      checked={!isInternal}
-                      onCheckedChange={(checked) => setIsInternal(!checked)}
-                    />
-                    <span className="text-sm">
-                      {isInternal ? (
-                        <span className="flex items-center gap-1 text-muted-foreground">
-                          <Lock className="h-3 w-3" /> Internal note
-                        </span>
-                      ) : (
-                        <span className="flex items-center gap-1 text-blue-600 dark:text-blue-400">
-                          <Mail className="h-3 w-3" /> Send email
-                        </span>
-                      )}
-                    </span>
-                  </div>
+                  {!isInternal && !selectedTicket.user_email ? (
+                    <p className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                      <AlertTriangle className="h-3 w-3" />
+                      No customer email — reply will be saved but not sent.
+                    </p>
+                  ) : (
+                    <div />
+                  )}
 
                   <Button
                     size="sm"
                     onClick={addNote}
                     disabled={!noteContent.trim() || sendingNote}
+                    variant={isInternal ? "outline" : "default"}
                   >
                     {sendingNote ? (
                       <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                    ) : isInternal ? (
+                      <StickyNote className="h-4 w-4 mr-1" />
                     ) : (
                       <Send className="h-4 w-4 mr-1" />
                     )}
-                    {isInternal ? "Add Note" : "Send"}
+                    {isInternal ? "Add Note" : "Send Reply"}
                   </Button>
                 </div>
-
-                {/* Warning if public note but no user */}
-                {!isInternal && !selectedTicket.user_id && (
-                  <p className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1">
-                    <AlertTriangle className="h-3 w-3" />
-                    This ticket has no associated user — email cannot be sent.
-                    The note will still be saved.
-                  </p>
-                )}
               </div>
             </>
           )}

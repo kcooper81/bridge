@@ -5,9 +5,11 @@ import { notifyAdminsOfNewTicket } from "@/lib/notify-admins";
 /**
  * Resend Inbound Email Webhook
  *
- * Receives inbound emails sent to support@teamprompt.app (or configured address).
+ * Receives inbound emails sent to *@teamprompt.app (domain-level MX).
+ * - sales@teamprompt.app → ticket type "sales"
+ * - support@teamprompt.app (and everything else) → ticket type "email"
  * - Replies to existing tickets (matched by subject line) → added as notes
- * - New emails → created as feedback records with type "email"
+ * - New emails → created as feedback records
  *
  * Setup:
  * 1. Add MX record for your domain pointing to Resend's inbound servers
@@ -26,6 +28,13 @@ interface ResendInboundPayload {
     html: string;
     headers: { name: string; value: string }[];
   };
+}
+
+/** Determine ticket type based on the recipient address */
+function detectTicketType(toAddresses: string[]): string {
+  const joined = toAddresses.join(",").toLowerCase();
+  if (joined.includes("sales@")) return "sales";
+  return "email";
 }
 
 function extractEmail(from: string): string {
@@ -102,9 +111,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ ok: true });
     }
 
-    const { from, subject, text, html } = payload.data;
+    const { from, to, subject, text, html } = payload.data;
     const senderEmail = extractEmail(from);
     const senderName = extractName(from);
+    const ticketType = detectTicketType(to || []);
     const body = text || html?.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim() || "";
 
     if (!senderEmail || !body) {
@@ -174,11 +184,11 @@ export async function POST(request: NextRequest) {
       .insert({
         user_id: senderProfile?.id || null,
         org_id: senderProfile?.org_id || null,
-        type: "email",
+        type: ticketType,
         subject: subject || "(No subject)",
         message: fullMessage,
         status: "new",
-        priority: "normal",
+        priority: ticketType === "sales" ? "high" : "normal",
       })
       .select("id")
       .single();
@@ -196,7 +206,7 @@ export async function POST(request: NextRequest) {
       notifyAdminsOfNewTicket({
         subject: subject || "(No subject)",
         senderEmail,
-        type: "email",
+        type: ticketType,
         message: body,
         ticketId: inserted.id,
       });

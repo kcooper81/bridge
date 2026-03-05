@@ -142,6 +142,13 @@ export async function POST(request: NextRequest) {
     const from = data.from || "";
     const to = data.to || [];
     const subject = data.subject || "";
+
+    // Ignore emails sent FROM our own domain to prevent loops
+    const senderAddress = extractEmail(from).toLowerCase();
+    if (senderAddress.endsWith("@teamprompt.app")) {
+      console.log("Inbound email: ignoring email from own domain:", senderAddress);
+      return NextResponse.json({ ok: true, action: "ignored_own_domain" });
+    }
     const text = data.text || "";
     const html = data.html || "";
     const headers = data.headers || [];

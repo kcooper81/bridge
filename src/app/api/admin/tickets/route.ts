@@ -157,11 +157,13 @@ export async function PATCH(request: NextRequest) {
   }
 
   const body = await request.json();
-  const { id, status, priority } = body;
+  const { id, ids, status, priority } = body;
 
-  if (!id || (!status && !priority)) {
+  // Support single id or bulk ids
+  const ticketIds: string[] = ids || (id ? [id] : []);
+  if (ticketIds.length === 0 || (!status && !priority)) {
     return NextResponse.json(
-      { error: "id and at least one of status/priority required" },
+      { error: "id(s) and at least one of status/priority required" },
       { status: 400 }
     );
   }
@@ -188,12 +190,39 @@ export async function PATCH(request: NextRequest) {
     updates.priority = priority;
   }
 
-  const { error } = await db.from("feedback").update(updates).eq("id", id);
+  const { error } = await db.from("feedback").update(updates).in("id", ticketIds);
 
   if (error) {
     console.error("Admin ticket update error:", error);
     return NextResponse.json({ error: "Failed to update ticket" }, { status: 500 });
   }
 
-  return NextResponse.json({ success: true });
+  return NextResponse.json({ success: true, count: ticketIds.length });
+}
+
+export async function DELETE(request: NextRequest) {
+  const isAdmin = await verifySuperAdmin();
+  if (!isAdmin) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  const body = await request.json();
+  const { ids } = body;
+
+  if (!Array.isArray(ids) || ids.length === 0) {
+    return NextResponse.json({ error: "ids array required" }, { status: 400 });
+  }
+
+  const db = createServiceClient();
+
+  // Delete notes first (cascade should handle this, but be explicit)
+  await db.from("ticket_notes").delete().in("ticket_id", ids);
+  const { error } = await db.from("feedback").delete().in("id", ids);
+
+  if (error) {
+    console.error("Admin ticket delete error:", error);
+    return NextResponse.json({ error: "Failed to delete tickets" }, { status: 500 });
+  }
+
+  return NextResponse.json({ success: true, count: ids.length });
 }

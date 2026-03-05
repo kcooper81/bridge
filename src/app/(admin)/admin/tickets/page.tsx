@@ -40,7 +40,11 @@ import {
   AlertTriangle,
   DollarSign,
   Inbox,
+  Trash2,
+  ArrowUp,
+  XCircle,
 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
@@ -114,6 +118,10 @@ export default function TicketsPage() {
   // Detail sheet
   const [selectedTicket, setSelectedTicket] = useState<TicketRow | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
+
+  // Selection
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkLoading, setBulkLoading] = useState(false);
 
   // Note form
   const [noteContent, setNoteContent] = useState("");
@@ -259,6 +267,73 @@ export default function TicketsPage() {
     setSheetOpen(true);
     setNoteContent("");
     setIsInternal(true);
+  };
+
+  // Selection helpers
+  const toggleSelect = (id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const selectAll = () => {
+    if (selected.size === filtered.length) {
+      setSelected(new Set());
+    } else {
+      setSelected(new Set(filtered.map((t) => t.id)));
+    }
+  };
+
+  const clearSelection = () => setSelected(new Set());
+
+  // Bulk actions
+  const bulkUpdate = async (updates: { status?: string; priority?: string }) => {
+    if (selected.size === 0) return;
+    setBulkLoading(true);
+    try {
+      const res = await fetch("/api/admin/tickets", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: Array.from(selected), ...updates }),
+      });
+      if (!res.ok) throw new Error("Failed");
+      const label = updates.status
+        ? `Marked ${selected.size} as ${updates.status.replace("_", " ")}`
+        : `Set ${selected.size} to ${updates.priority}`;
+      toast.success(label);
+      setTickets((prev) =>
+        prev.map((t) => (selected.has(t.id) ? { ...t, ...updates } : t))
+      );
+      clearSelection();
+    } catch {
+      toast.error("Bulk update failed");
+    } finally {
+      setBulkLoading(false);
+    }
+  };
+
+  const bulkDelete = async () => {
+    if (selected.size === 0) return;
+    if (!confirm(`Delete ${selected.size} ticket${selected.size > 1 ? "s" : ""}? This cannot be undone.`)) return;
+    setBulkLoading(true);
+    try {
+      const res = await fetch("/api/admin/tickets", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: Array.from(selected) }),
+      });
+      if (!res.ok) throw new Error("Failed");
+      toast.success(`Deleted ${selected.size} ticket${selected.size > 1 ? "s" : ""}`);
+      setTickets((prev) => prev.filter((t) => !selected.has(t.id)));
+      clearSelection();
+    } catch {
+      toast.error("Delete failed");
+    } finally {
+      setBulkLoading(false);
+    }
   };
 
   // Client-side filtering
@@ -408,10 +483,88 @@ export default function TicketsPage() {
         </div>
       </div>
 
-      {/* Result count */}
-      <p className="text-sm text-muted-foreground">
-        {filtered.length} ticket{filtered.length !== 1 ? "s" : ""} found
-      </p>
+      {/* Select all + result count + bulk actions */}
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div className="flex items-center gap-3">
+          {filtered.length > 0 && (
+            <Checkbox
+              checked={selected.size === filtered.length && filtered.length > 0}
+              onCheckedChange={selectAll}
+              aria-label="Select all"
+            />
+          )}
+          <p className="text-sm text-muted-foreground">
+            {selected.size > 0
+              ? `${selected.size} of ${filtered.length} selected`
+              : `${filtered.length} ticket${filtered.length !== 1 ? "s" : ""} found`}
+          </p>
+          {selected.size > 0 && (
+            <Button variant="ghost" size="sm" onClick={clearSelection} className="text-xs h-7 px-2">
+              Clear
+            </Button>
+          )}
+        </div>
+
+        {/* Bulk action bar */}
+        {selected.size > 0 && (
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={bulkLoading}
+              onClick={() => bulkUpdate({ status: "in_progress" })}
+            >
+              <Clock className="h-3.5 w-3.5 mr-1" />
+              Start
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={bulkLoading}
+              onClick={() => bulkUpdate({ status: "resolved" })}
+            >
+              <CheckCircle className="h-3.5 w-3.5 mr-1" />
+              Resolve
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={bulkLoading}
+              onClick={() => bulkUpdate({ status: "closed" })}
+            >
+              <XCircle className="h-3.5 w-3.5 mr-1" />
+              Close
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={bulkLoading}
+              onClick={() => bulkUpdate({ priority: "urgent" })}
+            >
+              <ArrowUp className="h-3.5 w-3.5 mr-1 text-red-500" />
+              Urgent
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={bulkLoading}
+              onClick={() => bulkUpdate({ priority: "high" })}
+            >
+              <ArrowUp className="h-3.5 w-3.5 mr-1 text-amber-500" />
+              High
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              disabled={bulkLoading}
+              onClick={bulkDelete}
+            >
+              <Trash2 className="h-3.5 w-3.5 mr-1" />
+              Delete
+            </Button>
+          </div>
+        )}
+      </div>
 
       {/* Ticket cards */}
       {filtered.length === 0 ? (
@@ -423,14 +576,25 @@ export default function TicketsPage() {
         <div className="space-y-3">
           {filtered.map((ticket) => {
             const StatusIcon = STATUS_ICONS[ticket.status] || AlertCircle;
+            const isSelected = selected.has(ticket.id);
             return (
               <Card
                 key={ticket.id}
-                className="cursor-pointer transition-colors hover:bg-muted/50"
+                className={cn(
+                  "cursor-pointer transition-colors hover:bg-muted/50",
+                  isSelected && "ring-2 ring-primary bg-primary/5"
+                )}
                 onClick={() => openTicket(ticket)}
               >
                 <CardContent className="p-4">
-                  <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start gap-3">
+                    <Checkbox
+                      checked={isSelected}
+                      onCheckedChange={() => toggleSelect(ticket.id)}
+                      onClick={(e) => e.stopPropagation()}
+                      className="mt-1"
+                      aria-label={`Select ticket ${ticket.subject || ticket.id}`}
+                    />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <span

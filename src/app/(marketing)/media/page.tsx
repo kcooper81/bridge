@@ -797,19 +797,66 @@ export default function MediaPage() {
             <h3 className="text-lg font-semibold mb-2">Chrome Web Store Screenshots</h3>
             <p className="text-xs text-zinc-400 mb-4">
               Clean, Loom-style marketing screenshots — one bold headline per slide with a large product mockup.
-              Recommended for Chrome Web Store (max 5).
+              Recommended for Chrome Web Store (max 5). Three color palettes to choose from.
             </p>
-            <div className="grid gap-4 sm:grid-cols-2 mb-10">
+
+            {/* Palette A — Ocean */}
+            <h4 className="text-sm font-medium text-zinc-300 mb-3 mt-6">Palette A — Ocean</h4>
+            <div className="grid gap-4 sm:grid-cols-2 mb-8">
               {([
-                { Component: ChromeScreenshot1, variant: "Prompt Library", name: "chrome-store-1-prompts" },
-                { Component: ChromeScreenshot2, variant: "DLP Protection", name: "chrome-store-2-dlp" },
-                { Component: ChromeScreenshot3, variant: "One-Click Insert", name: "chrome-store-3-insert" },
-                { Component: ChromeScreenshot4, variant: "Analytics", name: "chrome-store-4-analytics" },
-                { Component: ChromeScreenshot5, variant: "Multi-AI Support", name: "chrome-store-5-multi-ai" },
-              ] as const).map((b) => (
+                { Component: ChromeScreenshot1, variant: "Prompt Library", name: "chrome-a1-prompts", gradient: "blue" as const },
+                { Component: ChromeScreenshot2, variant: "Data Protection", name: "chrome-a2-dlp", gradient: "indigo" as const },
+                { Component: ChromeScreenshot3, variant: "One-Click Insert", name: "chrome-a3-insert", gradient: "emerald" as const },
+                { Component: ChromeScreenshot4, variant: "Analytics", name: "chrome-a4-analytics", gradient: "violet" as const },
+                { Component: ChromeScreenshot5, variant: "Multi-AI Support", name: "chrome-a5-multi-ai", gradient: "slate" as const },
+              ]).map((b) => (
                 <div key={b.name}>
                   <BannerDownloadWrapper filename={`teamprompt-${b.name}`} downloadWidth={1280}>
-                    <b.Component />
+                    <b.Component gradient={b.gradient} />
+                  </BannerDownloadWrapper>
+                  <div className="flex items-center justify-between mt-1.5 px-1">
+                    <p className="text-xs font-medium text-zinc-300">{b.variant}</p>
+                    <p className="text-[10px] text-zinc-500">1280 &times; 800 px</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Palette B — Sunset */}
+            <h4 className="text-sm font-medium text-zinc-300 mb-3">Palette B — Sunset</h4>
+            <div className="grid gap-4 sm:grid-cols-2 mb-8">
+              {([
+                { Component: ChromeScreenshot1, variant: "Prompt Library", name: "chrome-b1-prompts", gradient: "sky" as const },
+                { Component: ChromeScreenshot2, variant: "Data Protection", name: "chrome-b2-dlp", gradient: "rose" as const },
+                { Component: ChromeScreenshot3, variant: "One-Click Insert", name: "chrome-b3-insert", gradient: "teal" as const },
+                { Component: ChromeScreenshot4, variant: "Analytics", name: "chrome-b4-analytics", gradient: "amber" as const },
+                { Component: ChromeScreenshot5, variant: "Multi-AI Support", name: "chrome-b5-multi-ai", gradient: "violet" as const },
+              ]).map((b) => (
+                <div key={b.name}>
+                  <BannerDownloadWrapper filename={`teamprompt-${b.name}`} downloadWidth={1280}>
+                    <b.Component gradient={b.gradient} />
+                  </BannerDownloadWrapper>
+                  <div className="flex items-center justify-between mt-1.5 px-1">
+                    <p className="text-xs font-medium text-zinc-300">{b.variant}</p>
+                    <p className="text-[10px] text-zinc-500">1280 &times; 800 px</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Palette C — Midnight */}
+            <h4 className="text-sm font-medium text-zinc-300 mb-3">Palette C — Midnight</h4>
+            <div className="grid gap-4 sm:grid-cols-2 mb-10">
+              {([
+                { Component: ChromeScreenshot1, variant: "Prompt Library", name: "chrome-c1-prompts", gradient: "slate" as const },
+                { Component: ChromeScreenshot2, variant: "Data Protection", name: "chrome-c2-dlp", gradient: "blue" as const },
+                { Component: ChromeScreenshot3, variant: "One-Click Insert", name: "chrome-c3-insert", gradient: "cyan" as const },
+                { Component: ChromeScreenshot4, variant: "Analytics", name: "chrome-c4-analytics", gradient: "indigo" as const },
+                { Component: ChromeScreenshot5, variant: "Multi-AI Support", name: "chrome-c5-multi-ai", gradient: "emerald" as const },
+              ]).map((b) => (
+                <div key={b.name}>
+                  <BannerDownloadWrapper filename={`teamprompt-${b.name}`} downloadWidth={1280}>
+                    <b.Component gradient={b.gradient} />
                   </BannerDownloadWrapper>
                   <div className="flex items-center justify-between mt-1.5 px-1">
                     <p className="text-xs font-medium text-zinc-300">{b.variant}</p>

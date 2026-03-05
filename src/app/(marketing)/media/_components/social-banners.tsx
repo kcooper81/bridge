@@ -26,7 +26,7 @@ import {
  * Scene 1: Prompt Vault — matches features page VaultMockup style
  * Stats, tabs, search, table with icons (Heart, Star, Template badges)
  */
-function VaultScene({ className, compact }: { className?: string; compact?: boolean }) {
+function VaultScene({ className, compact, hideChrome }: { className?: string; compact?: boolean; hideChrome?: boolean }) {
   const prompts = [
     { title: "Customer Onboarding Email", desc: "marketing, email, outreach", uses: 142, rating: 4.8, fav: true, template: false, updated: "2d ago" },
     { title: "Code Review Feedback", desc: "Review code and provide constructive fe...", uses: 89, rating: 4.0, fav: false, template: true, updated: "5d ago" },
@@ -38,14 +38,16 @@ function VaultScene({ className, compact }: { className?: string; compact?: bool
     <div className={cn("relative", className)}>
       <div className="rounded-lg bg-white border border-zinc-200 overflow-hidden shadow-2xl">
         {/* Browser chrome */}
-        <div className="flex items-center gap-1.5 px-3 py-1.5 border-b border-zinc-100 bg-zinc-50">
-          <div className="w-1.5 h-1.5 rounded-full bg-red-400/70" />
-          <div className="w-1.5 h-1.5 rounded-full bg-yellow-400/70" />
-          <div className="w-1.5 h-1.5 rounded-full bg-green-400/70" />
-          <div className="ml-2 flex-1 h-3.5 rounded bg-zinc-100 flex items-center px-2">
-            <span className="text-[5px] text-zinc-400 font-medium">app.teamprompt.app</span>
+        {!hideChrome && (
+          <div className="flex items-center gap-1.5 px-3 py-1.5 border-b border-zinc-100 bg-zinc-50">
+            <div className="w-1.5 h-1.5 rounded-full bg-red-400/70" />
+            <div className="w-1.5 h-1.5 rounded-full bg-yellow-400/70" />
+            <div className="w-1.5 h-1.5 rounded-full bg-green-400/70" />
+            <div className="ml-2 flex-1 h-3.5 rounded bg-zinc-100 flex items-center px-2">
+              <span className="text-[5px] text-zinc-400 font-medium">app.teamprompt.app</span>
+            </div>
           </div>
-        </div>
+        )}
         <div className="flex">
           {/* Sidebar */}
           {!compact && (
@@ -200,7 +202,7 @@ function DLPBlockScene({ className, compact }: { className?: string; compact?: b
           {!compact && (
             <>
               <p className="text-[4px] font-bold uppercase text-zinc-400 tracking-wider">Recent Activity</p>
-              {["SSN detected — blocked", "API key found — blocked", "Patient name — blocked"].map((v, i) => (
+              {["Social Security number — blocked", "Credit card number — blocked", "Patient record — blocked"].map((v, i) => (
                 <div key={i} className="flex items-center justify-between py-0.5 border-b border-zinc-100 last:border-0">
                   <span className="text-[4px] text-zinc-600 truncate">{v}</span>
                   <span className="text-[4px] text-red-600 font-bold shrink-0">Blocked</span>
@@ -321,20 +323,22 @@ function InsertScene({ className }: { className?: string }) {
  * Scene 4: Analytics dashboard — matches features page AnalyticsMockup style
  * Icon stat cards, secondary stats, chart with date labels, dual panels
  */
-function AnalyticsScene({ className, compact }: { className?: string; compact?: boolean }) {
+function AnalyticsScene({ className, compact, hideChrome }: { className?: string; compact?: boolean; hideChrome?: boolean }) {
   const bars = [20, 35, 25, 40, 55, 30, 45, 60, 40, 50, 35, 65, 45, 55, 70, 50, 60, 75, 55, 65, 45, 70, 80, 60, 70, 50, 75, 85, 65, 80];
   return (
     <div className={cn("relative", className)}>
       <div className="rounded-lg bg-white border border-zinc-200 overflow-hidden shadow-2xl">
         {/* Browser chrome */}
-        <div className="flex items-center gap-1.5 px-3 py-1.5 border-b border-zinc-100 bg-zinc-50">
-          <div className="w-1.5 h-1.5 rounded-full bg-red-400/70" />
-          <div className="w-1.5 h-1.5 rounded-full bg-yellow-400/70" />
-          <div className="w-1.5 h-1.5 rounded-full bg-green-400/70" />
-          <div className="ml-2 flex-1 h-3.5 rounded bg-zinc-100 flex items-center px-2">
-            <span className="text-[5px] text-zinc-400 font-medium">app.teamprompt.app/analytics</span>
+        {!hideChrome && (
+          <div className="flex items-center gap-1.5 px-3 py-1.5 border-b border-zinc-100 bg-zinc-50">
+            <div className="w-1.5 h-1.5 rounded-full bg-red-400/70" />
+            <div className="w-1.5 h-1.5 rounded-full bg-yellow-400/70" />
+            <div className="w-1.5 h-1.5 rounded-full bg-green-400/70" />
+            <div className="ml-2 flex-1 h-3.5 rounded bg-zinc-100 flex items-center px-2">
+              <span className="text-[5px] text-zinc-400 font-medium">app.teamprompt.app/analytics</span>
+            </div>
           </div>
-        </div>
+        )}
         <div className="flex">
           {/* Sidebar */}
           {!compact && (
@@ -1765,6 +1769,8 @@ export function ExtensionSmallPromoLifestyle() {
    Clean gradient BG + bold headline + large product mockup
    ══════════════════════════════════════════════════ */
 
+type LoomGradient = "blue" | "indigo" | "emerald" | "violet" | "slate" | "rose" | "teal" | "amber" | "sky" | "cyan";
+
 /** Loom-style shell — gradient background, centered content */
 function LoomStyleShell({
   aspectRatio,
@@ -1773,14 +1779,19 @@ function LoomStyleShell({
 }: {
   aspectRatio: string;
   children: React.ReactNode;
-  gradient?: "blue" | "indigo" | "emerald" | "violet" | "slate";
+  gradient?: LoomGradient;
 }) {
-  const gradientMap = {
+  const gradientMap: Record<LoomGradient, string> = {
     blue: "radial-gradient(ellipse 120% 80% at 50% 40%, #1e40af 0%, #0f172a 80%)",
     indigo: "radial-gradient(ellipse 120% 80% at 50% 40%, #312e81 0%, #0f172a 80%)",
     emerald: "radial-gradient(ellipse 120% 80% at 50% 40%, #065f46 0%, #0f172a 80%)",
     violet: "radial-gradient(ellipse 120% 80% at 50% 40%, #4c1d95 0%, #0f172a 80%)",
     slate: "radial-gradient(ellipse 120% 80% at 50% 40%, #1e293b 0%, #0f172a 80%)",
+    rose: "radial-gradient(ellipse 120% 80% at 50% 40%, #9f1239 0%, #0f172a 80%)",
+    teal: "radial-gradient(ellipse 120% 80% at 50% 40%, #115e59 0%, #0f172a 80%)",
+    amber: "radial-gradient(ellipse 120% 80% at 50% 40%, #92400e 0%, #0f172a 80%)",
+    sky: "radial-gradient(ellipse 120% 80% at 50% 40%, #0369a1 0%, #0f172a 80%)",
+    cyan: "radial-gradient(ellipse 120% 80% at 50% 40%, #155e75 0%, #0f172a 80%)",
   };
 
   return (
@@ -1822,9 +1833,9 @@ function LoomMockupFrame({ children, className }: { children: React.ReactNode; c
 }
 
 /** Loom-style screenshot 1 — Prompt Library */
-export function ChromeScreenshot1() {
+export function ChromeScreenshot1({ gradient = "blue" }: { gradient?: LoomGradient }) {
   return (
-    <LoomStyleShell aspectRatio="1280/800" gradient="blue">
+    <LoomStyleShell aspectRatio="1280/800" gradient={gradient}>
       <BannerWordmark size="sm" />
       <h2 className="text-white text-sm sm:text-2xl font-bold text-center mt-2 sm:mt-4 leading-tight tracking-tight">
         Your team&apos;s AI prompt library
@@ -1834,7 +1845,7 @@ export function ChromeScreenshot1() {
       </p>
       <div className="flex-1 flex items-end justify-center mt-3 sm:mt-5 w-full relative">
         <LoomMockupFrame>
-          <VaultScene />
+          <VaultScene hideChrome />
         </LoomMockupFrame>
         <FrostedBadge icon={Users} headline="Shared with 8 teams" subtitle="Organization-wide" color="blue" className="top-0 sm:top-2 -left-1 sm:left-[2%]" />
         <FrostedBadge icon={BarChart3} headline="142 prompts" subtitle="Used this month" color="emerald" className="top-8 sm:top-14 -right-1 sm:right-[2%]" />
@@ -1844,31 +1855,32 @@ export function ChromeScreenshot1() {
 }
 
 /** Loom-style screenshot 2 — DLP Protection */
-export function ChromeScreenshot2() {
+export function ChromeScreenshot2({ gradient = "indigo" }: { gradient?: LoomGradient }) {
   return (
-    <LoomStyleShell aspectRatio="1280/800" gradient="indigo">
+    <LoomStyleShell aspectRatio="1280/800" gradient={gradient}>
       <BannerWordmark size="sm" />
       <h2 className="text-white text-sm sm:text-2xl font-bold text-center mt-2 sm:mt-4 leading-tight tracking-tight">
-        Stop sensitive data from reaching AI
+        Protect sensitive information in AI chats
       </h2>
       <p className="text-white/50 text-[8px] sm:text-xs text-center mt-1 sm:mt-2 max-w-[70%] leading-relaxed">
-        Automatically scan and block PII, API keys, and confidential data before it&apos;s sent
+        Automatically catch Social Security numbers, financial data, patient records,
+        and more before they reach AI tools
       </p>
       <div className="flex-1 flex items-end justify-center mt-3 sm:mt-5 w-full relative">
         <LoomMockupFrame>
           <DLPBlockScene />
         </LoomMockupFrame>
-        <FrostedBadge icon={Shield} headline="DLP Active" subtitle="Real-time scanning" color="red" className="top-0 sm:top-2 -left-1 sm:left-[2%]" />
-        <FrostedBadge icon={AlertTriangle} headline="15 blocked" subtitle="This week" color="amber" className="top-8 sm:top-14 -right-1 sm:right-[2%]" />
+        <FrostedBadge icon={Shield} headline="Always-on protection" subtitle="Real-time scanning" color="red" className="top-0 sm:top-2 -left-1 sm:left-[2%]" />
+        <FrostedBadge icon={AlertTriangle} headline="15 risks caught" subtitle="This week" color="amber" className="top-8 sm:top-14 -right-1 sm:right-[2%]" />
       </div>
     </LoomStyleShell>
   );
 }
 
 /** Loom-style screenshot 3 — One-Click Insert */
-export function ChromeScreenshot3() {
+export function ChromeScreenshot3({ gradient = "emerald" }: { gradient?: LoomGradient }) {
   return (
-    <LoomStyleShell aspectRatio="1280/800" gradient="emerald">
+    <LoomStyleShell aspectRatio="1280/800" gradient={gradient}>
       <BannerWordmark size="sm" />
       <h2 className="text-white text-sm sm:text-2xl font-bold text-center mt-2 sm:mt-4 leading-tight tracking-tight">
         Insert prompts in one click
@@ -1888,9 +1900,9 @@ export function ChromeScreenshot3() {
 }
 
 /** Loom-style screenshot 4 — Analytics */
-export function ChromeScreenshot4() {
+export function ChromeScreenshot4({ gradient = "violet" }: { gradient?: LoomGradient }) {
   return (
-    <LoomStyleShell aspectRatio="1280/800" gradient="violet">
+    <LoomStyleShell aspectRatio="1280/800" gradient={gradient}>
       <BannerWordmark size="sm" />
       <h2 className="text-white text-sm sm:text-2xl font-bold text-center mt-2 sm:mt-4 leading-tight tracking-tight">
         Track how your team uses AI
@@ -1900,7 +1912,7 @@ export function ChromeScreenshot4() {
       </p>
       <div className="flex-1 flex items-end justify-center mt-3 sm:mt-5 w-full relative">
         <LoomMockupFrame>
-          <AnalyticsScene />
+          <AnalyticsScene hideChrome />
         </LoomMockupFrame>
         <FrostedBadge icon={BarChart3} headline="+23% adoption" subtitle="Team-wide" color="emerald" className="top-0 sm:top-2 -left-1 sm:left-[2%]" />
         <FrostedBadge icon={Activity} headline="89 uses" subtitle="This month" color="blue" className="top-8 sm:top-14 -right-1 sm:right-[2%]" />
@@ -1910,7 +1922,7 @@ export function ChromeScreenshot4() {
 }
 
 /** Loom-style screenshot 5 — Multi-AI Support */
-export function ChromeScreenshot5() {
+export function ChromeScreenshot5({ gradient = "slate" }: { gradient?: LoomGradient }) {
   const aiTools = [
     { name: "ChatGPT", color: "#10A37F", letter: "G" },
     { name: "Claude", color: "#D97757", letter: "C" },
@@ -1920,7 +1932,7 @@ export function ChromeScreenshot5() {
   ];
 
   return (
-    <LoomStyleShell aspectRatio="1280/800" gradient="slate">
+    <LoomStyleShell aspectRatio="1280/800" gradient={gradient}>
       <BannerWordmark size="sm" />
       <h2 className="text-white text-sm sm:text-2xl font-bold text-center mt-2 sm:mt-4 leading-tight tracking-tight">
         Works with every AI tool

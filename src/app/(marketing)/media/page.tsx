@@ -50,6 +50,10 @@ import {
   ProScreenshot3,
   ProScreenshot4,
   ProScreenshot5,
+  ProMarquee1,
+  ProMarquee2,
+  ProMarquee3,
+  ProSmallPromo,
 } from "./_components/social-banners";
 
 export const metadata: Metadata = generatePageMetadata({
@@ -951,7 +955,8 @@ export default function MediaPage() {
             </div>
 
             <h4 className="text-sm font-medium text-zinc-300 mb-4">Marquee Promo — 1400 &times; 560 px</h4>
-            <div className="grid gap-4 sm:grid-cols-2 mb-10">
+            <p className="text-[10px] text-zinc-500 -mt-3 mb-4">Lifestyle (dark)</p>
+            <div className="grid gap-4 sm:grid-cols-2 mb-6">
               {([
                 { Component: ExtensionMarqueeLifestyle1, variant: "Team + Vault", name: "ext-marquee-lifestyle-1" },
                 { Component: ExtensionMarqueeLifestyle2, variant: "DLP Shield", name: "ext-marquee-lifestyle-2" },
@@ -969,14 +974,46 @@ export default function MediaPage() {
               ))}
             </div>
 
+            <p className="text-[10px] text-zinc-500 mb-4">Professional (light)</p>
+            <div className="grid gap-4 sm:grid-cols-2 mb-10">
+              {([
+                { Component: ProMarquee1, variant: "Prompt Library", name: "pro-marquee-1-prompts", accent: "blue" as const },
+                { Component: ProMarquee2, variant: "Data Protection", name: "pro-marquee-2-dlp", accent: "rose" as const },
+                { Component: ProMarquee3, variant: "Insert Flow", name: "pro-marquee-3-insert", accent: "emerald" as const },
+              ]).map((b) => (
+                <div key={b.name}>
+                  <BannerDownloadWrapper filename={`teamprompt-${b.name}`} downloadWidth={1400}>
+                    <b.Component accent={b.accent} />
+                  </BannerDownloadWrapper>
+                  <div className="flex items-center justify-between mt-1.5 px-1">
+                    <p className="text-xs font-medium text-zinc-300">{b.variant}</p>
+                    <p className="text-[10px] text-zinc-500">1400 &times; 560 px</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
             <h4 className="text-sm font-medium text-zinc-300 mb-4">Small Promo Tile — 440 &times; 280 px</h4>
-            <div className="max-w-sm">
-              <BannerDownloadWrapper filename="teamprompt-ext-small-promo-lifestyle" downloadWidth={440}>
-                <ExtensionSmallPromoLifestyle />
-              </BannerDownloadWrapper>
-              <div className="flex items-center justify-between mt-1.5 px-1">
-                <p className="text-xs font-medium text-zinc-300">Lifestyle</p>
-                <p className="text-[10px] text-zinc-500">440 &times; 280 px</p>
+            <div className="flex gap-6 flex-wrap">
+              <div className="max-w-sm">
+                <p className="text-[10px] text-zinc-500 mb-2">Lifestyle (dark)</p>
+                <BannerDownloadWrapper filename="teamprompt-ext-small-promo-lifestyle" downloadWidth={440}>
+                  <ExtensionSmallPromoLifestyle />
+                </BannerDownloadWrapper>
+                <div className="flex items-center justify-between mt-1.5 px-1">
+                  <p className="text-xs font-medium text-zinc-300">Lifestyle</p>
+                  <p className="text-[10px] text-zinc-500">440 &times; 280 px</p>
+                </div>
+              </div>
+              <div className="max-w-sm">
+                <p className="text-[10px] text-zinc-500 mb-2">Professional (light)</p>
+                <BannerDownloadWrapper filename="teamprompt-pro-small-promo" downloadWidth={440}>
+                  <ProSmallPromo />
+                </BannerDownloadWrapper>
+                <div className="flex items-center justify-between mt-1.5 px-1">
+                  <p className="text-xs font-medium text-zinc-300">Professional</p>
+                  <p className="text-[10px] text-zinc-500">440 &times; 280 px</p>
+                </div>
               </div>
             </div>
           </div>

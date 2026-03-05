@@ -2162,6 +2162,117 @@ export function ProScreenshot5({ accent = "teal" }: { accent?: ProAccent }) {
   );
 }
 
+/* ── Professional Marquee Promos (1400 x 560) ──── */
+
+/** Pro marquee 1 — Prompt Library hero */
+export function ProMarquee1({ accent = "blue" }: { accent?: ProAccent }) {
+  return (
+    <ProShell aspectRatio="1400/560" accent={accent}>
+      <div className="flex items-center h-full w-full gap-4 sm:gap-10">
+        <div className="flex-1 space-y-2 sm:space-y-3 max-w-[40%]">
+          <BannerWordmark size="md" dark />
+          <h2 className="text-zinc-900 text-xs sm:text-xl font-bold leading-snug">
+            Your team&apos;s AI prompt library — with built-in data protection
+          </h2>
+          <div className="flex flex-wrap gap-1">
+            <FeaturePill label="Shared Prompt Library" dark />
+            <FeaturePill label="Data Protection" dark />
+            <FeaturePill label="Usage Analytics" dark />
+          </div>
+          <CompatibilityLine dark />
+        </div>
+        <div className="hidden sm:flex flex-1 items-center justify-center">
+          <div className="w-[90%]">
+            <div className="rounded-xl overflow-hidden shadow-lg shadow-black/[0.06] border border-zinc-200">
+              <VaultScene compact hideChrome />
+            </div>
+          </div>
+        </div>
+      </div>
+    </ProShell>
+  );
+}
+
+/** Pro marquee 2 — DLP Protection hero */
+export function ProMarquee2({ accent = "rose" }: { accent?: ProAccent }) {
+  return (
+    <ProShell aspectRatio="1400/560" accent={accent}>
+      <div className="flex items-center h-full w-full gap-4 sm:gap-10">
+        <div className="flex-1 space-y-2 sm:space-y-3 max-w-[40%]">
+          <BannerWordmark size="md" dark />
+          <h2 className="text-zinc-900 text-xs sm:text-xl font-bold leading-snug">
+            Protect sensitive information before it reaches AI tools
+          </h2>
+          <div className="flex flex-wrap gap-1">
+            <FeaturePill label="Social Security Numbers" dark />
+            <FeaturePill label="Financial Data" dark />
+            <FeaturePill label="Patient Records" dark />
+          </div>
+          <CompatibilityLine dark />
+        </div>
+        <div className="hidden sm:flex flex-1 items-center justify-center">
+          <div className="w-[75%]">
+            <div className="rounded-xl overflow-hidden shadow-lg shadow-black/[0.06] border border-zinc-200">
+              <DLPBlockScene />
+            </div>
+          </div>
+        </div>
+      </div>
+    </ProShell>
+  );
+}
+
+/** Pro marquee 3 — One-Click Insert hero */
+export function ProMarquee3({ accent = "emerald" }: { accent?: ProAccent }) {
+  return (
+    <ProShell aspectRatio="1400/560" accent={accent}>
+      <div className="flex items-center h-full w-full gap-4 sm:gap-10">
+        <div className="flex-1 space-y-2 sm:space-y-3 max-w-[40%]">
+          <BannerWordmark size="md" dark />
+          <h2 className="text-zinc-900 text-xs sm:text-xl font-bold leading-snug">
+            One click to insert team prompts into any AI tool
+          </h2>
+          <div className="flex flex-wrap gap-1">
+            <FeaturePill label="One-Click Insert" dark />
+            <FeaturePill label="Template Variables" dark />
+            <FeaturePill label="5 AI Tools" dark />
+          </div>
+          <CompatibilityLine dark />
+        </div>
+        <div className="hidden sm:flex flex-1 items-center justify-center">
+          <div className="w-[65%]">
+            <div className="rounded-xl overflow-hidden shadow-lg shadow-black/[0.06] border border-zinc-200">
+              <InsertScene />
+            </div>
+          </div>
+        </div>
+      </div>
+    </ProShell>
+  );
+}
+
+/* ── Professional Small Promo Tile (440 x 280) ── */
+
+/** Pro small promo — compact overview */
+export function ProSmallPromo({ accent = "blue" }: { accent?: ProAccent }) {
+  return (
+    <ProShell aspectRatio="440/280" accent={accent}>
+      <div className="flex flex-col justify-center items-center h-full gap-1.5 sm:gap-2 text-center">
+        <BannerWordmark size="sm" dark />
+        <p className="text-zinc-900 text-[8px] sm:text-xs font-bold leading-snug max-w-[80%]">
+          AI prompt management &amp; data protection for teams
+        </p>
+        <div className="flex flex-wrap justify-center gap-1">
+          <FeaturePill label="Shared Prompts" dark />
+          <FeaturePill label="DLP Shield" dark />
+          <FeaturePill label="Analytics" dark />
+        </div>
+        <CompatibilityLine dark className="mt-0.5" />
+      </div>
+    </ProShell>
+  );
+}
+
 /* ── Export map ──────────────────────────────────── */
 
 export const socialBannerComponents = {
@@ -2206,4 +2317,8 @@ export const socialBannerComponents = {
   proScreenshot3: { Component: ProScreenshot3, label: "Chrome Store Pro — One-Click Insert", dims: "1280 x 800" },
   proScreenshot4: { Component: ProScreenshot4, label: "Chrome Store Pro — Analytics", dims: "1280 x 800" },
   proScreenshot5: { Component: ProScreenshot5, label: "Chrome Store Pro — Multi-AI Support", dims: "1280 x 800" },
+  proMarquee1: { Component: ProMarquee1, label: "Pro Marquee — Prompt Library", dims: "1400 x 560" },
+  proMarquee2: { Component: ProMarquee2, label: "Pro Marquee — Data Protection", dims: "1400 x 560" },
+  proMarquee3: { Component: ProMarquee3, label: "Pro Marquee — Insert Flow", dims: "1400 x 560" },
+  proSmallPromo: { Component: ProSmallPromo, label: "Pro Small Promo Tile", dims: "440 x 280" },
 } as const;

@@ -1803,18 +1803,20 @@ function LoomStyleShell({
 /** Large mockup wrapper — browser-like chrome with shadow, displayed large at bottom */
 function LoomMockupFrame({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={cn("w-full max-w-[85%] rounded-t-xl overflow-hidden shadow-2xl shadow-black/40 border border-white/[0.08] border-b-0", className)}>
-      {/* Browser chrome */}
-      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#1e1e2e] border-b border-white/[0.06]">
-        <div className="w-2 h-2 rounded-full bg-[#ff5f56]" />
-        <div className="w-2 h-2 rounded-full bg-[#ffbd2e]" />
-        <div className="w-2 h-2 rounded-full bg-[#27c93f]" />
-        <div className="ml-3 flex-1 h-4 rounded-md bg-white/[0.06] flex items-center px-2">
-          <span className="text-[6px] text-white/40 font-medium">app.teamprompt.app</span>
+    <div className={cn("w-full max-w-[85%]", className)}>
+      {/* Browser chrome — rounded top with clipping */}
+      <div className="rounded-t-xl overflow-hidden shadow-2xl shadow-black/40 border border-white/[0.08] border-b-0">
+        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#1e1e2e] border-b border-white/[0.06]">
+          <div className="w-2 h-2 rounded-full bg-[#ff5f56]" />
+          <div className="w-2 h-2 rounded-full bg-[#ffbd2e]" />
+          <div className="w-2 h-2 rounded-full bg-[#27c93f]" />
+          <div className="ml-3 flex-1 h-4 rounded-md bg-white/[0.06] flex items-center px-2">
+            <span className="text-[6px] text-white/40 font-medium">app.teamprompt.app</span>
+          </div>
         </div>
       </div>
-      {/* Content */}
-      <div className="bg-white">{children}</div>
+      {/* Content — no overflow-hidden so scene badges can float */}
+      <div className="bg-white border-x border-white/[0.08] shadow-2xl shadow-black/40">{children}</div>
     </div>
   );
 }
@@ -1830,10 +1832,12 @@ export function ChromeScreenshot1() {
       <p className="text-white/50 text-[8px] sm:text-xs text-center mt-1 sm:mt-2 max-w-[70%] leading-relaxed">
         Browse, search, and share approved prompts across your entire organization
       </p>
-      <div className="flex-1 flex items-end justify-center mt-3 sm:mt-5 w-full">
+      <div className="flex-1 flex items-end justify-center mt-3 sm:mt-5 w-full relative">
         <LoomMockupFrame>
           <VaultScene />
         </LoomMockupFrame>
+        <FrostedBadge icon={Users} headline="Shared with 8 teams" subtitle="Organization-wide" color="blue" className="top-0 sm:top-2 -left-1 sm:left-[2%]" />
+        <FrostedBadge icon={BarChart3} headline="142 prompts" subtitle="Used this month" color="emerald" className="top-8 sm:top-14 -right-1 sm:right-[2%]" />
       </div>
     </LoomStyleShell>
   );
@@ -1850,10 +1854,12 @@ export function ChromeScreenshot2() {
       <p className="text-white/50 text-[8px] sm:text-xs text-center mt-1 sm:mt-2 max-w-[70%] leading-relaxed">
         Automatically scan and block PII, API keys, and confidential data before it&apos;s sent
       </p>
-      <div className="flex-1 flex items-end justify-center mt-3 sm:mt-5 w-full">
+      <div className="flex-1 flex items-end justify-center mt-3 sm:mt-5 w-full relative">
         <LoomMockupFrame>
           <DLPBlockScene />
         </LoomMockupFrame>
+        <FrostedBadge icon={Shield} headline="DLP Active" subtitle="Real-time scanning" color="red" className="top-0 sm:top-2 -left-1 sm:left-[2%]" />
+        <FrostedBadge icon={AlertTriangle} headline="15 blocked" subtitle="This week" color="amber" className="top-8 sm:top-14 -right-1 sm:right-[2%]" />
       </div>
     </LoomStyleShell>
   );
@@ -1870,10 +1876,12 @@ export function ChromeScreenshot3() {
       <p className="text-white/50 text-[8px] sm:text-xs text-center mt-1 sm:mt-2 max-w-[70%] leading-relaxed">
         Works right inside ChatGPT, Claude, Gemini, Copilot, and Perplexity
       </p>
-      <div className="flex-1 flex items-end justify-center mt-3 sm:mt-5 w-full">
+      <div className="flex-1 flex items-end justify-center mt-3 sm:mt-5 w-full relative">
         <LoomMockupFrame>
           <InsertScene />
         </LoomMockupFrame>
+        <FrostedBadge icon={Zap} headline="One-click insert" subtitle="Into any AI tool" color="emerald" className="top-0 sm:top-2 -left-1 sm:left-[2%]" />
+        <FrostedBadge icon={Users} headline="5 AI tools" subtitle="Connected" color="blue" className="top-8 sm:top-14 -right-1 sm:right-[2%]" />
       </div>
     </LoomStyleShell>
   );
@@ -1890,10 +1898,12 @@ export function ChromeScreenshot4() {
       <p className="text-white/50 text-[8px] sm:text-xs text-center mt-1 sm:mt-2 max-w-[70%] leading-relaxed">
         Usage analytics, prompt adoption, and team insights — all in one dashboard
       </p>
-      <div className="flex-1 flex items-end justify-center mt-3 sm:mt-5 w-full">
+      <div className="flex-1 flex items-end justify-center mt-3 sm:mt-5 w-full relative">
         <LoomMockupFrame>
           <AnalyticsScene />
         </LoomMockupFrame>
+        <FrostedBadge icon={BarChart3} headline="+23% adoption" subtitle="Team-wide" color="emerald" className="top-0 sm:top-2 -left-1 sm:left-[2%]" />
+        <FrostedBadge icon={Activity} headline="89 uses" subtitle="This month" color="blue" className="top-8 sm:top-14 -right-1 sm:right-[2%]" />
       </div>
     </LoomStyleShell>
   );
@@ -1933,10 +1943,12 @@ export function ChromeScreenshot5() {
         ))}
       </div>
       {/* Bottom mockup — smaller, showing the extension popup */}
-      <div className="flex-1 flex items-end justify-center mt-3 sm:mt-5 w-full">
+      <div className="flex-1 flex items-end justify-center mt-3 sm:mt-5 w-full relative">
         <LoomMockupFrame className="max-w-[70%]">
           <InsertScene />
         </LoomMockupFrame>
+        <FrostedBadge icon={Shield} headline="DLP active" subtitle="On every tool" color="red" className="top-0 sm:top-2 left-0 sm:left-[5%]" />
+        <FrostedBadge icon={Users} headline="5 AI tools" subtitle="One extension" color="blue" className="top-8 sm:top-14 right-0 sm:right-[5%]" />
       </div>
     </LoomStyleShell>
   );

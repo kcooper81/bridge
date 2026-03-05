@@ -45,6 +45,11 @@ import {
   ChromeScreenshot3,
   ChromeScreenshot4,
   ChromeScreenshot5,
+  ProScreenshot1,
+  ProScreenshot2,
+  ProScreenshot3,
+  ProScreenshot4,
+  ProScreenshot5,
 } from "./_components/social-banners";
 
 export const metadata: Metadata = generatePageMetadata({
@@ -857,6 +862,53 @@ export default function MediaPage() {
                 <div key={b.name}>
                   <BannerDownloadWrapper filename={`teamprompt-${b.name}`} downloadWidth={1280}>
                     <b.Component gradient={b.gradient} />
+                  </BannerDownloadWrapper>
+                  <div className="flex items-center justify-between mt-1.5 px-1">
+                    <p className="text-xs font-medium text-zinc-300">{b.variant}</p>
+                    <p className="text-[10px] text-zinc-500">1280 &times; 800 px</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Palette D — Professional (Light) */}
+            <h4 className="text-sm font-medium text-zinc-300 mb-3">Palette D — Professional (Light)</h4>
+            <p className="text-[10px] text-zinc-500 mb-4">
+              White background with subtle accent glow and dot pattern. Inspired by Loom &amp; Viitor Translate.
+            </p>
+            <div className="grid gap-4 sm:grid-cols-2 mb-8">
+              {([
+                { Component: ProScreenshot1, variant: "Prompt Library", name: "chrome-d1-prompts", accent: "blue" as const },
+                { Component: ProScreenshot2, variant: "Data Protection", name: "chrome-d2-dlp", accent: "rose" as const },
+                { Component: ProScreenshot3, variant: "One-Click Insert", name: "chrome-d3-insert", accent: "emerald" as const },
+                { Component: ProScreenshot4, variant: "Analytics", name: "chrome-d4-analytics", accent: "violet" as const },
+                { Component: ProScreenshot5, variant: "Multi-AI Support", name: "chrome-d5-multi-ai", accent: "teal" as const },
+              ]).map((b) => (
+                <div key={b.name}>
+                  <BannerDownloadWrapper filename={`teamprompt-${b.name}`} downloadWidth={1280}>
+                    <b.Component accent={b.accent} />
+                  </BannerDownloadWrapper>
+                  <div className="flex items-center justify-between mt-1.5 px-1">
+                    <p className="text-xs font-medium text-zinc-300">{b.variant}</p>
+                    <p className="text-[10px] text-zinc-500">1280 &times; 800 px</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Palette E — Professional (Blue accent) */}
+            <h4 className="text-sm font-medium text-zinc-300 mb-3">Palette E — Professional (All Blue)</h4>
+            <div className="grid gap-4 sm:grid-cols-2 mb-10">
+              {([
+                { Component: ProScreenshot1, variant: "Prompt Library", name: "chrome-e1-prompts", accent: "blue" as const },
+                { Component: ProScreenshot2, variant: "Data Protection", name: "chrome-e2-dlp", accent: "blue" as const },
+                { Component: ProScreenshot3, variant: "One-Click Insert", name: "chrome-e3-insert", accent: "blue" as const },
+                { Component: ProScreenshot4, variant: "Analytics", name: "chrome-e4-analytics", accent: "blue" as const },
+                { Component: ProScreenshot5, variant: "Multi-AI Support", name: "chrome-e5-multi-ai", accent: "blue" as const },
+              ]).map((b) => (
+                <div key={b.name}>
+                  <BannerDownloadWrapper filename={`teamprompt-${b.name}`} downloadWidth={1280}>
+                    <b.Component accent={b.accent} />
                   </BannerDownloadWrapper>
                   <div className="flex items-center justify-between mt-1.5 px-1">
                     <p className="text-xs font-medium text-zinc-300">{b.variant}</p>

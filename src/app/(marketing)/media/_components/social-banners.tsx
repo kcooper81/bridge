@@ -1966,6 +1966,202 @@ export function ChromeScreenshot5({ gradient = "slate" }: { gradient?: LoomGradi
   );
 }
 
+/* ══════════════════════════════════════════════════
+   PROFESSIONAL / LIGHT-THEME CHROME WEB STORE SCREENSHOTS
+   Clean white BG + subtle accent glow + dark text + floating mockup
+   Inspired by Loom & Viitor Translate store listings
+   ══════════════════════════════════════════════════ */
+
+type ProAccent = "blue" | "violet" | "emerald" | "rose" | "teal";
+
+/** Professional light-themed shell — white/light gray bg with subtle colored glow */
+function ProShell({
+  aspectRatio,
+  children,
+  accent = "blue",
+}: {
+  aspectRatio: string;
+  children: React.ReactNode;
+  accent?: ProAccent;
+}) {
+  const accents: Record<ProAccent, { bar: string; glow: string }> = {
+    blue: { bar: "linear-gradient(90deg, #2563EB, #60A5FA, #2563EB)", glow: "rgba(37,99,235,0.07)" },
+    violet: { bar: "linear-gradient(90deg, #7C3AED, #A78BFA, #7C3AED)", glow: "rgba(124,58,237,0.07)" },
+    emerald: { bar: "linear-gradient(90deg, #059669, #34D399, #059669)", glow: "rgba(5,150,105,0.07)" },
+    rose: { bar: "linear-gradient(90deg, #E11D48, #FB7185, #E11D48)", glow: "rgba(225,29,72,0.06)" },
+    teal: { bar: "linear-gradient(90deg, #0D9488, #5EEAD4, #0D9488)", glow: "rgba(13,148,136,0.07)" },
+  };
+  const a = accents[accent];
+
+  return (
+    <div
+      className="w-full rounded-xl overflow-hidden relative bg-[#FAFBFC]"
+      style={{ aspectRatio }}
+    >
+      {/* Top accent gradient bar */}
+      <div className="absolute top-0 left-0 right-0 h-1 z-20" style={{ background: a.bar }} />
+      {/* Subtle dot pattern */}
+      <div
+        className="absolute inset-0 opacity-[0.4]"
+        style={{
+          backgroundImage: "radial-gradient(circle, #e4e4e7 0.5px, transparent 0.5px)",
+          backgroundSize: "12px 12px",
+        }}
+      />
+      {/* Ambient glow behind mockup area */}
+      <div
+        className="absolute bottom-[-5%] left-1/2 -translate-x-1/2 w-[70%] h-[55%] rounded-full"
+        style={{ background: a.glow, filter: "blur(50px)" }}
+      />
+      {/* Content */}
+      <div className="absolute inset-0 flex flex-col items-center z-10 px-6 sm:px-10 pt-5 sm:pt-9 pb-0">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+/** Light-theme mockup frame — lighter chrome, strong shadow for contrast on white */
+function ProMockupFrame({ children, className }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div className={cn("w-full max-w-[85%]", className)}>
+      <div className="rounded-t-xl overflow-hidden shadow-xl shadow-black/[0.08] border border-zinc-200 border-b-0">
+        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-100 border-b border-zinc-200">
+          <div className="w-2 h-2 rounded-full bg-zinc-300" />
+          <div className="w-2 h-2 rounded-full bg-zinc-300" />
+          <div className="w-2 h-2 rounded-full bg-zinc-300" />
+          <div className="ml-3 flex-1 h-4 rounded-md bg-white border border-zinc-200 flex items-center px-2">
+            <span className="text-[6px] text-zinc-400 font-medium">app.teamprompt.app</span>
+          </div>
+        </div>
+      </div>
+      <div className="bg-white border-x border-zinc-200 shadow-xl shadow-black/[0.08]">{children}</div>
+    </div>
+  );
+}
+
+/** Pro screenshot 1 — Prompt Library */
+export function ProScreenshot1({ accent = "blue" }: { accent?: ProAccent }) {
+  return (
+    <ProShell aspectRatio="1280/800" accent={accent}>
+      <BannerWordmark size="sm" dark />
+      <h2 className="text-zinc-900 text-sm sm:text-2xl font-bold text-center mt-2 sm:mt-4 leading-tight tracking-tight">
+        Your team&apos;s AI prompt library
+      </h2>
+      <p className="text-zinc-400 text-[8px] sm:text-xs text-center mt-1 sm:mt-2 max-w-[70%] leading-relaxed">
+        Browse, search, and share approved prompts across your entire organization
+      </p>
+      <div className="flex-1 flex items-end justify-center mt-3 sm:mt-5 w-full">
+        <ProMockupFrame>
+          <VaultScene hideChrome />
+        </ProMockupFrame>
+      </div>
+    </ProShell>
+  );
+}
+
+/** Pro screenshot 2 — DLP Protection */
+export function ProScreenshot2({ accent = "rose" }: { accent?: ProAccent }) {
+  return (
+    <ProShell aspectRatio="1280/800" accent={accent}>
+      <BannerWordmark size="sm" dark />
+      <h2 className="text-zinc-900 text-sm sm:text-2xl font-bold text-center mt-2 sm:mt-4 leading-tight tracking-tight">
+        Protect sensitive information in AI chats
+      </h2>
+      <p className="text-zinc-400 text-[8px] sm:text-xs text-center mt-1 sm:mt-2 max-w-[70%] leading-relaxed">
+        Automatically catch Social Security numbers, financial data, patient records,
+        and more before they reach AI tools
+      </p>
+      <div className="flex-1 flex items-end justify-center mt-3 sm:mt-5 w-full">
+        <ProMockupFrame>
+          <DLPBlockScene />
+        </ProMockupFrame>
+      </div>
+    </ProShell>
+  );
+}
+
+/** Pro screenshot 3 — One-Click Insert */
+export function ProScreenshot3({ accent = "emerald" }: { accent?: ProAccent }) {
+  return (
+    <ProShell aspectRatio="1280/800" accent={accent}>
+      <BannerWordmark size="sm" dark />
+      <h2 className="text-zinc-900 text-sm sm:text-2xl font-bold text-center mt-2 sm:mt-4 leading-tight tracking-tight">
+        Insert prompts in one click
+      </h2>
+      <p className="text-zinc-400 text-[8px] sm:text-xs text-center mt-1 sm:mt-2 max-w-[70%] leading-relaxed">
+        Works right inside ChatGPT, Claude, Gemini, Copilot, and Perplexity
+      </p>
+      <div className="flex-1 flex items-end justify-center mt-3 sm:mt-5 w-full">
+        <ProMockupFrame>
+          <InsertScene />
+        </ProMockupFrame>
+      </div>
+    </ProShell>
+  );
+}
+
+/** Pro screenshot 4 — Analytics */
+export function ProScreenshot4({ accent = "violet" }: { accent?: ProAccent }) {
+  return (
+    <ProShell aspectRatio="1280/800" accent={accent}>
+      <BannerWordmark size="sm" dark />
+      <h2 className="text-zinc-900 text-sm sm:text-2xl font-bold text-center mt-2 sm:mt-4 leading-tight tracking-tight">
+        Track how your team uses AI
+      </h2>
+      <p className="text-zinc-400 text-[8px] sm:text-xs text-center mt-1 sm:mt-2 max-w-[70%] leading-relaxed">
+        Usage analytics, prompt adoption, and team insights — all in one dashboard
+      </p>
+      <div className="flex-1 flex items-end justify-center mt-3 sm:mt-5 w-full">
+        <ProMockupFrame>
+          <AnalyticsScene hideChrome />
+        </ProMockupFrame>
+      </div>
+    </ProShell>
+  );
+}
+
+/** Pro screenshot 5 — Multi-AI Support */
+export function ProScreenshot5({ accent = "teal" }: { accent?: ProAccent }) {
+  const aiTools = [
+    { name: "ChatGPT", color: "#10A37F", letter: "G" },
+    { name: "Claude", color: "#D97757", letter: "C" },
+    { name: "Gemini", color: "#4285F4", letter: "G" },
+    { name: "Copilot", color: "#7B61FF", letter: "C" },
+    { name: "Perplexity", color: "#20808D", letter: "P" },
+  ];
+
+  return (
+    <ProShell aspectRatio="1280/800" accent={accent}>
+      <BannerWordmark size="sm" dark />
+      <h2 className="text-zinc-900 text-sm sm:text-2xl font-bold text-center mt-2 sm:mt-4 leading-tight tracking-tight">
+        Works with every AI tool
+      </h2>
+      <p className="text-zinc-400 text-[8px] sm:text-xs text-center mt-1 sm:mt-2 max-w-[70%] leading-relaxed">
+        One extension for ChatGPT, Claude, Gemini, Microsoft Copilot, and Perplexity
+      </p>
+      <div className="flex items-center justify-center gap-3 sm:gap-6 mt-4 sm:mt-6">
+        {aiTools.map((tool) => (
+          <div key={tool.name} className="flex flex-col items-center gap-1 sm:gap-2">
+            <div
+              className="w-8 h-8 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center text-white font-bold text-xs sm:text-lg shadow-md"
+              style={{ backgroundColor: tool.color }}
+            >
+              {tool.letter}
+            </div>
+            <span className="text-[6px] sm:text-[10px] text-zinc-400 font-medium">{tool.name}</span>
+          </div>
+        ))}
+      </div>
+      <div className="flex-1 flex items-end justify-center mt-3 sm:mt-4 w-full">
+        <ProMockupFrame className="max-w-[70%]">
+          <InsertScene />
+        </ProMockupFrame>
+      </div>
+    </ProShell>
+  );
+}
+
 /* ── Export map ──────────────────────────────────── */
 
 export const socialBannerComponents = {
@@ -2005,4 +2201,9 @@ export const socialBannerComponents = {
   chromeScreenshot3: { Component: ChromeScreenshot3, label: "Chrome Store — One-Click Insert", dims: "1280 x 800" },
   chromeScreenshot4: { Component: ChromeScreenshot4, label: "Chrome Store — Analytics", dims: "1280 x 800" },
   chromeScreenshot5: { Component: ChromeScreenshot5, label: "Chrome Store — Multi-AI Support", dims: "1280 x 800" },
+  proScreenshot1: { Component: ProScreenshot1, label: "Chrome Store Pro — Prompt Library", dims: "1280 x 800" },
+  proScreenshot2: { Component: ProScreenshot2, label: "Chrome Store Pro — Data Protection", dims: "1280 x 800" },
+  proScreenshot3: { Component: ProScreenshot3, label: "Chrome Store Pro — One-Click Insert", dims: "1280 x 800" },
+  proScreenshot4: { Component: ProScreenshot4, label: "Chrome Store Pro — Analytics", dims: "1280 x 800" },
+  proScreenshot5: { Component: ProScreenshot5, label: "Chrome Store Pro — Multi-AI Support", dims: "1280 x 800" },
 } as const;

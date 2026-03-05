@@ -25,7 +25,7 @@ export const EXTENSION_STORES: Record<
   },
   firefox: {
     name: "Firefox Add-ons",
-    url: "https://addons.mozilla.org/en-US/firefox/addon/teamprompt/",
+    url: "https://addons.mozilla.org/en-US/firefox/addon/teamprompt-manage-shield/",
     buttonLabel: "Install for Firefox",
   },
   edge: {

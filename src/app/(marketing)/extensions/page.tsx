@@ -123,7 +123,7 @@ const browsers = [
   {
     name: "Firefox",
     storeName: "Firefox Add-ons",
-    url: "https://addons.mozilla.org/en-US/firefox/addon/teamprompt/",
+    url: "https://addons.mozilla.org/en-US/firefox/addon/teamprompt-manage-shield/",
     note: "Full feature support on Firefox",
     color: "from-orange-500/20 to-red-500/10",
     borderColor: "border-orange-500/20",

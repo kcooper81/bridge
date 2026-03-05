@@ -119,7 +119,7 @@ Free plan available. No credit card required.
 **Developer Console:** https://addons.mozilla.org/en-US/developers/
 **Zip to upload:** `extension/dist/teamprompt-extension-1.0.0-firefox.zip` (run `npm run zip:firefox`)
 **Source code zip:** `extension/dist/teamprompt-extension-1.0.0-sources.zip` (auto-generated, upload if requested)
-**Store URL:** https://addons.mozilla.org/en-US/firefox/addon/teamprompt/ (fill in after approval)
+**Store URL:** https://addons.mozilla.org/en-US/firefox/addon/teamprompt-manage-shield/
 
 **Category 1:** Privacy & Security
 **Category 2:** Search Tools

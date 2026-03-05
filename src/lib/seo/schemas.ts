@@ -77,6 +77,7 @@ export function generateOrganizationSchema() {
       "https://www.linkedin.com/company/teamprompt",
       "https://github.com/kcooper81",
       "https://chromewebstore.google.com/detail/teamprompt/hpdekjimndbhdkebpedfgaceohplbpil",
+      "https://addons.mozilla.org/en-US/firefox/addon/teamprompt-manage-shield/",
     ],
   };
 }

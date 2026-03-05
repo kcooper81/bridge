@@ -87,8 +87,8 @@ const _RAW_CATEGORIES: RawCategory[] = [
       },
       {
         q: "How do I install the browser extension?",
-        a: "Visit the Chrome Web Store and search for \"TeamPrompt,\" or click the install banner in your dashboard. After installing, click the TeamPrompt icon in your toolbar and sign in with your account. Your prompts, settings, and security rules sync automatically.",
-        keywords: ["chrome", "extension", "install", "browser", "addon"],
+        a: "Visit the extension store for your browser — Chrome Web Store, Firefox Add-ons, or Edge Add-ons — and search for \"TeamPrompt,\" or click the install banner in your dashboard (it detects your browser automatically). After installing, click the TeamPrompt icon in your toolbar and sign in with your account. Your prompts, settings, and security rules sync automatically.",
+        keywords: ["chrome", "firefox", "edge", "extension", "install", "browser", "addon"],
       },
       {
         q: "How do I create my first prompt?",
@@ -259,8 +259,8 @@ const _RAW_CATEGORIES: RawCategory[] = [
       },
       {
         q: "How do I install and sign in?",
-        a: "Install from the Chrome Web Store (search \"TeamPrompt\"). Click the TeamPrompt icon in your browser toolbar and sign in with your email/password, Google, or GitHub account. Your prompts and guardrail settings sync automatically from your workspace.",
-        keywords: ["install", "sign in", "login", "chrome", "setup"],
+        a: "Install from your browser's extension store — Chrome Web Store, Firefox Add-ons, or Edge Add-ons (search \"TeamPrompt\"). You can also visit teamprompt.app/extensions for direct links. Click the TeamPrompt icon in your browser toolbar and sign in with your email/password, Google, or GitHub account. Your prompts and guardrail settings sync automatically from your workspace.",
+        keywords: ["install", "sign in", "login", "chrome", "firefox", "edge", "setup"],
       },
       {
         q: "How do I insert prompts into AI tools?",

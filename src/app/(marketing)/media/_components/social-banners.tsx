@@ -1760,6 +1760,188 @@ export function ExtensionSmallPromoLifestyle() {
   );
 }
 
+/* ══════════════════════════════════════════════════
+   LOOM-STYLE CHROME WEB STORE SCREENSHOTS
+   Clean gradient BG + bold headline + large product mockup
+   ══════════════════════════════════════════════════ */
+
+/** Loom-style shell — gradient background, centered content */
+function LoomStyleShell({
+  aspectRatio,
+  children,
+  gradient = "blue",
+}: {
+  aspectRatio: string;
+  children: React.ReactNode;
+  gradient?: "blue" | "indigo" | "emerald" | "violet" | "slate";
+}) {
+  const gradientMap = {
+    blue: "radial-gradient(ellipse 120% 80% at 50% 40%, #1e40af 0%, #0f172a 80%)",
+    indigo: "radial-gradient(ellipse 120% 80% at 50% 40%, #312e81 0%, #0f172a 80%)",
+    emerald: "radial-gradient(ellipse 120% 80% at 50% 40%, #065f46 0%, #0f172a 80%)",
+    violet: "radial-gradient(ellipse 120% 80% at 50% 40%, #4c1d95 0%, #0f172a 80%)",
+    slate: "radial-gradient(ellipse 120% 80% at 50% 40%, #1e293b 0%, #0f172a 80%)",
+  };
+
+  return (
+    <div
+      className="w-full rounded-xl overflow-hidden relative"
+      style={{ aspectRatio, background: gradientMap[gradient] }}
+    >
+      {/* Subtle noise texture overlay */}
+      <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")" }} />
+      {/* Accent glow */}
+      <div className="absolute top-[10%] left-1/2 -translate-x-1/2 w-[60%] h-[30%] rounded-full bg-blue-500/10 blur-3xl" />
+      {/* Content */}
+      <div className="absolute inset-0 flex flex-col items-center z-10 px-6 sm:px-10 pt-4 sm:pt-8 pb-0">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+/** Large mockup wrapper — browser-like chrome with shadow, displayed large at bottom */
+function LoomMockupFrame({ children, className }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div className={cn("w-full max-w-[85%] rounded-t-xl overflow-hidden shadow-2xl shadow-black/40 border border-white/[0.08] border-b-0", className)}>
+      {/* Browser chrome */}
+      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#1e1e2e] border-b border-white/[0.06]">
+        <div className="w-2 h-2 rounded-full bg-[#ff5f56]" />
+        <div className="w-2 h-2 rounded-full bg-[#ffbd2e]" />
+        <div className="w-2 h-2 rounded-full bg-[#27c93f]" />
+        <div className="ml-3 flex-1 h-4 rounded-md bg-white/[0.06] flex items-center px-2">
+          <span className="text-[6px] text-white/40 font-medium">app.teamprompt.app</span>
+        </div>
+      </div>
+      {/* Content */}
+      <div className="bg-white">{children}</div>
+    </div>
+  );
+}
+
+/** Loom-style screenshot 1 — Prompt Library */
+export function ChromeScreenshot1() {
+  return (
+    <LoomStyleShell aspectRatio="1280/800" gradient="blue">
+      <BannerWordmark size="sm" />
+      <h2 className="text-white text-sm sm:text-2xl font-bold text-center mt-2 sm:mt-4 leading-tight tracking-tight">
+        Your team&apos;s AI prompt library
+      </h2>
+      <p className="text-white/50 text-[8px] sm:text-xs text-center mt-1 sm:mt-2 max-w-[70%] leading-relaxed">
+        Browse, search, and share approved prompts across your entire organization
+      </p>
+      <div className="flex-1 flex items-end justify-center mt-3 sm:mt-5 w-full">
+        <LoomMockupFrame>
+          <VaultScene />
+        </LoomMockupFrame>
+      </div>
+    </LoomStyleShell>
+  );
+}
+
+/** Loom-style screenshot 2 — DLP Protection */
+export function ChromeScreenshot2() {
+  return (
+    <LoomStyleShell aspectRatio="1280/800" gradient="indigo">
+      <BannerWordmark size="sm" />
+      <h2 className="text-white text-sm sm:text-2xl font-bold text-center mt-2 sm:mt-4 leading-tight tracking-tight">
+        Stop sensitive data from reaching AI
+      </h2>
+      <p className="text-white/50 text-[8px] sm:text-xs text-center mt-1 sm:mt-2 max-w-[70%] leading-relaxed">
+        Automatically scan and block PII, API keys, and confidential data before it&apos;s sent
+      </p>
+      <div className="flex-1 flex items-end justify-center mt-3 sm:mt-5 w-full">
+        <LoomMockupFrame>
+          <DLPBlockScene />
+        </LoomMockupFrame>
+      </div>
+    </LoomStyleShell>
+  );
+}
+
+/** Loom-style screenshot 3 — One-Click Insert */
+export function ChromeScreenshot3() {
+  return (
+    <LoomStyleShell aspectRatio="1280/800" gradient="emerald">
+      <BannerWordmark size="sm" />
+      <h2 className="text-white text-sm sm:text-2xl font-bold text-center mt-2 sm:mt-4 leading-tight tracking-tight">
+        Insert prompts in one click
+      </h2>
+      <p className="text-white/50 text-[8px] sm:text-xs text-center mt-1 sm:mt-2 max-w-[70%] leading-relaxed">
+        Works right inside ChatGPT, Claude, Gemini, Copilot, and Perplexity
+      </p>
+      <div className="flex-1 flex items-end justify-center mt-3 sm:mt-5 w-full">
+        <LoomMockupFrame>
+          <InsertScene />
+        </LoomMockupFrame>
+      </div>
+    </LoomStyleShell>
+  );
+}
+
+/** Loom-style screenshot 4 — Analytics */
+export function ChromeScreenshot4() {
+  return (
+    <LoomStyleShell aspectRatio="1280/800" gradient="violet">
+      <BannerWordmark size="sm" />
+      <h2 className="text-white text-sm sm:text-2xl font-bold text-center mt-2 sm:mt-4 leading-tight tracking-tight">
+        Track how your team uses AI
+      </h2>
+      <p className="text-white/50 text-[8px] sm:text-xs text-center mt-1 sm:mt-2 max-w-[70%] leading-relaxed">
+        Usage analytics, prompt adoption, and team insights — all in one dashboard
+      </p>
+      <div className="flex-1 flex items-end justify-center mt-3 sm:mt-5 w-full">
+        <LoomMockupFrame>
+          <AnalyticsScene />
+        </LoomMockupFrame>
+      </div>
+    </LoomStyleShell>
+  );
+}
+
+/** Loom-style screenshot 5 — Multi-AI Support */
+export function ChromeScreenshot5() {
+  const aiTools = [
+    { name: "ChatGPT", color: "#10A37F", letter: "G" },
+    { name: "Claude", color: "#D97757", letter: "C" },
+    { name: "Gemini", color: "#4285F4", letter: "G" },
+    { name: "Copilot", color: "#7B61FF", letter: "C" },
+    { name: "Perplexity", color: "#20808D", letter: "P" },
+  ];
+
+  return (
+    <LoomStyleShell aspectRatio="1280/800" gradient="slate">
+      <BannerWordmark size="sm" />
+      <h2 className="text-white text-sm sm:text-2xl font-bold text-center mt-2 sm:mt-4 leading-tight tracking-tight">
+        Works with every AI tool
+      </h2>
+      <p className="text-white/50 text-[8px] sm:text-xs text-center mt-1 sm:mt-2 max-w-[70%] leading-relaxed">
+        One extension for ChatGPT, Claude, Gemini, Microsoft Copilot, and Perplexity
+      </p>
+      {/* AI tool icons row */}
+      <div className="flex items-center justify-center gap-3 sm:gap-6 mt-4 sm:mt-8">
+        {aiTools.map((tool) => (
+          <div key={tool.name} className="flex flex-col items-center gap-1 sm:gap-2">
+            <div
+              className="w-8 h-8 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center text-white font-bold text-xs sm:text-xl shadow-lg"
+              style={{ backgroundColor: tool.color }}
+            >
+              {tool.letter}
+            </div>
+            <span className="text-[6px] sm:text-[10px] text-white/60 font-medium">{tool.name}</span>
+          </div>
+        ))}
+      </div>
+      {/* Bottom mockup — smaller, showing the extension popup */}
+      <div className="flex-1 flex items-end justify-center mt-3 sm:mt-5 w-full">
+        <LoomMockupFrame className="max-w-[70%]">
+          <InsertScene />
+        </LoomMockupFrame>
+      </div>
+    </LoomStyleShell>
+  );
+}
+
 /* ── Export map ──────────────────────────────────── */
 
 export const socialBannerComponents = {
@@ -1794,4 +1976,9 @@ export const socialBannerComponents = {
   extMarquee2: { Component: ExtensionMarqueeLifestyle2, label: "Extension Marquee — DLP Shield", dims: "1400 x 560" },
   extMarquee3: { Component: ExtensionMarqueeLifestyle3, label: "Extension Marquee — Insert Flow", dims: "1400 x 560" },
   extSmallPromo: { Component: ExtensionSmallPromoLifestyle, label: "Extension Small Promo — Lifestyle", dims: "440 x 280" },
+  chromeScreenshot1: { Component: ChromeScreenshot1, label: "Chrome Store — Prompt Library", dims: "1280 x 800" },
+  chromeScreenshot2: { Component: ChromeScreenshot2, label: "Chrome Store — DLP Protection", dims: "1280 x 800" },
+  chromeScreenshot3: { Component: ChromeScreenshot3, label: "Chrome Store — One-Click Insert", dims: "1280 x 800" },
+  chromeScreenshot4: { Component: ChromeScreenshot4, label: "Chrome Store — Analytics", dims: "1280 x 800" },
+  chromeScreenshot5: { Component: ChromeScreenshot5, label: "Chrome Store — Multi-AI Support", dims: "1280 x 800" },
 } as const;

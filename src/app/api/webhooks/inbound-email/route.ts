@@ -17,19 +17,6 @@ import { notifyAdminsOfNewTicket } from "@/lib/notify-admins";
  * 3. Set RESEND_WEBHOOK_SECRET in .env.local for signature verification
  */
 
-interface ResendInboundPayload {
-  type: "email.received";
-  created_at: string;
-  data: {
-    from: string; // "Jane <jane@example.com>" or "jane@example.com"
-    to: string[];
-    subject: string;
-    text: string;
-    html: string;
-    headers: { name: string; value: string }[];
-  };
-}
-
 /** Known inboxes — the first matching address wins */
 const KNOWN_INBOXES: { prefix: string; type: string }[] = [
   { prefix: "sales@", type: "sales" },
@@ -138,25 +125,42 @@ export async function POST(request: NextRequest) {
       // (Full Svix verification can be added when Resend provides the signing secret)
     }
 
-    const payload: ResendInboundPayload = await request.json();
+    const raw = await request.json();
+
+    // Log the raw payload structure for debugging
+    console.log("Inbound email webhook payload:", JSON.stringify(raw, null, 2));
+
+    // Resend may wrap in { type, data } or send data at top level
+    const payload = raw.data ? raw : { type: "email.received", data: raw };
 
     // Only handle email.received events
-    if (payload.type !== "email.received") {
+    if (raw.type && raw.type !== "email.received") {
       return NextResponse.json({ ok: true });
     }
 
-    const { from, to, subject, text, html, headers } = payload.data;
+    const data = payload.data || {};
+    const from = data.from || "";
+    const to = data.to || [];
+    const subject = data.subject || "";
+    const text = data.text || "";
+    const html = data.html || "";
+    const headers = data.headers || [];
+
     const senderEmail = extractEmail(from);
     const senderName = extractName(from);
-    const { inboxEmail, ticketType } = detectInbox(to || [], headers || []);
+    const { inboxEmail, ticketType } = detectInbox(Array.isArray(to) ? to : [to], headers);
     const body = text || html?.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim() || "";
 
-    if (!senderEmail || !body) {
+    if (!senderEmail) {
+      console.error("Inbound email: no sender found. from:", from, "payload keys:", Object.keys(raw));
       return NextResponse.json(
-        { error: "Missing sender or body" },
+        { error: "Missing sender" },
         { status: 400 }
       );
     }
+
+    // Allow empty body — still create the ticket
+    const finalBody = body || "(No message body)";
 
     const db = createServiceClient();
 
@@ -175,7 +179,7 @@ export async function POST(request: NextRequest) {
       const { error: noteError } = await db.from("ticket_notes").insert({
         ticket_id: existingTicket.id,
         author_id: senderProfile?.id || existingTicket.user_id,
-        content: `[Email reply from ${senderName} <${senderEmail}>]\n\n${body}`,
+        content: `[Email reply from ${senderName} <${senderEmail}>]\n\n${finalBody}`,
         is_internal: false,
         email_sent: false, // This IS the email, no need to send one
       });
@@ -211,7 +215,7 @@ export async function POST(request: NextRequest) {
     }
 
     // New ticket from inbound email
-    const fullMessage = `From: ${senderName} <${senderEmail}>\n\n${body}`;
+    const fullMessage = `From: ${senderName} <${senderEmail}>\n\n${finalBody}`;
 
     const { data: inserted, error: insertError } = await db
       .from("feedback")
@@ -242,7 +246,7 @@ export async function POST(request: NextRequest) {
         subject: subject || "(No subject)",
         senderEmail,
         type: ticketType,
-        message: body,
+        message: finalBody,
         ticketId: inserted.id,
       });
     }

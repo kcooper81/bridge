@@ -41,13 +41,23 @@ const KNOWN_INBOXES: { prefix: string; type: string }[] = [
   { prefix: "kade@", type: "email" },
 ];
 
-/** Find the first recognised inbox address from the to list */
-function detectInbox(toAddresses: string[]): { inboxEmail: string; ticketType: string } {
-  const joined = toAddresses.join(",").toLowerCase();
+/**
+ * Find the first recognised inbox address.
+ * Checks the original "To" header first (preserved through forwarding),
+ * then falls back to the envelope `to` list.
+ */
+function detectInbox(
+  toAddresses: string[],
+  headers: { name: string; value: string }[]
+): { inboxEmail: string; ticketType: string } {
+  // Build a search string: original To header first, then envelope to addresses
+  const originalTo = headers
+    .find((h) => h.name.toLowerCase() === "to")?.value || "";
+  const searchPool = [originalTo, ...toAddresses].join(",").toLowerCase();
+
   for (const inbox of KNOWN_INBOXES) {
-    if (joined.includes(inbox.prefix)) {
-      // Extract the full address (e.g. "sales@teamprompt.app")
-      const match = joined.match(new RegExp(`(${inbox.prefix}[^\\s,<>]+)`));
+    if (searchPool.includes(inbox.prefix)) {
+      const match = searchPool.match(new RegExp(`(${inbox.prefix}[^\\s,<>]+)`));
       return {
         inboxEmail: match ? match[1] : `${inbox.prefix}teamprompt.app`,
         ticketType: inbox.type,
@@ -135,10 +145,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ ok: true });
     }
 
-    const { from, to, subject, text, html } = payload.data;
+    const { from, to, subject, text, html, headers } = payload.data;
     const senderEmail = extractEmail(from);
     const senderName = extractName(from);
-    const { inboxEmail, ticketType } = detectInbox(to || []);
+    const { inboxEmail, ticketType } = detectInbox(to || [], headers || []);
     const body = text || html?.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim() || "";
 
     if (!senderEmail || !body) {

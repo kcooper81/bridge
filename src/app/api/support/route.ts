@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { limiters, checkRateLimit } from "@/lib/rate-limit";
+import { notifyAdminsOfNewTicket } from "@/lib/notify-admins";
 
 export async function POST(request: NextRequest) {
   try {
@@ -49,7 +50,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const { error: insertError } = await db.from("feedback").insert({
+    const { data: inserted, error: insertError } = await db.from("feedback").insert({
       user_id: null,
       org_id: null,
       type: ticketType,
@@ -57,7 +58,7 @@ export async function POST(request: NextRequest) {
       message: fullMessage,
       status: "new",
       priority: "normal",
-    });
+    }).select("id").single();
 
     if (insertError) {
       console.error("Support form insert error:", insertError);
@@ -65,6 +66,17 @@ export async function POST(request: NextRequest) {
         { error: "Failed to submit your message. Please try again." },
         { status: 500 }
       );
+    }
+
+    // Notify admins via email (non-blocking)
+    if (inserted) {
+      notifyAdminsOfNewTicket({
+        subject: `[${name}] ${subject}`,
+        senderEmail: email,
+        type: ticketType,
+        message,
+        ticketId: inserted.id,
+      });
     }
 
     return NextResponse.json({ success: true });

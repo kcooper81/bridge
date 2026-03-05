@@ -1,0 +1,213 @@
+import { NextRequest, NextResponse } from "next/server";
+import { createServiceClient } from "@/lib/supabase/server";
+import { notifyAdminsOfNewTicket } from "@/lib/notify-admins";
+
+/**
+ * Resend Inbound Email Webhook
+ *
+ * Receives inbound emails sent to support@teamprompt.app (or configured address).
+ * - Replies to existing tickets (matched by subject line) → added as notes
+ * - New emails → created as feedback records with type "email"
+ *
+ * Setup:
+ * 1. Add MX record for your domain pointing to Resend's inbound servers
+ * 2. Configure inbound webhook in Resend dashboard → POST to /api/webhooks/inbound-email
+ * 3. Set RESEND_WEBHOOK_SECRET in .env.local for signature verification
+ */
+
+interface ResendInboundPayload {
+  type: "email.received";
+  created_at: string;
+  data: {
+    from: string; // "Jane <jane@example.com>" or "jane@example.com"
+    to: string[];
+    subject: string;
+    text: string;
+    html: string;
+    headers: { name: string; value: string }[];
+  };
+}
+
+function extractEmail(from: string): string {
+  const match = from.match(/<([^>]+)>/);
+  return match ? match[1] : from.trim();
+}
+
+function extractName(from: string): string {
+  const match = from.match(/^(.+?)\s*</);
+  return match ? match[1].replace(/"/g, "").trim() : extractEmail(from);
+}
+
+/**
+ * Try to match a reply to an existing ticket by:
+ * 1. Ticket ID in subject line: [Ticket#UUID]
+ * 2. Subject prefix match: "Re: Original Subject"
+ */
+async function findExistingTicket(
+  db: ReturnType<typeof createServiceClient>,
+  subject: string
+) {
+  // Check for ticket ID in subject: [Ticket#<uuid>]
+  const idMatch = subject.match(/\[Ticket#([a-f0-9-]{36})\]/i);
+  if (idMatch) {
+    const { data } = await db
+      .from("feedback")
+      .select("id, subject, user_id")
+      .eq("id", idMatch[1])
+      .single();
+    if (data) return data;
+  }
+
+  // Fallback: strip Re:/Fwd: prefixes and look for exact subject match
+  const cleanSubject = subject
+    .replace(/^(Re|Fwd|Fw):\s*/gi, "")
+    .replace(/\[Ticket#[a-f0-9-]+\]/gi, "")
+    .trim();
+
+  if (cleanSubject.length > 3) {
+    const { data } = await db
+      .from("feedback")
+      .select("id, subject, user_id")
+      .ilike("subject", `%${cleanSubject}%`)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .single();
+    if (data) return data;
+  }
+
+  return null;
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    // Verify webhook secret if configured
+    const webhookSecret = process.env.RESEND_WEBHOOK_SECRET;
+    if (webhookSecret) {
+      const signature = request.headers.get("svix-signature");
+      if (!signature) {
+        return NextResponse.json(
+          { error: "Missing signature" },
+          { status: 401 }
+        );
+      }
+      // For production: use @svix/webhook to verify signature
+      // For now, check that the secret header is present
+      // (Full Svix verification can be added when Resend provides the signing secret)
+    }
+
+    const payload: ResendInboundPayload = await request.json();
+
+    // Only handle email.received events
+    if (payload.type !== "email.received") {
+      return NextResponse.json({ ok: true });
+    }
+
+    const { from, subject, text, html } = payload.data;
+    const senderEmail = extractEmail(from);
+    const senderName = extractName(from);
+    const body = text || html?.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim() || "";
+
+    if (!senderEmail || !body) {
+      return NextResponse.json(
+        { error: "Missing sender or body" },
+        { status: 400 }
+      );
+    }
+
+    const db = createServiceClient();
+
+    // Try to find the sender as an existing user
+    const { data: senderProfile } = await db
+      .from("profiles")
+      .select("id, org_id")
+      .eq("email", senderEmail)
+      .single();
+
+    // Check if this is a reply to an existing ticket
+    const existingTicket = await findExistingTicket(db, subject || "");
+
+    if (existingTicket) {
+      // Add as a note on the existing ticket (external reply, not internal)
+      const { error: noteError } = await db.from("ticket_notes").insert({
+        ticket_id: existingTicket.id,
+        author_id: senderProfile?.id || existingTicket.user_id,
+        content: `[Email reply from ${senderName} <${senderEmail}>]\n\n${body}`,
+        is_internal: false,
+        email_sent: false, // This IS the email, no need to send one
+      });
+
+      if (noteError) {
+        console.error("Inbound email note insert error:", noteError);
+        return NextResponse.json(
+          { error: "Failed to add reply" },
+          { status: 500 }
+        );
+      }
+
+      // Reopen ticket if it was resolved/closed
+      const { data: ticket } = await db
+        .from("feedback")
+        .select("status")
+        .eq("id", existingTicket.id)
+        .single();
+
+      if (ticket && (ticket.status === "resolved" || ticket.status === "closed")) {
+        await db
+          .from("feedback")
+          .update({ status: "new", updated_at: new Date().toISOString() })
+          .eq("id", existingTicket.id);
+      } else {
+        await db
+          .from("feedback")
+          .update({ updated_at: new Date().toISOString() })
+          .eq("id", existingTicket.id);
+      }
+
+      return NextResponse.json({ ok: true, action: "reply_added", ticket_id: existingTicket.id });
+    }
+
+    // New ticket from inbound email
+    const fullMessage = `From: ${senderName} <${senderEmail}>\n\n${body}`;
+
+    const { data: inserted, error: insertError } = await db
+      .from("feedback")
+      .insert({
+        user_id: senderProfile?.id || null,
+        org_id: senderProfile?.org_id || null,
+        type: "email",
+        subject: subject || "(No subject)",
+        message: fullMessage,
+        status: "new",
+        priority: "normal",
+      })
+      .select("id")
+      .single();
+
+    if (insertError) {
+      console.error("Inbound email ticket insert error:", insertError);
+      return NextResponse.json(
+        { error: "Failed to create ticket" },
+        { status: 500 }
+      );
+    }
+
+    // Notify admins
+    if (inserted) {
+      notifyAdminsOfNewTicket({
+        subject: subject || "(No subject)",
+        senderEmail,
+        type: "email",
+        message: body,
+        ticketId: inserted.id,
+      });
+    }
+
+    return NextResponse.json({ ok: true, action: "ticket_created", ticket_id: inserted?.id });
+  } catch (error) {
+    console.error("Inbound email webhook error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}

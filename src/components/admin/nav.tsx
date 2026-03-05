@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -49,6 +49,7 @@ export function AdminNav({ superAdminRole }: { superAdminRole: SuperAdminRole | 
     newTickets: 0,
     unresolvedErrors: 0,
   });
+  const prevTicketCount = useRef(0);
 
   const isSupport = superAdminRole === "support";
 
@@ -58,13 +59,7 @@ export function AdminNav({ superAdminRole }: { superAdminRole: SuperAdminRole | 
     return true;
   });
 
-  useEffect(() => {
-    loadBadgeCounts();
-    const interval = setInterval(loadBadgeCounts, 60000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const loadBadgeCounts = async () => {
+  const loadBadgeCounts = useCallback(async () => {
     const supabase = createClient();
 
     const [ticketsResult, errorsResult] = await Promise.all([
@@ -78,11 +73,70 @@ export function AdminNav({ superAdminRole }: { superAdminRole: SuperAdminRole | 
         .eq("resolved", false),
     ]);
 
+    const newTicketCount = ticketsResult.count || 0;
+    const prevCount = prevTicketCount.current;
+
     setBadges({
-      newTickets: ticketsResult.count || 0,
+      newTickets: newTicketCount,
       unresolvedErrors: errorsResult.count || 0,
     });
-  };
+
+    // Browser notification if ticket count increased (and not first load)
+    if (prevCount > 0 && newTicketCount > prevCount) {
+      const diff = newTicketCount - prevCount;
+      showBrowserNotification(
+        `${diff} new ticket${diff > 1 ? "s" : ""}`,
+        "New support ticket received in TeamPrompt"
+      );
+    }
+
+    prevTicketCount.current = newTicketCount;
+  }, []);
+
+  useEffect(() => {
+    loadBadgeCounts();
+
+    // Fallback polling every 60s
+    const interval = setInterval(loadBadgeCounts, 60000);
+
+    // Supabase Realtime: subscribe to new feedback inserts + updates
+    const supabase = createClient();
+
+    const feedbackChannel = supabase
+      .channel("admin-feedback-realtime")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "feedback" },
+        () => {
+          loadBadgeCounts();
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "feedback" },
+        () => {
+          loadBadgeCounts();
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "error_logs" },
+        () => {
+          loadBadgeCounts();
+        }
+      )
+      .subscribe();
+
+    // Request notification permission on mount
+    if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission();
+    }
+
+    return () => {
+      clearInterval(interval);
+      supabase.removeChannel(feedbackChannel);
+    };
+  }, [loadBadgeCounts]);
 
   const renderNavItem = (item: (typeof allNavItems)[0], mobile?: boolean) => {
     const isActive =
@@ -158,4 +212,21 @@ export function AdminNav({ superAdminRole }: { superAdminRole: SuperAdminRole | 
       </nav>
     </>
   );
+}
+
+function showBrowserNotification(title: string, body: string) {
+  if (typeof window === "undefined" || !("Notification" in window)) return;
+  if (Notification.permission !== "granted") return;
+
+  const n = new Notification(title, {
+    body,
+    icon: "/brand/logo-icon-blue.svg",
+    tag: "teamprompt-ticket",
+  });
+
+  n.onclick = () => {
+    window.focus();
+    window.location.href = "/admin/tickets";
+    n.close();
+  };
 }

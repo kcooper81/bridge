@@ -78,7 +78,7 @@ export async function POST(
         await resend.emails.send({
           from: fromEmail,
           to: ticketUser.email,
-          subject: `Re: ${ticket.subject || "Your support request"}`,
+          subject: `Re: ${ticket.subject || "Your support request"} [Ticket#${ticket.id}]`,
           html: buildTicketResponseEmail({
             ticketSubject: ticket.subject || "Your support request",
             responseBody: content.trim(),

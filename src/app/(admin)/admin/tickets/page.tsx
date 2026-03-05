@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -38,9 +38,11 @@ import {
   Lock,
   Mail,
   AlertTriangle,
+  DollarSign,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { createClient } from "@/lib/supabase/client";
 
 interface NoteRow {
   id: string;
@@ -93,6 +95,8 @@ const TYPE_ICONS: Record<string, React.ElementType> = {
   bug: Bug,
   feature: Lightbulb,
   feedback: MessageSquare,
+  email: Mail,
+  sales: DollarSign,
 };
 
 export default function TicketsPage() {
@@ -114,11 +118,7 @@ export default function TicketsPage() {
   const [isInternal, setIsInternal] = useState(true);
   const [sendingNote, setSendingNote] = useState(false);
 
-  useEffect(() => {
-    loadTickets();
-  }, []);
-
-  const loadTickets = async () => {
+  const loadTickets = useCallback(async () => {
     try {
       const res = await fetch("/api/admin/tickets");
       if (!res.ok) throw new Error("Failed to fetch tickets");
@@ -129,7 +129,36 @@ export default function TicketsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadTickets();
+
+    // Supabase Realtime: auto-refresh when tickets change
+    const supabase = createClient();
+    const channel = supabase
+      .channel("admin-tickets-realtime")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "feedback" },
+        () => loadTickets()
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "feedback" },
+        () => loadTickets()
+      )
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "ticket_notes" },
+        () => loadTickets()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [loadTickets]);
 
   const updateStatus = async (id: string, newStatus: string) => {
     try {
@@ -262,7 +291,7 @@ export default function TicketsPage() {
       total: tickets.length,
       new: tickets.filter((t) => t.status === "new").length,
       bugs: tickets.filter((t) => t.type === "bug").length,
-      features: tickets.filter((t) => t.type === "feature").length,
+      emails: tickets.filter((t) => t.type === "email").length,
     }),
     [tickets]
   );
@@ -305,9 +334,9 @@ export default function TicketsPage() {
         <Card>
           <CardContent className="p-4">
             <div className="text-2xl font-bold text-amber-500">
-              {stats.features}
+              {stats.emails}
             </div>
-            <p className="text-xs text-muted-foreground">Features</p>
+            <p className="text-xs text-muted-foreground">Emails</p>
           </CardContent>
         </Card>
       </div>
@@ -343,7 +372,7 @@ export default function TicketsPage() {
       {/* Type + priority filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="flex gap-1.5 flex-wrap">
-          {(["all", "bug", "feature", "feedback"] as const).map((f) => {
+          {(["all", "bug", "feature", "feedback", "email", "sales"] as const).map((f) => {
             const TypeIcon = f !== "all" ? TYPE_ICONS[f] : null;
             return (
               <Button

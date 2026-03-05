@@ -39,6 +39,7 @@ import {
   Mail,
   AlertTriangle,
   DollarSign,
+  Inbox,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -63,6 +64,7 @@ interface TicketRow {
   user_id: string | null;
   user_email: string | null;
   org_name: string | null;
+  inbox_email: string | null;
   notes: NoteRow[];
   notes_count: number;
   created_at: string;
@@ -454,6 +456,12 @@ export default function TicketsPage() {
                             {ticket.notes_count}
                           </span>
                         )}
+                        {ticket.inbox_email && (
+                          <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                            <Inbox className="h-3 w-3" />
+                            {ticket.inbox_email.split("@")[0]}
+                          </span>
+                        )}
                       </div>
                       <h3 className="font-medium">
                         {ticket.subject || "No subject"}
@@ -577,6 +585,12 @@ export default function TicketsPage() {
                   <Badge variant="outline" className="capitalize">
                     {selectedTicket.type}
                   </Badge>
+                  {selectedTicket.inbox_email && (
+                    <Badge variant="secondary" className="text-xs">
+                      <Inbox className="h-3 w-3 mr-1" />
+                      {selectedTicket.inbox_email}
+                    </Badge>
+                  )}
                 </div>
               </div>
 

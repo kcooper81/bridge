@@ -50,7 +50,7 @@ export async function POST(
   // Verify ticket exists and get details for potential email
   const { data: ticket, error: ticketError } = await db
     .from("feedback")
-    .select("id, subject, message, user_id")
+    .select("id, subject, message, user_id, inbox_email")
     .eq("id", ticketId)
     .single();
 
@@ -71,9 +71,20 @@ export async function POST(
     if (ticketUser?.email && process.env.RESEND_API_KEY) {
       try {
         const resend = new Resend(process.env.RESEND_API_KEY);
-        const fromEmail =
-          process.env.RESEND_FROM_EMAIL ||
-          "TeamPrompt <noreply@teamprompt.app>";
+
+        // Reply from the same inbox the customer originally emailed
+        const INBOX_LABELS: Record<string, string> = {
+          "support@teamprompt.app": "TeamPrompt Support",
+          "sales@teamprompt.app": "TeamPrompt Sales",
+          "help@teamprompt.app": "TeamPrompt Help",
+          "contact@teamprompt.app": "TeamPrompt",
+          "info@teamprompt.app": "TeamPrompt Info",
+          "team@teamprompt.app": "TeamPrompt Team",
+          "kade@teamprompt.app": "Kade at TeamPrompt",
+        };
+        const inbox = ticket.inbox_email || "support@teamprompt.app";
+        const label = INBOX_LABELS[inbox] || "TeamPrompt";
+        const fromEmail = `${label} <${inbox}>`;
 
         await resend.emails.send({
           from: fromEmail,

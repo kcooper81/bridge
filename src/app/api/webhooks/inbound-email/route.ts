@@ -30,11 +30,35 @@ interface ResendInboundPayload {
   };
 }
 
-/** Determine ticket type based on the recipient address */
-function detectTicketType(toAddresses: string[]): string {
+/** Known inboxes — the first matching address wins */
+const KNOWN_INBOXES: { prefix: string; type: string }[] = [
+  { prefix: "sales@", type: "sales" },
+  { prefix: "support@", type: "email" },
+  { prefix: "help@", type: "email" },
+  { prefix: "contact@", type: "email" },
+  { prefix: "info@", type: "email" },
+  { prefix: "team@", type: "email" },
+  { prefix: "kade@", type: "email" },
+];
+
+/** Find the first recognised inbox address from the to list */
+function detectInbox(toAddresses: string[]): { inboxEmail: string; ticketType: string } {
   const joined = toAddresses.join(",").toLowerCase();
-  if (joined.includes("sales@")) return "sales";
-  return "email";
+  for (const inbox of KNOWN_INBOXES) {
+    if (joined.includes(inbox.prefix)) {
+      // Extract the full address (e.g. "sales@teamprompt.app")
+      const match = joined.match(new RegExp(`(${inbox.prefix}[^\\s,<>]+)`));
+      return {
+        inboxEmail: match ? match[1] : `${inbox.prefix}teamprompt.app`,
+        ticketType: inbox.type,
+      };
+    }
+  }
+  // Unknown alias — still capture it
+  const fallbackEmail = toAddresses[0]
+    ? extractEmail(toAddresses[0])
+    : "support@teamprompt.app";
+  return { inboxEmail: fallbackEmail, ticketType: "email" };
 }
 
 function extractEmail(from: string): string {
@@ -114,7 +138,7 @@ export async function POST(request: NextRequest) {
     const { from, to, subject, text, html } = payload.data;
     const senderEmail = extractEmail(from);
     const senderName = extractName(from);
-    const ticketType = detectTicketType(to || []);
+    const { inboxEmail, ticketType } = detectInbox(to || []);
     const body = text || html?.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim() || "";
 
     if (!senderEmail || !body) {
@@ -189,6 +213,7 @@ export async function POST(request: NextRequest) {
         message: fullMessage,
         status: "new",
         priority: ticketType === "sales" ? "high" : "normal",
+        inbox_email: inboxEmail,
       })
       .select("id")
       .single();

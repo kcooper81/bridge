@@ -50,6 +50,10 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    const inboxEmail = ticketType === "sales"
+      ? "sales@teamprompt.app"
+      : "support@teamprompt.app";
+
     const { data: inserted, error: insertError } = await db.from("feedback").insert({
       user_id: null,
       org_id: null,
@@ -58,6 +62,7 @@ export async function POST(request: NextRequest) {
       message: fullMessage,
       status: "new",
       priority: "normal",
+      inbox_email: inboxEmail,
     }).select("id").single();
 
     if (insertError) {

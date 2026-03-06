@@ -7,15 +7,9 @@ import { sendAutoAck } from "@/lib/auto-ack";
  * Resend Inbound Email Webhook
  *
  * Receives inbound emails sent to *@teamprompt.app (domain-level MX).
- * - sales@teamprompt.app → ticket type "sales"
- * - support@teamprompt.app (and everything else) → ticket type "email"
- * - Replies to existing tickets (matched by subject line) → added as notes
- * - New emails → created as feedback records
  *
- * Setup:
- * 1. Add MX record for your domain pointing to Resend's inbound servers
- * 2. Configure inbound webhook in Resend dashboard → POST to /api/webhooks/inbound-email
- * 3. Set RESEND_WEBHOOK_SECRET in .env.local for signature verification
+ * IMPORTANT: Resend webhooks do NOT include the email body.
+ * We must call GET /emails/receiving/{email_id} to fetch text/html content.
  */
 
 /** Known inboxes — the first matching address wins */
@@ -38,7 +32,6 @@ function detectInbox(
   toAddresses: string[],
   headers: { name: string; value: string }[]
 ): { inboxEmail: string; ticketType: string } {
-  // Build a search string: original To header first, then envelope to addresses
   const originalTo = headers
     .find((h) => h.name.toLowerCase() === "to")?.value || "";
   const searchPool = [originalTo, ...toAddresses].join(",").toLowerCase();
@@ -52,7 +45,6 @@ function detectInbox(
       };
     }
   }
-  // Unknown alias — still capture it
   const fallbackEmail = toAddresses[0]
     ? extractEmail(toAddresses[0])
     : "support@teamprompt.app";
@@ -70,6 +62,38 @@ function extractName(from: string): string {
 }
 
 /**
+ * Fetch the full email content (text + html) from Resend's Receiving API.
+ * The webhook only sends metadata — body must be fetched separately.
+ */
+async function fetchEmailContent(emailId: string): Promise<{ text: string; html: string }> {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    console.error("RESEND_API_KEY not set — cannot fetch email content");
+    return { text: "", html: "" };
+  }
+
+  try {
+    const res = await fetch(`https://api.resend.com/emails/receiving/${emailId}`, {
+      headers: { Authorization: `Bearer ${apiKey}` },
+    });
+
+    if (!res.ok) {
+      console.error("Failed to fetch email content:", res.status, await res.text());
+      return { text: "", html: "" };
+    }
+
+    const email = await res.json();
+    return {
+      text: email.text || "",
+      html: email.html || "",
+    };
+  } catch (err) {
+    console.error("Error fetching email content from Resend:", err);
+    return { text: "", html: "" };
+  }
+}
+
+/**
  * Try to match a reply to an existing ticket by:
  * 1. Ticket ID in subject line: [Ticket#UUID]
  * 2. Subject prefix match: "Re: Original Subject"
@@ -78,7 +102,6 @@ async function findExistingTicket(
   db: ReturnType<typeof createServiceClient>,
   subject: string
 ) {
-  // Check for ticket ID in subject: [Ticket#<uuid>]
   const idMatch = subject.match(/\[Ticket#([a-f0-9-]{36})\]/i);
   if (idMatch) {
     const { data } = await db
@@ -89,7 +112,6 @@ async function findExistingTicket(
     if (data) return data;
   }
 
-  // Fallback: strip Re:/Fwd: prefixes and look for exact subject match
   const cleanSubject = subject
     .replace(/^(Re|Fwd|Fw):\s*/gi, "")
     .replace(/\[Ticket#[a-f0-9-]+\]/gi, "")
@@ -109,29 +131,36 @@ async function findExistingTicket(
   return null;
 }
 
+/**
+ * Convert HTML to readable plain text (preserving line breaks).
+ */
+function htmlToText(html: string): string {
+  return html
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/p>/gi, "\n\n")
+    .replace(/<\/div>/gi, "\n")
+    .replace(/<\/li>/gi, "\n")
+    .replace(/<[^>]*>/g, "")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 export async function POST(request: NextRequest) {
   try {
-    // Verify webhook secret if configured
-    const webhookSecret = process.env.RESEND_WEBHOOK_SECRET;
-    if (webhookSecret) {
-      const signature = request.headers.get("svix-signature");
-      if (!signature) {
-        return NextResponse.json(
-          { error: "Missing signature" },
-          { status: 401 }
-        );
-      }
-      // For production: use @svix/webhook to verify signature
-      // For now, check that the secret header is present
-      // (Full Svix verification can be added when Resend provides the signing secret)
-    }
-
     const raw = await request.json();
 
-    // Log the raw payload structure for debugging
-    console.log("Inbound email webhook payload:", JSON.stringify(raw, null, 2));
+    console.log("Inbound email webhook received:", {
+      type: raw.type,
+      dataKeys: raw.data ? Object.keys(raw.data) : Object.keys(raw),
+    });
 
-    // Resend may wrap in { type, data } or send data at top level
+    // Resend wraps in { type, data }
     const payload = raw.data ? raw : { type: "email.received", data: raw };
 
     // Only handle email.received events
@@ -143,11 +172,12 @@ export async function POST(request: NextRequest) {
     const from = data.from || "";
     const to = data.to || [];
     const subject = data.subject || "";
+    const emailId = data.email_id || data.id || "";
 
-    // Only process emails addressed to @teamprompt.app (Resend fires for all domains on the account)
+    // Only process emails addressed to @teamprompt.app
     const toAddresses = Array.isArray(to) ? to : [to];
     const headers = data.headers || [];
-    const originalTo = headers.find((h: { name: string }) => h.name.toLowerCase() === "to")?.value || "";
+    const originalTo = headers.find?.((h: { name: string }) => h.name?.toLowerCase() === "to")?.value || "";
     const allRecipients = [originalTo, ...toAddresses].join(",").toLowerCase();
     if (!allRecipients.includes("@teamprompt.app")) {
       console.log("Inbound email: ignoring non-teamprompt.app recipient:", allRecipients);
@@ -160,39 +190,27 @@ export async function POST(request: NextRequest) {
       console.log("Inbound email: ignoring email from own domain:", senderAddress);
       return NextResponse.json({ ok: true, action: "ignored_own_domain" });
     }
-    // Resend may send body as text/html or textBody/htmlBody depending on version
-    const text = data.text || data.textBody || data.body || "";
-    const html = data.html || data.htmlBody || "";
-    console.log("Inbound email body fields:", {
-      hasText: !!data.text, hasHtml: !!data.html,
-      hasTextBody: !!data.textBody, hasHtmlBody: !!data.htmlBody,
-      hasBody: !!data.body,
-      textLen: text.length, htmlLen: html.length,
-      dataKeys: Object.keys(data),
-    });
+
+    // Fetch the actual email body from Resend API
+    // (webhooks only include metadata, NOT the body)
+    let text = "";
+    let html = "";
+
+    if (emailId) {
+      const content = await fetchEmailContent(emailId);
+      text = content.text;
+      html = content.html;
+      console.log("Fetched email content:", { emailId, textLen: text.length, htmlLen: html.length });
+    } else {
+      console.warn("No email_id in webhook payload — cannot fetch body");
+    }
 
     const senderEmail = extractEmail(from);
     const senderName = extractName(from);
     const { inboxEmail, ticketType } = detectInbox(toAddresses, headers);
-    // Prefer text version; fall back to HTML stripped to readable text
-    const body = text || (html
-      ? html
-          .replace(/<br\s*\/?>/gi, "\n")
-          .replace(/<\/p>/gi, "\n\n")
-          .replace(/<\/div>/gi, "\n")
-          .replace(/<\/li>/gi, "\n")
-          .replace(/<[^>]*>/g, "")
-          .replace(/&nbsp;/gi, " ")
-          .replace(/&amp;/gi, "&")
-          .replace(/&lt;/gi, "<")
-          .replace(/&gt;/gi, ">")
-          .replace(/&quot;/gi, '"')
-          .replace(/&#39;/gi, "'")
-          .replace(/\n{3,}/g, "\n\n")
-          .trim()
-      : "");
+    const body = text || (html ? htmlToText(html) : "");
 
-    // Extract attachment metadata (don't store content — just metadata for now)
+    // Extract attachment metadata
     const rawAttachments = data.attachments || [];
     const attachments = Array.isArray(rawAttachments)
       ? rawAttachments.map((a: { filename?: string; mimeType?: string; content_type?: string; size?: number }) => ({
@@ -203,16 +221,14 @@ export async function POST(request: NextRequest) {
       : [];
 
     if (!senderEmail) {
-      console.error("Inbound email: no sender found. from:", from, "payload keys:", Object.keys(raw));
+      console.error("Inbound email: no sender found. from:", from);
       return NextResponse.json(
         { error: "Missing sender" },
         { status: 400 }
       );
     }
 
-    // Allow empty body — still create the ticket
     const finalBody = body || "(No message body)";
-
     const db = createServiceClient();
 
     // Try to find the sender as an existing user
@@ -226,13 +242,12 @@ export async function POST(request: NextRequest) {
     const existingTicket = await findExistingTicket(db, subject || "");
 
     if (existingTicket) {
-      // Add as a note on the existing ticket (external reply, not internal)
       const { error: noteError } = await db.from("ticket_notes").insert({
         ticket_id: existingTicket.id,
         author_id: senderProfile?.id || existingTicket.user_id,
         content: `[Email reply from ${senderName} <${senderEmail}>]\n\n${finalBody}`,
         is_internal: false,
-        email_sent: false, // This IS the email, no need to send one
+        email_sent: false,
       });
 
       if (noteError) {
@@ -266,7 +281,6 @@ export async function POST(request: NextRequest) {
     }
 
     // New ticket from inbound email
-    // Store clean body (no "From:" prefix) + HTML + sender columns
     const { data: inserted, error: insertError } = await db
       .from("feedback")
       .insert({

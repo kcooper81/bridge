@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import type { SuperAdminRole } from "@/lib/constants";
+import { DEFAULT_SUPPORT_PAGES } from "@/lib/constants";
 import {
   LayoutDashboard,
   Building2,
@@ -91,7 +92,7 @@ const navGroups: NavGroup[] = [
   },
 ];
 
-export function AdminNav({ superAdminRole }: { superAdminRole: SuperAdminRole | null }) {
+export function AdminNav({ superAdminRole, supportAllowedPages }: { superAdminRole: SuperAdminRole | null; supportAllowedPages?: string[] | null }) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [badges, setBadges] = useState<NavBadgeCounts>({
@@ -103,19 +104,21 @@ export function AdminNav({ superAdminRole }: { superAdminRole: SuperAdminRole | 
   const prevTicketCount = useRef(0);
 
   const isSupport = superAdminRole === "support";
+  const allowedPages = isSupport
+    ? (supportAllowedPages && supportAllowedPages.length > 0 ? supportAllowedPages : DEFAULT_SUPPORT_PAGES)
+    : null;
 
   // Filter groups and items based on role
   const filteredGroups = navGroups
     .map((group) => ({
       ...group,
       items: group.items.filter((item) => {
-        if (isSupport) return item.supportVisible;
+        if (isSupport) return allowedPages!.includes(item.href);
         if (item.superAdminOnly && isSupport) return false;
         return true;
       }),
     }))
     .filter((group) => {
-      if (isSupport && !group.supportVisible) return false;
       return group.items.length > 0;
     });
 

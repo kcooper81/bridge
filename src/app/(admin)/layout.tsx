@@ -8,6 +8,7 @@ export const metadata: Metadata = {
 import { AuthProvider } from "@/components/providers/auth-provider";
 import { AdminNav } from "@/components/admin/nav";
 import { AdminHeader } from "@/components/admin/header";
+import { SupportAccessGuard } from "@/components/admin/support-access-guard";
 import { SUPER_ADMIN_EMAILS } from "@/lib/constants";
 import type { SuperAdminRole } from "@/lib/constants";
 
@@ -31,7 +32,7 @@ export default async function AdminLayout({
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("is_super_admin, super_admin_role")
+    .select("is_super_admin, super_admin_role, support_allowed_pages")
     .eq("id", user.id)
     .single();
 
@@ -64,8 +65,11 @@ export default async function AdminLayout({
     <AuthProvider initialUser={user} initialSession={session}>
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
         <AdminHeader user={user} />
+        {isSupportStaff && !isSuperAdmin && (
+          <SupportAccessGuard allowedPages={profile?.support_allowed_pages || []} />
+        )}
         <div className="flex">
-          <AdminNav superAdminRole={superAdminRole} />
+          <AdminNav superAdminRole={superAdminRole} supportAllowedPages={profile?.support_allowed_pages || null} />
           <main className="flex-1 p-3 sm:p-4 md:p-6 min-w-0 overflow-x-hidden">
             {children}
           </main>

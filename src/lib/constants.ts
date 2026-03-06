@@ -7,6 +7,24 @@ export const SUPER_ADMIN_EMAILS = [
 
 export type SuperAdminRole = "super_admin" | "support";
 
+/** All admin pages that can be granted to support staff */
+export const ADMIN_PAGES = [
+  { href: "/admin", label: "Dashboard" },
+  { href: "/admin/analytics", label: "Analytics" },
+  { href: "/admin/tickets", label: "Tickets & Email" },
+  { href: "/admin/errors", label: "Error Logs" },
+  { href: "/admin/organizations", label: "Organizations" },
+  { href: "/admin/users", label: "Users" },
+  { href: "/admin/subscriptions", label: "Subscriptions" },
+  { href: "/admin/activity", label: "Activity Logs" },
+  { href: "/admin/testing-guide", label: "Testing Guide" },
+  { href: "/admin/settings/inbox", label: "Inbox Settings" },
+  { href: "/admin/settings", label: "Settings" },
+] as const;
+
+/** Default pages support staff can access when no custom config is set */
+export const DEFAULT_SUPPORT_PAGES = ["/admin/tickets", "/admin/testing-guide"];
+
 export const SITE_NAME = "TeamPrompt";
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || "https://teamprompt.app";

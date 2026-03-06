@@ -40,7 +40,7 @@ export async function GET() {
 
   const { data: admins, error } = await db
     .from("profiles")
-    .select("id, email, name, is_super_admin, super_admin_role, created_at")
+    .select("id, email, name, is_super_admin, super_admin_role, support_allowed_pages, created_at")
     .or("is_super_admin.eq.true,super_admin_role.not.is.null")
     .order("created_at", { ascending: true });
 
@@ -112,6 +112,53 @@ export async function POST(request: NextRequest) {
   if (updateErr) {
     console.error("Admin user update error:", updateErr);
     return NextResponse.json({ error: "Failed to update user role" }, { status: 500 });
+  }
+
+  return NextResponse.json({ success: true });
+}
+
+/** PATCH — update support staff allowed pages */
+export async function PATCH(request: NextRequest) {
+  const isAdmin = await verifySuperAdmin();
+  if (!isAdmin) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  const body = await request.json();
+  const { userId, allowedPages } = body as { userId?: string; allowedPages?: string[] };
+
+  if (!userId) {
+    return NextResponse.json({ error: "userId is required" }, { status: 400 });
+  }
+
+  if (!Array.isArray(allowedPages)) {
+    return NextResponse.json({ error: "allowedPages must be an array" }, { status: 400 });
+  }
+
+  const db = createServiceClient();
+
+  // Verify the target user is a support user
+  const { data: target } = await db
+    .from("profiles")
+    .select("super_admin_role")
+    .eq("id", userId)
+    .single();
+
+  if (!target || target.super_admin_role !== "support") {
+    return NextResponse.json({ error: "User is not a support staff member" }, { status: 400 });
+  }
+
+  const { error } = await db
+    .from("profiles")
+    .update({
+      support_allowed_pages: allowedPages.length > 0 ? allowedPages : null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", userId);
+
+  if (error) {
+    console.error("Update allowed pages error:", error);
+    return NextResponse.json({ error: "Failed to update allowed pages" }, { status: 500 });
   }
 
   return NextResponse.json({ success: true });

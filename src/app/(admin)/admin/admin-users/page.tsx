@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   Card,
   CardContent,
@@ -18,9 +18,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { UserCog, Plus, Trash2, Loader2, AlertCircle } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { UserCog, Plus, Trash2, Loader2, AlertCircle, ChevronDown, ChevronRight, Shield } from "lucide-react";
 import { useAuth } from "@/components/providers/auth-provider";
 import type { SuperAdminRole } from "@/lib/constants";
+import { ADMIN_PAGES, DEFAULT_SUPPORT_PAGES } from "@/lib/constants";
+import { toast } from "sonner";
 
 interface AdminUser {
   id: string;
@@ -28,6 +31,7 @@ interface AdminUser {
   name: string;
   is_super_admin: boolean;
   super_admin_role: SuperAdminRole | null;
+  support_allowed_pages: string[] | null;
   created_at: string;
 }
 
@@ -40,6 +44,8 @@ export default function AdminUsersPage() {
   const [newRole, setNewRole] = useState<SuperAdminRole>("support");
   const [adding, setAdding] = useState(false);
   const [removingId, setRemovingId] = useState<string | null>(null);
+  const [expandedUserId, setExpandedUserId] = useState<string | null>(null);
+  const [savingPages, setSavingPages] = useState<string | null>(null);
 
   const fetchAdmins = useCallback(async () => {
     try {
@@ -119,6 +125,50 @@ export default function AdminUsersPage() {
     }
   }
 
+  function getAllowedPages(user: AdminUser): string[] {
+    return user.support_allowed_pages && user.support_allowed_pages.length > 0
+      ? user.support_allowed_pages
+      : DEFAULT_SUPPORT_PAGES;
+  }
+
+  function togglePage(userId: string, href: string) {
+    setAdmins((prev) =>
+      prev.map((a) => {
+        if (a.id !== userId) return a;
+        const current = getAllowedPages(a);
+        const updated = current.includes(href)
+          ? current.filter((p) => p !== href)
+          : [...current, href];
+        return { ...a, support_allowed_pages: updated };
+      })
+    );
+  }
+
+  async function saveAllowedPages(userId: string) {
+    const user = admins.find((a) => a.id === userId);
+    if (!user) return;
+    setSavingPages(userId);
+
+    try {
+      const res = await fetch("/api/admin/admin-users", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId,
+          allowedPages: user.support_allowed_pages || [],
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to save");
+      toast.success("Page access updated");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to save");
+    } finally {
+      setSavingPages(null);
+    }
+  }
+
   function getRoleBadge(user: AdminUser) {
     const role = user.super_admin_role || (user.is_super_admin ? "super_admin" : null);
     if (role === "super_admin") {
@@ -183,7 +233,7 @@ export default function AdminUsersPage() {
           </div>
           <p className="text-xs text-muted-foreground mt-2">
             <strong>Super Admin</strong> — full access to all admin pages and can manage other admins.{" "}
-            <strong>Support</strong> — can only view Tickets and Testing Guide.
+            <strong>Support</strong> — configurable access to specific pages (default: Tickets &amp; Testing Guide).
           </p>
         </CardContent>
       </Card>
@@ -221,31 +271,94 @@ export default function AdminUsersPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {admins.map((admin) => (
-                    <tr key={admin.id} className="border-b last:border-0">
-                      <td className="p-3 font-mono text-xs">{admin.email}</td>
-                      <td className="p-3">{admin.name || "—"}</td>
-                      <td className="p-3">{getRoleBadge(admin)}</td>
-                      <td className="p-3 text-muted-foreground text-xs">
-                        {new Date(admin.created_at).toLocaleDateString()}
-                      </td>
-                      <td className="p-3 text-right">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                          onClick={() => handleRemove(admin.id)}
-                          disabled={removingId === admin.id}
-                        >
-                          {removingId === admin.id ? (
-                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                          ) : (
-                            <Trash2 className="h-3.5 w-3.5" />
-                          )}
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
+                  {admins.map((admin) => {
+                    const isSupport = admin.super_admin_role === "support";
+                    const isExpanded = expandedUserId === admin.id;
+                    const currentPages = getAllowedPages(admin);
+
+                    return (
+                      <React.Fragment key={admin.id}>
+                        <tr className="border-b last:border-0">
+                          <td className="p-3 font-mono text-xs">{admin.email}</td>
+                          <td className="p-3">{admin.name || "—"}</td>
+                          <td className="p-3">{getRoleBadge(admin)}</td>
+                          <td className="p-3 text-muted-foreground text-xs">
+                            {new Date(admin.created_at).toLocaleDateString()}
+                          </td>
+                          <td className="p-3 text-right">
+                            <div className="flex items-center justify-end gap-1">
+                              {isSupport && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-8 gap-1 text-xs"
+                                  onClick={() => setExpandedUserId(isExpanded ? null : admin.id)}
+                                >
+                                  <Shield className="h-3.5 w-3.5" />
+                                  <span className="hidden sm:inline">Access</span>
+                                  {isExpanded ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+                                </Button>
+                              )}
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                onClick={() => handleRemove(admin.id)}
+                                disabled={removingId === admin.id}
+                              >
+                                {removingId === admin.id ? (
+                                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                ) : (
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                )}
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                        {isSupport && isExpanded && (
+                          <tr className="bg-muted/30">
+                            <td colSpan={5} className="px-4 py-3">
+                              <div className="space-y-2">
+                                <p className="text-xs font-medium text-muted-foreground">
+                                  Page Access — select which admin pages this support user can see
+                                </p>
+                                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+                                  {ADMIN_PAGES.map((page) => (
+                                    <label
+                                      key={page.href}
+                                      className="flex items-center gap-2 rounded-md border px-3 py-2 text-xs cursor-pointer hover:bg-muted/50 transition-colors"
+                                    >
+                                      <Checkbox
+                                        checked={currentPages.includes(page.href)}
+                                        onCheckedChange={() => togglePage(admin.id, page.href)}
+                                      />
+                                      <span>{page.label}</span>
+                                    </label>
+                                  ))}
+                                </div>
+                                <div className="flex items-center gap-2 pt-1">
+                                  <Button
+                                    size="sm"
+                                    className="h-7 text-xs"
+                                    onClick={() => saveAllowedPages(admin.id)}
+                                    disabled={savingPages === admin.id}
+                                  >
+                                    {savingPages === admin.id ? (
+                                      <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                                    ) : null}
+                                    Save Access
+                                  </Button>
+                                  <span className="text-[11px] text-muted-foreground">
+                                    {currentPages.length} page{currentPages.length !== 1 ? "s" : ""} selected
+                                  </span>
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </React.Fragment>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

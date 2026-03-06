@@ -56,11 +56,14 @@ import {
   Plus,
   X,
   PartyPopper,
+  UserRound,
+  UserRoundX,
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
+import { useAuth } from "@/components/providers/auth-provider";
 
 // --- Types ---
 
@@ -92,11 +95,21 @@ interface TicketRow {
   user_email: string | null;
   org_name: string | null;
   inbox_email: string | null;
+  assigned_to: string | null;
+  assigned_email: string | null;
+  assigned_name: string | null;
   attachments: AttachmentMeta[];
   notes: NoteRow[];
   notes_count: number;
   created_at: string;
   updated_at: string;
+}
+
+interface StaffMember {
+  id: string;
+  email: string;
+  name: string | null;
+  super_admin_role: string | null;
 }
 
 interface CannedResponse {
@@ -139,7 +152,7 @@ const TYPE_ICONS: Record<string, React.ElementType> = {
   sales: DollarSign,
 };
 
-type QuickFilter = "all" | "unread" | "open" | "resolved" | "closed";
+type QuickFilter = "all" | "unread" | "open" | "mine" | "unassigned" | "resolved" | "closed";
 
 // --- Helpers ---
 
@@ -248,15 +261,19 @@ function EmailHtmlBody({ html }: { html: string }) {
 function TicketContent({
   ticket,
   tickets,
+  staff,
   onSelectTicket,
   updateStatus,
   updatePriority,
+  assignTicket,
 }: {
   ticket: TicketRow;
   tickets: TicketRow[];
+  staff: StaffMember[];
   onSelectTicket: (t: TicketRow) => void;
   updateStatus: (id: string, status: string) => void;
   updatePriority: (id: string, priority: string) => void;
+  assignTicket: (id: string, assignedTo: string | null) => void;
 }) {
   const [historyOpen, setHistoryOpen] = useState(false);
 
@@ -315,6 +332,31 @@ function TicketContent({
               <SelectItem value="normal">Normal</SelectItem>
               <SelectItem value="high">High</SelectItem>
               <SelectItem value="urgent">Urgent</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select
+            value={ticket.assigned_to || "_unassigned"}
+            onValueChange={(val) => assignTicket(ticket.id, val === "_unassigned" ? null : val)}
+          >
+            <SelectTrigger className="w-[160px] h-8 text-xs">
+              <div className="flex items-center gap-1.5 truncate">
+                <UserRound className="h-3 w-3 flex-shrink-0" />
+                <SelectValue placeholder="Unassigned" />
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="_unassigned">
+                <span className="flex items-center gap-1.5">
+                  <UserRoundX className="h-3 w-3 text-muted-foreground" />
+                  Unassigned
+                </span>
+              </SelectItem>
+              {staff.map((s) => (
+                <SelectItem key={s.id} value={s.id}>
+                  <span className="truncate">{s.name || s.email}</span>
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
 
@@ -533,8 +575,10 @@ function TicketContent({
 // --- Main Component ---
 
 export default function TicketsPage() {
+  const { user } = useAuth();
   const [tickets, setTickets] = useState<TicketRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [staff, setStaff] = useState<StaffMember[]>([]);
 
   // Filters
   const [search, setSearch] = useState("");
@@ -601,9 +645,22 @@ export default function TicketsPage() {
     }
   }, []);
 
+  const loadStaff = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/staff");
+      if (res.ok) {
+        const data = await res.json();
+        setStaff(data.staff || []);
+      }
+    } catch {
+      // Non-critical
+    }
+  }, []);
+
   useEffect(() => {
     loadTickets();
     loadCannedResponses();
+    loadStaff();
 
     const supabase = createClient();
     const channel = supabase
@@ -645,7 +702,7 @@ export default function TicketsPage() {
       window.removeEventListener("focus", handleFocus);
       supabase.removeChannel(channel);
     };
-  }, [loadTickets, loadCannedResponses]);
+  }, [loadTickets, loadCannedResponses, loadStaff]);
 
   // --- Actions ---
 
@@ -682,6 +739,33 @@ export default function TicketsPage() {
       toast.success(`Priority updated to ${priority}`);
     } catch {
       toast.error("Failed to update priority");
+    }
+  };
+
+  const assignTicket = async (id: string, assignedTo: string | null) => {
+    try {
+      const res = await fetch("/api/admin/tickets", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, assigned_to: assignedTo }),
+      });
+      if (!res.ok) throw new Error("Failed");
+      const assignee = assignedTo ? staff.find((s) => s.id === assignedTo) : null;
+      setTickets((prev) =>
+        prev.map((t) =>
+          t.id === id
+            ? { ...t, assigned_to: assignedTo, assigned_email: assignee?.email || null, assigned_name: assignee?.name || null }
+            : t
+        )
+      );
+      setSelectedTicket((prev) =>
+        prev?.id === id
+          ? { ...prev, assigned_to: assignedTo, assigned_email: assignee?.email || null, assigned_name: assignee?.name || null }
+          : prev
+      );
+      toast.success(assignedTo ? `Assigned to ${assignee?.name || assignee?.email}` : "Unassigned");
+    } catch {
+      toast.error("Failed to assign ticket");
     }
   };
 
@@ -767,10 +851,13 @@ export default function TicketsPage() {
       const data = await res.json();
       const newNote: NoteRow = data.note;
 
+      // Auto-assign: if ticket was unassigned, the API auto-assigned to current user
+      const wasUnassigned = !selectedTicket.assigned_to;
       const updateTicketNotes = (t: TicketRow): TicketRow => ({
         ...t,
         notes: [...t.notes, newNote],
         notes_count: t.notes_count + 1,
+        ...(wasUnassigned && user ? { assigned_to: user.id, assigned_email: user.email || null, assigned_name: null } : {}),
       });
 
       setTickets((prev) =>
@@ -899,6 +986,10 @@ export default function TicketsPage() {
       result = result.filter((t) => t.status === "new");
     } else if (quickFilter === "open") {
       result = result.filter((t) => t.status === "new" || t.status === "in_progress");
+    } else if (quickFilter === "mine") {
+      result = result.filter((t) => t.assigned_to === user?.id && t.status !== "closed");
+    } else if (quickFilter === "unassigned") {
+      result = result.filter((t) => !t.assigned_to && t.status !== "resolved" && t.status !== "closed");
     } else if (quickFilter === "resolved") {
       result = result.filter((t) => t.status === "resolved");
     } else if (quickFilter === "closed") {
@@ -927,10 +1018,12 @@ export default function TicketsPage() {
       total: tickets.length,
       new: tickets.filter((t) => t.status === "new").length,
       open: tickets.filter((t) => t.status === "in_progress").length,
+      mine: tickets.filter((t) => t.assigned_to === user?.id && t.status !== "closed").length,
+      unassigned: tickets.filter((t) => !t.assigned_to && t.status !== "resolved" && t.status !== "closed").length,
       resolved: tickets.filter((t) => t.status === "resolved").length,
       closed: tickets.filter((t) => t.status === "closed").length,
     }),
-    [tickets]
+    [tickets, user?.id]
   );
 
   // Canned responses by category
@@ -1103,6 +1196,12 @@ export default function TicketsPage() {
                 {ticket.notes_count}
               </span>
             )}
+            {ticket.assigned_to && (
+              <span className="inline-flex items-center gap-0.5 text-[10px] text-muted-foreground" title={`Assigned to ${ticket.assigned_name || ticket.assigned_email}`}>
+                <UserRound className="h-3 w-3" />
+                {(ticket.assigned_name || ticket.assigned_email || "").split("@")[0]}
+              </span>
+            )}
             {/* Waiting indicator: no admin reply yet */}
             {!hasReply && ticket.status !== "closed" && ticket.status !== "resolved" && (
               <span className={cn("text-[10px] font-medium", slaColor(activity))}>
@@ -1129,6 +1228,28 @@ export default function TicketsPage() {
           <p className="font-medium text-foreground">Inbox zero!</p>
           <p className="text-sm text-muted-foreground mt-1">
             All caught up. No unread tickets.
+          </p>
+        </div>
+      );
+    }
+    if (quickFilter === "mine" && stats.mine === 0 && stats.total > 0) {
+      return (
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <UserRound className="h-10 w-10 text-muted-foreground mb-3" />
+          <p className="font-medium text-foreground">No tickets assigned to you</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            Pick up tickets from the Unassigned tab.
+          </p>
+        </div>
+      );
+    }
+    if (quickFilter === "unassigned" && stats.unassigned === 0 && stats.total > 0) {
+      return (
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <PartyPopper className="h-10 w-10 text-green-500 mb-3" />
+          <p className="font-medium text-foreground">All tickets assigned!</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            Every open ticket has an owner.
           </p>
         </div>
       );
@@ -1390,6 +1511,8 @@ export default function TicketsPage() {
         {([
           { key: "unread" as QuickFilter, label: "Unread", count: stats.new },
           { key: "open" as QuickFilter, label: "Open", count: stats.new + stats.open },
+          { key: "mine" as QuickFilter, label: "Mine", count: stats.mine },
+          { key: "unassigned" as QuickFilter, label: "Unassigned", count: stats.unassigned },
           { key: "resolved" as QuickFilter, label: "Resolved", count: stats.resolved },
           { key: "closed" as QuickFilter, label: "Closed", count: stats.closed },
           { key: "all" as QuickFilter, label: "All", count: stats.total },
@@ -1504,9 +1627,9 @@ export default function TicketsPage() {
       </div>
 
       {/* Split pane: ticket list + detail (desktop) / full-width list (mobile) */}
-      <div className="lg:grid lg:grid-cols-[380px_1fr] lg:gap-0 lg:border lg:rounded-lg lg:overflow-hidden lg:bg-card" style={{ minHeight: "calc(100vh - 200px)" }}>
+      <div className="lg:grid lg:grid-cols-[380px_1fr] lg:gap-0 lg:border lg:rounded-lg lg:overflow-hidden lg:bg-card" style={{ minHeight: "calc(100vh - 130px)" }}>
         {/* Left: Ticket list */}
-        <div className="border rounded-lg lg:rounded-none lg:border-0 lg:border-r bg-card lg:flex lg:flex-col" style={{ maxHeight: "calc(100vh - 200px)" }}>
+        <div className="border rounded-lg lg:rounded-none lg:border-0 lg:border-r bg-card lg:flex lg:flex-col" style={{ maxHeight: "calc(100vh - 130px)" }}>
           <ScrollArea className="flex-1">
             {openTickets.length === 0 && resolvedTickets.length === 0 ? (
               renderEmptyState()
@@ -1558,15 +1681,17 @@ export default function TicketsPage() {
         </div>
 
         {/* Right: Detail panel (desktop only) */}
-        <div className="hidden lg:flex lg:flex-col" style={{ maxHeight: "calc(100vh - 200px)" }}>
+        <div className="hidden lg:flex lg:flex-col" style={{ maxHeight: "calc(100vh - 130px)" }}>
           {selectedTicket ? (
             <>
               <TicketContent
                 ticket={selectedTicket}
                 tickets={tickets}
+                staff={staff}
                 onSelectTicket={openTicket}
                 updateStatus={updateStatus}
                 updatePriority={updatePriority}
+                assignTicket={assignTicket}
               />
               {replyForm}
             </>
@@ -1598,9 +1723,11 @@ export default function TicketsPage() {
               <TicketContent
                 ticket={selectedTicket}
                 tickets={tickets}
+                staff={staff}
                 onSelectTicket={openTicket}
                 updateStatus={updateStatus}
                 updatePriority={updatePriority}
+                assignTicket={assignTicket}
               />
               {replyForm}
             </>

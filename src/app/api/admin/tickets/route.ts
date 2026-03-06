@@ -32,7 +32,7 @@ export async function GET() {
 
   const { data: tickets, error } = await db
     .from("feedback")
-    .select("id, type, subject, message, html_body, sender_email, sender_name, status, priority, user_id, org_id, inbox_email, attachments, created_at, updated_at")
+    .select("id, type, subject, message, html_body, sender_email, sender_name, status, priority, user_id, org_id, inbox_email, attachments, assigned_to, created_at, updated_at")
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -50,8 +50,11 @@ export async function GET() {
   const orgIds = Array.from(
     new Set((tickets || []).map((t) => t.org_id).filter(Boolean) as string[])
   );
+  const assigneeIds = Array.from(
+    new Set((tickets || []).map((t) => t.assigned_to).filter(Boolean) as string[])
+  );
 
-  const [usersRes, orgsRes, notesRes] = await Promise.all([
+  const [usersRes, orgsRes, notesRes, assigneesRes] = await Promise.all([
     userIds.length > 0
       ? db.from("profiles").select("id, email").in("id", userIds)
       : { data: [] },
@@ -64,6 +67,9 @@ export async function GET() {
           .select("id, ticket_id, author_id, content, is_internal, email_sent, created_at")
           .in("ticket_id", ticketIds)
           .order("created_at", { ascending: true })
+      : { data: [] },
+    assigneeIds.length > 0
+      ? db.from("profiles").select("id, email, name").in("id", assigneeIds)
       : { data: [] },
   ]);
 
@@ -92,6 +98,9 @@ export async function GET() {
   );
   const orgMap = new Map(
     (orgsRes.data || []).map((o: { id: string; name: string }) => [o.id, o.name])
+  );
+  const assigneeMap = new Map(
+    (assigneesRes.data || []).map((a: { id: string; email: string; name: string }) => [a.id, { email: a.email, name: a.name }])
   );
 
   // Combine both maps for author email lookup
@@ -159,6 +168,9 @@ export async function GET() {
       user_email: senderEmail,
       org_name: t.org_id ? orgMap.get(t.org_id) || null : null,
       inbox_email: t.inbox_email || null,
+      assigned_to: t.assigned_to || null,
+      assigned_email: t.assigned_to ? assigneeMap.get(t.assigned_to)?.email || null : null,
+      assigned_name: t.assigned_to ? assigneeMap.get(t.assigned_to)?.name || null : null,
       attachments: t.attachments || [],
       notes: notesMap.get(t.id) || [],
       notes_count: (notesMap.get(t.id) || []).length,
@@ -177,13 +189,14 @@ export async function PATCH(request: NextRequest) {
   }
 
   const body = await request.json();
-  const { id, ids, status, priority } = body;
+  const { id, ids, status, priority, assigned_to } = body;
 
   // Support single id or bulk ids
   const ticketIds: string[] = ids || (id ? [id] : []);
-  if (ticketIds.length === 0 || (!status && !priority)) {
+  const hasAssignment = assigned_to !== undefined; // allow null to unassign
+  if (ticketIds.length === 0 || (!status && !priority && !hasAssignment)) {
     return NextResponse.json(
-      { error: "id(s) and at least one of status/priority required" },
+      { error: "id(s) and at least one of status/priority/assigned_to required" },
       { status: 400 }
     );
   }
@@ -208,6 +221,9 @@ export async function PATCH(request: NextRequest) {
   }
   if (priority) {
     updates.priority = priority;
+  }
+  if (hasAssignment) {
+    updates.assigned_to = assigned_to; // null = unassign
   }
 
   const { error } = await db.from("feedback").update(updates).in("id", ticketIds);

@@ -50,7 +50,7 @@ export async function POST(
   // Verify ticket exists and get details for potential email
   const { data: ticket, error: ticketError } = await db
     .from("feedback")
-    .select("id, subject, message, user_id, inbox_email, sender_email")
+    .select("id, subject, message, user_id, inbox_email, sender_email, assigned_to")
     .eq("id", ticketId)
     .single();
 
@@ -94,6 +94,14 @@ export async function POST(
       { error: "Failed to create note" },
       { status: 500 }
     );
+  }
+
+  // Auto-assign to the replying admin if ticket is unassigned
+  if (!ticket.assigned_to) {
+    await db
+      .from("feedback")
+      .update({ assigned_to: user.id, updated_at: new Date().toISOString() })
+      .eq("id", ticketId);
   }
 
   // Now send email if public note and we have a recipient

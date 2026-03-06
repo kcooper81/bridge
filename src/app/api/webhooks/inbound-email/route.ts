@@ -144,6 +144,16 @@ export async function POST(request: NextRequest) {
     const to = data.to || [];
     const subject = data.subject || "";
 
+    // Only process emails addressed to @teamprompt.app (Resend fires for all domains on the account)
+    const toAddresses = Array.isArray(to) ? to : [to];
+    const headers = data.headers || [];
+    const originalTo = headers.find((h: { name: string }) => h.name.toLowerCase() === "to")?.value || "";
+    const allRecipients = [originalTo, ...toAddresses].join(",").toLowerCase();
+    if (!allRecipients.includes("@teamprompt.app")) {
+      console.log("Inbound email: ignoring non-teamprompt.app recipient:", allRecipients);
+      return NextResponse.json({ ok: true, action: "ignored_wrong_domain" });
+    }
+
     // Ignore emails sent FROM our own domain to prevent loops
     const senderAddress = extractEmail(from).toLowerCase();
     if (senderAddress.endsWith("@teamprompt.app")) {
@@ -152,11 +162,10 @@ export async function POST(request: NextRequest) {
     }
     const text = data.text || "";
     const html = data.html || "";
-    const headers = data.headers || [];
 
     const senderEmail = extractEmail(from);
     const senderName = extractName(from);
-    const { inboxEmail, ticketType } = detectInbox(Array.isArray(to) ? to : [to], headers);
+    const { inboxEmail, ticketType } = detectInbox(toAddresses, headers);
     const body = text || html?.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim() || "";
 
     // Extract attachment metadata (don't store content — just metadata for now)

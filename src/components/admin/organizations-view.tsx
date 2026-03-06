@@ -4,8 +4,13 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Building2, TrendingUp, Users as UsersIcon, Calendar } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Building2, TrendingUp, Users as UsersIcon, Calendar } from "lucide-react";
+import {
+  AdminPageHeader,
+  AdminLoadingState,
+  StatCardRow,
+  StatCard,
+} from "@/components/admin/admin-page-layout";
 import { OrgListPanel, type OrgListItem } from "@/components/admin/org-list-panel";
 import { OrgDetailPanel } from "@/components/admin/org-detail-panel";
 import { MemberTable, type MemberRow } from "@/components/admin/member-table";
@@ -39,20 +44,12 @@ export function OrganizationsView() {
   const [orgs, setOrgs] = useState<OrgFull[]>([]);
   const [subscriptions, setSubscriptions] = useState<SubRow[]>([]);
   const [profiles, setProfiles] = useState<MemberRow[]>([]);
-  const [promptCounts, setPromptCounts] = useState<Map<string, number>>(
-    new Map()
-  );
+  const [promptCounts, setPromptCounts] = useState<Map<string, number>>(new Map());
 
-  const [selectedOrgId, setSelectedOrgId] = useState<string | null>(
-    searchParams.get("org")
-  );
-  const [activeTab, setActiveTab] = useState<string>(
-    searchParams.get("view") === "users" ? "users" : "teams"
-  );
-  // Mobile: when an org is selected on mobile, show the detail view
+  const [selectedOrgId, setSelectedOrgId] = useState<string | null>(searchParams.get("org"));
+  const [activeTab, setActiveTab] = useState<string>(searchParams.get("view") === "users" ? "users" : "teams");
   const [mobileShowDetail, setMobileShowDetail] = useState(false);
 
-  // URL sync
   useEffect(() => {
     const params = new URLSearchParams();
     if (activeTab === "users") {
@@ -60,9 +57,7 @@ export function OrganizationsView() {
     } else if (selectedOrgId) {
       params.set("org", selectedOrgId);
     }
-    const newUrl = params.toString()
-      ? `?${params.toString()}`
-      : "/admin/organizations";
+    const newUrl = params.toString() ? `?${params.toString()}` : "/admin/organizations";
     router.replace(newUrl, { scroll: false });
   }, [selectedOrgId, activeTab, router]);
 
@@ -71,57 +66,31 @@ export function OrganizationsView() {
     const supabase = createClient();
 
     const [orgsRes, subsRes, profilesRes, promptsRes] = await Promise.all([
-      supabase
-        .from("organizations")
-        .select("id, name, domain, is_suspended, created_at")
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("subscriptions")
-        .select(
-          "org_id, plan, status, seats, current_period_end, stripe_customer_id"
-        ),
-      supabase
-        .from("profiles")
-        .select(
-          "id, name, email, role, is_super_admin, org_id, created_at, extension_status, last_extension_active"
-        )
-        .order("created_at", { ascending: false }),
+      supabase.from("organizations").select("id, name, domain, is_suspended, created_at").order("created_at", { ascending: false }),
+      supabase.from("subscriptions").select("org_id, plan, status, seats, current_period_end, stripe_customer_id"),
+      supabase.from("profiles").select("id, name, email, role, is_super_admin, org_id, created_at, extension_status, last_extension_active").order("created_at", { ascending: false }),
       supabase.from("prompts").select("org_id"),
     ]);
 
-    setOrgs(
-      (orgsRes.data || []).map((o) => ({
-        ...o,
-        is_suspended: o.is_suspended || false,
-      }))
-    );
+    setOrgs((orgsRes.data || []).map((o) => ({ ...o, is_suspended: o.is_suspended || false })));
     setSubscriptions(subsRes.data || []);
-    setProfiles(
-      (profilesRes.data || []).map((p) => ({
-        ...p,
-        extension_status: p.extension_status || "unknown",
-        last_extension_active: p.last_extension_active || null,
-      }))
-    );
+    setProfiles((profilesRes.data || []).map((p) => ({
+      ...p,
+      extension_status: p.extension_status || "unknown",
+      last_extension_active: p.last_extension_active || null,
+    })));
 
     const pCounts = new Map<string, number>();
     (promptsRes.data || []).forEach((p: PromptCountRow) => {
       pCounts.set(p.org_id, (pCounts.get(p.org_id) || 0) + 1);
     });
     setPromptCounts(pCounts);
-
     setLoading(false);
   }, []);
 
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
+  useEffect(() => { loadData(); }, [loadData]);
 
-  // Derived data
-  const subMap = useMemo(
-    () => new Map(subscriptions.map((s) => [s.org_id, s])),
-    [subscriptions]
-  );
+  const subMap = useMemo(() => new Map(subscriptions.map((s) => [s.org_id, s])), [subscriptions]);
 
   const membersByOrg = useMemo(() => {
     const map = new Map<string, MemberRow[]>();
@@ -136,38 +105,31 @@ export function OrganizationsView() {
   }, [profiles]);
 
   const orgListItems: OrgListItem[] = useMemo(
-    () =>
-      orgs.map((o) => ({
-        ...o,
-        plan: subMap.get(o.id)?.plan || "free",
-        status: subMap.get(o.id)?.status || "active",
-        memberCount: membersByOrg.get(o.id)?.length || 0,
-      })),
+    () => orgs.map((o) => ({
+      ...o,
+      plan: subMap.get(o.id)?.plan || "free",
+      status: subMap.get(o.id)?.status || "active",
+      memberCount: membersByOrg.get(o.id)?.length || 0,
+    })),
     [orgs, subMap, membersByOrg]
   );
 
   const stats = useMemo(() => {
     const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-    const newThisWeek = orgs.filter(o => o.created_at >= oneWeekAgo).length;
-    const suspended = orgs.filter(o => o.is_suspended).length;
-    const paidOrgs = orgListItems.filter(o => o.plan !== "free").length;
-    const totalMembers = profiles.length;
-    return { newThisWeek, suspended, paidOrgs, totalMembers };
+    return {
+      total: orgs.length,
+      paidOrgs: orgListItems.filter((o) => o.plan !== "free").length,
+      newThisWeek: orgs.filter((o) => o.created_at >= oneWeekAgo).length,
+      totalMembers: profiles.length,
+    };
   }, [orgs, orgListItems, profiles]);
 
-  const orgMap = useMemo(
-    () => new Map(orgs.map((o) => [o.id, o.name])),
-    [orgs]
-  );
+  const orgMap = useMemo(() => new Map(orgs.map((o) => [o.id, o.name])), [orgs]);
 
   const selectedOrg = orgs.find((o) => o.id === selectedOrgId) || null;
   const selectedSub = selectedOrgId ? subMap.get(selectedOrgId) || null : null;
-  const selectedMembers = selectedOrgId
-    ? membersByOrg.get(selectedOrgId) || []
-    : [];
-  const selectedPromptCount = selectedOrgId
-    ? promptCounts.get(selectedOrgId) || 0
-    : 0;
+  const selectedMembers = selectedOrgId ? membersByOrg.get(selectedOrgId) || [] : [];
+  const selectedPromptCount = selectedOrgId ? promptCounts.get(selectedOrgId) || 0 : 0;
 
   const handleSelectOrg = (orgId: string) => {
     setSelectedOrgId(orgId);
@@ -182,16 +144,8 @@ export function OrganizationsView() {
     }
   };
 
-  const handleOrgUpdate = (updatedOrg: {
-    id: string;
-    name: string;
-    domain: string | null;
-    is_suspended: boolean;
-    created_at: string;
-  }) => {
-    setOrgs((prev) =>
-      prev.map((o) => (o.id === updatedOrg.id ? updatedOrg : o))
-    );
+  const handleOrgUpdate = (updatedOrg: OrgFull) => {
+    setOrgs((prev) => prev.map((o) => (o.id === updatedOrg.id ? updatedOrg : o)));
   };
 
   const handleOrgDelete = () => {
@@ -200,86 +154,25 @@ export function OrganizationsView() {
     setMobileShowDetail(false);
   };
 
-  const handleMobileBack = () => {
-    setMobileShowDetail(false);
-  };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
+  if (loading) return <AdminLoadingState />;
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Organizations</h1>
-        <p className="text-muted-foreground">
-          {orgs.length} organizations &middot; {profiles.length} total users
-        </p>
-      </div>
+      <AdminPageHeader
+        title="Organizations"
+        subtitle={`${orgs.length} organizations \u00B7 ${profiles.length} total users`}
+      />
 
-      {/* Summary Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-blue-100 dark:bg-blue-900/30 p-2">
-                <Building2 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{orgs.length}</p>
-                <p className="text-xs text-muted-foreground">Total Orgs</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-green-100 dark:bg-green-900/30 p-2">
-                <TrendingUp className="h-5 w-5 text-green-600 dark:text-green-400" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{stats.paidOrgs}</p>
-                <p className="text-xs text-muted-foreground">Paid Orgs</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-amber-100 dark:bg-amber-900/30 p-2">
-                <Calendar className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{stats.newThisWeek}</p>
-                <p className="text-xs text-muted-foreground">New This Week</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-purple-100 dark:bg-purple-900/30 p-2">
-                <UsersIcon className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{stats.totalMembers}</p>
-                <p className="text-xs text-muted-foreground">Total Members</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <StatCardRow>
+        <StatCard label="Total Orgs" value={stats.total} icon={Building2} color="blue" />
+        <StatCard label="Paid Orgs" value={stats.paidOrgs} icon={TrendingUp} color="green" />
+        <StatCard label="New This Week" value={stats.newThisWeek} icon={Calendar} color="amber" />
+        <StatCard label="Total Members" value={stats.totalMembers} icon={UsersIcon} color="purple" />
+      </StatCardRow>
 
       <Tabs value={activeTab} onValueChange={handleTabChange}>
         <TabsList>
-          <TabsTrigger value="teams">Teams</TabsTrigger>
+          <TabsTrigger value="teams">Organizations</TabsTrigger>
           <TabsTrigger value="users">All Users</TabsTrigger>
         </TabsList>
       </Tabs>
@@ -287,13 +180,9 @@ export function OrganizationsView() {
       {activeTab === "teams" ? (
         <>
           {/* Desktop: side-by-side */}
-          <div className="hidden lg:flex border rounded-lg overflow-hidden h-[calc(100vh-220px)]">
-            <div className="w-72 border-r shrink-0 overflow-hidden">
-              <OrgListPanel
-                orgs={orgListItems}
-                selectedOrgId={selectedOrgId}
-                onSelect={handleSelectOrg}
-              />
+          <div className="hidden lg:flex border rounded-lg overflow-hidden h-[calc(100vh-280px)]">
+            <div className="w-80 border-r shrink-0 overflow-hidden">
+              <OrgListPanel orgs={orgListItems} selectedOrgId={selectedOrgId} onSelect={handleSelectOrg} />
             </div>
             <div className="flex-1 overflow-hidden">
               {selectedOrg ? (
@@ -308,10 +197,8 @@ export function OrganizationsView() {
                 />
               ) : (
                 <div className="flex flex-col items-center justify-center h-full text-center">
-                  <Building2 className="h-12 w-12 text-muted-foreground mb-3" />
-                  <p className="text-muted-foreground">
-                    Select a team to view details
-                  </p>
+                  <Building2 className="h-12 w-12 text-muted-foreground/30 mb-3" />
+                  <p className="text-muted-foreground">Select an organization to view details</p>
                 </div>
               )}
             </div>
@@ -330,22 +217,17 @@ export function OrganizationsView() {
                   onOrgUpdate={handleOrgUpdate}
                   onOrgDelete={handleOrgDelete}
                   showBackButton
-                  onBack={handleMobileBack}
+                  onBack={() => setMobileShowDetail(false)}
                 />
               </div>
             ) : (
-              <div className="border rounded-lg overflow-hidden h-[calc(100vh-220px)]">
-                <OrgListPanel
-                  orgs={orgListItems}
-                  selectedOrgId={selectedOrgId}
-                  onSelect={handleSelectOrg}
-                />
+              <div className="border rounded-lg overflow-hidden h-[calc(100vh-280px)]">
+                <OrgListPanel orgs={orgListItems} selectedOrgId={selectedOrgId} onSelect={handleSelectOrg} />
               </div>
             )}
           </div>
         </>
       ) : (
-        /* All Users tab */
         <MemberTable
           members={profiles}
           showOrgColumn

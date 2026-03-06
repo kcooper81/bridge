@@ -218,16 +218,57 @@ export async function POST(request: NextRequest) {
       } while (memberPageToken);
     }
 
-    // Get existing members in the org
+    // Get existing members in the org (include id and directory_sync_source for deprovisioning)
     const { data: existingMembers } = await db
       .from("profiles")
-      .select("email")
+      .select("id, email, name, directory_sync_source")
       .eq("org_id", profile.org_id);
+
+    const allOrgMembers = existingMembers || [];
     const existingEmails = new Set(
-      (existingMembers || []).map((m) => m.email.toLowerCase())
+      allOrgMembers.map((m) => m.email.toLowerCase())
     );
 
+    // Build set of directory emails for diff detection
+    const directoryEmails = new Set(
+      users.map((u) => u.email.toLowerCase())
+    );
+
+    // Mark existing members as directory-synced (retroactive tagging)
+    const membersToTag = allOrgMembers
+      .filter((m) => directoryEmails.has(m.email.toLowerCase()))
+      .filter((m) => !m.directory_sync_source)
+      .map((m) => m.id);
+
+    if (membersToTag.length > 0) {
+      await db
+        .from("profiles")
+        .update({ directory_sync_source: "google_workspace" })
+        .in("id", membersToTag);
+    }
+
+    // Detect removed users: members previously synced from directory but no longer in it
+    const removedUsers = allOrgMembers
+      .filter((m) => m.directory_sync_source === "google_workspace")
+      .filter((m) => !directoryEmails.has(m.email.toLowerCase()))
+      .map((m) => ({ id: m.id, email: m.email, name: m.name || m.email }));
+
+    // Log the sync for audit trail
+    const syncedEmailList = users.map((u) => u.email.toLowerCase());
+    const removedEmailList = removedUsers.map((u) => u.email.toLowerCase());
+    await db
+      .from("directory_sync_log")
+      .insert({
+        org_id: profile.org_id,
+        provider: "google_workspace",
+        synced_emails: syncedEmailList,
+        removed_emails: removedEmailList,
+        deprovisioned_count: 0, // actual deprovisioning happens via separate action
+      });
+
     // Map to BulkImportRow[], filtering out existing members
+    // Note: when these users are bulk-invited, directory_sync_source should be
+    // set to 'google_workspace' on their profile upon invite acceptance.
     const rows: BulkImportRow[] = users
       .filter((u) => !existingEmails.has(u.email.toLowerCase()))
       .map((u) => ({
@@ -249,6 +290,7 @@ export async function POST(request: NextRequest) {
       groups: groups.map((g) => g.name),
       totalDirectoryUsers: users.length,
       alreadyMembers: users.length - rows.length,
+      removedUsers,
     });
   } catch (error) {
     console.error("Google sync error:", error);

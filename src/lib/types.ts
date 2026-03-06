@@ -66,6 +66,7 @@ export interface Organization {
     auto_redact_sensitive_data?: boolean;
     allow_external_ai_tools?: boolean;
     activity_logging_enabled?: boolean;
+    auto_deprovision_on_sync?: boolean;
   } | null;
   security_settings?: Record<string, unknown> | null;
   is_suspended?: boolean;

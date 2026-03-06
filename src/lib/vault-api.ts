@@ -654,6 +654,34 @@ export async function updateTeamMemberRole(teamId: string, userId: string, role:
   return !error;
 }
 
+export async function deprovisionUsers(
+  userIds: string[]
+): Promise<{
+  deprovisioned: { id: string; email: string; name: string }[];
+  count: number;
+}> {
+  const db = supabase();
+  const {
+    data: { session },
+  } = await db.auth.getSession();
+
+  const res = await fetch("/api/integrations/deprovision", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(session ? { Authorization: `Bearer ${session.access_token}` } : {}),
+    },
+    body: JSON.stringify({ userIds }),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || "Failed to deprovision users");
+  }
+
+  return res.json();
+}
+
 export async function toggleMemberShield(memberId: string, disabled: boolean): Promise<boolean> {
   const { error } = await supabase()
     .from("profiles")

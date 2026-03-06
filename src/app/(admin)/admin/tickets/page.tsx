@@ -1,10 +1,14 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+
+import type { RichEditorRef } from "@/components/admin/rich-editor";
+const RichEditor = dynamic(() => import("@/components/admin/rich-editor"), { ssr: false });
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -229,6 +233,7 @@ export default function TicketsPage() {
   const [noteContent, setNoteContent] = useState("");
   const [isInternal, setIsInternal] = useState(true);
   const [sendingNote, setSendingNote] = useState(false);
+  const editorRef = useRef<RichEditorRef>(null);
 
   // Canned responses
   const [cannedResponses, setCannedResponses] = useState<CannedResponse[]>([]);
@@ -345,7 +350,21 @@ export default function TicketsPage() {
   };
 
   const addNote = async () => {
-    if (!selectedTicket || !noteContent.trim()) return;
+    // For replies, get content from rich editor; for notes, from textarea
+    const isReply = !isInternal;
+    let content: string;
+    let isHtml = false;
+
+    if (isReply && editorRef.current) {
+      if (editorRef.current.isEmpty()) return;
+      content = editorRef.current.getHTML();
+      isHtml = true;
+    } else {
+      if (!noteContent.trim()) return;
+      content = noteContent.trim();
+    }
+
+    if (!selectedTicket) return;
     setSendingNote(true);
 
     try {
@@ -355,8 +374,9 @@ export default function TicketsPage() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            content: noteContent.trim(),
+            content,
             is_internal: isInternal,
+            is_html: isHtml,
           }),
         }
       );
@@ -377,6 +397,7 @@ export default function TicketsPage() {
       );
       setSelectedTicket((prev) => (prev ? updateTicketNotes(prev) : prev));
       setNoteContent("");
+      if (editorRef.current) editorRef.current.clear();
       toast.success(
         isInternal ? "Internal note added" : "Response sent"
       );
@@ -464,7 +485,11 @@ export default function TicketsPage() {
 
   // Canned response actions
   const insertCanned = (content: string) => {
-    setNoteContent((prev) => (prev ? prev + "\n\n" + content : content));
+    if (!isInternal && editorRef.current) {
+      editorRef.current.insertContent(content);
+    } else {
+      setNoteContent((prev) => (prev ? prev + "\n\n" + content : content));
+    }
     setCannedOpen(false);
   };
 
@@ -710,81 +735,85 @@ export default function TicketsPage() {
               <div
                 key={ticket.id}
                 className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 cursor-pointer transition-colors hover:bg-muted/50",
+                  "flex gap-3 px-3 py-2.5 cursor-pointer transition-colors hover:bg-muted/50",
                   isSelected && "bg-primary/5",
                   isNew && "bg-blue-50/50 dark:bg-blue-950/10"
                 )}
                 onClick={() => openTicket(ticket)}
               >
-                <Checkbox
-                  checked={isSelected}
-                  onCheckedChange={() => toggleSelect(ticket.id)}
-                  onClick={(e) => e.stopPropagation()}
-                  aria-label={`Select ${ticket.subject || ticket.id}`}
-                />
-
-                {/* Unread dot */}
-                <div className="w-2 flex-shrink-0">
-                  {isNew && <div className="h-2 w-2 rounded-full bg-blue-500" />}
+                {/* Left: checkbox + unread dot */}
+                <div className="flex items-center gap-2 pt-0.5 flex-shrink-0">
+                  <Checkbox
+                    checked={isSelected}
+                    onCheckedChange={() => toggleSelect(ticket.id)}
+                    onClick={(e) => e.stopPropagation()}
+                    aria-label={`Select ${ticket.subject || ticket.id}`}
+                  />
+                  <div className="w-2">
+                    {isNew && <div className="h-2 w-2 rounded-full bg-blue-500" />}
+                  </div>
                 </div>
 
-                {/* Type icon */}
-                <TypeIcon className={cn("h-4 w-4 flex-shrink-0", isNew ? "text-foreground" : "text-muted-foreground")} />
-
-                {/* Sender — fixed width */}
-                <span className={cn(
-                  "w-36 truncate text-sm flex-shrink-0",
-                  isNew ? "font-semibold" : "text-muted-foreground"
-                )}>
-                  {ticket.sender_name || ticket.user_email || "Anonymous"}
-                </span>
-
-                {/* Subject + preview */}
-                <div className="flex-1 min-w-0 flex items-center gap-2">
-                  <span className={cn("truncate text-sm", isNew && "font-semibold")}>
-                    {ticket.subject || "No subject"}
-                  </span>
-                  <span className="hidden md:inline truncate text-xs text-muted-foreground">
-                    — {ticket.message.replace(/^From:.*?\n\n/, "").slice(0, 80)}
-                  </span>
-                </div>
-
-                {/* Indicators */}
-                <div className="flex items-center gap-1.5 flex-shrink-0">
-                  {hasAttachments && (
-                    <Paperclip className="h-3.5 w-3.5 text-muted-foreground" />
-                  )}
-                  {ticket.notes_count > 0 && (
-                    <span className="inline-flex items-center gap-0.5 text-xs text-muted-foreground">
-                      <StickyNote className="h-3 w-3" />
-                      {ticket.notes_count}
+                {/* Content: two lines */}
+                <div className="flex-1 min-w-0">
+                  {/* Line 1: sender + time */}
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <TypeIcon className={cn("h-3.5 w-3.5 flex-shrink-0", isNew ? "text-foreground" : "text-muted-foreground")} />
+                      <span className={cn("truncate text-sm", isNew ? "font-semibold" : "text-muted-foreground")}>
+                        {ticket.sender_name || ticket.user_email || "Anonymous"}
+                      </span>
+                      {ticket.inbox_email && (
+                        <span className="hidden sm:inline text-[10px] text-muted-foreground bg-muted rounded px-1.5 py-0.5 flex-shrink-0">
+                          {ticket.inbox_email.split("@")[0]}
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-xs text-muted-foreground flex-shrink-0">
+                      {timeAgo(ticket.created_at)}
                     </span>
-                  )}
-                  <span
-                    className={cn(
-                      "inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-medium",
-                      STATUS_COLORS[ticket.status] || ""
+                  </div>
+
+                  {/* Line 2: subject + preview */}
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <p className={cn("truncate text-sm", isNew ? "font-medium text-foreground" : "text-muted-foreground")}>
+                      {ticket.subject || "No subject"}
+                      <span className="hidden sm:inline font-normal text-muted-foreground">
+                        {" — "}{ticket.message.replace(/^From:.*?\n\n/, "").slice(0, 60)}
+                      </span>
+                    </p>
+                  </div>
+
+                  {/* Line 3: badges + indicators */}
+                  <div className="flex items-center gap-1.5 mt-1">
+                    <span
+                      className={cn(
+                        "inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-medium",
+                        STATUS_COLORS[ticket.status] || ""
+                      )}
+                    >
+                      <StatusIcon className="h-2.5 w-2.5" />
+                      {ticket.status.replace("_", " ")}
+                    </span>
+                    <Badge variant="outline" className="text-[10px] capitalize px-1.5 py-0 h-4">
+                      {ticket.type}
+                    </Badge>
+                    {ticket.priority !== "normal" && (
+                      <span className={cn("text-[10px] font-semibold capitalize", PRIORITY_COLORS[ticket.priority])}>
+                        {ticket.priority}
+                      </span>
                     )}
-                  >
-                    <StatusIcon className="h-2.5 w-2.5" />
-                    <span className="hidden sm:inline">{ticket.status.replace("_", " ")}</span>
-                  </span>
-                  {ticket.priority !== "normal" && (
-                    <span className={cn("text-[10px] font-medium capitalize", PRIORITY_COLORS[ticket.priority])}>
-                      {ticket.priority}
-                    </span>
-                  )}
-                  {ticket.inbox_email && (
-                    <span className="hidden lg:inline text-[10px] text-muted-foreground">
-                      {ticket.inbox_email.split("@")[0]}
-                    </span>
-                  )}
+                    {hasAttachments && (
+                      <Paperclip className="h-3 w-3 text-muted-foreground" />
+                    )}
+                    {ticket.notes_count > 0 && (
+                      <span className="inline-flex items-center gap-0.5 text-[10px] text-muted-foreground">
+                        <StickyNote className="h-3 w-3" />
+                        {ticket.notes_count}
+                      </span>
+                    )}
+                  </div>
                 </div>
-
-                {/* Time */}
-                <span className="text-xs text-muted-foreground flex-shrink-0 w-14 text-right">
-                  {timeAgo(ticket.created_at)}
-                </span>
               </div>
             );
           })}
@@ -1032,9 +1061,16 @@ export default function TicketsPage() {
                                 </Badge>
                               )}
                             </div>
-                            <p className="whitespace-pre-wrap">
-                              {note.content}
-                            </p>
+                            {!note.is_internal && note.content.startsWith("<") ? (
+                              <div
+                                className="prose prose-sm max-w-none [&_a]:text-blue-600 [&_a]:underline"
+                                dangerouslySetInnerHTML={{ __html: note.content }}
+                              />
+                            ) : (
+                              <p className="whitespace-pre-wrap">
+                                {note.content}
+                              </p>
+                            )}
                           </div>
                         ))}
                       </div>
@@ -1095,7 +1131,7 @@ export default function TicketsPage() {
                   </div>
                 )}
 
-                {/* Templates + textarea */}
+                {/* Templates + editor/textarea */}
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <Popover open={cannedOpen} onOpenChange={setCannedOpen}>
@@ -1218,17 +1254,20 @@ export default function TicketsPage() {
                     )}
                   </div>
 
-                  <Textarea
-                    placeholder={
-                      isInternal
-                        ? "Add an internal note (only visible to admins)..."
-                        : "Write your reply to the customer..."
-                    }
-                    value={noteContent}
-                    onChange={(e) => setNoteContent(e.target.value)}
-                    rows={6}
-                    className="resize-y min-h-[120px]"
-                  />
+                  {isInternal ? (
+                    <Textarea
+                      placeholder="Add an internal note (only visible to admins)..."
+                      value={noteContent}
+                      onChange={(e) => setNoteContent(e.target.value)}
+                      rows={4}
+                      className="resize-y min-h-[80px]"
+                    />
+                  ) : (
+                    <RichEditor
+                      ref={editorRef}
+                      placeholder="Write your reply to the customer..."
+                    />
+                  )}
                 </div>
 
                 <div className="flex items-center justify-between">
@@ -1244,7 +1283,7 @@ export default function TicketsPage() {
                   <Button
                     size="sm"
                     onClick={addNote}
-                    disabled={!noteContent.trim() || sendingNote}
+                    disabled={sendingNote}
                     variant={isInternal ? "outline" : "default"}
                   >
                     {sendingNote ? (

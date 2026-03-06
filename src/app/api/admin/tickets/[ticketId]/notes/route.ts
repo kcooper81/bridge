@@ -36,7 +36,7 @@ export async function POST(
 
   const { ticketId } = await params;
   const body = await request.json();
-  const { content, is_internal = true } = body;
+  const { content, is_internal = true, is_html = false } = body;
 
   if (!content || typeof content !== "string" || !content.trim()) {
     return NextResponse.json(
@@ -82,18 +82,15 @@ export async function POST(
     try {
       const resend = new Resend(process.env.RESEND_API_KEY);
 
-      // Reply from the same inbox the customer originally emailed
-      const INBOX_LABELS: Record<string, string> = {
-        "support@teamprompt.app": "TeamPrompt Support",
-        "sales@teamprompt.app": "TeamPrompt Sales",
-        "help@teamprompt.app": "TeamPrompt Help",
-        "contact@teamprompt.app": "TeamPrompt",
-        "info@teamprompt.app": "TeamPrompt Info",
-        "team@teamprompt.app": "TeamPrompt Team",
-        "kade@teamprompt.app": "Kade at TeamPrompt",
-      };
+      // Look up mailbox settings for signature + display name
       const inbox = ticket.inbox_email || "support@teamprompt.app";
-      const label = INBOX_LABELS[inbox] || "TeamPrompt";
+      const { data: mailbox } = await db
+        .from("mailbox_settings")
+        .select("display_name, signature_html")
+        .eq("email", inbox)
+        .single();
+
+      const label = mailbox?.display_name || "TeamPrompt";
       const fromEmail = `${label} <${inbox}>`;
 
       await resend.emails.send({
@@ -103,9 +100,11 @@ export async function POST(
         html: buildTicketResponseEmail({
           ticketSubject: ticket.subject || "Your support request",
           responseBody: content.trim(),
+          isHtml: is_html,
           originalMessage: ticket.message,
           senderLabel: label,
           senderEmail: inbox,
+          signatureHtml: mailbox?.signature_html || undefined,
         }),
       });
       emailSent = true;

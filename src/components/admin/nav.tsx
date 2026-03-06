@@ -18,6 +18,7 @@ import {
   Settings,
   ClipboardCheck,
   UserCog,
+  Inbox,
   Menu,
   X,
 } from "lucide-react";
@@ -81,6 +82,7 @@ const navGroups: NavGroup[] = [
     supportVisible: true,
     items: [
       { href: "/admin/testing-guide", label: "Testing Guide", icon: ClipboardCheck, badgeKey: null, supportVisible: true },
+      { href: "/admin/settings/inbox", label: "Inbox Settings", icon: Inbox, badgeKey: null, supportVisible: false },
       { href: "/admin/settings", label: "Settings", icon: Settings, badgeKey: null, supportVisible: false },
       { href: "/admin/admin-users", label: "Admin Users", icon: UserCog, badgeKey: null, supportVisible: false, superAdminOnly: true },
     ],

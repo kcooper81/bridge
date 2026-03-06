@@ -22,11 +22,16 @@ async function upsertSubscription(
   sub: Stripe.Subscription,
   customerId: string
 ) {
+  if (!sub.items.data[0]) {
+    console.warn("upsertSubscription: sub.items.data is empty, skipping plan update", { subId: sub.id, orgId });
+    return;
+  }
+
   const priceId = sub.items.data[0]?.price?.id || "";
   const plan = getPlanFromPriceId(priceId);
   const seats = sub.items.data[0]?.quantity || 1;
 
-  await db.from("subscriptions").upsert(
+  const { error: upsertError } = await db.from("subscriptions").upsert(
     {
       org_id: orgId,
       stripe_customer_id: customerId,
@@ -47,7 +52,17 @@ async function upsertSubscription(
     { onConflict: "org_id" }
   );
 
-  await db.from("organizations").update({ plan }).eq("id", orgId);
+  if (upsertError) {
+    console.error("upsertSubscription: failed to upsert subscription", { orgId, subId: sub.id, error: upsertError });
+    throw new Error(`Failed to upsert subscription: ${upsertError.message}`);
+  }
+
+  const { error: orgUpdateError } = await db.from("organizations").update({ plan }).eq("id", orgId);
+
+  if (orgUpdateError) {
+    console.error("upsertSubscription: failed to update organization plan", { orgId, plan, error: orgUpdateError });
+    throw new Error(`Failed to update organization plan: ${orgUpdateError.message}`);
+  }
 }
 
 export async function POST(request: NextRequest) {
@@ -126,7 +141,7 @@ export async function POST(request: NextRequest) {
           break;
         }
 
-        await db
+        const { error: cancelSubError } = await db
           .from("subscriptions")
           .update({
             status: "canceled",
@@ -138,10 +153,20 @@ export async function POST(request: NextRequest) {
           })
           .eq("org_id", orgId);
 
-        await db
+        if (cancelSubError) {
+          console.error("Webhook customer.subscription.deleted: failed to update subscription", { orgId, error: cancelSubError });
+          return NextResponse.json({ error: "Database error" }, { status: 500 });
+        }
+
+        const { error: cancelOrgError } = await db
           .from("organizations")
           .update({ plan: "free" })
           .eq("id", orgId);
+
+        if (cancelOrgError) {
+          console.error("Webhook customer.subscription.deleted: failed to update organization", { orgId, error: cancelOrgError });
+          return NextResponse.json({ error: "Database error" }, { status: 500 });
+        }
         break;
       }
 
@@ -150,7 +175,7 @@ export async function POST(request: NextRequest) {
         const subId = invoice.subscription as string;
         if (!subId) break;
 
-        await db
+        const { error: invoicePaidError } = await db
           .from("subscriptions")
           .update({
             status: "active",
@@ -158,6 +183,11 @@ export async function POST(request: NextRequest) {
             updated_at: new Date().toISOString(),
           })
           .eq("stripe_subscription_id", subId);
+
+        if (invoicePaidError) {
+          console.error("Webhook invoice.paid: failed to update subscription", { subId, error: invoicePaidError });
+          return NextResponse.json({ error: "Database error" }, { status: 500 });
+        }
         break;
       }
 
@@ -166,7 +196,7 @@ export async function POST(request: NextRequest) {
         const subId = invoice.subscription as string;
         if (!subId) break;
 
-        await db
+        const { error: paymentFailedError } = await db
           .from("subscriptions")
           .update({
             status: "past_due",
@@ -174,6 +204,11 @@ export async function POST(request: NextRequest) {
             updated_at: new Date().toISOString(),
           })
           .eq("stripe_subscription_id", subId);
+
+        if (paymentFailedError) {
+          console.error("Webhook invoice.payment_failed: failed to update subscription", { subId, error: paymentFailedError });
+          return NextResponse.json({ error: "Database error" }, { status: 500 });
+        }
         break;
       }
 
@@ -182,7 +217,7 @@ export async function POST(request: NextRequest) {
         const orgId = sub.metadata?.orgId;
         if (!orgId) break;
 
-        await db
+        const { error: trialEndError } = await db
           .from("subscriptions")
           .update({
             trial_ends_at: sub.trial_end
@@ -191,6 +226,11 @@ export async function POST(request: NextRequest) {
             updated_at: new Date().toISOString(),
           })
           .eq("org_id", orgId);
+
+        if (trialEndError) {
+          console.error("Webhook customer.subscription.trial_will_end: failed to update subscription", { orgId, error: trialEndError });
+          return NextResponse.json({ error: "Database error" }, { status: 500 });
+        }
         break;
       }
 
@@ -202,13 +242,18 @@ export async function POST(request: NextRequest) {
           break;
         }
 
-        await db
+        const { error: pauseError } = await db
           .from("subscriptions")
           .update({
             status: "paused",
             updated_at: new Date().toISOString(),
           })
           .eq("org_id", orgId);
+
+        if (pauseError) {
+          console.error("Webhook customer.subscription.paused: failed to update subscription", { orgId, error: pauseError });
+          return NextResponse.json({ error: "Database error" }, { status: 500 });
+        }
         break;
       }
 
@@ -241,13 +286,18 @@ export async function POST(request: NextRequest) {
         const subId = invoice?.subscription as string;
         if (!subId) break;
 
-        await db
+        const { error: disputeUpdateError } = await db
           .from("subscriptions")
           .update({
             dispute_status: dispute.status === "won" ? null : dispute.status,
             updated_at: new Date().toISOString(),
           })
           .eq("stripe_subscription_id", subId);
+
+        if (disputeUpdateError) {
+          console.error(`Webhook ${event.type}: failed to update subscription dispute status`, { subId, error: disputeUpdateError });
+          return NextResponse.json({ error: "Database error" }, { status: 500 });
+        }
         break;
       }
 
@@ -262,13 +312,18 @@ export async function POST(request: NextRequest) {
         const subId = invoice?.subscription as string;
         if (!subId) break;
 
-        await db
+        const { error: disputeCloseError } = await db
           .from("subscriptions")
           .update({
             dispute_status: dispute.status === "won" ? null : "lost",
             updated_at: new Date().toISOString(),
           })
           .eq("stripe_subscription_id", subId);
+
+        if (disputeCloseError) {
+          console.error("Webhook charge.dispute.closed: failed to update subscription dispute status", { subId, error: disputeCloseError });
+          return NextResponse.json({ error: "Database error" }, { status: 500 });
+        }
         break;
       }
     }

@@ -77,6 +77,7 @@ export default function AdminDashboardPage() {
   }, []);
 
   const loadDashboard = async () => {
+    try {
     const supabase = createClient();
 
     const now = new Date();
@@ -231,6 +232,10 @@ export default function AdminDashboardPage() {
     );
 
     setLoading(false);
+    } catch (err) {
+      console.error("Dashboard load error:", err);
+      setLoading(false);
+    }
   };
 
   const getTimeAgo = (date: string) => {

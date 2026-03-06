@@ -155,8 +155,8 @@ function timeAgo(dateStr: string): string {
 function formatBytes(bytes: number): string {
   if (bytes === 0) return "0 B";
   const k = 1024;
-  const sizes = ["B", "KB", "MB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  const sizes = ["B", "KB", "MB", "GB", "TB"];
+  const i = Math.min(Math.floor(Math.log(bytes) / Math.log(k)), sizes.length - 1);
   return `${Math.round(bytes / Math.pow(k, i))} ${sizes[i]}`;
 }
 
@@ -251,7 +251,14 @@ export default function TicketsPage() {
       const res = await fetch("/api/admin/tickets");
       if (!res.ok) throw new Error("Failed to fetch tickets");
       const data = await res.json();
-      setTickets(data.tickets || []);
+      const fresh = data.tickets || [];
+      setTickets(fresh);
+      // Keep selectedTicket in sync with refreshed data
+      setSelectedTicket((prev) => {
+        if (!prev) return null;
+        const updated = fresh.find((t: TicketRow) => t.id === prev.id);
+        return updated || null;
+      });
     } catch {
       toast.error("Failed to load tickets");
     } finally {
@@ -1084,7 +1091,14 @@ export default function TicketsPage() {
                             {!note.is_internal && note.content.startsWith("<") ? (
                               <div
                                 className="prose prose-sm max-w-none [&_a]:text-blue-600 [&_a]:underline"
-                                dangerouslySetInnerHTML={{ __html: note.content }}
+                                dangerouslySetInnerHTML={{
+                                  __html: note.content
+                                    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+                                    .replace(/\bon\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]*)/gi, "")
+                                    .replace(/<iframe\b[^>]*>/gi, "")
+                                    .replace(/<object\b[^>]*>/gi, "")
+                                    .replace(/<embed\b[^>]*>/gi, "")
+                                }}
                               />
                             ) : (
                               <p className="whitespace-pre-wrap">

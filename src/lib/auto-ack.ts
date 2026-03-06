@@ -1,5 +1,5 @@
 import { Resend } from "resend";
-import { buildEmail } from "./email-template";
+import { buildEmail, escapeHtml } from "./email-template";
 
 interface AutoAckOptions {
   recipientEmail: string;
@@ -43,11 +43,11 @@ export async function sendAutoAck(options: AutoAckOptions) {
       html: buildEmail({
         heading: "We received your message",
         body: `
-          <p>Hi${recipientName && recipientName !== recipientEmail ? ` ${recipientName}` : ""},</p>
+          <p>Hi${recipientName && recipientName !== recipientEmail ? ` ${escapeHtml(recipientName)}` : ""},</p>
           <p>Thanks for reaching out! We've received your message and will get back to you as soon as possible.</p>
           <div style="margin: 16px 0; padding: 12px 16px; background: #f4f4f5; border-radius: 8px; font-size: 14px;">
             Reference: <strong>#${shortId}</strong><br/>
-            Subject: ${subject}
+            Subject: ${escapeHtml(subject)}
           </div>
           <p style="font-size: 13px; color: #71717a;">You can reply to this email to add more details to your request.</p>
         `,

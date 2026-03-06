@@ -86,11 +86,7 @@ export default function InboxSettingsPage() {
     // Give the editor time to mount
     const timer = setTimeout(() => {
       if (signatureEditorRef.current && selected.signature_html) {
-        // Clear and insert the HTML signature
-        signatureEditorRef.current.clear();
-        signatureEditorRef.current.insertContent(
-          selected.signature_html.replace(/<[^>]*>/g, "\n").replace(/\n{3,}/g, "\n\n").trim()
-        );
+        signatureEditorRef.current.setHTML(selected.signature_html);
       }
       setSignatureLoaded(true);
     }, 200);

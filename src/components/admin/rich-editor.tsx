@@ -20,6 +20,7 @@ export interface RichEditorRef {
   getText: () => string;
   clear: () => void;
   insertContent: (text: string) => void;
+  setHTML: (html: string) => void;
   isEmpty: () => boolean;
 }
 
@@ -78,6 +79,9 @@ const RichEditor = forwardRef<RichEditorRef, RichEditorProps>(
             editor.commands.insertContent({ type: "paragraph", content: [{ type: "text", text: p }] });
           }
         }
+      },
+      setHTML: (html: string) => {
+        editor?.commands.setContent(html);
       },
       isEmpty: () => editor?.isEmpty ?? true,
     }));

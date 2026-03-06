@@ -3,6 +3,18 @@
  * Used by invite emails (sent via Resend) and as reference for Supabase Auth templates.
  */
 
+/**
+ * Escape HTML special characters to prevent injection.
+ */
+export function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 const BRAND_COLOR = "#2563EB";
 const DARK_BG = "#0f1117";
 const LIGHT_TEXT = "#e4e4e7";
@@ -41,7 +53,10 @@ interface TicketResponseEmailOptions {
 }
 
 export function buildEmail(options: EmailOptions): string {
-  const { heading, body, ctaText, ctaUrl, footerNote } = options;
+  const { body, ctaUrl } = options;
+  const heading = escapeHtml(options.heading);
+  const ctaText = escapeHtml(options.ctaText);
+  const footerNote = options.footerNote ? escapeHtml(options.footerNote) : undefined;
 
   return `
 <!DOCTYPE html>
@@ -130,10 +145,12 @@ export function buildEmail(options: EmailOptions): string {
  * Includes the admin response and a quoted block of the original message.
  */
 export function buildTicketResponseEmail(options: TicketResponseEmailOptions): string {
-  const { ticketSubject, responseBody, isHtml, originalMessage, senderLabel, senderEmail, signatureHtml: customSignature, useBrandedTemplate = true } = options;
+  const { responseBody, isHtml, originalMessage, senderEmail, signatureHtml: customSignature, useBrandedTemplate = true } = options;
 
-  const escapedResponse = isHtml ? responseBody : responseBody.replace(/\n/g, "<br />");
-  const escapedOriginal = originalMessage.replace(/\n/g, "<br />");
+  const ticketSubject = escapeHtml(options.ticketSubject);
+  const senderLabel = options.senderLabel ? escapeHtml(options.senderLabel) : undefined;
+  const escapedResponse = isHtml ? responseBody : escapeHtml(responseBody).replace(/\n/g, "<br />");
+  const escapedOriginal = escapeHtml(originalMessage).replace(/\n/g, "<br />");
 
   // Use custom DB-stored signature if available, otherwise fall back to auto-generated
   const signatureHtml = customSignature

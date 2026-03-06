@@ -58,8 +58,6 @@ export async function POST(
     return NextResponse.json({ error: "Ticket not found" }, { status: 404 });
   }
 
-  let emailSent = false;
-
   // Resolve the customer's email: sender_email column → profile → message extraction (legacy)
   let recipientEmail: string | null = ticket.sender_email || null;
   if (!recipientEmail && ticket.user_id) {
@@ -77,7 +75,29 @@ export async function POST(
     if (emailMatch) recipientEmail = emailMatch[1];
   }
 
-  // If public note and we have a recipient, send email
+  // Insert the note FIRST — ensures we never lose data even if email fails
+  const { data: note, error: insertError } = await db
+    .from("ticket_notes")
+    .insert({
+      ticket_id: ticketId,
+      author_id: user.id,
+      content: content.trim(),
+      is_internal: is_internal,
+      email_sent: false,
+    })
+    .select("id, content, is_internal, email_sent, created_at")
+    .single();
+
+  if (insertError) {
+    console.error("Insert ticket note error:", insertError);
+    return NextResponse.json(
+      { error: "Failed to create note" },
+      { status: 500 }
+    );
+  }
+
+  // Now send email if public note and we have a recipient
+  let emailSent = false;
   if (!is_internal && recipientEmail && process.env.RESEND_API_KEY) {
     try {
       const resend = new Resend(process.env.RESEND_API_KEY);
@@ -109,35 +129,21 @@ export async function POST(
         }),
       });
       emailSent = true;
+
+      // Update note to reflect email was sent
+      await db
+        .from("ticket_notes")
+        .update({ email_sent: true })
+        .eq("id", note.id);
     } catch (emailError) {
       console.error("Failed to send ticket response email:", emailError);
     }
   }
 
-  // Insert the note
-  const { data: note, error: insertError } = await db
-    .from("ticket_notes")
-    .insert({
-      ticket_id: ticketId,
-      author_id: user.id,
-      content: content.trim(),
-      is_internal: is_internal,
-      email_sent: emailSent,
-    })
-    .select("id, content, is_internal, email_sent, created_at")
-    .single();
-
-  if (insertError) {
-    console.error("Insert ticket note error:", insertError);
-    return NextResponse.json(
-      { error: "Failed to create note" },
-      { status: 500 }
-    );
-  }
-
   return NextResponse.json({
     note: {
       ...note,
+      email_sent: emailSent,
       author_email: user.email,
     },
     recipient_email: recipientEmail,

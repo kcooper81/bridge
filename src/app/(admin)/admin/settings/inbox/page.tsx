@@ -29,6 +29,7 @@ interface MailboxRow {
   email: string;
   display_name: string;
   signature_html: string | null;
+  use_branded_template: boolean;
   auto_reply_enabled: boolean;
   auto_reply_subject: string | null;
   auto_reply_body: string | null;
@@ -42,6 +43,7 @@ export default function InboxSettingsPage() {
 
   // Edit form
   const [displayName, setDisplayName] = useState("");
+  const [useBrandedTemplate, setUseBrandedTemplate] = useState(true);
   const [autoReplyEnabled, setAutoReplyEnabled] = useState(false);
   const [autoReplySubject, setAutoReplySubject] = useState("");
   const [autoReplyBody, setAutoReplyBody] = useState("");
@@ -70,6 +72,7 @@ export default function InboxSettingsPage() {
   const selectMailbox = (mailbox: MailboxRow) => {
     setSelectedId(mailbox.id);
     setDisplayName(mailbox.display_name);
+    setUseBrandedTemplate(mailbox.use_branded_template !== false);
     setAutoReplyEnabled(mailbox.auto_reply_enabled);
     setAutoReplySubject(mailbox.auto_reply_subject || "");
     setAutoReplyBody(mailbox.auto_reply_body || "");
@@ -115,6 +118,7 @@ export default function InboxSettingsPage() {
           id: selectedId,
           display_name: displayName.trim(),
           signature_html: isSignatureEmpty ? null : signatureHtml,
+          use_branded_template: useBrandedTemplate,
           auto_reply_enabled: autoReplyEnabled,
           auto_reply_subject: autoReplySubject.trim() || null,
           auto_reply_body: autoReplyBody.trim() || null,
@@ -187,6 +191,11 @@ export default function InboxSettingsPage() {
                     Sig
                   </Badge>
                 )}
+                {mailbox.use_branded_template === false && (
+                  <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4">
+                    Personal
+                  </Badge>
+                )}
                 {mailbox.auto_reply_enabled && (
                   <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4">
                     Auto
@@ -251,6 +260,24 @@ export default function InboxSettingsPage() {
                     />
                   </div>
                 )}
+              </div>
+
+              <Separator />
+
+              {/* Branded Template Toggle */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-sm font-medium">Branded Email Template</label>
+                  <Switch
+                    checked={useBrandedTemplate}
+                    onCheckedChange={setUseBrandedTemplate}
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {useBrandedTemplate
+                    ? "Replies use the full branded template with header, footer, and logo. Turn off for a more personal feel."
+                    : "Replies look like a normal personal email — just your message and signature. No branding or logo."}
+                </p>
               </div>
 
               <Separator />

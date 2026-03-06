@@ -36,6 +36,8 @@ interface TicketResponseEmailOptions {
   senderEmail?: string;
   /** Custom HTML signature from mailbox settings (overrides default) */
   signatureHtml?: string;
+  /** If false, send a plain personal-style email without branded template */
+  useBrandedTemplate?: boolean;
 }
 
 export function buildEmail(options: EmailOptions): string {
@@ -128,7 +130,7 @@ export function buildEmail(options: EmailOptions): string {
  * Includes the admin response and a quoted block of the original message.
  */
 export function buildTicketResponseEmail(options: TicketResponseEmailOptions): string {
-  const { ticketSubject, responseBody, isHtml, originalMessage, senderLabel, senderEmail, signatureHtml: customSignature } = options;
+  const { ticketSubject, responseBody, isHtml, originalMessage, senderLabel, senderEmail, signatureHtml: customSignature, useBrandedTemplate = true } = options;
 
   const escapedResponse = isHtml ? responseBody : responseBody.replace(/\n/g, "<br />");
   const escapedOriginal = originalMessage.replace(/\n/g, "<br />");
@@ -143,6 +145,32 @@ export function buildTicketResponseEmail(options: TicketResponseEmailOptions): s
           <p style="margin: 4px 0 0; font-size: 13px;"><a href="https://teamprompt.app" style="color: ${BRAND_COLOR}; text-decoration: none;">teamprompt.app</a></p>
         </div>`
       : "";
+
+  // Plain personal-style email — no branded header/footer, looks like a normal reply
+  if (!useBrandedTemplate) {
+    return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+  <div style="font-size: 15px; line-height: 1.6; color: #1a1a1a; padding: 0;">
+    ${escapedResponse}
+  </div>
+
+  ${signatureHtml}
+
+  <div style="margin-top: 24px; padding-top: 12px; border-top: 1px solid #e5e5e5;">
+    <p style="margin: 0 0 4px; font-size: 12px; color: #999;">On ${new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}, the original message was:</p>
+    <blockquote style="margin: 8px 0 0 0; padding: 0 0 0 12px; border-left: 2px solid #ddd; color: #666; font-size: 14px; line-height: 1.5;">
+      ${escapedOriginal}
+    </blockquote>
+  </div>
+</body>
+</html>`.trim();
+  }
 
   return `
 <!DOCTYPE html>

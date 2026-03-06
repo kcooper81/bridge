@@ -86,7 +86,7 @@ export async function POST(
       const inbox = ticket.inbox_email || "support@teamprompt.app";
       const { data: mailbox } = await db
         .from("mailbox_settings")
-        .select("display_name, signature_html")
+        .select("display_name, signature_html, use_branded_template")
         .eq("email", inbox)
         .single();
 
@@ -105,6 +105,7 @@ export async function POST(
           senderLabel: label,
           senderEmail: inbox,
           signatureHtml: mailbox?.signature_html || undefined,
+          useBrandedTemplate: mailbox?.use_branded_template !== false,
         }),
       });
       emailSent = true;

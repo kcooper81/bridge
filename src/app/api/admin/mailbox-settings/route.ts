@@ -50,7 +50,7 @@ export async function PATCH(request: NextRequest) {
   }
 
   const body = await request.json();
-  const { id, display_name, signature_html, auto_reply_enabled, auto_reply_subject, auto_reply_body } = body;
+  const { id, display_name, signature_html, auto_reply_enabled, auto_reply_subject, auto_reply_body, use_branded_template } = body;
 
   if (!id) {
     return NextResponse.json({ error: "ID required" }, { status: 400 });
@@ -63,6 +63,7 @@ export async function PATCH(request: NextRequest) {
   if (auto_reply_enabled !== undefined) updates.auto_reply_enabled = auto_reply_enabled;
   if (auto_reply_subject !== undefined) updates.auto_reply_subject = auto_reply_subject;
   if (auto_reply_body !== undefined) updates.auto_reply_body = auto_reply_body;
+  if (use_branded_template !== undefined) updates.use_branded_template = use_branded_template;
 
   const { data, error } = await db
     .from("mailbox_settings")

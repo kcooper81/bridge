@@ -294,9 +294,17 @@ export default function TicketsPage() {
         { event: "INSERT", schema: "public", table: "ticket_notes" },
         () => loadTickets()
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status === "CHANNEL_ERROR") {
+          console.warn("Realtime channel error — falling back to polling");
+        }
+      });
+
+    // Fallback polling every 30s in case Realtime disconnects
+    const pollInterval = setInterval(loadTickets, 30000);
 
     return () => {
+      clearInterval(pollInterval);
       supabase.removeChannel(channel);
     };
   }, [loadTickets, loadCannedResponses]);
@@ -735,7 +743,7 @@ export default function TicketsPage() {
               <div
                 key={ticket.id}
                 className={cn(
-                  "flex gap-3 px-3 py-2.5 cursor-pointer transition-colors hover:bg-muted/50",
+                  "flex gap-3 px-4 py-3.5 cursor-pointer transition-colors hover:bg-muted/50",
                   isSelected && "bg-primary/5",
                   isNew && "bg-blue-50/50 dark:bg-blue-950/10"
                 )}
@@ -775,7 +783,7 @@ export default function TicketsPage() {
                   </div>
 
                   {/* Line 2: subject + preview */}
-                  <div className="flex items-center gap-2 mt-0.5">
+                  <div className="flex items-center gap-2 mt-1">
                     <p className={cn("truncate text-sm", isNew ? "font-medium text-foreground" : "text-muted-foreground")}>
                       {ticket.subject || "No subject"}
                       <span className="hidden sm:inline font-normal text-muted-foreground">
@@ -785,7 +793,7 @@ export default function TicketsPage() {
                   </div>
 
                   {/* Line 3: badges + indicators */}
-                  <div className="flex items-center gap-1.5 mt-1">
+                  <div className="flex items-center gap-1.5 mt-1.5">
                     <span
                       className={cn(
                         "inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-medium",

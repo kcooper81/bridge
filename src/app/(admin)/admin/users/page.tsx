@@ -16,6 +16,9 @@ import {
   ChevronRight,
   ArrowUpDown,
   Download,
+  UserPlus,
+  Clock,
+  ShieldCheck,
 } from "lucide-react";
 import { toast } from "sonner";
 import { ProtectionBadge } from "@/components/admin/protection-badge";
@@ -37,7 +40,7 @@ interface UserRow {
 const PAGE_SIZE = 20;
 const ROLE_FILTERS = ["all", "admin", "manager", "member"] as const;
 
-type SortKey = "name" | "email" | "role" | "org_name" | "created_at";
+type SortKey = "name" | "email" | "role" | "org_name" | "created_at" | "last_extension_active";
 
 function relativeTime(dateStr: string | null): string {
   if (!dateStr) return "Never";
@@ -63,6 +66,8 @@ export default function UsersPage() {
   const [filterSuperAdmin, setFilterSuperAdmin] = useState(false);
   const [filterUnprotected, setFilterUnprotected] = useState(false);
   const [roleFilter, setRoleFilter] = useState<string>("all");
+  const [filterNewThisWeek, setFilterNewThisWeek] = useState(false);
+  const [filterNoExtension, setFilterNoExtension] = useState(false);
   const [sortKey, setSortKey] = useState<SortKey>("created_at");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
 
@@ -140,6 +145,15 @@ export default function UsersPage() {
       filtered = filtered.filter((u) => u.role === roleFilter);
     }
 
+    if (filterNewThisWeek) {
+      const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      filtered = filtered.filter((u) => u.created_at >= oneWeekAgo);
+    }
+
+    if (filterNoExtension) {
+      filtered = filtered.filter((u) => !u.extension_version);
+    }
+
     // Sort
     filtered.sort((a, b) => {
       let cmp = 0;
@@ -158,6 +172,9 @@ export default function UsersPage() {
           break;
         case "created_at":
           cmp = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+          break;
+        case "last_extension_active":
+          cmp = new Date(a.last_extension_active || 0).getTime() - new Date(b.last_extension_active || 0).getTime();
           break;
       }
       return sortDir === "asc" ? cmp : -cmp;
@@ -195,7 +212,7 @@ export default function UsersPage() {
 
   const exportCsv = () => {
     const header = "Name,Email,Role,Organization,Super Admin,Last Active,Extension Version,Joined";
-    const csvRows = paginatedUsers.map(
+    const csvRows = allFiltered.map(
       (u) =>
         `"${u.name || ""}","${u.email}","${u.role}","${u.org_name || ""}",${u.is_super_admin},"${relativeTime(u.last_extension_active)}","${u.extension_version || ""}","${u.created_at}"`
     );
@@ -230,6 +247,62 @@ export default function UsersPage() {
           <Download className="mr-2 h-4 w-4" />
           Export CSV
         </Button>
+      </div>
+
+      {/* Summary Stats */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg bg-blue-100 dark:bg-blue-900/30 p-2">
+                <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{users.length}</p>
+                <p className="text-xs text-muted-foreground">Total Users</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg bg-green-100 dark:bg-green-900/30 p-2">
+                <ShieldCheck className="h-5 w-5 text-green-600 dark:text-green-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{users.filter(u => u.extension_status === "active" || u.extension_status === "session_valid").length}</p>
+                <p className="text-xs text-muted-foreground">Protected</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg bg-red-100 dark:bg-red-900/30 p-2">
+                <ShieldOff className="h-5 w-5 text-red-600 dark:text-red-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{users.filter(u => u.extension_status === "session_lost" || !u.extension_version).length}</p>
+                <p className="text-xs text-muted-foreground">Unprotected</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg bg-amber-100 dark:bg-amber-900/30 p-2">
+                <UserPlus className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{users.filter(u => new Date(u.created_at) >= new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)).length}</p>
+                <p className="text-xs text-muted-foreground">New This Week</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Filters */}
@@ -268,6 +341,28 @@ export default function UsersPage() {
           >
             <ShieldOff className="mr-2 h-4 w-4" />
             Unprotected
+          </Button>
+          <Button
+            variant={filterNewThisWeek ? "default" : "outline"}
+            size="sm"
+            onClick={() => {
+              setFilterNewThisWeek(!filterNewThisWeek);
+              setPage(0);
+            }}
+          >
+            <UserPlus className="mr-2 h-4 w-4" />
+            New This Week
+          </Button>
+          <Button
+            variant={filterNoExtension ? "default" : "outline"}
+            size="sm"
+            onClick={() => {
+              setFilterNoExtension(!filterNoExtension);
+              setPage(0);
+            }}
+          >
+            <Clock className="mr-2 h-4 w-4" />
+            No Extension
           </Button>
         </div>
         <div className="flex gap-1 flex-wrap">
@@ -328,6 +423,11 @@ export default function UsersPage() {
                         Joined <ArrowUpDown className="h-3 w-3" />
                       </button>
                     </th>
+                    <th className="text-left p-3 font-medium hidden xl:table-cell">
+                      <button className="flex items-center gap-1 hover:text-foreground" onClick={() => handleSort("last_extension_active")}>
+                        Last Active <ArrowUpDown className="h-3 w-3" />
+                      </button>
+                    </th>
                     <th className="text-right p-3 font-medium">Actions</th>
                   </tr>
                 </thead>
@@ -375,6 +475,9 @@ export default function UsersPage() {
                       </td>
                       <td className="p-3 text-muted-foreground hidden xl:table-cell">
                         {new Date(user.created_at).toLocaleDateString()}
+                      </td>
+                      <td className="p-3 text-muted-foreground hidden xl:table-cell">
+                        {relativeTime(user.last_extension_active)}
                       </td>
                       <td className="p-3 text-right">
                         <Button

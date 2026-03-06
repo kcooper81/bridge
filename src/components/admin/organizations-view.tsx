@@ -4,7 +4,8 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Building2 } from "lucide-react";
+import { Loader2, Building2, TrendingUp, Users as UsersIcon, Calendar } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { OrgListPanel, type OrgListItem } from "@/components/admin/org-list-panel";
 import { OrgDetailPanel } from "@/components/admin/org-detail-panel";
 import { MemberTable, type MemberRow } from "@/components/admin/member-table";
@@ -145,6 +146,15 @@ export function OrganizationsView() {
     [orgs, subMap, membersByOrg]
   );
 
+  const stats = useMemo(() => {
+    const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    const newThisWeek = orgs.filter(o => o.created_at >= oneWeekAgo).length;
+    const suspended = orgs.filter(o => o.is_suspended).length;
+    const paidOrgs = orgListItems.filter(o => o.plan !== "free").length;
+    const totalMembers = profiles.length;
+    return { newThisWeek, suspended, paidOrgs, totalMembers };
+  }, [orgs, orgListItems, profiles]);
+
   const orgMap = useMemo(
     () => new Map(orgs.map((o) => [o.id, o.name])),
     [orgs]
@@ -209,6 +219,62 @@ export function OrganizationsView() {
         <p className="text-muted-foreground">
           {orgs.length} organizations &middot; {profiles.length} total users
         </p>
+      </div>
+
+      {/* Summary Stats */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg bg-blue-100 dark:bg-blue-900/30 p-2">
+                <Building2 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{orgs.length}</p>
+                <p className="text-xs text-muted-foreground">Total Orgs</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg bg-green-100 dark:bg-green-900/30 p-2">
+                <TrendingUp className="h-5 w-5 text-green-600 dark:text-green-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{stats.paidOrgs}</p>
+                <p className="text-xs text-muted-foreground">Paid Orgs</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg bg-amber-100 dark:bg-amber-900/30 p-2">
+                <Calendar className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{stats.newThisWeek}</p>
+                <p className="text-xs text-muted-foreground">New This Week</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg bg-purple-100 dark:bg-purple-900/30 p-2">
+                <UsersIcon className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{stats.totalMembers}</p>
+                <p className="text-xs text-muted-foreground">Total Members</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <Tabs value={activeTab} onValueChange={handleTabChange}>

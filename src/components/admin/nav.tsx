@@ -27,13 +27,15 @@ import { Button } from "@/components/ui/button";
 interface NavBadgeCounts {
   newTickets: number;
   unresolvedErrors: number;
+  pastDueSubs: number;
+  newSignups: number;
 }
 
 interface NavItem {
   href: string;
   label: string;
   icon: React.ElementType;
-  badgeKey: "newTickets" | "unresolvedErrors" | null;
+  badgeKey: keyof NavBadgeCounts | null;
   supportVisible: boolean;
   superAdminOnly?: boolean;
 }
@@ -65,9 +67,9 @@ const navGroups: NavGroup[] = [
     label: "Manage",
     supportVisible: false,
     items: [
-      { href: "/admin/organizations", label: "Organizations", icon: Building2, badgeKey: null, supportVisible: false },
+      { href: "/admin/organizations", label: "Organizations", icon: Building2, badgeKey: "newSignups" as const, supportVisible: false },
       { href: "/admin/users", label: "Users", icon: Users, badgeKey: null, supportVisible: false },
-      { href: "/admin/subscriptions", label: "Subscriptions", icon: CreditCard, badgeKey: null, supportVisible: false },
+      { href: "/admin/subscriptions", label: "Subscriptions", icon: CreditCard, badgeKey: "pastDueSubs" as const, supportVisible: false },
     ],
   },
   {
@@ -95,6 +97,8 @@ export function AdminNav({ superAdminRole }: { superAdminRole: SuperAdminRole | 
   const [badges, setBadges] = useState<NavBadgeCounts>({
     newTickets: 0,
     unresolvedErrors: 0,
+    pastDueSubs: 0,
+    newSignups: 0,
   });
   const prevTicketCount = useRef(0);
 
@@ -117,8 +121,9 @@ export function AdminNav({ superAdminRole }: { superAdminRole: SuperAdminRole | 
 
   const loadBadgeCounts = useCallback(async () => {
     const supabase = createClient();
+    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 
-    const [ticketsResult, errorsResult] = await Promise.all([
+    const [ticketsResult, errorsResult, pastDueResult, newSignupsResult] = await Promise.all([
       supabase
         .from("feedback")
         .select("*", { count: "exact", head: true })
@@ -127,6 +132,14 @@ export function AdminNav({ superAdminRole }: { superAdminRole: SuperAdminRole | 
         .from("error_logs")
         .select("*", { count: "exact", head: true })
         .eq("resolved", false),
+      supabase
+        .from("subscriptions")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "past_due"),
+      supabase
+        .from("organizations")
+        .select("*", { count: "exact", head: true })
+        .gte("created_at", oneDayAgo),
     ]);
 
     const newTicketCount = ticketsResult.count || 0;
@@ -135,6 +148,8 @@ export function AdminNav({ superAdminRole }: { superAdminRole: SuperAdminRole | 
     setBadges({
       newTickets: newTicketCount,
       unresolvedErrors: errorsResult.count || 0,
+      pastDueSubs: pastDueResult.count || 0,
+      newSignups: newSignupsResult.count || 0,
     });
 
     // Browser notification if ticket count increased (and not first load)
@@ -159,28 +174,19 @@ export function AdminNav({ superAdminRole }: { superAdminRole: SuperAdminRole | 
     const supabase = createClient();
 
     const feedbackChannel = supabase
-      .channel("admin-feedback-realtime")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "feedback" },
-        () => {
-          loadBadgeCounts();
-        }
-      )
-      .on(
-        "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "feedback" },
-        () => {
-          loadBadgeCounts();
-        }
-      )
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "error_logs" },
-        () => {
-          loadBadgeCounts();
-        }
-      )
+      .channel("admin-nav-realtime")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "feedback" }, () => loadBadgeCounts())
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "feedback" }, () => loadBadgeCounts())
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "error_logs" }, () => loadBadgeCounts())
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "subscriptions" }, () => {
+        loadBadgeCounts();
+        showBrowserNotification("New subscription", "A new subscription was created in TeamPrompt");
+      })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "subscriptions" }, () => loadBadgeCounts())
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "organizations" }, () => {
+        loadBadgeCounts();
+        showBrowserNotification("New signup", "A new organization signed up for TeamPrompt");
+      })
       .subscribe();
 
     // Request notification permission on mount
@@ -216,7 +222,14 @@ export function AdminNav({ superAdminRole }: { superAdminRole: SuperAdminRole | 
         <item.icon className="h-5 w-5" />
         <span className="flex-1">{item.label}</span>
         {badgeCount > 0 && (
-          <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-blue-500/15 px-1.5 text-[10px] font-medium text-blue-400">
+          <span className={cn(
+            "ml-auto flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] font-medium",
+            item.badgeKey === "pastDueSubs"
+              ? "bg-red-500/15 text-red-400"
+              : item.badgeKey === "newSignups"
+                ? "bg-green-500/15 text-green-400"
+                : "bg-blue-500/15 text-blue-400"
+          )}>
             {badgeCount > 99 ? "99+" : badgeCount}
           </span>
         )}

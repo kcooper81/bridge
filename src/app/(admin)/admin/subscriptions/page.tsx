@@ -15,6 +15,10 @@ import {
   ChevronLeft,
   ChevronRight,
   Download,
+  TrendingUp,
+  AlertTriangle,
+  Users,
+  Building2,
 } from "lucide-react";
 
 interface SubRow {
@@ -43,6 +47,7 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 const STATUS_FILTERS = ["all", "active", "trialing", "past_due", "canceled", "paused", "no_subscription"] as const;
+const PLAN_FILTERS = ["all", "free", "pro", "team", "business"] as const;
 const PLAN_PRICES: Record<string, number> = { free: 0, pro: 9, team: 7, business: 12 };
 
 type SortKey = "org_name" | "plan" | "status" | "seats" | "current_period_end" | "mrr" | "created_at";
@@ -53,6 +58,7 @@ export default function SubscriptionsPage() {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [planFilter, setPlanFilter] = useState<string>("all");
   const [page, setPage] = useState(0);
   const [sortKey, setSortKey] = useState<SortKey>("created_at");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
@@ -141,6 +147,11 @@ export default function SubscriptionsPage() {
       filtered = filtered.filter((s) => s.status === statusFilter);
     }
 
+    // Plan filter
+    if (planFilter !== "all") {
+      filtered = filtered.filter((s) => s.plan === planFilter);
+    }
+
     // Sort
     filtered.sort((a, b) => {
       let cmp = 0;
@@ -184,7 +195,7 @@ export default function SubscriptionsPage() {
 
   const exportCsv = () => {
     const header = "Organization,Plan,Status,Seats,MRR,Renews,Stripe ID,Created";
-    const csvRows = paginatedSubs.map(
+    const csvRows = allFiltered.map(
       (s) =>
         `"${s.org_name}","${s.plan}","${s.status}",${s.seats},${s.mrr.toFixed(2)},"${s.current_period_end || ""}","${s.stripe_subscription_id || ""}","${s.created_at}"`
     );
@@ -238,6 +249,62 @@ export default function SubscriptionsPage() {
         </Button>
       </div>
 
+      {/* Summary Stats */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg bg-green-100 dark:bg-green-900/30 p-2">
+                <TrendingUp className="h-5 w-5 text-green-600 dark:text-green-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">${totalMrr.toFixed(0)}</p>
+                <p className="text-xs text-muted-foreground">Monthly Revenue</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg bg-blue-100 dark:bg-blue-900/30 p-2">
+                <CreditCard className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{subs.filter(s => s.status === "active").length}</p>
+                <p className="text-xs text-muted-foreground">Active Subs</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg bg-red-100 dark:bg-red-900/30 p-2">
+                <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{subs.filter(s => s.status === "past_due").length}</p>
+                <p className="text-xs text-muted-foreground">Past Due</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg bg-amber-100 dark:bg-amber-900/30 p-2">
+                <Users className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{subs.filter(s => s.status === "trialing").length}</p>
+                <p className="text-xs text-muted-foreground">Trialing</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Filters */}
       <div className="flex flex-col gap-3">
         <div className="relative max-w-md">
@@ -266,6 +333,23 @@ export default function SubscriptionsPage() {
               className="capitalize"
             >
               {f === "past_due" ? "Past Due" : f === "no_subscription" ? "No Sub" : f}
+            </Button>
+          ))}
+        </div>
+        <div className="flex gap-1 flex-wrap">
+          <span className="text-sm text-muted-foreground self-center mr-1">Plan:</span>
+          {PLAN_FILTERS.map((f) => (
+            <Button
+              key={f}
+              variant={planFilter === f ? "default" : "outline"}
+              size="sm"
+              onClick={() => {
+                setPlanFilter(f);
+                setPage(0);
+              }}
+              className="capitalize"
+            >
+              {f}
             </Button>
           ))}
         </div>
@@ -313,6 +397,11 @@ export default function SubscriptionsPage() {
                         Renews <ArrowUpDown className="h-3 w-3" />
                       </button>
                     </th>
+                    <th className="text-left p-3 font-medium hidden lg:table-cell">
+                      <button className="flex items-center gap-1 hover:text-foreground" onClick={() => handleSort("created_at")}>
+                        Created <ArrowUpDown className="h-3 w-3" />
+                      </button>
+                    </th>
                     <th className="text-right p-3 font-medium">Stripe</th>
                   </tr>
                 </thead>
@@ -352,6 +441,9 @@ export default function SubscriptionsPage() {
                         {sub.current_period_end
                           ? new Date(sub.current_period_end).toLocaleDateString()
                           : "\u2014"}
+                      </td>
+                      <td className="p-3 text-muted-foreground hidden lg:table-cell">
+                        {new Date(sub.created_at).toLocaleDateString()}
                       </td>
                       <td className="p-3 text-right">
                         {sub.stripe_subscription_id ? (

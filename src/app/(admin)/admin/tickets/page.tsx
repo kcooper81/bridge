@@ -287,26 +287,28 @@ function TicketContent({
   return (
     <>
       {/* Header — compact with clear hierarchy */}
-      <div className="px-5 pt-4 pb-3 border-b flex-shrink-0 space-y-2.5">
-        <div className="flex items-start justify-between gap-3">
+      <div className="px-3 sm:px-5 pt-3 sm:pt-4 pb-3 border-b flex-shrink-0 space-y-2">
+        <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <h2 className="text-base font-semibold leading-snug truncate">
+            <h2 className="text-sm sm:text-base font-semibold leading-snug line-clamp-2 sm:truncate">
               {ticket.subject || "No subject"}
             </h2>
-            <p className="text-xs text-muted-foreground mt-0.5 truncate">
+            <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5 truncate">
               {ticket.sender_name && ticket.sender_name !== ticket.user_email
                 ? `${ticket.sender_name} <${ticket.user_email}>`
                 : ticket.user_email || "Anonymous"}
               {ticket.org_name && ` · ${ticket.org_name}`}
-              {" · "}{new Date(ticket.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
+              <span className="hidden sm:inline">
+                {" · "}{new Date(ticket.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
+              </span>
             </p>
           </div>
-          <div className="flex items-center gap-1.5 flex-shrink-0">
+          <div className="flex items-center gap-1 flex-shrink-0">
             <Badge variant="outline" className="capitalize text-[10px] h-5">
               {ticket.type}
             </Badge>
             {ticket.inbox_email && (
-              <Badge variant="secondary" className="text-[10px] h-5 gap-0.5">
+              <Badge variant="secondary" className="text-[10px] h-5 gap-0.5 hidden sm:inline-flex">
                 <Inbox className="h-2.5 w-2.5" />
                 {ticket.inbox_email.split("@")[0]}
               </Badge>
@@ -314,12 +316,12 @@ function TicketContent({
           </div>
         </div>
 
-        {/* Controls — grouped with labels */}
-        <div className="flex items-center gap-3 flex-wrap">
+        {/* Controls — stacked on mobile, inline on larger */}
+        <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 sm:gap-3">
           <div className="flex items-center gap-1.5">
-            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Status</span>
+            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider hidden sm:inline">Status</span>
             <Select value={ticket.status} onValueChange={(val) => updateStatus(ticket.id, val)}>
-              <SelectTrigger className="w-[115px] h-7 text-xs"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="w-full sm:w-[115px] h-7 text-xs"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="new">New</SelectItem>
                 <SelectItem value="in_progress">In Progress</SelectItem>
@@ -329,9 +331,9 @@ function TicketContent({
             </Select>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Priority</span>
+            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider hidden sm:inline">Priority</span>
             <Select value={ticket.priority} onValueChange={(val) => updatePriority(ticket.id, val)}>
-              <SelectTrigger className="w-[95px] h-7 text-xs"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="w-full sm:w-[95px] h-7 text-xs"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="low">Low</SelectItem>
                 <SelectItem value="normal">Normal</SelectItem>
@@ -340,10 +342,10 @@ function TicketContent({
               </SelectContent>
             </Select>
           </div>
-          <div className="flex items-center gap-1.5">
-            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Assignee</span>
+          <div className="flex items-center gap-1.5 col-span-2">
+            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider hidden sm:inline">Assignee</span>
             <Select value={ticket.assigned_to || "_unassigned"} onValueChange={(val) => assignTicket(ticket.id, val === "_unassigned" ? null : val)}>
-              <SelectTrigger className="w-[140px] h-7 text-xs">
+              <SelectTrigger className="w-full sm:w-[140px] h-7 text-xs">
                 <div className="flex items-center gap-1 truncate">
                   <UserRound className="h-3 w-3 flex-shrink-0 text-muted-foreground" />
                   <SelectValue placeholder="Unassigned" />
@@ -362,7 +364,7 @@ function TicketContent({
 
       {/* Scrollable content */}
       <ScrollArea className="flex-1">
-        <div className="px-5 py-4 space-y-4">
+        <div className="px-3 sm:px-5 py-3 sm:py-4 space-y-4">
           {/* Original message — prominent card */}
           <div className="rounded-lg border shadow-sm overflow-hidden">
             <div className="bg-muted/40 px-4 py-2 text-[11px] flex items-center justify-between border-b">
@@ -1072,7 +1074,7 @@ export default function TicketsPage() {
       <div
         key={ticket.id}
         className={cn(
-          "flex gap-3 px-4 py-3.5 cursor-pointer transition-colors",
+          "flex gap-2 sm:gap-3 px-3 sm:px-4 py-3 sm:py-3.5 cursor-pointer transition-colors",
           isActive
             ? "bg-primary/10 border-l-2 border-l-primary"
             : isNew
@@ -1084,12 +1086,13 @@ export default function TicketsPage() {
         onClick={() => isMobile ? openTicketMobile(ticket) : openTicket(ticket)}
       >
         {/* Left: checkbox + unread dot */}
-        <div className="flex items-center gap-2 pt-0.5 flex-shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-2 pt-0.5 flex-shrink-0">
           <Checkbox
             checked={isSelected}
             onCheckedChange={() => toggleSelect(ticket.id)}
             onClick={(e) => e.stopPropagation()}
             aria-label={`Select ${ticket.subject || ticket.id}`}
+            className="hidden sm:inline-flex"
           />
           <div className="w-2">
             {isNew && <div className="h-2 w-2 rounded-full bg-blue-500" />}
@@ -1224,13 +1227,13 @@ export default function TicketsPage() {
   const replyForm = selectedTicket && (
     <div className="border-t bg-card flex-shrink-0">
       {/* Mode tabs — compact pill toggle */}
-      <div className="flex items-center gap-2 px-4 pt-3 pb-2">
+      <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 pt-2.5 sm:pt-3 pb-2">
         <div className="flex gap-0.5 bg-muted rounded-md p-0.5">
           <button
             type="button"
             onClick={() => setIsInternal(false)}
             className={cn(
-              "flex items-center gap-1 rounded px-2.5 py-1.5 text-xs font-medium transition-colors",
+              "flex items-center gap-1 rounded px-2 sm:px-2.5 py-1.5 text-xs font-medium transition-colors",
               !isInternal
                 ? "bg-blue-600 text-white shadow-sm"
                 : "text-muted-foreground hover:text-foreground"
@@ -1243,7 +1246,7 @@ export default function TicketsPage() {
             type="button"
             onClick={() => setIsInternal(true)}
             className={cn(
-              "flex items-center gap-1 rounded px-2.5 py-1.5 text-xs font-medium transition-colors",
+              "flex items-center gap-1 rounded px-2 sm:px-2.5 py-1.5 text-xs font-medium transition-colors",
               isInternal
                 ? "bg-amber-500 text-white shadow-sm"
                 : "text-muted-foreground hover:text-foreground"
@@ -1254,9 +1257,9 @@ export default function TicketsPage() {
           </button>
         </div>
 
-        {/* Reply context inline */}
+        {/* Reply context inline — hidden on very small screens */}
         {!isInternal && (
-          <span className="text-[11px] text-muted-foreground truncate">
+          <span className="text-[11px] text-muted-foreground truncate hidden sm:inline">
             to {selectedTicket.user_email || <span className="text-amber-600 dark:text-amber-400">no email</span>}
             {selectedTicket.inbox_email && <> via {selectedTicket.inbox_email.split("@")[0]}</>}
           </span>
@@ -1266,9 +1269,9 @@ export default function TicketsPage() {
 
         <Popover open={cannedOpen} onOpenChange={setCannedOpen}>
           <PopoverTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-6 text-[11px] gap-1 px-2">
+            <Button variant="ghost" size="sm" className="h-6 text-[11px] gap-1 px-1.5 sm:px-2">
               <Zap className="h-3 w-3" />
-              Templates
+              <span className="hidden sm:inline">Templates</span>
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-72 p-0" align="end">
@@ -1330,14 +1333,14 @@ export default function TicketsPage() {
       </div>
 
       {/* Editor area */}
-      <div className="px-4 pb-3">
+      <div className="px-3 sm:px-4 pb-2 sm:pb-3">
         {isInternal ? (
           <Textarea
             placeholder="Internal note (only visible to admins)..."
             value={noteContent}
             onChange={(e) => setNoteContent(e.target.value)}
             rows={3}
-            className="resize-y min-h-[72px] text-sm"
+            className="resize-y min-h-[60px] sm:min-h-[72px] text-sm"
           />
         ) : (
           <RichEditor ref={editorRef} placeholder="Write your reply..." />
@@ -1345,7 +1348,7 @@ export default function TicketsPage() {
       </div>
 
       {/* Footer with send */}
-      <div className="flex items-center justify-between px-4 pb-3">
+      <div className="flex items-center justify-between px-3 sm:px-4 pb-3">
         {!isInternal && !selectedTicket.user_email ? (
           <p className="text-[11px] text-amber-600 dark:text-amber-400 flex items-center gap-1">
             <AlertTriangle className="h-3 w-3" />
@@ -1384,15 +1387,15 @@ export default function TicketsPage() {
     <div className="space-y-3">
       {/* Compact header row */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <h1 className="text-xl font-bold tracking-tight">Inbox</h1>
+        <div className="flex items-center gap-2 sm:gap-3">
+          <h1 className="text-lg sm:text-xl font-bold tracking-tight">Inbox</h1>
           {stats.new > 0 && (
             <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 px-2 py-0.5 text-xs font-medium">
               {stats.new} new
             </span>
           )}
         </div>
-        <div className="hidden sm:flex items-center gap-1.5 text-[11px] text-muted-foreground">
+        <div className="hidden lg:flex items-center gap-1.5 text-[11px] text-muted-foreground">
           <kbd className="px-1 py-0.5 rounded bg-muted border text-[10px]">j</kbd><kbd className="px-1 py-0.5 rounded bg-muted border text-[10px]">k</kbd>
           <span>nav</span>
           <kbd className="px-1 py-0.5 rounded bg-muted border text-[10px] ml-1.5">r</kbd>
@@ -1405,10 +1408,10 @@ export default function TicketsPage() {
       {/* Split pane: ticket list + detail (desktop) / full-width list (mobile) */}
       <div className="lg:grid lg:grid-cols-[380px_1fr] lg:gap-0 lg:border lg:rounded-lg lg:overflow-hidden lg:bg-card" style={{ minHeight: "calc(100vh - 120px)" }}>
         {/* Left: Ticket list */}
-        <div className="border rounded-lg lg:rounded-none lg:border-0 lg:border-r bg-card lg:flex lg:flex-col" style={{ maxHeight: "calc(100vh - 120px)" }}>
+        <div className="border rounded-lg lg:rounded-none lg:border-0 lg:border-r bg-card flex flex-col" style={{ maxHeight: "calc(100vh - 120px)" }}>
 
           {/* Filter tabs inside list pane */}
-          <div className="flex items-center border-b overflow-x-auto flex-shrink-0">
+          <div className="flex items-center border-b overflow-x-auto flex-shrink-0 scrollbar-hide">
             {([
               { key: "open" as QuickFilter, label: "Open", count: stats.new + stats.open },
               { key: "mine" as QuickFilter, label: "Mine", count: stats.mine },
@@ -1612,7 +1615,7 @@ export default function TicketsPage() {
 
       {/* Mobile: Sheet flyout */}
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent className="sm:max-w-2xl w-full flex flex-col h-full overflow-hidden p-0 lg:hidden">
+        <SheetContent className="sm:max-w-2xl w-[100vw] sm:w-full flex flex-col h-full overflow-hidden p-0 lg:hidden">
           {selectedTicket && sheetOpen && (
             <>
               <SheetHeader className="sr-only">

@@ -235,14 +235,14 @@ export default function SubscriptionsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Subscriptions</h1>
-          <p className="text-muted-foreground">
-            {subs.length} organizations &middot; {subs.filter(s => s.status !== "no_subscription").length} with subscriptions &middot; ${totalMrr.toFixed(0)} MRR
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Subscriptions</h1>
+          <p className="text-sm text-muted-foreground">
+            {subs.length} orgs &middot; {subs.filter(s => s.status !== "no_subscription").length} with subs &middot; ${totalMrr.toFixed(0)} MRR
           </p>
         </div>
-        <Button variant="outline" onClick={exportCsv}>
+        <Button variant="outline" size="sm" onClick={exportCsv}>
           <Download className="mr-2 h-4 w-4" />
           Export CSV
         </Button>

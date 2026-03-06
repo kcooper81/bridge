@@ -160,13 +160,37 @@ export async function POST(request: NextRequest) {
       console.log("Inbound email: ignoring email from own domain:", senderAddress);
       return NextResponse.json({ ok: true, action: "ignored_own_domain" });
     }
-    const text = data.text || "";
-    const html = data.html || "";
+    // Resend may send body as text/html or textBody/htmlBody depending on version
+    const text = data.text || data.textBody || data.body || "";
+    const html = data.html || data.htmlBody || "";
+    console.log("Inbound email body fields:", {
+      hasText: !!data.text, hasHtml: !!data.html,
+      hasTextBody: !!data.textBody, hasHtmlBody: !!data.htmlBody,
+      hasBody: !!data.body,
+      textLen: text.length, htmlLen: html.length,
+      dataKeys: Object.keys(data),
+    });
 
     const senderEmail = extractEmail(from);
     const senderName = extractName(from);
     const { inboxEmail, ticketType } = detectInbox(toAddresses, headers);
-    const body = text || html?.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim() || "";
+    // Prefer text version; fall back to HTML stripped to readable text
+    const body = text || (html
+      ? html
+          .replace(/<br\s*\/?>/gi, "\n")
+          .replace(/<\/p>/gi, "\n\n")
+          .replace(/<\/div>/gi, "\n")
+          .replace(/<\/li>/gi, "\n")
+          .replace(/<[^>]*>/g, "")
+          .replace(/&nbsp;/gi, " ")
+          .replace(/&amp;/gi, "&")
+          .replace(/&lt;/gi, "<")
+          .replace(/&gt;/gi, ">")
+          .replace(/&quot;/gi, '"')
+          .replace(/&#39;/gi, "'")
+          .replace(/\n{3,}/g, "\n\n")
+          .trim()
+      : "");
 
     // Extract attachment metadata (don't store content — just metadata for now)
     const rawAttachments = data.attachments || [];

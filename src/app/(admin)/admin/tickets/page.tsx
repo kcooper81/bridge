@@ -9,7 +9,6 @@ import { Textarea } from "@/components/ui/textarea";
 import RichEditor from "@/components/admin/rich-editor";
 import type { RichEditorRef } from "@/components/admin/rich-editor";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 import {
   Select,
   SelectContent,
@@ -46,7 +45,6 @@ import {
   DollarSign,
   Inbox,
   Trash2,
-  ArrowUp,
   XCircle,
   Paperclip,
   Zap,
@@ -57,7 +55,6 @@ import {
   X,
   PartyPopper,
   UserRound,
-  UserRoundX,
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
@@ -152,7 +149,10 @@ const TYPE_ICONS: Record<string, React.ElementType> = {
   sales: DollarSign,
 };
 
-type QuickFilter = "all" | "unread" | "open" | "mine" | "unassigned" | "resolved" | "closed";
+type QuickFilter = "all" | "open" | "mine" | "unassigned" | "resolved" | "closed";
+
+// Add Filter icon
+import { Filter } from "lucide-react";
 
 // --- Helpers ---
 
@@ -286,137 +286,104 @@ function TicketContent({
 
   return (
     <>
-      {/* Header */}
-      <div className="p-5 pb-3 border-b flex-shrink-0">
-        <h2 className="text-lg font-semibold leading-tight">
-          {ticket.subject || "No subject"}
-        </h2>
-        <div className="flex items-center gap-2 flex-wrap mt-1 text-sm text-muted-foreground">
-          <span>{ticket.user_email || "Anonymous"}</span>
-          <span>&middot;</span>
-          <span>{new Date(ticket.created_at).toLocaleString()}</span>
-          {ticket.org_name && (
-            <>
-              <span>&middot;</span>
-              <span>{ticket.org_name}</span>
-            </>
-          )}
+      {/* Header — compact with clear hierarchy */}
+      <div className="px-5 pt-4 pb-3 border-b flex-shrink-0 space-y-2.5">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h2 className="text-base font-semibold leading-snug truncate">
+              {ticket.subject || "No subject"}
+            </h2>
+            <p className="text-xs text-muted-foreground mt-0.5 truncate">
+              {ticket.sender_name && ticket.sender_name !== ticket.user_email
+                ? `${ticket.sender_name} <${ticket.user_email}>`
+                : ticket.user_email || "Anonymous"}
+              {ticket.org_name && ` · ${ticket.org_name}`}
+              {" · "}{new Date(ticket.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
+            </p>
+          </div>
+          <div className="flex items-center gap-1.5 flex-shrink-0">
+            <Badge variant="outline" className="capitalize text-[10px] h-5">
+              {ticket.type}
+            </Badge>
+            {ticket.inbox_email && (
+              <Badge variant="secondary" className="text-[10px] h-5 gap-0.5">
+                <Inbox className="h-2.5 w-2.5" />
+                {ticket.inbox_email.split("@")[0]}
+              </Badge>
+            )}
+          </div>
         </div>
 
-        {/* Controls row */}
-        <div className="flex items-center gap-2 mt-3 flex-wrap">
-          <Select
-            value={ticket.status}
-            onValueChange={(val) => updateStatus(ticket.id, val)}
-          >
-            <SelectTrigger className="w-[130px] h-8 text-xs">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="new">New</SelectItem>
-              <SelectItem value="in_progress">In Progress</SelectItem>
-              <SelectItem value="resolved">Resolved</SelectItem>
-              <SelectItem value="closed">Closed</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Select
-            value={ticket.priority}
-            onValueChange={(val) => updatePriority(ticket.id, val)}
-          >
-            <SelectTrigger className="w-[110px] h-8 text-xs">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="low">Low</SelectItem>
-              <SelectItem value="normal">Normal</SelectItem>
-              <SelectItem value="high">High</SelectItem>
-              <SelectItem value="urgent">Urgent</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Select
-            value={ticket.assigned_to || "_unassigned"}
-            onValueChange={(val) => assignTicket(ticket.id, val === "_unassigned" ? null : val)}
-          >
-            <SelectTrigger className="w-[160px] h-8 text-xs">
-              <div className="flex items-center gap-1.5 truncate">
-                <UserRound className="h-3 w-3 flex-shrink-0" />
-                <SelectValue placeholder="Unassigned" />
-              </div>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="_unassigned">
-                <span className="flex items-center gap-1.5">
-                  <UserRoundX className="h-3 w-3 text-muted-foreground" />
-                  Unassigned
-                </span>
-              </SelectItem>
-              {staff.map((s) => (
-                <SelectItem key={s.id} value={s.id}>
-                  <span className="truncate">{s.name || s.email}</span>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Badge variant="outline" className="capitalize text-xs">
-            {ticket.type}
-          </Badge>
-          {ticket.inbox_email && (
-            <Badge variant="secondary" className="text-xs gap-1">
-              <Inbox className="h-3 w-3" />
-              {ticket.inbox_email}
-            </Badge>
-          )}
+        {/* Controls — grouped with labels */}
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex items-center gap-1.5">
+            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Status</span>
+            <Select value={ticket.status} onValueChange={(val) => updateStatus(ticket.id, val)}>
+              <SelectTrigger className="w-[115px] h-7 text-xs"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="new">New</SelectItem>
+                <SelectItem value="in_progress">In Progress</SelectItem>
+                <SelectItem value="resolved">Resolved</SelectItem>
+                <SelectItem value="closed">Closed</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Priority</span>
+            <Select value={ticket.priority} onValueChange={(val) => updatePriority(ticket.id, val)}>
+              <SelectTrigger className="w-[95px] h-7 text-xs"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="low">Low</SelectItem>
+                <SelectItem value="normal">Normal</SelectItem>
+                <SelectItem value="high">High</SelectItem>
+                <SelectItem value="urgent">Urgent</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Assignee</span>
+            <Select value={ticket.assigned_to || "_unassigned"} onValueChange={(val) => assignTicket(ticket.id, val === "_unassigned" ? null : val)}>
+              <SelectTrigger className="w-[140px] h-7 text-xs">
+                <div className="flex items-center gap-1 truncate">
+                  <UserRound className="h-3 w-3 flex-shrink-0 text-muted-foreground" />
+                  <SelectValue placeholder="Unassigned" />
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="_unassigned">Unassigned</SelectItem>
+                {staff.map((s) => (
+                  <SelectItem key={s.id} value={s.id}>{s.name || s.email}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </div>
 
       {/* Scrollable content */}
-      <ScrollArea className="flex-1 px-6">
-        <div className="py-5 space-y-5">
-          {/* Original message — email-style display */}
-          <div className="rounded-lg border overflow-hidden">
-            {/* Email header */}
-            <div className="bg-muted/50 px-4 py-2.5 text-xs space-y-1 border-b">
-              <div className="flex gap-2">
-                <span className="font-medium text-muted-foreground w-10 flex-shrink-0">From</span>
-                <span className="text-foreground">
-                  {ticket.sender_name && ticket.sender_name !== ticket.user_email ? (
-                    <>
-                      <span className="font-medium">{ticket.sender_name}</span>
-                      {ticket.user_email && (
-                        <span className="text-muted-foreground"> &lt;{ticket.user_email}&gt;</span>
-                      )}
-                    </>
-                  ) : (
-                    <span className="font-medium">{ticket.user_email || "Anonymous"}</span>
-                  )}
-                </span>
-              </div>
-              {ticket.inbox_email && (
-                <div className="flex gap-2">
-                  <span className="font-medium text-muted-foreground w-10 flex-shrink-0">To</span>
-                  <span className="text-foreground">{ticket.inbox_email}</span>
+      <ScrollArea className="flex-1">
+        <div className="px-5 py-4 space-y-4">
+          {/* Original message — prominent card */}
+          <div className="rounded-lg border shadow-sm overflow-hidden">
+            <div className="bg-muted/40 px-4 py-2 text-[11px] flex items-center justify-between border-b">
+              <div className="flex items-center gap-2">
+                <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <Mail className="h-3 w-3 text-primary" />
                 </div>
-              )}
-              <div className="flex gap-2">
-                <span className="font-medium text-muted-foreground w-10 flex-shrink-0">Date</span>
-                <span className="text-foreground">
-                  {new Date(ticket.created_at).toLocaleString(undefined, {
-                    weekday: "short",
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                    hour: "numeric",
-                    minute: "2-digit",
-                  })}
+                <span className="font-medium text-foreground">
+                  {ticket.sender_name || ticket.user_email?.split("@")[0] || "Customer"}
                 </span>
+                {ticket.inbox_email && (
+                  <span className="text-muted-foreground">
+                    to {ticket.inbox_email.split("@")[0]}
+                  </span>
+                )}
               </div>
+              <span className="text-muted-foreground">
+                {new Date(ticket.created_at).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
+              </span>
             </div>
-
-            {/* Email body */}
-            <div className="p-5">
+            <div className="p-4">
               {ticket.html_body ? (
                 <EmailHtmlBody html={ticket.html_body} />
               ) : (
@@ -425,147 +392,129 @@ function TicketContent({
                 </p>
               )}
             </div>
-          </div>
-
-          {/* Attachments */}
-          {ticket.attachments && ticket.attachments.length > 0 && (
-            <div>
-              <h4 className="text-sm font-medium mb-2 flex items-center gap-1.5">
-                <Paperclip className="h-3.5 w-3.5" />
-                Attachments ({ticket.attachments.length})
-              </h4>
-              <div className="flex flex-wrap gap-2">
+            {/* Attachments inline with message */}
+            {ticket.attachments && ticket.attachments.length > 0 && (
+              <div className="px-4 pb-3 flex flex-wrap gap-1.5">
                 {ticket.attachments.map((att, i) => (
-                  <div
-                    key={i}
-                    className="inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-xs bg-muted/50"
-                  >
+                  <div key={i} className="inline-flex items-center gap-1.5 rounded border px-2 py-1 text-[11px] bg-muted/50">
                     <Paperclip className="h-3 w-3 text-muted-foreground" />
                     <span className="font-medium">{att.filename}</span>
-                    <span className="text-muted-foreground">
-                      {formatBytes(att.size)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Customer history */}
-          {customerHistory.length > 0 && (
-            <div>
-              <button
-                type="button"
-                onClick={() => setHistoryOpen(!historyOpen)}
-                className="flex items-center gap-1.5 text-sm font-medium hover:text-foreground transition-colors"
-              >
-                <ChevronRight
-                  className={cn(
-                    "h-3.5 w-3.5 transition-transform",
-                    historyOpen && "rotate-90"
-                  )}
-                />
-                <History className="h-3.5 w-3.5" />
-                Customer History ({customerHistory.length} other ticket{customerHistory.length !== 1 ? "s" : ""})
-              </button>
-              {historyOpen && (
-                <div className="mt-2 space-y-1.5 pl-5">
-                  {customerHistory.map((t) => (
-                    <div
-                      key={t.id}
-                      className="flex items-center gap-2 text-xs rounded-md border px-3 py-2 cursor-pointer hover:bg-muted/50 transition-colors"
-                      onClick={() => {
-                        onSelectTicket(t);
-                        setHistoryOpen(false);
-                      }}
-                    >
-                      <span
-                        className={cn(
-                          "inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-medium",
-                          STATUS_COLORS[t.status]
-                        )}
-                      >
-                        {t.status.replace("_", " ")}
-                      </span>
-                      <span className="font-medium truncate flex-1">
-                        {t.subject || "No subject"}
-                      </span>
-                      <span className="text-muted-foreground flex-shrink-0">
-                        {timeAgo(t.created_at)}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          <Separator />
-
-          {/* Notes thread */}
-          <div>
-            <h4 className="text-sm font-medium mb-3">
-              Notes & Responses ({ticket.notes.length})
-            </h4>
-            {ticket.notes.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                No notes yet
-              </p>
-            ) : (
-              <div className="space-y-3">
-                {ticket.notes.map((note) => (
-                  <div
-                    key={note.id}
-                    className={cn(
-                      "rounded-lg p-3 text-sm",
-                      note.is_internal
-                        ? "bg-amber-50 border border-amber-200 dark:bg-amber-950/30 dark:border-amber-800/50"
-                        : "bg-blue-50 border border-blue-200 dark:bg-blue-950/30 dark:border-blue-800/50"
-                    )}
-                  >
-                    <div className="flex items-center gap-2 mb-1.5">
-                      {note.is_internal ? (
-                        <Lock className="h-3 w-3 text-amber-600 dark:text-amber-400" />
-                      ) : (
-                        <Mail className="h-3 w-3 text-blue-600 dark:text-blue-400" />
-                      )}
-                      <span className="text-xs font-medium">
-                        {note.author_email || "Admin"}
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        {new Date(note.created_at).toLocaleString()}
-                      </span>
-                      {note.email_sent && (
-                        <Badge
-                          variant="outline"
-                          className="text-[10px] px-1.5 py-0 h-4"
-                        >
-                          Email sent
-                        </Badge>
-                      )}
-                    </div>
-                    {!note.is_internal && note.content.startsWith("<") ? (
-                      <div
-                        className="prose prose-sm max-w-none [&_a]:text-blue-600 [&_a]:underline"
-                        dangerouslySetInnerHTML={{
-                          __html: note.content
-                            .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
-                            .replace(/\bon\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]*)/gi, "")
-                            .replace(/<iframe\b[^>]*>/gi, "")
-                            .replace(/<object\b[^>]*>/gi, "")
-                            .replace(/<embed\b[^>]*>/gi, "")
-                        }}
-                      />
-                    ) : (
-                      <p className="whitespace-pre-wrap">
-                        {note.content}
-                      </p>
-                    )}
+                    <span className="text-muted-foreground">{formatBytes(att.size)}</span>
                   </div>
                 ))}
               </div>
             )}
           </div>
+
+          {/* Customer history */}
+          {customerHistory.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setHistoryOpen(!historyOpen)}
+              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <ChevronRight className={cn("h-3 w-3 transition-transform", historyOpen && "rotate-90")} />
+              <History className="h-3 w-3" />
+              {customerHistory.length} previous ticket{customerHistory.length !== 1 ? "s" : ""}
+            </button>
+          )}
+          {historyOpen && customerHistory.length > 0 && (
+            <div className="space-y-1 pl-4">
+              {customerHistory.map((t) => (
+                <div
+                  key={t.id}
+                  className="flex items-center gap-2 text-[11px] rounded border px-2.5 py-1.5 cursor-pointer hover:bg-muted/50 transition-colors"
+                  onClick={() => { onSelectTicket(t); setHistoryOpen(false); }}
+                >
+                  <span className={cn("inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-medium", STATUS_COLORS[t.status])}>
+                    {t.status.replace("_", " ")}
+                  </span>
+                  <span className="font-medium truncate flex-1">{t.subject || "No subject"}</span>
+                  <span className="text-muted-foreground flex-shrink-0">{timeAgo(t.created_at)}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Notes thread — timeline style */}
+          {ticket.notes.length > 0 && (
+            <div className="relative">
+              <div className="flex items-center gap-2 mb-3">
+                <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  Activity ({ticket.notes.length})
+                </h4>
+                <div className="flex-1 h-px bg-border" />
+              </div>
+
+              {/* Timeline line */}
+              <div className="relative pl-6">
+                <div className="absolute left-[9px] top-2 bottom-2 w-px bg-border" />
+
+                <div className="space-y-3">
+                  {ticket.notes.map((note) => (
+                    <div key={note.id} className="relative">
+                      {/* Timeline dot */}
+                      <div className={cn(
+                        "absolute -left-6 top-2.5 h-[18px] w-[18px] rounded-full border-2 flex items-center justify-center",
+                        note.is_internal
+                          ? "bg-amber-50 border-amber-300 dark:bg-amber-950 dark:border-amber-700"
+                          : "bg-blue-50 border-blue-300 dark:bg-blue-950 dark:border-blue-700"
+                      )}>
+                        {note.is_internal ? (
+                          <Lock className="h-2 w-2 text-amber-600 dark:text-amber-400" />
+                        ) : (
+                          <Send className="h-2 w-2 text-blue-600 dark:text-blue-400" />
+                        )}
+                      </div>
+
+                      {/* Note card */}
+                      <div className={cn(
+                        "rounded-lg border text-sm",
+                        note.is_internal
+                          ? "border-amber-200 dark:border-amber-800/50"
+                          : "border-blue-200 dark:border-blue-800/50"
+                      )}>
+                        <div className={cn(
+                          "flex items-center gap-2 px-3 py-1.5 rounded-t-lg text-[11px]",
+                          note.is_internal
+                            ? "bg-amber-50/80 dark:bg-amber-950/30"
+                            : "bg-blue-50/80 dark:bg-blue-950/30"
+                        )}>
+                          <span className="font-medium">{note.author_email || "Admin"}</span>
+                          <span className="text-muted-foreground">{timeAgo(note.created_at)}</span>
+                          {note.is_internal && (
+                            <span className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">Internal</span>
+                          )}
+                          {note.email_sent && (
+                            <span className="text-[10px] text-blue-600 dark:text-blue-400 font-medium flex items-center gap-0.5">
+                              <CheckCircle className="h-2.5 w-2.5" /> Sent
+                            </span>
+                          )}
+                        </div>
+                        <div className="px-3 py-2.5">
+                          {!note.is_internal && note.content.startsWith("<") ? (
+                            <div
+                              className="prose prose-sm max-w-none [&_a]:text-blue-600 [&_a]:underline"
+                              dangerouslySetInnerHTML={{
+                                __html: note.content
+                                  .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+                                  .replace(/\bon\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]*)/gi, "")
+                                  .replace(/<iframe\b[^>]*>/gi, "")
+                                  .replace(/<object\b[^>]*>/gi, "")
+                                  .replace(/<embed\b[^>]*>/gi, "")
+                              }}
+                            />
+                          ) : (
+                            <p className="whitespace-pre-wrap text-sm">{note.content}</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </ScrollArea>
     </>
@@ -582,7 +531,7 @@ export default function TicketsPage() {
 
   // Filters
   const [search, setSearch] = useState("");
-  const [quickFilter, setQuickFilter] = useState<QuickFilter>("unread");
+  const [quickFilter, setQuickFilter] = useState<QuickFilter>("open");
   const [typeFilter, setTypeFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
 
@@ -982,18 +931,14 @@ export default function TicketsPage() {
   const activeFiltered = useMemo(() => {
     let result = filtered;
 
-    if (quickFilter === "unread") {
-      result = result.filter((t) => t.status === "new");
-    } else if (quickFilter === "open") {
+    if (quickFilter === "open") {
       result = result.filter((t) => t.status === "new" || t.status === "in_progress");
     } else if (quickFilter === "mine") {
       result = result.filter((t) => t.assigned_to === user?.id && t.status !== "closed");
     } else if (quickFilter === "unassigned") {
       result = result.filter((t) => !t.assigned_to && t.status !== "resolved" && t.status !== "closed");
     } else if (quickFilter === "resolved") {
-      result = result.filter((t) => t.status === "resolved");
-    } else if (quickFilter === "closed") {
-      result = result.filter((t) => t.status === "closed");
+      result = result.filter((t) => t.status === "resolved" || t.status === "closed");
     }
 
     return [...result].sort(smartSort);
@@ -1234,13 +1179,13 @@ export default function TicketsPage() {
   );
 
   const renderEmptyState = () => {
-    if (quickFilter === "unread" && stats.new === 0 && stats.total > 0) {
+    if (quickFilter === "open" && (stats.new + stats.open) === 0 && stats.total > 0) {
       return (
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <PartyPopper className="h-10 w-10 text-green-500 mb-3" />
           <p className="font-medium text-foreground">Inbox zero!</p>
           <p className="text-sm text-muted-foreground mt-1">
-            All caught up. No unread tickets.
+            All caught up. No open tickets.
           </p>
         </div>
       );
@@ -1277,372 +1222,313 @@ export default function TicketsPage() {
 
   // Reply form JSX — rendered inline in the parent so the ref stays connected
   const replyForm = selectedTicket && (
-    <div className="border-t-2 border-primary/20 bg-muted/30 p-4 space-y-3 flex-shrink-0">
-      {/* Mode tabs */}
-      <div className="flex gap-1 bg-muted rounded-lg p-1">
-        <button
-          type="button"
-          onClick={() => setIsInternal(false)}
-          className={cn(
-            "flex-1 flex items-center justify-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-            !isInternal
-              ? "bg-blue-600 text-white shadow-sm"
-              : "text-muted-foreground hover:text-foreground"
-          )}
-        >
-          <Mail className="h-3.5 w-3.5" />
-          Reply
-        </button>
-        <button
-          type="button"
-          onClick={() => setIsInternal(true)}
-          className={cn(
-            "flex-1 flex items-center justify-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-            isInternal
-              ? "bg-amber-500 text-white shadow-sm"
-              : "text-muted-foreground hover:text-foreground"
-          )}
-        >
-          <Lock className="h-3.5 w-3.5" />
-          Internal Note
-        </button>
-      </div>
-
-      {/* Reply context */}
-      {!isInternal && (
-        <div className="rounded-md bg-blue-50 dark:bg-blue-950/30 px-3 py-2 text-xs space-y-0.5">
-          <div className="flex items-center gap-1 text-muted-foreground">
-            <span className="font-medium text-foreground">To:</span>
-            {selectedTicket.user_email || (
-              <span className="text-amber-600 dark:text-amber-400">
-                No email found
-              </span>
+    <div className="border-t bg-card flex-shrink-0">
+      {/* Mode tabs — compact pill toggle */}
+      <div className="flex items-center gap-2 px-4 pt-3 pb-2">
+        <div className="flex gap-0.5 bg-muted rounded-md p-0.5">
+          <button
+            type="button"
+            onClick={() => setIsInternal(false)}
+            className={cn(
+              "flex items-center gap-1 rounded px-2.5 py-1.5 text-xs font-medium transition-colors",
+              !isInternal
+                ? "bg-blue-600 text-white shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
             )}
-          </div>
-          {selectedTicket.inbox_email && (
-            <div className="flex items-center gap-1 text-muted-foreground">
-              <span className="font-medium text-foreground">From:</span>
-              {selectedTicket.inbox_email}
-            </div>
-          )}
+          >
+            <Mail className="h-3 w-3" />
+            Reply
+          </button>
+          <button
+            type="button"
+            onClick={() => setIsInternal(true)}
+            className={cn(
+              "flex items-center gap-1 rounded px-2.5 py-1.5 text-xs font-medium transition-colors",
+              isInternal
+                ? "bg-amber-500 text-white shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <Lock className="h-3 w-3" />
+            Note
+          </button>
         </div>
-      )}
 
-      {/* Templates + editor/textarea */}
-      <div className="space-y-2">
-        <div className="flex items-center gap-2">
-          <Popover open={cannedOpen} onOpenChange={setCannedOpen}>
-            <PopoverTrigger asChild>
-              <Button variant="outline" size="sm" className="h-7 text-xs gap-1">
-                <Zap className="h-3 w-3" />
-                Templates
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-80 p-0" align="start">
-              {showAddCanned ? (
-                <div className="p-3 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-sm font-medium">New Template</h4>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-6 w-6 p-0"
-                      onClick={() => setShowAddCanned(false)}
-                    >
-                      <X className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
-                  <Input
-                    placeholder="Title"
-                    value={newCannedTitle}
-                    onChange={(e) => setNewCannedTitle(e.target.value)}
-                    className="h-8 text-xs"
-                  />
-                  <Textarea
-                    placeholder="Response content..."
-                    value={newCannedContent}
-                    onChange={(e) => setNewCannedContent(e.target.value)}
-                    rows={3}
-                    className="text-xs resize-none"
-                  />
-                  <Select value={newCannedCategory} onValueChange={setNewCannedCategory}>
-                    <SelectTrigger className="h-8 text-xs">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="general">General</SelectItem>
-                      <SelectItem value="support">Support</SelectItem>
-                      <SelectItem value="sales">Sales</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Button size="sm" className="w-full h-7 text-xs" onClick={saveCannedResponse}>
-                    Save Template
+        {/* Reply context inline */}
+        {!isInternal && (
+          <span className="text-[11px] text-muted-foreground truncate">
+            to {selectedTicket.user_email || <span className="text-amber-600 dark:text-amber-400">no email</span>}
+            {selectedTicket.inbox_email && <> via {selectedTicket.inbox_email.split("@")[0]}</>}
+          </span>
+        )}
+
+        <div className="flex-1" />
+
+        <Popover open={cannedOpen} onOpenChange={setCannedOpen}>
+          <PopoverTrigger asChild>
+            <Button variant="ghost" size="sm" className="h-6 text-[11px] gap-1 px-2">
+              <Zap className="h-3 w-3" />
+              Templates
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-72 p-0" align="end">
+            {showAddCanned ? (
+              <div className="p-3 space-y-2">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-medium">New Template</h4>
+                  <Button variant="ghost" size="sm" className="h-5 w-5 p-0" onClick={() => setShowAddCanned(false)}>
+                    <X className="h-3 w-3" />
                   </Button>
                 </div>
-              ) : (
-                <div>
-                  <div className="p-2 border-b">
-                    <p className="text-xs font-medium text-muted-foreground px-1">Insert a template</p>
-                  </div>
-                  <ScrollArea className="max-h-60">
-                    {cannedResponses.length === 0 ? (
-                      <p className="p-3 text-xs text-muted-foreground text-center">
-                        No templates yet
-                      </p>
-                    ) : (
-                      <div className="p-1">
-                        {Array.from(cannedByCategory.entries()).map(([category, items]) => (
-                          <div key={category}>
-                            <p className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                              {category}
-                            </p>
-                            {items.map((r) => (
-                              <div
-                                key={r.id}
-                                className="group flex items-center gap-2 rounded-md px-2 py-1.5 cursor-pointer hover:bg-muted transition-colors"
-                              >
-                                <button
-                                  type="button"
-                                  className="flex-1 text-left"
-                                  onClick={() => insertCanned(r.content)}
-                                >
-                                  <p className="text-xs font-medium">{r.title}</p>
-                                  <p className="text-[10px] text-muted-foreground line-clamp-1">
-                                    {r.content}
-                                  </p>
-                                </button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="h-5 w-5 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    deleteCannedResponse(r.id);
-                                  }}
-                                >
-                                  <X className="h-3 w-3" />
-                                </Button>
-                              </div>
-                            ))}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </ScrollArea>
-                  <div className="p-2 border-t">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="w-full h-7 text-xs gap-1"
-                      onClick={() => setShowAddCanned(true)}
-                    >
-                      <Plus className="h-3 w-3" />
-                      Add Template
-                    </Button>
-                  </div>
+                <Input placeholder="Title" value={newCannedTitle} onChange={(e) => setNewCannedTitle(e.target.value)} className="h-7 text-xs" />
+                <Textarea placeholder="Content..." value={newCannedContent} onChange={(e) => setNewCannedContent(e.target.value)} rows={3} className="text-xs resize-none" />
+                <Select value={newCannedCategory} onValueChange={setNewCannedCategory}>
+                  <SelectTrigger className="h-7 text-xs"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="general">General</SelectItem>
+                    <SelectItem value="support">Support</SelectItem>
+                    <SelectItem value="sales">Sales</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button size="sm" className="w-full h-7 text-xs" onClick={saveCannedResponse}>Save</Button>
+              </div>
+            ) : (
+              <div>
+                <ScrollArea className="max-h-48">
+                  {cannedResponses.length === 0 ? (
+                    <p className="p-3 text-xs text-muted-foreground text-center">No templates yet</p>
+                  ) : (
+                    <div className="p-1">
+                      {Array.from(cannedByCategory.entries()).map(([category, items]) => (
+                        <div key={category}>
+                          <p className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{category}</p>
+                          {items.map((r) => (
+                            <div key={r.id} className="group flex items-center gap-1 rounded px-2 py-1 cursor-pointer hover:bg-muted transition-colors">
+                              <button type="button" className="flex-1 text-left" onClick={() => insertCanned(r.content)}>
+                                <p className="text-xs font-medium">{r.title}</p>
+                                <p className="text-[10px] text-muted-foreground line-clamp-1">{r.content}</p>
+                              </button>
+                              <Button variant="ghost" size="sm" className="h-4 w-4 p-0 opacity-0 group-hover:opacity-100" onClick={(e) => { e.stopPropagation(); deleteCannedResponse(r.id); }}>
+                                <X className="h-2.5 w-2.5" />
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </ScrollArea>
+                <div className="p-1.5 border-t">
+                  <Button variant="ghost" size="sm" className="w-full h-6 text-[11px] gap-1" onClick={() => setShowAddCanned(true)}>
+                    <Plus className="h-3 w-3" /> Add Template
+                  </Button>
                 </div>
-              )}
-            </PopoverContent>
-          </Popover>
-          {!isInternal && (
-            <span className="text-[10px] text-muted-foreground">
-              Replies include email signature automatically
-            </span>
-          )}
-        </div>
+              </div>
+            )}
+          </PopoverContent>
+        </Popover>
+      </div>
 
+      {/* Editor area */}
+      <div className="px-4 pb-3">
         {isInternal ? (
           <Textarea
-            placeholder="Add an internal note (only visible to admins)..."
+            placeholder="Internal note (only visible to admins)..."
             value={noteContent}
             onChange={(e) => setNoteContent(e.target.value)}
-            rows={4}
-            className="resize-y min-h-[80px]"
+            rows={3}
+            className="resize-y min-h-[72px] text-sm"
           />
         ) : (
-          <RichEditor
-            ref={editorRef}
-            placeholder="Write your reply to the customer..."
-          />
+          <RichEditor ref={editorRef} placeholder="Write your reply..." />
         )}
       </div>
 
-      <div className="flex items-center justify-between">
+      {/* Footer with send */}
+      <div className="flex items-center justify-between px-4 pb-3">
         {!isInternal && !selectedTicket.user_email ? (
-          <p className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1">
+          <p className="text-[11px] text-amber-600 dark:text-amber-400 flex items-center gap-1">
             <AlertTriangle className="h-3 w-3" />
-            No customer email — reply saved but not sent.
+            No email — saved as note only
+          </p>
+        ) : !isInternal ? (
+          <p className="text-[11px] text-muted-foreground">
+            Signature included automatically
           </p>
         ) : (
           <div />
         )}
-
         <Button
           size="sm"
           onClick={addNote}
           disabled={sendingNote}
           variant={isInternal ? "outline" : "default"}
+          className="gap-1.5"
         >
           {sendingNote ? (
-            <Loader2 className="h-4 w-4 animate-spin mr-1" />
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
           ) : isInternal ? (
-            <StickyNote className="h-4 w-4 mr-1" />
+            <StickyNote className="h-3.5 w-3.5" />
           ) : (
-            <Send className="h-4 w-4 mr-1" />
+            <Send className="h-3.5 w-3.5" />
           )}
-          {isInternal ? "Add Note" : "Send Reply"}
+          {isInternal ? "Add Note" : "Send"}
         </Button>
       </div>
     </div>
   );
 
+  const hasActiveFilters = typeFilter !== "all" || priorityFilter !== "all";
+
   return (
-    <div className="space-y-4">
-      {/* Header */}
+    <div className="space-y-3">
+      {/* Compact header row */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Inbox</h1>
-          <p className="text-sm text-muted-foreground">
-            {stats.new + stats.open > 0
-              ? `${stats.new + stats.open} open · ${stats.total} total`
-              : `${stats.total} tickets`}
-          </p>
+        <div className="flex items-center gap-3">
+          <h1 className="text-xl font-bold tracking-tight">Inbox</h1>
+          {stats.new > 0 && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 px-2 py-0.5 text-xs font-medium">
+              {stats.new} new
+            </span>
+          )}
         </div>
-        <div className="hidden sm:flex items-center gap-1.5 text-xs text-muted-foreground">
-          <kbd className="px-1.5 py-0.5 rounded bg-muted border text-[10px]">j</kbd>
-          <kbd className="px-1.5 py-0.5 rounded bg-muted border text-[10px]">k</kbd>
-          <span>navigate</span>
-          <kbd className="px-1.5 py-0.5 rounded bg-muted border text-[10px] ml-2">r</kbd>
+        <div className="hidden sm:flex items-center gap-1.5 text-[11px] text-muted-foreground">
+          <kbd className="px-1 py-0.5 rounded bg-muted border text-[10px]">j</kbd><kbd className="px-1 py-0.5 rounded bg-muted border text-[10px]">k</kbd>
+          <span>nav</span>
+          <kbd className="px-1 py-0.5 rounded bg-muted border text-[10px] ml-1.5">r</kbd>
           <span>reply</span>
-          <kbd className="px-1.5 py-0.5 rounded bg-muted border text-[10px] ml-2">e</kbd>
+          <kbd className="px-1 py-0.5 rounded bg-muted border text-[10px] ml-1.5">e</kbd>
           <span>resolve</span>
         </div>
       </div>
 
-      {/* Quick filter tabs */}
-      <div className="flex items-center gap-1 border-b">
-        {([
-          { key: "unread" as QuickFilter, label: "Unread", count: stats.new },
-          { key: "open" as QuickFilter, label: "Open", count: stats.new + stats.open },
-          { key: "mine" as QuickFilter, label: "Mine", count: stats.mine },
-          { key: "unassigned" as QuickFilter, label: "Unassigned", count: stats.unassigned },
-          { key: "resolved" as QuickFilter, label: "Resolved", count: stats.resolved },
-          { key: "closed" as QuickFilter, label: "Closed", count: stats.closed },
-          { key: "all" as QuickFilter, label: "All", count: stats.total },
-        ]).map((tab) => (
-          <button
-            key={tab.key}
-            type="button"
-            onClick={() => { setQuickFilter(tab.key); setFocusedIndex(-1); }}
-            className={cn(
-              "px-3 py-2 text-sm font-medium border-b-2 transition-colors -mb-px",
-              quickFilter === tab.key
-                ? "border-primary text-foreground"
-                : "border-transparent text-muted-foreground hover:text-foreground hover:border-muted-foreground/30"
-            )}
-          >
-            {tab.label}
-            {tab.count > 0 && (
-              <span className={cn(
-                "ml-1.5 text-xs rounded-full px-1.5 py-0.5",
-                quickFilter === tab.key
-                  ? "bg-primary/10 text-primary"
-                  : "bg-muted text-muted-foreground"
-              )}>
-                {tab.count}
-              </span>
-            )}
-          </button>
-        ))}
-      </div>
-
-      {/* Search + secondary filters */}
-      <div className="flex flex-col sm:flex-row gap-2">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search tickets, messages, notes..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9"
-          />
-        </div>
-        <div className="flex gap-2">
-          <Select value={typeFilter} onValueChange={setTypeFilter}>
-            <SelectTrigger className="w-[120px] h-9">
-              <SelectValue placeholder="Type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Types</SelectItem>
-              <SelectItem value="bug">Bug</SelectItem>
-              <SelectItem value="feature">Feature</SelectItem>
-              <SelectItem value="feedback">Feedback</SelectItem>
-              <SelectItem value="email">Email</SelectItem>
-              <SelectItem value="sales">Sales</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-            <SelectTrigger className="w-[120px] h-9">
-              <SelectValue placeholder="Priority" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Priority</SelectItem>
-              <SelectItem value="urgent">Urgent</SelectItem>
-              <SelectItem value="high">High</SelectItem>
-              <SelectItem value="normal">Normal</SelectItem>
-              <SelectItem value="low">Low</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      {/* Select all + bulk actions */}
-      <div className="flex items-center justify-between gap-2 flex-wrap min-h-[32px]">
-        <div className="flex items-center gap-2">
-          {openTickets.length > 0 && (
-            <Checkbox
-              checked={selected.size === activeFiltered.length && activeFiltered.length > 0}
-              onCheckedChange={selectAll}
-              aria-label="Select all"
-            />
-          )}
-          <p className="text-xs text-muted-foreground">
-            {selected.size > 0
-              ? `${selected.size} of ${activeFiltered.length} selected`
-              : `${activeFiltered.length} result${activeFiltered.length !== 1 ? "s" : ""}`}
-          </p>
-          {selected.size > 0 && (
-            <Button variant="ghost" size="sm" onClick={clearSelection} className="text-xs h-6 px-1.5">
-              Clear
-            </Button>
-          )}
-        </div>
-
-        {selected.size > 0 && (
-          <div className="flex items-center gap-1 flex-wrap">
-            <Button variant="outline" size="sm" className="h-7 text-xs" disabled={bulkLoading} onClick={() => bulkUpdate({ status: "in_progress" })}>
-              <Clock className="h-3 w-3 mr-1" /> Start
-            </Button>
-            <Button variant="outline" size="sm" className="h-7 text-xs" disabled={bulkLoading} onClick={() => bulkUpdate({ status: "resolved" })}>
-              <CheckCircle className="h-3 w-3 mr-1" /> Resolve
-            </Button>
-            <Button variant="outline" size="sm" className="h-7 text-xs" disabled={bulkLoading} onClick={() => bulkUpdate({ status: "closed" })}>
-              <XCircle className="h-3 w-3 mr-1" /> Close
-            </Button>
-            <Button variant="outline" size="sm" className="h-7 text-xs" disabled={bulkLoading} onClick={() => bulkUpdate({ priority: "urgent" })}>
-              <ArrowUp className="h-3 w-3 mr-1 text-red-500" /> Urgent
-            </Button>
-            <Button variant="destructive" size="sm" className="h-7 text-xs" disabled={bulkLoading} onClick={bulkDelete}>
-              <Trash2 className="h-3 w-3 mr-1" /> Delete
-            </Button>
-          </div>
-        )}
-      </div>
-
       {/* Split pane: ticket list + detail (desktop) / full-width list (mobile) */}
-      <div className="lg:grid lg:grid-cols-[380px_1fr] lg:gap-0 lg:border lg:rounded-lg lg:overflow-hidden lg:bg-card" style={{ minHeight: "calc(100vh - 130px)" }}>
+      <div className="lg:grid lg:grid-cols-[380px_1fr] lg:gap-0 lg:border lg:rounded-lg lg:overflow-hidden lg:bg-card" style={{ minHeight: "calc(100vh - 120px)" }}>
         {/* Left: Ticket list */}
-        <div className="border rounded-lg lg:rounded-none lg:border-0 lg:border-r bg-card lg:flex lg:flex-col" style={{ maxHeight: "calc(100vh - 130px)" }}>
+        <div className="border rounded-lg lg:rounded-none lg:border-0 lg:border-r bg-card lg:flex lg:flex-col" style={{ maxHeight: "calc(100vh - 120px)" }}>
+
+          {/* Filter tabs inside list pane */}
+          <div className="flex items-center border-b overflow-x-auto flex-shrink-0">
+            {([
+              { key: "open" as QuickFilter, label: "Open", count: stats.new + stats.open },
+              { key: "mine" as QuickFilter, label: "Mine", count: stats.mine },
+              { key: "unassigned" as QuickFilter, label: "Unassigned", count: stats.unassigned },
+              { key: "resolved" as QuickFilter, label: "Done", count: stats.resolved + stats.closed },
+              { key: "all" as QuickFilter, label: "All", count: stats.total },
+            ]).map((tab) => (
+              <button
+                key={tab.key}
+                type="button"
+                onClick={() => { setQuickFilter(tab.key); setFocusedIndex(-1); }}
+                className={cn(
+                  "px-3 py-2 text-xs font-medium border-b-2 transition-colors -mb-px whitespace-nowrap",
+                  quickFilter === tab.key
+                    ? "border-primary text-foreground"
+                    : "border-transparent text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {tab.label}
+                {tab.count > 0 && (
+                  <span className={cn(
+                    "ml-1 text-[10px] rounded-full px-1.5 py-0.5",
+                    quickFilter === tab.key ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+                  )}>
+                    {tab.count}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+
+          {/* Search + filter bar inside list pane */}
+          <div className="flex items-center gap-1.5 px-3 py-2 border-b flex-shrink-0">
+            <div className="relative flex-1">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+              <Input
+                placeholder="Search..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="h-8 pl-8 text-xs"
+              />
+            </div>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant={hasActiveFilters ? "default" : "outline"} size="sm" className="h-8 text-xs gap-1 px-2.5">
+                  <Filter className="h-3 w-3" />
+                  {hasActiveFilters && <span className="h-1.5 w-1.5 rounded-full bg-white" />}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-56 p-3 space-y-3" align="end">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium">Type</label>
+                  <Select value={typeFilter} onValueChange={setTypeFilter}>
+                    <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Types</SelectItem>
+                      <SelectItem value="bug">Bug</SelectItem>
+                      <SelectItem value="feature">Feature</SelectItem>
+                      <SelectItem value="feedback">Feedback</SelectItem>
+                      <SelectItem value="email">Email</SelectItem>
+                      <SelectItem value="sales">Sales</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium">Priority</label>
+                  <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+                    <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Priority</SelectItem>
+                      <SelectItem value="urgent">Urgent</SelectItem>
+                      <SelectItem value="high">High</SelectItem>
+                      <SelectItem value="normal">Normal</SelectItem>
+                      <SelectItem value="low">Low</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                {hasActiveFilters && (
+                  <Button variant="ghost" size="sm" className="w-full h-7 text-xs" onClick={() => { setTypeFilter("all"); setPriorityFilter("all"); }}>
+                    Clear filters
+                  </Button>
+                )}
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          {/* Select all + bulk actions */}
+          {(selected.size > 0 || openTickets.length > 0) && (
+            <div className="flex items-center justify-between gap-1 px-3 py-1.5 border-b flex-shrink-0 bg-muted/30">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  checked={selected.size === activeFiltered.length && activeFiltered.length > 0}
+                  onCheckedChange={selectAll}
+                  aria-label="Select all"
+                  className="h-3.5 w-3.5"
+                />
+                <span className="text-[11px] text-muted-foreground">
+                  {selected.size > 0 ? `${selected.size} selected` : `${activeFiltered.length}`}
+                </span>
+                {selected.size > 0 && (
+                  <Button variant="ghost" size="sm" onClick={clearSelection} className="text-[11px] h-5 px-1">
+                    Clear
+                  </Button>
+                )}
+              </div>
+              {selected.size > 0 && (
+                <div className="flex items-center gap-0.5">
+                  <Button variant="ghost" size="sm" className="h-6 text-[11px] px-1.5" disabled={bulkLoading} onClick={() => bulkUpdate({ status: "resolved" })}>
+                    <CheckCircle className="h-3 w-3" />
+                  </Button>
+                  <Button variant="ghost" size="sm" className="h-6 text-[11px] px-1.5" disabled={bulkLoading} onClick={() => bulkUpdate({ status: "closed" })}>
+                    <XCircle className="h-3 w-3" />
+                  </Button>
+                  <Button variant="ghost" size="sm" className="h-6 text-[11px] px-1.5 text-destructive" disabled={bulkLoading} onClick={bulkDelete}>
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
           <ScrollArea className="flex-1">
             {openTickets.length === 0 && resolvedTickets.length === 0 ? (
               renderEmptyState()
@@ -1694,7 +1580,7 @@ export default function TicketsPage() {
         </div>
 
         {/* Right: Detail panel (desktop only) */}
-        <div className="hidden lg:flex lg:flex-col" style={{ maxHeight: "calc(100vh - 130px)" }}>
+        <div className="hidden lg:flex lg:flex-col" style={{ maxHeight: "calc(100vh - 120px)" }}>
           {selectedTicket ? (
             <>
               <TicketContent

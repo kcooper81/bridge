@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { notifyAdminsOfNewTicket } from "@/lib/notify-admins";
+import { sendAutoAck } from "@/lib/auto-ack";
 
 /**
  * Resend Inbound Email Webhook
@@ -158,6 +159,16 @@ export async function POST(request: NextRequest) {
     const { inboxEmail, ticketType } = detectInbox(Array.isArray(to) ? to : [to], headers);
     const body = text || html?.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim() || "";
 
+    // Extract attachment metadata (don't store content — just metadata for now)
+    const rawAttachments = data.attachments || [];
+    const attachments = Array.isArray(rawAttachments)
+      ? rawAttachments.map((a: { filename?: string; mimeType?: string; content_type?: string; size?: number }) => ({
+          filename: a.filename || "attachment",
+          content_type: a.mimeType || a.content_type || "application/octet-stream",
+          size: a.size || 0,
+        }))
+      : [];
+
     if (!senderEmail) {
       console.error("Inbound email: no sender found. from:", from, "payload keys:", Object.keys(raw));
       return NextResponse.json(
@@ -222,8 +233,7 @@ export async function POST(request: NextRequest) {
     }
 
     // New ticket from inbound email
-    const fullMessage = `From: ${senderName} <${senderEmail}>\n\n${finalBody}`;
-
+    // Store clean body (no "From:" prefix) + HTML + sender columns
     const { data: inserted, error: insertError } = await db
       .from("feedback")
       .insert({
@@ -231,10 +241,14 @@ export async function POST(request: NextRequest) {
         org_id: senderProfile?.org_id || null,
         type: ticketType,
         subject: subject || "(No subject)",
-        message: fullMessage,
+        message: finalBody,
+        html_body: html || null,
+        sender_email: senderEmail,
+        sender_name: senderName !== senderEmail ? senderName : null,
         status: "new",
         priority: ticketType === "sales" ? "high" : "normal",
         inbox_email: inboxEmail,
+        attachments: attachments,
       })
       .select("id")
       .single();
@@ -247,7 +261,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Notify admins
+    // Notify admins + send auto-ack to sender
     if (inserted) {
       notifyAdminsOfNewTicket({
         subject: subject || "(No subject)",
@@ -255,6 +269,13 @@ export async function POST(request: NextRequest) {
         type: ticketType,
         message: finalBody,
         ticketId: inserted.id,
+      });
+      sendAutoAck({
+        recipientEmail: senderEmail,
+        recipientName: senderName,
+        ticketId: inserted.id,
+        subject: subject || "(No subject)",
+        inboxEmail,
       });
     }
 

@@ -32,7 +32,7 @@ export async function GET() {
 
   const { data: tickets, error } = await db
     .from("feedback")
-    .select("id, type, subject, message, status, priority, user_id, org_id, inbox_email, created_at")
+    .select("id, type, subject, message, html_body, sender_email, sender_name, status, priority, user_id, org_id, inbox_email, attachments, created_at")
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -132,25 +132,34 @@ export async function GET() {
   }
 
   const enriched = (tickets || []).map((t) => {
-    // Resolve sender email: from profile or extracted from message
-    let senderEmail = t.user_id ? userMap.get(t.user_id) || null : null;
+    // Resolve sender email: new column → profile → extracted from message (legacy)
+    let senderEmail = t.sender_email || null;
+    if (!senderEmail && t.user_id) {
+      senderEmail = userMap.get(t.user_id) || null;
+    }
     if (!senderEmail) {
       const match = t.message.match(/From:.*?<([^>]+@[^>]+)>/i)
         || t.message.match(/From:.*?([^\s<]+@[^\s>]+)/i);
       if (match) senderEmail = match[1];
     }
 
+    // Clean message for display: strip legacy "From: ..." prefix
+    const displayMessage = t.message.replace(/^From:.*?\n\n/, "");
+
     return {
       id: t.id,
       type: t.type,
       subject: t.subject,
-      message: t.message,
+      message: displayMessage,
+      html_body: t.html_body || null,
+      sender_name: t.sender_name || null,
       status: t.status,
       priority: t.priority || "normal",
       user_id: t.user_id || null,
       user_email: senderEmail,
       org_name: t.org_id ? orgMap.get(t.org_id) || null : null,
       inbox_email: t.inbox_email || null,
+      attachments: t.attachments || [],
       notes: notesMap.get(t.id) || [],
       notes_count: (notesMap.get(t.id) || []).length,
       created_at: t.created_at,

@@ -50,7 +50,7 @@ export async function POST(
   // Verify ticket exists and get details for potential email
   const { data: ticket, error: ticketError } = await db
     .from("feedback")
-    .select("id, subject, message, user_id, inbox_email")
+    .select("id, subject, message, user_id, inbox_email, sender_email")
     .eq("id", ticketId)
     .single();
 
@@ -60,9 +60,9 @@ export async function POST(
 
   let emailSent = false;
 
-  // Resolve the customer's email: profile lookup OR extract from message
-  let recipientEmail: string | null = null;
-  if (ticket.user_id) {
+  // Resolve the customer's email: sender_email column → profile → message extraction (legacy)
+  let recipientEmail: string | null = ticket.sender_email || null;
+  if (!recipientEmail && ticket.user_id) {
     const { data: ticketUser } = await db
       .from("profiles")
       .select("email")
@@ -71,7 +71,7 @@ export async function POST(
     recipientEmail = ticketUser?.email || null;
   }
   if (!recipientEmail) {
-    // Extract email from "From: Name <email>" line in message body
+    // Legacy fallback: extract email from "From: Name <email>" line in message body
     const emailMatch = ticket.message.match(/From:.*?<([^>]+@[^>]+)>/i)
       || ticket.message.match(/From:.*?([^\s<]+@[^\s>]+)/i);
     if (emailMatch) recipientEmail = emailMatch[1];

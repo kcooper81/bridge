@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { limiters, checkRateLimit } from "@/lib/rate-limit";
 import { notifyAdminsOfNewTicket } from "@/lib/notify-admins";
+import { sendAutoAck } from "@/lib/auto-ack";
 
 export async function POST(request: NextRequest) {
   try {
@@ -39,13 +40,13 @@ export async function POST(request: NextRequest) {
     const db = createServiceClient();
 
     // Build message body — append screenshot data URLs if provided
-    let fullMessage = `From: ${name} <${email}>\n\n${message}`;
+    let cleanMessage = message;
     const screenshotList = Array.isArray(screenshots) ? screenshots : [];
     if (screenshotList.length > 0) {
-      fullMessage += `\n\n--- Screenshots (${screenshotList.length}) ---`;
+      cleanMessage += `\n\n--- Screenshots (${screenshotList.length}) ---`;
       for (const s of screenshotList) {
         if (s?.name && s?.dataUrl) {
-          fullMessage += `\n[${s.name}]\n${s.dataUrl}`;
+          cleanMessage += `\n[${s.name}]\n${s.dataUrl}`;
         }
       }
     }
@@ -59,7 +60,9 @@ export async function POST(request: NextRequest) {
       org_id: null,
       type: ticketType,
       subject: `[${name}] ${subject}`,
-      message: fullMessage,
+      message: cleanMessage,
+      sender_email: email,
+      sender_name: name,
       status: "new",
       priority: "normal",
       inbox_email: inboxEmail,
@@ -73,7 +76,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Notify admins via email (non-blocking)
+    // Notify admins via email + send auto-ack to customer (non-blocking)
     if (inserted) {
       notifyAdminsOfNewTicket({
         subject: `[${name}] ${subject}`,
@@ -81,6 +84,13 @@ export async function POST(request: NextRequest) {
         type: ticketType,
         message,
         ticketId: inserted.id,
+      });
+      sendAutoAck({
+        recipientEmail: email,
+        recipientName: name,
+        ticketId: inserted.id,
+        subject: `[${name}] ${subject}`,
+        inboxEmail,
       });
     }
 

@@ -220,3 +220,20 @@
   - Evaluate options: desktop companion app, system-level proxy, clipboard monitoring
   - Consider DLP coverage gap — extension only covers browser-based AI tools
   - Research OS-level APIs for input interception on Windows/macOS
+- [ ] Mobile responsiveness overhaul — /vault and all app views
+  - **Priority 1 — Core UX:**
+    - Vault page: table overflow on mobile, fixed-width dropdowns (w-[160px] etc.), toolbar layout breaks
+    - Sidebar: already hidden on mobile with sheet, but touch targets need improvement
+    - Dashboard layout: `h-screen` → `min-h-dvh` for mobile browser chrome
+  - **Priority 2 — Common Controls:**
+    - Prompt modal: `max-w-2xl` needs `max-w-[90vw] sm:max-w-2xl` for mobile
+    - Dialog base (ui/dialog.tsx): padding `p-6` → `p-4 sm:p-6`
+    - Page header: `text-3xl` → `text-2xl sm:text-3xl`
+    - Button touch targets: many `size="sm"` and `h-8 w-8` icon buttons below 44px WCAG minimum
+  - **Priority 3 — Data Pages:**
+    - Analytics: table columns need responsive hide/show
+    - Team page: member table needs mobile layout
+    - Approvals: fixed-width dropdowns, table overflow
+  - **Priority 4 — Settings:**
+    - All settings pages: `max-w-4xl`/`max-w-5xl` need mobile padding
+    - Settings tabs: need `overflow-x-auto` on mobile

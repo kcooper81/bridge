@@ -4,7 +4,7 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
-import { useCallback, useImperativeHandle, forwardRef } from "react";
+import { useCallback, useImperativeHandle, forwardRef, useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import {
   Bold,
@@ -31,6 +31,9 @@ interface RichEditorProps {
 
 const RichEditor = forwardRef<RichEditorRef, RichEditorProps>(
   ({ placeholder = "Write your reply...", className }, ref) => {
+    const [mounted, setMounted] = useState(false);
+    useEffect(() => setMounted(true), []);
+
     const editor = useEditor({
       extensions: [
         StarterKit.configure({
@@ -99,7 +102,7 @@ const RichEditor = forwardRef<RichEditorRef, RichEditorProps>(
       editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
     }, [editor]);
 
-    if (!editor) return null;
+    if (!mounted || !editor) return null;
 
     return (
       <div className={cn("rounded-md border bg-background", className)}>

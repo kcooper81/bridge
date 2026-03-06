@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -17,12 +16,9 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import RichEditor from "@/components/admin/rich-editor";
 import type { RichEditorRef } from "@/components/admin/rich-editor";
 import Link from "next/link";
-
-const RichEditor = dynamic(() => import("@/components/admin/rich-editor"), {
-  ssr: false,
-});
 
 interface MailboxRow {
   id: string;

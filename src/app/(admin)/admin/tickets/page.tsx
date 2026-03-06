@@ -1,14 +1,13 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
-import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
+import RichEditor from "@/components/admin/rich-editor";
 import type { RichEditorRef } from "@/components/admin/rich-editor";
-const RichEditor = dynamic(() => import("@/components/admin/rich-editor"), { ssr: false });
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -203,18 +202,20 @@ function EmailHtmlBody({ html }: { html: string }) {
     const iframe = iframeRef.current;
     if (!iframe) return;
 
-    const handleLoad = () => {
+    const resizeIframe = () => {
       const doc = iframe.contentDocument;
       if (!doc) return;
       const height = doc.documentElement.scrollHeight || doc.body.scrollHeight;
-      iframe.style.height = `${Math.max(height, 60)}px`;
+      if (height > 60) {
+        iframe.style.height = `${height}px`;
+      }
     };
 
     const doc = iframe.contentDocument;
     if (doc) {
       doc.open();
       doc.write(`<!DOCTYPE html><html><head><style>
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 14px; line-height: 1.6; color: #374151; margin: 0; padding: 0; word-wrap: break-word; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 14px; line-height: 1.6; color: #374151; margin: 0; padding: 8px 0; word-wrap: break-word; }
         a { color: #2563eb; }
         img { max-width: 100%; height: auto; }
         blockquote { border-left: 3px solid #d1d5db; margin: 8px 0; padding: 4px 12px; color: #6b7280; }
@@ -223,8 +224,11 @@ function EmailHtmlBody({ html }: { html: string }) {
         td, th { padding: 4px 8px; }
       </style></head><body>${html}</body></html>`);
       doc.close();
-      iframe.onload = handleLoad;
-      setTimeout(handleLoad, 50);
+      iframe.onload = resizeIframe;
+      // Multiple retries to catch late-rendering content
+      setTimeout(resizeIframe, 50);
+      setTimeout(resizeIframe, 200);
+      setTimeout(resizeIframe, 500);
     }
   }, [html]);
 
@@ -233,7 +237,7 @@ function EmailHtmlBody({ html }: { html: string }) {
       ref={iframeRef}
       className="w-full border-0"
       sandbox="allow-same-origin"
-      style={{ minHeight: "60px" }}
+      style={{ minHeight: "120px" }}
       title="Email content"
     />
   );
@@ -327,8 +331,8 @@ function TicketContent({
       </div>
 
       {/* Scrollable content */}
-      <ScrollArea className="flex-1 px-5">
-        <div className="py-4 space-y-4">
+      <ScrollArea className="flex-1 px-6">
+        <div className="py-5 space-y-5">
           {/* Original message — email-style display */}
           <div className="rounded-lg border overflow-hidden">
             {/* Email header */}
@@ -370,7 +374,7 @@ function TicketContent({
             </div>
 
             {/* Email body */}
-            <div className="p-4">
+            <div className="p-5">
               {ticket.html_body ? (
                 <EmailHtmlBody html={ticket.html_body} />
               ) : (
@@ -1500,9 +1504,9 @@ export default function TicketsPage() {
       </div>
 
       {/* Split pane: ticket list + detail (desktop) / full-width list (mobile) */}
-      <div className="lg:grid lg:grid-cols-[380px_1fr] lg:gap-0 lg:border lg:rounded-lg lg:overflow-hidden lg:bg-card" style={{ minHeight: "calc(100vh - 320px)" }}>
+      <div className="lg:grid lg:grid-cols-[380px_1fr] lg:gap-0 lg:border lg:rounded-lg lg:overflow-hidden lg:bg-card" style={{ minHeight: "calc(100vh - 200px)" }}>
         {/* Left: Ticket list */}
-        <div className="border rounded-lg lg:rounded-none lg:border-0 lg:border-r bg-card lg:flex lg:flex-col" style={{ maxHeight: "calc(100vh - 320px)" }}>
+        <div className="border rounded-lg lg:rounded-none lg:border-0 lg:border-r bg-card lg:flex lg:flex-col" style={{ maxHeight: "calc(100vh - 200px)" }}>
           <ScrollArea className="flex-1">
             {openTickets.length === 0 && resolvedTickets.length === 0 ? (
               renderEmptyState()
@@ -1554,7 +1558,7 @@ export default function TicketsPage() {
         </div>
 
         {/* Right: Detail panel (desktop only) */}
-        <div className="hidden lg:flex lg:flex-col" style={{ maxHeight: "calc(100vh - 320px)" }}>
+        <div className="hidden lg:flex lg:flex-col" style={{ maxHeight: "calc(100vh - 200px)" }}>
           {selectedTicket ? (
             <>
               <TicketContent

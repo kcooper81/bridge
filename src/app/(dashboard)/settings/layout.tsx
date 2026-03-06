@@ -36,7 +36,7 @@ export default function SettingsLayout({
         description="Manage your account and organization"
       />
 
-      <nav className="mb-6">
+      <nav className="mb-6 overflow-x-auto scrollbar-hide">
         <div className="inline-flex h-11 items-center justify-center rounded-xl bg-muted/50 p-1.5 text-muted-foreground backdrop-blur-sm">
           {tabs.filter((tab) => !tab.roles || tab.roles.includes(currentUserRole)).map((tab) => (
             <Link

@@ -190,7 +190,7 @@ export function MobileSidebarSheet({
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetTrigger asChild>{children}</SheetTrigger>
-      <SheetContent side="left" className="w-[var(--sidebar-width)] p-0">
+      <SheetContent side="left" className="w-[var(--sidebar-width)] max-w-[280px] p-0">
         <SheetTitle className="sr-only">Navigation</SheetTitle>
         <NavContent onItemClick={() => onOpenChange(false)} />
       </SheetContent>

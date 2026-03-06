@@ -282,7 +282,7 @@ export default function ApprovalsPage() {
                   <TableHead>Submitted By</TableHead>
                   <TableHead>Submitted</TableHead>
                   <TableHead>Tags</TableHead>
-                  <TableHead className="w-[160px]">Actions</TableHead>
+                  <TableHead className="w-auto sm:w-[160px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -326,7 +326,7 @@ export default function ApprovalsPage() {
                         <div className="flex gap-1">
                           <Button
                             size="sm"
-                            className="h-7 text-xs gap-1 bg-green-600 hover:bg-green-700"
+                            className="h-8 sm:h-7 text-xs gap-1 bg-green-600 hover:bg-green-700"
                             onClick={() => handleApprovePrompt(p.id)}
                             disabled={actionId === p.id}
                           >
@@ -340,7 +340,7 @@ export default function ApprovalsPage() {
                           <Button
                             size="sm"
                             variant="destructive"
-                            className="h-7 text-xs gap-1"
+                            className="h-8 sm:h-7 text-xs gap-1"
                             onClick={() => openRejectModal(p.id)}
                             disabled={actionId === p.id}
                           >
@@ -368,7 +368,7 @@ export default function ApprovalsPage() {
                   <TableHead>Severity</TableHead>
                   <TableHead>Suggested By</TableHead>
                   <TableHead>Date</TableHead>
-                  <TableHead className="w-[160px]">Actions</TableHead>
+                  <TableHead className="w-auto sm:w-[160px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -412,7 +412,7 @@ export default function ApprovalsPage() {
                         <div className="flex gap-1">
                           <Button
                             size="sm"
-                            className="h-7 text-xs gap-1 bg-green-600 hover:bg-green-700"
+                            className="h-8 sm:h-7 text-xs gap-1 bg-green-600 hover:bg-green-700"
                             onClick={() => openRuleModal(s)}
                           >
                             <CheckCircle2 className="h-3 w-3" />
@@ -421,7 +421,7 @@ export default function ApprovalsPage() {
                           <Button
                             size="sm"
                             variant="outline"
-                            className="h-7 text-xs"
+                            className="h-8 sm:h-7 text-xs"
                             onClick={() => handleDismissSuggestion(s.id)}
                             disabled={actionId === s.id}
                           >
@@ -564,7 +564,7 @@ export default function ApprovalsPage() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="space-y-2">
                   <Label>Pattern Type</Label>
                   <Select value={rulePatternType} onValueChange={(v) => setRulePatternType(v as SecurityPatternType)}>

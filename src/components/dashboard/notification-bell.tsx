@@ -179,7 +179,7 @@ export function NotificationBell() {
       </PopoverTrigger>
       <PopoverContent
         align="end"
-        className="w-[380px] p-0 max-h-[500px] overflow-hidden"
+        className="w-[95vw] sm:w-[380px] p-0 max-h-[500px] overflow-hidden"
         sideOffset={8}
       >
         <div className="flex items-center justify-between px-4 py-3 border-b border-border/50">

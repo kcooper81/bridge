@@ -18,7 +18,6 @@ import {
   TrendingUp,
   AlertTriangle,
   Users,
-  Building2,
 } from "lucide-react";
 
 interface SubRow {

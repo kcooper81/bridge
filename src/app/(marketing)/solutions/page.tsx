@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Layers, Plug, GitCompareArrows, Replace, BookOpen, Workflow, UserCircle, FileText, Users } from "lucide-react";
 import { generatePageMetadata } from "@/lib/seo/metadata";
+import { generateBreadcrumbSchema } from "@/lib/seo/schemas";
 import { SectionLabel } from "@/components/marketing/section-label";
 import { CTASection } from "@/components/marketing/cta-section";
 import { HeroImage } from "@/components/marketing/hero-image";
@@ -9,7 +10,7 @@ import { allSeoPages } from "@/lib/seo-pages/data";
 import type { SeoPageData } from "@/lib/seo-pages/types";
 
 export const metadata: Metadata = generatePageMetadata({
-  title: "Solutions",
+  title: "Solutions — Use Cases, Guides & Templates",
   description:
     "Explore TeamPrompt solutions: use cases, integrations, comparisons, guides, workflows, role-based solutions, and ready-to-use prompt templates.",
   path: "/solutions",
@@ -19,6 +20,7 @@ export const metadata: Metadata = generatePageMetadata({
     "prompt library",
     "AI governance",
     "DLP for AI",
+    "prompt management software",
   ],
 });
 
@@ -124,9 +126,18 @@ function SolutionCard({ page }: { page: SeoPageData }) {
   );
 }
 
+const breadcrumbs = generateBreadcrumbSchema([
+  { name: "Home", url: "https://teamprompt.app" },
+  { name: "Solutions", url: "https://teamprompt.app/solutions" },
+]);
+
 export default function SolutionsPage() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbs) }}
+      />
       {/* ━━━ HERO ━━━ */}
       <section className="relative overflow-hidden bg-zinc-950 text-white">
         <div

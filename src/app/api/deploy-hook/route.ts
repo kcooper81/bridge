@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Submit all sitemap URLs
-  const urls = await getAllSitemapUrls();
+  const urls = getAllSitemapUrls();
   const result = await submitToIndexNow(urls);
 
   console.log(`[deploy-hook] IndexNow auto-submit: ${result.urlCount} URLs, status ${result.statusCode}`);

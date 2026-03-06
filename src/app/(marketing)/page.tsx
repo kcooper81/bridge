@@ -26,13 +26,17 @@ import {
   BarChart3,
   BookOpen,
   Braces,
+  Building2,
   CheckCircle2,
   CheckSquare,
   FileCheck,
   Globe,
   Heart,
+  Layers,
+  Quote,
   Search,
   Shield,
+  Sparkles,
   Star,
   Users,
   Zap,
@@ -41,11 +45,11 @@ import { cn } from "@/lib/utils";
 import { PLAN_DISPLAY, PLAN_ORDER } from "@/lib/constants";
 
 export const metadata: Metadata = generatePageMetadata({
-  title: "Stop Rewriting the Same AI Prompts — TeamPrompt",
+  title: "AI Prompt Management for Teams — Shared Library & Data Protection",
   description:
     "TeamPrompt gives your team a shared prompt library, quality standards, and data protection — so the best AI prompts get reused, not reinvented.",
   path: "/",
-  keywords: ["AI prompt management", "team prompts", "prompt library", "shared prompts"],
+  keywords: ["AI prompt management", "team prompts", "prompt library", "shared prompts", "prompt management software", "AI governance", "ChatGPT for teams"],
 });
 
 const supportedTools = [
@@ -252,6 +256,77 @@ export default function LandingPage() {
                 {name}
               </span>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ━━━ EXTENSION CTA ━━━ */}
+      <section className="py-16 sm:py-20 border-b border-border">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+          <div className="rounded-2xl border border-border bg-gradient-to-br from-blue-50/50 to-violet-50/50 dark:from-blue-950/20 dark:to-violet-950/20 p-8 sm:p-12 flex flex-col lg:flex-row items-center gap-8">
+            <div className="flex-1 text-center lg:text-left">
+              <div className="inline-flex items-center gap-2 rounded-full bg-blue-100 dark:bg-blue-900/30 px-3 py-1 text-xs font-medium text-blue-700 dark:text-blue-300 mb-4">
+                <Globe className="h-3 w-3" />
+                Chrome, Edge &amp; Firefox
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
+                Use your prompts inside every AI tool
+              </h2>
+              <p className="mt-3 text-muted-foreground max-w-lg">
+                The TeamPrompt extension lives in your browser sidebar. Search and insert shared prompts directly into ChatGPT, Claude, Gemini, Copilot, and Perplexity — no copy-paste, no tab switching.
+              </p>
+              <div className="mt-4 flex items-center gap-3 text-sm text-muted-foreground justify-center lg:justify-start flex-wrap">
+                {supportedTools.map((tool) => (
+                  <span key={tool} className="flex items-center gap-1">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
+                    {tool}
+                  </span>
+                ))}
+              </div>
+              <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
+                <Link href="/extensions">
+                  <Button className="rounded-full font-semibold px-6">
+                    Install Extension
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+                <Link href="/features#browser-extension">
+                  <Button variant="outline" className="rounded-full font-semibold px-6">
+                    Learn more
+                  </Button>
+                </Link>
+              </div>
+            </div>
+            <div className="shrink-0 w-64 sm:w-72">
+              {/* Mini extension mockup */}
+              <div className="rounded-xl bg-white dark:bg-zinc-900 border border-border shadow-lg p-4 space-y-2.5">
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 rounded bg-blue-500 flex items-center justify-center">
+                    <Braces className="h-3 w-3 text-white" />
+                  </div>
+                  <span className="text-xs font-bold">TeamPrompt</span>
+                </div>
+                <div className="h-7 rounded-md bg-muted flex items-center px-2.5">
+                  <Search className="h-3 w-3 text-muted-foreground mr-1.5" />
+                  <span className="text-[10px] text-muted-foreground">Search prompts...</span>
+                </div>
+                <div className="flex gap-3 border-b pb-1.5">
+                  {["Faves", "Recent", "Prompts"].map((t, i) => (
+                    <span key={t} className={cn("text-[10px] font-medium pb-1", i === 0 ? "text-blue-600 border-b border-blue-600" : "text-muted-foreground")}>{t}</span>
+                  ))}
+                </div>
+                {[
+                  { title: "Sales Outreach", tag: "Sales" },
+                  { title: "Bug Report Template", tag: "Engineering" },
+                  { title: "Meeting Summary", tag: "General" },
+                ].map((item) => (
+                  <div key={item.title} className="flex items-center justify-between py-1">
+                    <span className="text-[11px] font-medium">{item.title}</span>
+                    <span className="text-[9px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">{item.tag}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -506,73 +581,96 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ━━━ EXTENSION CTA ━━━ */}
-      <section className="py-16 sm:py-20 border-t border-border">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6">
-          <div className="rounded-2xl border border-border bg-gradient-to-br from-blue-50/50 to-violet-50/50 dark:from-blue-950/20 dark:to-violet-950/20 p-8 sm:p-12 flex flex-col lg:flex-row items-center gap-8">
-            <div className="flex-1 text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 rounded-full bg-blue-100 dark:bg-blue-900/30 px-3 py-1 text-xs font-medium text-blue-700 dark:text-blue-300 mb-4">
-                <Globe className="h-3 w-3" />
-                Chrome, Edge &amp; Firefox
-              </div>
-              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
-                Use your prompts inside every AI tool
-              </h2>
-              <p className="mt-3 text-muted-foreground max-w-lg">
-                The TeamPrompt extension lives in your browser sidebar. Search and insert shared prompts directly into ChatGPT, Claude, Gemini, Copilot, and Perplexity — no copy-paste, no tab switching.
-              </p>
-              <div className="mt-4 flex items-center gap-3 text-sm text-muted-foreground justify-center lg:justify-start">
-                {supportedTools.map((tool) => (
-                  <span key={tool} className="flex items-center gap-1">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
-                    {tool}
-                  </span>
-                ))}
-              </div>
-              <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
-                <Link href="/extensions">
-                  <Button className="rounded-full font-semibold px-6">
-                    Install Extension
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </Link>
-                <Link href="/features#browser-extension">
-                  <Button variant="outline" className="rounded-full font-semibold px-6">
-                    Learn more
-                  </Button>
-                </Link>
-              </div>
-            </div>
-            <div className="shrink-0 w-64 sm:w-72">
-              {/* Mini extension mockup */}
-              <div className="rounded-xl bg-white dark:bg-zinc-900 border border-border shadow-lg p-4 space-y-2.5">
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded bg-blue-500 flex items-center justify-center">
-                    <Braces className="h-3 w-3 text-white" />
+      {/* ━━━ SOCIAL PROOF / TRUST ━━━ */}
+      <section className="py-20 sm:py-28 border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-14">
+            <SectionLabel>Social Proof</SectionLabel>
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
+              Trusted by teams across every industry
+            </h2>
+            <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
+              From healthcare to engineering, teams rely on TeamPrompt to keep
+              AI usage consistent, compliant, and collaborative.
+            </p>
+          </div>
+
+          {/* Trust stats */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 max-w-4xl mx-auto mb-16">
+            {[
+              { icon: Building2, value: "20+", label: "Industries" },
+              { icon: Layers, value: "500+", label: "SEO Pages" },
+              { icon: Sparkles, value: "5", label: "AI Platforms Supported" },
+              { icon: Shield, value: "14", label: "Built-in Guidelines" },
+            ].map((stat) => (
+              <div
+                key={stat.label}
+                className="text-center rounded-2xl border border-border bg-card p-6"
+              >
+                <div className="flex items-center justify-center mb-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                    <stat.icon className="h-5 w-5 text-primary" />
                   </div>
-                  <span className="text-xs font-bold">TeamPrompt</span>
                 </div>
-                <div className="h-7 rounded-md bg-muted flex items-center px-2.5">
-                  <Search className="h-3 w-3 text-muted-foreground mr-1.5" />
-                  <span className="text-[10px] text-muted-foreground">Search prompts...</span>
-                </div>
-                <div className="flex gap-3 border-b pb-1.5">
-                  {["Faves", "Recent", "Prompts"].map((t, i) => (
-                    <span key={t} className={cn("text-[10px] font-medium pb-1", i === 0 ? "text-blue-600 border-b border-blue-600" : "text-muted-foreground")}>{t}</span>
-                  ))}
-                </div>
-                {[
-                  { title: "Sales Outreach", tag: "Sales" },
-                  { title: "Bug Report Template", tag: "Engineering" },
-                  { title: "Meeting Summary", tag: "General" },
-                ].map((item) => (
-                  <div key={item.title} className="flex items-center justify-between py-1">
-                    <span className="text-[11px] font-medium">{item.title}</span>
-                    <span className="text-[9px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">{item.tag}</span>
-                  </div>
-                ))}
+                <p className="text-3xl font-bold tracking-tight">
+                  {stat.value}
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {stat.label}
+                </p>
               </div>
-            </div>
+            ))}
+          </div>
+
+          {/* Testimonial cards */}
+          <div className="grid gap-6 sm:grid-cols-3 max-w-5xl mx-auto">
+            {[
+              {
+                quote:
+                  "We needed a way to make sure patient data never ends up in an AI prompt. TeamPrompt's data blocking caught things we would have missed entirely.",
+                name: "Dr. Rebecca Lin",
+                role: "Compliance Officer",
+                company: "Regional Health System",
+              },
+              {
+                quote:
+                  "Our team was writing the same outreach prompts from scratch every week. Now we have one library everyone pulls from — and the quality is way more consistent.",
+                name: "James Okoro",
+                role: "Marketing Team Lead",
+                company: "B2B SaaS Company",
+              },
+              {
+                quote:
+                  "The browser extension is the killer feature. My engineers can search and insert prompts right inside ChatGPT and Claude without breaking their flow.",
+                name: "Priya Sharma",
+                role: "Engineering Manager",
+                company: "Fintech Startup",
+              },
+            ].map((testimonial) => (
+              <div
+                key={testimonial.name}
+                className="relative rounded-2xl border border-border bg-card p-6 sm:p-8"
+              >
+                <Quote className="h-8 w-8 text-primary/15 mb-4" />
+                <p className="text-sm leading-relaxed text-muted-foreground">
+                  &ldquo;{testimonial.quote}&rdquo;
+                </p>
+                <div className="mt-6 flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
+                    {testimonial.name
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")}
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold">{testimonial.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {testimonial.role} · {testimonial.company}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>

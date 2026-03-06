@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Settings, Database, Shield, Server, Globe, Loader2 } from "lucide-react";
+import { Settings, Database, Shield, Server, Globe, Loader2, ExternalLink, FileText, Search } from "lucide-react";
 import { SUPER_ADMIN_EMAILS } from "@/lib/constants";
 
 export default function SettingsPage() {
@@ -179,45 +179,100 @@ export default function SettingsPage() {
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="md:col-span-2">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Globe className="h-5 w-5" />
-              SEO — IndexNow
+              <Search className="h-5 w-5" />
+              SEO Health
             </CardTitle>
-            <CardDescription>Notify search engines of content changes</CardDescription>
+            <CardDescription>Search engine optimization status and tools</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Engines</span>
-              <span className="text-xs text-muted-foreground">Bing, Yandex, Naver, Seznam</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">API Key</span>
-              <Badge className={process.env.NEXT_PUBLIC_SUPABASE_URL ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300" : "bg-red-100 text-red-800"}>
-                Configured
-              </Badge>
-            </div>
-            <div className="flex items-center justify-between">
-              <Label htmlFor="auto-indexnow" className="text-sm text-muted-foreground cursor-pointer">Auto-submit on deploy</Label>
-              <Switch
-                id="auto-indexnow"
-                checked={autoIndexNow}
-                onCheckedChange={toggleAutoIndexNow}
-                disabled={autoIndexNowLoading}
-              />
-            </div>
-            <Button onClick={handleIndexNow} disabled={indexNowLoading} size="sm" className="w-full">
-              {indexNowLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Globe className="h-4 w-4 mr-2" />}
-              Submit All URLs Now
-            </Button>
-            {indexNowResult && (
-              <div className={`p-3 rounded-lg text-sm ${indexNowResult.success ? "bg-green-500/10 text-green-600" : "bg-red-500/10 text-red-600"}`}>
-                {indexNowResult.success
-                  ? `Submitted ${indexNowResult.urlCount || 0} URLs`
-                  : `Failed: ${indexNowResult.message}`}
+          <CardContent>
+            <div className="grid gap-6 sm:grid-cols-2">
+              {/* Sitemap & Indexing */}
+              <div className="space-y-3">
+                <h4 className="text-sm font-semibold flex items-center gap-2">
+                  <FileText className="h-4 w-4" />
+                  Sitemap & Indexing
+                </h4>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Sitemap</span>
+                  <a
+                    href="https://teamprompt.app/sitemap.xml"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-blue-600 hover:underline flex items-center gap-1"
+                  >
+                    sitemap.xml
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">robots.txt</span>
+                  <a
+                    href="https://teamprompt.app/robots.txt"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-blue-600 hover:underline flex items-center gap-1"
+                  >
+                    robots.txt
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Google Search Console</span>
+                  <a
+                    href="https://search.google.com/search-console?resource_id=sc-domain%3Ateamprompt.app"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-blue-600 hover:underline flex items-center gap-1"
+                  >
+                    Open GSC
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Google Verification</span>
+                  <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
+                    DNS Verified
+                  </Badge>
+                </div>
               </div>
-            )}
+
+              {/* IndexNow */}
+              <div className="space-y-3">
+                <h4 className="text-sm font-semibold flex items-center gap-2">
+                  <Globe className="h-4 w-4" />
+                  IndexNow (Bing, Yandex, Naver, Seznam)
+                </h4>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">API Key</span>
+                  <Badge className={process.env.NEXT_PUBLIC_SUPABASE_URL ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300" : "bg-red-100 text-red-800"}>
+                    Configured
+                  </Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="auto-indexnow" className="text-sm text-muted-foreground cursor-pointer">Auto-submit on deploy</Label>
+                  <Switch
+                    id="auto-indexnow"
+                    checked={autoIndexNow}
+                    onCheckedChange={toggleAutoIndexNow}
+                    disabled={autoIndexNowLoading}
+                  />
+                </div>
+                <Button onClick={handleIndexNow} disabled={indexNowLoading} size="sm" className="w-full">
+                  {indexNowLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Globe className="h-4 w-4 mr-2" />}
+                  Submit All URLs Now
+                </Button>
+                {indexNowResult && (
+                  <div className={`p-3 rounded-lg text-sm ${indexNowResult.success ? "bg-green-500/10 text-green-600" : "bg-red-500/10 text-red-600"}`}>
+                    {indexNowResult.success
+                      ? `Submitted ${indexNowResult.urlCount || 0} URLs to IndexNow`
+                      : `Failed: ${indexNowResult.message}`}
+                  </div>
+                )}
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>

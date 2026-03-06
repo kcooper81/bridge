@@ -5,11 +5,13 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import {
   ChevronDown,
+  FileText,
   Gavel,
   GraduationCap,
   HeartPulse,
   Landmark,
   Laptop,
+  Lock,
   PiggyBank,
   Shield,
   ShieldCheck,
@@ -28,9 +30,10 @@ const industries = [
 
 const useCases = [
   { label: "Prompt Library", description: "Organize and share prompt collections", href: "/solutions/prompt-library", icon: Zap, bg: "bg-yellow-500/10" },
-  { label: "AI Governance", description: "Data protection, policies, and audit trails", href: "/solutions/ai-governance", icon: Shield, bg: "bg-red-500/10" },
+  { label: "Data Protection", description: "Sensitive data blocking for AI tools", href: "/security", icon: Lock, bg: "bg-red-500/10" },
   { label: "DLP & Compliance", description: "Prevent data leaks in AI tools", href: "/solutions/ai-dlp", icon: ShieldCheck, bg: "bg-sky-500/10" },
-  { label: "Prompt Templates", description: "Ready-to-use templates for teams", href: "/solutions/prompt-templates", icon: Zap, bg: "bg-indigo-500/10" },
+  { label: "AI Governance", description: "Policies, audit trails, and controls", href: "/solutions/ai-governance", icon: Shield, bg: "bg-violet-500/10" },
+  { label: "Prompt Templates", description: "Ready-to-use templates for teams", href: "/solutions/prompt-templates", icon: FileText, bg: "bg-indigo-500/10" },
 ];
 
 const iconClass = "text-foreground/70";

@@ -23,6 +23,7 @@ import {
   Server,
   FileText,
   FileCheck,
+  ExternalLink,
 } from "lucide-react";
 
 export const metadata = generatePageMetadata({
@@ -105,6 +106,7 @@ const platformFeatures = [
     title: "Secure by Default",
     description:
       "All data encrypted at rest and in transit. Security scanning happens server-side — your prompt content is never shared with third-party AI providers.",
+    link: { href: "/security", label: "Learn about our data protection" },
   },
   {
     icon: FileText,
@@ -396,6 +398,15 @@ export default function EnterprisePage() {
                 <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
                   {feature.description}
                 </p>
+                {"link" in feature && feature.link && (
+                  <Link
+                    href={(feature.link as { href: string; label: string }).href}
+                    className="inline-flex items-center gap-1.5 mt-3 text-sm font-medium text-primary hover:underline"
+                  >
+                    {(feature.link as { href: string; label: string }).label}
+                    <ExternalLink className="h-3.5 w-3.5" />
+                  </Link>
+                )}
               </div>
             ))}
           </div>
@@ -459,6 +470,23 @@ export default function EnterprisePage() {
             subtitle="Start with the free plan, or talk to sales about company-wide deployment."
             buttonText="Start for free"
           />
+          <div className="flex items-center justify-center gap-6 mt-8 text-sm">
+            <Link
+              href="/security"
+              className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-primary transition-colors"
+            >
+              <Shield className="h-4 w-4" />
+              Data protection details
+            </Link>
+            <span className="text-border">|</span>
+            <Link
+              href="/pricing"
+              className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-primary transition-colors"
+            >
+              <BarChart3 className="h-4 w-4" />
+              Compare plans & pricing
+            </Link>
+          </div>
         </div>
       </section>
     </>

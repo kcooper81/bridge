@@ -43,7 +43,7 @@ export async function POST(request: Request) {
   let urls: string[] = [];
 
   if (body.submitAll) {
-    urls = await getAllSitemapUrls();
+    urls = getAllSitemapUrls();
   } else if (body.urls && Array.isArray(body.urls)) {
     urls = body.urls;
   } else {

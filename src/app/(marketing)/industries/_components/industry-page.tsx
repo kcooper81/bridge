@@ -7,7 +7,7 @@ import { FAQSection } from "@/components/marketing/faq-section";
 import { StatsRow } from "@/components/marketing/stats-row";
 import { AppMockup } from "@/components/marketing/app-mockup";
 import { HeroImage } from "@/components/marketing/hero-image";
-import { ArrowRight, Shield, MessageCircle } from "lucide-react";
+import { ArrowRight, Shield, MessageCircle, ArrowUpRight } from "lucide-react";
 import {
   Archive,
   ArrowDownUp,
@@ -69,6 +69,44 @@ const industryHeroImages: Record<string, { src: string; alt: string; badgeIcon: 
   government: { src: "https://images.unsplash.com/photo-1541872703-74c5e44368f9?w=640&q=80&auto=format&fit=crop", alt: "Government office building", badgeIcon: "Shield", badgeHeadline: "CUI compliant", badgeSubtitle: "Controlled info blocked", topBadgeIcon: "Lock", topBadgeHeadline: "FedRAMP aligned", topBadgeSubtitle: "Security controls" },
   education: { src: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=640&q=80&auto=format&fit=crop", alt: "Students collaborating in classroom", badgeIcon: "Users", badgeHeadline: "Student data safe", badgeSubtitle: "FERPA-ready protection", topBadgeIcon: "ShieldCheck", topBadgeHeadline: "PII blocked", topBadgeSubtitle: "Auto-detected" },
   insurance: { src: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=640&q=80&auto=format&fit=crop", alt: "Insurance professional at desk", badgeIcon: "ShieldAlert", badgeHeadline: "Claims secured", badgeSubtitle: "PII auto-detected", topBadgeIcon: "Eye", topBadgeHeadline: "15 blocked", topBadgeSubtitle: "This week" },
+};
+
+const relatedIndustries: Record<string, { slug: string; name: string; desc: string }[]> = {
+  healthcare: [
+    { slug: "insurance", name: "Insurance", desc: "Claims & policyholder data protection" },
+    { slug: "legal", name: "Legal", desc: "Privilege & client data security" },
+    { slug: "government", name: "Government", desc: "CUI & citizen data compliance" },
+  ],
+  legal: [
+    { slug: "finance", name: "Finance", desc: "PCI-DSS & financial data protection" },
+    { slug: "healthcare", name: "Healthcare", desc: "HIPAA-ready PHI detection" },
+    { slug: "insurance", name: "Insurance", desc: "Claims & policyholder data protection" },
+  ],
+  technology: [
+    { slug: "finance", name: "Finance", desc: "PCI-DSS & financial data protection" },
+    { slug: "healthcare", name: "Healthcare", desc: "HIPAA-ready PHI detection" },
+    { slug: "government", name: "Government", desc: "CUI & citizen data compliance" },
+  ],
+  finance: [
+    { slug: "insurance", name: "Insurance", desc: "Claims & policyholder data protection" },
+    { slug: "legal", name: "Legal", desc: "Privilege & client data security" },
+    { slug: "healthcare", name: "Healthcare", desc: "HIPAA-ready PHI detection" },
+  ],
+  government: [
+    { slug: "healthcare", name: "Healthcare", desc: "HIPAA-ready PHI detection" },
+    { slug: "education", name: "Education", desc: "FERPA & student data protection" },
+    { slug: "legal", name: "Legal", desc: "Privilege & client data security" },
+  ],
+  education: [
+    { slug: "government", name: "Government", desc: "CUI & citizen data compliance" },
+    { slug: "healthcare", name: "Healthcare", desc: "HIPAA-ready PHI detection" },
+    { slug: "technology", name: "Technology", desc: "API key & source code protection" },
+  ],
+  insurance: [
+    { slug: "healthcare", name: "Healthcare", desc: "HIPAA-ready PHI detection" },
+    { slug: "finance", name: "Finance", desc: "PCI-DSS & financial data protection" },
+    { slug: "legal", name: "Legal", desc: "Privilege & client data security" },
+  ],
 };
 
 export function IndustryPage({ data }: { data: IndustryPageData }) {
@@ -348,6 +386,37 @@ export function IndustryPage({ data }: { data: IndustryPageData }) {
           <FAQSection faqs={data.faqs} />
         </div>
       </section>
+
+      {/* ━━━ RELATED INDUSTRIES ━━━ */}
+      {relatedIndustries[data.slug] && (
+        <section className="py-20 sm:py-28 bg-muted/30 border-y border-border">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+            <div className="text-center mb-10">
+              <SectionLabel>Related Industries</SectionLabel>
+              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
+                Explore other industries we serve
+              </h2>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-3 max-w-3xl mx-auto">
+              {relatedIndustries[data.slug].map((related) => (
+                <Link
+                  key={related.slug}
+                  href={`/industries/${related.slug}`}
+                  className="group rounded-2xl border border-border bg-card p-6 hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-semibold group-hover:text-primary transition-colors">
+                      {related.name}
+                    </h3>
+                    <ArrowUpRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                  </div>
+                  <p className="text-sm text-muted-foreground">{related.desc}</p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ━━━ CTA ━━━ */}
       <section className="py-20 sm:py-28 border-t border-border">

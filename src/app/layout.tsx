@@ -35,6 +35,8 @@ export const metadata: Metadata = {
     title: "TeamPrompt - AI Prompt Management for Teams",
     description:
       "TeamPrompt gives your team a shared prompt library, quality guidelines, and data protection.",
+    site: "@teampromptapp",
+    creator: "@teampromptapp",
   },
   robots: {
     index: true,

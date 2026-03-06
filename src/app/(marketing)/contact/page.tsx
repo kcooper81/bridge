@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { generatePageMetadata } from "@/lib/seo/metadata";
+import { generateBreadcrumbSchema } from "@/lib/seo/schemas";
 import { SectionLabel } from "@/components/marketing/section-label";
 import { CTASection } from "@/components/marketing/cta-section";
 import { SupportForm } from "../help/_components/support-form";
@@ -13,8 +14,18 @@ export const metadata: Metadata = generatePageMetadata({
   keywords: ["contact TeamPrompt", "support", "feedback", "bug report"],
 });
 
+const breadcrumbs = generateBreadcrumbSchema([
+  { name: "Home", url: "https://teamprompt.app" },
+  { name: "Contact", url: "https://teamprompt.app/contact" },
+]);
+
 export default function ContactPage() {
   return (
+    <>
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbs) }}
+    />
     <div className="py-20 sm:py-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         {/* Hero */}
@@ -105,5 +116,6 @@ export default function ContactPage() {
         />
       </div>
     </div>
+    </>
   );
 }

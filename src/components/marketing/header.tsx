@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, ChevronDown, BookOpen, MessageSquare } from "lucide-react";
+import { Menu, ChevronDown, BookOpen, MessageSquare, PenLine } from "lucide-react";
 import { SolutionsDropdown, MobileSolutionsMenu } from "./mega-menu";
 
 export function MarketingHeader() {
@@ -86,23 +86,23 @@ export function MarketingHeader() {
           </Link>
 
           <Link
-            href="/integrations"
+            href="/extensions"
             className={cn(
               "text-sm font-medium transition-colors",
-              pathname === "/integrations" ? activeTextClass : textClass
+              pathname === "/extensions" ? activeTextClass : textClass
             )}
           >
-            Integrations
+            Extensions
           </Link>
 
           <Link
-            href="/security"
+            href="/enterprise"
             className={cn(
               "text-sm font-medium transition-colors",
-              pathname === "/security" ? activeTextClass : textClass
+              pathname === "/enterprise" ? activeTextClass : textClass
             )}
           >
-            Data Protection
+            Enterprise
           </Link>
 
           <HelpDropdown
@@ -163,18 +163,18 @@ export function MarketingHeader() {
                   Pricing
                 </Link>
                 <Link
-                  href="/integrations"
+                  href="/extensions"
                   onClick={() => setMobileOpen(false)}
                   className="text-lg font-medium hover:text-primary transition-colors"
                 >
-                  Integrations
+                  Extensions
                 </Link>
                 <Link
-                  href="/security"
+                  href="/enterprise"
                   onClick={() => setMobileOpen(false)}
                   className="text-lg font-medium hover:text-primary transition-colors"
                 >
-                  Data Protection
+                  Enterprise
                 </Link>
                 <MobileHelpMenu onNavigate={() => setMobileOpen(false)} />
                 <div className="border-t border-border pt-4 mt-4 flex flex-col gap-3">
@@ -219,7 +219,7 @@ function HelpDropdown({
     };
   }, []);
 
-  const isActive = pathname === "/help" || pathname.startsWith("/help/") || pathname === "/contact";
+  const isActive = pathname === "/help" || pathname.startsWith("/help/") || pathname === "/contact" || pathname.startsWith("/blog");
 
   return (
     <div
@@ -263,6 +263,19 @@ function HelpDropdown({
               <div>
                 <p className="text-sm font-medium">Documentation</p>
                 <p className="text-xs text-muted-foreground">Guides & articles</p>
+              </div>
+            </Link>
+            <Link
+              href="/blog"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-foreground/80 hover:text-foreground hover:bg-muted/50 transition-colors"
+            >
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10 shrink-0">
+                <PenLine className="h-4 w-4 text-foreground/70" />
+              </span>
+              <div>
+                <p className="text-sm font-medium">Blog</p>
+                <p className="text-xs text-muted-foreground">Tips & insights</p>
               </div>
             </Link>
             <Link
@@ -315,6 +328,16 @@ function MobileHelpMenu({ onNavigate }: { onNavigate: () => void }) {
               <BookOpen className="h-3.5 w-3.5 text-foreground/70" />
             </span>
             Documentation
+          </Link>
+          <Link
+            href="/blog"
+            onClick={onNavigate}
+            className="flex items-center gap-2 text-sm text-foreground/80 hover:text-foreground transition-colors"
+          >
+            <span className="flex h-6 w-6 items-center justify-center rounded-md bg-amber-500/10 shrink-0">
+              <PenLine className="h-3.5 w-3.5 text-foreground/70" />
+            </span>
+            Blog
           </Link>
           <Link
             href="/contact"

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { Github, Linkedin, Twitter } from "lucide-react";
 
 const footerLinks = {
   Product: [
@@ -27,6 +28,7 @@ const footerLinks = {
     { label: "Insurance", href: "/industries/insurance" },
   ],
   Resources: [
+    { label: "Blog", href: "/blog" },
     { label: "Help & Support", href: "/help" },
     { label: "Contact", href: "/contact" },
     { label: "Changelog", href: "/changelog" },
@@ -89,6 +91,17 @@ export function MarketingFooter() {
             <Link href="mailto:support@teamprompt.app" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">
               support@teamprompt.app
             </Link>
+            <div className="flex items-center gap-4 ml-2">
+              <a href="https://x.com/teampromptapp" target="_blank" rel="noopener noreferrer" aria-label="TeamPrompt on X" className="text-zinc-500 hover:text-zinc-300 transition-colors">
+                <Twitter className="h-4 w-4" />
+              </a>
+              <a href="https://www.linkedin.com/company/teamprompt" target="_blank" rel="noopener noreferrer" aria-label="TeamPrompt on LinkedIn" className="text-zinc-500 hover:text-zinc-300 transition-colors">
+                <Linkedin className="h-4 w-4" />
+              </a>
+              <a href="https://github.com/kcooper81" target="_blank" rel="noopener noreferrer" aria-label="TeamPrompt on GitHub" className="text-zinc-500 hover:text-zinc-300 transition-colors">
+                <Github className="h-4 w-4" />
+              </a>
+            </div>
           </div>
         </div>
       </div>

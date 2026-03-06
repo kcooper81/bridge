@@ -40,6 +40,7 @@ export function generatePageMetadata({
       url,
       type: "website",
       siteName: "TeamPrompt",
+      locale: "en_US",
       images: [
         {
           url: `${SITE_URL}/og-default.png`,
@@ -53,6 +54,8 @@ export function generatePageMetadata({
       card: "summary_large_image",
       title,
       description,
+      site: "@teampromptapp",
+      creator: "@teampromptapp",
       images: [`${SITE_URL}/og-default.png`],
     },
     alternates: {

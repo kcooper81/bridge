@@ -4,14 +4,14 @@ import { FAQSection } from "@/components/marketing/faq-section";
 import { CTASection } from "@/components/marketing/cta-section";
 import { SectionLabel } from "@/components/marketing/section-label";
 import { PricingGrid } from "./_components/pricing-grid";
-import { generateFAQSchema } from "@/lib/seo/schemas";
+import { generateFAQSchema, generateBreadcrumbSchema } from "@/lib/seo/schemas";
 
 export const metadata: Metadata = generatePageMetadata({
-  title: "Pricing",
+  title: "Pricing — Plans for Every Team Size",
   description:
     "Start free, no credit card required. Pro and Team plans include a 14-day trial. Upgrade when your team grows.",
   path: "/pricing",
-  keywords: ["TeamPrompt pricing", "AI tool pricing", "prompt management plans"],
+  keywords: ["TeamPrompt pricing", "AI tool pricing", "prompt management plans", "prompt management cost", "AI governance pricing"],
 });
 
 const faqs = [
@@ -47,6 +47,11 @@ const faqs = [
   },
 ];
 
+const breadcrumbs = generateBreadcrumbSchema([
+  { name: "Home", url: "https://teamprompt.app" },
+  { name: "Pricing", url: "https://teamprompt.app/pricing" },
+]);
+
 export default function PricingPage() {
   return (
     <>
@@ -54,6 +59,12 @@ export default function PricingPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(generateFAQSchema(faqs)),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(breadcrumbs),
         }}
       />
     <div className="py-20 sm:py-28">

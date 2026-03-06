@@ -1,6 +1,15 @@
 import { MetadataRoute } from "next";
 import { allSeoPages } from "@/lib/seo-pages/data";
 
+const BLOG_SLUGS = [
+  "how-to-build-a-team-prompt-library",
+  "what-is-ai-data-loss-prevention-dlp",
+  "5-signs-your-team-needs-prompt-management",
+  "teamprompt-vs-shared-google-docs-for-prompts",
+  "getting-started-with-teamprompt-in-under-2-minutes",
+  "ai-governance-for-regulated-industries",
+];
+
 const HELP_CATEGORIES = [
   "getting-started",
   "prompt-library",
@@ -117,6 +126,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${baseUrl}/integrations`, lastModified: today, changeFrequency: "monthly", priority: 0.8 },
     { url: `${baseUrl}/extensions`, lastModified: today, changeFrequency: "monthly", priority: 0.7 },
     { url: `${baseUrl}/solutions`, lastModified: today, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${baseUrl}/blog`, lastModified: today, changeFrequency: "weekly", priority: 0.8 },
     { url: `${baseUrl}/help`, lastModified: today, changeFrequency: "monthly", priority: 0.7 },
     { url: `${baseUrl}/contact`, lastModified: today, changeFrequency: "monthly", priority: 0.7 },
     { url: `${baseUrl}/changelog`, lastModified: today, changeFrequency: "weekly", priority: 0.6 },
@@ -158,11 +168,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
       }))
   );
 
+  const blogPages: MetadataRoute.Sitemap = BLOG_SLUGS.map((slug) => ({
+    url: `${baseUrl}/blog/${slug}`,
+    lastModified: today,
+    changeFrequency: "monthly",
+    priority: 0.7,
+  }));
+
   // Deduplicate by URL (strip trailing slashes)
   const all = [
     ...corePages,
     ...industryPages,
     ...seoPages,
+    ...blogPages,
     ...helpCategoryPages,
     ...helpArticlePages,
   ];

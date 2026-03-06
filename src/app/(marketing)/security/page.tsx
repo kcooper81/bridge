@@ -3,10 +3,13 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
   ArrowRight,
+  Building2,
   Eye,
   FileCheck,
+  Heart,
   Key,
   Lock,
+  Scale,
   Shield,
   ShieldAlert,
   ShieldCheck,
@@ -235,6 +238,35 @@ export default function SecurityPage() {
             What&apos;s included
           </h2>
           <BenefitsGrid benefits={benefits} />
+        </div>
+
+        {/* Popular in regulated industries */}
+        <div className="mb-24">
+          <h2 className="text-2xl sm:text-3xl font-bold text-center mb-3">
+            Popular in regulated industries
+          </h2>
+          <p className="text-center text-muted-foreground mb-8">
+            Teams in these industries rely on TeamPrompt to keep sensitive data out of AI tools.
+          </p>
+          <div className="grid gap-4 sm:grid-cols-3 max-w-3xl mx-auto">
+            {[
+              { href: "/industries/healthcare", icon: Heart, name: "Healthcare", desc: "HIPAA-ready PHI detection" },
+              { href: "/industries/finance", icon: Building2, name: "Finance", desc: "PCI-DSS & SOX compliance" },
+              { href: "/industries/legal", icon: Scale, name: "Legal", desc: "Privilege & client data protection" },
+            ].map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="group rounded-2xl border border-border bg-card p-6 hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5"
+              >
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary mb-4">
+                  <item.icon className="h-5 w-5" />
+                </div>
+                <h3 className="font-semibold group-hover:text-primary transition-colors">{item.name}</h3>
+                <p className="text-sm text-muted-foreground mt-1">{item.desc}</p>
+              </Link>
+            ))}
+          </div>
         </div>
 
         {/* CTA */}

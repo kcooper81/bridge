@@ -19,6 +19,7 @@ const PUBLIC_ROUTES = [
   "/contact",
   "/changelog",
   "/extensions",
+  "/blog",
 ];
 
 function isPublicRoute(pathname: string) {
@@ -160,6 +161,6 @@ function setSecurityHeaders(response: NextResponse) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|sitemap\\.xml|robots\\.txt|llms(?:-full)?\\.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|sitemap\\.xml|robots\\.txt|llms(?:-full)?\\.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|txt)$).*)",
   ],
 };

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import {
   Activity,
   AlertTriangle,
@@ -36,11 +37,11 @@ import { SectionLabel } from "@/components/marketing/section-label";
 import { CTASection } from "@/components/marketing/cta-section";
 
 export const metadata: Metadata = generatePageMetadata({
-  title: "Features",
+  title: "Features — Prompt Library, DLP, Extensions & More",
   description:
     "Explore TeamPrompt's features: shared prompt library, data protection, quality guidelines, team management, browser extension, and analytics.",
   path: "/features",
-  keywords: ["prompt library", "AI data protection", "browser extension", "prompt templates", "compliance rules", "auto-sanitization", "approval queue", "version diff"],
+  keywords: ["prompt library", "AI data protection", "browser extension", "prompt templates", "compliance rules", "auto-sanitization", "approval queue", "version diff", "AI DLP", "prompt versioning"],
 });
 
 /* ── CSS-only app preview mockups ────────────────────────── */
@@ -999,8 +1000,37 @@ export default function FeaturesPage() {
           })}
         </div>
 
+        {/* Explore by use case */}
+        <div className="mt-28 mb-28">
+          <div className="text-center mb-10">
+            <SectionLabel>Solutions</SectionLabel>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
+              Explore by use case
+            </h2>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-3 max-w-4xl mx-auto">
+            {[
+              { href: "/solutions/prompt-library", icon: BookOpen, name: "Prompt Library", desc: "Organize, version, and share prompts across your team" },
+              { href: "/solutions/ai-dlp", icon: Shield, name: "AI Data Protection", desc: "Block sensitive data before it reaches AI tools" },
+              { href: "/solutions/ai-governance", icon: Activity, name: "AI Governance", desc: "Activity logging, approvals, and compliance controls" },
+            ].map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="group rounded-2xl border border-border bg-card p-6 hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5"
+              >
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary mb-4">
+                  <item.icon className="h-5 w-5" />
+                </div>
+                <h3 className="font-semibold group-hover:text-primary transition-colors">{item.name}</h3>
+                <p className="text-sm text-muted-foreground mt-1">{item.desc}</p>
+              </Link>
+            ))}
+          </div>
+        </div>
+
         {/* CTA */}
-        <div className="mt-28">
+        <div className="mt-0">
           <CTASection
             headline="See it for yourself."
             gradientText="Start for free."

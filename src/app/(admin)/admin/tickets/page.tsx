@@ -300,11 +300,23 @@ export default function TicketsPage() {
         }
       });
 
-    // Fallback polling every 30s in case Realtime disconnects
-    const pollInterval = setInterval(loadTickets, 30000);
+    // Poll every 10s as reliable fallback
+    const pollInterval = setInterval(loadTickets, 10000);
+
+    // Refresh immediately when tab regains focus
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") loadTickets();
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    // Refresh on window focus (covers alt-tab, clicking back to window)
+    const handleFocus = () => loadTickets();
+    window.addEventListener("focus", handleFocus);
 
     return () => {
       clearInterval(pollInterval);
+      document.removeEventListener("visibilitychange", handleVisibility);
+      window.removeEventListener("focus", handleFocus);
       supabase.removeChannel(channel);
     };
   }, [loadTickets, loadCannedResponses]);

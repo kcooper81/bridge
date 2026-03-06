@@ -32,7 +32,7 @@ export async function GET() {
 
   const { data: tickets, error } = await db
     .from("feedback")
-    .select("id, type, subject, message, html_body, sender_email, sender_name, status, priority, user_id, org_id, inbox_email, attachments, created_at")
+    .select("id, type, subject, message, html_body, sender_email, sender_name, status, priority, user_id, org_id, inbox_email, attachments, created_at, updated_at")
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -163,6 +163,7 @@ export async function GET() {
       notes: notesMap.get(t.id) || [],
       notes_count: (notesMap.get(t.id) || []).length,
       created_at: t.created_at,
+      updated_at: t.updated_at || t.created_at,
     };
   });
 

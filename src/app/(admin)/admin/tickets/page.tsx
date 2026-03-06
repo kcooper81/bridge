@@ -997,7 +997,7 @@ export default function TicketsPage() {
     }
 
     return [...result].sort(smartSort);
-  }, [filtered, quickFilter]);
+  }, [filtered, quickFilter, user?.id]);
 
   // Separate resolved/closed for collapsible section (only shown in "all" view)
   const resolvedTickets = useMemo(() => {
@@ -1089,6 +1089,19 @@ export default function TicketsPage() {
     return () => window.removeEventListener("keydown", handleKey);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedTicket, sheetOpen, openTickets, activeFiltered, quickFilter]);
+
+  // Auto-select first ticket on initial load (desktop only)
+  const hasAutoSelected = useRef(false);
+  useEffect(() => {
+    if (!loading && !hasAutoSelected.current && openTickets.length > 0 && !selectedTicket) {
+      // Only auto-select on desktop (lg breakpoint = 1024px)
+      if (window.innerWidth >= 1024) {
+        setSelectedTicket(openTickets[0]);
+        setFocusedIndex(0);
+      }
+      hasAutoSelected.current = true;
+    }
+  }, [loading, openTickets, selectedTicket]);
 
   if (loading) {
     return (

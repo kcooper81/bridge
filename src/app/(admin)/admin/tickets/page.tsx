@@ -239,65 +239,18 @@ function EmailHtmlBody({ html }: { html: string }) {
   );
 }
 
-// --- Detail Panel (shared between split pane and sheet) ---
+// --- Read-only ticket content (shared between split pane and sheet) ---
 
-function TicketDetail({
+function TicketContent({
   ticket,
   tickets,
   onSelectTicket,
-  // Note form state
-  isInternal,
-  setIsInternal,
-  noteContent,
-  setNoteContent,
-  sendingNote,
-  editorRef,
-  addNote,
-  // Canned responses
-  cannedResponses,
-  cannedByCategory,
-  cannedOpen,
-  setCannedOpen,
-  showAddCanned,
-  setShowAddCanned,
-  newCannedTitle,
-  setNewCannedTitle,
-  newCannedContent,
-  setNewCannedContent,
-  newCannedCategory,
-  setNewCannedCategory,
-  insertCanned,
-  saveCannedResponse,
-  deleteCannedResponse,
-  // Actions
   updateStatus,
   updatePriority,
 }: {
   ticket: TicketRow;
   tickets: TicketRow[];
   onSelectTicket: (t: TicketRow) => void;
-  isInternal: boolean;
-  setIsInternal: (v: boolean) => void;
-  noteContent: string;
-  setNoteContent: (v: string) => void;
-  sendingNote: boolean;
-  editorRef: React.RefObject<RichEditorRef>;
-  addNote: () => void;
-  cannedResponses: CannedResponse[];
-  cannedByCategory: Map<string, CannedResponse[]>;
-  cannedOpen: boolean;
-  setCannedOpen: (v: boolean) => void;
-  showAddCanned: boolean;
-  setShowAddCanned: (v: boolean) => void;
-  newCannedTitle: string;
-  setNewCannedTitle: (v: string) => void;
-  newCannedContent: string;
-  setNewCannedContent: (v: string) => void;
-  newCannedCategory: string;
-  setNewCannedCategory: (v: string) => void;
-  insertCanned: (content: string) => void;
-  saveCannedResponse: () => void;
-  deleteCannedResponse: (id: string) => void;
   updateStatus: (id: string, status: string) => void;
   updatePriority: (id: string, priority: string) => void;
 }) {
@@ -311,7 +264,7 @@ function TicketDetail({
   }, [tickets, ticket]);
 
   return (
-    <div className="flex flex-col h-full">
+    <>
       {/* Header */}
       <div className="p-5 pb-3 border-b flex-shrink-0">
         <h2 className="text-lg font-semibold leading-tight">
@@ -569,226 +522,7 @@ function TicketDetail({
           </div>
         </div>
       </ScrollArea>
-
-      {/* Bottom pinned reply/note form */}
-      <div className="border-t-2 border-primary/20 bg-muted/30 p-4 space-y-3 flex-shrink-0">
-        {/* Mode tabs */}
-        <div className="flex gap-1 bg-muted rounded-lg p-1">
-          <button
-            type="button"
-            onClick={() => setIsInternal(false)}
-            className={cn(
-              "flex-1 flex items-center justify-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-              !isInternal
-                ? "bg-blue-600 text-white shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            <Mail className="h-3.5 w-3.5" />
-            Reply
-          </button>
-          <button
-            type="button"
-            onClick={() => setIsInternal(true)}
-            className={cn(
-              "flex-1 flex items-center justify-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-              isInternal
-                ? "bg-amber-500 text-white shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            <Lock className="h-3.5 w-3.5" />
-            Internal Note
-          </button>
-        </div>
-
-        {/* Reply context */}
-        {!isInternal && (
-          <div className="rounded-md bg-blue-50 dark:bg-blue-950/30 px-3 py-2 text-xs space-y-0.5">
-            <div className="flex items-center gap-1 text-muted-foreground">
-              <span className="font-medium text-foreground">To:</span>
-              {ticket.user_email || (
-                <span className="text-amber-600 dark:text-amber-400">
-                  No email found
-                </span>
-              )}
-            </div>
-            {ticket.inbox_email && (
-              <div className="flex items-center gap-1 text-muted-foreground">
-                <span className="font-medium text-foreground">From:</span>
-                {ticket.inbox_email}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Templates + editor/textarea */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <Popover open={cannedOpen} onOpenChange={setCannedOpen}>
-              <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className="h-7 text-xs gap-1">
-                  <Zap className="h-3 w-3" />
-                  Templates
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-80 p-0" align="start">
-                {showAddCanned ? (
-                  <div className="p-3 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <h4 className="text-sm font-medium">New Template</h4>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 w-6 p-0"
-                        onClick={() => setShowAddCanned(false)}
-                      >
-                        <X className="h-3.5 w-3.5" />
-                      </Button>
-                    </div>
-                    <Input
-                      placeholder="Title"
-                      value={newCannedTitle}
-                      onChange={(e) => setNewCannedTitle(e.target.value)}
-                      className="h-8 text-xs"
-                    />
-                    <Textarea
-                      placeholder="Response content..."
-                      value={newCannedContent}
-                      onChange={(e) => setNewCannedContent(e.target.value)}
-                      rows={3}
-                      className="text-xs resize-none"
-                    />
-                    <Select value={newCannedCategory} onValueChange={setNewCannedCategory}>
-                      <SelectTrigger className="h-8 text-xs">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="general">General</SelectItem>
-                        <SelectItem value="support">Support</SelectItem>
-                        <SelectItem value="sales">Sales</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Button size="sm" className="w-full h-7 text-xs" onClick={saveCannedResponse}>
-                      Save Template
-                    </Button>
-                  </div>
-                ) : (
-                  <div>
-                    <div className="p-2 border-b">
-                      <p className="text-xs font-medium text-muted-foreground px-1">Insert a template</p>
-                    </div>
-                    <ScrollArea className="max-h-60">
-                      {cannedResponses.length === 0 ? (
-                        <p className="p-3 text-xs text-muted-foreground text-center">
-                          No templates yet
-                        </p>
-                      ) : (
-                        <div className="p-1">
-                          {Array.from(cannedByCategory.entries()).map(([category, items]) => (
-                            <div key={category}>
-                              <p className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                                {category}
-                              </p>
-                              {items.map((r) => (
-                                <div
-                                  key={r.id}
-                                  className="group flex items-center gap-2 rounded-md px-2 py-1.5 cursor-pointer hover:bg-muted transition-colors"
-                                >
-                                  <button
-                                    type="button"
-                                    className="flex-1 text-left"
-                                    onClick={() => insertCanned(r.content)}
-                                  >
-                                    <p className="text-xs font-medium">{r.title}</p>
-                                    <p className="text-[10px] text-muted-foreground line-clamp-1">
-                                      {r.content}
-                                    </p>
-                                  </button>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-5 w-5 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      deleteCannedResponse(r.id);
-                                    }}
-                                  >
-                                    <X className="h-3 w-3" />
-                                  </Button>
-                                </div>
-                              ))}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </ScrollArea>
-                    <div className="p-2 border-t">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="w-full h-7 text-xs gap-1"
-                        onClick={() => setShowAddCanned(true)}
-                      >
-                        <Plus className="h-3 w-3" />
-                        Add Template
-                      </Button>
-                    </div>
-                  </div>
-                )}
-              </PopoverContent>
-            </Popover>
-            {!isInternal && (
-              <span className="text-[10px] text-muted-foreground">
-                Replies include email signature automatically
-              </span>
-            )}
-          </div>
-
-          {isInternal ? (
-            <Textarea
-              placeholder="Add an internal note (only visible to admins)..."
-              value={noteContent}
-              onChange={(e) => setNoteContent(e.target.value)}
-              rows={4}
-              className="resize-y min-h-[80px]"
-            />
-          ) : (
-            <RichEditor
-              ref={editorRef}
-              placeholder="Write your reply to the customer..."
-            />
-          )}
-        </div>
-
-        <div className="flex items-center justify-between">
-          {!isInternal && !ticket.user_email ? (
-            <p className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1">
-              <AlertTriangle className="h-3 w-3" />
-              No customer email — reply saved but not sent.
-            </p>
-          ) : (
-            <div />
-          )}
-
-          <Button
-            size="sm"
-            onClick={addNote}
-            disabled={sendingNote}
-            variant={isInternal ? "outline" : "default"}
-          >
-            {sendingNote ? (
-              <Loader2 className="h-4 w-4 animate-spin mr-1" />
-            ) : isInternal ? (
-              <StickyNote className="h-4 w-4 mr-1" />
-            ) : (
-              <Send className="h-4 w-4 mr-1" />
-            )}
-            {isInternal ? "Add Note" : "Send Reply"}
-          </Button>
-        </div>
-      </div>
-    </div>
+    </>
   );
 }
 
@@ -1406,36 +1140,226 @@ export default function TicketsPage() {
     );
   };
 
-  // Shared detail props
-  const detailProps = selectedTicket ? {
-    ticket: selectedTicket,
-    tickets,
-    onSelectTicket: openTicket,
-    isInternal,
-    setIsInternal,
-    noteContent,
-    setNoteContent,
-    sendingNote,
-    editorRef,
-    addNote,
-    cannedResponses,
-    cannedByCategory,
-    cannedOpen,
-    setCannedOpen,
-    showAddCanned,
-    setShowAddCanned,
-    newCannedTitle,
-    setNewCannedTitle,
-    newCannedContent,
-    setNewCannedContent,
-    newCannedCategory,
-    setNewCannedCategory,
-    insertCanned,
-    saveCannedResponse,
-    deleteCannedResponse,
-    updateStatus,
-    updatePriority,
-  } : null;
+  // Reply form JSX — rendered inline in the parent so the ref stays connected
+  const replyForm = selectedTicket && (
+    <div className="border-t-2 border-primary/20 bg-muted/30 p-4 space-y-3 flex-shrink-0">
+      {/* Mode tabs */}
+      <div className="flex gap-1 bg-muted rounded-lg p-1">
+        <button
+          type="button"
+          onClick={() => setIsInternal(false)}
+          className={cn(
+            "flex-1 flex items-center justify-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+            !isInternal
+              ? "bg-blue-600 text-white shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          <Mail className="h-3.5 w-3.5" />
+          Reply
+        </button>
+        <button
+          type="button"
+          onClick={() => setIsInternal(true)}
+          className={cn(
+            "flex-1 flex items-center justify-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+            isInternal
+              ? "bg-amber-500 text-white shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          <Lock className="h-3.5 w-3.5" />
+          Internal Note
+        </button>
+      </div>
+
+      {/* Reply context */}
+      {!isInternal && (
+        <div className="rounded-md bg-blue-50 dark:bg-blue-950/30 px-3 py-2 text-xs space-y-0.5">
+          <div className="flex items-center gap-1 text-muted-foreground">
+            <span className="font-medium text-foreground">To:</span>
+            {selectedTicket.user_email || (
+              <span className="text-amber-600 dark:text-amber-400">
+                No email found
+              </span>
+            )}
+          </div>
+          {selectedTicket.inbox_email && (
+            <div className="flex items-center gap-1 text-muted-foreground">
+              <span className="font-medium text-foreground">From:</span>
+              {selectedTicket.inbox_email}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Templates + editor/textarea */}
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <Popover open={cannedOpen} onOpenChange={setCannedOpen}>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm" className="h-7 text-xs gap-1">
+                <Zap className="h-3 w-3" />
+                Templates
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80 p-0" align="start">
+              {showAddCanned ? (
+                <div className="p-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-medium">New Template</h4>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0"
+                      onClick={() => setShowAddCanned(false)}
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                  <Input
+                    placeholder="Title"
+                    value={newCannedTitle}
+                    onChange={(e) => setNewCannedTitle(e.target.value)}
+                    className="h-8 text-xs"
+                  />
+                  <Textarea
+                    placeholder="Response content..."
+                    value={newCannedContent}
+                    onChange={(e) => setNewCannedContent(e.target.value)}
+                    rows={3}
+                    className="text-xs resize-none"
+                  />
+                  <Select value={newCannedCategory} onValueChange={setNewCannedCategory}>
+                    <SelectTrigger className="h-8 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="general">General</SelectItem>
+                      <SelectItem value="support">Support</SelectItem>
+                      <SelectItem value="sales">Sales</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button size="sm" className="w-full h-7 text-xs" onClick={saveCannedResponse}>
+                    Save Template
+                  </Button>
+                </div>
+              ) : (
+                <div>
+                  <div className="p-2 border-b">
+                    <p className="text-xs font-medium text-muted-foreground px-1">Insert a template</p>
+                  </div>
+                  <ScrollArea className="max-h-60">
+                    {cannedResponses.length === 0 ? (
+                      <p className="p-3 text-xs text-muted-foreground text-center">
+                        No templates yet
+                      </p>
+                    ) : (
+                      <div className="p-1">
+                        {Array.from(cannedByCategory.entries()).map(([category, items]) => (
+                          <div key={category}>
+                            <p className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                              {category}
+                            </p>
+                            {items.map((r) => (
+                              <div
+                                key={r.id}
+                                className="group flex items-center gap-2 rounded-md px-2 py-1.5 cursor-pointer hover:bg-muted transition-colors"
+                              >
+                                <button
+                                  type="button"
+                                  className="flex-1 text-left"
+                                  onClick={() => insertCanned(r.content)}
+                                >
+                                  <p className="text-xs font-medium">{r.title}</p>
+                                  <p className="text-[10px] text-muted-foreground line-clamp-1">
+                                    {r.content}
+                                  </p>
+                                </button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-5 w-5 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    deleteCannedResponse(r.id);
+                                  }}
+                                >
+                                  <X className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </ScrollArea>
+                  <div className="p-2 border-t">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full h-7 text-xs gap-1"
+                      onClick={() => setShowAddCanned(true)}
+                    >
+                      <Plus className="h-3 w-3" />
+                      Add Template
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </PopoverContent>
+          </Popover>
+          {!isInternal && (
+            <span className="text-[10px] text-muted-foreground">
+              Replies include email signature automatically
+            </span>
+          )}
+        </div>
+
+        {isInternal ? (
+          <Textarea
+            placeholder="Add an internal note (only visible to admins)..."
+            value={noteContent}
+            onChange={(e) => setNoteContent(e.target.value)}
+            rows={4}
+            className="resize-y min-h-[80px]"
+          />
+        ) : (
+          <RichEditor
+            ref={editorRef}
+            placeholder="Write your reply to the customer..."
+          />
+        )}
+      </div>
+
+      <div className="flex items-center justify-between">
+        {!isInternal && !selectedTicket.user_email ? (
+          <p className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1">
+            <AlertTriangle className="h-3 w-3" />
+            No customer email — reply saved but not sent.
+          </p>
+        ) : (
+          <div />
+        )}
+
+        <Button
+          size="sm"
+          onClick={addNote}
+          disabled={sendingNote}
+          variant={isInternal ? "outline" : "default"}
+        >
+          {sendingNote ? (
+            <Loader2 className="h-4 w-4 animate-spin mr-1" />
+          ) : isInternal ? (
+            <StickyNote className="h-4 w-4 mr-1" />
+          ) : (
+            <Send className="h-4 w-4 mr-1" />
+          )}
+          {isInternal ? "Add Note" : "Send Reply"}
+        </Button>
+      </div>
+    </div>
+  );
 
   return (
     <div className="space-y-4">
@@ -1634,8 +1558,17 @@ export default function TicketsPage() {
 
         {/* Right: Detail panel (desktop only) */}
         <div className="hidden lg:flex lg:flex-col" style={{ maxHeight: "calc(100vh - 320px)" }}>
-          {detailProps ? (
-            <TicketDetail {...detailProps} />
+          {selectedTicket ? (
+            <>
+              <TicketContent
+                ticket={selectedTicket}
+                tickets={tickets}
+                onSelectTicket={openTicket}
+                updateStatus={updateStatus}
+                updatePriority={updatePriority}
+              />
+              {replyForm}
+            </>
           ) : (
             <div className="flex-1 flex items-center justify-center text-center p-12">
               <div>
@@ -1655,13 +1588,20 @@ export default function TicketsPage() {
       {/* Mobile: Sheet flyout */}
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
         <SheetContent className="sm:max-w-2xl w-full flex flex-col h-full overflow-hidden p-0 lg:hidden">
-          {detailProps && (
+          {selectedTicket && sheetOpen && (
             <>
               <SheetHeader className="sr-only">
-                <SheetTitle>{selectedTicket?.subject || "Ticket"}</SheetTitle>
+                <SheetTitle>{selectedTicket.subject || "Ticket"}</SheetTitle>
                 <SheetDescription>Ticket details and reply</SheetDescription>
               </SheetHeader>
-              <TicketDetail {...detailProps} />
+              <TicketContent
+                ticket={selectedTicket}
+                tickets={tickets}
+                onSelectTicket={openTicket}
+                updateStatus={updateStatus}
+                updatePriority={updatePriority}
+              />
+              {replyForm}
             </>
           )}
         </SheetContent>

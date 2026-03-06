@@ -4,7 +4,7 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
-import { useCallback, useEffect, useImperativeHandle, forwardRef } from "react";
+import { useCallback, useImperativeHandle, forwardRef } from "react";
 import { cn } from "@/lib/utils";
 import {
   Bold,
@@ -39,6 +39,7 @@ const RichEditor = forwardRef<RichEditorRef, RichEditorProps>(
           code: false,
           horizontalRule: false,
           blockquote: { HTMLAttributes: { class: "border-l-3 border-gray-300 pl-3 text-gray-500" } },
+          link: false, // Disable StarterKit's link to avoid duplicate
         }),
         Link.configure({
           openOnClick: false,
@@ -85,13 +86,6 @@ const RichEditor = forwardRef<RichEditorRef, RichEditorProps>(
       },
       isEmpty: () => editor?.isEmpty ?? true,
     }));
-
-    // Cleanup
-    useEffect(() => {
-      return () => {
-        editor?.destroy();
-      };
-    }, [editor]);
 
     const setLink = useCallback(() => {
       if (!editor) return;

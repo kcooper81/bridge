@@ -1045,31 +1045,28 @@ export default function TicketsPage() {
         <div className="flex-1 min-w-0">
           {/* Line 1: sender + time */}
           <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2 min-w-0">
-              <TypeIcon className={cn("h-3.5 w-3.5 flex-shrink-0", isNew ? "text-foreground" : "text-muted-foreground")} />
-              <span className={cn("truncate text-sm", isNew ? "font-semibold" : "text-muted-foreground")}>
+            <div className="flex items-center gap-1.5 min-w-0">
+              <TypeIcon className={cn("h-3 w-3 flex-shrink-0", isNew ? "text-foreground" : "text-muted-foreground")} />
+              <span className={cn("truncate text-xs", isNew ? "font-semibold" : "text-muted-foreground")}>
                 {ticket.sender_name || ticket.user_email || "Anonymous"}
               </span>
               {ticket.inbox_email && (
-                <span className="hidden sm:inline text-[10px] text-muted-foreground bg-muted rounded px-1.5 py-0.5 flex-shrink-0">
+                <span className="hidden sm:inline text-[10px] text-muted-foreground bg-muted rounded px-1 py-0.5 flex-shrink-0">
                   {ticket.inbox_email.split("@")[0]}
                 </span>
               )}
             </div>
-            <div className="flex items-center gap-2 flex-shrink-0">
-              {/* Last activity timestamp */}
-              <span className={cn("text-xs", hasReply ? "text-muted-foreground" : slaColor(activity))}>
-                {timeAgo(activity)}
-              </span>
-            </div>
+            <span className={cn("text-[11px] flex-shrink-0", hasReply ? "text-muted-foreground" : slaColor(activity))}>
+              {timeAgo(activity)}
+            </span>
           </div>
 
           {/* Line 2: subject + preview */}
-          <div className="flex items-center gap-2 mt-1">
-            <p className={cn("truncate text-sm", isNew ? "font-medium text-foreground" : "text-muted-foreground")}>
+          <div className="flex items-center gap-2 mt-0.5">
+            <p className={cn("truncate text-xs", isNew ? "font-medium text-foreground" : "text-muted-foreground")}>
               {ticket.subject || "No subject"}
               <span className="hidden sm:inline font-normal text-muted-foreground">
-                {" — "}{ticket.message.replace(/^From:.*?\n\n/, "").slice(0, 60)}
+                {" — "}{ticket.message.replace(/^From:.*?\n\n/, "").slice(0, 50)}
               </span>
             </p>
           </div>

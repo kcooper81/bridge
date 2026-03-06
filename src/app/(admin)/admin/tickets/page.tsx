@@ -231,7 +231,7 @@ export default function TicketsPage() {
 
   // Note form
   const [noteContent, setNoteContent] = useState("");
-  const [isInternal, setIsInternal] = useState(true);
+  const [isInternal, setIsInternal] = useState(false);
   const [sendingNote, setSendingNote] = useState(false);
   const editorRef = useRef<RichEditorRef>(null);
 
@@ -439,7 +439,7 @@ export default function TicketsPage() {
     setSelectedTicket(ticket);
     setSheetOpen(true);
     setNoteContent("");
-    setIsInternal(true);
+    setIsInternal(false);
     setHistoryOpen(false);
   };
 
@@ -762,9 +762,10 @@ export default function TicketsPage() {
               <div
                 key={ticket.id}
                 className={cn(
-                  "flex gap-3 px-4 py-3.5 cursor-pointer transition-colors hover:bg-muted/50",
-                  isSelected && "bg-primary/5",
-                  isNew && "bg-blue-50/50 dark:bg-blue-950/10"
+                  "flex gap-3 px-4 py-3.5 cursor-pointer transition-colors hover:bg-accent/60",
+                  isSelected && "bg-primary/10 hover:bg-primary/15",
+                  isNew && "bg-blue-50 dark:bg-blue-950/20 border-l-2 border-l-blue-500",
+                  !isNew && !isSelected && "border-l-2 border-l-transparent"
                 )}
                 onClick={() => openTicket(ticket)}
               >
@@ -1114,16 +1115,16 @@ export default function TicketsPage() {
               </ScrollArea>
 
               {/* Bottom pinned reply/note form — more space */}
-              <div className="border-t p-4 space-y-3">
+              <div className="border-t-2 border-primary/20 bg-muted/30 p-4 space-y-3">
                 {/* Mode tabs */}
-                <div className="flex gap-1 bg-muted rounded-lg p-0.5">
+                <div className="flex gap-1 bg-muted rounded-lg p-1">
                   <button
                     type="button"
                     onClick={() => setIsInternal(false)}
                     className={cn(
-                      "flex-1 flex items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
+                      "flex-1 flex items-center justify-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors",
                       !isInternal
-                        ? "bg-background text-blue-600 dark:text-blue-400 shadow-sm"
+                        ? "bg-blue-600 text-white shadow-sm"
                         : "text-muted-foreground hover:text-foreground"
                     )}
                   >
@@ -1134,9 +1135,9 @@ export default function TicketsPage() {
                     type="button"
                     onClick={() => setIsInternal(true)}
                     className={cn(
-                      "flex-1 flex items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
+                      "flex-1 flex items-center justify-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors",
                       isInternal
-                        ? "bg-background text-amber-600 dark:text-amber-400 shadow-sm"
+                        ? "bg-amber-500 text-white shadow-sm"
                         : "text-muted-foreground hover:text-foreground"
                     )}
                   >

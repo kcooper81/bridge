@@ -111,7 +111,19 @@ export async function POST(request: NextRequest) {
     // Migrate: clean up solo org, move user to target org
     const oldOrgId = profile.org_id;
 
-    await Promise.all([
+    // Move user first so they're not orphaned if cleanup fails
+    const { error: moveError } = await db
+      .from("profiles")
+      .update({ org_id: targetOrg.id, role: "member" })
+      .eq("id", profile.id);
+
+    if (moveError) {
+      console.error("Domain join: failed to move user:", moveError);
+      return NextResponse.json({ joined: false });
+    }
+
+    // Clean up old org data (non-fatal — orphaned data is acceptable)
+    await Promise.allSettled([
       db.from("prompts").delete().eq("org_id", oldOrgId),
       db.from("folders").delete().eq("org_id", oldOrgId),
       db.from("teams").delete().eq("org_id", oldOrgId),
@@ -119,13 +131,7 @@ export async function POST(request: NextRequest) {
       db.from("invites").delete().eq("org_id", oldOrgId),
     ]);
 
-    // Update profile to target org as member
-    await db
-      .from("profiles")
-      .update({ org_id: targetOrg.id, role: "member" })
-      .eq("id", profile.id);
-
-    // Delete the orphaned org
+    // Delete the orphaned org (non-fatal)
     await db.from("organizations").delete().eq("id", oldOrgId);
 
     return NextResponse.json({ joined: true });

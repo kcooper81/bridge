@@ -53,6 +53,8 @@ const DialogContent = React.forwardRef<
       {...props}
     >
       {children}
+      {/* Fallback hidden description to suppress Radix accessibility warnings */}
+      <DialogPrimitive.Description className="sr-only">Dialog content</DialogPrimitive.Description>
       <DialogPrimitive.Close className="absolute right-4 top-4 rounded-lg p-1.5 opacity-70 ring-offset-background transition-all duration-200 hover:opacity-100 hover:bg-muted hover:scale-110 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none">
         <X className="h-4 w-4" />
         <span className="sr-only">Close</span>

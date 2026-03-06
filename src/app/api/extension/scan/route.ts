@@ -71,9 +71,12 @@ export async function POST(request: NextRequest) {
       .eq("user_id", user.id);
     const userTeamIds = (teamRows || []).map((r) => r.team_id);
 
-    // Build team filter: org-wide rules (team_id IS NULL) + user's team rules
-    const teamFilter = userTeamIds.length > 0
-      ? `team_id.is.null,team_id.in.(${userTeamIds.join(",")})`
+    // Build safe PostgREST filter for team scope: org-wide (null) + user's teams
+    // Validate team IDs are valid UUIDs to prevent filter injection
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const safeTeamIds = userTeamIds.filter((id) => uuidRegex.test(id));
+    const teamFilter = safeTeamIds.length > 0
+      ? `team_id.is.null,team_id.in.(${safeTeamIds.join(",")})`
       : "team_id.is.null";
 
     // Fetch active security rules, sensitive terms, AND org settings

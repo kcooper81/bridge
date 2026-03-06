@@ -186,6 +186,26 @@
   - StaggeredMockup component: overlapping, offset app screenshots
   - All gradient variants updated: Twitter, LinkedIn, Facebook, YouTube, OG
 
+- [x] Admin Inbox Redesign & Features
+  - Fixed reply editor (next/dynamic ref forwarding bug → direct import + SSR guard)
+  - Ticket assignment system: assign dropdown, My Tickets/Unassigned filters, auto-assign on reply
+  - Auto-select first ticket on load (desktop)
+  - Full UI redesign: consolidated filters, timeline notes, prominent message card, labeled controls
+  - Compact reply form: pill toggle, inline context, canned response templates
+  - `/api/admin/staff` endpoint for assignment dropdowns
+  - Realtime nav badges: past due subscriptions (red), new signups (green), browser notifications
+
+- [x] Admin Pages Enhancement (Subscriptions, Users, Organizations)
+  - Subscriptions: summary stat cards (MRR, active, past due, trialing), plan filter, Created column, full CSV export
+  - Users: summary stat cards (total, protected, unprotected, new this week), new filters (new this week, no extension), Last Active column
+  - Organizations: summary stat cards (total orgs, paid, new this week, total members)
+
+- [x] QA Audit Fixes
+  - Fixed SQL injection risk in extension routes (security-status, scan) — UUID validation on team_id filter
+  - Fixed unhandled promise rejections in invite/accept and domain-join — `Promise.all` → `Promise.allSettled` for cleanup ops
+  - Fixed missing DialogDescription warnings — added sr-only fallback in dialog.tsx
+  - Configurable support staff page access — ADMIN_PAGES constant, SupportAccessGuard, PATCH endpoint
+
 ## Pending
 - [ ] Guardrail security hardening for sensitive pattern data (passwords, secrets)
   - Evaluate encryption-at-rest for custom DLP patterns
@@ -215,25 +235,25 @@
 - [ ] Microsoft Entra ID (Azure AD) directory sync
 - [ ] SCIM 2.0 provisioning endpoint (for Okta, OneLogin, JumpCloud)
 - [ ] SAML SSO
-- [ ] Auto-deprovisioning (remove access when employee leaves directory)
+- [x] Auto-deprovisioning (remove access when employee leaves directory)
+  - Migration 044: `directory_sync_source` column on profiles, `directory_sync_log` table
+  - Google sync route detects removed users (compares directory vs tagged members)
+  - Retroactive tagging: existing members matched by email get `directory_sync_source` set
+  - `/api/integrations/deprovision` POST endpoint: safely removes directory-synced users
+  - `deprovisionUsers()` client helper in vault-api.ts
+  - `auto_deprovision_on_sync` org setting in types.ts
 - [ ] How to handle desktop AI clients (Claude Desktop, ChatGPT Desktop, etc.)
   - Evaluate options: desktop companion app, system-level proxy, clipboard monitoring
   - Consider DLP coverage gap — extension only covers browser-based AI tools
   - Research OS-level APIs for input interception on Windows/macOS
-- [ ] Mobile responsiveness overhaul — /vault and all app views
-  - **Priority 1 — Core UX:**
-    - Vault page: table overflow on mobile, fixed-width dropdowns (w-[160px] etc.), toolbar layout breaks
-    - Sidebar: already hidden on mobile with sheet, but touch targets need improvement
-    - Dashboard layout: `h-screen` → `min-h-dvh` for mobile browser chrome
-  - **Priority 2 — Common Controls:**
-    - Prompt modal: `max-w-2xl` needs `max-w-[90vw] sm:max-w-2xl` for mobile
-    - Dialog base (ui/dialog.tsx): padding `p-6` → `p-4 sm:p-6`
-    - Page header: `text-3xl` → `text-2xl sm:text-3xl`
-    - Button touch targets: many `size="sm"` and `h-8 w-8` icon buttons below 44px WCAG minimum
-  - **Priority 3 — Data Pages:**
-    - Analytics: table columns need responsive hide/show
-    - Team page: member table needs mobile layout
-    - Approvals: fixed-width dropdowns, table overflow
-  - **Priority 4 — Settings:**
-    - All settings pages: `max-w-4xl`/`max-w-5xl` need mobile padding
-    - Settings tabs: need `overflow-x-auto` on mobile
+- [x] Mobile responsiveness overhaul — /vault and all app views
+  - Dashboard layout: `h-screen` → `min-h-dvh` for mobile browser chrome
+  - Dialog base: `w-[95vw]` + `p-4 sm:p-6` for mobile
+  - Prompt modal: `w-[95vw] sm:max-w-2xl`, responsive grids (`grid-cols-1 sm:grid-cols-N`)
+  - Vault page: full-width filter dropdowns on mobile (`w-full sm:w-[Npx]`)
+  - Notification bell: responsive popover width (`w-[95vw] sm:w-[380px]`)
+  - Page header: `text-2xl sm:text-3xl`
+  - Approvals: larger touch targets (`h-8 sm:h-7`), responsive action column widths
+  - Settings: scrollable tab bar (`overflow-x-auto scrollbar-hide`), container padding
+  - Sidebar: `max-w-[280px]` on mobile sheet
+  - Admin views: responsive stat cards, stacking headers, tighter ticket UI on mobile

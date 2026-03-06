@@ -78,8 +78,12 @@ export async function GET(request: NextRequest) {
       .eq("user_id", user.id);
     const userTeamIds = (teamRows || []).map((r) => r.team_id);
 
-    const teamFilter = userTeamIds.length > 0
-      ? `team_id.is.null,team_id.in.(${userTeamIds.join(",")})`
+    // Build safe PostgREST filter for team scope: org-wide (null) + user's teams
+    // Validate team IDs are valid UUIDs to prevent filter injection
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const safeTeamIds = userTeamIds.filter((id) => uuidRegex.test(id));
+    const teamFilter = safeTeamIds.length > 0
+      ? `team_id.is.null,team_id.in.(${safeTeamIds.join(",")})`
       : "team_id.is.null";
 
     // Fetch in parallel: active rules count, weekly violations, recent violations

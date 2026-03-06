@@ -97,8 +97,8 @@ export async function POST(request: NextRequest) {
       // Solo personal org — clean it up so user can join the invited org
       const oldOrgId = existingProfile.org_id;
 
-      // Remove any teams, folders, prompts, etc. tied to the old org
-      await Promise.all([
+      // Remove any teams, folders, prompts, etc. tied to the old org (non-fatal)
+      await Promise.allSettled([
         db.from("prompts").delete().eq("org_id", oldOrgId),
         db.from("folders").delete().eq("org_id", oldOrgId),
         db.from("teams").delete().eq("org_id", oldOrgId),
@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
         db.from("invites").delete().eq("org_id", oldOrgId),
       ]);
 
-      // Delete the orphaned org
+      // Delete the orphaned org (non-fatal)
       await db.from("organizations").delete().eq("id", oldOrgId);
     }
 

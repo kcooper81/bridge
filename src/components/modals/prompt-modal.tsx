@@ -140,7 +140,7 @@ export function PromptModal({
     setExpandedVars(new Set());
     setDiffVersion(null);
     setDiffLines([]);
-  }, [prompt, open]);
+  }, [prompt, open, currentUserRole]);
 
   function insertVariable(name: string) {
     const textarea = contentRef.current;

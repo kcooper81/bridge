@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { CreditCard, ExternalLink, TrendingUp, AlertTriangle, Users } from "lucide-react";
+import { CreditCard, ExternalLink, TrendingUp, AlertTriangle, Users, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ComposeEmailModal } from "@/components/admin/compose-email-modal";
 import {
   AdminPageHeader,
   AdminLoadingState,
@@ -27,6 +28,8 @@ interface SubRow {
   id: string;
   org_id: string;
   org_name: string;
+  admin_email: string | null;
+  admin_name: string | null;
   plan: string;
   status: string;
   seats: number;
@@ -50,12 +53,14 @@ export default function SubscriptionsPage() {
   const [planFilter, setPlanFilter] = useState("all");
   const { sortKey, sortDir, handleSort } = useSortState<string>("created_at");
   const { page, setPage, paginate, resetPage } = usePaginationState();
+  const [composeTarget, setComposeTarget] = useState<SubRow | null>(null);
 
   const loadSubs = useCallback(async () => {
     const supabase = createClient();
-    const [orgsRes, subsRes] = await Promise.all([
+    const [orgsRes, subsRes, profilesRes] = await Promise.all([
       supabase.from("organizations").select("id, name, plan, created_at").order("created_at", { ascending: false }),
       supabase.from("subscriptions").select("id, org_id, plan, status, seats, current_period_end, stripe_customer_id, stripe_subscription_id, created_at"),
+      supabase.from("profiles").select("org_id, email, name, role").eq("role", "admin"),
     ]);
 
     if (orgsRes.error) {
@@ -66,9 +71,18 @@ export default function SubscriptionsPage() {
 
     const subMap = new Map((subsRes.data || []).map((s) => [s.org_id, s]));
 
+    // Build map of org_id → first admin contact
+    const adminMap = new Map<string, { email: string; name: string }>();
+    for (const p of (profilesRes.data || []) as { org_id: string; email: string; name: string; role: string }[]) {
+      if (p.org_id && !adminMap.has(p.org_id)) {
+        adminMap.set(p.org_id, { email: p.email, name: p.name });
+      }
+    }
+
     const rows: SubRow[] = (orgsRes.data || []).map(
       (org: { id: string; name: string; plan: string; created_at: string }) => {
         const sub = subMap.get(org.id);
+        const admin = adminMap.get(org.id);
         const plan = sub?.plan || org.plan || "free";
         const status = sub ? sub.status : "no_subscription";
         const seats = sub?.seats || 1;
@@ -76,6 +90,8 @@ export default function SubscriptionsPage() {
           id: sub?.id || org.id,
           org_id: org.id,
           org_name: org.name || "Unknown",
+          admin_email: admin?.email || null,
+          admin_name: admin?.name || null,
           plan,
           status,
           seats,
@@ -179,22 +195,28 @@ export default function SubscriptionsPage() {
       render: (row) => <span className="text-muted-foreground">{new Date(row.created_at).toLocaleDateString()}</span>,
     },
     {
-      key: "stripe", label: "Stripe", align: "right",
-      render: (row) =>
-        row.stripe_subscription_id ? (
-          <a
-            href={`https://dashboard.stripe.com/subscriptions/${row.stripe_subscription_id}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
-              <ExternalLink className="h-3.5 w-3.5" />
+      key: "actions", label: "", align: "right",
+      render: (row) => (
+        <div className="flex items-center justify-end gap-0.5">
+          {row.admin_email && (
+            <Button variant="ghost" size="sm" className="h-7 w-7 p-0" title={`Email ${row.admin_email}`} onClick={(e) => { e.stopPropagation(); setComposeTarget(row); }}>
+              <Mail className="h-3.5 w-3.5" />
             </Button>
-          </a>
-        ) : (
-          <span className="text-muted-foreground text-xs">&mdash;</span>
-        ),
+          )}
+          {row.stripe_subscription_id && (
+            <a
+              href={`https://dashboard.stripe.com/subscriptions/${row.stripe_subscription_id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+                <ExternalLink className="h-3.5 w-3.5" />
+              </Button>
+            </a>
+          )}
+        </div>
+      ),
     },
   ];
 
@@ -281,6 +303,14 @@ export default function SubscriptionsPage() {
       />
 
       <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+
+      <ComposeEmailModal
+        open={!!composeTarget}
+        onOpenChange={(open) => !open && setComposeTarget(null)}
+        toEmail={composeTarget?.admin_email || ""}
+        toName={composeTarget?.admin_name || ""}
+        orgId={composeTarget?.org_id}
+      />
     </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -14,6 +14,7 @@ import {
   Trash2,
   ArrowLeft,
   MoreHorizontal,
+  Mail,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -26,6 +27,7 @@ import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import { MemberTable, type MemberRow } from "@/components/admin/member-table";
 import { PlanBadge, StatusBadge } from "@/components/admin/admin-page-layout";
+import { ComposeEmailModal } from "@/components/admin/compose-email-modal";
 
 interface SubDetail {
   plan: string;
@@ -66,6 +68,14 @@ export function OrgDetailPanel({
   onBack,
 }: OrgDetailPanelProps) {
   const [actionLoading, setActionLoading] = useState(false);
+  const [composeOpen, setComposeOpen] = useState(false);
+
+  // Find the org admin (first admin member, fallback to first member)
+  const orgContact = useMemo(() => {
+    const admin = members.find((m) => m.role === "admin");
+    const contact = admin || members[0];
+    return contact ? { email: contact.email, name: contact.name } : null;
+  }, [members]);
 
   const handleToggleSuspend = async () => {
     const action = org.is_suspended ? "unsuspend" : "suspend";
@@ -134,6 +144,12 @@ export function OrgDetailPanel({
           </p>
         </div>
         <div className="flex gap-2 shrink-0">
+          {orgContact && (
+            <Button variant="outline" size="sm" className="h-8" onClick={() => setComposeOpen(true)}>
+              <Mail className="mr-1.5 h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Email</span>
+            </Button>
+          )}
           <Button variant="outline" size="sm" className="h-8" onClick={handleImpersonate}>
             <Eye className="mr-1.5 h-3.5 w-3.5" />
             <span className="hidden sm:inline">Impersonate</span>
@@ -233,6 +249,16 @@ export function OrgDetailPanel({
         </h3>
         <MemberTable members={members} />
       </div>
+
+      {orgContact && (
+        <ComposeEmailModal
+          open={composeOpen}
+          onOpenChange={setComposeOpen}
+          toEmail={orgContact.email}
+          toName={orgContact.name}
+          orgId={org.id}
+        />
+      )}
     </div>
   );
 }

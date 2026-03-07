@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Calendar, Clock, User, ArrowLeft } from "lucide-react";
 import { generatePageMetadata } from "@/lib/seo/metadata";
 import { generateBreadcrumbSchema } from "@/lib/seo/schemas";
@@ -73,6 +74,7 @@ export default async function BlogPostPage({ params }: Props) {
     "@type": "Article",
     headline: post.title,
     description: post.description,
+    image: post.coverImage,
     datePublished: post.publishedAt,
     dateModified: post.updatedAt || post.publishedAt,
     author: {
@@ -153,9 +155,32 @@ export default async function BlogPostPage({ params }: Props) {
               </div>
             </header>
 
+            {/* Cover image */}
+            {post.coverImage && (
+              <div className="relative aspect-[2/1] w-full rounded-2xl overflow-hidden mb-12">
+                <Image
+                  src={post.coverImage}
+                  alt={post.coverImageAlt}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 768px"
+                  priority
+                />
+              </div>
+            )}
+
             {/* Content */}
             <div
-              className="prose prose-zinc dark:prose-invert max-w-none prose-headings:font-semibold prose-headings:tracking-tight prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4 prose-p:leading-relaxed prose-p:text-muted-foreground prose-li:text-muted-foreground prose-ul:my-4 prose-li:my-1 prose-strong:text-foreground prose-a:text-primary hover:prose-a:underline"
+              className="prose prose-lg prose-zinc dark:prose-invert max-w-none
+                prose-headings:font-semibold prose-headings:tracking-tight
+                prose-h2:text-2xl prose-h2:mt-14 prose-h2:mb-5
+                prose-p:leading-[1.8] prose-p:text-foreground/80 prose-p:mb-6
+                prose-li:text-foreground/80 prose-li:leading-[1.8]
+                prose-ul:my-6 prose-ol:my-6 prose-li:my-2
+                prose-strong:text-foreground prose-strong:font-semibold
+                prose-a:text-primary hover:prose-a:underline
+                prose-figure:my-0 prose-figcaption:text-center prose-figcaption:text-sm prose-figcaption:text-muted-foreground prose-figcaption:mt-3
+                prose-img:rounded-xl prose-img:my-0"
               dangerouslySetInnerHTML={{ __html: post.content }}
             />
 

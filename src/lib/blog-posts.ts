@@ -19,6 +19,8 @@ export interface BlogPost {
   tags: string[];
   readingTime: string;
   relatedSlugs: string[];
+  coverImage: string;
+  coverImageAlt: string;
 }
 
 export interface BlogCategory {
@@ -56,6 +58,8 @@ const _POSTS: BlogPost[] = [
     category: "guide",
     tags: ["prompt library", "team collaboration", "prompt management", "templates"],
     readingTime: "7 min read",
+    coverImage: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1200&q=80&auto=format&fit=crop",
+    coverImageAlt: "Team collaborating around a table with laptops",
     relatedSlugs: [
       "5-signs-your-team-needs-prompt-management",
       "getting-started-with-teamprompt-in-under-2-minutes",
@@ -71,6 +75,11 @@ const _POSTS: BlogPost[] = [
 <p>Before you create anything new, collect what already exists. Send a quick message to your team: "Share your three most-used AI prompts." You will be surprised how many battle-tested prompts are already hiding in personal workflows. A marketing lead might have a polished prompt for generating blog outlines. A support manager might have one for summarizing tickets. A developer might have a prompt that writes unit tests from function signatures.</p>
 
 <p>Gather these into a single document or spreadsheet. For each prompt, note who submitted it, what it does, which AI tool it was written for, and how often they use it. This audit gives you a foundation of proven prompts instead of starting from zero.</p>
+
+<figure class="my-10 -mx-4 sm:mx-0">
+  <img src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=900&q=80&auto=format&fit=crop" alt="Team members reviewing documents together" class="rounded-xl w-full" loading="lazy" />
+  <figcaption class="text-center text-sm text-muted-foreground mt-3">Start by collecting the prompts your team already uses daily.</figcaption>
+</figure>
 
 <h2>Step 2: Define Your Categories</h2>
 
@@ -93,6 +102,11 @@ const _POSTS: BlogPost[] = [
 <p>"Summarize the following <strong>{{ticket_type}}</strong> from a <strong>{{customer_tier}}</strong> customer. Focus on <strong>{{key_issue}}</strong>. Keep the summary under <strong>{{max_length}}</strong>."</p>
 
 <p>Good variable names are self-documenting. Anyone reading the template should understand what to fill in without additional instructions. Add a one-line description to each variable if the name alone is not clear enough.</p>
+
+<figure class="my-10 -mx-4 sm:mx-0">
+  <img src="https://images.unsplash.com/photo-1553877522-43269d4ea984?w=900&q=80&auto=format&fit=crop" alt="Person organizing sticky notes on a board" class="rounded-xl w-full" loading="lazy" />
+  <figcaption class="text-center text-sm text-muted-foreground mt-3">Templates with variables turn one-time prompts into reusable tools.</figcaption>
+</figure>
 
 <h2>Step 4: Set Quality Standards</h2>
 
@@ -134,6 +148,8 @@ const _POSTS: BlogPost[] = [
     category: "guide",
     tags: ["DLP", "data protection", "security", "compliance", "AI governance"],
     readingTime: "8 min read",
+    coverImage: "https://images.unsplash.com/photo-1563986768609-322da13575f2?w=1200&q=80&auto=format&fit=crop",
+    coverImageAlt: "Digital security shield concept with data streams",
     relatedSlugs: [
       "ai-governance-for-regulated-industries",
       "5-signs-your-team-needs-prompt-management",
@@ -153,6 +169,11 @@ const _POSTS: BlogPost[] = [
 <p>Traditional DLP products work by inspecting traffic at specific chokepoints: email servers, file-sharing services, endpoint USB interfaces, and cloud app APIs. AI chat tools do not fit neatly into any of these categories. They are web applications accessed through the browser, and the data is entered interactively — typed or pasted one message at a time.</p>
 
 <p>Network-level DLP proxies can sometimes catch AI traffic, but they see encrypted HTTPS requests and typically cannot inspect the content of individual chat messages. Endpoint DLP agents monitor clipboard activity but lack the context to distinguish between pasting a prompt into ChatGPT (risky) and pasting the same text into an internal tool (safe). The gap between traditional DLP capabilities and AI tool behavior is where data leaks occur.</p>
+
+<figure class="my-10 -mx-4 sm:mx-0">
+  <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=900&q=80&auto=format&fit=crop" alt="Abstract cybersecurity visualization" class="rounded-xl w-full" loading="lazy" />
+  <figcaption class="text-center text-sm text-muted-foreground mt-3">AI tools create a new data exfiltration channel that legacy DLP wasn't designed to monitor.</figcaption>
+</figure>
 
 <h2>How AI-Specific DLP Works</h2>
 
@@ -201,6 +222,8 @@ const _POSTS: BlogPost[] = [
     category: "insight",
     tags: ["prompt management", "team productivity", "AI adoption", "scaling AI"],
     readingTime: "6 min read",
+    coverImage: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=1200&q=80&auto=format&fit=crop",
+    coverImageAlt: "Team having a productive discussion around a whiteboard",
     relatedSlugs: [
       "how-to-build-a-team-prompt-library",
       "teamprompt-vs-shared-google-docs-for-prompts",
@@ -220,6 +243,11 @@ const _POSTS: BlogPost[] = [
 <p>Two people on the same team use AI for the same task and get dramatically different results. One person writes detailed, well-structured prompts with clear constraints and format specifications. The other writes vague, one-line instructions and gets vague, inconsistent responses. The gap between their outputs creates quality inconsistencies that affect the work downstream.</p>
 
 <p>This is not a training problem you can solve with a lunch-and-learn session. It is a systems problem. When you provide templates with built-in best practices — context, constraints, format specifications, variable placeholders — even the team member who has never written a prompt can produce quality results on their first try. The template encodes the expertise; the user fills in the blanks.</p>
+
+<figure class="my-10 -mx-4 sm:mx-0">
+  <img src="https://images.unsplash.com/photo-1531482615713-2afd69097998?w=900&q=80&auto=format&fit=crop" alt="Team members looking at screens with different tools" class="rounded-xl w-full" loading="lazy" />
+  <figcaption class="text-center text-sm text-muted-foreground mt-3">When everyone writes prompts differently, output quality becomes unpredictable.</figcaption>
+</figure>
 
 <h2>3. No One Knows Which AI Tools People Are Actually Using</h2>
 
@@ -260,6 +288,8 @@ const _POSTS: BlogPost[] = [
     category: "comparison",
     tags: ["Google Docs", "prompt management", "comparison", "team collaboration"],
     readingTime: "7 min read",
+    coverImage: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=1200&q=80&auto=format&fit=crop",
+    coverImageAlt: "Person comparing documents on a desk with laptop",
     relatedSlugs: [
       "how-to-build-a-team-prompt-library",
       "5-signs-your-team-needs-prompt-management",
@@ -285,6 +315,11 @@ const _POSTS: BlogPost[] = [
 <p><strong>TeamPrompt:</strong> Templates use named variables with double curly braces — {{customer_name}}, {{tone}}, {{output_format}}. When a user selects the template, they see a form with labeled fields for each variable. The prompt is assembled automatically when they click Insert. Variables cannot be missed or incorrectly replaced because the system handles the substitution.</p>
 
 <p><strong>Verdict:</strong> If your prompts are static text with no variables, both work equally well. The moment you need reusable templates — which you will — a dedicated system prevents the errors that manual find-and-replace introduces.</p>
+
+<figure class="my-10 -mx-4 sm:mx-0">
+  <img src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=900&q=80&auto=format&fit=crop" alt="Person working on laptop with organized interface" class="rounded-xl w-full" loading="lazy" />
+  <figcaption class="text-center text-sm text-muted-foreground mt-3">Purpose-built tools handle what general-purpose documents can't — search, templates, and version control at the prompt level.</figcaption>
+</figure>
 
 <h2>Version Control</h2>
 
@@ -339,6 +374,8 @@ const _POSTS: BlogPost[] = [
     category: "tutorial",
     tags: ["getting started", "tutorial", "onboarding", "browser extension"],
     readingTime: "5 min read",
+    coverImage: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=1200&q=80&auto=format&fit=crop",
+    coverImageAlt: "Laptop on desk ready for setup",
     relatedSlugs: [
       "how-to-build-a-team-prompt-library",
       "5-signs-your-team-needs-prompt-management",
@@ -372,6 +409,11 @@ const _POSTS: BlogPost[] = [
 <p><strong>Content:</strong> "You are a customer support specialist. Summarize the following {{ticket_type}} ticket in 2-3 bullet points. Focus on: the customer's core issue, any steps already taken, and the recommended next action. Tone: {{tone}}."</p>
 
 <p>That template works for every ticket type your team handles — just fill in the variables when you use it.</p>
+
+<figure class="my-10 -mx-4 sm:mx-0">
+  <img src="https://images.unsplash.com/photo-1551434678-e076c223a692?w=900&q=80&auto=format&fit=crop" alt="Developer working at a clean desk with multiple monitors" class="rounded-xl w-full" loading="lazy" />
+  <figcaption class="text-center text-sm text-muted-foreground mt-3">The browser extension puts your prompt library right inside your AI tools — no tab switching needed.</figcaption>
+</figure>
 
 <h2>Step 3: Install the Browser Extension (30 seconds)</h2>
 
@@ -420,6 +462,8 @@ const _POSTS: BlogPost[] = [
     category: "guide",
     tags: ["AI governance", "compliance", "HIPAA", "SOC 2", "regulated industries"],
     readingTime: "8 min read",
+    coverImage: "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=1200&q=80&auto=format&fit=crop",
+    coverImageAlt: "Professional reviewing compliance documents at a desk",
     relatedSlugs: [
       "what-is-ai-data-loss-prevention-dlp",
       "5-signs-your-team-needs-prompt-management",
@@ -443,6 +487,11 @@ const _POSTS: BlogPost[] = [
 <p>Practical governance for healthcare means three things. First, classify which AI tools are approved for which data types. Enterprise tiers of some AI providers offer BAAs, but free and standard tiers do not. Second, deploy DLP scanning that detects the 18 HIPAA identifiers — patient names, medical record numbers, dates of service, Social Security numbers, and more — before they leave the browser. Third, maintain an audit trail of every AI interaction and DLP event for compliance reviews and incident investigation.</p>
 
 <p>A HIPAA compliance pack pre-loads all of these detection rules so your security team does not have to author regex patterns for every identifier type. Enable the pack, and the guardrails are active immediately.</p>
+
+<figure class="my-10 -mx-4 sm:mx-0">
+  <img src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=900&q=80&auto=format&fit=crop" alt="Healthcare professional reviewing data on a tablet" class="rounded-xl w-full" loading="lazy" />
+  <figcaption class="text-center text-sm text-muted-foreground mt-3">Healthcare, finance, and legal teams need technical controls — not just policies — to use AI safely.</figcaption>
+</figure>
 
 <h2>Finance: SOC 2 and PCI-DSS</h2>
 

@@ -383,7 +383,7 @@ export function IndustryPage({ data }: { data: IndustryPageData }) {
       {/* ━━━ FAQ ━━━ */}
       <section className="py-20 sm:py-28">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <FAQSection faqs={data.faqs} />
+          <FAQSection faqs={data.faqs} includeSchema={false} />
         </div>
       </section>
 

@@ -266,7 +266,7 @@ export default function ExtensionsPage() {
       </section>
 
       {/* FAQ */}
-      <FAQSection faqs={faqs} />
+      <FAQSection faqs={faqs} includeSchema={false} />
 
       {/* CTA */}
       <section className="py-20 sm:py-28">

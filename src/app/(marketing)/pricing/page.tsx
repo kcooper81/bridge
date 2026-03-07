@@ -4,7 +4,7 @@ import { FAQSection } from "@/components/marketing/faq-section";
 import { CTASection } from "@/components/marketing/cta-section";
 import { SectionLabel } from "@/components/marketing/section-label";
 import { PricingGrid } from "./_components/pricing-grid";
-import { generateFAQSchema, generateBreadcrumbSchema } from "@/lib/seo/schemas";
+import { generateBreadcrumbSchema } from "@/lib/seo/schemas";
 
 export const metadata: Metadata = generatePageMetadata({
   title: "Pricing — Plans for Every Team Size",
@@ -55,12 +55,6 @@ const breadcrumbs = generateBreadcrumbSchema([
 export default function PricingPage() {
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(generateFAQSchema(faqs)),
-        }}
-      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{

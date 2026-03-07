@@ -78,7 +78,7 @@ export default function HelpPage() {
 
           {/* FAQ */}
           <div className="mb-24">
-            <FAQSection faqs={HELP_FAQS} />
+            <FAQSection faqs={HELP_FAQS} includeSchema={false} />
           </div>
 
           {/* Support Form */}

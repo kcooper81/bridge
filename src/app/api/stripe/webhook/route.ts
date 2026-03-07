@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createServiceClient } from "@/lib/supabase/server";
 import { limiters, checkRateLimit } from "@/lib/rate-limit";
+import { notifyAdminsOfNewSubscription } from "@/lib/notify-admins";
 
 function getStripe() {
   return new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -112,6 +113,18 @@ export async function POST(request: NextRequest) {
           sub,
           session.customer as string
         );
+
+        // Notify super admins of new subscription
+        const plan = sub.items.data[0] ? getPlanFromPriceId(sub.items.data[0].price.id) : "unknown";
+        const seats = sub.items.data[0]?.quantity || 1;
+        const { data: org } = await db.from("organizations").select("name").eq("id", orgId).single();
+        notifyAdminsOfNewSubscription({
+          orgName: org?.name || orgId,
+          plan,
+          seats,
+          customerEmail: session.customer_email || session.customer_details?.email || null,
+          orgId,
+        });
         break;
       }
 

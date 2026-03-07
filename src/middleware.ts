@@ -35,6 +35,15 @@ function isAuthRoute(pathname: string) {
 }
 
 export async function middleware(request: NextRequest) {
+  // IndexNow key verification file — serve at runtime so env var doesn't need build-time access
+  const indexNowKey = process.env.INDEXNOW_API_KEY;
+  if (indexNowKey && request.nextUrl.pathname === `/${indexNowKey}.txt`) {
+    return new NextResponse(indexNowKey, {
+      status: 200,
+      headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "public, max-age=86400" },
+    });
+  }
+
   // www → non-www 301 redirect (SEO canonical)
   const host = request.headers.get("host") || "";
   if (host.startsWith("www.")) {
@@ -161,6 +170,6 @@ function setSecurityHeaders(response: NextResponse) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|sitemap\\.xml|robots\\.txt|llms(?:-full)?\\.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|txt)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|sitemap\\.xml|robots\\.txt|llms(?:-full)?\\.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
   ],
 };

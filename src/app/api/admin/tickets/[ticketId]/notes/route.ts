@@ -50,7 +50,7 @@ export async function POST(
   // Verify ticket exists and get details for potential email
   const { data: ticket, error: ticketError } = await db
     .from("feedback")
-    .select("id, subject, message, user_id, inbox_email, sender_email, assigned_to")
+    .select("id, subject, message, status, user_id, inbox_email, sender_email, assigned_to")
     .eq("id", ticketId)
     .single();
 
@@ -96,12 +96,14 @@ export async function POST(
     );
   }
 
-  // Auto-assign to the replying admin if ticket is unassigned
-  if (!ticket.assigned_to) {
-    await db
-      .from("feedback")
-      .update({ assigned_to: user.id, updated_at: new Date().toISOString() })
-      .eq("id", ticketId);
+  // Auto-assign + auto-progress: replying marks "new" tickets as "in_progress"
+  const needsAssign = !ticket.assigned_to;
+  const needsProgress = !is_internal && ticket.status === "new";
+  if (needsAssign || needsProgress) {
+    const updates: Record<string, string> = { updated_at: new Date().toISOString() };
+    if (needsAssign) updates.assigned_to = user.id;
+    if (needsProgress) updates.status = "in_progress";
+    await db.from("feedback").update(updates).eq("id", ticketId);
   }
 
   // Now send email if public note and we have a recipient

@@ -820,11 +820,14 @@ export default function TicketsPage() {
       const newNote: NoteRow = data.note;
 
       // Auto-assign: if ticket was unassigned, the API auto-assigned to current user
+      // Auto-progress: replying to a "new" ticket marks it as "in_progress" (read but still open)
       const wasUnassigned = !selectedTicket.assigned_to;
+      const shouldProgress = isReply && selectedTicket.status === "new";
       const updateTicketNotes = (t: TicketRow): TicketRow => ({
         ...t,
         notes: [...t.notes, newNote],
         notes_count: t.notes_count + 1,
+        ...(shouldProgress ? { status: "in_progress" } : {}),
         ...(wasUnassigned && user ? { assigned_to: user.id, assigned_email: user.email || null, assigned_name: null } : {}),
       });
 

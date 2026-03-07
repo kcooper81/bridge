@@ -92,7 +92,7 @@ const logos = [
     label: "Icon — White BG",
     file: "/brand/logo-icon-white-bg.svg",
     bg: "bg-zinc-100",
-    desc: "Blue logo on white — LinkedIn profile, no rounded square",
+    desc: "Dark logo on white — LinkedIn profile, no rounded square",
   },
   {
     label: "Wordmark — Light",
@@ -226,7 +226,7 @@ const socialMediaAssets = [
     assets: [
       { file: "/store-assets/social-profile-400.png", label: "Profile picture", dims: "400 x 400" },
       { file: "/store-assets/social-profile-300.png", label: "Company logo", dims: "300 x 300" },
-      { file: "/brand/logo-icon-white-bg.svg", label: "Logo mark (white bg, no square)", dims: "512 x 512" },
+      { file: "/brand/logo-icon-white-bg.svg", label: "Logo mark (dark on white, no square)", dims: "512 x 512" },
       { file: "/store-assets/linkedin-banner.png", label: "Cover banner", dims: "1584 x 396" },
     ],
   },

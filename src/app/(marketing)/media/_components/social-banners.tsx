@@ -1234,10 +1234,10 @@ const lifestylePhotos = {
   facebook: "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=800&q=80&auto=format&fit=crop",  // coworkers at laptops together
   youtube: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&q=80&auto=format&fit=crop",   // multiple people at laptop screens
   og: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&q=80&auto=format&fit=crop",        // person typing on laptop close-up
-  // Lifestyle 2 set — different vibes
-  team2: "https://images.unsplash.com/photo-1553877522-43269d4ea984?w=800&q=80&auto=format&fit=crop",        // startup team brainstorming at whiteboard
-  solo: "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?w=800&q=80&auto=format&fit=crop",      // colorful code on screen
-  office: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80&auto=format&fit=crop",    // modern open-plan office
+  // Lifestyle 2 set — professional team/work environments
+  team2: "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&q=80&auto=format&fit=crop",        // business team in meeting room with laptops
+  solo: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=800&q=80&auto=format&fit=crop",      // professional woman working at computer
+  office: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=800&q=80&auto=format&fit=crop",       // team collaborating around table with laptops
 };
 
 /* ── Twitter Lifestyle (1500 x 500) ── */

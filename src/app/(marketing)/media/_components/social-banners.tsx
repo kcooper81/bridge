@@ -1234,6 +1234,10 @@ const lifestylePhotos = {
   facebook: "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=800&q=80&auto=format&fit=crop",  // coworkers at laptops together
   youtube: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&q=80&auto=format&fit=crop",   // multiple people at laptop screens
   og: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&q=80&auto=format&fit=crop",        // person typing on laptop close-up
+  // Lifestyle 2 set — different vibes
+  team2: "https://images.unsplash.com/photo-1553877522-43269d4ea984?w=800&q=80&auto=format&fit=crop",        // startup team brainstorming at whiteboard
+  solo: "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?w=800&q=80&auto=format&fit=crop",      // colorful code on screen
+  office: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80&auto=format&fit=crop",    // modern open-plan office
 };
 
 /* ── Twitter Lifestyle (1500 x 500) ── */
@@ -1400,6 +1404,167 @@ export function OGBannerLifestyle() {
           <FrostedBadge icon={Shield} headline="Data protected" subtitle="Real-time scanning" color="red" className="top-[35%] left-[32%]" />
           {/* Badge overlaps bottom of photo */}
           <FrostedBadge icon={Users} headline="Team library" subtitle="Shared prompts" color="blue" className="-bottom-3 left-[5%]" />
+        </div>
+      </div>
+    </LifestyleBannerShell>
+  );
+}
+
+/* ══════════════════════════════════════════════════
+   LIFESTYLE 2 — alternate photo + scene combos
+   ══════════════════════════════════════════════════ */
+
+/* ── Twitter Lifestyle 2 (1500 x 500) ── */
+
+export function TwitterBannerLifestyle2() {
+  return (
+    <LifestyleBannerShell aspectRatio="1500/500">
+      <div className="flex items-center h-full gap-4 sm:gap-6">
+        <div className="flex-1 space-y-2 sm:space-y-2.5 shrink-0 max-w-[40%]">
+          <BannerWordmark size="md" />
+          <p className="text-white text-[10px] sm:text-sm font-bold leading-snug">
+            Shared prompts &middot; DLP scanning &middot; Usage analytics
+          </p>
+          <FeaturePills />
+          <CompatibilityLine />
+        </div>
+        <div className="hidden sm:flex w-[55%] items-center relative">
+          <LifestylePhoto
+            src={lifestylePhotos.team2}
+            alt="Team brainstorming at whiteboard"
+            className="w-[60%] aspect-[4/3]"
+          />
+          <div className="w-[50%] -ml-10 relative z-10">
+            <AnalyticsScene compact />
+          </div>
+          <FrostedBadge icon={BarChart3} headline="Usage +34%" subtitle="vs last month" color="blue" className="bottom-0 left-[38%]" />
+          <FrostedBadge icon={Zap} headline="142 inserts" subtitle="This week" color="emerald" className="-top-2 right-[5%]" />
+        </div>
+      </div>
+    </LifestyleBannerShell>
+  );
+}
+
+/* ── LinkedIn Lifestyle 2 (1584 x 396) ── */
+
+export function LinkedInBannerLifestyle2() {
+  return (
+    <LifestyleBannerShell aspectRatio="1584/396">
+      <div className="flex items-center h-full gap-4 sm:gap-6">
+        <div className="flex-1 space-y-2 sm:space-y-2.5 max-w-[38%]">
+          <BannerWordmark size="sm" />
+          <p className="text-white text-[10px] sm:text-xs font-bold leading-snug">
+            One prompt library for your entire team &mdash; across every AI tool
+          </p>
+          <FeaturePills />
+          <CompatibilityLine />
+        </div>
+        <div className="hidden sm:flex w-[55%] items-center relative">
+          <LifestylePhoto
+            src={lifestylePhotos.office}
+            alt="Modern open-plan office"
+            className="w-[55%] aspect-[4/3]"
+          />
+          <div className="w-[50%] -ml-10 relative z-10">
+            <VaultScene compact />
+          </div>
+          <FrostedBadge icon={Users} headline="12 teams" subtitle="Sharing prompts" color="blue" className="bottom-0 left-[35%]" />
+          <FrostedBadge icon={Zap} headline="One-click insert" subtitle="Into any AI tool" color="emerald" className="-top-2 right-[5%]" />
+        </div>
+      </div>
+    </LifestyleBannerShell>
+  );
+}
+
+/* ── LinkedIn Personal Cover (1128 x 191) ── */
+
+export function LinkedInPersonalCover() {
+  return (
+    <LifestyleBannerShell aspectRatio="1128/191">
+      <div className="flex items-center h-full gap-3 sm:gap-5">
+        <div className="flex-1 space-y-1 sm:space-y-1.5 max-w-[42%]">
+          <BannerWordmark size="xs" />
+          <p className="text-white text-[8px] sm:text-[10px] font-bold leading-snug">
+            AI prompt management &middot; Data protection &middot; Team analytics
+          </p>
+          <CompatibilityLine />
+        </div>
+        <div className="hidden sm:flex w-[52%] items-center relative">
+          <LifestylePhoto
+            src={lifestylePhotos.solo}
+            alt="Code on screen"
+            className="w-[55%] aspect-[4/3]"
+          />
+          <div className="w-[50%] -ml-8 relative z-10">
+            <VaultScene compact />
+          </div>
+          <FrostedBadge icon={Shield} headline="DLP Active" subtitle="Data protected" color="red" className="bottom-0 left-[36%]" />
+        </div>
+      </div>
+    </LifestyleBannerShell>
+  );
+}
+
+/* ── Facebook Lifestyle 2 (851 x 315) ── */
+
+export function FacebookCoverLifestyle2() {
+  return (
+    <LifestyleBannerShell aspectRatio="851/315">
+      <div className="flex items-center h-full gap-3 sm:gap-4">
+        <div className="flex-1 space-y-1.5 sm:space-y-2 max-w-[38%]">
+          <BannerWordmark size="xs" />
+          <p className="text-white text-[9px] sm:text-xs font-bold leading-snug">
+            Your team&apos;s AI prompt library &mdash; with built-in data protection
+          </p>
+          <FeaturePills />
+        </div>
+        <div className="hidden sm:flex w-[55%] items-center relative">
+          <LifestylePhoto
+            src={lifestylePhotos.team2}
+            alt="Team brainstorming"
+            className="w-[55%] aspect-[4/3]"
+          />
+          <div className="w-[50%] -ml-10 relative z-10">
+            <AnalyticsScene compact />
+          </div>
+          <FrostedBadge icon={BarChart3} headline="Usage insights" subtitle="Real-time data" color="blue" className="bottom-0 left-[35%]" />
+          <FrostedBadge icon={Shield} headline="DLP Active" subtitle="3 threats blocked" color="red" className="-top-2 right-[5%]" />
+        </div>
+      </div>
+    </LifestyleBannerShell>
+  );
+}
+
+/* ── OG Lifestyle 2 (1200 x 630) ── */
+
+export function OGBannerLifestyle2() {
+  return (
+    <LifestyleBannerShell aspectRatio="1200/630">
+      <div className="flex items-center h-full gap-4 sm:gap-6">
+        <div className="flex-1 space-y-2.5 sm:space-y-3 max-w-[38%]">
+          <BannerWordmark size="md" />
+          <p className="text-white text-xs sm:text-base font-bold leading-snug">
+            One Prompt Library
+            <br />
+            for Every AI Tool
+          </p>
+          <FeaturePills />
+          <CompatibilityLine />
+        </div>
+        <div className="w-[55%] relative">
+          <div className="flex items-start">
+            <LifestylePhoto
+              src={lifestylePhotos.office}
+              alt="Modern office workspace"
+              className="w-[50%] aspect-[4/3]"
+            />
+            <div className="w-[55%] space-y-2 -ml-8 relative z-10">
+              <AnalyticsScene compact />
+              <InsertScene />
+            </div>
+          </div>
+          <FrostedBadge icon={BarChart3} headline="+34% adoption" subtitle="This quarter" color="blue" className="top-[35%] left-[32%]" />
+          <FrostedBadge icon={Zap} headline="One-click insert" subtitle="Works everywhere" color="emerald" className="-bottom-3 left-[5%]" />
         </div>
       </div>
     </LifestyleBannerShell>

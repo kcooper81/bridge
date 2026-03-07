@@ -40,6 +40,11 @@ import {
   ExtensionMarqueeLifestyle2,
   ExtensionMarqueeLifestyle3,
   ExtensionSmallPromoLifestyle,
+  TwitterBannerLifestyle2,
+  LinkedInBannerLifestyle2,
+  LinkedInPersonalCover,
+  FacebookCoverLifestyle2,
+  OGBannerLifestyle2,
   ChromeScreenshot1,
   ChromeScreenshot2,
   ChromeScreenshot3,
@@ -82,6 +87,12 @@ const logos = [
     file: "/brand/logo-icon-blue.svg",
     bg: "bg-zinc-100",
     desc: "White on blue — social media, extensions",
+  },
+  {
+    label: "Icon — White BG",
+    file: "/brand/logo-icon-white-bg.svg",
+    bg: "bg-zinc-100",
+    desc: "Blue logo on white — LinkedIn profile, no rounded square",
   },
   {
     label: "Wordmark — Light",
@@ -195,6 +206,7 @@ const socialMediaAssets = [
       { Component: TwitterBannerWhite, variant: "White", downloadFile: null },
       { Component: TwitterBannerGradient, variant: "Gradient", downloadFile: null },
       { Component: TwitterBannerLifestyle, variant: "Lifestyle", downloadFile: null },
+      { Component: TwitterBannerLifestyle2, variant: "Lifestyle 2", downloadFile: null },
     ],
     assets: [
       { file: "/store-assets/social-profile-400.png", label: "Profile picture", dims: "400 x 400" },
@@ -208,10 +220,13 @@ const socialMediaAssets = [
       { Component: LinkedInBannerWhite, variant: "White", downloadFile: null },
       { Component: LinkedInBannerGradient, variant: "Gradient", downloadFile: null },
       { Component: LinkedInBannerLifestyle, variant: "Lifestyle", downloadFile: null },
+      { Component: LinkedInBannerLifestyle2, variant: "Lifestyle 2", downloadFile: null },
+      { Component: LinkedInPersonalCover, variant: "Personal Cover (1128\u00D7191)", downloadFile: null },
     ],
     assets: [
       { file: "/store-assets/social-profile-400.png", label: "Profile picture", dims: "400 x 400" },
       { file: "/store-assets/social-profile-300.png", label: "Company logo", dims: "300 x 300" },
+      { file: "/brand/logo-icon-white-bg.svg", label: "Logo mark (white bg, no square)", dims: "512 x 512" },
       { file: "/store-assets/linkedin-banner.png", label: "Cover banner", dims: "1584 x 396" },
     ],
   },
@@ -222,6 +237,7 @@ const socialMediaAssets = [
       { Component: FacebookCoverWhite, variant: "White", downloadFile: null },
       { Component: FacebookCoverGradient, variant: "Gradient", downloadFile: null },
       { Component: FacebookCoverLifestyle, variant: "Lifestyle", downloadFile: null },
+      { Component: FacebookCoverLifestyle2, variant: "Lifestyle 2", downloadFile: null },
     ],
     assets: [
       { file: "/store-assets/social-profile-800.png", label: "Profile picture", dims: "720 x 720 (use 800px)" },
@@ -649,6 +665,7 @@ export default function MediaPage() {
               { label: "White", Component: OGBannerWhite, name: "og-white" },
               { label: "Gradient", Component: OGBannerGradient, name: "og-gradient" },
               { label: "Lifestyle", Component: OGBannerLifestyle, name: "og-lifestyle" },
+              { label: "Lifestyle 2", Component: OGBannerLifestyle2, name: "og-lifestyle-2" },
             ].map((variant) => (
               <div key={variant.name}>
                 <p className="text-xs text-muted-foreground font-medium mb-1.5">

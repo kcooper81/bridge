@@ -224,8 +224,8 @@ function EmailHtmlBody({ html }: { html: string }) {
     // Revoke previous blob URL
     if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
 
-    // Build a full HTML document with base styles
-    const fullHtml = `<!DOCTYPE html><html><head><style>
+    // Build a full HTML document with base styles — links open in new tab
+    const fullHtml = `<!DOCTYPE html><html><head><base target="_blank"><style>
       body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 14px; line-height: 1.6; color: #374151; margin: 0; padding: 8px 0; word-wrap: break-word; }
       a { color: #2563eb; }
       img { max-width: 100%; height: auto; }
@@ -270,8 +270,8 @@ function EmailHtmlBody({ html }: { html: string }) {
     <iframe
       ref={iframeRef}
       className="w-full border-0"
-      sandbox="allow-same-origin"
-      style={{ minHeight: "120px" }}
+      sandbox="allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+      style={{ minHeight: "400px" }}
       title="Email content"
     />
   );

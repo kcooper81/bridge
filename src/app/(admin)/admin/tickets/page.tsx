@@ -664,7 +664,7 @@ export default function TicketsPage() {
 
   // --- Actions ---
 
-  const updateStatus = async (id: string, status: string) => {
+  const updateStatus = async (id: string, status: string, silent = false) => {
     try {
       const res = await fetch("/api/admin/tickets", {
         method: "PATCH",
@@ -676,9 +676,11 @@ export default function TicketsPage() {
         prev.map((t) => (t.id === id ? { ...t, status } : t))
       );
       setSelectedTicket((prev) => (prev?.id === id ? { ...prev, status } : prev));
-      toast.success(status === "closed" ? "Marked as done" : `Status → ${status.replace("_", " ")}`);
+      if (!silent) {
+        toast.success(status === "closed" ? "Marked as done" : `Status → ${status.replace("_", " ")}`);
+      }
     } catch {
-      toast.error("Failed to update status");
+      if (!silent) toast.error("Failed to update status");
     }
   };
 
@@ -847,6 +849,11 @@ export default function TicketsPage() {
     setSelectedTicket(ticket);
     setNoteContent("");
     setIsInternal(false);
+
+    // Auto-mark as read: "new" → "in_progress" on open (like an email inbox)
+    if (ticket.status === "new") {
+      updateStatus(ticket.id, "in_progress", true);
+    }
   };
 
   const openTicketMobile = (ticket: TicketRow) => {

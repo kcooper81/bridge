@@ -21,7 +21,7 @@ import {
   StatCard,
   FilterBar,
   SearchInput,
-  FilterGroup,
+  SelectFilter,
   ToggleFilter,
   DataTable,
   Pagination,
@@ -251,17 +251,13 @@ export default function UsersPage() {
       </StatCardRow>
 
       <FilterBar>
-        <div className="flex flex-col sm:flex-row gap-2">
-          <SearchInput value={search} onChange={(v) => { setSearch(v); resetPage(); }} placeholder="Search by name or email..." />
-          <div className="flex gap-1.5 flex-wrap">
-            <ToggleFilter label="Super Admins" icon={Shield} active={filterSuperAdmin} onClick={() => { setFilterSuperAdmin(!filterSuperAdmin); resetPage(); }} />
-            <ToggleFilter label="Unprotected" icon={ShieldOff} active={filterUnprotected} onClick={() => { setFilterUnprotected(!filterUnprotected); resetPage(); }} variant="destructive" />
-            <ToggleFilter label="New This Week" icon={UserPlus} active={filterNewThisWeek} onClick={() => { setFilterNewThisWeek(!filterNewThisWeek); resetPage(); }} />
-            <ToggleFilter label="No Extension" icon={Clock} active={filterNoExtension} onClick={() => { setFilterNoExtension(!filterNoExtension); resetPage(); }} />
-          </div>
-        </div>
-        <FilterGroup label="Role" options={ROLE_FILTERS} value={roleFilter} onChange={(v) => { setRoleFilter(v); resetPage(); }} />
-        <p className="text-xs text-muted-foreground">{filtered.length} result{filtered.length !== 1 ? "s" : ""}</p>
+        <SearchInput value={search} onChange={(v) => { setSearch(v); resetPage(); }} placeholder="Search by name or email..." />
+        <SelectFilter label="Role" options={ROLE_FILTERS} value={roleFilter} onChange={(v) => { setRoleFilter(v); resetPage(); }} />
+        <ToggleFilter label="Super Admins" icon={Shield} active={filterSuperAdmin} onClick={() => { setFilterSuperAdmin(!filterSuperAdmin); resetPage(); }} />
+        <ToggleFilter label="Unprotected" icon={ShieldOff} active={filterUnprotected} onClick={() => { setFilterUnprotected(!filterUnprotected); resetPage(); }} variant="destructive" />
+        <ToggleFilter label="New This Week" icon={UserPlus} active={filterNewThisWeek} onClick={() => { setFilterNewThisWeek(!filterNewThisWeek); resetPage(); }} />
+        <ToggleFilter label="No Extension" icon={Clock} active={filterNoExtension} onClick={() => { setFilterNoExtension(!filterNoExtension); resetPage(); }} />
+        <p className="text-xs text-muted-foreground ml-auto">{filtered.length} result{filtered.length !== 1 ? "s" : ""}</p>
       </FilterBar>
 
       <DataTable

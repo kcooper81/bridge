@@ -29,6 +29,7 @@ interface NavBadgeCounts {
   newTickets: number;
   unresolvedErrors: number;
   pastDueSubs: number;
+  newSubs: number;
   newSignups: number;
 }
 
@@ -70,7 +71,7 @@ const navGroups: NavGroup[] = [
     items: [
       { href: "/admin/organizations", label: "Organizations", icon: Building2, badgeKey: "newSignups" as const, supportVisible: false },
       { href: "/admin/users", label: "Users", icon: Users, badgeKey: null, supportVisible: false },
-      { href: "/admin/subscriptions", label: "Subscriptions", icon: CreditCard, badgeKey: "pastDueSubs" as const, supportVisible: false },
+      { href: "/admin/subscriptions", label: "Subscriptions", icon: CreditCard, badgeKey: "newSubs" as const, supportVisible: false },
     ],
   },
   {
@@ -99,6 +100,7 @@ export function AdminNav({ superAdminRole, supportAllowedPages }: { superAdminRo
     newTickets: 0,
     unresolvedErrors: 0,
     pastDueSubs: 0,
+    newSubs: 0,
     newSignups: 0,
   });
   const prevTicketCount = useRef(0);
@@ -126,7 +128,7 @@ export function AdminNav({ superAdminRole, supportAllowedPages }: { superAdminRo
     const supabase = createClient();
     const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 
-    const [ticketsResult, errorsResult, pastDueResult, newSignupsResult] = await Promise.all([
+    const [ticketsResult, errorsResult, pastDueResult, newSubsResult, newSignupsResult] = await Promise.all([
       supabase
         .from("feedback")
         .select("*", { count: "exact", head: true })
@@ -140,6 +142,10 @@ export function AdminNav({ superAdminRole, supportAllowedPages }: { superAdminRo
         .select("*", { count: "exact", head: true })
         .eq("status", "past_due"),
       supabase
+        .from("subscriptions")
+        .select("*", { count: "exact", head: true })
+        .gte("created_at", oneDayAgo),
+      supabase
         .from("organizations")
         .select("*", { count: "exact", head: true })
         .gte("created_at", oneDayAgo),
@@ -147,11 +153,14 @@ export function AdminNav({ superAdminRole, supportAllowedPages }: { superAdminRo
 
     const newTicketCount = ticketsResult.count || 0;
     const prevCount = prevTicketCount.current;
+    const pastDueCount = pastDueResult.count || 0;
+    const newSubsCount = newSubsResult.count || 0;
 
     setBadges({
       newTickets: newTicketCount,
       unresolvedErrors: errorsResult.count || 0,
-      pastDueSubs: pastDueResult.count || 0,
+      pastDueSubs: pastDueCount,
+      newSubs: pastDueCount > 0 ? pastDueCount : newSubsCount,
       newSignups: newSignupsResult.count || 0,
     });
 
@@ -227,11 +236,13 @@ export function AdminNav({ superAdminRole, supportAllowedPages }: { superAdminRo
         {badgeCount > 0 && (
           <span className={cn(
             "ml-auto flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] font-medium",
-            item.badgeKey === "pastDueSubs"
+            item.badgeKey === "newSubs" && badges.pastDueSubs > 0
               ? "bg-red-500/15 text-red-400"
-              : item.badgeKey === "newSignups"
+              : item.badgeKey === "newSubs"
                 ? "bg-green-500/15 text-green-400"
-                : "bg-blue-500/15 text-blue-400"
+                : item.badgeKey === "newSignups"
+                  ? "bg-green-500/15 text-green-400"
+                  : "bg-blue-500/15 text-blue-400"
           )}>
             {badgeCount > 99 ? "99+" : badgeCount}
           </span>

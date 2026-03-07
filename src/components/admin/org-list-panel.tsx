@@ -4,7 +4,7 @@ import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Building2, Users, ArrowUpDown } from "lucide-react";
-import { PlanBadge, SearchInput, FilterGroup } from "@/components/admin/admin-page-layout";
+import { PlanBadge, SearchInput, SelectFilter } from "@/components/admin/admin-page-layout";
 
 export interface OrgListItem {
   id: string;
@@ -76,10 +76,10 @@ export function OrgListPanel({ orgs, selectedOrgId, onSelect }: OrgListPanelProp
     <div className="flex flex-col h-full">
       <div className="p-3 space-y-2 border-b">
         <SearchInput value={search} onChange={setSearch} placeholder="Search organizations..." />
-        <FilterGroup label="Plan" options={PLAN_FILTERS} value={planFilter} onChange={setPlanFilter} />
-        <div className="flex items-center justify-between">
-          <FilterGroup label="Status" options={STATUS_FILTERS} value={statusFilter} onChange={setStatusFilter} />
-          <Button variant="ghost" size="sm" className="h-6 text-xs px-2 shrink-0" onClick={cycleSort}>
+        <div className="flex items-center gap-1.5">
+          <SelectFilter label="Plan" options={PLAN_FILTERS} value={planFilter} onChange={setPlanFilter} className="flex-1 min-w-0" />
+          <SelectFilter label="Status" options={STATUS_FILTERS} value={statusFilter} onChange={setStatusFilter} className="flex-1 min-w-0" />
+          <Button variant="ghost" size="sm" className="h-9 text-xs px-2 shrink-0" onClick={cycleSort} title={`Sort by ${SORT_LABELS[sortKey]}`}>
             <ArrowUpDown className="h-3 w-3 mr-1" />
             {SORT_LABELS[sortKey]}
           </Button>

@@ -6,6 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Search,
   ChevronLeft,
   ChevronRight,
@@ -131,7 +138,36 @@ export function SearchInput({ value, onChange, placeholder = "Search..." }: {
 }
 
 export function FilterBar({ children }: { children: ReactNode }) {
-  return <div className="flex flex-col gap-2">{children}</div>;
+  return <div className="flex flex-wrap items-center gap-2">{children}</div>;
+}
+
+// ─── Select Filter (compact dropdown) ───
+
+export interface SelectFilterProps {
+  label: string;
+  options: readonly string[];
+  value: string;
+  onChange: (val: string) => void;
+  formatLabel?: (val: string) => string;
+  className?: string;
+}
+
+export function SelectFilter({ label, options, value, onChange, formatLabel, className }: SelectFilterProps) {
+  const fmt = (v: string) => (formatLabel ? formatLabel(v) : v === "all" ? `All ${label}` : v);
+  return (
+    <Select value={value} onValueChange={onChange}>
+      <SelectTrigger className={`h-9 w-auto min-w-[120px] text-xs capitalize ${className || ""}`}>
+        <SelectValue>{fmt(value)}</SelectValue>
+      </SelectTrigger>
+      <SelectContent>
+        {options.map((opt) => (
+          <SelectItem key={opt} value={opt} className="text-xs capitalize">
+            {fmt(opt)}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
 }
 
 // ─── Data Table ───

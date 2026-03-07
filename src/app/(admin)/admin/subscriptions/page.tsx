@@ -11,7 +11,7 @@ import {
   StatCard,
   FilterBar,
   SearchInput,
-  FilterGroup,
+  SelectFilter,
   DataTable,
   Pagination,
   ExportButton,
@@ -92,7 +92,19 @@ export default function SubscriptionsPage() {
     setLoading(false);
   }, []);
 
-  useEffect(() => { loadSubs(); }, [loadSubs]);
+  useEffect(() => {
+    loadSubs();
+
+    // Realtime: refresh on subscription changes
+    const supabase = createClient();
+    const channel = supabase
+      .channel("admin-subs-realtime")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "subscriptions" }, () => loadSubs())
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "subscriptions" }, () => loadSubs())
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [loadSubs]);
 
   const filtered = useMemo(() => {
     let result = [...subs];
@@ -241,20 +253,20 @@ export default function SubscriptionsPage() {
 
       <FilterBar>
         <SearchInput value={search} onChange={(v) => { setSearch(v); resetPage(); }} placeholder="Search by organization..." />
-        <FilterGroup
+        <SelectFilter
           label="Status"
           options={STATUS_FILTERS}
           value={statusFilter}
           onChange={(v) => { setStatusFilter(v); resetPage(); }}
-          formatLabel={(v) => v === "past_due" ? "Past Due" : v === "no_subscription" ? "No Sub" : v}
+          formatLabel={(v) => v === "past_due" ? "Past Due" : v === "no_subscription" ? "No Sub" : v === "all" ? "All Status" : v}
         />
-        <FilterGroup
+        <SelectFilter
           label="Plan"
           options={PLAN_FILTERS}
           value={planFilter}
           onChange={(v) => { setPlanFilter(v); resetPage(); }}
         />
-        <p className="text-xs text-muted-foreground">{filtered.length} result{filtered.length !== 1 ? "s" : ""}</p>
+        <p className="text-xs text-muted-foreground ml-auto">{filtered.length} result{filtered.length !== 1 ? "s" : ""}</p>
       </FilterBar>
 
       <DataTable

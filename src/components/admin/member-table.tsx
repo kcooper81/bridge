@@ -6,7 +6,7 @@ import { ProtectionBadge } from "@/components/admin/protection-badge";
 import {
   FilterBar,
   SearchInput,
-  FilterGroup,
+  SelectFilter,
   DataTable,
   Pagination,
   RoleBadge,
@@ -130,15 +130,15 @@ export function MemberTable({ members, showOrgColumn = false, orgMap, onSelectOr
     <div className="space-y-3">
       <FilterBar>
         <SearchInput value={search} onChange={(v) => { setSearch(v); resetPage(); }} placeholder="Search by name or email..." />
-        <FilterGroup label="Role" options={ROLE_FILTERS} value={roleFilter} onChange={(v) => { setRoleFilter(v); resetPage(); }} />
-        <FilterGroup
+        <SelectFilter label="Role" options={ROLE_FILTERS} value={roleFilter} onChange={(v) => { setRoleFilter(v); resetPage(); }} />
+        <SelectFilter
           label="Protection"
           options={PROTECTION_FILTERS}
           value={protectionFilter}
           onChange={(v) => { setProtectionFilter(v); resetPage(); }}
-          formatLabel={(v) => v === "no-extension" ? "No Ext" : v}
+          formatLabel={(v) => v === "no-extension" ? "No Ext" : v === "all" ? "All Protection" : v}
         />
-        <p className="text-xs text-muted-foreground">{filtered.length} member{filtered.length !== 1 ? "s" : ""}</p>
+        <p className="text-xs text-muted-foreground ml-auto">{filtered.length} member{filtered.length !== 1 ? "s" : ""}</p>
       </FilterBar>
 
       <DataTable

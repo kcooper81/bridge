@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
-import { notifyAdminsOfNewTicket } from "@/lib/notify-admins";
+import { notifyAdminsOfNewTicket, notifyAdminsOfTicketReply } from "@/lib/notify-admins";
 import { sendAutoAck } from "@/lib/auto-ack";
 
 /**
@@ -276,6 +276,14 @@ export async function POST(request: NextRequest) {
           .update({ updated_at: new Date().toISOString() })
           .eq("id", existingTicket.id);
       }
+
+      // Notify admins of the customer reply
+      notifyAdminsOfTicketReply({
+        subject: existingTicket.subject || subject || "(No subject)",
+        senderEmail,
+        message: finalBody,
+        ticketId: existingTicket.id,
+      });
 
       return NextResponse.json({ ok: true, action: "reply_added", ticket_id: existingTicket.id });
     }

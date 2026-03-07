@@ -515,17 +515,7 @@ function TicketContent({
                         </div>
                         <div className="px-3 py-2.5">
                           {!note.is_internal && note.content.startsWith("<") ? (
-                            <div
-                              className="prose prose-sm max-w-none [&_a]:text-blue-600 [&_a]:underline"
-                              dangerouslySetInnerHTML={{
-                                __html: note.content
-                                  .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
-                                  .replace(/\bon\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]*)/gi, "")
-                                  .replace(/<iframe\b[^>]*>/gi, "")
-                                  .replace(/<object\b[^>]*>/gi, "")
-                                  .replace(/<embed\b[^>]*>/gi, "")
-                              }}
-                            />
+                            <EmailHtmlBody html={note.content} />
                           ) : (
                             <p className="whitespace-pre-wrap text-sm">{note.content}</p>
                           )}
@@ -837,9 +827,15 @@ export default function TicketsPage() {
       setSelectedTicket((prev) => (prev ? updateTicketNotes(prev) : prev));
       setNoteContent("");
       if (editorRef.current) editorRef.current.clear();
-      toast.success(
-        isInternal ? "Internal note added" : "Response sent"
-      );
+      if (isInternal) {
+        toast.success("Internal note added");
+      } else if (data.note?.email_sent) {
+        toast.success("Response sent via email");
+      } else if (data.recipient_email) {
+        toast.warning("Note saved but email failed to send");
+      } else {
+        toast.success("Note saved (no recipient email found)");
+      }
     } catch {
       toast.error("Failed to add note");
     } finally {

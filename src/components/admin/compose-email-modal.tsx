@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -45,13 +45,12 @@ export function ComposeEmailModal({
   const [sending, setSending] = useState(false);
   const editorRef = useRef<RichEditorRef>(null);
 
-  // Reset form when modal opens with new props
+  // Sync state when props change (e.g. clicking a different row)
+  useEffect(() => { setToEmail(initialEmail); }, [initialEmail]);
+  useEffect(() => { setToName(initialName); }, [initialName]);
+  useEffect(() => { setSubject(initialSubject); }, [initialSubject]);
+
   const handleOpenChange = (open: boolean) => {
-    if (open) {
-      setToEmail(initialEmail);
-      setToName(initialName);
-      setSubject(initialSubject);
-    }
     onOpenChange(open);
   };
 

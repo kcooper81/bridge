@@ -11,9 +11,11 @@ import {
   ShieldCheck,
   UserPlus,
   Clock,
+  Mail,
 } from "lucide-react";
 import { toast } from "sonner";
 import { ProtectionBadge } from "@/components/admin/protection-badge";
+import { ComposeEmailModal } from "@/components/admin/compose-email-modal";
 import {
   AdminPageHeader,
   AdminLoadingState,
@@ -73,6 +75,7 @@ export default function UsersPage() {
   const [filterNoExtension, setFilterNoExtension] = useState(false);
   const { sortKey, sortDir, handleSort } = useSortState<string>("created_at");
   const { page, setPage, paginate, resetPage } = usePaginationState();
+  const [composeTarget, setComposeTarget] = useState<UserRow | null>(null);
 
   const loadUsers = useCallback(async () => {
     const supabase = createClient();
@@ -196,17 +199,28 @@ export default function UsersPage() {
       render: (row) => <span className="text-muted-foreground">{relativeTime(row.last_extension_active)}</span>,
     },
     {
-      key: "actions", label: "Actions", align: "right",
+      key: "actions", label: "", align: "right",
       render: (row) => (
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-7 w-7 p-0"
-          onClick={(e) => { e.stopPropagation(); toggleSuperAdmin(row.id, row.is_super_admin); }}
-          title={row.is_super_admin ? "Remove super admin" : "Make super admin"}
-        >
-          {row.is_super_admin ? <ShieldOff className="h-3.5 w-3.5" /> : <Shield className="h-3.5 w-3.5" />}
-        </Button>
+        <div className="flex items-center justify-end gap-0.5">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 w-7 p-0"
+            onClick={(e) => { e.stopPropagation(); setComposeTarget(row); }}
+            title={`Email ${row.email}`}
+          >
+            <Mail className="h-3.5 w-3.5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 w-7 p-0"
+            onClick={(e) => { e.stopPropagation(); toggleSuperAdmin(row.id, row.is_super_admin); }}
+            title={row.is_super_admin ? "Remove super admin" : "Make super admin"}
+          >
+            {row.is_super_admin ? <ShieldOff className="h-3.5 w-3.5" /> : <Shield className="h-3.5 w-3.5" />}
+          </Button>
+        </div>
       ),
     },
   ];
@@ -272,6 +286,14 @@ export default function UsersPage() {
       />
 
       <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+
+      <ComposeEmailModal
+        open={!!composeTarget}
+        onOpenChange={(open) => !open && setComposeTarget(null)}
+        toEmail={composeTarget?.email || ""}
+        toName={composeTarget?.name || ""}
+        orgId={composeTarget?.org_id || undefined}
+      />
     </div>
   );
 }

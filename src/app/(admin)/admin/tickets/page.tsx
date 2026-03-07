@@ -45,12 +45,10 @@ import {
   DollarSign,
   Inbox,
   Trash2,
-  XCircle,
   Paperclip,
   Zap,
   History,
   ChevronRight,
-  ChevronDown,
   Plus,
   X,
   PartyPopper,
@@ -131,7 +129,14 @@ const STATUS_COLORS: Record<string, string> = {
     "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",
   resolved:
     "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
-  closed: "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300",
+  closed: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
+};
+
+const STATUS_LABELS: Record<string, string> = {
+  new: "new",
+  in_progress: "in progress",
+  resolved: "done",
+  closed: "done",
 };
 
 const PRIORITY_COLORS: Record<string, string> = {
@@ -210,39 +215,55 @@ function smartSort(a: TicketRow, b: TicketRow): number {
 
 function EmailHtmlBody({ html }: { html: string }) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const blobUrlRef = useRef<string | null>(null);
 
   useEffect(() => {
     const iframe = iframeRef.current;
     if (!iframe) return;
 
+    // Revoke previous blob URL
+    if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
+
+    // Build a full HTML document with base styles
+    const fullHtml = `<!DOCTYPE html><html><head><style>
+      body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 14px; line-height: 1.6; color: #374151; margin: 0; padding: 8px 0; word-wrap: break-word; }
+      a { color: #2563eb; }
+      img { max-width: 100%; height: auto; }
+      blockquote { border-left: 3px solid #d1d5db; margin: 8px 0; padding: 4px 12px; color: #6b7280; }
+      pre { background: #f3f4f6; padding: 8px; border-radius: 4px; overflow-x: auto; font-size: 13px; }
+      table { border-collapse: collapse; max-width: 100%; }
+      td, th { padding: 4px 8px; }
+    </style></head><body>${html}</body></html>`;
+
+    // Use a blob URL so the iframe gets its own origin, bypassing the parent page's CSP
+    const blob = new Blob([fullHtml], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    blobUrlRef.current = url;
+    iframe.src = url;
+
     const resizeIframe = () => {
-      const doc = iframe.contentDocument;
-      if (!doc) return;
-      const height = doc.documentElement.scrollHeight || doc.body.scrollHeight;
-      if (height > 60) {
-        iframe.style.height = `${height}px`;
+      try {
+        const doc = iframe.contentDocument;
+        if (!doc) return;
+        const height = doc.documentElement.scrollHeight || doc.body.scrollHeight;
+        if (height > 60) iframe.style.height = `${height}px`;
+      } catch {
+        // Cross-origin after blob load — use fallback height
       }
     };
 
-    const doc = iframe.contentDocument;
-    if (doc) {
-      doc.open();
-      doc.write(`<!DOCTYPE html><html><head><style>
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 14px; line-height: 1.6; color: #374151; margin: 0; padding: 8px 0; word-wrap: break-word; }
-        a { color: #2563eb; }
-        img { max-width: 100%; height: auto; }
-        blockquote { border-left: 3px solid #d1d5db; margin: 8px 0; padding: 4px 12px; color: #6b7280; }
-        pre { background: #f3f4f6; padding: 8px; border-radius: 4px; overflow-x: auto; font-size: 13px; }
-        table { border-collapse: collapse; max-width: 100%; }
-        td, th { padding: 4px 8px; }
-      </style></head><body>${html}</body></html>`);
-      doc.close();
-      iframe.onload = resizeIframe;
-      // Multiple retries to catch late-rendering content
-      setTimeout(resizeIframe, 50);
+    iframe.onload = () => {
+      resizeIframe();
       setTimeout(resizeIframe, 200);
       setTimeout(resizeIframe, 500);
-    }
+    };
+
+    return () => {
+      if (blobUrlRef.current) {
+        URL.revokeObjectURL(blobUrlRef.current);
+        blobUrlRef.current = null;
+      }
+    };
   }, [html]);
 
   return (
@@ -320,13 +341,12 @@ function TicketContent({
         <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 sm:gap-3">
           <div className="flex items-center gap-1.5">
             <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider hidden sm:inline">Status</span>
-            <Select value={ticket.status} onValueChange={(val) => updateStatus(ticket.id, val)}>
+            <Select value={ticket.status === "resolved" ? "closed" : ticket.status} onValueChange={(val) => updateStatus(ticket.id, val)}>
               <SelectTrigger className="w-full sm:w-[115px] h-7 text-xs"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="new">New</SelectItem>
                 <SelectItem value="in_progress">In Progress</SelectItem>
-                <SelectItem value="resolved">Resolved</SelectItem>
-                <SelectItem value="closed">Closed</SelectItem>
+                <SelectItem value="closed">Done</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -429,7 +449,7 @@ function TicketContent({
                   onClick={() => { onSelectTicket(t); setHistoryOpen(false); }}
                 >
                   <span className={cn("inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-medium", STATUS_COLORS[t.status])}>
-                    {t.status.replace("_", " ")}
+                    {STATUS_LABELS[t.status] || t.status}
                   </span>
                   <span className="font-medium truncate flex-1">{t.subject || "No subject"}</span>
                   <span className="text-muted-foreground flex-shrink-0">{timeAgo(t.created_at)}</span>
@@ -559,9 +579,6 @@ export default function TicketsPage() {
   const [newCannedContent, setNewCannedContent] = useState("");
   const [newCannedCategory, setNewCannedCategory] = useState("general");
 
-  // Resolved/closed section
-  const [showResolved, setShowResolved] = useState(false);
-
   // Track focused index for keyboard nav
   const [focusedIndex, setFocusedIndex] = useState(-1);
 
@@ -669,7 +686,7 @@ export default function TicketsPage() {
         prev.map((t) => (t.id === id ? { ...t, status } : t))
       );
       setSelectedTicket((prev) => (prev?.id === id ? { ...prev, status } : prev));
-      toast.success(`Status updated to ${status.replace("_", " ")}`);
+      toast.success(status === "closed" ? "Marked as done" : `Status → ${status.replace("_", " ")}`);
     } catch {
       toast.error("Failed to update status");
     }
@@ -1020,7 +1037,7 @@ export default function TicketsPage() {
       } else if (e.key === "e") {
         if (selectedTicket) {
           e.preventDefault();
-          updateStatus(selectedTicket.id, "resolved");
+          updateStatus(selectedTicket.id, "closed");
         }
       } else if (e.key === "Escape") {
         if (sheetOpen) {
@@ -1074,7 +1091,7 @@ export default function TicketsPage() {
       <div
         key={ticket.id}
         className={cn(
-          "flex gap-2 sm:gap-3 px-3 sm:px-4 py-3 sm:py-3.5 cursor-pointer transition-colors",
+          "group flex gap-2 sm:gap-3 px-3 sm:px-4 py-3 sm:py-3.5 cursor-pointer transition-colors",
           isActive
             ? "bg-primary/10 border-l-2 border-l-primary"
             : isNew
@@ -1138,7 +1155,7 @@ export default function TicketsPage() {
               )}
             >
               <StatusIcon className="h-2.5 w-2.5" />
-              {ticket.status.replace("_", " ")}
+              {STATUS_LABELS[ticket.status] || ticket.status}
             </span>
             <Badge variant="outline" className="text-[10px] capitalize px-1.5 py-0 h-4">
               {ticket.type}
@@ -1171,6 +1188,18 @@ export default function TicketsPage() {
             )}
           </div>
         </div>
+
+        {/* Quick-done button */}
+        {ticket.status !== "closed" && ticket.status !== "resolved" && (
+          <button
+            type="button"
+            title="Mark as done"
+            onClick={(e) => { e.stopPropagation(); updateStatus(ticket.id, "closed"); }}
+            className="self-center flex-shrink-0 h-7 w-7 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-green-100 dark:hover:bg-green-900/30 text-muted-foreground hover:text-green-600 dark:hover:text-green-400 transition-all"
+          >
+            <CheckCircle className="h-4 w-4" />
+          </button>
+        )}
       </div>
     );
   };
@@ -1401,7 +1430,7 @@ export default function TicketsPage() {
           <kbd className="px-1 py-0.5 rounded bg-muted border text-[10px] ml-1.5">r</kbd>
           <span>reply</span>
           <kbd className="px-1 py-0.5 rounded bg-muted border text-[10px] ml-1.5">e</kbd>
-          <span>resolve</span>
+          <span>done</span>
         </div>
       </div>
 
@@ -1519,11 +1548,8 @@ export default function TicketsPage() {
               </div>
               {selected.size > 0 && (
                 <div className="flex items-center gap-0.5">
-                  <Button variant="ghost" size="sm" className="h-6 text-[11px] px-1.5" disabled={bulkLoading} onClick={() => bulkUpdate({ status: "resolved" })}>
-                    <CheckCircle className="h-3 w-3" />
-                  </Button>
-                  <Button variant="ghost" size="sm" className="h-6 text-[11px] px-1.5" disabled={bulkLoading} onClick={() => bulkUpdate({ status: "closed" })}>
-                    <XCircle className="h-3 w-3" />
+                  <Button variant="ghost" size="sm" className="h-6 text-[11px] px-1.5 gap-1" disabled={bulkLoading} onClick={() => bulkUpdate({ status: "closed" })}>
+                    <CheckCircle className="h-3 w-3" /> Done
                   </Button>
                   <Button variant="ghost" size="sm" className="h-6 text-[11px] px-1.5 text-destructive" disabled={bulkLoading} onClick={bulkDelete}>
                     <Trash2 className="h-3 w-3" />
@@ -1549,32 +1575,20 @@ export default function TicketsPage() {
                     : renderTicketList(openTickets, false)}
                 </div>
 
-                {/* Resolved/closed collapsible section (only in "all" view) */}
+                {/* Done tickets (only in "all" view) */}
                 {quickFilter === "all" && resolvedTickets.length > 0 && (
                   <div className="border-t">
-                    <button
-                      type="button"
-                      onClick={() => setShowResolved(!showResolved)}
-                      className="w-full flex items-center gap-2 px-4 py-2.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
-                    >
-                      {showResolved ? (
-                        <ChevronDown className="h-3.5 w-3.5" />
-                      ) : (
-                        <ChevronRight className="h-3.5 w-3.5" />
-                      )}
-                      <CheckCircle className="h-3.5 w-3.5" />
-                      Resolved & Closed ({resolvedTickets.length})
-                    </button>
-                    {showResolved && (
-                      <>
-                        <div className="hidden lg:block">
-                          {renderTicketList(resolvedTickets, false)}
-                        </div>
-                        <div className="lg:hidden">
-                          {renderTicketList(resolvedTickets, true)}
-                        </div>
-                      </>
-                    )}
+                    <div className="px-4 py-2 text-[11px] font-medium text-muted-foreground uppercase tracking-wider bg-muted/30">
+                      Done ({resolvedTickets.length})
+                    </div>
+                    <div className="opacity-60">
+                      <div className="hidden lg:block">
+                        {renderTicketList(resolvedTickets, false)}
+                      </div>
+                      <div className="lg:hidden">
+                        {renderTicketList(resolvedTickets, true)}
+                      </div>
+                    </div>
                   </div>
                 )}
               </>

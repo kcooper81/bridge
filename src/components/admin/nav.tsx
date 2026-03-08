@@ -20,6 +20,7 @@ import {
   ClipboardCheck,
   UserCog,
   Inbox,
+  PenLine,
   Menu,
   X,
 } from "lucide-react";
@@ -79,6 +80,13 @@ const navGroups: NavGroup[] = [
     supportVisible: false,
     items: [
       { href: "/admin/activity", label: "Activity Logs", icon: ScrollText, badgeKey: null, supportVisible: false },
+    ],
+  },
+  {
+    label: "Growth",
+    supportVisible: false,
+    items: [
+      { href: "/admin/content", label: "Content & SEO", icon: PenLine, badgeKey: null, supportVisible: false, superAdminOnly: true },
     ],
   },
   {

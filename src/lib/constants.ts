@@ -18,6 +18,7 @@ export const ADMIN_PAGES = [
   { href: "/admin/subscriptions", label: "Subscriptions" },
   { href: "/admin/activity", label: "Activity Logs" },
   { href: "/admin/testing-guide", label: "Testing Guide" },
+  { href: "/admin/content", label: "Content & SEO" },
   { href: "/admin/settings/inbox", label: "Inbox Settings" },
   { href: "/admin/settings", label: "Settings" },
 ] as const;

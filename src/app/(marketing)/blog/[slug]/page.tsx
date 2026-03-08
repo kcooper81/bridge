@@ -11,8 +11,8 @@ import { SectionLabel } from "@/components/marketing/section-label";
 import { CTASection } from "@/components/marketing/cta-section";
 import {
   BLOG_POSTS,
-  getBlogPostBySlug,
-  getRelatedPosts,
+  getBlogPostBySlugAsync,
+  getRelatedPostsAsync,
 } from "@/lib/blog-posts";
 
 const SITE_URL =
@@ -43,7 +43,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const post = getBlogPostBySlug(slug);
+  const post = await getBlogPostBySlugAsync(slug);
   if (!post) return {};
 
   return generatePageMetadata({
@@ -54,13 +54,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   });
 }
 
+export const dynamicParams = true;
+
 export default async function BlogPostPage({ params }: Props) {
   const { slug } = await params;
-  const post = getBlogPostBySlug(slug);
+  const post = await getBlogPostBySlugAsync(slug);
   if (!post) notFound();
 
   // Related posts from the relatedSlugs array
-  const related = getRelatedPosts(post);
+  const related = await getRelatedPostsAsync(post);
 
   // Schemas
   const breadcrumbSchema = generateBreadcrumbSchema([

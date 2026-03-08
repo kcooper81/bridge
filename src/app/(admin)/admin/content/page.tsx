@@ -19,6 +19,11 @@ import {
   TrendingUp,
   Target,
   Globe,
+  Sparkles,
+  Check,
+  X,
+  Zap,
+  ExternalLink,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
@@ -26,6 +31,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import {
   Dialog,
   DialogContent,
@@ -64,6 +70,22 @@ interface ContentItem {
   notes: string | null;
   created_at: string;
   updated_at: string;
+}
+
+interface BlogPost {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  content: string;
+  category: string;
+  tags: string[];
+  reading_time: string;
+  cover_image: string;
+  cover_image_alt: string;
+  status: string;
+  pipeline_id: string;
+  published_at: string;
 }
 
 interface SiteInfo {
@@ -127,6 +149,18 @@ export default function ContentPage() {
   const [showDialog, setShowDialog] = useState(false);
   const [editItem, setEditItem] = useState<ContentItem | null>(null);
   const [statusFilter, setStatusFilter] = useState("all");
+
+  // Generation & preview
+  const [generatingId, setGeneratingId] = useState<string | null>(null);
+  const [previewPost, setPreviewPost] = useState<BlogPost | null>(null);
+  const [showPreview, setShowPreview] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [autoPublish, setAutoPublish] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("content_auto_publish") === "true";
+    }
+    return false;
+  });
 
   // Form
   const [formTitle, setFormTitle] = useState("");
@@ -347,6 +381,112 @@ export default function ContentPage() {
       setItems((prev) => prev.filter((i) => i.id !== id));
       toast.success("Deleted");
     }
+  };
+
+  const generatePost = async (item: ContentItem) => {
+    setGeneratingId(item.id);
+    try {
+      const res = await fetch("/api/admin/content/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pipelineId: item.id, autoPublish }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        toast.error(err.error || "Generation failed");
+        return;
+      }
+      const data = await res.json();
+      if (autoPublish) {
+        toast.success("Blog post generated and published");
+        setItems((prev) =>
+          prev.map((i) =>
+            i.id === item.id ? { ...i, status: "published" } : i
+          )
+        );
+      } else {
+        toast.success("Draft generated — review it below");
+        setPreviewPost(data.blogPost);
+        setShowPreview(true);
+        setItems((prev) =>
+          prev.map((i) =>
+            i.id === item.id ? { ...i, status: "review" } : i
+          )
+        );
+      }
+    } catch {
+      toast.error("Generation failed");
+    } finally {
+      setGeneratingId(null);
+    }
+  };
+
+  const approvePost = async () => {
+    if (!previewPost) return;
+    setPublishing(true);
+    try {
+      const res = await fetch("/api/admin/content/publish", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ blogPostId: previewPost.id, action: "approve" }),
+      });
+      if (res.ok) {
+        toast.success("Blog post published!");
+        setItems((prev) =>
+          prev.map((i) =>
+            i.id === previewPost.pipeline_id
+              ? { ...i, status: "published" }
+              : i
+          )
+        );
+        setShowPreview(false);
+        setPreviewPost(null);
+      } else {
+        toast.error("Failed to publish");
+      }
+    } catch {
+      toast.error("Failed to publish");
+    } finally {
+      setPublishing(false);
+    }
+  };
+
+  const rejectPost = async () => {
+    if (!previewPost) return;
+    setPublishing(true);
+    try {
+      const res = await fetch("/api/admin/content/publish", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ blogPostId: previewPost.id, action: "reject" }),
+      });
+      if (res.ok) {
+        toast.success("Draft rejected — pipeline item reset to draft");
+        setItems((prev) =>
+          prev.map((i) =>
+            i.id === previewPost.pipeline_id ? { ...i, status: "draft" } : i
+          )
+        );
+        setShowPreview(false);
+        setPreviewPost(null);
+      } else {
+        toast.error("Failed to reject");
+      }
+    } catch {
+      toast.error("Failed to reject");
+    } finally {
+      setPublishing(false);
+    }
+  };
+
+  const toggleAutoPublish = (checked: boolean) => {
+    setAutoPublish(checked);
+    localStorage.setItem("content_auto_publish", String(checked));
+    toast.success(
+      checked
+        ? "Auto-publish ON — generated posts go live immediately"
+        : "Auto-publish OFF — posts go to review first"
+    );
   };
 
   const createIdeaFromQuery = (query: string) => {
@@ -807,10 +947,26 @@ export default function ContentPage() {
                 {filteredItems.length !== 1 ? "s" : ""}
               </span>
             </div>
-            <Button onClick={openNew} size="sm">
-              <Plus className="h-4 w-4 mr-1.5" />
-              Add Idea
-            </Button>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={autoPublish}
+                  onCheckedChange={toggleAutoPublish}
+                  id="auto-publish"
+                />
+                <label
+                  htmlFor="auto-publish"
+                  className="text-xs font-medium text-muted-foreground cursor-pointer select-none flex items-center gap-1"
+                >
+                  <Zap className={`h-3 w-3 ${autoPublish ? "text-amber-500" : ""}`} />
+                  {autoPublish ? "Auto-publish" : "Manual review"}
+                </label>
+              </div>
+              <Button onClick={openNew} size="sm">
+                <Plus className="h-4 w-4 mr-1.5" />
+                Add Idea
+              </Button>
+            </div>
           </div>
 
           {/* Items list */}
@@ -878,6 +1034,38 @@ export default function ContentPage() {
                       </div>
                     </div>
                     <div className="flex items-center gap-1 flex-shrink-0">
+                      {item.type === "blog" &&
+                        ["idea", "draft"].includes(item.status) && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-7 text-xs gap-1"
+                            disabled={generatingId === item.id}
+                            onClick={() => generatePost(item)}
+                          >
+                            {generatingId === item.id ? (
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            ) : (
+                              <Sparkles className="h-3.5 w-3.5" />
+                            )}
+                            {generatingId === item.id
+                              ? "Generating..."
+                              : "Generate"}
+                          </Button>
+                        )}
+                      {item.status === "published" && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7"
+                          title="View published post"
+                          onClick={() =>
+                            window.open(`/blog/${item.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 80)}`, "_blank")
+                          }
+                        >
+                          <ExternalLink className="h-3.5 w-3.5" />
+                        </Button>
+                      )}
                       <Select
                         value={item.status}
                         onValueChange={(v) => updateStatus(item.id, v)}
@@ -991,6 +1179,109 @@ export default function ContentPage() {
               {editItem ? "Save Changes" : "Add Idea"}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Preview / Approve Dialog ── */}
+      <Dialog open={showPreview} onOpenChange={setShowPreview}>
+        <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
+          {previewPost && (
+            <>
+              <DialogHeader>
+                <div className="flex items-center gap-2 mb-1">
+                  <Badge
+                    variant="secondary"
+                    className="text-[10px] uppercase tracking-wider"
+                  >
+                    {previewPost.category}
+                  </Badge>
+                  <Badge variant="outline" className="text-[10px]">
+                    {previewPost.reading_time}
+                  </Badge>
+                  <Badge
+                    variant="secondary"
+                    className={`text-[10px] ${
+                      previewPost.status === "published"
+                        ? "bg-green-500/10 text-green-600"
+                        : "bg-amber-500/10 text-amber-600"
+                    }`}
+                  >
+                    {previewPost.status}
+                  </Badge>
+                </div>
+                <DialogTitle className="text-xl leading-tight">
+                  {previewPost.title}
+                </DialogTitle>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {previewPost.description}
+                </p>
+              </DialogHeader>
+
+              {/* Cover image */}
+              {previewPost.cover_image && (
+                <div className="relative w-full aspect-[2/1] rounded-lg overflow-hidden bg-muted mt-2">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={previewPost.cover_image}
+                    alt={previewPost.cover_image_alt}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
+
+              {/* Content preview */}
+              <div
+                className="prose prose-sm prose-zinc dark:prose-invert max-w-none mt-4
+                  prose-headings:font-semibold prose-headings:tracking-tight
+                  prose-h2:text-lg prose-h2:mt-8 prose-h2:mb-3
+                  prose-p:leading-relaxed prose-p:text-foreground/80
+                  prose-li:text-foreground/80
+                  prose-strong:text-foreground"
+                dangerouslySetInnerHTML={{ __html: previewPost.content }}
+              />
+
+              {/* Tags */}
+              <div className="flex flex-wrap gap-1.5 mt-4 pt-4 border-t">
+                {previewPost.tags.map((tag) => (
+                  <Badge key={tag} variant="outline" className="text-[10px]">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+
+              {/* Slug preview */}
+              <p className="text-xs text-muted-foreground mt-2">
+                URL: /blog/{previewPost.slug}
+              </p>
+
+              <DialogFooter className="mt-4 gap-2 sm:gap-0">
+                <Button
+                  variant="destructive"
+                  onClick={rejectPost}
+                  disabled={publishing}
+                >
+                  {publishing ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
+                  ) : (
+                    <X className="h-4 w-4 mr-1.5" />
+                  )}
+                  Reject & Delete
+                </Button>
+                <Button
+                  onClick={approvePost}
+                  disabled={publishing}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  {publishing ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
+                  ) : (
+                    <Check className="h-4 w-4 mr-1.5" />
+                  )}
+                  Approve & Publish
+                </Button>
+              </DialogFooter>
+            </>
+          )}
         </DialogContent>
       </Dialog>
     </div>

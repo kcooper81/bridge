@@ -4,7 +4,7 @@ import { generateBreadcrumbSchema } from "@/lib/seo/schemas";
 import { SectionLabel } from "@/components/marketing/section-label";
 import { CTASection } from "@/components/marketing/cta-section";
 import { DarkSection } from "@/components/marketing/dark-section";
-import { BLOG_POSTS } from "@/lib/blog-posts";
+import { getAllBlogPosts } from "@/lib/blog-posts";
 import { BlogFilter } from "./_components/blog-filter";
 
 const SITE_URL =
@@ -25,7 +25,9 @@ export const metadata: Metadata = generatePageMetadata({
   ],
 });
 
-export default function BlogPage() {
+export default async function BlogPage() {
+  const posts = await getAllBlogPosts();
+
   const breadcrumbSchema = generateBreadcrumbSchema([
     { name: "Home", url: SITE_URL },
     { name: "Blog", url: `${SITE_URL}/blog` },
@@ -57,7 +59,7 @@ export default function BlogPage() {
           </DarkSection>
 
           {/* Filter + Grid (client component) */}
-          <BlogFilter posts={BLOG_POSTS} />
+          <BlogFilter posts={posts} />
 
           {/* CTA */}
           <div className="mt-20">

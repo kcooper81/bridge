@@ -1,15 +1,16 @@
 import { NextResponse } from "next/server";
-import { createServiceClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { SUPER_ADMIN_EMAILS } from "@/lib/constants";
 
 export async function DELETE() {
   try {
-    const db = createServiceClient();
-    const { data: { user } } = await db.auth.getUser();
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const db = createServiceClient();
     const { data: profile } = await db
       .from("profiles")
       .select("is_super_admin")

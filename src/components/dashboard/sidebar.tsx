@@ -48,7 +48,7 @@ const navSections: { title: string; items: NavItem[] }[] = [
     items: [
       { label: "Analytics", href: "/analytics", icon: BarChart3 },
       { label: "Activity Log", href: "/activity", icon: Activity, roles: ["admin", "manager"] },
-      { label: "Guardrails", href: "/guardrails", icon: Shield, roles: ["admin", "manager"] },
+      { label: "Guardrails", href: "/guardrails", icon: Shield },
     ],
   },
 ];

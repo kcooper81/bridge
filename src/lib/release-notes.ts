@@ -7,9 +7,22 @@ export interface ReleaseNote {
   badge?: "new" | "fix" | "improvement";
 }
 
-export const APP_VERSION = "1.7.0";
+export const APP_VERSION = "1.8.0";
 
 export const RELEASE_NOTES: ReleaseNote[] = [
+  {
+    version: "1.8.0",
+    date: "2026-03-09",
+    title: "Team-Scoped Prompts, Role Permissions & Extension Redesign",
+    highlights: [
+      "Team-scoped prompt visibility — members only see their own prompts and approved prompts from their teams",
+      "Guardrail suggestions — team members can suggest new security rules for admin review",
+      "Redesigned extension overlay — shield indicator with contextual states (active, inactive, scanning)",
+      "Centralized admin permissions — support staff can now access the ticket system properly",
+      "Role-aware prompt statuses — member-created prompts start as pending for admin approval",
+    ],
+    badge: "new",
+  },
   {
     version: "1.7.0",
     date: "2026-02-28",

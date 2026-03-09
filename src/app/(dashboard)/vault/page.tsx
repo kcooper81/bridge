@@ -105,15 +105,15 @@ export default function VaultPage() {
 
   // Members only see their own prompts + approved prompts from their teams
   const currentMember = members.find((m) => m.isCurrentUser);
-  const myTeamIds = currentMember?.teamIds || [];
   const visiblePrompts = useMemo(() => {
     if (canApprove) return prompts; // Admins/managers see everything
+    const teamIds = currentMember?.teamIds || [];
     return prompts.filter(
       (p) =>
         p.owner_id === currentMember?.id || // Own prompts (any status)
-        (p.status === "approved" && p.department_id && myTeamIds.includes(p.department_id)) // Approved team prompts
+        (p.status === "approved" && p.department_id && teamIds.includes(p.department_id)) // Approved team prompts
     );
-  }, [prompts, canApprove, currentMember?.id, myTeamIds]);
+  }, [prompts, canApprove, currentMember]);
 
   // Show checkout success toast
   useEffect(() => {

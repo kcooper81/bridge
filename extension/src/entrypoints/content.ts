@@ -97,6 +97,7 @@ let _lastBlockedText: string | null = null;
 let _shieldEl: HTMLElement | null = null;
 let _shieldStatusEl: HTMLElement | null = null;
 let _shieldLabelEl: HTMLElement | null = null;
+let _shieldDetailTextEl: HTMLElement | null = null;
 let _shieldCollapsed = true; // Start minimized — just the logo
 let _ruleCount = 0;
 let _isProtected = false;
@@ -395,41 +396,42 @@ function updateShieldState() {
     "tp-shield-disabled"
   );
 
-  // Fix 4: Context invalidated — show reload banner
   if (_contextDead) {
     _shieldEl.classList.add("tp-shield-invalidated");
-    _shieldLabelEl.textContent = "Reload page required";
+    _shieldLabelEl.textContent = "Reload Required";
+    if (_shieldDetailTextEl) _shieldDetailTextEl.textContent = "Extension updated";
     return;
   }
 
-  // Fix 5: Offline
   if (!_isOnline) {
     _shieldEl.classList.add("tp-shield-offline");
-    _shieldLabelEl.textContent = "Offline \u2014 scans paused";
+    _shieldLabelEl.textContent = "Offline";
+    if (_shieldDetailTextEl) _shieldDetailTextEl.textContent = "Scans paused";
     return;
   }
 
-  // Shield disabled by admin
   if (_isDisabled) {
     _shieldEl.classList.add("tp-shield-disabled");
-    _shieldLabelEl.textContent = "Guardrails disabled by admin";
+    _shieldLabelEl.textContent = "Guardrails Disabled";
+    if (_shieldDetailTextEl) _shieldDetailTextEl.textContent = "Disabled by admin";
     return;
   }
 
-  // Not authenticated
   if (!_isAuthenticated) {
     _shieldEl.classList.add("tp-shield-inactive");
-    _shieldLabelEl.textContent = "Not signed in \u2014 Click to sign in";
+    _shieldLabelEl.textContent = "Not Connected";
+    if (_shieldDetailTextEl) _shieldDetailTextEl.textContent = "Click to sign in";
     return;
   }
 
-  // Protected — shield icon turns green with checkmark (via CSS)
   if (_isProtected) {
     _shieldEl.classList.add("tp-shield-protected");
-    _shieldLabelEl.textContent = `${_ruleCount} rule${_ruleCount !== 1 ? "s" : ""} active`;
+    _shieldLabelEl.textContent = "Guardrails Active";
+    if (_shieldDetailTextEl) _shieldDetailTextEl.textContent = "Protected by";
   } else {
     _shieldEl.classList.add("tp-shield-unprotected");
-    _shieldLabelEl.textContent = "No rules configured";
+    _shieldLabelEl.textContent = "No Guardrails";
+    if (_shieldDetailTextEl) _shieldDetailTextEl.textContent = "Powered by";
   }
 }
 
@@ -647,30 +649,50 @@ function createShieldElement() {
     shield.classList.add("tp-shield-unprotected");
   }
 
-  // White logo for dark overlay background
-  const logoUrl = browser.runtime.getURL("/icons/icon-overlay.svg");
+  const logoUrl = browser.runtime.getURL("/icons/icon-overlay.png");
+
+  // Shield SVG icon — with contextual inner icon
+  let shieldInner = "";
+  if (_isProtected && _isAuthenticated && !_isDisabled) {
+    // Checkmark inside shield
+    shieldInner = `<polyline points="9 12 11 14 15 10" stroke-width="2"/>`;
+  } else if (!_isAuthenticated || _isDisabled) {
+    // Minus/dash inside shield
+    shieldInner = `<line x1="9" y1="12" x2="15" y2="12" stroke-width="2"/>`;
+  }
+  const shieldSvg = `<svg class="tp-shield-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>${shieldInner}</svg>`;
 
   // Status text
   let statusText = "";
+  let detailText = "";
   if (_contextDead) {
-    statusText = "Reload page required";
+    statusText = "Reload Required";
+    detailText = "Extension updated";
   } else if (!_isOnline) {
-    statusText = "Offline \u2014 scans paused";
+    statusText = "Offline";
+    detailText = "Scans paused";
   } else if (_isDisabled) {
-    statusText = "Guardrails disabled by admin";
+    statusText = "Guardrails Disabled";
+    detailText = "Disabled by admin";
   } else if (!_isAuthenticated) {
-    statusText = "Not signed in \u2014 Click to sign in";
+    statusText = "Not Connected";
+    detailText = "Click to sign in";
   } else if (_isProtected) {
-    statusText = `${_ruleCount} rule${_ruleCount !== 1 ? "s" : ""} active`;
+    statusText = "Guardrails Active";
+    detailText = "Protected by";
   } else {
-    statusText = "No rules configured";
+    statusText = "No Guardrails";
+    detailText = "Powered by";
   }
 
   shield.innerHTML = `
-    <img class="tp-shield-logo" src="${logoUrl}" alt="TeamPrompt" />
+    ${shieldSvg}
     <span class="tp-shield-status" id="tp-shield-status">
       <span class="tp-shield-label" id="tp-shield-label">${statusText}</span>
-      <span class="tp-shield-tool">on ${toolLabel}</span>
+      <span class="tp-shield-detail">
+        <span class="tp-shield-detail-text">${detailText}</span>
+        <img class="tp-shield-logo" src="${logoUrl}" alt="TeamPrompt" />
+      </span>
     </span>
   `;
 
@@ -678,6 +700,7 @@ function createShieldElement() {
   _shieldEl = shield;
   _shieldStatusEl = document.getElementById("tp-shield-status");
   _shieldLabelEl = document.getElementById("tp-shield-label");
+  _shieldDetailTextEl = shield.querySelector(".tp-shield-detail-text");
 
   // Click to toggle expand/collapse, or sign in if not authenticated
   shield.addEventListener("click", () => {

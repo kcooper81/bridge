@@ -37,7 +37,7 @@ export default defineConfig({
 
     return {
       name: "TeamPrompt — AI Prompt Manager & DLP Shield",
-      version: "1.0.5",
+      version: "1.0.6",
       description:
         "Access your team's prompt library, scan for sensitive data, and log AI conversations.",
       icons: {
@@ -56,6 +56,19 @@ export default defineConfig({
           description: "Open TeamPrompt",
         },
       },
+      web_accessible_resources: [
+        {
+          resources: ["icons/*"],
+          matches: [
+            "https://chat.openai.com/*",
+            "https://chatgpt.com/*",
+            "https://claude.ai/*",
+            "https://gemini.google.com/*",
+            "https://copilot.microsoft.com/*",
+            "https://www.perplexity.ai/*",
+          ],
+        },
+      ],
       host_permissions: [
         // AI tool domains - specific and limited
         "https://chat.openai.com/*",

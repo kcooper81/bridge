@@ -69,34 +69,57 @@
   border-color: rgba(99, 102, 241, 0.4);
 }
 
-/* Logo image */
-.tp-shield-logo {
-  width: 22px;
-  height: 22px;
+/* Shield icon — primary indicator */
+.tp-shield-icon {
+  width: 20px;
+  height: 20px;
   flex-shrink: 0;
-  border-radius: 6px;
-  transition: filter 0.2s ease, box-shadow 0.2s ease;
+  stroke: #71717a;
+  transition: stroke 0.2s ease, filter 0.2s ease;
 }
 
-/* Active logo — full brightness */
-.tp-shield-protected .tp-shield-logo {
-  opacity: 1;
+.tp-shield-protected .tp-shield-icon {
+  stroke: #22c55e;
+  fill: rgba(34, 197, 94, 0.1);
+  filter: drop-shadow(0 0 4px rgba(34, 197, 94, 0.3));
 }
-.tp-shield-unprotected .tp-shield-logo {
-  opacity: 0.8;
+.tp-shield-unprotected .tp-shield-icon {
+  stroke: #f59e0b;
+  fill: rgba(245, 158, 11, 0.08);
 }
-/* Inactive/disabled logo — dimmed and grayscale */
-.tp-shield-inactive .tp-shield-logo,
-.tp-shield-offline .tp-shield-logo,
-.tp-shield-disabled .tp-shield-logo {
-  opacity: 0.35;
-  filter: grayscale(1);
+.tp-shield-inactive .tp-shield-icon,
+.tp-shield-offline .tp-shield-icon,
+.tp-shield-disabled .tp-shield-icon {
+  stroke: #52525b;
+  opacity: 0.5;
 }
 
-/* Scanning pulse on logo */
-.tp-shield-scanning .tp-shield-logo {
+/* Scanning pulse on shield icon */
+.tp-shield-scanning .tp-shield-icon {
   animation: tp-icon-pulse 0.8s ease-in-out infinite;
-  filter: drop-shadow(0 0 5px rgba(59, 130, 246, 0.5));
+  stroke: #3b82f6;
+  filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.5));
+}
+
+/* Small logo in expanded detail row */
+.tp-shield-logo {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+/* Detail row: "Protected by" + logo */
+.tp-shield-detail {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tp-shield-detail-text {
+  font-size: 10px;
+  color: #71717a;
+  white-space: nowrap;
 }
 
 @keyframes tp-icon-pulse {
@@ -127,9 +150,9 @@
   white-space: nowrap;
 }
 
-/* Collapsed state — small rounded-square logo */
+/* Collapsed state — just the shield icon */
 .tp-shield-collapsed {
-  padding: 6px;
+  padding: 8px;
   border-radius: 10px;
   gap: 0;
   border-color: transparent;
@@ -142,16 +165,16 @@
   background: #27272a;
 }
 
+.tp-shield-collapsed .tp-shield-icon {
+  width: 22px;
+  height: 22px;
+}
+
 .tp-shield-collapsed .tp-shield-status {
   max-width: 0;
   opacity: 0;
   overflow: hidden;
   padding: 0;
-}
-
-.tp-shield-collapsed .tp-shield-logo {
-  width: 26px;
-  height: 26px;
 }
 
 /* Collapsed inactive states — just dim */

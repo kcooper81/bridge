@@ -97,7 +97,7 @@ let _lastBlockedText: string | null = null;
 let _shieldEl: HTMLElement | null = null;
 let _shieldStatusEl: HTMLElement | null = null;
 let _shieldLabelEl: HTMLElement | null = null;
-let _shieldCollapsed = false;
+let _shieldCollapsed = true; // Start minimized — just the logo
 let _ruleCount = 0;
 let _isProtected = false;
 let _isDisabled = false;
@@ -634,6 +634,9 @@ function createShieldElement() {
   shield.id = "tp-shield-indicator";
   shield.className = "tp-shield";
 
+  // Start collapsed by default
+  shield.classList.add("tp-shield-collapsed");
+
   if (_isDisabled) {
     shield.classList.add("tp-shield-disabled");
   } else if (!_isAuthenticated) {
@@ -644,9 +647,8 @@ function createShieldElement() {
     shield.classList.add("tp-shield-unprotected");
   }
 
-  // Shield icon — plain when inactive, checkmark when protected
-  const shieldSvgDefault = `<svg class="tp-shield-icon tp-shield-icon-default" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`;
-  const shieldSvgActive = `<svg class="tp-shield-icon tp-shield-icon-active" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10" stroke-width="2.5"/></svg>`;
+  // Use the actual TeamPrompt logo instead of shield SVGs
+  const logoUrl = browser.runtime.getURL("/icons/icon-32.png");
 
   // Status text
   let statusText = "";
@@ -665,15 +667,11 @@ function createShieldElement() {
   }
 
   shield.innerHTML = `
-    ${shieldSvgDefault}
-    ${shieldSvgActive}
+    <img class="tp-shield-logo" src="${logoUrl}" alt="TeamPrompt" />
     <span class="tp-shield-status" id="tp-shield-status">
       <span class="tp-shield-label" id="tp-shield-label">${statusText}</span>
       <span class="tp-shield-tool">on ${toolLabel}</span>
     </span>
-    <button class="tp-shield-toggle" id="tp-shield-toggle" title="Minimize">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
-    </button>
   `;
 
   document.body.appendChild(shield);
@@ -681,26 +679,15 @@ function createShieldElement() {
   _shieldStatusEl = document.getElementById("tp-shield-status");
   _shieldLabelEl = document.getElementById("tp-shield-label");
 
-  // Toggle collapse
-  document.getElementById("tp-shield-toggle")!.addEventListener("click", (e) => {
-    e.stopPropagation();
-    _shieldCollapsed = !_shieldCollapsed;
-    shield.classList.toggle("tp-shield-collapsed", _shieldCollapsed);
-  });
-
-  // Fix 3: Click to sign in if not authenticated, or expand if collapsed
+  // Click to toggle expand/collapse, or sign in if not authenticated
   shield.addEventListener("click", () => {
-    if (_shieldCollapsed) {
-      _shieldCollapsed = false;
-      shield.classList.remove("tp-shield-collapsed");
+    if (!_isAuthenticated && !_shieldCollapsed) {
+      // Already expanded and not signed in — open login
+      browser.runtime.sendMessage({ type: "OPEN_LOGIN" }).catch(() => {});
       return;
     }
-    if (!_isAuthenticated) {
-      // Content scripts can't use browser.tabs.create, so ask background
-      browser.runtime.sendMessage({ type: "OPEN_LOGIN" }).catch(() => {
-        // Context may be invalidated
-      });
-    }
+    _shieldCollapsed = !_shieldCollapsed;
+    shield.classList.toggle("tp-shield-collapsed", _shieldCollapsed);
   });
 }
 

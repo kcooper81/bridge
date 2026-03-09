@@ -11,21 +11,22 @@
   gap: 8px;
   padding: 8px 12px;
   background: #18181b;
-  border: 1px solid #27272a;
-  border-radius: 10px;
+  border: 2px solid #27272a;
+  border-radius: 12px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 12px;
   color: #a1a1aa;
   z-index: 999990;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  cursor: default;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
   user-select: none;
 }
 
 .tp-shield:hover {
   border-color: #3f3f46;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  transform: scale(1.03);
 }
 
 /* Protected state */
@@ -62,47 +63,39 @@
   opacity: 0.6;
   border-color: #3f3f46;
 }
-.tp-shield-disabled .tp-shield-icon {
-  color: #71717a;
-}
 
 /* Context invalidated state (Fix 4) */
 .tp-shield-invalidated {
   border-color: rgba(99, 102, 241, 0.4);
 }
 
-/* Shield icon — default vs active (checkmark) */
-.tp-shield-icon {
-  width: 16px;
-  height: 16px;
+/* Logo image */
+.tp-shield-logo {
+  width: 22px;
+  height: 22px;
   flex-shrink: 0;
+  border-radius: 6px;
+  transition: filter 0.2s ease, box-shadow 0.2s ease;
 }
 
-.tp-shield-icon-active {
-  display: none;
+/* State-based logo glow */
+.tp-shield-protected .tp-shield-logo {
+  filter: drop-shadow(0 0 5px rgba(34, 197, 94, 0.5));
+}
+.tp-shield-unprotected .tp-shield-logo {
+  filter: drop-shadow(0 0 5px rgba(245, 158, 11, 0.4));
+}
+.tp-shield-inactive .tp-shield-logo,
+.tp-shield-offline .tp-shield-logo,
+.tp-shield-disabled .tp-shield-logo {
+  opacity: 0.5;
+  filter: grayscale(1);
 }
 
-.tp-shield-protected .tp-shield-icon-default {
-  display: none;
-}
-.tp-shield-protected .tp-shield-icon-active {
-  display: inline;
-  color: #22c55e;
-  filter: drop-shadow(0 0 4px rgba(34, 197, 94, 0.3));
-}
-
-.tp-shield-unprotected .tp-shield-icon {
-  color: #f59e0b;
-}
-
-.tp-shield-inactive .tp-shield-icon {
-  color: #71717a;
-}
-
-/* Scanning pulse on icon */
-.tp-shield-scanning .tp-shield-icon {
+/* Scanning pulse on logo */
+.tp-shield-scanning .tp-shield-logo {
   animation: tp-icon-pulse 0.8s ease-in-out infinite;
-  color: #3b82f6;
+  filter: drop-shadow(0 0 5px rgba(59, 130, 246, 0.5));
 }
 
 @keyframes tp-icon-pulse {
@@ -133,49 +126,39 @@
   white-space: nowrap;
 }
 
-/* Toggle (minimize) button */
-.tp-shield-toggle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
-  background: none;
-  border: none;
-  color: #52525b;
-  cursor: pointer;
-  padding: 0;
-  flex-shrink: 0;
-  border-radius: 4px;
-  transition: color 0.15s, background 0.15s;
-}
-
-.tp-shield-toggle:hover {
-  color: #a1a1aa;
-  background: #27272a;
-}
-
-.tp-shield-toggle svg {
-  width: 12px;
-  height: 12px;
-  transition: transform 0.25s ease;
-}
-
-/* Collapsed state */
+/* Collapsed state — small circular logo pill */
 .tp-shield-collapsed {
-  padding: 8px;
-  cursor: pointer;
+  padding: 6px;
+  border-radius: 50%;
+  gap: 0;
 }
 
 .tp-shield-collapsed .tp-shield-status {
   max-width: 0;
   opacity: 0;
   overflow: hidden;
+  padding: 0;
 }
 
+.tp-shield-collapsed .tp-shield-logo {
+  width: 24px;
+  height: 24px;
+}
 
-.tp-shield-collapsed .tp-shield-toggle svg {
-  transform: rotate(180deg);
+/* Collapsed state border colors as active indicator */
+.tp-shield-collapsed.tp-shield-protected {
+  border-color: #22c55e;
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.25);
+}
+.tp-shield-collapsed.tp-shield-unprotected {
+  border-color: #f59e0b;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.2);
+}
+.tp-shield-collapsed.tp-shield-inactive,
+.tp-shield-collapsed.tp-shield-offline,
+.tp-shield-collapsed.tp-shield-disabled {
+  border-color: #3f3f46;
+  opacity: 0.5;
 }
 
 /* Scanning animation */

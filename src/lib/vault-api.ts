@@ -49,6 +49,21 @@ async function getUserId(): Promise<string | null> {
   return user?.id || null;
 }
 
+async function getUserRole(): Promise<UserRole> {
+  const db = supabase();
+  const {
+    data: { user },
+  } = await db.auth.getUser();
+  if (!user) return "member";
+
+  const { data } = await db
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+  return (data?.role as UserRole) || "member";
+}
+
 // ─── Status Helpers ───
 
 export function getDefaultStatus(
@@ -959,7 +974,23 @@ export async function importPack(
   const userId = await getUserId();
   if (!orgId || !userId) return { imported: 0, errors: ["Not authenticated"] };
 
+  const role = await getUserRole();
   const db = supabase();
+
+  // Check plan limit before importing
+  const [{ count: currentCount }, { data: orgData }] = await Promise.all([
+    db.from("prompts").select("*", { count: "exact", head: true }).eq("org_id", orgId),
+    db.from("organizations").select("plan").eq("id", orgId).single(),
+  ]);
+  const orgPlan = orgData?.plan || "free";
+  const limits = PLAN_LIMITS[orgPlan as keyof typeof PLAN_LIMITS];
+  if (limits.max_prompts !== -1 && (currentCount || 0) + pack.prompts.length > limits.max_prompts) {
+    return {
+      imported: 0,
+      errors: [`Importing ${pack.prompts.length} prompts would exceed your plan limit of ${limits.max_prompts}. You currently have ${currentCount || 0}.`],
+    };
+  }
+
   let imported = 0;
   const errors: string[] = [];
 
@@ -978,7 +1009,7 @@ export async function importPack(
       example_input: prompt.example_input,
       example_output: prompt.example_output,
       tags: prompt.tags || [],
-      status: "draft",
+      status: getDefaultStatus(role),
       version: 1,
       is_template: importIsTemplate,
       template_variables: normalizeVariables(prompt.template_variables),
@@ -1013,6 +1044,7 @@ export async function installLibraryPack(
   const userId = await getUserId();
   if (!orgId || !userId) return { promptsCreated: 0, guidelinesCreated: 0, rulesCreated: 0, error: "Not authenticated" };
 
+  const role = await getUserRole();
   const db = supabase();
 
   // Check current counts for plan limits
@@ -1069,7 +1101,7 @@ export async function installLibraryPack(
       description: p.description,
       tags: p.tags,
       tone: p.tone,
-      status: "approved" as const,
+      status: getDefaultStatus(role),
       version: 1,
       is_template: packIsTemplate,
       template_variables: normalizeVariables(p.template_variables),

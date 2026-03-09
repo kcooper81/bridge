@@ -7,6 +7,9 @@ export const SUPER_ADMIN_EMAILS = [
 
 export type SuperAdminRole = "super_admin" | "support";
 
+/** Per-seat monthly prices used for MRR calculations */
+export const PLAN_PRICES: Record<string, number> = { free: 0, pro: 9, team: 7, business: 12 };
+
 /** All admin pages that can be granted to support staff */
 export const ADMIN_PAGES = [
   { href: "/admin", label: "Dashboard" },

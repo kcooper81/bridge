@@ -108,10 +108,15 @@ export async function POST(request: NextRequest) {
     }
 
     // Sync profile table
-    await db
+    const { error: syncError } = await db
       .from("profiles")
       .update({ email: trimmedEmail, updated_at: new Date().toISOString() })
       .eq("id", effectiveUserId);
+
+    if (syncError) {
+      console.error("Profile email sync failed (auth updated, profile not):", syncError);
+      // Don't fail the request — auth email is already updated. Profile will sync on next login.
+    }
 
     return NextResponse.json({
       success: true,

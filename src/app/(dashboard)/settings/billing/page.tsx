@@ -37,6 +37,15 @@ export default function BillingPage() {
     }
   }, [searchParams, router]);
 
+  // Handle pending plan from signup/login flow
+  useEffect(() => {
+    const planParam = searchParams.get("plan");
+    if (planParam && !searchParams.get("checkout")) {
+      toast.info(`Select your ${planParam} plan below to start your free trial.`);
+      router.replace("/settings/billing");
+    }
+  }, [searchParams, router]);
+
   async function openPortal() {
     if (!org) return;
     setLoadingPortal(true);

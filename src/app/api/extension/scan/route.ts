@@ -133,7 +133,7 @@ export async function POST(request: NextRequest) {
           detectionType: "pattern",
         });
 
-        await db.from("security_violations").insert({
+        const { error: violationErr } = await db.from("security_violations").insert({
           org_id: profile.org_id,
           rule_id: rule.id,
           matched_text: redactMatch(matched),
@@ -141,6 +141,7 @@ export async function POST(request: NextRequest) {
           action_taken: rule.severity === "block" ? "blocked" : "overridden",
           detection_type: "pattern",
         });
+        if (violationErr) console.error("Failed to log pattern violation:", violationErr.message);
       }
     }
 
@@ -158,7 +159,7 @@ export async function POST(request: NextRequest) {
           detectionType: "term",
         });
 
-        await db.from("security_violations").insert({
+        const { error: termViolationErr } = await db.from("security_violations").insert({
           org_id: profile.org_id,
           rule_id: null,
           matched_text: redactMatch(matched),
@@ -166,6 +167,7 @@ export async function POST(request: NextRequest) {
           action_taken: term.severity === "block" ? "blocked" : "overridden",
           detection_type: "term",
         });
+        if (termViolationErr) console.error("Failed to log term violation:", termViolationErr.message);
       }
     }
 
@@ -184,7 +186,7 @@ export async function POST(request: NextRequest) {
             detectionType: "smart_pattern",
           });
 
-          await db.from("security_violations").insert({
+          const { error: smartViolationErr } = await db.from("security_violations").insert({
             org_id: profile.org_id,
             rule_id: null,
             matched_text: redactMatch(matched),
@@ -192,6 +194,7 @@ export async function POST(request: NextRequest) {
             action_taken: smartRule.severity === "block" ? "blocked" : "overridden",
             detection_type: "smart_pattern",
           });
+          if (smartViolationErr) console.error("Failed to log smart pattern violation:", smartViolationErr.message);
         }
       }
     }
@@ -216,7 +219,7 @@ export async function POST(request: NextRequest) {
           detectionType: "entropy",
         });
 
-        await db.from("security_violations").insert({
+        const { error: entropyViolationErr } = await db.from("security_violations").insert({
           org_id: profile.org_id,
           rule_id: null,
           matched_text: detected.redacted,
@@ -224,6 +227,7 @@ export async function POST(request: NextRequest) {
           action_taken: severity === "block" ? "blocked" : "overridden",
           detection_type: "entropy",
         });
+        if (entropyViolationErr) console.error("Failed to log entropy violation:", entropyViolationErr.message);
       }
     }
 

@@ -92,8 +92,12 @@ export default function GuidelinesPage() {
     }
     setSaving(true);
     try {
-      const parsedMin = minLength ? parseInt(minLength) : 0;
-      const parsedMax = maxLength ? parseInt(maxLength) : 0;
+      const parsedMin = minLength ? parseInt(minLength, 10) : 0;
+      const parsedMax = maxLength ? parseInt(maxLength, 10) : 0;
+      if (isNaN(parsedMin) || isNaN(parsedMax)) {
+        toast.error("Length values must be valid numbers");
+        return;
+      }
       if (parsedMin < 0 || parsedMax < 0) {
         toast.error("Length values cannot be negative");
         return;

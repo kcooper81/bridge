@@ -184,6 +184,11 @@ export default function VaultPage() {
     (page + 1) * VAULT_PAGE_SIZE
   );
 
+  // Clear selection when navigating to a different page
+  useEffect(() => {
+    setSelectedIds(new Set());
+  }, [page]);
+
   const totalUses = prompts.reduce((sum, p) => sum + (p.usage_count || 0), 0);
   const sharedCount = prompts.filter((p) => p.status === "approved").length;
   const enforcedGuidelines = guidelines.filter((s) => s.enforced).length;

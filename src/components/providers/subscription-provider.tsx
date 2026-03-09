@@ -40,7 +40,26 @@ export function SubscriptionProvider({
   function applySubscription(sub: Subscription | null) {
     if (sub) {
       setSubscription(sub);
-      const effectivePlan = sub.status === "canceled" ? "free" : (sub.plan as PlanTier);
+
+      // Determine effective plan based on subscription status
+      let effectivePlan: PlanTier;
+      if (sub.status === "canceled" || sub.status === "paused") {
+        effectivePlan = "free";
+      } else if (
+        sub.status === "trialing" &&
+        sub.trial_ends_at &&
+        new Date(sub.trial_ends_at) < new Date()
+      ) {
+        // Trial has expired but webhook hasn't processed yet
+        effectivePlan = "free";
+      } else if (sub.status === "past_due") {
+        // Grace period: keep plan active for past_due so users can fix payment,
+        // but could be tightened to "free" if desired
+        effectivePlan = sub.plan as PlanTier;
+      } else {
+        effectivePlan = sub.plan as PlanTier;
+      }
+
       setPlanLimits(PLAN_LIMITS[effectivePlan] || PLAN_LIMITS.free);
     } else {
       setSubscription(null);

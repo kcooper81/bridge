@@ -55,7 +55,8 @@ export async function PATCH(
     const { error: updateError } = await db
       .from("prompts")
       .update({ is_favorite: newValue })
-      .eq("id", id);
+      .eq("id", id)
+      .eq("org_id", profile.org_id);
 
     if (updateError) {
       return withCors(NextResponse.json({ error: "Failed to update" }, { status: 500 }), request);

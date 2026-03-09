@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { PLAN_PRICES } from "@/lib/constants";
 import {
   Card,
   CardContent,
@@ -122,8 +123,6 @@ export default function AdminDashboardPage() {
     let pastDueCount = 0;
     let totalMrr = 0;
 
-    const planPrices: Record<string, number> = { free: 0, pro: 9, team: 7, business: 12 };
-
     // Build set of org_ids that have a subscription row
     const orgsWithSub = new Set<string>();
     (subsResult.data || []).forEach((sub: { plan: string; status: string; org_id: string; seats?: number }) => {
@@ -135,7 +134,7 @@ export default function AdminDashboardPage() {
       if (sub.status === "past_due") pastDueCount++;
       if (sub.status === "active" || sub.status === "trialing") {
         const seats = sub.seats || 1;
-        totalMrr += (planPrices[plan] || 0) * seats;
+        totalMrr += (PLAN_PRICES[plan] || 0) * seats;
       }
     });
 

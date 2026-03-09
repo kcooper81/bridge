@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { PLAN_PRICES } from "@/lib/constants";
 import { CreditCard, ExternalLink, TrendingUp, AlertTriangle, Users, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ComposeEmailModal } from "@/components/admin/compose-email-modal";
@@ -42,8 +43,6 @@ interface SubRow {
 
 const STATUS_FILTERS = ["all", "active", "trialing", "past_due", "canceled", "paused", "no_subscription"] as const;
 const PLAN_FILTERS = ["all", "free", "pro", "team", "business"] as const;
-const PLAN_PRICES: Record<string, number> = { free: 0, pro: 9, team: 7, business: 12 };
-
 export default function SubscriptionsPage() {
   const [subs, setSubs] = useState<SubRow[]>([]);
   const [loading, setLoading] = useState(true);

@@ -161,6 +161,13 @@ export function OrgProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
+    // Log errors from parallel fetches (don't block — use fallback empty arrays)
+    if (promptsRes.error) console.error("Failed to fetch prompts:", promptsRes.error);
+    if (foldersRes.error) console.error("Failed to fetch folders:", foldersRes.error);
+    if (teamsRes.error) console.error("Failed to fetch teams:", teamsRes.error);
+    if (profilesRes.error) console.error("Failed to fetch profiles:", profilesRes.error);
+    if (standardsRes.error) console.error("Failed to fetch standards:", standardsRes.error);
+
     setOrg(orgRes.data);
     setPrompts(promptsRes.data || []);
     setFolders(foldersRes.data || []);

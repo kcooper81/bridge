@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useOrg } from "@/components/providers/org-provider";
 import { useAuth } from "@/components/providers/auth-provider";
 import { PageHeader } from "@/components/dashboard/page-header";
@@ -14,6 +15,7 @@ import type { Analytics } from "@/lib/types";
 export default function DashboardHomePage() {
   const { loading, noOrg } = useOrg();
   const { user } = useAuth();
+  const router = useRouter();
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [analyticsLoading, setAnalyticsLoading] = useState(true);
 
@@ -25,6 +27,16 @@ export default function DashboardHomePage() {
       })
       .finally(() => setAnalyticsLoading(false));
   }, []);
+
+  // Consume pending plan selection from signup/login flow
+  useEffect(() => {
+    if (loading || noOrg) return;
+    const pendingPlan = sessionStorage.getItem("pending_plan");
+    if (pendingPlan) {
+      sessionStorage.removeItem("pending_plan");
+      router.push(`/settings/billing?plan=${encodeURIComponent(pendingPlan)}`);
+    }
+  }, [loading, noOrg, router]);
 
   if (loading) return <PageSkeleton />;
 

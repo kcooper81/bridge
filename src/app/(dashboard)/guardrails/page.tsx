@@ -135,6 +135,9 @@ export default function GuardrailsPage() {
   const [installedPacks, setInstalledPacks] = useState<Set<string>>(new Set());
   const [previewPack, setPreviewPack] = useState<ComplianceTemplate | null>(null);
 
+  // Tab state (controlled so we can switch programmatically)
+  const [activeTab, setActiveTab] = useState("policies");
+
   // AI Generate state
   const [aiModalOpen, setAiModalOpen] = useState(false);
   const [aiPrompt, setAiPrompt] = useState("");
@@ -146,6 +149,8 @@ export default function GuardrailsPage() {
   }>>([]);
   const [aiError, setAiError] = useState("");
   const [aiSaving, setAiSaving] = useState(false);
+  const [aiNeedsSetup, setAiNeedsSetup] = useState(false);
+  const [aiCheckingSetup, setAiCheckingSetup] = useState(false);
 
   const fetchData = useCallback(async () => {
     if (!org) return;
@@ -331,6 +336,30 @@ export default function GuardrailsPage() {
     }
   }
 
+  async function handleAiModalOpen() {
+    setAiModalOpen(true);
+    setAiRules([]);
+    setAiError("");
+    setAiPrompt("");
+    setAiNeedsSetup(false);
+    setAiCheckingSetup(true);
+    try {
+      const supabase = createClient();
+      const { data: orgData } = await supabase
+        .from("organizations")
+        .select("security_settings")
+        .eq("id", org!.id)
+        .single();
+      const s = orgData?.security_settings || {};
+      const hasKey = (s.ai_detection_provider === "openai" || s.ai_detection_provider === "anthropic") && !!s.ai_api_key;
+      setAiNeedsSetup(!hasKey);
+    } catch {
+      setAiNeedsSetup(true);
+    } finally {
+      setAiCheckingSetup(false);
+    }
+  }
+
   async function handleAiGenerate() {
     if (!aiPrompt.trim()) return;
     setAiGenerating(true);
@@ -472,7 +501,7 @@ export default function GuardrailsPage() {
             )}
             {canAccess("custom_security") && (
               <>
-                <Button variant="outline" onClick={() => { setAiModalOpen(true); setAiRules([]); setAiError(""); }}>
+                <Button variant="outline" onClick={handleAiModalOpen}>
                   <Sparkles className="mr-2 h-4 w-4" />
                   AI Generate
                 </Button>
@@ -481,6 +510,11 @@ export default function GuardrailsPage() {
                   New Policy
                 </Button>
               </>
+            )}
+            {canEdit && (
+              <Button variant="ghost" size="icon" onClick={() => setActiveTab("detection")} title="Detection Settings">
+                <Settings2 className="h-4 w-4" />
+              </Button>
             )}
           </div>
         }
@@ -493,7 +527,7 @@ export default function GuardrailsPage() {
         <StatCard label="Block Rate" value={`${blockRate}%`} icon={<Shield className="h-5 w-5" />} />
       </div>
 
-      <Tabs defaultValue="policies">
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:inline-flex">
           <TabsTrigger value="policies" className="gap-1.5">
             <Shield className="h-4 w-4 hidden sm:inline" />
@@ -878,6 +912,35 @@ export default function GuardrailsPage() {
               Generate Rules with AI
             </DialogTitle>
           </DialogHeader>
+
+          {aiCheckingSetup ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+            </div>
+          ) : aiNeedsSetup ? (
+            <div className="space-y-4">
+              <div className="rounded-lg border border-border bg-muted/30 p-4 text-center space-y-3">
+                <div className="mx-auto h-12 w-12 rounded-full bg-purple-500/10 flex items-center justify-center">
+                  <Brain className="h-6 w-6 text-purple-500" />
+                </div>
+                <h3 className="text-sm font-semibold">Connect an AI provider</h3>
+                <p className="text-sm text-muted-foreground">
+                  AI rule generation requires an OpenAI or Anthropic API key. Connect your key in Detection settings to start generating rules with AI.
+                </p>
+                <Button
+                  onClick={() => {
+                    setAiModalOpen(false);
+                    setActiveTab("detection");
+                  }}
+                  className="mt-2"
+                >
+                  <Settings2 className="mr-2 h-4 w-4" />
+                  Go to Detection Settings
+                </Button>
+              </div>
+            </div>
+          ) : (
+          <>
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>Describe what you want to protect</Label>
@@ -971,6 +1034,8 @@ export default function GuardrailsPage() {
                 )}
               </Button>
             </div>
+          )}
+          </>
           )}
         </DialogContent>
       </Dialog>

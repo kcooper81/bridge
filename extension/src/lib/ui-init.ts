@@ -548,7 +548,53 @@ function switchToGuardrailsTab() {
   loadShieldView();
 }
 
-async function openCreatePromptPanel() {
+// ─── Quick Save (pre-fill create form from context menu / save button) ───
+
+async function checkPendingQuickSave() {
+  try {
+    const data = await browser.storage.local.get(["quickSaveContent", "quickSaveTimestamp"]);
+    if (data.quickSaveContent && data.quickSaveTimestamp) {
+      // Only act on saves from the last 5 seconds (avoid stale data)
+      const age = Date.now() - data.quickSaveTimestamp;
+      if (age < 5000) {
+        handleQuickSaveFromStorage();
+      } else {
+        // Clean up stale data
+        browser.storage.local.remove(["quickSaveContent", "quickSaveTimestamp"]);
+      }
+    }
+  } catch {
+    // Ignore — storage may not be available yet
+  }
+}
+
+async function handleQuickSaveFromStorage() {
+  try {
+    const data = await browser.storage.local.get(["quickSaveContent"]);
+    const content = data.quickSaveContent;
+    if (!content) return;
+
+    // Clear immediately so it doesn't re-trigger
+    browser.storage.local.remove(["quickSaveContent", "quickSaveTimestamp"]);
+
+    // Make sure we're in a logged-in state
+    const session = await getSession();
+    if (!session) return;
+
+    // Switch to Prompts tab and show main view
+    showMainView();
+
+    // Small delay to ensure DOM is ready
+    await new Promise((r) => setTimeout(r, 150));
+
+    // Open the create form with pre-filled content
+    await openCreatePromptPanel(content);
+  } catch {
+    // Ignore errors
+  }
+}
+
+async function openCreatePromptPanel(prefillContent?: string) {
   const contentArea = document.getElementById("content-area");
   if (!contentArea) return;
 
@@ -636,10 +682,29 @@ async function openCreatePromptPanel() {
   panel.querySelector("#cp-cancel")?.addEventListener("click", closeCreatePromptPanel);
   panel.querySelector("#cp-submit")?.addEventListener("click", handleCreatePrompt);
 
-  // Focus title
-  requestAnimationFrame(() => {
-    panel.querySelector<HTMLInputElement>("#cp-title")?.focus();
-  });
+  // Pre-fill content if provided (from quick save)
+  if (prefillContent) {
+    const contentEl = panel.querySelector<HTMLTextAreaElement>("#cp-content");
+    if (contentEl) contentEl.value = prefillContent;
+
+    // Auto-generate a title from the first line/sentence
+    const titleEl = panel.querySelector<HTMLInputElement>("#cp-title");
+    if (titleEl) {
+      const firstLine = prefillContent.split("\n")[0].trim();
+      const autoTitle = firstLine.length > 60 ? firstLine.slice(0, 57) + "..." : firstLine;
+      titleEl.value = autoTitle;
+    }
+
+    // Focus title so user can review/edit it
+    requestAnimationFrame(() => {
+      panel.querySelector<HTMLInputElement>("#cp-title")?.select();
+    });
+  } else {
+    // Focus title
+    requestAnimationFrame(() => {
+      panel.querySelector<HTMLInputElement>("#cp-title")?.focus();
+    });
+  }
 }
 
 function closeCreatePromptPanel() {
@@ -1145,7 +1210,8 @@ export function initSharedUI(elements: UIElements) {
 
   // Listen for auth-bridge session sync (login AND logout)
   browser.storage.onChanged.addListener((changes, area) => {
-    if (area === "local" && changes.accessToken) {
+    if (area !== "local") return;
+    if (changes.accessToken) {
       if (changes.accessToken.newValue) {
         extAuthDebug.log("state", "ui-init: accessToken storage change → login detected"); // AUTH-DEBUG
         // Logged in — show main view
@@ -1157,7 +1223,14 @@ export function initSharedUI(elements: UIElements) {
         showLoginView();
       }
     }
+    // Quick Save: content script or context menu stored text for us
+    if (changes.quickSaveContent?.newValue) {
+      handleQuickSaveFromStorage();
+    }
   });
+
+  // Check for pending quick save on panel open
+  checkPendingQuickSave();
 
   // Search
   els.searchInput.addEventListener("input", () => {

@@ -215,6 +215,7 @@ export function DetectionSettings({ orgId, canEdit, hasPremiumAccess }: Detectio
                     <SelectItem value="presidio">Microsoft Presidio (Self-hosted)</SelectItem>
                     <SelectItem value="aws_comprehend">AWS Comprehend</SelectItem>
                     <SelectItem value="openai">OpenAI (GPT-4)</SelectItem>
+                    <SelectItem value="anthropic">Anthropic (Claude)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -238,17 +239,17 @@ export function DetectionSettings({ orgId, canEdit, hasPremiumAccess }: Detectio
                     </div>
                   )}
 
-                  {(settings.ai_detection_provider === "aws_comprehend" || settings.ai_detection_provider === "openai") && (
+                  {(settings.ai_detection_provider === "aws_comprehend" || settings.ai_detection_provider === "openai" || settings.ai_detection_provider === "anthropic") && (
                     <div className="space-y-2">
                       <Label className="text-sm">
-                        {settings.ai_detection_provider === "aws_comprehend" ? "AWS Access Key" : "OpenAI API Key"}
+                        {settings.ai_detection_provider === "aws_comprehend" ? "AWS Access Key" : settings.ai_detection_provider === "anthropic" ? "Anthropic API Key" : "OpenAI API Key"}
                       </Label>
                       <div className="relative">
                         <Input
                           type={showApiKey ? "text" : "password"}
                           value={apiKeyDraft}
                           onChange={(e) => setApiKeyDraft(e.target.value)}
-                          placeholder={settings.ai_detection_provider === "aws_comprehend" ? "AKIA..." : "sk-..."}
+                          placeholder={settings.ai_detection_provider === "aws_comprehend" ? "AKIA..." : settings.ai_detection_provider === "anthropic" ? "sk-ant-..." : "sk-..."}
                           disabled={!canEdit}
                           className="pr-10"
                         />
@@ -263,7 +264,9 @@ export function DetectionSettings({ orgId, canEdit, hasPremiumAccess }: Detectio
                       <p className="text-[11px] text-muted-foreground">
                         {settings.ai_detection_provider === "aws_comprehend"
                           ? "Your AWS access key for Comprehend. Secret key is stored encrypted."
-                          : "Your OpenAI API key. Stored encrypted and only used for PII detection."}
+                          : settings.ai_detection_provider === "anthropic"
+                            ? "Your Anthropic API key. Stored encrypted and used for AI detection and rule generation."
+                            : "Your OpenAI API key. Stored encrypted and only used for PII detection."}
                       </p>
                     </div>
                   )}
@@ -317,7 +320,9 @@ export function DetectionSettings({ orgId, canEdit, hasPremiumAccess }: Detectio
                         ? "Deploy Presidio using the official Docker image, then enter your endpoint URL above."
                         : settings.ai_detection_provider === "aws_comprehend"
                           ? "Create an IAM user with ComprehendFullAccess policy. Enter the access key above."
-                          : "Create an API key at platform.openai.com. Only gpt-4 class models are used for detection."}
+                          : settings.ai_detection_provider === "anthropic"
+                            ? "Create an API key at console.anthropic.com. Claude models are used for detection and rule generation."
+                            : "Create an API key at platform.openai.com. Only gpt-4 class models are used for detection."}
                     </p>
                   </div>
                 </div>

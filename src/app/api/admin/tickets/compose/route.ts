@@ -46,6 +46,7 @@ export async function POST(request: NextRequest) {
       type: "email",
       status: "in_progress",
       priority: "normal",
+      direction: "outbound",
       assigned_to: auth.userId,
       inbox_email,
       org_id: org_id || null,

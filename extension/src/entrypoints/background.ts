@@ -47,6 +47,40 @@ export default defineBackground(() => {
     browser.storage.local.get(["alwaysOpenSidebar"]).then((data) => {
       applySidebarBehavior(!!data.alwaysOpenSidebar);
     });
+
+    // ─── Context Menu: "Save to TeamPrompt" ───
+    browser.contextMenus.create({
+      id: "tp-save-prompt",
+      title: "Save to TeamPrompt",
+      contexts: ["selection"],
+      documentUrlPatterns: [
+        "https://chat.openai.com/*",
+        "https://chatgpt.com/*",
+        "https://claude.ai/*",
+        "https://gemini.google.com/*",
+        "https://copilot.microsoft.com/*",
+        "https://www.perplexity.ai/*",
+      ],
+    });
+  });
+
+  // ─── Context Menu Click Handler ───
+  browser.contextMenus.onClicked.addListener((info, tab) => {
+    if (info.menuItemId === "tp-save-prompt" && info.selectionText) {
+      // Store the selected text so the side panel can pick it up
+      browser.storage.local.set({
+        quickSaveContent: info.selectionText,
+        quickSaveTimestamp: Date.now(),
+      });
+
+      // Open the side panel (Chrome only)
+      const chrome = globalThis as unknown as {
+        chrome?: { sidePanel?: { open: (opts: { tabId: number }) => void } };
+      };
+      if (chrome.chrome?.sidePanel && tab?.id) {
+        chrome.chrome.sidePanel.open({ tabId: tab.id });
+      }
+    }
   });
 
   // Apply sidebar preference on startup
@@ -88,6 +122,26 @@ export default defineBackground(() => {
           }
         });
         // Session cleared
+        sendResponse({ success: true });
+      } else if (message.type === "QUICK_SAVE") {
+        // Content script wants to save selected/input text — store it and open side panel
+        const msg = message as unknown as { content: string };
+        browser.storage.local.set({
+          quickSaveContent: msg.content,
+          quickSaveTimestamp: Date.now(),
+        });
+        const chrome = globalThis as unknown as {
+          chrome?: { sidePanel?: { open: (opts: { tabId: number }) => void } };
+        };
+        if (chrome.chrome?.sidePanel) {
+          browser.tabs
+            .query({ active: true, currentWindow: true })
+            .then((tabs) => {
+              if (tabs[0]?.id) {
+                chrome.chrome!.sidePanel!.open({ tabId: tabs[0].id });
+              }
+            });
+        }
         sendResponse({ success: true });
       } else if (message.type === "OPEN_SIDE_PANEL") {
         const chrome = globalThis as unknown as {

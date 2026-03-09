@@ -384,7 +384,7 @@ export interface SecuritySettings {
   entropy_detection_enabled: boolean;
   entropy_threshold: number;
   ai_detection_enabled: boolean;
-  ai_detection_provider: "presidio" | "aws_comprehend" | "openai" | null;
+  ai_detection_provider: "presidio" | "aws_comprehend" | "openai" | "anthropic" | null;
   ai_api_key?: string;
   ai_endpoint_url?: string;
   smart_patterns_enabled: boolean;

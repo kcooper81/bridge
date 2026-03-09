@@ -32,12 +32,12 @@ export default defineConfig({
     const isFirefox = browser === "firefox";
 
     const permissions = isFirefox
-      ? ["storage", "activeTab", "alarms"]
-      : ["storage", "activeTab", "alarms", "sidePanel"];
+      ? ["storage", "activeTab", "alarms", "contextMenus"]
+      : ["storage", "activeTab", "alarms", "sidePanel", "contextMenus"];
 
     return {
       name: "TeamPrompt — AI Prompt Manager & DLP Shield",
-      version: "1.0.6",
+      version: "1.0.7",
       description:
         "Access your team's prompt library, scan for sensitive data, and log AI conversations.",
       icons: {

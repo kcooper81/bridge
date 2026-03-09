@@ -244,6 +244,11 @@ const _RAW_CATEGORIES: RawCategory[] = [
         a: "Members can suggest new security rules from the Security Rules page by clicking \"Suggest Rule.\" Fill in the rule name, description, pattern, and category. The suggestion is submitted to the approval queue where admins and managers can review, approve, or reject it. Approved suggestions become active security rules. You'll be notified when your suggestion is reviewed.",
         keywords: ["suggest", "rule suggestion", "propose", "new rule", "request"],
       },
+      {
+        q: "How do I generate rules with AI?",
+        a: "Admins and managers can use AI to generate guardrail rules automatically. First, connect an API key in Guardrails → Detection tab — either OpenAI or Anthropic (Claude) is supported. Then click the \"AI Generate\" button on the Policies tab. Describe what sensitive data you want to protect in plain English (e.g., \"Block our internal project names: Falcon, Titan, and Aurora\"). The AI will generate one or more rules with appropriate patterns, categories, and severity levels. Review the generated rules, select the ones you want, and click Create to add them. If you haven't connected an API key yet, the modal will prompt you to set one up in Detection settings.",
+        keywords: ["ai generate", "ai rules", "generate rules", "openai", "anthropic", "claude", "automatic", "detection settings", "api key"],
+      },
     ],
   },
   {

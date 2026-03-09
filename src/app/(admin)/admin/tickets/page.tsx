@@ -58,6 +58,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
+import { ComposeEmailModal } from "@/components/admin/compose-email-modal";
 import { useAuth } from "@/components/providers/auth-provider";
 
 // --- Types ---
@@ -86,6 +87,7 @@ interface TicketRow {
   sender_name: string | null;
   status: string;
   priority: string;
+  direction: "inbound" | "outbound";
   user_id: string | null;
   user_email: string | null;
   org_name: string | null;
@@ -154,7 +156,7 @@ const TYPE_ICONS: Record<string, React.ElementType> = {
   sales: DollarSign,
 };
 
-type QuickFilter = "all" | "open" | "mine" | "unassigned" | "resolved" | "closed";
+type QuickFilter = "all" | "open" | "mine" | "unassigned" | "resolved" | "closed" | "sent";
 
 // Add Filter icon
 import { Filter } from "lucide-react";
@@ -328,6 +330,11 @@ function TicketContent({
             <Badge variant="outline" className="capitalize text-[10px] h-5">
               {ticket.type}
             </Badge>
+            {ticket.direction === "outbound" && (
+              <Badge variant="outline" className="text-[10px] h-5 border-purple-300 text-purple-700 dark:border-purple-700 dark:text-purple-400">
+                Outbound
+              </Badge>
+            )}
             {ticket.inbox_email && (
               <Badge variant="secondary" className="text-[10px] h-5 gap-0.5 hidden sm:inline-flex">
                 <Inbox className="h-2.5 w-2.5" />
@@ -554,6 +561,9 @@ export default function TicketsPage() {
   // Selection
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkLoading, setBulkLoading] = useState(false);
+
+  // Compose
+  const [composeOpen, setComposeOpen] = useState(false);
 
   // Note form
   const [noteContent, setNoteContent] = useState("");
@@ -964,6 +974,8 @@ export default function TicketsPage() {
       result = result.filter((t) => !t.assigned_to && t.status !== "resolved" && t.status !== "closed");
     } else if (quickFilter === "resolved") {
       result = result.filter((t) => t.status === "resolved" || t.status === "closed");
+    } else if (quickFilter === "sent") {
+      result = result.filter((t) => t.direction === "outbound");
     }
 
     return [...result].sort(smartSort);
@@ -992,6 +1004,7 @@ export default function TicketsPage() {
       unassigned: tickets.filter((t) => !t.assigned_to && t.status !== "resolved" && t.status !== "closed").length,
       resolved: tickets.filter((t) => t.status === "resolved").length,
       closed: tickets.filter((t) => t.status === "closed").length,
+      sent: tickets.filter((t) => t.direction === "outbound").length,
     }),
     [tickets, user?.id]
   );
@@ -1129,7 +1142,7 @@ export default function TicketsPage() {
             <div className="flex items-center gap-1.5 min-w-0">
               <TypeIcon className={cn("h-3 w-3 flex-shrink-0", isNew ? "text-foreground" : "text-muted-foreground")} />
               <span className={cn("truncate text-xs", isNew ? "font-semibold" : "text-muted-foreground")}>
-                {ticket.sender_name || ticket.user_email || "Anonymous"}
+                {ticket.direction === "outbound" ? `To: ${ticket.user_email || ticket.sender_name || "Unknown"}` : (ticket.sender_name || ticket.user_email || "Anonymous")}
               </span>
               {ticket.inbox_email && (
                 <span className="hidden sm:inline text-[10px] text-muted-foreground bg-muted rounded px-1 py-0.5 flex-shrink-0">
@@ -1166,6 +1179,11 @@ export default function TicketsPage() {
             <Badge variant="outline" className="text-[10px] capitalize px-1.5 py-0 h-4">
               {ticket.type}
             </Badge>
+            {ticket.direction === "outbound" && (
+              <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 border-purple-300 text-purple-700 dark:border-purple-700 dark:text-purple-400">
+                Sent
+              </Badge>
+            )}
             {ticket.priority !== "normal" && (
               <span className={cn("text-[10px] font-semibold capitalize", PRIORITY_COLORS[ticket.priority])}>
                 {ticket.priority}
@@ -1246,6 +1264,17 @@ export default function TicketsPage() {
           <p className="font-medium text-foreground">All tickets assigned!</p>
           <p className="text-sm text-muted-foreground mt-1">
             Every open ticket has an owner.
+          </p>
+        </div>
+      );
+    }
+    if (quickFilter === "sent" && stats.sent === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <Send className="h-10 w-10 text-muted-foreground mb-3" />
+          <p className="font-medium text-foreground">No sent emails yet</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            Use the Compose button to send an email.
           </p>
         </div>
       );
@@ -1430,13 +1459,19 @@ export default function TicketsPage() {
             </span>
           )}
         </div>
-        <div className="hidden lg:flex items-center gap-1.5 text-[11px] text-muted-foreground">
-          <kbd className="px-1 py-0.5 rounded bg-muted border text-[10px]">j</kbd><kbd className="px-1 py-0.5 rounded bg-muted border text-[10px]">k</kbd>
-          <span>nav</span>
-          <kbd className="px-1 py-0.5 rounded bg-muted border text-[10px] ml-1.5">r</kbd>
-          <span>reply</span>
-          <kbd className="px-1 py-0.5 rounded bg-muted border text-[10px] ml-1.5">e</kbd>
-          <span>done</span>
+        <div className="flex items-center gap-3">
+          <Button size="sm" onClick={() => setComposeOpen(true)}>
+            <Plus className="mr-1.5 h-3.5 w-3.5" />
+            Compose
+          </Button>
+          <div className="hidden lg:flex items-center gap-1.5 text-[11px] text-muted-foreground">
+            <kbd className="px-1 py-0.5 rounded bg-muted border text-[10px]">j</kbd><kbd className="px-1 py-0.5 rounded bg-muted border text-[10px]">k</kbd>
+            <span>nav</span>
+            <kbd className="px-1 py-0.5 rounded bg-muted border text-[10px] ml-1.5">r</kbd>
+            <span>reply</span>
+            <kbd className="px-1 py-0.5 rounded bg-muted border text-[10px] ml-1.5">e</kbd>
+            <span>done</span>
+          </div>
         </div>
       </div>
 
@@ -1452,6 +1487,7 @@ export default function TicketsPage() {
               { key: "mine" as QuickFilter, label: "Mine", count: stats.mine },
               { key: "unassigned" as QuickFilter, label: "Unassigned", count: stats.unassigned },
               { key: "resolved" as QuickFilter, label: "Done", count: stats.resolved + stats.closed },
+              { key: "sent" as QuickFilter, label: "Sent", count: stats.sent },
               { key: "all" as QuickFilter, label: "All", count: stats.total },
             ]).map((tab) => (
               <button
@@ -1656,6 +1692,12 @@ export default function TicketsPage() {
           )}
         </SheetContent>
       </Sheet>
+
+      <ComposeEmailModal
+        open={composeOpen}
+        onOpenChange={setComposeOpen}
+        onSent={() => loadTickets()}
+      />
     </div>
   );
 }

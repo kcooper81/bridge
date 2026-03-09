@@ -36,6 +36,67 @@ Guidelines:
 
 Respond with a JSON array of rule objects. Nothing else — no markdown, no explanation, just the JSON array.`;
 
+async function callOpenAI(apiKey: string, prompt: string): Promise<string> {
+  const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        { role: "user", content: prompt },
+      ],
+      temperature: 0.3,
+      max_tokens: 2000,
+    }),
+  });
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    if (response.status === 401) throw new Error("INVALID_KEY");
+    if (response.status === 429) throw new Error("RATE_LIMITED");
+    console.error("OpenAI API error:", err);
+    throw new Error("PROVIDER_ERROR");
+  }
+
+  const data = await response.json();
+  return data.choices?.[0]?.message?.content?.trim() || "";
+}
+
+async function callAnthropic(apiKey: string, prompt: string): Promise<string> {
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": apiKey,
+      "anthropic-version": "2023-06-01",
+    },
+    body: JSON.stringify({
+      model: "claude-haiku-4-5-20251001",
+      max_tokens: 2000,
+      system: SYSTEM_PROMPT,
+      messages: [
+        { role: "user", content: prompt },
+      ],
+    }),
+  });
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    if (response.status === 401) throw new Error("INVALID_KEY");
+    if (response.status === 429) throw new Error("RATE_LIMITED");
+    console.error("Anthropic API error:", err);
+    throw new Error("PROVIDER_ERROR");
+  }
+
+  const data = await response.json();
+  const textBlock = data.content?.find((b: { type: string }) => b.type === "text");
+  return textBlock?.text?.trim() || "";
+}
+
 export async function POST(request: NextRequest) {
   const supabase = createClient();
   const {
@@ -70,14 +131,14 @@ export async function POST(request: NextRequest) {
 
   if (!provider || !apiKey) {
     return NextResponse.json(
-      { error: "AI detection is not configured. Go to Guardrails → Detection Settings to add your API key." },
+      { error: "NO_API_KEY" },
       { status: 400 }
     );
   }
 
-  if (provider !== "openai") {
+  if (provider !== "openai" && provider !== "anthropic") {
     return NextResponse.json(
-      { error: "AI rule generation requires an OpenAI API key. Update your detection provider in Settings." },
+      { error: "AI rule generation requires an OpenAI or Anthropic API key. Update your provider in Detection settings." },
       { status: 400 }
     );
   }
@@ -90,37 +151,9 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: prompt.trim() },
-        ],
-        temperature: 0.3,
-        max_tokens: 2000,
-      }),
-    });
-
-    if (!response.ok) {
-      const err = await response.json().catch(() => ({}));
-      if (response.status === 401) {
-        return NextResponse.json({ error: "Invalid OpenAI API key. Check your key in Detection Settings." }, { status: 400 });
-      }
-      if (response.status === 429) {
-        return NextResponse.json({ error: "OpenAI rate limit reached. Try again in a moment." }, { status: 429 });
-      }
-      console.error("OpenAI API error:", err);
-      return NextResponse.json({ error: "AI generation failed. Try again." }, { status: 500 });
-    }
-
-    const data = await response.json();
-    const content = data.choices?.[0]?.message?.content?.trim();
+    const content = provider === "anthropic"
+      ? await callAnthropic(apiKey, prompt.trim())
+      : await callOpenAI(apiKey, prompt.trim());
 
     if (!content) {
       return NextResponse.json({ error: "AI returned an empty response. Try rephrasing." }, { status: 500 });
@@ -160,6 +193,14 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ rules: sanitized });
   } catch (err) {
+    const message = err instanceof Error ? err.message : "";
+    if (message === "INVALID_KEY") {
+      const providerName = provider === "anthropic" ? "Anthropic" : "OpenAI";
+      return NextResponse.json({ error: `Invalid ${providerName} API key. Check your key in Detection settings.` }, { status: 400 });
+    }
+    if (message === "RATE_LIMITED") {
+      return NextResponse.json({ error: "Rate limit reached. Try again in a moment." }, { status: 429 });
+    }
     console.error("AI rule generation error:", err);
     return NextResponse.json({ error: "Failed to connect to AI provider." }, { status: 500 });
   }

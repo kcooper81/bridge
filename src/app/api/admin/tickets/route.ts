@@ -12,7 +12,7 @@ export async function GET() {
 
   const { data: tickets, error } = await db
     .from("feedback")
-    .select("id, type, subject, message, html_body, sender_email, sender_name, status, priority, user_id, org_id, inbox_email, attachments, assigned_to, created_at, updated_at")
+    .select("id, type, subject, message, html_body, sender_email, sender_name, status, priority, direction, user_id, org_id, inbox_email, attachments, assigned_to, created_at, updated_at")
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -144,6 +144,7 @@ export async function GET() {
       sender_name: t.sender_name || null,
       status: t.status,
       priority: t.priority || "normal",
+      direction: t.direction || "inbound",
       user_id: t.user_id || null,
       user_email: senderEmail,
       org_name: t.org_id ? orgMap.get(t.org_id) || null : null,

@@ -232,9 +232,12 @@
   - Automate publish flow (upload → publish to testers → publish to public)
   - Version bump script (sync wxt.config.ts version with package.json)
   - Consider CI/CD pipeline trigger on extension changes
-- [ ] Microsoft Entra ID (Azure AD) directory sync
-- [ ] SCIM 2.0 provisioning endpoint (for Okta, OneLogin, JumpCloud)
-- [ ] SAML SSO
+- [ ] **Enterprise Integrations**
+  - [ ] Slack integration — DLP violation alerts, approval notifications to a channel
+  - [ ] Microsoft Teams integration — same as Slack (alerts + notifications)
+  - [ ] Microsoft Entra ID (Azure AD) directory sync
+  - [ ] SCIM 2.0 provisioning endpoint (for Okta, OneLogin, JumpCloud)
+  - [ ] SAML 2.0 SSO (Okta, Azure AD, OneLogin)
 - [x] Auto-deprovisioning (remove access when employee leaves directory)
   - Migration 044: `directory_sync_source` column on profiles, `directory_sync_log` table
   - Google sync route detects removed users (compares directory vs tagged members)
@@ -246,6 +249,21 @@
   - Evaluate options: desktop companion app, system-level proxy, clipboard monitoring
   - Consider DLP coverage gap — extension only covers browser-based AI tools
   - Research OS-level APIs for input interception on Windows/macOS
+- [x] AI-Powered Guardrail Rule Generation
+  - API: `POST /api/guardrails/generate` — OpenAI + Anthropic (Claude) support
+  - Anthropic provider added to Detection Settings (type, UI, API key field, info text)
+  - AI Generate modal: pre-checks API key, shows setup prompt if missing with link to Detection tab
+  - Settings gear icon on Guardrails page header → opens Detection tab
+  - Help article: "How do I generate rules with AI?"
+- [x] Quick Save Prompt from Extension
+  - Context menu: right-click selected text → "Save to TeamPrompt" (opens side panel with pre-filled form)
+  - Save button injected near chat input on AI pages (ChatGPT, Claude, Gemini, Copilot, Perplexity)
+  - Side panel auto-opens create form with pre-filled content and auto-generated title
+  - `contextMenus` permission added, `QUICK_SAVE` message handler in background.ts
+  - Storage-based handoff between content script → side panel (quickSaveContent + timestamp)
+- [x] Admin Ticket Compose Email
+  - "Compose" button in admin ticket inbox header
+  - `ComposeEmailModal` component + `/api/admin/tickets/compose` endpoint
 - [x] Mobile responsiveness overhaul — /vault and all app views
   - Dashboard layout: `h-screen` → `min-h-dvh` for mobile browser chrome
   - Dialog base: `w-[95vw]` + `p-4 sm:p-6` for mobile

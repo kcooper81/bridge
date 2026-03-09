@@ -31,15 +31,15 @@
 
 /* Protected state */
 .tp-shield-protected {
-  border-color: rgba(34, 197, 94, 0.3);
+  border-color: #27272a;
 }
 .tp-shield-protected:hover {
-  border-color: rgba(34, 197, 94, 0.5);
+  border-color: #3f3f46;
 }
 
 /* Unprotected state */
 .tp-shield-unprotected {
-  border-color: rgba(245, 158, 11, 0.3);
+  border-color: #27272a;
 }
 
 /* Inactive (not signed in) — Fix 3: clickable */
@@ -78,17 +78,18 @@
   transition: filter 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* State-based logo glow */
+/* Active logo — full brightness */
 .tp-shield-protected .tp-shield-logo {
-  filter: drop-shadow(0 0 5px rgba(34, 197, 94, 0.5));
+  opacity: 1;
 }
 .tp-shield-unprotected .tp-shield-logo {
-  filter: drop-shadow(0 0 5px rgba(245, 158, 11, 0.4));
+  opacity: 0.8;
 }
+/* Inactive/disabled logo — dimmed and grayscale */
 .tp-shield-inactive .tp-shield-logo,
 .tp-shield-offline .tp-shield-logo,
 .tp-shield-disabled .tp-shield-logo {
-  opacity: 0.5;
+  opacity: 0.35;
   filter: grayscale(1);
 }
 
@@ -126,11 +127,19 @@
   white-space: nowrap;
 }
 
-/* Collapsed state — small circular logo pill */
+/* Collapsed state — small rounded-square logo */
 .tp-shield-collapsed {
   padding: 6px;
-  border-radius: 50%;
+  border-radius: 10px;
   gap: 0;
+  border-color: transparent;
+  background: #18181b;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.tp-shield-collapsed:hover {
+  border-color: transparent;
+  background: #27272a;
 }
 
 .tp-shield-collapsed .tp-shield-status {
@@ -141,23 +150,14 @@
 }
 
 .tp-shield-collapsed .tp-shield-logo {
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
 }
 
-/* Collapsed state border colors as active indicator */
-.tp-shield-collapsed.tp-shield-protected {
-  border-color: #22c55e;
-  box-shadow: 0 0 8px rgba(34, 197, 94, 0.25);
-}
-.tp-shield-collapsed.tp-shield-unprotected {
-  border-color: #f59e0b;
-  box-shadow: 0 0 8px rgba(245, 158, 11, 0.2);
-}
+/* Collapsed inactive states — just dim */
 .tp-shield-collapsed.tp-shield-inactive,
 .tp-shield-collapsed.tp-shield-offline,
 .tp-shield-collapsed.tp-shield-disabled {
-  border-color: #3f3f46;
   opacity: 0.5;
 }
 
@@ -177,12 +177,12 @@
 
 @keyframes tp-shield-flash-red {
   0% { border-color: #ef4444; box-shadow: 0 0 12px rgba(239, 68, 68, 0.4); }
-  100% { border-color: rgba(34, 197, 94, 0.3); box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4); }
+  100% { border-color: #27272a; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4); }
 }
 
 @keyframes tp-shield-flash-amber {
   0% { border-color: #f59e0b; box-shadow: 0 0 12px rgba(245, 158, 11, 0.4); }
-  100% { border-color: rgba(34, 197, 94, 0.3); box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4); }
+  100% { border-color: #27272a; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4); }
 }
 
 /* ─── Toast ─── */

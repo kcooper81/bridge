@@ -647,8 +647,8 @@ function createShieldElement() {
     shield.classList.add("tp-shield-unprotected");
   }
 
-  // Use the actual TeamPrompt logo instead of shield SVGs
-  const logoUrl = browser.runtime.getURL("/icons/icon-32.png");
+  // White logo for dark overlay background
+  const logoUrl = browser.runtime.getURL("/icons/icon-overlay.svg");
 
   // Status text
   let statusText = "";

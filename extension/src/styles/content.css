@@ -412,10 +412,12 @@
   margin-top: 12px;
   align-items: center;
 }
+.tp-block-actions .tp-block-btn {
+  margin-top: 0;
+}
 
 .tp-block-btn-sanitize {
   background: #16a34a;
-  margin-top: 0;
 }
 .tp-block-btn-sanitize:hover {
   background: #15803d;

@@ -42,7 +42,8 @@ export async function GET(request: NextRequest) {
       .order("created_at", { ascending: false });
 
     if (packsError) {
-      return NextResponse.json({ error: packsError.message }, { status: 500 });
+      console.error("Template packs fetch error:", packsError);
+      return NextResponse.json({ error: "Failed to fetch template packs" }, { status: 500 });
     }
 
     // Fetch associations
@@ -142,7 +143,8 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (packError) {
-      return NextResponse.json({ error: packError.message }, { status: 500 });
+      console.error("Template pack create error:", packError);
+      return NextResponse.json({ error: "Failed to create template pack" }, { status: 500 });
     }
 
     // Associate prompts, guidelines, and rules
@@ -215,7 +217,8 @@ export async function DELETE(request: NextRequest) {
       .eq("id", packId);
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      console.error("Template pack delete error:", error);
+      return NextResponse.json({ error: "Failed to delete template pack" }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });

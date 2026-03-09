@@ -65,12 +65,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ url: session.url });
   } catch (error) {
     console.error("Portal error:", error);
-    const message =
-      error instanceof Stripe.errors.StripeError
-        ? error.message
-        : error instanceof Error
-          ? error.message
-          : "Internal server error";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

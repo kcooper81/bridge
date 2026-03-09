@@ -87,8 +87,9 @@ export async function PATCH(
       .eq("id", id);
 
     if (updateError) {
+      console.error("Rule suggestion update error:", updateError);
       return NextResponse.json(
-        { error: updateError.message },
+        { error: "Failed to update suggestion" },
         { status: 500 }
       );
     }

@@ -70,7 +70,8 @@ export async function POST(request: NextRequest) {
   const stripe = getStripe();
   try {
     // Rate limit by IP to prevent abuse before doing signature verification
-    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+    // Prefer x-real-ip (set by Vercel, not spoofable) over x-forwarded-for
+    const ip = request.headers.get("x-real-ip") || request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
     const rl = await checkRateLimit(limiters.stripeWebhook, ip);
     if (!rl.success) return rl.response;
 

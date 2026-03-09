@@ -130,6 +130,15 @@ export default defineBackground(() => {
           headers?: Record<string, string>;
           body?: string;
         };
+
+        // Security: Only allow fetches to trusted domains to prevent token exfiltration
+        const ALLOWED_ORIGINS = [CONFIG.SITE_URL, CONFIG.SUPABASE_URL];
+        const isAllowedUrl = ALLOWED_ORIGINS.some((origin) => msg.url.startsWith(origin));
+        if (!isAllowedUrl) {
+          sendResponse({ ok: false, status: 403, data: null });
+          return;
+        }
+
         const FETCH_TIMEOUT = 15_000;
         const doFetch = (headers: Record<string, string>) => {
           const controller = new AbortController();

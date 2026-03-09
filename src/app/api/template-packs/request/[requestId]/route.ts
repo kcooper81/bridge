@@ -79,7 +79,8 @@ export async function PATCH(
       .eq("id", requestId);
 
     if (updateError) {
-      return NextResponse.json({ error: updateError.message }, { status: 500 });
+      console.error("Pack request update error:", updateError);
+      return NextResponse.json({ error: "Failed to update pack request" }, { status: 500 });
     }
 
     return NextResponse.json({

@@ -51,7 +51,11 @@ function isEnabled(): boolean {
   if (_enabled !== null) return _enabled;
   if (typeof window === "undefined") return false;
   try {
-    if (new URLSearchParams(window.location.search).get("debug") === "auth") {
+    // Only allow URL-based activation in development
+    if (
+      process.env.NODE_ENV !== "production" &&
+      new URLSearchParams(window.location.search).get("debug") === "auth"
+    ) {
       localStorage.setItem(ENABLED_KEY, "1");
       // Set cookie so middleware can read it
       document.cookie = `${COOKIE_NAME}=1; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;

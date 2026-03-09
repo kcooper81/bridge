@@ -76,7 +76,8 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      console.error("Rule suggestion insert error:", error);
+      return NextResponse.json({ error: "Failed to submit suggestion" }, { status: 500 });
     }
 
     return NextResponse.json(
@@ -114,7 +115,8 @@ export async function GET(request: NextRequest) {
       .order("created_at", { ascending: false });
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      console.error("Rule suggestions fetch error:", error);
+      return NextResponse.json({ error: "Failed to fetch suggestions" }, { status: 500 });
     }
 
     // Enrich with suggester names

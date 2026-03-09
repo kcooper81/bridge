@@ -27,8 +27,8 @@ export async function POST(request: NextRequest) {
   if (missingEnvs.length > 0) {
     console.error("Missing Stripe env vars:", missingEnvs);
     return NextResponse.json(
-      { error: `Stripe not configured. Missing: ${missingEnvs.join(", ")}` },
-      { status: 500 }
+      { error: "Billing service is not available. Please try again later." },
+      { status: 503 }
     );
   }
 
@@ -160,12 +160,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ url: session.url });
   } catch (error) {
     console.error("Checkout error:", error);
-    const message =
-      error instanceof Stripe.errors.StripeError
-        ? error.message
-        : error instanceof Error
-          ? error.message
-          : "Internal server error";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

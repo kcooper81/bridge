@@ -6,8 +6,9 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 
 export async function POST(request: NextRequest) {
   try {
-    // Rate limit by IP
+    // Rate limit by IP (prefer x-real-ip set by Vercel, not spoofable)
     const ip =
+      request.headers.get("x-real-ip") ||
       request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
       "unknown";
     const rl = await checkRateLimit(limiters.sessionEvent, ip);

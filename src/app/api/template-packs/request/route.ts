@@ -73,7 +73,8 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      console.error("Pack request create error:", error);
+      return NextResponse.json({ error: "Failed to create pack request" }, { status: 500 });
     }
 
     return NextResponse.json(req, { status: 201 });
@@ -108,7 +109,8 @@ export async function GET(request: NextRequest) {
     const { data, error } = await query;
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      console.error("Pack requests fetch error:", error);
+      return NextResponse.json({ error: "Failed to fetch pack requests" }, { status: 500 });
     }
 
     // Enrich with requester names

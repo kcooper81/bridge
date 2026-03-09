@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { sanitizeHtml } from "@/lib/sanitize-html";
 import {
   Search,
   Eye,
@@ -1237,7 +1238,7 @@ export default function ContentPage() {
                   prose-p:leading-relaxed prose-p:text-foreground/80
                   prose-li:text-foreground/80
                   prose-strong:text-foreground"
-                dangerouslySetInnerHTML={{ __html: previewPost.content }}
+                dangerouslySetInnerHTML={{ __html: sanitizeHtml(previewPost.content) }}
               />
 
               {/* Tags */}

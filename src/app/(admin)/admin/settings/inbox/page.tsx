@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import { sanitizeHtml } from "@/lib/sanitize-html";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -248,7 +249,7 @@ export default function InboxSettingsPage() {
                     <p className="text-xs font-medium text-muted-foreground mb-1">Preview:</p>
                     <div
                       className="border rounded-md p-3 text-sm bg-muted/30"
-                      dangerouslySetInnerHTML={{ __html: selected.signature_html }}
+                      dangerouslySetInnerHTML={{ __html: sanitizeHtml(selected.signature_html) }}
                     />
                   </div>
                 )}

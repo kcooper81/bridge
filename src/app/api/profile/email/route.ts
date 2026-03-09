@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
       }
       console.error("Email update error:", updateError);
       return NextResponse.json(
-        { error: updateError.message || "Failed to update email" },
+        { error: "Failed to update email" },
         { status: 500 }
       );
     }

@@ -2,6 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { SUPER_ADMIN_EMAILS } from "@/lib/constants";
 
+/** Server-side HTML sanitizer — strips scripts, event handlers, and dangerous elements */
+function sanitizeContent(html: string): string {
+  return html
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+    .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, "")
+    .replace(/<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi, "")
+    .replace(/<embed\b[^>]*\/?>/gi, "")
+    .replace(/<link\b[^>]*\/?>/gi, "")
+    .replace(/\son\w+\s*=\s*["'][^"']*["']/gi, "")
+    .replace(/\son\w+\s*=\s*[^\s>]*/gi, "")
+    .replace(/javascript\s*:/gi, "");
+}
+
 async function verifySuperAdmin() {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -186,7 +199,7 @@ category must be one of: guide, insight, comparison, tutorial`;
       slug,
       title: generated.title || item.title,
       description: generated.description || "",
-      content: generated.content,
+      content: sanitizeContent(generated.content),
       category: generated.category || "guide",
       tags: generated.tags || item.target_keywords || [],
       reading_time: estimateReadingTime(generated.content),

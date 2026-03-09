@@ -1,31 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { SUPER_ADMIN_EMAILS } from "@/lib/constants";
-
-async function verifySuperAdmin() {
-  const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) return null;
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("is_super_admin")
-    .eq("id", user.id)
-    .single();
-
-  const isAdmin =
-    profile?.is_super_admin === true ||
-    SUPER_ADMIN_EMAILS.includes(user.email || "");
-
-  return isAdmin ? user : null;
-}
+import { createServiceClient } from "@/lib/supabase/server";
+import { verifyAdminAccess } from "@/lib/admin-auth";
 
 export async function GET() {
-  const user = await verifySuperAdmin();
-  if (!user) {
+  const auth = await verifyAdminAccess();
+  if (!auth) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -45,8 +24,8 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  const user = await verifySuperAdmin();
-  if (!user) {
+  const auth = await verifyAdminAccess();
+  if (!auth) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -67,7 +46,7 @@ export async function POST(request: NextRequest) {
       title: title.trim(),
       content: content.trim(),
       category: category.trim(),
-      created_by: user.id,
+      created_by: auth.userId,
     })
     .select("id, title, content, category, created_at")
     .single();
@@ -81,8 +60,8 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  const user = await verifySuperAdmin();
-  if (!user) {
+  const auth = await verifyAdminAccess();
+  if (!auth) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

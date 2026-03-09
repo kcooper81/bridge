@@ -1,27 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { SUPER_ADMIN_EMAILS } from "@/lib/constants";
-
-async function verifySuperAdmin() {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return null;
-
-  const db = createServiceClient();
-  const { data: profile } = await db
-    .from("profiles")
-    .select("is_super_admin")
-    .eq("id", user.id)
-    .single();
-
-  return profile?.is_super_admin || SUPER_ADMIN_EMAILS.includes(user.email || "")
-    ? user
-    : null;
-}
+import { createServiceClient } from "@/lib/supabase/server";
+import { verifyAdminAccess } from "@/lib/admin-auth";
 
 export async function POST(request: NextRequest) {
-  const user = await verifySuperAdmin();
-  if (!user) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const auth = await verifyAdminAccess();
+  if (!auth?.isSuperAdmin) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const { blogPostId, action } = await request.json();
   if (!blogPostId || !action) {

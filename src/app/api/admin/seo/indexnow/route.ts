@@ -1,28 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { SUPER_ADMIN_EMAILS } from "@/lib/constants";
+import { createServiceClient } from "@/lib/supabase/server";
+import { verifyAdminAccess } from "@/lib/admin-auth";
 import { submitToIndexNow, getAllSitemapUrls } from "@/lib/seo/indexnow";
-
-async function verifySuperAdmin() {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return false;
-
-  if (SUPER_ADMIN_EMAILS.includes(user.email || "")) return true;
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("is_super_admin")
-    .eq("id", user.id)
-    .single();
-
-  return profile?.is_super_admin === true;
-}
 
 /** GET — read auto-submit setting */
 export async function GET() {
-  const isAdmin = await verifySuperAdmin();
-  if (!isAdmin) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const auth = await verifyAdminAccess();
+  if (!auth?.isSuperAdmin) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const db = createServiceClient();
   const { data } = await db
@@ -36,8 +20,8 @@ export async function GET() {
 
 /** POST — manually submit URLs to IndexNow */
 export async function POST(request: Request) {
-  const isAdmin = await verifySuperAdmin();
-  if (!isAdmin) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const auth = await verifyAdminAccess();
+  if (!auth?.isSuperAdmin) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const body = await request.json();
   let urls: string[] = [];
@@ -56,8 +40,8 @@ export async function POST(request: Request) {
 
 /** PATCH — toggle auto-submit setting */
 export async function PATCH(request: NextRequest) {
-  const isAdmin = await verifySuperAdmin();
-  if (!isAdmin) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const auth = await verifyAdminAccess();
+  if (!auth?.isSuperAdmin) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const { autoSubmit } = await request.json();
   const db = createServiceClient();

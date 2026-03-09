@@ -1,36 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { SUPER_ADMIN_EMAILS } from "@/lib/constants";
+import { createServiceClient } from "@/lib/supabase/server";
+import { verifyAdminAccess } from "@/lib/admin-auth";
 import { Resend } from "resend";
 import { buildTicketResponseEmail } from "@/lib/email-template";
-
-async function verifySuperAdmin() {
-  const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) return null;
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("is_super_admin")
-    .eq("id", user.id)
-    .single();
-
-  const isAdmin =
-    profile?.is_super_admin === true ||
-    SUPER_ADMIN_EMAILS.includes(user.email || "");
-
-  return isAdmin ? user : null;
-}
 
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ ticketId: string }> }
 ) {
-  const user = await verifySuperAdmin();
-  if (!user) {
+  const auth = await verifyAdminAccess();
+  if (!auth) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -80,7 +59,7 @@ export async function POST(
     .from("ticket_notes")
     .insert({
       ticket_id: ticketId,
-      author_id: user.id,
+      author_id: auth.userId,
       content: content.trim(),
       is_internal: is_internal,
       email_sent: false,
@@ -101,7 +80,7 @@ export async function POST(
   const needsProgress = !is_internal && ticket.status === "new";
   if (needsAssign || needsProgress) {
     const updates: Record<string, string> = { updated_at: new Date().toISOString() };
-    if (needsAssign) updates.assigned_to = user.id;
+    if (needsAssign) updates.assigned_to = auth.userId;
     if (needsProgress) updates.status = "in_progress";
     await db.from("feedback").update(updates).eq("id", ticketId);
   }
@@ -154,7 +133,7 @@ export async function POST(
     note: {
       ...note,
       email_sent: emailSent,
-      author_email: user.email,
+      author_email: auth.email,
     },
     recipient_email: recipientEmail,
   });

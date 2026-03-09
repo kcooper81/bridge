@@ -1,37 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { SUPER_ADMIN_EMAILS } from "@/lib/constants";
+import { createServiceClient } from "@/lib/supabase/server";
+import { verifyAdminAccess } from "@/lib/admin-auth";
 import { Resend } from "resend";
 import { buildTicketResponseEmail } from "@/lib/email-template";
-
-async function verifySuperAdmin() {
-  const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) return null;
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("is_super_admin")
-    .eq("id", user.id)
-    .single();
-
-  const isAdmin =
-    profile?.is_super_admin === true ||
-    SUPER_ADMIN_EMAILS.includes(user.email || "");
-
-  return isAdmin ? user : null;
-}
 
 /**
  * POST /api/admin/tickets/compose
  * Creates a new outbound ticket and sends the email in one shot.
  */
 export async function POST(request: NextRequest) {
-  const user = await verifySuperAdmin();
-  if (!user) {
+  const auth = await verifyAdminAccess();
+  if (!auth) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -67,7 +46,7 @@ export async function POST(request: NextRequest) {
       type: "email",
       status: "in_progress",
       priority: "normal",
-      assigned_to: user.id,
+      assigned_to: auth.userId,
       inbox_email,
       org_id: org_id || null,
     })
@@ -87,7 +66,7 @@ export async function POST(request: NextRequest) {
     .from("ticket_notes")
     .insert({
       ticket_id: ticket.id,
-      author_id: user.id,
+      author_id: auth.userId,
       content: message.trim(),
       is_internal: false,
       email_sent: false,
@@ -147,7 +126,7 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json({
     ticket_id: ticket.id,
-    note: { ...note, email_sent: emailSent, author_email: user.email },
+    note: { ...note, email_sent: emailSent, author_email: auth.email },
     email_sent: emailSent,
   });
 }

@@ -1,38 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/server";
 import { SUPER_ADMIN_EMAILS } from "@/lib/constants";
 import type { SuperAdminRole } from "@/lib/constants";
-
-/** Only full super_admin role users can manage admins (not support) */
-async function verifySuperAdmin() {
-  const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) return false;
-
-  const emailIsAdmin = SUPER_ADMIN_EMAILS.includes(user.email || "");
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("is_super_admin, super_admin_role")
-    .eq("id", user.id)
-    .single();
-
-  const isAdmin = profile?.is_super_admin === true || emailIsAdmin;
-  if (!isAdmin) return false;
-
-  // Support role cannot manage admins
-  if (profile?.super_admin_role === "support" && !emailIsAdmin) return false;
-
-  return true;
-}
+import { verifyAdminAccess } from "@/lib/admin-auth";
 
 /** GET — list all admin/support users */
 export async function GET() {
-  const isAdmin = await verifySuperAdmin();
-  if (!isAdmin) {
+  const auth = await verifyAdminAccess();
+  if (!auth?.isSuperAdmin) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -54,8 +29,8 @@ export async function GET() {
 
 /** POST — add user as super_admin or support */
 export async function POST(request: NextRequest) {
-  const isAdmin = await verifySuperAdmin();
-  if (!isAdmin) {
+  const auth = await verifyAdminAccess();
+  if (!auth?.isSuperAdmin) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -119,8 +94,8 @@ export async function POST(request: NextRequest) {
 
 /** PATCH — update support staff allowed pages */
 export async function PATCH(request: NextRequest) {
-  const isAdmin = await verifySuperAdmin();
-  if (!isAdmin) {
+  const auth = await verifyAdminAccess();
+  if (!auth?.isSuperAdmin) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -166,8 +141,8 @@ export async function PATCH(request: NextRequest) {
 
 /** DELETE — remove admin role from a user */
 export async function DELETE(request: NextRequest) {
-  const isAdmin = await verifySuperAdmin();
-  if (!isAdmin) {
+  const auth = await verifyAdminAccess();
+  if (!auth?.isSuperAdmin) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -181,12 +156,7 @@ export async function DELETE(request: NextRequest) {
   const db = createServiceClient();
 
   // Don't allow removing yourself
-  const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (user?.id === userId) {
+  if (auth.userId === userId) {
     return NextResponse.json(
       { error: "You cannot remove your own admin role" },
       { status: 400 }

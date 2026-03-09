@@ -1,28 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { SUPER_ADMIN_EMAILS } from "@/lib/constants";
-
-async function verifySuperAdmin() {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return null;
-
-  const db = createServiceClient();
-  const { data: profile } = await db
-    .from("profiles")
-    .select("is_super_admin")
-    .eq("id", user.id)
-    .single();
-
-  return profile?.is_super_admin || SUPER_ADMIN_EMAILS.includes(user.email || "")
-    ? user
-    : null;
-}
+import { createServiceClient } from "@/lib/supabase/server";
+import { verifyAdminAccess } from "@/lib/admin-auth";
 
 /** GET — list all content pipeline items */
 export async function GET() {
-  const user = await verifySuperAdmin();
-  if (!user) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const auth = await verifyAdminAccess();
+  if (!auth?.isSuperAdmin) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const db = createServiceClient();
   const { data, error } = await db
@@ -40,8 +23,8 @@ export async function GET() {
 
 /** POST — create a new content idea */
 export async function POST(request: NextRequest) {
-  const user = await verifySuperAdmin();
-  if (!user) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const auth = await verifyAdminAccess();
+  if (!auth?.isSuperAdmin) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const body = await request.json();
   if (!body.title?.trim()) {
@@ -59,7 +42,7 @@ export async function POST(request: NextRequest) {
       target_keywords: body.target_keywords || [],
       source_query: body.source_query || null,
       notes: body.notes || null,
-      created_by: user.id,
+      created_by: auth.userId,
     })
     .select()
     .single();
@@ -74,8 +57,8 @@ export async function POST(request: NextRequest) {
 
 /** PATCH — update a content item */
 export async function PATCH(request: NextRequest) {
-  const user = await verifySuperAdmin();
-  if (!user) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const auth = await verifyAdminAccess();
+  if (!auth?.isSuperAdmin) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const body = await request.json();
   if (!body.id) {
@@ -111,8 +94,8 @@ export async function PATCH(request: NextRequest) {
 
 /** DELETE — remove a content item */
 export async function DELETE(request: NextRequest) {
-  const user = await verifySuperAdmin();
-  if (!user) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const auth = await verifyAdminAccess();
+  if (!auth?.isSuperAdmin) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");

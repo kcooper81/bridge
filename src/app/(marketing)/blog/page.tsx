@@ -4,7 +4,7 @@ import { generateBreadcrumbSchema } from "@/lib/seo/schemas";
 import { SectionLabel } from "@/components/marketing/section-label";
 import { CTASection } from "@/components/marketing/cta-section";
 import { DarkSection } from "@/components/marketing/dark-section";
-import { getAllBlogPosts } from "@/lib/blog-posts";
+import { getAllBlogPosts } from "@/lib/blog-posts.server";
 import { BlogFilter } from "./_components/blog-filter";
 
 const SITE_URL =

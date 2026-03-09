@@ -9,11 +9,11 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { SectionLabel } from "@/components/marketing/section-label";
 import { CTASection } from "@/components/marketing/cta-section";
+import { BLOG_POSTS } from "@/lib/blog-posts";
 import {
-  BLOG_POSTS,
   getBlogPostBySlugAsync,
   getRelatedPostsAsync,
-} from "@/lib/blog-posts";
+} from "@/lib/blog-posts.server";
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || "https://teamprompt.app";

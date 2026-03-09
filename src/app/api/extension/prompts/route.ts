@@ -142,12 +142,24 @@ export async function GET(request: NextRequest) {
 
     const { data: profile } = await db
       .from("profiles")
-      .select("org_id")
+      .select("org_id, role")
       .eq("id", user.id)
       .single();
 
     if (!profile?.org_id) {
       return withCors(NextResponse.json({ error: "No organization" }, { status: 403 }), request);
+    }
+
+    const isAdmin = profile.role === "admin" || profile.role === "manager";
+
+    // Members only see approved prompts from their teams
+    let userTeamIds: string[] = [];
+    if (!isAdmin) {
+      const { data: teamRows } = await db
+        .from("team_members")
+        .select("team_id")
+        .eq("user_id", user.id);
+      userTeamIds = (teamRows || []).map((r) => r.team_id);
     }
 
     const { searchParams } = new URL(request.url);
@@ -168,6 +180,17 @@ export async function GET(request: NextRequest) {
       .select("id, title, content, description, tags, tone, is_template, template_variables, usage_count, folder_id, department_id, is_favorite, last_used_at")
       .eq("org_id", profile.org_id)
       .eq("status", "approved");
+
+    // Scope to member's teams (admins/managers see all)
+    if (!isAdmin && userTeamIds.length > 0) {
+      q = q.in("department_id", userTeamIds);
+    } else if (!isAdmin) {
+      // Member with no teams sees nothing from the extension
+      return withCors(NextResponse.json({
+        prompts: [],
+        pagination: { limit, offset, hasMore: false },
+      }), request);
+    }
 
     if (sortRecent) {
       q = q.order("last_used_at", { ascending: false, nullsFirst: false });

@@ -91,7 +91,7 @@ const STATUS_BADGE_VARIANT: Record<PromptStatus, "default" | "secondary" | "dest
 };
 
 export default function VaultPage() {
-  const { prompts, folders, teams, guidelines, loading, refresh, currentUserRole, noOrg } = useOrg();
+  const { prompts, folders, teams, members, guidelines, loading, refresh, currentUserRole, noOrg } = useOrg();
   const { checkLimit, planLimits, canAccess } = useSubscription();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -102,6 +102,18 @@ export default function VaultPage() {
   const [bulkLoading, setBulkLoading] = useState(false);
 
   const canApprove = currentUserRole === "admin" || currentUserRole === "manager";
+
+  // Members only see their own prompts + approved prompts from their teams
+  const currentMember = members.find((m) => m.isCurrentUser);
+  const myTeamIds = currentMember?.teamIds || [];
+  const visiblePrompts = useMemo(() => {
+    if (canApprove) return prompts; // Admins/managers see everything
+    return prompts.filter(
+      (p) =>
+        p.owner_id === currentMember?.id || // Own prompts (any status)
+        (p.status === "approved" && p.department_id && myTeamIds.includes(p.department_id)) // Approved team prompts
+    );
+  }, [prompts, canApprove, currentMember?.id, myTeamIds]);
 
   // Show checkout success toast
   useEffect(() => {
@@ -129,12 +141,12 @@ export default function VaultPage() {
   const [fillPrompt, setFillPrompt] = useState<Prompt | null>(null);
 
   const pendingCount = useMemo(
-    () => prompts.filter((p) => p.status === "pending").length,
-    [prompts]
+    () => visiblePrompts.filter((p) => p.status === "pending").length,
+    [visiblePrompts]
   );
 
   const filtered = useMemo(() => {
-    let result = [...prompts];
+    let result = [...visiblePrompts];
 
     // Status filter
     if (statusFilter !== "all") {
@@ -176,7 +188,7 @@ export default function VaultPage() {
     }
 
     return result;
-  }, [prompts, search, filterFolder, filterTeam, sort, statusFilter]);
+  }, [visiblePrompts, search, filterFolder, filterTeam, sort, statusFilter]);
 
   const pageCount = Math.ceil(filtered.length / VAULT_PAGE_SIZE);
   const pageItems = filtered.slice(
@@ -189,8 +201,8 @@ export default function VaultPage() {
     setSelectedIds(new Set());
   }, [page]);
 
-  const totalUses = prompts.reduce((sum, p) => sum + (p.usage_count || 0), 0);
-  const sharedCount = prompts.filter((p) => p.status === "approved").length;
+  const totalUses = visiblePrompts.reduce((sum, p) => sum + (p.usage_count || 0), 0);
+  const sharedCount = visiblePrompts.filter((p) => p.status === "approved").length;
   const enforcedGuidelines = guidelines.filter((s) => s.enforced).length;
 
   function openNewPrompt() {

@@ -45,16 +45,28 @@ export function DashboardWidgets({ analytics, loading }: DashboardWidgetsProps) 
     return <WidgetsSkeleton />;
   }
 
+  // Members only see their own prompts + approved from their teams
+  const canSeeAll = currentUserRole === "admin" || currentUserRole === "manager";
+  const currentMember = members.find((m) => m.isCurrentUser);
+  const myTeamIds = currentMember?.teamIds || [];
+  const visiblePrompts = canSeeAll
+    ? prompts
+    : prompts.filter(
+        (p) =>
+          p.owner_id === currentMember?.id ||
+          (p.status === "approved" && p.department_id && myTeamIds.includes(p.department_id))
+      );
+
   const statusCounts: Record<PromptStatus, number> = {
-    draft: prompts.filter((p) => p.status === "draft").length,
-    pending: prompts.filter((p) => p.status === "pending").length,
-    approved: prompts.filter((p) => p.status === "approved").length,
-    archived: prompts.filter((p) => p.status === "archived").length,
+    draft: visiblePrompts.filter((p) => p.status === "draft").length,
+    pending: visiblePrompts.filter((p) => p.status === "pending").length,
+    approved: visiblePrompts.filter((p) => p.status === "approved").length,
+    archived: visiblePrompts.filter((p) => p.status === "archived").length,
   };
 
   const totalForBar = Object.values(statusCounts).reduce((a, b) => a + b, 0);
 
-  const recentPrompts = [...prompts]
+  const recentPrompts = [...visiblePrompts]
     .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
     .slice(0, 5);
 
@@ -70,7 +82,7 @@ export function DashboardWidgets({ analytics, loading }: DashboardWidgetsProps) 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           label="Total Prompts"
-          value={prompts.length}
+          value={visiblePrompts.length}
           icon={<Archive className="h-5 w-5" />}
         />
         <StatCard

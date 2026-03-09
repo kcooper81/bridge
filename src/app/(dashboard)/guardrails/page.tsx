@@ -7,6 +7,13 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -357,6 +364,24 @@ export default function GuardrailsPage() {
           ))}
         </div>
         <div className="h-64 rounded-lg bg-muted animate-pulse" />
+      </>
+    );
+  }
+
+  // Members see a simplified view — only the suggest form
+  if (!canEdit) {
+    return (
+      <>
+        <PageHeader
+          title="AI Guardrails"
+          description="Your organization uses guardrails to protect sensitive data in AI prompts"
+        />
+        <div className="mb-6 grid grid-cols-3 gap-4">
+          <StatCard label="Active Policies" value={activeRules} icon={<ShieldCheck className="h-5 w-5" />} />
+          <StatCard label="Violations (7d)" value={weekViolations} icon={<ShieldAlert className="h-5 w-5" />} />
+          <StatCard label="Block Rate" value={`${blockRate}%`} icon={<Shield className="h-5 w-5" />} />
+        </div>
+        <MemberSuggestRule />
       </>
     );
   }
@@ -921,5 +946,123 @@ export default function GuardrailsPage() {
         </DialogContent>
       </Dialog>
     </>
+  );
+}
+
+/** Lightweight rule suggestion form for non-admin members */
+function MemberSuggestRule() {
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [category, setCategory] = useState<SecurityCategory>("custom");
+  const [severity, setSeverity] = useState<SecuritySeverity>("warn");
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+
+  async function handleSubmit() {
+    if (!name.trim() || !description.trim()) return;
+    setSubmitting(true);
+    try {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error("Session expired. Please sign in again.");
+        return;
+      }
+      const res = await fetch("/api/guardrails/suggest", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ name: name.trim(), description: description.trim(), category, severity }),
+      });
+      if (!res.ok) {
+        toast.error("Failed to submit suggestion");
+        return;
+      }
+      toast.success("Rule suggestion submitted for review");
+      setName("");
+      setDescription("");
+      setCategory("custom");
+      setSeverity("warn");
+      setSubmitted(true);
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 rounded-xl bg-amber-500/10 flex items-center justify-center">
+            <Lightbulb className="h-5 w-5 text-amber-500" />
+          </div>
+          <div>
+            <CardTitle>Suggest a Rule</CardTitle>
+            <CardDescription>
+              Noticed sensitive data that should be blocked? Suggest a guardrail rule for your admin to review.
+            </CardDescription>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {submitted ? (
+          <div className="flex flex-col items-center py-8 text-center">
+            <CheckCircle2 className="h-10 w-10 text-tp-green mb-3" />
+            <h3 className="text-sm font-medium">Suggestion submitted</h3>
+            <p className="text-xs text-muted-foreground mt-1">Your admin will review it and create the rule if appropriate.</p>
+            <Button variant="outline" size="sm" className="mt-4" onClick={() => setSubmitted(false)}>
+              Suggest another
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-4 max-w-lg">
+            <div className="space-y-2">
+              <Label>What should be blocked?</Label>
+              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Internal project codenames" />
+            </div>
+            <div className="space-y-2">
+              <Label>Describe what to look for</Label>
+              <Textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="e.g. Our project codenames like 'Project Phoenix' and 'Project Atlas' should not be pasted into AI tools"
+                rows={3}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Category</Label>
+                <Select value={category} onValueChange={(v) => setCategory(v as SecurityCategory)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="internal_terms">Internal Terms</SelectItem>
+                    <SelectItem value="pii">Personal Info (PII)</SelectItem>
+                    <SelectItem value="credentials">Credentials</SelectItem>
+                    <SelectItem value="financial">Financial</SelectItem>
+                    <SelectItem value="custom">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Suggested severity</Label>
+                <Select value={severity} onValueChange={(v) => setSeverity(v as SecuritySeverity)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="block">Block (prevent sending)</SelectItem>
+                    <SelectItem value="warn">Warn (allow with alert)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <Button onClick={handleSubmit} disabled={submitting || !name.trim() || !description.trim()}>
+              {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {submitting ? "Submitting..." : "Submit Suggestion"}
+            </Button>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }

@@ -41,6 +41,7 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
+  Brain,
   CheckCircle2,
   Copy,
   Download,
@@ -52,6 +53,7 @@ import {
   Shield,
   ShieldAlert,
   ShieldCheck,
+  Sparkles,
   Trash2,
   Settings2,
   FileText,
@@ -132,6 +134,18 @@ export default function GuardrailsPage() {
   const [installingPack, setInstallingPack] = useState<string | null>(null);
   const [installedPacks, setInstalledPacks] = useState<Set<string>>(new Set());
   const [previewPack, setPreviewPack] = useState<ComplianceTemplate | null>(null);
+
+  // AI Generate state
+  const [aiModalOpen, setAiModalOpen] = useState(false);
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [aiGenerating, setAiGenerating] = useState(false);
+  const [aiRules, setAiRules] = useState<Array<{
+    name: string; description: string; pattern: string;
+    pattern_type: SecurityPatternType; category: SecurityCategory; severity: SecuritySeverity;
+    _selected: boolean;
+  }>>([]);
+  const [aiError, setAiError] = useState("");
+  const [aiSaving, setAiSaving] = useState(false);
 
   const fetchData = useCallback(async () => {
     if (!org) return;
@@ -317,6 +331,63 @@ export default function GuardrailsPage() {
     }
   }
 
+  async function handleAiGenerate() {
+    if (!aiPrompt.trim()) return;
+    setAiGenerating(true);
+    setAiError("");
+    setAiRules([]);
+    try {
+      const res = await fetch("/api/guardrails/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: aiPrompt.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setAiError(data.error || "Generation failed");
+        return;
+      }
+      setAiRules((data.rules || []).map((r: Record<string, unknown>) => ({ ...r, _selected: true })));
+    } catch {
+      setAiError("Failed to connect. Check your network.");
+    } finally {
+      setAiGenerating(false);
+    }
+  }
+
+  async function handleAiSaveSelected() {
+    if (!org) return;
+    const selected = aiRules.filter((r) => r._selected);
+    if (selected.length === 0) return;
+    setAiSaving(true);
+    try {
+      const supabase = createClient();
+      const inserts = selected.map((r) => ({
+        org_id: org.id,
+        name: r.name,
+        description: r.description,
+        pattern: r.pattern,
+        pattern_type: r.pattern_type,
+        category: r.category,
+        severity: r.severity,
+        is_active: true,
+        is_built_in: false,
+      }));
+      const { error } = await supabase.from("security_rules").insert(inserts);
+      if (error) {
+        toast.error("Failed to save rules");
+        return;
+      }
+      toast.success(`Created ${selected.length} rule${selected.length !== 1 ? "s" : ""}`);
+      setAiModalOpen(false);
+      setAiRules([]);
+      setAiPrompt("");
+      fetchData();
+    } finally {
+      setAiSaving(false);
+    }
+  }
+
   function handleTestPattern() {
     if (!testContent || !pattern) return;
     const result = testPattern(testContent, pattern, patternType);
@@ -400,10 +471,16 @@ export default function GuardrailsPage() {
               </Button>
             )}
             {canAccess("custom_security") && (
-              <Button onClick={() => openModal(null)}>
-                <Plus className="mr-2 h-4 w-4" />
-                New Policy
-              </Button>
+              <>
+                <Button variant="outline" onClick={() => { setAiModalOpen(true); setAiRules([]); setAiError(""); }}>
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  AI Generate
+                </Button>
+                <Button onClick={() => openModal(null)}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  New Policy
+                </Button>
+              </>
             )}
           </div>
         }
@@ -787,6 +864,112 @@ export default function GuardrailsPage() {
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* AI Generate Modal */}
+      <Dialog open={aiModalOpen} onOpenChange={setAiModalOpen}>
+        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-purple-500" />
+              Generate Rules with AI
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Describe what you want to protect</Label>
+              <Textarea
+                value={aiPrompt}
+                onChange={(e) => setAiPrompt(e.target.value)}
+                placeholder="e.g. Block our internal project names: Falcon, Titan, and Aurora. Also catch employee IDs that look like EMP-12345."
+                rows={3}
+                disabled={aiGenerating}
+              />
+              <p className="text-[11px] text-muted-foreground">
+                Describe in plain English what sensitive data to detect. AI will generate the patterns for you.
+              </p>
+            </div>
+
+            <Button onClick={handleAiGenerate} disabled={aiGenerating || !aiPrompt.trim()} className="w-full">
+              {aiGenerating ? (
+                <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Generating...</>
+              ) : (
+                <><Brain className="mr-2 h-4 w-4" />Generate Rules</>
+              )}
+            </Button>
+
+            {aiError && (
+              <div className="rounded-lg border border-destructive/50 bg-destructive/5 p-3 text-sm text-destructive">
+                {aiError}
+              </div>
+            )}
+
+            {aiRules.length > 0 && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium">{aiRules.length} rule{aiRules.length !== 1 ? "s" : ""} generated</p>
+                  <button
+                    className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                    onClick={() => {
+                      const allSelected = aiRules.every((r) => r._selected);
+                      setAiRules((prev) => prev.map((r) => ({ ...r, _selected: !allSelected })));
+                    }}
+                  >
+                    {aiRules.every((r) => r._selected) ? "Deselect all" : "Select all"}
+                  </button>
+                </div>
+                {aiRules.map((rule, i) => (
+                  <div
+                    key={i}
+                    className={`rounded-lg border p-3 space-y-1.5 cursor-pointer transition-colors ${
+                      rule._selected ? "border-primary/50 bg-primary/5" : "border-border opacity-60"
+                    }`}
+                    onClick={() => setAiRules((prev) => prev.map((r, j) => j === i ? { ...r, _selected: !r._selected } : r))}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={rule._selected}
+                          onChange={() => {}}
+                          className="rounded border-border"
+                        />
+                        <span className="text-sm font-medium">{rule.name}</span>
+                      </div>
+                      <div className="flex gap-1">
+                        <Badge variant="outline" className="text-[10px]">{rule.pattern_type}</Badge>
+                        <Badge variant={rule.severity === "block" ? "destructive" : "secondary"} className="text-[10px]">
+                          {rule.severity}
+                        </Badge>
+                      </div>
+                    </div>
+                    {rule.description && (
+                      <p className="text-xs text-muted-foreground pl-6">{rule.description}</p>
+                    )}
+                    <p className="text-xs font-mono text-muted-foreground pl-6 bg-muted/50 rounded px-2 py-1 break-all">
+                      {rule.pattern}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          {aiRules.length > 0 && (
+            <div className="mt-4 flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setAiModalOpen(false)} disabled={aiSaving}>Cancel</Button>
+              <Button
+                onClick={handleAiSaveSelected}
+                disabled={aiSaving || aiRules.filter((r) => r._selected).length === 0}
+              >
+                {aiSaving ? (
+                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Saving...</>
+                ) : (
+                  <>Create {aiRules.filter((r) => r._selected).length} Rule{aiRules.filter((r) => r._selected).length !== 1 ? "s" : ""}</>
+                )}
+              </Button>
             </div>
           )}
         </DialogContent>

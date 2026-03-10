@@ -103,8 +103,8 @@ export default function ApprovalsPage() {
   }, [org]);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    if (canEdit) fetchData();
+  }, [fetchData, canEdit]);
 
   async function handleApprovePrompt(id: string) {
     setActionId(id);

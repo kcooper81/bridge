@@ -118,10 +118,12 @@ async function findExistingTicket(
     .trim();
 
   if (cleanSubject.length > 3) {
+    // Escape PostgREST/SQL wildcards to prevent injection via subject line
+    const safeSubject = cleanSubject.replace(/%/g, "\\%").replace(/_/g, "\\_");
     const { data } = await db
       .from("feedback")
       .select("id, subject, user_id")
-      .ilike("subject", `%${cleanSubject}%`)
+      .ilike("subject", `%${safeSubject}%`)
       .order("created_at", { ascending: false })
       .limit(1)
       .single();

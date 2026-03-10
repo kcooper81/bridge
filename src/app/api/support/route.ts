@@ -17,8 +17,12 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { name, email, type, subject, message, screenshots } = body;
 
+    // Strip newlines from name and subject to prevent email header injection
+    const safeName = typeof name === "string" ? name.replace(/[\r\n]+/g, " ").trim() : name;
+    const safeSubject = typeof subject === "string" ? subject.replace(/[\r\n]+/g, " ").trim() : subject;
+
     // Validate required fields
-    if (!name || !email || !subject || !message) {
+    if (!safeName || !email || !safeSubject || !message) {
       return NextResponse.json(
         { error: "All fields are required." },
         { status: 400 }
@@ -84,10 +88,10 @@ export async function POST(request: NextRequest) {
       user_id: null,
       org_id: null,
       type: ticketType,
-      subject: `[${name}] ${subject}`,
+      subject: `[${safeName}] ${safeSubject}`,
       message: cleanMessage,
       sender_email: email,
-      sender_name: name,
+      sender_name: safeName,
       status: "new",
       priority: "normal",
       inbox_email: inboxEmail,
@@ -104,7 +108,7 @@ export async function POST(request: NextRequest) {
     // Notify admins via email + send auto-ack to customer (non-blocking)
     if (inserted) {
       notifyAdminsOfNewTicket({
-        subject: `[${name}] ${subject}`,
+        subject: `[${safeName}] ${safeSubject}`,
         senderEmail: email,
         type: ticketType,
         message,
@@ -112,9 +116,9 @@ export async function POST(request: NextRequest) {
       });
       sendAutoAck({
         recipientEmail: email,
-        recipientName: name,
+        recipientName: safeName,
         ticketId: inserted.id,
-        subject: `[${name}] ${subject}`,
+        subject: `[${safeName}] ${safeSubject}`,
         inboxEmail,
       });
     }

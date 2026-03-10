@@ -200,10 +200,10 @@ export default function VaultPage() {
     (page + 1) * vaultPageSize
   );
 
-  // Clear selection when navigating to a different page
+  // Clear selection when navigating to a different page or changing page size
   useEffect(() => {
     setSelectedIds(new Set());
-  }, [page]);
+  }, [page, vaultPageSize]);
 
   const totalUses = visiblePrompts.reduce((sum, p) => sum + (p.usage_count || 0), 0);
   const sharedCount = visiblePrompts.filter((p) => p.status === "approved").length;

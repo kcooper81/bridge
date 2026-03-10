@@ -233,8 +233,18 @@ export async function POST(request: NextRequest) {
     // Create invite records
     const siteUrl =
       process.env.NEXT_PUBLIC_SITE_URL || "https://teamprompt.app";
-    const orgName = orgData?.name || "their team";
-    const senderName = profile.name || "A team member";
+    const escapeHtml = (str: string) =>
+      str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+
+    const rawOrgName = orgData?.name || "their team";
+    const rawSenderName = profile.name || "A team member";
+    const orgName = escapeHtml(rawOrgName);
+    const senderName = escapeHtml(rawSenderName);
 
     const inviteRecords: {
       email: string;
@@ -295,7 +305,7 @@ export async function POST(request: NextRequest) {
           return {
             from: fromEmail,
             to: rec.email,
-            subject: `You're invited to join ${orgName} on TeamPrompt`,
+            subject: `You're invited to join ${rawOrgName.replace(/[\r\n]/g, '')} on TeamPrompt`,
             html: buildEmail({
               heading: "You've been invited!",
               body: `

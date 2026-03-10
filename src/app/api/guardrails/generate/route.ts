@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { limiters, checkRateLimit } from "@/lib/rate-limit";
 import type { SecurityCategory, SecurityPatternType, SecuritySeverity } from "@/lib/types";
 
 interface GeneratedRule {
@@ -106,6 +107,10 @@ export async function POST(request: NextRequest) {
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  // Rate limit by user ID
+  const rl = await checkRateLimit(limiters.aiGenerate, user.id);
+  if (!rl.success) return rl.response;
 
   // Get user's org and role
   const { data: profile } = await supabase

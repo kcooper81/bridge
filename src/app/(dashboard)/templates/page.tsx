@@ -115,7 +115,7 @@ type PreviewItem =
   | { type: "custom"; pack: CustomPack };
 
 export default function TemplatesPage() {
-  const { loading, noOrg, prompts, folders, refresh, currentUserRole } = useOrg();
+  const { loading, noOrg, prompts, folders, refresh, currentUserRole, members } = useOrg();
   const [installedPacks, setInstalledPacks] = useState<Set<string>>(new Set());
   const [installingPack, setInstallingPack] = useState<string | null>(null);
   const [previewItem, setPreviewItem] = useState<PreviewItem | null>(null);
@@ -141,10 +141,11 @@ export default function TemplatesPage() {
   const canManage = currentUserRole === "admin" || currentUserRole === "manager";
   const isMember = currentUserRole === "member";
 
+  const currentUserId = members.find((m) => m.isCurrentUser)?.id;
   const pendingRequests = installRequests.filter((r) => r.status === "pending");
   const myPendingPackIds = new Set(
     installRequests
-      .filter((r) => r.status === "pending")
+      .filter((r) => r.status === "pending" && r.requested_by === currentUserId)
       .map((r) => r.pack_id)
   );
 
@@ -1155,7 +1156,7 @@ function CreatePackDialog({
   onOpenChange: (open: boolean) => void;
   onCreated: () => void;
 }) {
-  const { prompts, guidelines, teams } = useOrg();
+  const { prompts, guidelines, teams, org } = useOrg();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [visibility, setVisibility] = useState("org");
@@ -1169,7 +1170,7 @@ function CreatePackDialog({
 
   // Fetch security rules when dialog opens
   useEffect(() => {
-    if (!open) return;
+    if (!open || !org) return;
     (async () => {
       const supabase = createClient();
       const { data: { session } } = await supabase.auth.getSession();
@@ -1177,10 +1178,11 @@ function CreatePackDialog({
       const { data } = await supabase
         .from("security_rules")
         .select("id, name, category, severity")
+        .eq("org_id", org.id)
         .order("name");
       setSecurityRules(data || []);
     })();
-  }, [open]);
+  }, [open, org]);
 
   function resetForm() {
     setName("");

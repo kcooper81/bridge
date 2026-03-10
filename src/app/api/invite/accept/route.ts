@@ -34,15 +34,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Look up invite
-    const { data: invite, error: inviteError } = await db
+    // Atomically claim the invite: update status to 'accepted' only if still 'pending'.
+    // This prevents double-accept race conditions where two concurrent requests
+    // both read the invite as 'pending'.
+    const { data: invite, error: claimError } = await db
       .from("invites")
-      .select("*")
+      .update({
+        status: "accepted",
+        accepted_at: new Date().toISOString(),
+      })
       .eq("token", inviteToken)
       .eq("status", "pending")
+      .select("*")
       .single();
 
-    if (inviteError || !invite) {
+    if (claimError || !invite) {
       return NextResponse.json(
         { error: "Invalid or expired invite" },
         { status: 404 }
@@ -51,6 +57,11 @@ export async function POST(request: NextRequest) {
 
     // Verify invite email matches authenticated user
     if (invite.email !== user.email) {
+      // Roll back the status change since this user cannot accept it
+      await db
+        .from("invites")
+        .update({ status: "pending", accepted_at: null })
+        .eq("id", invite.id);
       return NextResponse.json(
         { error: "This invite was sent to a different email" },
         { status: 403 }
@@ -61,7 +72,7 @@ export async function POST(request: NextRequest) {
     if (new Date(invite.expires_at) < new Date()) {
       await db
         .from("invites")
-        .update({ status: "expired" })
+        .update({ status: "expired", accepted_at: null })
         .eq("id", invite.id);
       return NextResponse.json(
         { error: "This invite has expired" },
@@ -92,7 +103,11 @@ export async function POST(request: NextRequest) {
       ]);
 
       if (count && count > 1) {
-        // Other members exist — can't silently abandon this org
+        // Other members exist — can't silently abandon this org; roll back invite claim
+        await db
+          .from("invites")
+          .update({ status: "pending", accepted_at: null })
+          .eq("id", invite.id);
         return NextResponse.json(
           {
             error:
@@ -104,6 +119,10 @@ export async function POST(request: NextRequest) {
 
       // Verify user is admin of the old org before deleting it
       if (!userOrgProfile || userOrgProfile.role !== "admin") {
+        await db
+          .from("invites")
+          .update({ status: "pending", accepted_at: null })
+          .eq("id", invite.id);
         return NextResponse.json(
           {
             error:
@@ -113,20 +132,6 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // Solo personal org — clean it up so user can join the invited org
-      const oldOrgId = existingProfile.org_id;
-
-      // Remove any teams, folders, prompts, etc. tied to the old org (non-fatal)
-      await Promise.allSettled([
-        db.from("prompts").delete().eq("org_id", oldOrgId),
-        db.from("folders").delete().eq("org_id", oldOrgId),
-        db.from("teams").delete().eq("org_id", oldOrgId),
-        db.from("standards").delete().eq("org_id", oldOrgId),
-        db.from("invites").delete().eq("org_id", oldOrgId),
-      ]);
-
-      // Delete the orphaned org (non-fatal)
-      await db.from("organizations").delete().eq("id", oldOrgId);
     }
 
     // Check member limit before allowing join
@@ -146,6 +151,10 @@ export async function POST(request: NextRequest) {
         .eq("org_id", invite.org_id);
 
       if ((memberCount || 0) >= limits.max_members) {
+        await db
+          .from("invites")
+          .update({ status: "pending", accepted_at: null })
+          .eq("id", invite.id);
         return NextResponse.json(
           { error: "This organization has reached its member limit. Please ask an admin to upgrade the plan." },
           { status: 403 }
@@ -153,7 +162,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Update user's profile with org and role
+    // Update user's profile with org and role BEFORE cleaning up old org
     const { error: profileUpdateError } = await db
       .from("profiles")
       .update({
@@ -164,10 +173,30 @@ export async function POST(request: NextRequest) {
 
     if (profileUpdateError) {
       console.error("Failed to update profile:", profileUpdateError);
+      // Roll back the invite claim so it can be retried
+      await db
+        .from("invites")
+        .update({ status: "pending", accepted_at: null })
+        .eq("id", invite.id);
       return NextResponse.json(
         { error: "Failed to join organization. Please try again." },
         { status: 500 }
       );
+    }
+
+    // Now that profile is safely moved, clean up the old solo org (non-fatal)
+    if (existingProfile?.org_id && existingProfile.org_id !== invite.org_id) {
+      const oldOrgId = existingProfile.org_id;
+      await Promise.allSettled([
+        db.from("prompts").delete().eq("org_id", oldOrgId),
+        db.from("folders").delete().eq("org_id", oldOrgId),
+        db.from("teams").delete().eq("org_id", oldOrgId),
+        db.from("standards").delete().eq("org_id", oldOrgId),
+        db.from("invites").delete().eq("org_id", oldOrgId),
+      ]);
+
+      // Delete the orphaned org (non-fatal)
+      await db.from("organizations").delete().eq("id", oldOrgId);
     }
 
     // If invite has a team_id, add user to that team
@@ -185,15 +214,6 @@ export async function POST(request: NextRequest) {
         // Non-fatal — user joined org successfully, team join failed
       }
     }
-
-    // Mark invite as accepted
-    await db
-      .from("invites")
-      .update({
-        status: "accepted",
-        accepted_at: new Date().toISOString(),
-      })
-      .eq("id", invite.id);
 
     // Send extension install email (non-blocking)
     try {
@@ -219,15 +239,25 @@ export async function POST(request: NextRequest) {
             .single(),
         ]);
 
-        const senderName = inviterProfile?.name || "Your team";
-        const orgName = org?.name || "your team";
+        const escapeHtml = (str: string) =>
+          str
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;");
+
+        const rawSenderName = inviterProfile?.name || "Your team";
+        const rawOrgName = org?.name || "your team";
+        const senderName = escapeHtml(rawSenderName);
+        const orgName = escapeHtml(rawOrgName);
         const extensionUrl = `${siteUrl}/extensions`;
 
         resend.emails
           .send({
             from: fromEmail,
             to: user.email,
-            subject: `Install the TeamPrompt extension for ${orgName}`,
+            subject: `Install the TeamPrompt extension for ${rawOrgName.replace(/[\r\n]/g, '')}`,
             html: buildEmail({
               heading: "Install the TeamPrompt Extension",
               body: `

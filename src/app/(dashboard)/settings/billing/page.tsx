@@ -78,6 +78,10 @@ export default function BillingPage() {
 
   async function startCheckout(plan: PlanTier) {
     if (!org) return;
+    if (members.length === 0) {
+      toast.error("Still loading team members. Please try again in a moment.");
+      return;
+    }
     setLoadingCheckout(plan);
     const info = PLAN_DISPLAY[plan];
     const priceNum = parseFloat(info.price.replace(/[^0-9.]/g, "")) || 0;
@@ -85,7 +89,7 @@ export default function BillingPage() {
       plan,
       price: priceNum,
       interval,
-      seats: members.length || 1,
+      seats: members.length,
     });
     try {
       const supabase = createClient();
@@ -104,7 +108,7 @@ export default function BillingPage() {
         body: JSON.stringify({
           plan,
           orgId: org.id,
-          seats: members.length || 1,
+          seats: members.length,
           interval,
         }),
       });

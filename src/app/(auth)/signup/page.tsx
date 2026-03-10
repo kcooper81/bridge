@@ -76,7 +76,6 @@ export default function SignupPage() {
       if (plan) {
         sessionStorage.setItem("pending_plan", plan);
       }
-      trackSignUp(provider);
       const supabase = createClient();
       const { error: oauthError } = await supabase.auth.signInWithOAuth({
         provider,
@@ -87,6 +86,8 @@ export default function SignupPage() {
       if (oauthError) {
         authDebug.error("provider", `OAuth error from signup: ${provider}`, { message: oauthError.message }); // AUTH-DEBUG
         setError(oauthError.message);
+      } else {
+        trackSignUp(provider);
       }
     } catch {
       authDebug.error("provider", `OAuth unexpected error from signup: ${provider}`); // AUTH-DEBUG

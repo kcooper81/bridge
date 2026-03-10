@@ -216,7 +216,7 @@ export async function POST(request: NextRequest) {
       await resend.emails.send({
         from: fromEmail,
         to: email,
-        subject: `You're invited to join ${rawOrgName} on TeamPrompt`,
+        subject: `You're invited to join ${rawOrgName.replace(/[\r\n]/g, '')} on TeamPrompt`,
         html: buildEmail({
           heading: "You've been invited!",
           body: `

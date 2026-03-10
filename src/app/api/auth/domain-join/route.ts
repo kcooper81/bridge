@@ -48,15 +48,22 @@ export async function POST(request: NextRequest) {
     // Get user profile + email domain
     const { data: profile } = await db
       .from("profiles")
-      .select("id, org_id, email, role")
+      .select("id, org_id, role")
       .eq("id", user.id)
       .single();
 
-    if (!profile?.email || !profile.org_id) {
+    if (!profile?.org_id) {
       return NextResponse.json({ joined: false });
     }
 
-    const emailDomain = profile.email.split("@")[1]?.toLowerCase();
+    // Use the verified auth email (user.email) instead of profile.email
+    // to prevent domain spoofing via profile email manipulation
+    const authEmail = user.email;
+    if (!authEmail) {
+      return NextResponse.json({ joined: false });
+    }
+
+    const emailDomain = authEmail.split("@")[1]?.toLowerCase();
     if (!emailDomain || FREE_PROVIDERS.has(emailDomain)) {
       return NextResponse.json({ joined: false });
     }

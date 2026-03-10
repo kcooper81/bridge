@@ -90,22 +90,22 @@ export default function GuidelinesPage() {
       toast.error("Name is required");
       return;
     }
+    const parsedMin = minLength ? parseInt(minLength, 10) : 0;
+    const parsedMax = maxLength ? parseInt(maxLength, 10) : 0;
+    if (isNaN(parsedMin) || isNaN(parsedMax)) {
+      toast.error("Length values must be valid numbers");
+      return;
+    }
+    if (parsedMin < 0 || parsedMax < 0) {
+      toast.error("Length values cannot be negative");
+      return;
+    }
+    if (parsedMin && parsedMax && parsedMin > parsedMax) {
+      toast.error("Min length cannot exceed max length");
+      return;
+    }
     setSaving(true);
     try {
-      const parsedMin = minLength ? parseInt(minLength, 10) : 0;
-      const parsedMax = maxLength ? parseInt(maxLength, 10) : 0;
-      if (isNaN(parsedMin) || isNaN(parsedMax)) {
-        toast.error("Length values must be valid numbers");
-        return;
-      }
-      if (parsedMin < 0 || parsedMax < 0) {
-        toast.error("Length values cannot be negative");
-        return;
-      }
-      if (parsedMin && parsedMax && parsedMin > parsedMax) {
-        toast.error("Min length cannot exceed max length");
-        return;
-      }
       const rules: GuidelineRules = {
         ...(bestPractices.length > 0 && { bestPractices }),
         ...(restrictions.length > 0 && { restrictions }),

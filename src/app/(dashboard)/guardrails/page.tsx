@@ -888,7 +888,7 @@ export default function GuardrailsPage() {
                 {(["all", "pattern", "term", "smart_pattern", "entropy", "ai"] as const).map((dt) => (
                   <button
                     key={dt}
-                    onClick={() => setDetectionFilter(dt)}
+                    onClick={() => { setDetectionFilter(dt); setViolationPage(0); }}
                     className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-colors hover:scale-100 active:scale-100 ${
                       detectionFilter === dt
                         ? "bg-primary text-primary-foreground"

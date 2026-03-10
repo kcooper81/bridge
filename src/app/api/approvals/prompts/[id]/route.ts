@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { limiters, checkRateLimit } from "@/lib/rate-limit";
 
 async function getAuthUser() {
   const supabase = createClient();
@@ -38,6 +39,10 @@ export async function PATCH(
     if (auth.role !== "admin" && auth.role !== "manager") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
+
+    // Rate limit by user ID
+    const rl = await checkRateLimit(limiters.approvals, auth.userId);
+    if (!rl.success) return rl.response;
 
     const { id } = await params;
     const body = await request.json();

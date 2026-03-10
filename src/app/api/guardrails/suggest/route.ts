@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
+import { limiters, checkRateLimit } from "@/lib/rate-limit";
 
 async function getAuthUser(request: NextRequest) {
   const authHeader = request.headers.get("authorization");
@@ -32,6 +33,10 @@ export async function POST(request: NextRequest) {
     if (!auth) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    // Rate limit by user ID
+    const rl = await checkRateLimit(limiters.guardrailsSuggest, auth.userId);
+    if (!rl.success) return rl.response;
 
     const body = await request.json();
     const { name, description, category, severity } = body;
@@ -108,6 +113,10 @@ export async function GET(request: NextRequest) {
     if (!auth) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    // Rate limit by user ID
+    const rlGet = await checkRateLimit(limiters.guardrailsSuggest, auth.userId);
+    if (!rlGet.success) return rlGet.response;
 
     if (auth.role !== "admin" && auth.role !== "manager") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });

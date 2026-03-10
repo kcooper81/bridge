@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { extractTemplateVariables, normalizeVariables } from "@/lib/variables";
+import { limiters, checkRateLimit } from "@/lib/rate-limit";
 
 export async function POST(
   request: NextRequest,
@@ -18,6 +19,10 @@ export async function POST(
     if (authError || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    // Rate limit by user ID
+    const rl = await checkRateLimit(limiters.packInstall, user.id);
+    if (!rl.success) return rl.response;
 
     const { data: profile } = await db
       .from("profiles")

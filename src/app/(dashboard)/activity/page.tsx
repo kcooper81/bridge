@@ -110,8 +110,8 @@ export default function ActivityPage() {
   }, [page, toolFilter]);
 
   useEffect(() => {
-    fetchLogs();
-  }, [fetchLogs]);
+    if (!orgLoading && ["admin", "manager"].includes(currentUserRole)) fetchLogs();
+  }, [fetchLogs, orgLoading, currentUserRole]);
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
 

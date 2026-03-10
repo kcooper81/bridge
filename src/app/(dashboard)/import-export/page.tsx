@@ -17,13 +17,26 @@ import { trackExport, trackImport } from "@/lib/analytics";
 import { NoOrgBanner } from "@/components/dashboard/no-org-banner";
 
 export default function ImportExportPage() {
-  const { prompts, refresh, noOrg } = useOrg();
+  const { prompts, refresh, noOrg, loading } = useOrg();
   const { canAccess } = useSubscription();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [packName, setPackName] = useState("My Prompt Pack");
   const [importing, setImporting] = useState(false);
   const [exporting, setExporting] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  if (loading) {
+    return (
+      <>
+        <PageHeader title="Import / Export" />
+        <div className="grid gap-6 lg:grid-cols-2">
+          {[1, 2].map((i) => (
+            <div key={i} className="h-64 rounded-lg bg-muted animate-pulse" />
+          ))}
+        </div>
+      </>
+    );
+  }
 
   if (noOrg) {
     return (

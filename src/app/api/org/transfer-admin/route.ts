@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { createClient } from "@/lib/supabase/server";
+import { limiters, checkRateLimit } from "@/lib/rate-limit";
 
 /**
  * POST — Transfer admin role to another org member.
@@ -17,6 +18,10 @@ export async function POST(request: NextRequest) {
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  // Rate limit by user ID
+  const rl = await checkRateLimit(limiters.transferAdmin, user.id);
+  if (!rl.success) return rl.response;
 
   const body = await request.json();
   const { target_user_id, new_role = "member" } = body;

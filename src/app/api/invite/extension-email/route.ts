@@ -47,14 +47,17 @@ export async function POST(request: NextRequest) {
 
     let recipientEmails: string[] = [];
 
+    const MAX_RECIPIENTS = 500;
+
     if (all) {
-      // Send to all org members who don't have an extension installed
+      // Send to all org members who don't have an extension installed (capped)
       const { data: members } = await db
         .from("profiles")
         .select("email")
         .eq("org_id", profile.org_id)
         .eq("has_extension", false)
-        .neq("id", user.id);
+        .neq("id", user.id)
+        .limit(MAX_RECIPIENTS);
 
       recipientEmails = (members || [])
         .map((m) => m.email)
@@ -113,8 +116,18 @@ export async function POST(request: NextRequest) {
       .eq("id", profile.org_id)
       .single();
 
-    const senderName = profile.name || "A team member";
-    const orgName = org?.name || "your team";
+    const escapeHtml = (str: string) =>
+      str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+
+    const rawSenderName = profile.name || "A team member";
+    const rawOrgName = org?.name || "your team";
+    const senderName = escapeHtml(rawSenderName);
+    const orgName = escapeHtml(rawOrgName);
     const extensionUrl = `${siteUrl}/extensions`;
 
     const emailHtml = buildEmail({
@@ -139,7 +152,7 @@ export async function POST(request: NextRequest) {
           resend.emails.send({
             from: fromEmail,
             to: email,
-            subject: `Install the TeamPrompt extension for ${orgName}`,
+            subject: `Install the TeamPrompt extension for ${rawOrgName.replace(/[\r\n]/g, '')}`,
             html: emailHtml,
           })
         )

@@ -49,6 +49,13 @@ export const limiters = {
   domainJoin: createLimiter(5, "1 m", "domain-join"),
   favorite: createLimiter(30, "1 m", "favorite"),
   googleSync: createLimiter(5, "1 m", "google-sync"),
+  aiGenerate: createLimiter(10, "1 m", "ai-generate"),
+  packInstall: createLimiter(10, "1 m", "pack-install"),
+  deprovision: createLimiter(5, "1 m", "deprovision"),
+  guardrailsSuggest: createLimiter(10, "1 m", "guardrails-suggest"),
+  packRequest: createLimiter(10, "1 m", "pack-request"),
+  approvals: createLimiter(20, "1 m", "approvals"),
+  transferAdmin: createLimiter(3, "10 m", "transfer-admin"),
 };
 
 export async function checkRateLimit(

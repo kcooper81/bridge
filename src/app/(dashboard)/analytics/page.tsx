@@ -37,7 +37,7 @@ import type { Analytics } from "@/lib/types";
 import { NoOrgBanner } from "@/components/dashboard/no-org-banner";
 
 export default function AnalyticsPage() {
-  const { teams, members, noOrg } = useOrg();
+  const { teams, members, noOrg, loading: orgLoading } = useOrg();
   const { canAccess } = useSubscription();
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [effectiveness, setEffectiveness] = useState<EffectivenessMetrics | null>(null);
@@ -45,6 +45,7 @@ export default function AnalyticsPage() {
   const [fetchError, setFetchError] = useState(false);
 
   useEffect(() => {
+    if (orgLoading || noOrg) return;
     Promise.all([getAnalytics(), getEffectivenessMetrics()])
       .then(([a, e]) => {
         setAnalytics(a);
@@ -55,7 +56,20 @@ export default function AnalyticsPage() {
         setFetchError(true);
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [orgLoading, noOrg]);
+
+  if (orgLoading) {
+    return (
+      <>
+        <PageHeader title="Analytics" description="Usage insights and trends for your team" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-24 rounded-lg bg-muted animate-pulse" />
+          ))}
+        </div>
+      </>
+    );
+  }
 
   if (noOrg) {
     return (

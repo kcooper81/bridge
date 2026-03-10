@@ -73,6 +73,16 @@ import {
   LinkedInAdK,
   LinkedInAdL,
   LinkedInAdM,
+  LinkedInAdN,
+  LinkedInAdO,
+  LinkedInAdP,
+  LinkedInAdQ,
+  LinkedInAdR,
+  LinkedInAdS,
+  LinkedInAdT,
+  LinkedInAdU,
+  LinkedInAdV,
+  LinkedInAdW,
 } from "./_components/social-banners";
 
 export const metadata: Metadata = generatePageMetadata({
@@ -1651,6 +1661,118 @@ export default function MediaPage() {
                 <p className="text-xs text-muted-foreground mb-2">Target: Agency owners, consulting partners, service delivery leads</p>
                 <BannerDownloadWrapper filename="linkedin-ad-g-agency">
                   <LinkedInAdG />
+                </BannerDownloadWrapper>
+              </div>
+            </div>
+          </div>
+
+          {/* New LinkedIn Ads — Wave 2 */}
+          <div className="rounded-2xl border border-border bg-card p-6 mb-8">
+            <h3 className="text-lg font-bold flex items-center gap-2 mb-2">
+              🎯 LinkedIn Ads — Wave 2 (New Personas &amp; Styles)
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              10 new ad creatives inspired by top-performing B2B SaaS ads. Bold stat callouts, before/after comparisons, thought leadership, industry-specific compliance, and urgency-driven messaging.
+            </p>
+            <div className="grid gap-8">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs font-semibold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">Ad N</span>
+                  <span className="text-sm font-medium">CFO / Finance — &ldquo;Can You Prove the ROI?&rdquo;</span>
+                </div>
+                <p className="text-xs text-muted-foreground mb-2">Target: CFOs, Finance Directors, FP&amp;A leads who need to justify AI spend</p>
+                <BannerDownloadWrapper filename="linkedin-ad-n-cfo-roi">
+                  <LinkedInAdN />
+                </BannerDownloadWrapper>
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs font-semibold bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">Ad O</span>
+                  <span className="text-sm font-medium">CEO / Founder — &ldquo;Companies Winning with AI Have One Thing in Common&rdquo;</span>
+                </div>
+                <p className="text-xs text-muted-foreground mb-2">Target: CEOs, founders, board members — thought leadership angle</p>
+                <BannerDownloadWrapper filename="linkedin-ad-o-ceo-competitive">
+                  <LinkedInAdO />
+                </BannerDownloadWrapper>
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs font-semibold bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">Ad P</span>
+                  <span className="text-sm font-medium">IT Admin — &ldquo;73% Use Unapproved AI Tools&rdquo; (Bold Stat)</span>
+                </div>
+                <p className="text-xs text-muted-foreground mb-2">Target: IT admins, sys admins, IT managers dealing with shadow AI sprawl</p>
+                <BannerDownloadWrapper filename="linkedin-ad-p-it-shadow-ai">
+                  <LinkedInAdP />
+                </BannerDownloadWrapper>
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs font-semibold bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Ad Q</span>
+                  <span className="text-sm font-medium">Customer Success — &ldquo;Every Client Gets Your Best Response&rdquo;</span>
+                </div>
+                <p className="text-xs text-muted-foreground mb-2">Target: CS leaders, account managers, support team leads</p>
+                <BannerDownloadWrapper filename="linkedin-ad-q-customer-success">
+                  <LinkedInAdQ />
+                </BannerDownloadWrapper>
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs font-semibold bg-red-100 text-red-700 px-2 py-0.5 rounded-full">Ad R</span>
+                  <span className="text-sm font-medium">Legal / Risk — &ldquo;Your Employees Paste Contracts Into ChatGPT&rdquo;</span>
+                </div>
+                <p className="text-xs text-muted-foreground mb-2">Target: General Counsel, Legal Ops, Risk &amp; Compliance Officers</p>
+                <BannerDownloadWrapper filename="linkedin-ad-r-legal-contracts">
+                  <LinkedInAdR />
+                </BannerDownloadWrapper>
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs font-semibold bg-cyan-100 text-cyan-700 px-2 py-0.5 rounded-full">Ad S</span>
+                  <span className="text-sm font-medium">Marketing — &ldquo;AI Content That Sounds Like Your Brand&rdquo;</span>
+                </div>
+                <p className="text-xs text-muted-foreground mb-2">Target: CMOs, content leads, brand managers using AI for copy</p>
+                <BannerDownloadWrapper filename="linkedin-ad-s-marketing-brand">
+                  <LinkedInAdS />
+                </BannerDownloadWrapper>
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs font-semibold bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Ad T</span>
+                  <span className="text-sm font-medium">Remote Teams — &ldquo;Distributed AI Collaboration&rdquo; (Social Proof)</span>
+                </div>
+                <p className="text-xs text-muted-foreground mb-2">Target: Remote-first companies, distributed team leaders, Head of Remote</p>
+                <BannerDownloadWrapper filename="linkedin-ad-t-remote-teams">
+                  <LinkedInAdT />
+                </BannerDownloadWrapper>
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs font-semibold bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Ad U</span>
+                  <span className="text-sm font-medium">Healthcare — &ldquo;Is PHI Leaking to OpenAI?&rdquo; (HIPAA)</span>
+                </div>
+                <p className="text-xs text-muted-foreground mb-2">Target: Healthcare CIOs, HIPAA officers, health system IT directors</p>
+                <BannerDownloadWrapper filename="linkedin-ad-u-healthcare-hipaa">
+                  <LinkedInAdU />
+                </BannerDownloadWrapper>
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs font-semibold bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">Ad V</span>
+                  <span className="text-sm font-medium">Research / Education — &ldquo;Accelerate Research Without Compromising Integrity&rdquo;</span>
+                </div>
+                <p className="text-xs text-muted-foreground mb-2">Target: Research directors, university IT, academic compliance officers</p>
+                <BannerDownloadWrapper filename="linkedin-ad-v-research-integrity">
+                  <LinkedInAdV />
+                </BannerDownloadWrapper>
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs font-semibold bg-cyan-100 text-cyan-700 px-2 py-0.5 rounded-full">Ad W</span>
+                  <span className="text-sm font-medium">Broad Audience — Before vs After Comparison</span>
+                </div>
+                <p className="text-xs text-muted-foreground mb-2">Target: Any AI decision-maker — visual before/after contrast drives conversions</p>
+                <BannerDownloadWrapper filename="linkedin-ad-w-before-after">
+                  <LinkedInAdW />
                 </BannerDownloadWrapper>
               </div>
             </div>

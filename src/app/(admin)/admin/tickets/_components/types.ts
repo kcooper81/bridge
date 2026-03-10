@@ -60,7 +60,12 @@ export interface CannedResponse {
   category: string;
 }
 
-export type QuickFilter = "all" | "open" | "mine" | "starred" | "unassigned" | "resolved" | "sent" | "snoozed" | "spam" | "trash";
+export type QuickFilter = "all" | "open" | "mine" | "starred" | "unassigned" | "resolved" | "sent" | "snoozed" | "spam" | "trash" | "tickets" | "emails";
+
+/** Form submission types (treated as "tickets") */
+export const TICKET_TYPES = ["bug", "feature", "feedback", "sales"] as const;
+/** Email types */
+export const EMAIL_TYPES = ["email"] as const;
 
 // --- Constants ---
 

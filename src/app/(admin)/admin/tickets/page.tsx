@@ -79,6 +79,8 @@ import type {
   QuickFilter,
 } from "./_components/types";
 import {
+  TICKET_TYPES,
+  EMAIL_TYPES,
   STATUS_COLORS,
   STATUS_LABELS,
   PRIORITY_COLORS,
@@ -1111,6 +1113,12 @@ export default function TicketsPage() {
       case "snoozed":
         result = result.filter((t) => isSnoozed(t));
         break;
+      case "tickets":
+        result = result.filter((t) => (TICKET_TYPES as readonly string[]).includes(t.type) && (t.status === "new" || t.status === "in_progress") && !isSnoozed(t));
+        break;
+      case "emails":
+        result = result.filter((t) => (EMAIL_TYPES as readonly string[]).includes(t.type) && t.direction === "inbound" && (t.status === "new" || t.status === "in_progress") && !isSnoozed(t));
+        break;
       // "all" / "spam" / "trash" — no extra filtering (folder handles it)
     }
 
@@ -1142,6 +1150,8 @@ export default function TicketsPage() {
       resolved: tickets.filter((t) => t.status === "resolved" || t.status === "closed").length,
       sent: tickets.filter((t) => t.direction === "outbound").length,
       snoozed: tickets.filter((t) => isSnoozed(t)).length,
+      tickets: tickets.filter((t) => (TICKET_TYPES as readonly string[]).includes(t.type) && (t.status === "new" || t.status === "in_progress") && !isSnoozed(t)).length,
+      emails: tickets.filter((t) => (EMAIL_TYPES as readonly string[]).includes(t.type) && t.direction === "inbound" && (t.status === "new" || t.status === "in_progress") && !isSnoozed(t)).length,
     }),
     [tickets, userId]
   );
@@ -1482,6 +1492,24 @@ export default function TicketsPage() {
         </div>
       );
     }
+    if (quickFilter === "tickets" && stats.tickets === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <MessageSquare className="h-10 w-10 text-muted-foreground mb-3" />
+          <p className="font-medium text-foreground">No form submissions</p>
+          <p className="text-sm text-muted-foreground mt-1">Bug reports, feature requests, and feedback will appear here.</p>
+        </div>
+      );
+    }
+    if (quickFilter === "emails" && stats.emails === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <Mail className="h-10 w-10 text-muted-foreground mb-3" />
+          <p className="font-medium text-foreground">No emails</p>
+          <p className="text-sm text-muted-foreground mt-1">Inbound emails will appear here.</p>
+        </div>
+      );
+    }
     if (quickFilter === "sent" && stats.sent === 0) {
       return (
         <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -1739,8 +1767,10 @@ export default function TicketsPage() {
   const hasActiveFilters = typeFilter !== "all" || priorityFilter !== "all";
 
   // Primary tabs (always shown) and secondary tabs (in dropdown)
-  const primaryTabs: { key: QuickFilter; label: string; count: number }[] = [
-    { key: "open", label: "Open", count: stats.new + stats.open },
+  const primaryTabs: { key: QuickFilter; label: string; count: number; icon?: React.ElementType }[] = [
+    { key: "open", label: "All Open", count: stats.new + stats.open },
+    { key: "tickets", label: "Tickets", count: stats.tickets, icon: MessageSquare },
+    { key: "emails", label: "Emails", count: stats.emails, icon: Mail },
     { key: "mine", label: "Mine", count: stats.mine },
     { key: "starred", label: "Starred", count: stats.starred },
     { key: "unassigned", label: "Unassigned", count: stats.unassigned },
@@ -1820,6 +1850,7 @@ export default function TicketsPage() {
                 : "border-transparent text-muted-foreground hover:text-foreground"
             )}
           >
+            {tab.icon && <tab.icon className="h-3 w-3 mr-1 inline-block" />}
             {tab.label}
             {tab.count > 0 && (
               <span className={cn(

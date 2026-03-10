@@ -1649,38 +1649,42 @@ export default function TeamPage() {
 
       {/* Manage Teams Modal */}
       <Dialog open={manageTeamsOpen} onOpenChange={setManageTeamsOpen}>
-        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <div className="flex items-center justify-between">
-              <DialogTitle className="flex items-center gap-2">
-                <Settings className="h-5 w-5" />
-                Manage Teams
-              </DialogTitle>
-              <div className="flex items-center gap-0.5 rounded-lg border border-border p-0.5">
-                <Button
-                  variant={manageTeamsView === "list" ? "secondary" : "ghost"}
-                  size="icon"
-                  className="h-7 w-7"
-                  onClick={() => setManageTeamsView("list")}
-                  title="List view"
-                >
-                  <LayoutList className="h-3.5 w-3.5" />
-                </Button>
-                <Button
-                  variant={manageTeamsView === "org" ? "secondary" : "ghost"}
-                  size="icon"
-                  className="h-7 w-7"
-                  onClick={() => setManageTeamsView("org")}
-                  title="Org chart view"
-                >
-                  <Network className="h-3.5 w-3.5" />
-                </Button>
-              </div>
-            </div>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5" />
+              Manage Teams
+            </DialogTitle>
             <DialogDescription>
               {teams.length} team{teams.length !== 1 ? "s" : ""} &middot; {members.length} members
             </DialogDescription>
           </DialogHeader>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-0.5 rounded-lg border border-border p-0.5">
+              <Button
+                variant={manageTeamsView === "list" ? "secondary" : "ghost"}
+                size="sm"
+                className="h-7 text-xs px-3 gap-1.5"
+                onClick={() => setManageTeamsView("list")}
+              >
+                <LayoutList className="h-3.5 w-3.5" />
+                List
+              </Button>
+              <Button
+                variant={manageTeamsView === "org" ? "secondary" : "ghost"}
+                size="sm"
+                className="h-7 text-xs px-3 gap-1.5"
+                onClick={() => setManageTeamsView("org")}
+              >
+                <Network className="h-3.5 w-3.5" />
+                Org Chart
+              </Button>
+            </div>
+            <Button size="sm" onClick={() => { setManageTeamsOpen(false); openTeamModal(null); }}>
+              <Plus className="mr-1.5 h-3.5 w-3.5" />
+              New Team
+            </Button>
+          </div>
 
           {teams.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-6">No teams yet. Create your first team below.</p>
@@ -1856,12 +1860,6 @@ export default function TeamPage() {
               </div>
             </div>
           )}
-          <div className="mt-4 flex justify-end">
-            <Button onClick={() => { setManageTeamsOpen(false); openTeamModal(null); }}>
-              <Plus className="mr-2 h-4 w-4" />
-              New Team
-            </Button>
-          </div>
         </DialogContent>
       </Dialog>
 

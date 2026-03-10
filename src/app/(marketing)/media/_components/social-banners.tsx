@@ -17,6 +17,7 @@ import {
   BookOpen,
   Activity,
   Lock,
+  TrendingUp,
 } from "lucide-react";
 
 /* ══════════════════════════════════════════════════
@@ -1239,6 +1240,12 @@ const lifestylePhotos = {
   team2: "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&q=80&auto=format&fit=crop",        // business team in meeting room with laptops
   solo: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=800&q=80&auto=format&fit=crop",      // professional woman working at computer
   office: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=800&q=80&auto=format&fit=crop",       // team collaborating around table with laptops
+  // AI / developer / team-at-computer photos for LinkedIn ads
+  coding: "https://images.unsplash.com/photo-1605379399642-870262d3d051?w=800&q=80&auto=format&fit=crop",      // developer with colorful code on monitor
+  teamScreen: "https://images.unsplash.com/photo-1553877522-43269d4ea984?w=800&q=80&auto=format&fit=crop",     // team watching screen together
+  womanLaptop: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=800&q=80&auto=format&fit=crop", // professional woman at laptop
+  pairWork: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&q=80&auto=format&fit=crop",    // diverse group at table with laptops
+  focusedDev: "https://images.unsplash.com/photo-1551434678-e076c223a692?w=800&q=80&auto=format&fit=crop",     // developer typing on laptop, warm light
 };
 
 /* ── Twitter Lifestyle (1500 x 500) ── */
@@ -2553,24 +2560,84 @@ export function LinkedInAdC() {
 }
 
 /* ══════════════════════════════════════════════════
+   VIBRANT BANNER SHELL — vivid gradient variant
+   for high-energy LinkedIn ads that pop in the feed
+   ══════════════════════════════════════════════════ */
+
+function VibrantBannerShell({
+  aspectRatio,
+  children,
+  className,
+  accent = "blue",
+}: {
+  aspectRatio: string;
+  children: React.ReactNode;
+  className?: string;
+  accent?: "blue" | "purple" | "cyan" | "emerald" | "orange";
+}) {
+  const gradients: Record<string, { bg: string; stripe: string }> = {
+    blue: {
+      bg: "radial-gradient(ellipse 80% 60% at 60% 50%, rgba(37,99,235,0.25) 0%, transparent 70%), radial-gradient(ellipse 50% 40% at 20% 80%, rgba(96,165,250,0.15) 0%, transparent 60%)",
+      stripe: "linear-gradient(90deg, #2563EB 0%, #60A5FA 30%, #818CF8 60%, #2563EB 100%)",
+    },
+    purple: {
+      bg: "radial-gradient(ellipse 80% 60% at 55% 45%, rgba(139,92,246,0.25) 0%, transparent 70%), radial-gradient(ellipse 50% 40% at 80% 80%, rgba(168,85,247,0.15) 0%, transparent 60%)",
+      stripe: "linear-gradient(90deg, #7C3AED 0%, #A78BFA 30%, #C084FC 60%, #7C3AED 100%)",
+    },
+    cyan: {
+      bg: "radial-gradient(ellipse 80% 60% at 60% 50%, rgba(6,182,212,0.25) 0%, transparent 70%), radial-gradient(ellipse 50% 40% at 30% 75%, rgba(34,211,238,0.15) 0%, transparent 60%)",
+      stripe: "linear-gradient(90deg, #0891B2 0%, #22D3EE 30%, #67E8F9 60%, #0891B2 100%)",
+    },
+    emerald: {
+      bg: "radial-gradient(ellipse 80% 60% at 55% 50%, rgba(16,185,129,0.25) 0%, transparent 70%), radial-gradient(ellipse 50% 40% at 80% 80%, rgba(52,211,153,0.15) 0%, transparent 60%)",
+      stripe: "linear-gradient(90deg, #059669 0%, #34D399 30%, #6EE7B7 60%, #059669 100%)",
+    },
+    orange: {
+      bg: "radial-gradient(ellipse 80% 60% at 55% 50%, rgba(249,115,22,0.25) 0%, transparent 70%), radial-gradient(ellipse 50% 40% at 30% 75%, rgba(251,146,60,0.15) 0%, transparent 60%)",
+      stripe: "linear-gradient(90deg, #EA580C 0%, #FB923C 30%, #FDBA74 60%, #EA580C 100%)",
+    },
+  };
+  const g = gradients[accent];
+  return (
+    <div
+      className={cn("w-full rounded-xl overflow-hidden relative bg-[#0A0E1A]", className)}
+      style={{ aspectRatio }}
+    >
+      {/* Vivid radial glows */}
+      <div className="absolute inset-0" style={{ background: g.bg }} />
+      {/* Bright accent stripe — thicker than standard */}
+      <div
+        className="absolute bottom-0 left-0 right-0 h-1.5 z-20"
+        style={{ background: g.stripe }}
+      />
+      {/* Content */}
+      <div className="absolute inset-0 p-4 sm:p-6 flex flex-col justify-between z-10">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════
    AUDIENCE-TARGETED LINKEDIN ADS — 1200 x 627
    Each targets a specific buyer persona with tailored
-   messaging, pain points, and visual focus.
+   messaging, pain points, lifestyle photos of people
+   using AI at computers, and staggered mockup overlays.
    ══════════════════════════════════════════════════ */
 
 /* ── Ad D: Engineering Managers — Shadow AI Risk ── */
 export function LinkedInAdD() {
   return (
-    <LifestyleBannerShell aspectRatio="1200/627">
+    <VibrantBannerShell aspectRatio="1200/627" accent="purple">
       <div className="flex items-center h-full gap-4 sm:gap-6">
         <div className="flex-1 space-y-2.5 sm:space-y-3 max-w-[42%]">
           <BannerWordmark size="md" />
           <p className="text-white text-xs sm:text-lg font-bold leading-snug">
             Your Devs Use AI Daily.
             <br />
-            Do You Know What
+            <span className="text-red-400">Do You Know What</span>
             <br />
-            They&apos;re Sharing?
+            <span className="text-red-400">They&apos;re Sharing?</span>
           </p>
           <p className="text-white/60 text-[9px] sm:text-xs leading-snug max-w-[220px]">
             DLP scanning catches API keys &amp; secrets before they reach any AI model
@@ -2585,27 +2652,28 @@ export function LinkedInAdD() {
         <div className="w-[52%] relative">
           <div className="flex items-start">
             <LifestylePhoto
-              src={lifestylePhotos.solo}
-              alt="Developer working at screen"
+              src={lifestylePhotos.coding}
+              alt="Developer coding on monitor"
               className="w-[50%] aspect-[4/3]"
+              rotate={-2}
             />
-            <div className="w-[55%] space-y-2 -ml-8 relative z-10">
+            <div className="w-[55%] space-y-2 -ml-10 mt-3 relative z-10">
               <DLPBlockScene compact />
               <VaultScene compact />
             </div>
           </div>
-          <FrostedBadge icon={Shield} headline="API key blocked" subtitle="Before it reached ChatGPT" color="red" className="top-[35%] left-[32%]" />
+          <FrostedBadge icon={Shield} headline="API key blocked" subtitle="Before it reached ChatGPT" color="red" className="top-[30%] left-[28%]" />
           <FrostedBadge icon={Lock} headline="Zero data leaks" subtitle="Real-time scanning" color="emerald" className="-bottom-3 left-[5%]" />
         </div>
       </div>
-    </LifestyleBannerShell>
+    </VibrantBannerShell>
   );
 }
 
 /* ── Ad E: CISO / Security Leaders ── */
 export function LinkedInAdE() {
   return (
-    <MockupBannerShell aspectRatio="1200/627">
+    <VibrantBannerShell aspectRatio="1200/627" accent="blue">
       <div className="flex items-center h-full gap-4 sm:gap-6">
         <div className="flex-1 space-y-2.5 sm:space-y-3 max-w-[42%]">
           <BannerWordmark size="md" />
@@ -2626,16 +2694,22 @@ export function LinkedInAdE() {
             <FeaturePill label="Violation Alerts" />
           </div>
         </div>
-        <div className="w-[55%]">
-          <StaggeredMockup
-            screenshots={[
-              { src: "/store-assets/screenshot-light-3-dlp-block.png", alt: "DLP blocking sensitive data" },
-              { src: "/store-assets/screenshot-light-1-prompts.png", alt: "Secure prompt library" },
-            ]}
-          />
+        <div className="w-[52%] relative">
+          <div className="flex items-start">
+            <LifestylePhoto
+              src={lifestylePhotos.teamScreen}
+              alt="Team analyzing data on screens"
+              className="w-[50%] aspect-[4/3]"
+            />
+            <div className="w-[55%] space-y-2 -ml-6 mt-2 relative z-10">
+              <DLPBlockScene compact />
+            </div>
+          </div>
+          <FrostedBadge icon={Shield} headline="PII detected" subtitle="Auto-blocked instantly" color="red" className="top-[40%] left-[30%]" />
+          <FrostedBadge icon={Lock} headline="Full audit trail" subtitle="Every AI interaction" color="blue" className="-bottom-3 left-[5%]" />
         </div>
       </div>
-    </MockupBannerShell>
+    </VibrantBannerShell>
   );
 }
 
@@ -2651,7 +2725,7 @@ export function LinkedInAdF() {
             <br />
             Across Your Org
             <br />
-            in Minutes
+            <span className="text-blue-400">in Minutes</span>
           </p>
           <p className="text-white/60 text-[9px] sm:text-xs leading-snug max-w-[220px]">
             One library. Every team. Consistent, compliant AI usage — no training needed.
@@ -2669,6 +2743,7 @@ export function LinkedInAdF() {
               src={lifestylePhotos.team2}
               alt="Team in meeting room with laptops"
               className="w-[50%] aspect-[4/3]"
+              rotate={1}
             />
             <div className="w-[55%] space-y-2 -ml-8 relative z-10">
               <VaultScene compact />
@@ -2686,16 +2761,16 @@ export function LinkedInAdF() {
 /* ── Ad G: Agency / Consulting — Client Consistency ── */
 export function LinkedInAdG() {
   return (
-    <MockupBannerShell aspectRatio="1200/627">
+    <VibrantBannerShell aspectRatio="1200/627" accent="cyan">
       <div className="flex items-center h-full gap-4 sm:gap-6">
         <div className="flex-1 space-y-2.5 sm:space-y-3 max-w-[42%]">
           <BannerWordmark size="md" />
           <p className="text-white text-xs sm:text-lg font-bold leading-snug">
             One Prompt Library.
             <br />
-            Every Client.
+            <span className="text-cyan-300">Every Client.</span>
             <br />
-            Total Consistency.
+            <span className="text-cyan-300">Total Consistency.</span>
           </p>
           <p className="text-white/60 text-[9px] sm:text-xs leading-snug max-w-[220px]">
             Your best frameworks, shared instantly. No more &ldquo;what prompt did you use?&rdquo;
@@ -2707,28 +2782,35 @@ export function LinkedInAdG() {
           </div>
           <CompatibilityLine />
         </div>
-        <div className="w-[55%]">
-          <StaggeredMockup
-            screenshots={[
-              { src: "/store-assets/screenshot-light-1-prompts.png", alt: "Shared prompt library" },
-              { src: "/store-assets/screenshot-light-3-dlp-block.png", alt: "Data protection for clients" },
-            ]}
-          />
+        <div className="w-[52%] relative">
+          <div className="flex items-start">
+            <LifestylePhoto
+              src={lifestylePhotos.womanLaptop}
+              alt="Professional at laptop"
+              className="w-[50%] aspect-[4/3]"
+              rotate={-1}
+            />
+            <div className="w-[55%] space-y-2 -ml-10 mt-4 relative z-10">
+              <VaultScene compact />
+            </div>
+          </div>
+          <FrostedBadge icon={Zap} headline="One-click insert" subtitle="Into any AI tool" color="emerald" className="top-[35%] left-[30%]" />
+          <FrostedBadge icon={BarChart3} headline="5 clients" subtitle="Same quality output" color="blue" className="-bottom-3 left-[5%]" />
         </div>
       </div>
-    </MockupBannerShell>
+    </VibrantBannerShell>
   );
 }
 
 /* ── Ad H: Startup CTO — Speed + Version Control ── */
 export function LinkedInAdH() {
   return (
-    <LifestyleBannerShell aspectRatio="1200/627">
+    <VibrantBannerShell aspectRatio="1200/627" accent="emerald">
       <div className="flex items-center h-full gap-4 sm:gap-6">
         <div className="flex-1 space-y-2.5 sm:space-y-3 max-w-[42%]">
           <BannerWordmark size="md" />
           <p className="text-white text-xs sm:text-lg font-bold leading-snug">
-            Ship Faster.
+            <span className="text-emerald-300">Ship Faster.</span>
             <br />
             Every Prompt,
             <br />
@@ -2747,11 +2829,12 @@ export function LinkedInAdH() {
         <div className="w-[52%] relative">
           <div className="flex items-start">
             <LifestylePhoto
-              src={lifestylePhotos.og}
-              alt="Developer typing on laptop"
+              src={lifestylePhotos.focusedDev}
+              alt="Developer focused on laptop"
               className="w-[50%] aspect-[4/3]"
+              rotate={2}
             />
-            <div className="w-[55%] space-y-2 -ml-8 relative z-10">
+            <div className="w-[55%] space-y-2 -ml-8 mt-1 relative z-10">
               <VaultScene compact />
             </div>
           </div>
@@ -2759,14 +2842,14 @@ export function LinkedInAdH() {
           <FrostedBadge icon={BarChart3} headline="v12 → v13" subtitle="Version history" color="blue" className="-bottom-3 left-[5%]" />
         </div>
       </div>
-    </LifestyleBannerShell>
+    </VibrantBannerShell>
   );
 }
 
 /* ── Ad I: Sales Leaders — Best Rep's Prompts ── */
 export function LinkedInAdI() {
   return (
-    <MockupBannerShell aspectRatio="1200/627">
+    <LifestyleBannerShell aspectRatio="1200/627">
       <div className="flex items-center h-full gap-4 sm:gap-6">
         <div className="flex-1 space-y-2.5 sm:space-y-3 max-w-[42%]">
           <BannerWordmark size="md" />
@@ -2775,7 +2858,7 @@ export function LinkedInAdI() {
             <br />
             Best Prompts.
             <br />
-            Available to Everyone.
+            <span className="text-blue-400">Available to Everyone.</span>
           </p>
           <p className="text-white/60 text-[9px] sm:text-xs leading-snug max-w-[220px]">
             Turn individual AI wins into team-wide playbooks — outreach, proposals, research
@@ -2787,32 +2870,40 @@ export function LinkedInAdI() {
           </div>
           <CompatibilityLine />
         </div>
-        <div className="w-[55%]">
-          <StaggeredMockup
-            screenshots={[
-              { src: "/store-assets/screenshot-light-1-prompts.png", alt: "Prompt library with sales templates" },
-              { src: "/store-assets/screenshot-light-3-dlp-block.png", alt: "Protected client data" },
-            ]}
-          />
+        <div className="w-[52%] relative">
+          <div className="flex items-start">
+            <LifestylePhoto
+              src={lifestylePhotos.pairWork}
+              alt="Team collaborating on laptops"
+              className="w-[50%] aspect-[4/3]"
+              rotate={-1}
+            />
+            <div className="w-[55%] space-y-2 -ml-10 mt-2 relative z-10">
+              <VaultScene compact />
+              <AnalyticsScene compact />
+            </div>
+          </div>
+          <FrostedBadge icon={TrendingUp} headline="+34% close rate" subtitle="With shared prompts" color="emerald" className="top-[30%] left-[28%]" />
+          <FrostedBadge icon={Users} headline="Team playbook" subtitle="12 prompts shared" color="blue" className="-bottom-3 left-[5%]" />
         </div>
       </div>
-    </MockupBannerShell>
+    </LifestyleBannerShell>
   );
 }
 
 /* ── Ad J: Product Managers — Scale What Works ── */
 export function LinkedInAdJ() {
   return (
-    <LifestyleBannerShell aspectRatio="1200/627">
+    <VibrantBannerShell aspectRatio="1200/627" accent="purple">
       <div className="flex items-center h-full gap-4 sm:gap-6">
         <div className="flex-1 space-y-2.5 sm:space-y-3 max-w-[42%]">
           <BannerWordmark size="md" />
           <p className="text-white text-xs sm:text-lg font-bold leading-snug">
             Stop Reinventing
             <br />
-            Prompts. Start Scaling
+            Prompts. <span className="text-purple-300">Start Scaling</span>
             <br />
-            What Works.
+            <span className="text-purple-300">What Works.</span>
           </p>
           <p className="text-white/60 text-[9px] sm:text-xs leading-snug max-w-[220px]">
             Templatize your best AI workflows with variables and share across teams
@@ -2827,11 +2918,11 @@ export function LinkedInAdJ() {
         <div className="w-[52%] relative">
           <div className="flex items-start">
             <LifestylePhoto
-              src={lifestylePhotos.office}
-              alt="Team collaborating around table"
+              src={lifestylePhotos.teamScreen}
+              alt="Team analyzing data on screens"
               className="w-[50%] aspect-[4/3]"
             />
-            <div className="w-[55%] space-y-2 -ml-8 relative z-10">
+            <div className="w-[55%] space-y-2 -ml-8 mt-3 relative z-10">
               <VaultScene compact />
               <AnalyticsScene compact />
             </div>
@@ -2840,19 +2931,19 @@ export function LinkedInAdJ() {
           <FrostedBadge icon={Users} headline="4 teams" subtitle="Using this template" color="emerald" className="-bottom-3 left-[5%]" />
         </div>
       </div>
-    </LifestyleBannerShell>
+    </VibrantBannerShell>
   );
 }
 
 /* ── Ad K: COO / Exec — AI Visibility ── */
 export function LinkedInAdK() {
   return (
-    <MockupBannerShell aspectRatio="1200/627">
+    <VibrantBannerShell aspectRatio="1200/627" accent="orange">
       <div className="flex items-center h-full gap-4 sm:gap-6">
         <div className="flex-1 space-y-2.5 sm:space-y-3 max-w-[42%]">
           <BannerWordmark size="md" />
           <p className="text-white text-xs sm:text-lg font-bold leading-snug">
-            See Exactly How
+            See <span className="text-amber-300">Exactly</span> How
             <br />
             Your Team Uses AI
           </p>
@@ -2860,7 +2951,7 @@ export function LinkedInAdK() {
             Who&apos;s using which tools, how often, and what&apos;s working — all in one dashboard
           </p>
           <div className="space-y-1">
-            <p className="text-blue-300/90 text-[9px] sm:text-xs font-semibold">Real-time org-wide analytics</p>
+            <p className="text-amber-300/90 text-[9px] sm:text-xs font-semibold">Real-time org-wide analytics</p>
             <p className="text-white/50 text-[8px] sm:text-[11px]">Extension activity &middot; Usage trends &middot; ROI metrics</p>
           </div>
           <div className="flex flex-wrap gap-1.5">
@@ -2868,16 +2959,24 @@ export function LinkedInAdK() {
             <FeaturePill label="Team Insights" />
           </div>
         </div>
-        <div className="w-[55%]">
-          <StaggeredMockup
-            screenshots={[
-              { src: "/store-assets/screenshot-light-1-prompts.png", alt: "Organization dashboard" },
-              { src: "/store-assets/screenshot-light-3-dlp-block.png", alt: "Security and compliance view" },
-            ]}
-          />
+        <div className="w-[52%] relative">
+          <div className="flex items-start">
+            <LifestylePhoto
+              src={lifestylePhotos.office}
+              alt="Team collaborating around table"
+              className="w-[50%] aspect-[4/3]"
+              rotate={1}
+            />
+            <div className="w-[55%] space-y-2 -ml-10 mt-2 relative z-10">
+              <AnalyticsScene compact />
+              <VaultScene compact />
+            </div>
+          </div>
+          <FrostedBadge icon={TrendingUp} headline="Usage +48%" subtitle="vs last quarter" color="amber" className="top-[30%] left-[28%]" />
+          <FrostedBadge icon={BarChart3} headline="ROI tracked" subtitle="Per team &amp; tool" color="blue" className="-bottom-3 left-[5%]" />
         </div>
       </div>
-    </MockupBannerShell>
+    </VibrantBannerShell>
   );
 }
 
@@ -2891,9 +2990,9 @@ export function LinkedInAdL() {
           <p className="text-white text-xs sm:text-lg font-bold leading-snug">
             Train Your Team
             <br />
-            on AI — the
+            on AI — <span className="text-emerald-400">the</span>
             <br />
-            Right Way
+            <span className="text-emerald-400">Right Way</span>
           </p>
           <p className="text-white/60 text-[9px] sm:text-xs leading-snug max-w-[220px]">
             Pre-built prompt templates with guardrails. Your team gets AI superpowers without the risk.
@@ -2908,11 +3007,12 @@ export function LinkedInAdL() {
         <div className="w-[52%] relative">
           <div className="flex items-start">
             <LifestylePhoto
-              src={lifestylePhotos.linkedin}
-              alt="Diverse team working at computers"
+              src={lifestylePhotos.pairWork}
+              alt="Diverse team collaborating on laptops"
               className="w-[50%] aspect-[4/3]"
+              rotate={-2}
             />
-            <div className="w-[55%] space-y-2 -ml-8 relative z-10">
+            <div className="w-[55%] space-y-2 -ml-8 mt-1 relative z-10">
               <VaultScene compact />
               <DLPBlockScene compact />
             </div>
@@ -2928,14 +3028,14 @@ export function LinkedInAdL() {
 /* ── Ad M: Enterprise Compliance — Friction-Free ── */
 export function LinkedInAdM() {
   return (
-    <MockupBannerShell aspectRatio="1200/627">
+    <VibrantBannerShell aspectRatio="1200/627" accent="blue">
       <div className="flex items-center h-full gap-4 sm:gap-6">
         <div className="flex-1 space-y-2.5 sm:space-y-3 max-w-[42%]">
           <BannerWordmark size="md" />
           <p className="text-white text-xs sm:text-lg font-bold leading-snug">
             AI Compliance
             <br />
-            Without the Friction
+            <span className="text-blue-300">Without the Friction</span>
           </p>
           <p className="text-white/60 text-[9px] sm:text-xs leading-snug max-w-[220px]">
             Regex-powered DLP rules, audit trails, and approval workflows — all without blocking productivity
@@ -2950,16 +3050,23 @@ export function LinkedInAdM() {
             <FeaturePill label="Approval Flows" />
           </div>
         </div>
-        <div className="w-[55%]">
-          <StaggeredMockup
-            screenshots={[
-              { src: "/store-assets/screenshot-light-3-dlp-block.png", alt: "DLP rules catching violations" },
-              { src: "/store-assets/screenshot-light-1-prompts.png", alt: "Governed prompt library" },
-            ]}
-          />
+        <div className="w-[52%] relative">
+          <div className="flex items-start">
+            <LifestylePhoto
+              src={lifestylePhotos.womanLaptop}
+              alt="Professional working at laptop"
+              className="w-[50%] aspect-[4/3]"
+              rotate={1}
+            />
+            <div className="w-[55%] space-y-2 -ml-6 mt-3 relative z-10">
+              <DLPBlockScene compact />
+            </div>
+          </div>
+          <FrostedBadge icon={Shield} headline="Compliant" subtitle="SOC 2 &amp; GDPR ready" color="emerald" className="top-[40%] left-[30%]" />
+          <FrostedBadge icon={Lock} headline="Every interaction" subtitle="Fully audited" color="blue" className="-bottom-3 left-[5%]" />
         </div>
       </div>
-    </MockupBannerShell>
+    </VibrantBannerShell>
   );
 }
 

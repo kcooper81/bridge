@@ -25,7 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowLeft, ArrowUpDown, CheckCircle2, FileSpreadsheet, Loader2, Mail, Pencil, Plug, Plus, Search, Shield, ShieldOff, Trash2, UserPlus, Users, X } from "lucide-react";
+import { ArrowLeft, ArrowUpDown, CheckCircle2, FileSpreadsheet, LayoutList, Loader2, Mail, Network, Pencil, Plug, Plus, Search, Shield, ShieldOff, Trash2, UserPlus, Users, X } from "lucide-react";
 import { SelectWithQuickAdd } from "@/components/ui/select-with-quick-add";
 import { ExtensionStatusBadge } from "@/components/dashboard/extension-status-badge";
 import { NoOrgBanner } from "@/components/dashboard/no-org-banner";
@@ -76,6 +76,9 @@ export default function TeamPage() {
   const [removingMemberId, setRemovingMemberId] = useState<string | null>(null);
   const [removingFromTeamId, setRemovingFromTeamId] = useState<string | null>(null);
   const [togglingShieldId, setTogglingShieldId] = useState<string | null>(null);
+
+  // View mode toggle
+  const [teamViewMode, setTeamViewMode] = useState<"table" | "chart">("table");
 
   // Bulk role assignment
   const [selectedMemberIds, setSelectedMemberIds] = useState<Set<string>>(new Set());
@@ -152,7 +155,8 @@ export default function TeamPage() {
   const [memberShieldFilter, setMemberShieldFilter] = useState<"all" | "enabled" | "disabled">("all");
   const [memberSort, setMemberSort] = useState<{ key: "name" | "email" | "role"; dir: "asc" | "desc" }>({ key: "name", dir: "asc" });
 
-  const filteredMembers = useMemo(() => {
+  // Members after search/role/shield filters but BEFORE team filter (for accurate chip counts)
+  const membersPreTeamFilter = useMemo(() => {
     let result = [...members];
 
     if (memberSearch.trim()) {
@@ -160,10 +164,6 @@ export default function TeamPage() {
       result = result.filter(
         (m) => m.name?.toLowerCase().includes(q) || m.email.toLowerCase().includes(q)
       );
-    }
-
-    if (memberTeamFilter !== "all") {
-      result = result.filter((m) => m.teamIds.includes(memberTeamFilter));
     }
 
     if (memberRoleFilter !== "all") {
@@ -174,6 +174,16 @@ export default function TeamPage() {
       result = result.filter((m) =>
         memberShieldFilter === "disabled" ? m.shield_disabled : !m.shield_disabled
       );
+    }
+
+    return result;
+  }, [members, memberSearch, memberRoleFilter, memberShieldFilter]);
+
+  const filteredMembers = useMemo(() => {
+    let result = [...membersPreTeamFilter];
+
+    if (memberTeamFilter !== "all") {
+      result = result.filter((m) => m.teamIds.includes(memberTeamFilter));
     }
 
     result.sort((a, b) => {
@@ -193,7 +203,7 @@ export default function TeamPage() {
     });
 
     return result;
-  }, [members, memberSearch, memberTeamFilter, memberRoleFilter, memberShieldFilter, memberSort]);
+  }, [membersPreTeamFilter, memberTeamFilter, memberSort]);
 
   const handleMemberSort = (key: "name" | "email" | "role") => {
     setMemberSort((prev) =>
@@ -354,7 +364,7 @@ export default function TeamPage() {
           setInviteEmail("");
           setInviteTeamId("");
           setInviteModalOpen(false);
-          refresh();
+          await refresh();
         } else {
           toast.error("Failed to add member to team");
         }
@@ -411,7 +421,7 @@ export default function TeamPage() {
         toast.success("Member added to team");
         setAddMemberToTeamOpen(false);
         setSelectedMemberToAdd("");
-        refresh();
+        await refresh();
       } else {
         toast.error("Failed to add member to team");
       }
@@ -427,7 +437,7 @@ export default function TeamPage() {
       const success = await removeTeamMember(teamId, userId);
       if (success) {
         toast.success("Removed from team");
-        refresh();
+        await refresh();
       } else {
         toast.error("Failed to remove from team");
       }
@@ -749,6 +759,26 @@ export default function TeamPage() {
                 </SelectContent>
               </Select>
             )}
+            <div className="flex items-center gap-0.5 rounded-lg border border-border p-0.5">
+              <Button
+                variant={teamViewMode === "table" ? "secondary" : "ghost"}
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => setTeamViewMode("table")}
+                title="Table view"
+              >
+                <LayoutList className="h-3.5 w-3.5" />
+              </Button>
+              <Button
+                variant={teamViewMode === "chart" ? "secondary" : "ghost"}
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => setTeamViewMode("chart")}
+                title="Org chart view"
+              >
+                <Network className="h-3.5 w-3.5" />
+              </Button>
+            </div>
           </div>
         </div>
         {teams.length > 0 && (
@@ -773,7 +803,7 @@ export default function TeamPage() {
               >
                 {team.name}
                 <span className="ml-1 text-[10px] opacity-60">
-                  {members.filter((m) => m.teamIds.includes(team.id)).length}
+                  {membersPreTeamFilter.filter((m) => m.teamIds.includes(team.id)).length}
                 </span>
               </Button>
             ))}
@@ -803,13 +833,188 @@ export default function TeamPage() {
         </div>
       )}
 
+      {/* Org Chart View */}
+      {teamViewMode === "chart" && (
+        <div className="space-y-6">
+          {/* Unassigned members */}
+          {(() => {
+            const unassigned = filteredMembers.filter((m) => m.teamIds.length === 0);
+            const assigned = teams.map((team) => ({
+              team,
+              members: filteredMembers.filter((m) => m.teamIds.includes(team.id)),
+            })).filter((g) => g.members.length > 0 || true);
+
+            return (
+              <>
+                {/* Organization header node */}
+                <div className="flex flex-col items-center">
+                  <div className="rounded-xl border-2 border-primary/30 bg-primary/5 px-6 py-3 shadow-sm">
+                    <p className="text-sm font-semibold text-primary">{members.length} Members</p>
+                    <p className="text-xs text-muted-foreground text-center">{teams.length} Teams</p>
+                  </div>
+                  {/* Connector line */}
+                  <div className="w-px h-6 bg-border" />
+                </div>
+
+                {/* Teams grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+                  {assigned.map(({ team, members: teamMembers }) => {
+                    const admins = teamMembers.filter((m) => m.role === "admin" || m.teamRoles[team.id] === "admin");
+                    const rest = teamMembers.filter((m) => m.role !== "admin" && m.teamRoles[team.id] !== "admin");
+                    return (
+                      <div
+                        key={team.id}
+                        className="group rounded-xl border border-border bg-card shadow-sm hover:shadow-md hover:border-primary/20 transition-all duration-200"
+                      >
+                        {/* Team header */}
+                        <div className="flex items-center justify-between border-b border-border/50 px-4 py-3">
+                          <div className="min-w-0">
+                            <h3 className="font-semibold text-sm truncate">{team.name}</h3>
+                            {team.description && (
+                              <p className="text-xs text-muted-foreground truncate">{team.description}</p>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <Badge variant="secondary" className="text-[10px]">
+                              {teamMembers.length} {teamMembers.length === 1 ? "member" : "members"}
+                            </Badge>
+                            {currentUserRole === "admin" && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
+                                onClick={() => setSelectedTeam(team)}
+                                title="Manage team"
+                              >
+                                <Pencil className="h-3.5 w-3.5" />
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Team members */}
+                        <div className="p-3 space-y-1">
+                          {teamMembers.length === 0 ? (
+                            <p className="text-xs text-muted-foreground text-center py-4">No members</p>
+                          ) : (
+                            <>
+                              {/* Team leads/admins first */}
+                              {admins.map((m) => {
+                                const initials = m.name?.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2) || "U";
+                                return (
+                                  <div key={m.id} className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 hover:bg-muted/50 transition-colors">
+                                    <div className="relative">
+                                      <Avatar className="h-8 w-8">
+                                        {m.avatar_url && <AvatarImage src={m.avatar_url} />}
+                                        <AvatarFallback className="bg-primary/20 text-primary text-[10px]">{initials}</AvatarFallback>
+                                      </Avatar>
+                                      <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-card bg-amber-500" title="Team Lead" />
+                                    </div>
+                                    <div className="min-w-0 flex-1">
+                                      <p className="text-xs font-medium truncate">{m.name || m.email}</p>
+                                      <p className="text-[10px] text-muted-foreground truncate">{m.email}</p>
+                                    </div>
+                                    <Badge variant="outline" className="text-[9px] px-1.5 py-0 capitalize shrink-0">
+                                      {m.teamRoles[team.id] || m.role}
+                                    </Badge>
+                                  </div>
+                                );
+                              })}
+                              {rest.map((m) => {
+                                const initials = m.name?.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2) || "U";
+                                return (
+                                  <div key={m.id} className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 hover:bg-muted/50 transition-colors">
+                                    <Avatar className="h-8 w-8">
+                                      {m.avatar_url && <AvatarImage src={m.avatar_url} />}
+                                      <AvatarFallback className="bg-muted text-muted-foreground text-[10px]">{initials}</AvatarFallback>
+                                    </Avatar>
+                                    <div className="min-w-0 flex-1">
+                                      <p className="text-xs font-medium truncate">{m.name || m.email}</p>
+                                      <p className="text-[10px] text-muted-foreground truncate">{m.email}</p>
+                                    </div>
+                                    <Badge variant="outline" className="text-[9px] px-1.5 py-0 capitalize shrink-0">
+                                      {m.teamRoles[team.id] || m.role}
+                                    </Badge>
+                                  </div>
+                                );
+                              })}
+                            </>
+                          )}
+                        </div>
+
+                        {/* Stacked avatar footer */}
+                        {teamMembers.length > 0 && (
+                          <div className="flex items-center gap-2 border-t border-border/50 px-4 py-2">
+                            <div className="flex -space-x-2">
+                              {teamMembers.slice(0, 5).map((m) => {
+                                const initials = m.name?.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2) || "U";
+                                return (
+                                  <Avatar key={m.id} className="h-6 w-6 border-2 border-card">
+                                    {m.avatar_url && <AvatarImage src={m.avatar_url} />}
+                                    <AvatarFallback className="bg-muted text-[8px]">{initials}</AvatarFallback>
+                                  </Avatar>
+                                );
+                              })}
+                            </div>
+                            {teamMembers.length > 5 && (
+                              <span className="text-[10px] text-muted-foreground">+{teamMembers.length - 5} more</span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+
+                  {/* Unassigned card */}
+                  {unassigned.length > 0 && (
+                    <div className="rounded-xl border border-dashed border-border bg-muted/20">
+                      <div className="flex items-center justify-between border-b border-border/50 px-4 py-3">
+                        <div>
+                          <h3 className="font-semibold text-sm text-muted-foreground">Unassigned</h3>
+                          <p className="text-xs text-muted-foreground/70">Not on any team</p>
+                        </div>
+                        <Badge variant="outline" className="text-[10px]">
+                          {unassigned.length} {unassigned.length === 1 ? "member" : "members"}
+                        </Badge>
+                      </div>
+                      <div className="p-3 space-y-1">
+                        {unassigned.map((m) => {
+                          const initials = m.name?.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2) || "U";
+                          return (
+                            <div key={m.id} className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 hover:bg-muted/50 transition-colors">
+                              <Avatar className="h-8 w-8">
+                                {m.avatar_url && <AvatarImage src={m.avatar_url} />}
+                                <AvatarFallback className="bg-muted text-muted-foreground text-[10px]">{initials}</AvatarFallback>
+                              </Avatar>
+                              <div className="min-w-0 flex-1">
+                                <p className="text-xs font-medium truncate">{m.name || m.email}</p>
+                                <p className="text-[10px] text-muted-foreground truncate">{m.email}</p>
+                              </div>
+                              <Badge variant="outline" className="text-[9px] px-1.5 py-0 capitalize shrink-0">
+                                {m.role}
+                              </Badge>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </>
+            );
+          })()}
+        </div>
+      )}
+
       {/* Result count */}
-      <p className="text-xs text-muted-foreground mb-2">
-        {filteredMembers.length} member{filteredMembers.length !== 1 ? "s" : ""}
-      </p>
+      {teamViewMode === "table" && (
+        <p className="text-xs text-muted-foreground mb-2">
+          {filteredMembers.length} member{filteredMembers.length !== 1 ? "s" : ""}
+        </p>
+      )}
 
       {/* Members Table */}
-      <Card>
+      {teamViewMode === "table" && <Card>
         <CardContent className="p-0">
           {filteredMembers.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -979,7 +1184,7 @@ export default function TeamPage() {
             </div>
           )}
         </CardContent>
-      </Card>
+      </Card>}
 
       {/* Pending Invites */}
       {pendingInvites.length > 0 && (

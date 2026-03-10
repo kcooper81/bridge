@@ -180,9 +180,10 @@ export function OrgProvider({ children }: { children: React.ReactNode }) {
 
     const [teamMembersRes] = await Promise.all([
       orgTeamIds.length > 0
-        ? supabase.from("team_members").select("*").in("team_id", orgTeamIds)
+        ? supabase.from("team_members").select("team_id, user_id, role").in("team_id", orgTeamIds)
         : Promise.resolve({ data: [], error: null }),
     ]);
+    if (teamMembersRes.error) console.error("Failed to fetch team_members:", teamMembersRes.error);
 
     // Map team memberships
     const teamMemberMap = new Map<string, string[]>();

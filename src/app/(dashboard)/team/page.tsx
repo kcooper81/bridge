@@ -302,6 +302,10 @@ export default function TeamPage() {
     return members.find((m) => m.email.toLowerCase() === trimmed) || null;
   }, [inviteEmail, members]);
 
+  const adminMembers = useMemo(() => members.filter((m) => m.role === "admin"), [members]);
+  const isLastAdmin = currentUserRole === "admin" && adminMembers.length <= 1;
+  const nonAdminMembers = useMemo(() => members.filter((m) => m.role !== "admin" && !m.isCurrentUser), [members]);
+
   if (loading) {
     return (
       <>
@@ -420,10 +424,6 @@ export default function TeamPage() {
       setRemovingMemberId(null);
     }
   }
-
-  const adminMembers = useMemo(() => members.filter((m) => m.role === "admin"), [members]);
-  const isLastAdmin = currentUserRole === "admin" && adminMembers.length <= 1;
-  const nonAdminMembers = useMemo(() => members.filter((m) => m.role !== "admin" && !m.isCurrentUser), [members]);
 
   async function handleTransferAdmin() {
     if (!transferTargetId) {

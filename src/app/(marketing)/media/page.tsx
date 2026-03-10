@@ -63,6 +63,16 @@ import {
   LinkedInAdA,
   LinkedInAdB,
   LinkedInAdC,
+  LinkedInAdD,
+  LinkedInAdE,
+  LinkedInAdF,
+  LinkedInAdG,
+  LinkedInAdH,
+  LinkedInAdI,
+  LinkedInAdJ,
+  LinkedInAdK,
+  LinkedInAdL,
+  LinkedInAdM,
 } from "./_components/social-banners";
 
 export const metadata: Metadata = generatePageMetadata({
@@ -1490,10 +1500,12 @@ export default function MediaPage() {
               LinkedIn Ad Images — Ready to Use
             </h3>
             <p className="text-sm text-muted-foreground mb-6">
-              1200 x 627px — the exact size for LinkedIn single image ads. Right-click &rarr; Save, or use the download button. Each matches an ad variation above.
+              1200 x 627px — the exact size for LinkedIn single image ads. 13 audience-targeted variations. Right-click &rarr; Save, or use the download button.
             </p>
-            <div className="space-y-6">
-              {/* Ad A */}
+
+            {/* General / Multi-Audience */}
+            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">General — Multi-Audience</h4>
+            <div className="space-y-5 mb-8">
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-xs font-semibold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Ad A</span>
@@ -1503,7 +1515,6 @@ export default function MediaPage() {
                   <LinkedInAdA />
                 </BannerDownloadWrapper>
               </div>
-              {/* Ad B */}
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-xs font-semibold bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">Ad B</span>
@@ -1513,7 +1524,6 @@ export default function MediaPage() {
                   <LinkedInAdB />
                 </BannerDownloadWrapper>
               </div>
-              {/* Ad C */}
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-xs font-semibold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">Ad C</span>
@@ -1521,6 +1531,126 @@ export default function MediaPage() {
                 </div>
                 <BannerDownloadWrapper filename="linkedin-ad-c-feature-led">
                   <LinkedInAdC />
+                </BannerDownloadWrapper>
+              </div>
+            </div>
+
+            {/* Security & Compliance */}
+            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Security &amp; Compliance</h4>
+            <div className="space-y-5 mb-8">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs font-semibold bg-red-100 text-red-700 px-2 py-0.5 rounded-full">Ad D</span>
+                  <span className="text-sm font-medium">Engineering Managers — &ldquo;Your Devs Use AI Daily. Do You Know What They&apos;re Sharing?&rdquo;</span>
+                </div>
+                <p className="text-xs text-muted-foreground mb-2">Target: VP Eng, Eng Directors, Tech Leads managing 10+ developers</p>
+                <BannerDownloadWrapper filename="linkedin-ad-d-eng-managers">
+                  <LinkedInAdD />
+                </BannerDownloadWrapper>
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs font-semibold bg-red-100 text-red-700 px-2 py-0.5 rounded-full">Ad E</span>
+                  <span className="text-sm font-medium">CISO / Security — &ldquo;91% of Employees Use AI. Are Your Secrets Safe?&rdquo;</span>
+                </div>
+                <p className="text-xs text-muted-foreground mb-2">Target: CISOs, InfoSec Directors, Security Engineers</p>
+                <BannerDownloadWrapper filename="linkedin-ad-e-ciso-security">
+                  <LinkedInAdE />
+                </BannerDownloadWrapper>
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs font-semibold bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full">Ad M</span>
+                  <span className="text-sm font-medium">Enterprise Compliance — &ldquo;AI Compliance Without the Friction&rdquo;</span>
+                </div>
+                <p className="text-xs text-muted-foreground mb-2">Target: Compliance Officers, GRC, Legal Ops at regulated industries</p>
+                <BannerDownloadWrapper filename="linkedin-ad-m-compliance">
+                  <LinkedInAdM />
+                </BannerDownloadWrapper>
+              </div>
+            </div>
+
+            {/* Leadership & Operations */}
+            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Leadership &amp; Operations</h4>
+            <div className="space-y-5 mb-8">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs font-semibold bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Ad F</span>
+                  <span className="text-sm font-medium">VP Ops / IT — &ldquo;Standardize AI Across Your Org in Minutes&rdquo;</span>
+                </div>
+                <p className="text-xs text-muted-foreground mb-2">Target: VP Operations, IT Directors, CIO, Digital Transformation leads</p>
+                <BannerDownloadWrapper filename="linkedin-ad-f-vp-ops">
+                  <LinkedInAdF />
+                </BannerDownloadWrapper>
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs font-semibold bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full">Ad K</span>
+                  <span className="text-sm font-medium">COO / Exec — &ldquo;See Exactly How Your Team Uses AI&rdquo;</span>
+                </div>
+                <p className="text-xs text-muted-foreground mb-2">Target: COO, CEO, VP Strategy — executives who want visibility</p>
+                <BannerDownloadWrapper filename="linkedin-ad-k-coo-visibility">
+                  <LinkedInAdK />
+                </BannerDownloadWrapper>
+              </div>
+            </div>
+
+            {/* Teams & Enablement */}
+            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Teams &amp; Enablement</h4>
+            <div className="space-y-5 mb-8">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs font-semibold bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full">Ad L</span>
+                  <span className="text-sm font-medium">HR / L&amp;D — &ldquo;Train Your Team on AI — the Right Way&rdquo;</span>
+                </div>
+                <p className="text-xs text-muted-foreground mb-2">Target: HR Directors, L&amp;D Managers, Chief People Officers</p>
+                <BannerDownloadWrapper filename="linkedin-ad-l-hr-training">
+                  <LinkedInAdL />
+                </BannerDownloadWrapper>
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs font-semibold bg-cyan-100 text-cyan-700 px-2 py-0.5 rounded-full">Ad I</span>
+                  <span className="text-sm font-medium">Sales Leaders — &ldquo;Your Top Rep&apos;s Best Prompts. Available to Everyone.&rdquo;</span>
+                </div>
+                <p className="text-xs text-muted-foreground mb-2">Target: VP Sales, Sales Ops, Revenue Leaders using AI for outreach</p>
+                <BannerDownloadWrapper filename="linkedin-ad-i-sales-leaders">
+                  <LinkedInAdI />
+                </BannerDownloadWrapper>
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs font-semibold bg-violet-100 text-violet-700 px-2 py-0.5 rounded-full">Ad J</span>
+                  <span className="text-sm font-medium">Product Managers — &ldquo;Stop Reinventing Prompts. Start Scaling What Works.&rdquo;</span>
+                </div>
+                <p className="text-xs text-muted-foreground mb-2">Target: Product Managers, PMs who use AI for specs, research, analysis</p>
+                <BannerDownloadWrapper filename="linkedin-ad-j-product-managers">
+                  <LinkedInAdJ />
+                </BannerDownloadWrapper>
+              </div>
+            </div>
+
+            {/* Startups & Agencies */}
+            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Startups &amp; Agencies</h4>
+            <div className="space-y-5">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs font-semibold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">Ad H</span>
+                  <span className="text-sm font-medium">Startup CTO — &ldquo;Ship Faster. Every Prompt, Version-Controlled.&rdquo;</span>
+                </div>
+                <p className="text-xs text-muted-foreground mb-2">Target: CTOs, technical co-founders at Series A-C startups</p>
+                <BannerDownloadWrapper filename="linkedin-ad-h-startup-cto">
+                  <LinkedInAdH />
+                </BannerDownloadWrapper>
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs font-semibold bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">Ad G</span>
+                  <span className="text-sm font-medium">Agency / Consulting — &ldquo;One Prompt Library. Every Client. Total Consistency.&rdquo;</span>
+                </div>
+                <p className="text-xs text-muted-foreground mb-2">Target: Agency owners, consulting partners, service delivery leads</p>
+                <BannerDownloadWrapper filename="linkedin-ad-g-agency">
+                  <LinkedInAdG />
                 </BannerDownloadWrapper>
               </div>
             </div>

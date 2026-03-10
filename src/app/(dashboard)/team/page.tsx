@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { AlertTriangle, ArrowLeft, ArrowUpDown, CheckCircle2, Clock, Crown, FileSpreadsheet, LayoutList, Loader2, Mail, Network, Pencil, Plug, Plus, RefreshCw, Search, Send, Shield, ShieldOff, Trash2, UserPlus, Users, X } from "lucide-react";
+import { AlertTriangle, ArrowLeft, ArrowUpDown, CheckCircle2, Clock, Crown, Eye, FileSpreadsheet, LayoutList, Loader2, Mail, Network, Pencil, Plug, Plus, RefreshCw, Search, Send, Settings, Shield, ShieldOff, Trash2, UserPlus, Users, X } from "lucide-react";
 import { getExtensionStatus } from "@/lib/extension-status";
 import { SelectWithQuickAdd } from "@/components/ui/select-with-quick-add";
 import { ExtensionStatusBadge } from "@/components/dashboard/extension-status-badge";
@@ -90,6 +90,7 @@ export default function TeamPage() {
   // View mode toggle
   const [teamViewMode, setTeamViewMode] = useState<"table" | "chart">("table");
   const [manageTeamsOpen, setManageTeamsOpen] = useState(false);
+  const [manageTeamsView, setManageTeamsView] = useState<"list" | "org">("list");
 
   // Bulk role assignment
   const [selectedMemberIds, setSelectedMemberIds] = useState<Set<string>>(new Set());
@@ -882,6 +883,12 @@ export default function TeamPage() {
               <UserPlus className="mr-2 h-4 w-4" />
               Invite Member
             </Button>
+            {currentUserRole === "admin" && teams.length > 0 && (
+              <Button variant="outline" size="sm" onClick={() => setManageTeamsOpen(true)}>
+                <Settings className="mr-2 h-4 w-4" />
+                Manage Teams
+              </Button>
+            )}
             <Button size="sm" onClick={() => openTeamModal(null)}>
               <Plus className="mr-2 h-4 w-4" />
               New Team
@@ -1059,17 +1066,6 @@ export default function TeamPage() {
                 </span>
               </Button>
             ))}
-            {currentUserRole === "admin" && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-7 text-xs gap-1 text-muted-foreground"
-                onClick={() => setManageTeamsOpen(true)}
-              >
-                <Pencil className="h-3 w-3" />
-                Manage Teams
-              </Button>
-            )}
           </div>
         )}
       </div>
@@ -1653,31 +1649,88 @@ export default function TeamPage() {
 
       {/* Manage Teams Modal */}
       <Dialog open={manageTeamsOpen} onOpenChange={setManageTeamsOpen}>
-        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5" />
-              Manage Teams
-            </DialogTitle>
+            <div className="flex items-center justify-between">
+              <DialogTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5" />
+                Manage Teams
+              </DialogTitle>
+              <div className="flex items-center gap-0.5 rounded-lg border border-border p-0.5">
+                <Button
+                  variant={manageTeamsView === "list" ? "secondary" : "ghost"}
+                  size="icon"
+                  className="h-7 w-7"
+                  onClick={() => setManageTeamsView("list")}
+                  title="List view"
+                >
+                  <LayoutList className="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  variant={manageTeamsView === "org" ? "secondary" : "ghost"}
+                  size="icon"
+                  className="h-7 w-7"
+                  onClick={() => setManageTeamsView("org")}
+                  title="Org chart view"
+                >
+                  <Network className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            </div>
+            <DialogDescription>
+              {teams.length} team{teams.length !== 1 ? "s" : ""} &middot; {members.length} members
+            </DialogDescription>
           </DialogHeader>
-          <div className="space-y-2 mt-2">
-            {teams.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-6">No teams yet. Create your first team below.</p>
-            ) : (
-              teams.map((team) => {
+
+          {teams.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-6">No teams yet. Create your first team below.</p>
+          ) : manageTeamsView === "list" ? (
+            <div className="space-y-2 mt-2">
+              {teams.map((team) => {
                 const teamMemberCount = members.filter((m) => m.teamIds.includes(team.id)).length;
+                const teamLeads = members.filter((m) => m.teamIds.includes(team.id) && (m.role === "admin" || m.teamRoles[team.id] === "admin"));
                 return (
                   <div key={team.id} className="flex items-center gap-3 rounded-lg border border-border px-4 py-3 group hover:bg-muted/30 transition-colors">
+                    <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                      <Network className="h-4 w-4 text-primary" />
+                    </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate">{team.name}</p>
                       <p className="text-xs text-muted-foreground truncate">
-                        {team.description || `${teamMemberCount} member${teamMemberCount !== 1 ? "s" : ""}`}
+                        {team.description || (teamLeads.length > 0
+                          ? `Led by ${teamLeads.map((l) => l.name || l.email.split("@")[0]).join(", ")}`
+                          : `${teamMemberCount} member${teamMemberCount !== 1 ? "s" : ""}`)}
                       </p>
+                    </div>
+                    <div className="flex -space-x-1.5 shrink-0">
+                      {members.filter((m) => m.teamIds.includes(team.id)).slice(0, 4).map((m) => {
+                        const initials = m.name?.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2) || "U";
+                        return (
+                          <Avatar key={m.id} className="h-6 w-6 border-2 border-card">
+                            {m.avatar_url && <AvatarImage src={m.avatar_url} />}
+                            <AvatarFallback className="bg-muted text-[8px]">{initials}</AvatarFallback>
+                          </Avatar>
+                        );
+                      })}
+                      {teamMemberCount > 4 && (
+                        <div className="h-6 w-6 rounded-full border-2 border-card bg-muted flex items-center justify-center">
+                          <span className="text-[8px] text-muted-foreground">+{teamMemberCount - 4}</span>
+                        </div>
+                      )}
                     </div>
                     <Badge variant="secondary" className="text-[10px] shrink-0">
                       {teamMemberCount}
                     </Badge>
                     <div className="flex items-center gap-1 shrink-0">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7"
+                        onClick={() => { setManageTeamsOpen(false); setSelectedTeam(team); }}
+                        title="View team"
+                      >
+                        <Eye className="h-3.5 w-3.5" />
+                      </Button>
                       <Button
                         variant="ghost"
                         size="icon"
@@ -1690,7 +1743,7 @@ export default function TeamPage() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-7 w-7 text-destructive"
+                        className="h-7 w-7 text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
                         onClick={() => { setManageTeamsOpen(false); handleDeleteTeam(team); }}
                         title="Delete team"
                       >
@@ -1699,9 +1752,110 @@ export default function TeamPage() {
                     </div>
                   </div>
                 );
-              })
-            )}
-          </div>
+              })}
+              {/* Unassigned members summary */}
+              {(() => {
+                const unassigned = members.filter((m) => m.teamIds.length === 0);
+                return unassigned.length > 0 ? (
+                  <div className="flex items-center gap-3 rounded-lg border border-dashed border-border px-4 py-3 bg-muted/20">
+                    <div className="h-9 w-9 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                      <Users className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-muted-foreground">Unassigned</p>
+                      <p className="text-xs text-muted-foreground/70">Not on any team</p>
+                    </div>
+                    <Badge variant="outline" className="text-[10px]">{unassigned.length}</Badge>
+                  </div>
+                ) : null;
+              })()}
+            </div>
+          ) : (
+            /* Org tree view inside modal */
+            <div className="mt-2 flex flex-col items-center">
+              {/* Root */}
+              <div className="rounded-xl border-2 border-primary/30 bg-primary/5 px-6 py-3 shadow-sm">
+                <div className="flex items-center gap-2">
+                  <Users className="h-4 w-4 text-primary" />
+                  <div>
+                    <p className="text-sm font-bold text-primary">Organization</p>
+                    <p className="text-[10px] text-muted-foreground">{members.length} members &middot; {teams.length} teams</p>
+                  </div>
+                </div>
+              </div>
+              <div className="w-px h-5 bg-border" />
+              {/* Branches */}
+              <div className="grid gap-3 w-full" style={{ gridTemplateColumns: `repeat(${Math.min(teams.length + (members.some((m) => m.teamIds.length === 0) ? 1 : 0), 3)}, 1fr)` }}>
+                {teams.map((team) => {
+                  const teamMembers = members.filter((m) => m.teamIds.includes(team.id));
+                  return (
+                    <div key={team.id} className="flex flex-col items-center">
+                      <div className="w-px h-4 bg-border" />
+                      <div className="w-full rounded-lg border border-border bg-card p-3 hover:border-primary/20 transition-colors">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            <Network className="h-3 w-3 text-primary shrink-0" />
+                            <p className="text-xs font-semibold truncate">{team.name}</p>
+                          </div>
+                          <div className="flex items-center gap-0.5 shrink-0">
+                            <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => { setManageTeamsOpen(false); openTeamModal(team); }}>
+                              <Pencil className="h-2.5 w-2.5" />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="h-5 w-5 text-destructive" onClick={() => { setManageTeamsOpen(false); handleDeleteTeam(team); }}>
+                              <Trash2 className="h-2.5 w-2.5" />
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="space-y-0.5 max-h-[180px] overflow-y-auto">
+                          {teamMembers.length === 0 ? (
+                            <p className="text-[10px] text-muted-foreground text-center py-3">No members</p>
+                          ) : teamMembers.map((m) => {
+                            const initials = m.name?.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2) || "U";
+                            const isLead = m.role === "admin" || m.teamRoles[team.id] === "admin";
+                            return (
+                              <div key={m.id} className="flex items-center gap-1.5 rounded px-1.5 py-1 hover:bg-muted/50">
+                                <div className="relative shrink-0">
+                                  <Avatar className="h-5 w-5">
+                                    {m.avatar_url && <AvatarImage src={m.avatar_url} />}
+                                    <AvatarFallback className="bg-muted text-[7px]">{initials}</AvatarFallback>
+                                  </Avatar>
+                                  {isLead && <Crown className="absolute -top-0.5 -right-0.5 h-2 w-2 text-amber-500" />}
+                                </div>
+                                <p className="text-[10px] truncate">{m.name || m.email.split("@")[0]}</p>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+                {/* Unassigned */}
+                {members.some((m) => m.teamIds.length === 0) && (
+                  <div className="flex flex-col items-center">
+                    <div className="w-px h-4 bg-border" />
+                    <div className="w-full rounded-lg border border-dashed border-border bg-muted/20 p-3">
+                      <p className="text-xs font-semibold text-muted-foreground mb-2">Unassigned</p>
+                      <div className="space-y-0.5 max-h-[180px] overflow-y-auto">
+                        {members.filter((m) => m.teamIds.length === 0).map((m) => {
+                          const initials = m.name?.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2) || "U";
+                          return (
+                            <div key={m.id} className="flex items-center gap-1.5 rounded px-1.5 py-1 hover:bg-muted/50">
+                              <Avatar className="h-5 w-5 shrink-0">
+                                {m.avatar_url && <AvatarImage src={m.avatar_url} />}
+                                <AvatarFallback className="bg-muted text-[7px]">{initials}</AvatarFallback>
+                              </Avatar>
+                              <p className="text-[10px] truncate">{m.name || m.email.split("@")[0]}</p>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
           <div className="mt-4 flex justify-end">
             <Button onClick={() => { setManageTeamsOpen(false); openTeamModal(null); }}>
               <Plus className="mr-2 h-4 w-4" />

@@ -16,6 +16,7 @@ import {
   Share2,
   BookOpen,
   Activity,
+  Lock,
 } from "lucide-react";
 
 /* ══════════════════════════════════════════════════
@@ -2551,6 +2552,417 @@ export function LinkedInAdC() {
   );
 }
 
+/* ══════════════════════════════════════════════════
+   AUDIENCE-TARGETED LINKEDIN ADS — 1200 x 627
+   Each targets a specific buyer persona with tailored
+   messaging, pain points, and visual focus.
+   ══════════════════════════════════════════════════ */
+
+/* ── Ad D: Engineering Managers — Shadow AI Risk ── */
+export function LinkedInAdD() {
+  return (
+    <LifestyleBannerShell aspectRatio="1200/627">
+      <div className="flex items-center h-full gap-4 sm:gap-6">
+        <div className="flex-1 space-y-2.5 sm:space-y-3 max-w-[42%]">
+          <BannerWordmark size="md" />
+          <p className="text-white text-xs sm:text-lg font-bold leading-snug">
+            Your Devs Use AI Daily.
+            <br />
+            Do You Know What
+            <br />
+            They&apos;re Sharing?
+          </p>
+          <p className="text-white/60 text-[9px] sm:text-xs leading-snug max-w-[220px]">
+            DLP scanning catches API keys &amp; secrets before they reach any AI model
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            <FeaturePill label="Real-Time DLP" />
+            <FeaturePill label="Prompt Audit Log" />
+            <FeaturePill label="Team Analytics" />
+          </div>
+          <CompatibilityLine />
+        </div>
+        <div className="w-[52%] relative">
+          <div className="flex items-start">
+            <LifestylePhoto
+              src={lifestylePhotos.solo}
+              alt="Developer working at screen"
+              className="w-[50%] aspect-[4/3]"
+            />
+            <div className="w-[55%] space-y-2 -ml-8 relative z-10">
+              <DLPBlockScene compact />
+              <VaultScene compact />
+            </div>
+          </div>
+          <FrostedBadge icon={Shield} headline="API key blocked" subtitle="Before it reached ChatGPT" color="red" className="top-[35%] left-[32%]" />
+          <FrostedBadge icon={Lock} headline="Zero data leaks" subtitle="Real-time scanning" color="emerald" className="-bottom-3 left-[5%]" />
+        </div>
+      </div>
+    </LifestyleBannerShell>
+  );
+}
+
+/* ── Ad E: CISO / Security Leaders ── */
+export function LinkedInAdE() {
+  return (
+    <MockupBannerShell aspectRatio="1200/627">
+      <div className="flex items-center h-full gap-4 sm:gap-6">
+        <div className="flex-1 space-y-2.5 sm:space-y-3 max-w-[42%]">
+          <BannerWordmark size="md" />
+          <p className="text-white text-xs sm:text-lg font-bold leading-snug">
+            91% of Employees
+            <br />
+            Use AI at Work.
+          </p>
+          <p className="text-red-400/90 text-[10px] sm:text-sm font-semibold">
+            Are your company secrets safe?
+          </p>
+          <p className="text-white/50 text-[8px] sm:text-[11px] leading-snug max-w-[200px]">
+            Catch PII, credentials, and proprietary data before they leave your org
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            <FeaturePill label="Data Loss Prevention" />
+            <FeaturePill label="Security Rules" />
+            <FeaturePill label="Violation Alerts" />
+          </div>
+        </div>
+        <div className="w-[55%]">
+          <StaggeredMockup
+            screenshots={[
+              { src: "/store-assets/screenshot-light-3-dlp-block.png", alt: "DLP blocking sensitive data" },
+              { src: "/store-assets/screenshot-light-1-prompts.png", alt: "Secure prompt library" },
+            ]}
+          />
+        </div>
+      </div>
+    </MockupBannerShell>
+  );
+}
+
+/* ── Ad F: VP Ops / IT Leaders — Standardization ── */
+export function LinkedInAdF() {
+  return (
+    <LifestyleBannerShell aspectRatio="1200/627">
+      <div className="flex items-center h-full gap-4 sm:gap-6">
+        <div className="flex-1 space-y-2.5 sm:space-y-3 max-w-[42%]">
+          <BannerWordmark size="md" />
+          <p className="text-white text-xs sm:text-lg font-bold leading-snug">
+            Standardize AI
+            <br />
+            Across Your Org
+            <br />
+            in Minutes
+          </p>
+          <p className="text-white/60 text-[9px] sm:text-xs leading-snug max-w-[220px]">
+            One library. Every team. Consistent, compliant AI usage — no training needed.
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            <FeaturePill label="Org-Wide Library" />
+            <FeaturePill label="Role-Based Access" />
+            <FeaturePill label="One-Click Deploy" />
+          </div>
+          <CompatibilityLine />
+        </div>
+        <div className="w-[52%] relative">
+          <div className="flex items-start">
+            <LifestylePhoto
+              src={lifestylePhotos.team2}
+              alt="Team in meeting room with laptops"
+              className="w-[50%] aspect-[4/3]"
+            />
+            <div className="w-[55%] space-y-2 -ml-8 relative z-10">
+              <VaultScene compact />
+              <AnalyticsScene compact />
+            </div>
+          </div>
+          <FrostedBadge icon={Users} headline="148 members" subtitle="Onboarded this week" color="blue" className="top-[35%] left-[32%]" />
+          <FrostedBadge icon={Zap} headline="2-min setup" subtitle="No training required" color="emerald" className="-bottom-3 left-[5%]" />
+        </div>
+      </div>
+    </LifestyleBannerShell>
+  );
+}
+
+/* ── Ad G: Agency / Consulting — Client Consistency ── */
+export function LinkedInAdG() {
+  return (
+    <MockupBannerShell aspectRatio="1200/627">
+      <div className="flex items-center h-full gap-4 sm:gap-6">
+        <div className="flex-1 space-y-2.5 sm:space-y-3 max-w-[42%]">
+          <BannerWordmark size="md" />
+          <p className="text-white text-xs sm:text-lg font-bold leading-snug">
+            One Prompt Library.
+            <br />
+            Every Client.
+            <br />
+            Total Consistency.
+          </p>
+          <p className="text-white/60 text-[9px] sm:text-xs leading-snug max-w-[220px]">
+            Your best frameworks, shared instantly. No more &ldquo;what prompt did you use?&rdquo;
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            <FeaturePill label="Team Templates" />
+            <FeaturePill label="Version Control" />
+            <FeaturePill label="Approval Flows" />
+          </div>
+          <CompatibilityLine />
+        </div>
+        <div className="w-[55%]">
+          <StaggeredMockup
+            screenshots={[
+              { src: "/store-assets/screenshot-light-1-prompts.png", alt: "Shared prompt library" },
+              { src: "/store-assets/screenshot-light-3-dlp-block.png", alt: "Data protection for clients" },
+            ]}
+          />
+        </div>
+      </div>
+    </MockupBannerShell>
+  );
+}
+
+/* ── Ad H: Startup CTO — Speed + Version Control ── */
+export function LinkedInAdH() {
+  return (
+    <LifestyleBannerShell aspectRatio="1200/627">
+      <div className="flex items-center h-full gap-4 sm:gap-6">
+        <div className="flex-1 space-y-2.5 sm:space-y-3 max-w-[42%]">
+          <BannerWordmark size="md" />
+          <p className="text-white text-xs sm:text-lg font-bold leading-snug">
+            Ship Faster.
+            <br />
+            Every Prompt,
+            <br />
+            Version-Controlled.
+          </p>
+          <p className="text-white/60 text-[9px] sm:text-xs leading-snug max-w-[220px]">
+            Your team&apos;s best AI workflows — saved, shared, and iterated on together
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            <FeaturePill label="Prompt Versioning" />
+            <FeaturePill label="Variables" />
+            <FeaturePill label="One-Click Insert" />
+          </div>
+          <CompatibilityLine />
+        </div>
+        <div className="w-[52%] relative">
+          <div className="flex items-start">
+            <LifestylePhoto
+              src={lifestylePhotos.og}
+              alt="Developer typing on laptop"
+              className="w-[50%] aspect-[4/3]"
+            />
+            <div className="w-[55%] space-y-2 -ml-8 relative z-10">
+              <VaultScene compact />
+            </div>
+          </div>
+          <FrostedBadge icon={Zap} headline="10x faster" subtitle="Than copy-paste" color="emerald" className="top-[40%] left-[32%]" />
+          <FrostedBadge icon={BarChart3} headline="v12 → v13" subtitle="Version history" color="blue" className="-bottom-3 left-[5%]" />
+        </div>
+      </div>
+    </LifestyleBannerShell>
+  );
+}
+
+/* ── Ad I: Sales Leaders — Best Rep's Prompts ── */
+export function LinkedInAdI() {
+  return (
+    <MockupBannerShell aspectRatio="1200/627">
+      <div className="flex items-center h-full gap-4 sm:gap-6">
+        <div className="flex-1 space-y-2.5 sm:space-y-3 max-w-[42%]">
+          <BannerWordmark size="md" />
+          <p className="text-white text-xs sm:text-lg font-bold leading-snug">
+            Your Top Rep&apos;s
+            <br />
+            Best Prompts.
+            <br />
+            Available to Everyone.
+          </p>
+          <p className="text-white/60 text-[9px] sm:text-xs leading-snug max-w-[220px]">
+            Turn individual AI wins into team-wide playbooks — outreach, proposals, research
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            <FeaturePill label="Shared Playbooks" />
+            <FeaturePill label="Variable Fields" />
+            <FeaturePill label="Usage Tracking" />
+          </div>
+          <CompatibilityLine />
+        </div>
+        <div className="w-[55%]">
+          <StaggeredMockup
+            screenshots={[
+              { src: "/store-assets/screenshot-light-1-prompts.png", alt: "Prompt library with sales templates" },
+              { src: "/store-assets/screenshot-light-3-dlp-block.png", alt: "Protected client data" },
+            ]}
+          />
+        </div>
+      </div>
+    </MockupBannerShell>
+  );
+}
+
+/* ── Ad J: Product Managers — Scale What Works ── */
+export function LinkedInAdJ() {
+  return (
+    <LifestyleBannerShell aspectRatio="1200/627">
+      <div className="flex items-center h-full gap-4 sm:gap-6">
+        <div className="flex-1 space-y-2.5 sm:space-y-3 max-w-[42%]">
+          <BannerWordmark size="md" />
+          <p className="text-white text-xs sm:text-lg font-bold leading-snug">
+            Stop Reinventing
+            <br />
+            Prompts. Start Scaling
+            <br />
+            What Works.
+          </p>
+          <p className="text-white/60 text-[9px] sm:text-xs leading-snug max-w-[220px]">
+            Templatize your best AI workflows with variables and share across teams
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            <FeaturePill label="Prompt Templates" />
+            <FeaturePill label="Team Analytics" />
+            <FeaturePill label="Favorites" />
+          </div>
+          <CompatibilityLine />
+        </div>
+        <div className="w-[52%] relative">
+          <div className="flex items-start">
+            <LifestylePhoto
+              src={lifestylePhotos.office}
+              alt="Team collaborating around table"
+              className="w-[50%] aspect-[4/3]"
+            />
+            <div className="w-[55%] space-y-2 -ml-8 relative z-10">
+              <VaultScene compact />
+              <AnalyticsScene compact />
+            </div>
+          </div>
+          <FrostedBadge icon={BarChart3} headline="312 inserts" subtitle="This month" color="blue" className="top-[35%] left-[32%]" />
+          <FrostedBadge icon={Users} headline="4 teams" subtitle="Using this template" color="emerald" className="-bottom-3 left-[5%]" />
+        </div>
+      </div>
+    </LifestyleBannerShell>
+  );
+}
+
+/* ── Ad K: COO / Exec — AI Visibility ── */
+export function LinkedInAdK() {
+  return (
+    <MockupBannerShell aspectRatio="1200/627">
+      <div className="flex items-center h-full gap-4 sm:gap-6">
+        <div className="flex-1 space-y-2.5 sm:space-y-3 max-w-[42%]">
+          <BannerWordmark size="md" />
+          <p className="text-white text-xs sm:text-lg font-bold leading-snug">
+            See Exactly How
+            <br />
+            Your Team Uses AI
+          </p>
+          <p className="text-white/60 text-[9px] sm:text-xs leading-snug max-w-[220px]">
+            Who&apos;s using which tools, how often, and what&apos;s working — all in one dashboard
+          </p>
+          <div className="space-y-1">
+            <p className="text-blue-300/90 text-[9px] sm:text-xs font-semibold">Real-time org-wide analytics</p>
+            <p className="text-white/50 text-[8px] sm:text-[11px]">Extension activity &middot; Usage trends &middot; ROI metrics</p>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            <FeaturePill label="Analytics Dashboard" />
+            <FeaturePill label="Team Insights" />
+          </div>
+        </div>
+        <div className="w-[55%]">
+          <StaggeredMockup
+            screenshots={[
+              { src: "/store-assets/screenshot-light-1-prompts.png", alt: "Organization dashboard" },
+              { src: "/store-assets/screenshot-light-3-dlp-block.png", alt: "Security and compliance view" },
+            ]}
+          />
+        </div>
+      </div>
+    </MockupBannerShell>
+  );
+}
+
+/* ── Ad L: HR / L&D — AI Training ── */
+export function LinkedInAdL() {
+  return (
+    <LifestyleBannerShell aspectRatio="1200/627">
+      <div className="flex items-center h-full gap-4 sm:gap-6">
+        <div className="flex-1 space-y-2.5 sm:space-y-3 max-w-[42%]">
+          <BannerWordmark size="md" />
+          <p className="text-white text-xs sm:text-lg font-bold leading-snug">
+            Train Your Team
+            <br />
+            on AI — the
+            <br />
+            Right Way
+          </p>
+          <p className="text-white/60 text-[9px] sm:text-xs leading-snug max-w-[220px]">
+            Pre-built prompt templates with guardrails. Your team gets AI superpowers without the risk.
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            <FeaturePill label="Ready-Made Templates" />
+            <FeaturePill label="Built-In Guardrails" />
+            <FeaturePill label="Adoption Tracking" />
+          </div>
+          <CompatibilityLine />
+        </div>
+        <div className="w-[52%] relative">
+          <div className="flex items-start">
+            <LifestylePhoto
+              src={lifestylePhotos.linkedin}
+              alt="Diverse team working at computers"
+              className="w-[50%] aspect-[4/3]"
+            />
+            <div className="w-[55%] space-y-2 -ml-8 relative z-10">
+              <VaultScene compact />
+              <DLPBlockScene compact />
+            </div>
+          </div>
+          <FrostedBadge icon={Users} headline="92% adopted" subtitle="Within first week" color="emerald" className="top-[35%] left-[32%]" />
+          <FrostedBadge icon={Shield} headline="Safe by default" subtitle="Guardrails built-in" color="blue" className="-bottom-3 left-[5%]" />
+        </div>
+      </div>
+    </LifestyleBannerShell>
+  );
+}
+
+/* ── Ad M: Enterprise Compliance — Friction-Free ── */
+export function LinkedInAdM() {
+  return (
+    <MockupBannerShell aspectRatio="1200/627">
+      <div className="flex items-center h-full gap-4 sm:gap-6">
+        <div className="flex-1 space-y-2.5 sm:space-y-3 max-w-[42%]">
+          <BannerWordmark size="md" />
+          <p className="text-white text-xs sm:text-lg font-bold leading-snug">
+            AI Compliance
+            <br />
+            Without the Friction
+          </p>
+          <p className="text-white/60 text-[9px] sm:text-xs leading-snug max-w-[220px]">
+            Regex-powered DLP rules, audit trails, and approval workflows — all without blocking productivity
+          </p>
+          <div className="space-y-1">
+            <p className="text-emerald-300/90 text-[9px] sm:text-xs font-semibold">SOC 2 &middot; GDPR &middot; HIPAA ready</p>
+            <p className="text-white/50 text-[8px] sm:text-[11px]">Full audit trail for every AI interaction</p>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            <FeaturePill label="Audit Logs" />
+            <FeaturePill label="Custom DLP Rules" />
+            <FeaturePill label="Approval Flows" />
+          </div>
+        </div>
+        <div className="w-[55%]">
+          <StaggeredMockup
+            screenshots={[
+              { src: "/store-assets/screenshot-light-3-dlp-block.png", alt: "DLP rules catching violations" },
+              { src: "/store-assets/screenshot-light-1-prompts.png", alt: "Governed prompt library" },
+            ]}
+          />
+        </div>
+      </div>
+    </MockupBannerShell>
+  );
+}
+
 /* ── Export map ──────────────────────────────────── */
 
 export const socialBannerComponents = {
@@ -2602,4 +3014,14 @@ export const socialBannerComponents = {
   linkedinAdA: { Component: LinkedInAdA, label: "LinkedIn Ad — Problem-Solve", dims: "1200 x 627" },
   linkedinAdB: { Component: LinkedInAdB, label: "LinkedIn Ad — Social Proof", dims: "1200 x 627" },
   linkedinAdC: { Component: LinkedInAdC, label: "LinkedIn Ad — Feature-Led", dims: "1200 x 627" },
+  linkedinAdD: { Component: LinkedInAdD, label: "LinkedIn Ad — Eng Managers (Shadow AI)", dims: "1200 x 627" },
+  linkedinAdE: { Component: LinkedInAdE, label: "LinkedIn Ad — CISO (Security)", dims: "1200 x 627" },
+  linkedinAdF: { Component: LinkedInAdF, label: "LinkedIn Ad — VP Ops (Standardize)", dims: "1200 x 627" },
+  linkedinAdG: { Component: LinkedInAdG, label: "LinkedIn Ad — Agency (Consistency)", dims: "1200 x 627" },
+  linkedinAdH: { Component: LinkedInAdH, label: "LinkedIn Ad — CTO (Ship Faster)", dims: "1200 x 627" },
+  linkedinAdI: { Component: LinkedInAdI, label: "LinkedIn Ad — Sales Leaders", dims: "1200 x 627" },
+  linkedinAdJ: { Component: LinkedInAdJ, label: "LinkedIn Ad — Product Managers", dims: "1200 x 627" },
+  linkedinAdK: { Component: LinkedInAdK, label: "LinkedIn Ad — COO (Visibility)", dims: "1200 x 627" },
+  linkedinAdL: { Component: LinkedInAdL, label: "LinkedIn Ad — HR/L&D (Training)", dims: "1200 x 627" },
+  linkedinAdM: { Component: LinkedInAdM, label: "LinkedIn Ad — Enterprise Compliance", dims: "1200 x 627" },
 } as const;

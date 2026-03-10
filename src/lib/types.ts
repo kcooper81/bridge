@@ -258,6 +258,7 @@ export interface SecurityRule {
   severity: SecuritySeverity;
   is_active: boolean;
   is_built_in: boolean;
+  source_pack: string | null;
   created_by: string | null;
   created_at: string;
   updated_at: string;

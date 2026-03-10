@@ -58,10 +58,18 @@ import {
   Settings2,
   FileText,
   Lightbulb,
+  ChevronDown,
+  ChevronUp,
+  Filter,
+  TrendingUp,
+  TrendingDown,
+  Users,
+  ArrowUpDown,
+  AlertTriangle,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { DEFAULT_SECURITY_RULES } from "@/lib/security/default-rules";
-import { COMPLIANCE_TEMPLATES, type ComplianceTemplate } from "@/lib/security/compliance-templates";
+import { COMPLIANCE_TEMPLATES, PACK_GROUPS, type ComplianceTemplate } from "@/lib/security/compliance-templates";
 import { installComplianceTemplate } from "@/lib/vault-api";
 import { testPattern } from "@/lib/security/scanner";
 import { toast } from "sonner";
@@ -104,6 +112,53 @@ function detectionTypeBadgeClass(dt: DetectionType | string): string {
   }
 }
 
+function CompliancePackCard({
+  tpl, rules, installedPacks, installingPack, onInstall, onPreview,
+}: {
+  tpl: ComplianceTemplate;
+  rules: SecurityRule[];
+  installedPacks: Set<string>;
+  installingPack: string | null;
+  onInstall: (id: string) => void;
+  onPreview: (tpl: ComplianceTemplate) => void;
+}) {
+  const isInstalled = installedPacks.has(tpl.id);
+  const isInstalling = installingPack === tpl.id;
+  const existingCount = tpl.rules.filter((r) => rules.some((er) => er.name === r.name)).length;
+  const allExist = existingCount === tpl.rules.length;
+
+  return (
+    <div className="rounded-lg border border-border p-4 flex flex-col gap-2">
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="font-medium text-sm">{tpl.name}</p>
+          <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{tpl.description}</p>
+        </div>
+      </div>
+      <div className="flex items-center justify-between mt-auto pt-2">
+        <div className="flex items-center gap-2">
+          <Badge variant="outline" className="text-[10px]">{tpl.rules.length} rules</Badge>
+          <Button variant="ghost" size="sm" className="h-6 text-[10px] px-2 gap-1 text-muted-foreground" onClick={() => onPreview(tpl)}>
+            <Eye className="h-3 w-3" />
+            Preview
+          </Button>
+        </div>
+        {isInstalled || allExist ? (
+          <Button variant="ghost" size="sm" className="h-7 text-xs text-tp-green gap-1" onClick={() => onInstall(tpl.id)} disabled={isInstalling}>
+            {isInstalling ? <Loader2 className="h-3 w-3 animate-spin" /> : <CheckCircle2 className="h-3 w-3" />}
+            {isInstalling ? "Installing..." : "Installed"}
+          </Button>
+        ) : (
+          <Button size="sm" className="h-7 text-xs" onClick={() => onInstall(tpl.id)} disabled={isInstalling}>
+            {isInstalling ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <Download className="mr-1 h-3 w-3" />}
+            {isInstalling ? "Installing..." : existingCount > 0 ? `Install (${tpl.rules.length - existingCount} new)` : "Install"}
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function GuardrailsPage() {
   const { org, currentUserRole, noOrg } = useOrg();
   const { canAccess } = useSubscription();
@@ -115,7 +170,11 @@ export default function GuardrailsPage() {
   const [editRule, setEditRule] = useState<SecurityRule | null>(null);
   const [teams, setTeams] = useState<Team[]>([]);
   const [teamFilter, setTeamFilter] = useState<string>("all"); // "all" | "global" | team_id
+  const [packFilter, setPackFilter] = useState<string>("all"); // "all" | pack_id
   const [detectionFilter, setDetectionFilter] = useState<string>("all"); // "all" | DetectionType
+  const [showAllPacks, setShowAllPacks] = useState(false);
+  const [violationSort, setViolationSort] = useState<{ col: "date" | "user" | "policy" | "detection" | "action"; dir: "asc" | "desc" }>({ col: "date", dir: "desc" });
+  const [policySort, setPolicySort] = useState<{ col: "name" | "source" | "scope" | "category" | "severity" | "active"; dir: "asc" | "desc" }>({ col: "name", dir: "asc" });
 
   // Form state
   const [name, setName] = useState("");
@@ -423,27 +482,51 @@ export default function GuardrailsPage() {
     setTestResult(result);
   }
 
-  // Filter rules by team scope
+  // Filter rules by team scope and pack
   const filteredRules = rules.filter((r) => {
-    if (teamFilter === "all") return true;
-    if (teamFilter === "global") return r.team_id === null;
-    return r.team_id === teamFilter;
+    if (teamFilter !== "all") {
+      if (teamFilter === "global" && r.team_id !== null) return false;
+      if (teamFilter !== "global" && r.team_id !== teamFilter) return false;
+    }
+    if (packFilter !== "all") {
+      if (packFilter === "none") { if (r.source_pack) return false; }
+      else if (r.source_pack !== packFilter) return false;
+    }
+    return true;
   });
+
+  // Determine which packs have installed rules
+  const installedPackIds = new Set(rules.map((r) => r.source_pack).filter(Boolean) as string[]);
 
   const teamNameMap = new Map(teams.map((t) => [t.id, t.name]));
 
   const activeRules = rules.filter((r) => r.is_active).length;
-  const weekViolations = violations.filter(
-    (v) => new Date(v.created_at) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-  ).length;
+  const inactiveRules = rules.length - activeRules;
+  const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  const weekViolations = violations.filter((v) => new Date(v.created_at) > weekAgo).length;
+  const prevWeekViolations = violations.filter((v) => {
+    const d = new Date(v.created_at);
+    return d > new Date(Date.now() - 14 * 24 * 60 * 60 * 1000) && d <= weekAgo;
+  }).length;
+  const weekTrend = prevWeekViolations > 0
+    ? Math.round(((weekViolations - prevWeekViolations) / prevWeekViolations) * 100)
+    : weekViolations > 0 ? 100 : 0;
+  const blockedCount = violations.filter((v) => v.action_taken === "blocked").length;
   const blockRate =
     violations.length > 0
-      ? Math.round(
-          (violations.filter((v) => v.action_taken === "blocked").length /
-            violations.length) *
-            100
-        )
+      ? Math.round((blockedCount / violations.length) * 100)
       : 0;
+  // Top triggered rule this week
+  const weekViolationsList = violations.filter((v) => new Date(v.created_at) > weekAgo);
+  const ruleHitCounts = new Map<string, number>();
+  weekViolationsList.forEach((v) => {
+    const rName = (v.rule as unknown as SecurityRule)?.name || "Unknown";
+    ruleHitCounts.set(rName, (ruleHitCounts.get(rName) || 0) + 1);
+  });
+  const topTriggeredRule = Array.from(ruleHitCounts.entries()).sort((a, b) => b[1] - a[1])[0];
+  // Unique users who triggered violations this week
+  const uniqueViolationUsers = new Set(weekViolationsList.map((v) => v.user_id)).size;
+  const packsInstalled = installedPackIds.size;
 
   if (noOrg) {
     return (
@@ -521,10 +604,56 @@ export default function GuardrailsPage() {
       />
 
       {/* Stats */}
-      <div className="mb-6 grid grid-cols-3 gap-4">
-        <StatCard label="Active Policies" value={activeRules} icon={<ShieldCheck className="h-5 w-5" />} />
-        <StatCard label="Violations (7d)" value={weekViolations} icon={<ShieldAlert className="h-5 w-5" />} />
+      <div className="mb-6 grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard
+          label={`Active Policies${inactiveRules > 0 ? ` (${inactiveRules} inactive)` : ""}`}
+          value={activeRules}
+          icon={<ShieldCheck className="h-5 w-5" />}
+        />
+        <div className="rounded-2xl border border-border/50 bg-card p-5 flex items-center gap-5 shadow-elevation-2 backdrop-blur-sm">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 text-primary">
+            <ShieldAlert className="h-5 w-5" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <p className="text-3xl font-bold tracking-tight">{weekViolations}</p>
+              {weekTrend !== 0 && (
+                <span className={`flex items-center gap-0.5 text-xs font-medium ${weekTrend > 0 ? "text-destructive" : "text-green-600 dark:text-green-400"}`}>
+                  {weekTrend > 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                  {weekTrend > 0 ? "+" : ""}{weekTrend}%
+                </span>
+              )}
+            </div>
+            <p className="text-sm text-muted-foreground font-medium">Violations (7d)</p>
+          </div>
+        </div>
         <StatCard label="Block Rate" value={`${blockRate}%`} icon={<Shield className="h-5 w-5" />} />
+        <div className="rounded-2xl border border-border/50 bg-card p-5 shadow-elevation-2 backdrop-blur-sm">
+          <div className="space-y-2">
+            {topTriggeredRule ? (
+              <>
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0" />
+                  <p className="text-sm font-semibold truncate">{topTriggeredRule[0]}</p>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Top triggered rule — {topTriggeredRule[1]} hit{topTriggeredRule[1] !== 1 ? "s" : ""} this week
+                  {uniqueViolationUsers > 0 && ` by ${uniqueViolationUsers} user${uniqueViolationUsers !== 1 ? "s" : ""}`}
+                </p>
+              </>
+            ) : (
+              <>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                  <p className="text-sm font-semibold">No Violations</p>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Clean week — {packsInstalled > 0 ? `${packsInstalled} pack${packsInstalled !== 1 ? "s" : ""} active` : "no packs installed yet"}
+                </p>
+              </>
+            )}
+          </div>
+        </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -559,128 +688,171 @@ export default function GuardrailsPage() {
           {/* Compliance Packs */}
           {canAccess("custom_security") && canEdit && (
             <div className="mb-6">
-              <div className="flex items-center gap-2 mb-3">
-                <Package className="h-4 w-4 text-primary" />
-                <h3 className="text-sm font-semibold">Compliance Packs</h3>
-                <span className="text-xs text-muted-foreground">One-click install regulatory rule sets</span>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Package className="h-4 w-4 text-primary" />
+                  <h3 className="text-sm font-semibold">Compliance Packs</h3>
+                  <span className="text-xs text-muted-foreground">One-click install regulatory rule sets</span>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 text-xs gap-1"
+                  onClick={() => setShowAllPacks(!showAllPacks)}
+                >
+                  <Package className="h-3 w-3" />
+                  {showAllPacks ? "Show Less" : `Browse All Packs (${COMPLIANCE_TEMPLATES.length})`}
+                  {showAllPacks ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                </Button>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {COMPLIANCE_TEMPLATES.map((tpl) => {
-                  const isInstalled = installedPacks.has(tpl.id);
-                  const isInstalling = installingPack === tpl.id;
-                  // Check if any rules from this pack already exist
-                  const existingCount = tpl.rules.filter((r) =>
-                    rules.some((er) => er.name === r.name)
-                  ).length;
-                  const allExist = existingCount === tpl.rules.length;
 
-                  return (
-                    <div
+              {showAllPacks ? (
+                /* ─── Browse All Packs (grouped by industry) ─── */
+                <div className="space-y-6">
+                  {PACK_GROUPS.map((group) => {
+                    const groupTemplates = group.packIds
+                      .map((id) => COMPLIANCE_TEMPLATES.find((t) => t.id === id))
+                      .filter(Boolean) as ComplianceTemplate[];
+                    if (groupTemplates.length === 0) return null;
+
+                    return (
+                      <div key={group.label}>
+                        <div className="mb-2">
+                          <p className="text-sm font-semibold">{group.label}</p>
+                          <p className="text-xs text-muted-foreground">{group.description}</p>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                          {groupTemplates.map((tpl) => (
+                            <CompliancePackCard
+                              key={tpl.id}
+                              tpl={tpl}
+                              rules={rules}
+                              installedPacks={installedPacks}
+                              installingPack={installingPack}
+                              onInstall={handleInstallCompliancePack}
+                              onPreview={setPreviewPack}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                /* ─── Quick-access top packs (first 6) ─── */
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {COMPLIANCE_TEMPLATES.slice(0, 6).map((tpl) => (
+                    <CompliancePackCard
                       key={tpl.id}
-                      className="rounded-lg border border-border p-4 flex flex-col gap-2"
-                    >
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <p className="font-medium text-sm">{tpl.name}</p>
-                          <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
-                            {tpl.description}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between mt-auto pt-2">
-                        <div className="flex items-center gap-2">
-                          <Badge variant="outline" className="text-[10px]">
-                            {tpl.rules.length} rules
-                          </Badge>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-6 text-[10px] px-2 gap-1 text-muted-foreground"
-                            onClick={() => setPreviewPack(tpl)}
-                          >
-                            <Eye className="h-3 w-3" />
-                            Preview
-                          </Button>
-                        </div>
-                        {isInstalled || allExist ? (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 text-xs text-tp-green gap-1"
-                            onClick={() => handleInstallCompliancePack(tpl.id)}
-                            disabled={isInstalling}
-                          >
-                            {isInstalling ? (
-                              <Loader2 className="h-3 w-3 animate-spin" />
-                            ) : (
-                              <CheckCircle2 className="h-3 w-3" />
-                            )}
-                            {isInstalling ? "Installing..." : "Installed"}
-                          </Button>
-                        ) : (
-                          <Button
-                            size="sm"
-                            className="h-7 text-xs"
-                            onClick={() => handleInstallCompliancePack(tpl.id)}
-                            disabled={isInstalling}
-                          >
-                            {isInstalling ? (
-                              <Loader2 className="mr-1 h-3 w-3 animate-spin" />
-                            ) : (
-                              <Download className="mr-1 h-3 w-3" />
-                            )}
-                            {isInstalling ? "Installing..." : existingCount > 0 ? `Install (${tpl.rules.length - existingCount} new)` : "Install"}
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+                      tpl={tpl}
+                      rules={rules}
+                      installedPacks={installedPacks}
+                      installingPack={installingPack}
+                      onInstall={handleInstallCompliancePack}
+                      onPreview={setPreviewPack}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
-          {teams.length > 0 && (
-            <div className="mb-4 flex items-center gap-2">
-              <Label className="text-sm text-muted-foreground">Scope:</Label>
-              <Select value={teamFilter} onValueChange={setTeamFilter}>
-                <SelectTrigger className="w-[200px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Policies</SelectItem>
-                  <SelectItem value="global">Global Only</SelectItem>
-                  {teams.map((t) => (
-                    <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
+          <div className="mb-4 flex items-center gap-4 flex-wrap">
+            {teams.length > 0 && (
+              <div className="flex items-center gap-2">
+                <Label className="text-sm text-muted-foreground">Scope:</Label>
+                <Select value={teamFilter} onValueChange={setTeamFilter}>
+                  <SelectTrigger className="w-[200px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Policies</SelectItem>
+                    <SelectItem value="global">Global Only</SelectItem>
+                    {teams.map((t) => (
+                      <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            {installedPackIds.size > 0 && (
+              <div className="flex items-center gap-2">
+                <Filter className="h-3.5 w-3.5 text-muted-foreground" />
+                <Label className="text-sm text-muted-foreground">Pack:</Label>
+                <Select value={packFilter} onValueChange={setPackFilter}>
+                  <SelectTrigger className="w-[200px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Sources</SelectItem>
+                    <SelectItem value="none">No Pack (Custom)</SelectItem>
+                    {Array.from(installedPackIds).map((packId) => {
+                      const tpl = COMPLIANCE_TEMPLATES.find((t) => t.id === packId);
+                      return (
+                        <SelectItem key={packId} value={packId}>
+                          {tpl?.name || packId}
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+          </div>
           <div className="rounded-lg border border-border">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Policy</TableHead>
-                  <TableHead>Scope</TableHead>
-                  <TableHead>Pattern</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Severity</TableHead>
-                  <TableHead>Active</TableHead>
+                  {([
+                    { key: "name", label: "Policy" },
+                    { key: "source", label: "Source" },
+                    { key: "scope", label: "Scope" },
+                    { key: null, label: "Pattern" },
+                    { key: "category", label: "Category" },
+                    { key: "severity", label: "Severity" },
+                    { key: "active", label: "Active" },
+                  ] as const).map((col, i) => (
+                    <TableHead key={i}>
+                      {col.key ? (
+                        <button
+                          className="flex items-center gap-1 hover:text-foreground transition-colors"
+                          onClick={() => setPolicySort((prev) =>
+                            prev.col === col.key
+                              ? { col: col.key, dir: prev.dir === "asc" ? "desc" : "asc" }
+                              : { col: col.key, dir: "asc" }
+                          )}
+                        >
+                          {col.label}
+                          <ArrowUpDown className={`h-3 w-3 ${policySort.col === col.key ? "text-primary" : "opacity-40"}`} />
+                        </button>
+                      ) : col.label}
+                    </TableHead>
+                  ))}
                   <TableHead className="w-[80px]" />
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredRules.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="h-32 text-center text-muted-foreground">
+                    <TableCell colSpan={8} className="h-32 text-center text-muted-foreground">
                       {rules.length === 0
                         ? "No policies yet. Install defaults to get started."
                         : "No policies match the current filter."}
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredRules.map((rule) => (
+                  [...filteredRules].sort((a, b) => {
+                    const dir = policySort.dir === "asc" ? 1 : -1;
+                    switch (policySort.col) {
+                      case "name": return dir * a.name.localeCompare(b.name);
+                      case "source": return dir * (a.source_pack || "").localeCompare(b.source_pack || "");
+                      case "scope": return dir * (a.team_id || "").localeCompare(b.team_id || "");
+                      case "category": return dir * a.category.localeCompare(b.category);
+                      case "severity": return dir * a.severity.localeCompare(b.severity);
+                      case "active": return dir * (Number(a.is_active) - Number(b.is_active));
+                      default: return 0;
+                    }
+                  }).map((rule) => (
                     <TableRow key={rule.id}>
                       <TableCell>
                         <div>
@@ -689,6 +861,18 @@ export default function GuardrailsPage() {
                             <p className="text-xs text-muted-foreground truncate max-w-xs">{rule.description}</p>
                           )}
                         </div>
+                      </TableCell>
+                      <TableCell>
+                        {rule.source_pack ? (
+                          <Badge variant="secondary" className="text-[10px] gap-1">
+                            <Package className="h-2.5 w-2.5" />
+                            {COMPLIANCE_TEMPLATES.find((t) => t.id === rule.source_pack)?.name?.replace(" Compliance", "").replace(" Protection", "") || rule.source_pack}
+                          </Badge>
+                        ) : rule.is_built_in ? (
+                          <Badge variant="outline" className="text-[10px]">Default</Badge>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">Custom</span>
+                        )}
                       </TableCell>
                       <TableCell>
                         <Badge variant={rule.team_id ? "secondary" : "outline"} className="text-xs">
@@ -717,11 +901,9 @@ export default function GuardrailsPage() {
                             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openModal(rule)}>
                               <Pencil className="h-3.5 w-3.5" />
                             </Button>
-                            {!rule.is_built_in && (
-                              <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => handleDelete(rule.id)} disabled={deleting === rule.id}>
-                                {deleting === rule.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
-                              </Button>
-                            )}
+                            <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => handleDelete(rule.id)} disabled={deleting === rule.id}>
+                              {deleting === rule.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+                            </Button>
                           </div>
                         )}
                       </TableCell>
@@ -764,12 +946,28 @@ export default function GuardrailsPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Date</TableHead>
-                      <TableHead>User</TableHead>
-                      <TableHead>Policy / Source</TableHead>
-                      <TableHead>Detection</TableHead>
+                      {([
+                        { key: "date", label: "Date" },
+                        { key: "user", label: "User" },
+                        { key: "policy", label: "Policy / Source" },
+                        { key: "detection", label: "Detection" },
+                        { key: "action", label: "Action" },
+                      ] as const).map((col) => (
+                        <TableHead key={col.key}>
+                          <button
+                            className="flex items-center gap-1 hover:text-foreground transition-colors"
+                            onClick={() => setViolationSort((prev) =>
+                              prev.col === col.key
+                                ? { col: col.key, dir: prev.dir === "asc" ? "desc" : "asc" }
+                                : { col: col.key, dir: "desc" }
+                            )}
+                          >
+                            {col.label}
+                            <ArrowUpDown className={`h-3 w-3 ${violationSort.col === col.key ? "text-primary" : "opacity-40"}`} />
+                          </button>
+                        </TableHead>
+                      ))}
                       <TableHead>Match</TableHead>
-                      <TableHead>Action</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -777,7 +975,32 @@ export default function GuardrailsPage() {
                       const filtered = detectionFilter === "all"
                         ? violations
                         : violations.filter((v) => (v.detection_type || "pattern") === detectionFilter);
-                      if (filtered.length === 0) {
+
+                      const sorted = [...filtered].sort((a, b) => {
+                        const dir = violationSort.dir === "asc" ? 1 : -1;
+                        switch (violationSort.col) {
+                          case "date":
+                            return dir * (new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+                          case "user": {
+                            const aUser = (a.user as unknown as { name: string; email: string })?.name || (a.user as unknown as { name: string; email: string })?.email || "";
+                            const bUser = (b.user as unknown as { name: string; email: string })?.name || (b.user as unknown as { name: string; email: string })?.email || "";
+                            return dir * aUser.localeCompare(bUser);
+                          }
+                          case "policy": {
+                            const aName = (a.rule as unknown as SecurityRule)?.name || "";
+                            const bName = (b.rule as unknown as SecurityRule)?.name || "";
+                            return dir * aName.localeCompare(bName);
+                          }
+                          case "detection":
+                            return dir * (a.detection_type || "pattern").localeCompare(b.detection_type || "pattern");
+                          case "action":
+                            return dir * (a.action_taken || "").localeCompare(b.action_taken || "");
+                          default:
+                            return 0;
+                        }
+                      });
+
+                      if (sorted.length === 0) {
                         return (
                           <TableRow>
                             <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
@@ -788,7 +1011,7 @@ export default function GuardrailsPage() {
                           </TableRow>
                         );
                       }
-                      return filtered.map((v) => (
+                      return sorted.map((v) => (
                         <TableRow key={v.id}>
                           <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
                             {formatDistanceToNow(new Date(v.created_at), { addSuffix: true })}
@@ -807,17 +1030,17 @@ export default function GuardrailsPage() {
                             </Badge>
                           </TableCell>
                           <TableCell>
-                            <code className="text-xs bg-muted px-1.5 py-0.5 rounded">
-                              {v.matched_text}
-                            </code>
-                          </TableCell>
-                          <TableCell>
                             <Badge
                               variant={v.action_taken === "blocked" ? "destructive" : "default"}
                               className="text-xs"
                             >
                               {v.action_taken === "blocked" ? "Blocked" : v.action_taken === "overridden" ? "Overridden" : "Auto-redacted"}
                             </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <code className="text-xs bg-muted px-1.5 py-0.5 rounded">
+                              {v.matched_text}
+                            </code>
                           </TableCell>
                         </TableRow>
                       ));

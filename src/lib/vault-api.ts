@@ -1218,6 +1218,7 @@ export async function installComplianceTemplate(
         severity: r.severity,
         is_active: true,
         is_built_in: false,
+        source_pack: templateId,
         created_by: userId,
       }))
     )

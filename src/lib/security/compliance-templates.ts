@@ -951,6 +951,7 @@ export interface PackGroup {
 
 export const PACK_GROUPS: PackGroup[] = [
   { label: "Healthcare", description: "HIPAA, HITECH, and related health data protections", packIds: ["hipaa", "hitech"] },
+  { label: "Education", description: "FERPA and student data privacy protections", packIds: ["ferpa"] },
   { label: "Finance & Banking", description: "GLBA, PCI-DSS, SOX and financial data protections", packIds: ["glba", "pci_dss", "sox"] },
   { label: "Privacy & Consumer", description: "GDPR, CCPA, COPPA, FTC consumer protections", packIds: ["gdpr", "ccpa", "coppa", "ftc_retail", "general_pii"] },
   { label: "Government & Defense", description: "NIST, FedRAMP, ITAR, CJIS, and federal requirements", packIds: ["nist_800_171", "fedramp", "itar", "cjis"] },

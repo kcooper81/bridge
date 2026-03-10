@@ -58,8 +58,6 @@ import {
   Settings2,
   FileText,
   Lightbulb,
-  ChevronDown,
-  ChevronUp,
   Filter,
   TrendingUp,
   TrendingDown,
@@ -697,62 +695,25 @@ export default function GuardrailsPage() {
                   variant="outline"
                   size="sm"
                   className="h-7 text-xs gap-1"
-                  onClick={() => setShowAllPacks(!showAllPacks)}
+                  onClick={() => setShowAllPacks(true)}
                 >
                   <Package className="h-3 w-3" />
-                  {showAllPacks ? "Show Less" : `Browse All Packs (${COMPLIANCE_TEMPLATES.length})`}
-                  {showAllPacks ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                  Browse All Packs ({COMPLIANCE_TEMPLATES.length})
                 </Button>
               </div>
-
-              {showAllPacks ? (
-                /* ─── Browse All Packs (grouped by industry) ─── */
-                <div className="space-y-6">
-                  {PACK_GROUPS.map((group) => {
-                    const groupTemplates = group.packIds
-                      .map((id) => COMPLIANCE_TEMPLATES.find((t) => t.id === id))
-                      .filter(Boolean) as ComplianceTemplate[];
-                    if (groupTemplates.length === 0) return null;
-
-                    return (
-                      <div key={group.label}>
-                        <div className="mb-2">
-                          <p className="text-sm font-semibold">{group.label}</p>
-                          <p className="text-xs text-muted-foreground">{group.description}</p>
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                          {groupTemplates.map((tpl) => (
-                            <CompliancePackCard
-                              key={tpl.id}
-                              tpl={tpl}
-                              rules={rules}
-                              installedPacks={installedPacks}
-                              installingPack={installingPack}
-                              onInstall={handleInstallCompliancePack}
-                              onPreview={setPreviewPack}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                /* ─── Quick-access top packs (first 6) ─── */
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {COMPLIANCE_TEMPLATES.slice(0, 6).map((tpl) => (
-                    <CompliancePackCard
-                      key={tpl.id}
-                      tpl={tpl}
-                      rules={rules}
-                      installedPacks={installedPacks}
-                      installingPack={installingPack}
-                      onInstall={handleInstallCompliancePack}
-                      onPreview={setPreviewPack}
-                    />
-                  ))}
-                </div>
-              )}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {COMPLIANCE_TEMPLATES.slice(0, 6).map((tpl) => (
+                  <CompliancePackCard
+                    key={tpl.id}
+                    tpl={tpl}
+                    rules={rules}
+                    installedPacks={installedPacks}
+                    installingPack={installingPack}
+                    onInstall={handleInstallCompliancePack}
+                    onPreview={setPreviewPack}
+                  />
+                ))}
+              </div>
             </div>
           )}
 
@@ -1072,6 +1033,48 @@ export default function GuardrailsPage() {
           <SuggestedRules canEdit={canEdit} />
         </TabsContent>
       </Tabs>
+
+      {/* Browse All Packs Modal */}
+      <Dialog open={showAllPacks} onOpenChange={setShowAllPacks}>
+        <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Package className="h-5 w-5 text-primary" />
+              Browse All Compliance Packs
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 mt-2">
+            {PACK_GROUPS.map((group) => {
+              const groupTemplates = group.packIds
+                .map((id) => COMPLIANCE_TEMPLATES.find((t) => t.id === id))
+                .filter(Boolean) as ComplianceTemplate[];
+              if (groupTemplates.length === 0) return null;
+
+              return (
+                <div key={group.label}>
+                  <div className="mb-2">
+                    <p className="text-sm font-semibold">{group.label}</p>
+                    <p className="text-xs text-muted-foreground">{group.description}</p>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {groupTemplates.map((tpl) => (
+                      <CompliancePackCard
+                        key={tpl.id}
+                        tpl={tpl}
+                        rules={rules}
+                        installedPacks={installedPacks}
+                        installingPack={installingPack}
+                        onInstall={handleInstallCompliancePack}
+                        onPreview={(t) => { setShowAllPacks(false); setPreviewPack(t); }}
+                      />
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Compliance Pack Preview Modal */}
       <Dialog open={!!previewPack} onOpenChange={() => setPreviewPack(null)}>

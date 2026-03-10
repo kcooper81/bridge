@@ -329,6 +329,11 @@ export interface Analytics {
   userUsage: { userId: string; name: string; count: number }[];
   templateCount: number;
   guardrailBlocks: number;
+  guardrailBlocksThisWeek: number;
+  guardrailWarnings: number;
+  guardrailWarningsThisWeek: number;
+  topTriggeredRules: { name: string; count: number; severity: string }[];
+  guardrailUserBreakdown: { userId: string; name: string; blocks: number; warnings: number }[];
 }
 
 export interface ConversationLog {

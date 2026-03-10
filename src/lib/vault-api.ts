@@ -713,7 +713,7 @@ export async function getAnalytics(): Promise<Analytics | null> {
 
   const db = supabase();
 
-  let violationsRes: { data: { id: string }[] | null; error: unknown } = { data: [], error: null };
+  let violationsRes: { data: { id: string; action_taken: string; created_at: string; user_id: string; rule_id: string | null }[] | null; error: unknown } = { data: [], error: null };
 
   const [promptsRes, eventsRes] = await Promise.all([
     db.from("prompts").select("*").eq("org_id", orgId),
@@ -729,8 +729,10 @@ export async function getAnalytics(): Promise<Analytics | null> {
   try {
     violationsRes = await db
       .from("security_violations")
-      .select("id")
-      .eq("org_id", orgId);
+      .select("id, action_taken, created_at, user_id, rule_id")
+      .eq("org_id", orgId)
+      .order("created_at", { ascending: false })
+      .limit(1000);
   } catch {
     // Table may not exist yet
   }
@@ -806,7 +808,66 @@ export async function getAnalytics(): Promise<Analytics | null> {
   }
 
   const templateCount = prompts.filter((p) => p.is_template).length;
-  const guardrailBlocks = (violationsRes.data || []).length;
+
+  // ── Guardrail analytics ──
+  const allViolations = violationsRes.data || [];
+  const guardrailBlocks = allViolations.filter((v) => v.action_taken === "blocked").length;
+  const guardrailWarnings = allViolations.filter((v) => v.action_taken !== "blocked").length;
+  const guardrailBlocksThisWeek = allViolations.filter(
+    (v) => v.action_taken === "blocked" && new Date(v.created_at) > oneWeekAgo
+  ).length;
+  const guardrailWarningsThisWeek = allViolations.filter(
+    (v) => v.action_taken !== "blocked" && new Date(v.created_at) > oneWeekAgo
+  ).length;
+
+  // Top triggered rules
+  const ruleIdCounts: Record<string, number> = {};
+  for (const v of allViolations) {
+    if (v.rule_id) ruleIdCounts[v.rule_id] = (ruleIdCounts[v.rule_id] || 0) + 1;
+  }
+  let topTriggeredRules: { name: string; count: number; severity: string }[] = [];
+  const ruleIds = Object.keys(ruleIdCounts);
+  if (ruleIds.length > 0) {
+    const { data: ruleData } = await db
+      .from("security_rules")
+      .select("id, name, severity")
+      .in("id", ruleIds);
+    const ruleMap = new Map((ruleData || []).map((r) => [r.id, r]));
+    topTriggeredRules = Object.entries(ruleIdCounts)
+      .map(([ruleId, count]) => ({
+        name: ruleMap.get(ruleId)?.name || "Unknown Rule",
+        count,
+        severity: ruleMap.get(ruleId)?.severity || "warn",
+      }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+  }
+
+  // Per-user guardrail breakdown
+  const guardrailUserMap: Record<string, { blocks: number; warnings: number }> = {};
+  for (const v of allViolations) {
+    if (!guardrailUserMap[v.user_id]) guardrailUserMap[v.user_id] = { blocks: 0, warnings: 0 };
+    if (v.action_taken === "blocked") guardrailUserMap[v.user_id].blocks++;
+    else guardrailUserMap[v.user_id].warnings++;
+  }
+  const guardrailUserIds = Object.keys(guardrailUserMap);
+  let guardrailUserBreakdown: { userId: string; name: string; blocks: number; warnings: number }[] = [];
+  if (guardrailUserIds.length > 0) {
+    const { data: gProfiles } = await db
+      .from("profiles")
+      .select("id, name, email")
+      .in("id", guardrailUserIds);
+    const gNameMap = new Map((gProfiles || []).map((p) => [p.id, p.name || p.email]));
+    guardrailUserBreakdown = Object.entries(guardrailUserMap)
+      .map(([userId, data]) => ({
+        userId,
+        name: gNameMap.get(userId) || "Unknown",
+        blocks: data.blocks,
+        warnings: data.warnings,
+      }))
+      .sort((a, b) => (b.blocks + b.warnings) - (a.blocks + a.warnings))
+      .slice(0, 10);
+  }
 
   return {
     totalPrompts: prompts.length,
@@ -820,6 +881,11 @@ export async function getAnalytics(): Promise<Analytics | null> {
     userUsage,
     templateCount,
     guardrailBlocks,
+    guardrailBlocksThisWeek,
+    guardrailWarnings,
+    guardrailWarningsThisWeek,
+    topTriggeredRules,
+    guardrailUserBreakdown,
   };
 }
 

@@ -18,6 +18,8 @@ import {
   Zap,
   Users,
   Shield,
+  ShieldAlert,
+  ShieldCheck,
   Braces,
 } from "lucide-react";
 import {
@@ -298,6 +300,158 @@ export default function AnalyticsPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* ─── Guardrails Section ─── */}
+      {(analytics.guardrailBlocks > 0 || analytics.guardrailWarnings > 0) && (
+        <>
+          <div className="flex items-center gap-2 mt-8 mb-4">
+            <Shield className="h-5 w-5 text-primary" />
+            <h2 className="text-lg font-semibold">Guardrail Activity</h2>
+          </div>
+
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <Card className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-muted-foreground">Total Blocks</p>
+                  <p className="text-xl font-bold tabular-nums">{analytics.guardrailBlocks}</p>
+                  {analytics.guardrailBlocksThisWeek > 0 && (
+                    <p className="text-[10px] text-destructive font-medium">{analytics.guardrailBlocksThisWeek} this week</p>
+                  )}
+                </div>
+                <ShieldAlert className="h-5 w-5 text-destructive" />
+              </div>
+            </Card>
+            <Card className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-muted-foreground">Total Warnings</p>
+                  <p className="text-xl font-bold tabular-nums">{analytics.guardrailWarnings}</p>
+                  {analytics.guardrailWarningsThisWeek > 0 && (
+                    <p className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">{analytics.guardrailWarningsThisWeek} this week</p>
+                  )}
+                </div>
+                <AlertTriangle className="h-5 w-5 text-amber-500" />
+              </div>
+            </Card>
+            <Card className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-muted-foreground">Block Rate</p>
+                  <p className="text-xl font-bold tabular-nums">
+                    {(analytics.guardrailBlocks + analytics.guardrailWarnings) > 0
+                      ? Math.round((analytics.guardrailBlocks / (analytics.guardrailBlocks + analytics.guardrailWarnings)) * 100)
+                      : 0}%
+                  </p>
+                </div>
+                <Shield className="h-5 w-5 text-muted-foreground" />
+              </div>
+            </Card>
+            <Card className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-muted-foreground">Users Flagged</p>
+                  <p className="text-xl font-bold tabular-nums">{analytics.guardrailUserBreakdown.length}</p>
+                </div>
+                <Users className="h-5 w-5 text-muted-foreground" />
+              </div>
+            </Card>
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-2 mb-6">
+            {/* Top Triggered Rules */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <ShieldCheck className="h-4 w-4 text-primary" />
+                  Most Triggered Rules
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {analytics.topTriggeredRules.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No rule triggers recorded</p>
+                ) : (
+                  <div className="space-y-3">
+                    {analytics.topTriggeredRules.slice(0, 8).map((r, i) => {
+                      const maxCount = analytics.topTriggeredRules[0]?.count || 1;
+                      return (
+                        <div key={i}>
+                          <div className="flex items-center justify-between mb-1">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs text-muted-foreground w-5 text-right">{i + 1}.</span>
+                              <span className="text-sm truncate">{r.name}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Badge variant={r.severity === "block" ? "destructive" : "default"} className="text-[10px]">
+                                {r.severity === "block" ? "Block" : "Warn"}
+                              </Badge>
+                              <span className="text-xs text-muted-foreground tabular-nums">{r.count}</span>
+                            </div>
+                          </div>
+                          <div className="h-1.5 rounded-full bg-muted overflow-hidden ml-7">
+                            <div
+                              className={`h-full rounded-full ${r.severity === "block" ? "bg-destructive/70" : "bg-amber-500/70"}`}
+                              style={{ width: `${(r.count / maxCount) * 100}%` }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Violations by User */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Users className="h-4 w-4 text-muted-foreground" />
+                  Violations by Member
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {analytics.guardrailUserBreakdown.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No violations recorded</p>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Member</TableHead>
+                        <TableHead className="w-[70px] text-right">Blocks</TableHead>
+                        <TableHead className="w-[80px] text-right">Warnings</TableHead>
+                        <TableHead className="w-[60px] text-right">Total</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {analytics.guardrailUserBreakdown.map((u) => (
+                        <TableRow key={u.userId}>
+                          <TableCell className="text-sm">{u.name}</TableCell>
+                          <TableCell className="text-right">
+                            {u.blocks > 0 ? (
+                              <Badge variant="destructive" className="text-[10px] tabular-nums">{u.blocks}</Badge>
+                            ) : (
+                              <span className="text-xs text-muted-foreground">0</span>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {u.warnings > 0 ? (
+                              <Badge variant="outline" className="text-[10px] tabular-nums">{u.warnings}</Badge>
+                            ) : (
+                              <span className="text-xs text-muted-foreground">0</span>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-right text-sm font-medium tabular-nums">{u.blocks + u.warnings}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </>
+      )}
 
       {/* ─── Prompt Effectiveness Section ─── */}
       {effectiveness && (

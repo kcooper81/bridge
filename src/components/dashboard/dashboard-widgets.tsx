@@ -12,6 +12,8 @@ import {
   BookOpen,
   Plus,
   Settings,
+  Shield,
+  ShieldAlert,
   Star,
   TrendingUp,
   Users,
@@ -266,6 +268,57 @@ export function DashboardWidgets({ analytics, loading }: DashboardWidgetsProps) 
           </CardContent>
         </Card>
       </div>
+
+      {/* Guardrails Summary (admin/manager only) */}
+      {canSeeAll && analytics && (analytics.guardrailBlocks > 0 || analytics.guardrailWarnings > 0) && (
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Shield className="h-4 w-4 text-primary" />
+              Guardrail Activity
+            </CardTitle>
+            <Link href="/guardrails" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+              View guardrails &rarr;
+            </Link>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
+              <div>
+                <p className="text-2xl font-bold tabular-nums">{analytics.guardrailBlocksThisWeek}</p>
+                <p className="text-xs text-muted-foreground">Blocks this week</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold tabular-nums">{analytics.guardrailWarningsThisWeek}</p>
+                <p className="text-xs text-muted-foreground">Warnings this week</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold tabular-nums">{analytics.guardrailBlocks}</p>
+                <p className="text-xs text-muted-foreground">Total blocks</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold tabular-nums">{analytics.guardrailUserBreakdown.length}</p>
+                <p className="text-xs text-muted-foreground">Users flagged</p>
+              </div>
+            </div>
+            {analytics.topTriggeredRules.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-xs font-medium text-muted-foreground">Most triggered rules</p>
+                {analytics.topTriggeredRules.slice(0, 3).map((r, i) => (
+                  <div key={i} className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <ShieldAlert className={`h-3.5 w-3.5 shrink-0 ${r.severity === "block" ? "text-destructive" : "text-amber-500"}`} />
+                      <span className="text-sm truncate">{r.name}</span>
+                    </div>
+                    <Badge variant={r.severity === "block" ? "destructive" : "outline"} className="text-[10px] tabular-nums shrink-0">
+                      {r.count} hits
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Usage Trend */}
       {dailyUsage.length > 0 && (

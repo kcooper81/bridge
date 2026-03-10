@@ -16,7 +16,6 @@
  */
 
 const BRAND_COLOR = "#2563EB";
-const DARK_BG = "#0f1117";
 const LIGHT_BG = "#f4f4f5";
 const MUTED_TEXT = "#71717a";
 
@@ -28,6 +27,17 @@ export interface TemplateField {
   default?: string;
 }
 
+/** A repeatable group of fields (e.g. features, benefits). */
+export interface RepeatableGroup {
+  key: string;
+  label: string;
+  addLabel: string;
+  min: number;
+  max: number;
+  defaultCount: number;
+  fields: (Omit<TemplateField, "key"> & { suffix: string })[];
+}
+
 export interface CampaignTemplate {
   id: string;
   name: string;
@@ -36,9 +46,10 @@ export interface CampaignTemplate {
   defaultSubject: string;
   previewText: string;
   fields: TemplateField[];
-  /** Build final HTML from field values. Missing values use placeholder hints. */
+  repeatableGroups?: RepeatableGroup[];
+  /** Build final HTML from field values. Repeatable items use keys like `features_0_name`. */
   build: (values: Record<string, string>) => string;
-  /** Legacy: static HTML for preview when no fields are filled */
+  /** Static HTML for preview when no fields are filled */
   html: string;
 }
 
@@ -95,14 +106,14 @@ ${body}
 function headerBlock(): string {
   return `          <!-- Header -->
           <tr>
-            <td style="background-color: ${DARK_BG}; padding: 24px 32px; border-radius: 12px 12px 0 0;">
+            <td style="background-color: #ffffff; padding: 24px 32px; border-radius: 12px 12px 0 0; border-bottom: 1px solid #e4e4e7;">
               <table role="presentation" cellpadding="0" cellspacing="0">
                 <tr>
                   <td style="width: 32px; height: 32px; vertical-align: middle;">
                     <img src="https://teamprompt.app/brand/social-profile-512.png" alt="TeamPrompt" width="32" height="32" style="display: block; border-radius: 8px;" />
                   </td>
                   <td style="padding-left: 12px;">
-                    <span style="color: #e4e4e7; font-size: 18px; font-weight: 700;">TeamPrompt</span>
+                    <span style="color: #18181b; font-size: 18px; font-weight: 700;">TeamPrompt</span>
                   </td>
                 </tr>
               </table>
@@ -143,6 +154,17 @@ function v(values: Record<string, string>, key: string, fallback: string): strin
   return val ? esc(val) : fallback;
 }
 
+/** Count how many items exist in a repeatable group (checks key existence, not just non-empty values) */
+function repeatCount(values: Record<string, string>, groupKey: string, suffixes: string[]): number {
+  let count = 0;
+  for (let i = 0; i < 20; i++) {
+    const hasAny = suffixes.some((s) => `${groupKey}_${i}_${s}` in values);
+    if (hasAny) count = i + 1;
+    else if (i >= 3 && !hasAny) break;
+  }
+  return Math.max(count, 0);
+}
+
 // ─── Feature block helper ────────────────────────────────────
 
 function featureBlock(emoji: string, bgColor: string, title: string, desc: string): string {
@@ -173,25 +195,42 @@ export const CAMPAIGN_TEMPLATES: CampaignTemplate[] = [
     fields: [
       { key: "headline", label: "Headline", type: "text", placeholder: "What's New in TeamPrompt", default: "What's New in TeamPrompt" },
       { key: "subtitle", label: "Subtitle", type: "text", placeholder: "Here's what we've been building for you" },
-      { key: "feature1_name", label: "Feature 1 — Name", type: "text", placeholder: "e.g. Prompt Version History" },
-      { key: "feature1_desc", label: "Feature 1 — Description", type: "textarea", placeholder: "Describe the feature and how it helps users. 1-2 sentences." },
-      { key: "feature2_name", label: "Feature 2 — Name", type: "text", placeholder: "e.g. DLP Shield Improvements" },
-      { key: "feature2_desc", label: "Feature 2 — Description", type: "textarea", placeholder: "Describe the feature." },
-      { key: "feature3_name", label: "Feature 3 — Name", type: "text", placeholder: "e.g. Team Analytics Dashboard" },
-      { key: "feature3_desc", label: "Feature 3 — Description", type: "textarea", placeholder: "Describe the feature." },
       { key: "cta_text", label: "Button Text", type: "text", placeholder: "See What's New", default: "See What's New" },
       { key: "cta_url", label: "Button URL", type: "text", placeholder: "https://teamprompt.app/changelog", default: "https://teamprompt.app/changelog" },
     ],
+    repeatableGroups: [
+      {
+        key: "features",
+        label: "Features",
+        addLabel: "Add Feature",
+        min: 1,
+        max: 10,
+        defaultCount: 3,
+        fields: [
+          { suffix: "name", label: "Name", type: "text", placeholder: "e.g. Prompt Version History" },
+          { suffix: "desc", label: "Description", type: "textarea", placeholder: "Describe the feature. 1-2 sentences." },
+        ],
+      },
+    ],
     build(vals) {
+      const emojis = ["&#x2728;", "&#x1F6E1;", "&#x26A1;", "&#x1F680;", "&#x2705;", "&#x1F4CA;", "&#x1F50D;", "&#x1F4A1;", "&#x1F3AF;", "&#x2B50;"];
+      const colors = ["#EFF6FF", "#F0FDF4", "#FEF3C7", "#FEF2F2", "#F0F9FF", "#FDF4FF", "#F0FDF4", "#FFF7ED", "#ECFDF5", "#EFF6FF"];
+      const count = Math.max(repeatCount(vals, "features", ["name", "desc"]), 1);
+      const blocks = Array.from({ length: count }, (_, i) =>
+        featureBlock(
+          emojis[i % emojis.length],
+          colors[i % colors.length],
+          v(vals, `features_${i}_name`, "[Feature Name]"),
+          v(vals, `features_${i}_desc`, "[Describe the feature.]"),
+        )
+      ).join("\n");
       return wrap(`
 ${headerBlock()}
           <tr>
             <td class="content-padding" style="background-color: #ffffff; padding: 32px;">
               <h1 style="margin: 0 0 8px; font-size: 22px; font-weight: 700; color: #18181b;">${v(vals, "headline", "What's New in TeamPrompt")}</h1>
               <p style="margin: 0 0 24px; font-size: 14px; color: ${MUTED_TEXT};">${v(vals, "subtitle", "Here's what we've been building for you")}</p>
-${featureBlock("&#x2728;", "#EFF6FF", v(vals, "feature1_name", "[Feature Name]"), v(vals, "feature1_desc", "[Describe the feature and how it helps users.]"))}
-${featureBlock("&#x1F6E1;", "#F0FDF4", v(vals, "feature2_name", "[Feature Name]"), v(vals, "feature2_desc", "[Describe the feature.]"))}
-${featureBlock("&#x26A1;", "#FEF3C7", v(vals, "feature3_name", "[Feature Name]"), v(vals, "feature3_desc", "[Describe the feature.]"))}
+${blocks}
 ${ctaButton(v(vals, "cta_text", "See What's New"), vals.cta_url?.trim() || "https://teamprompt.app/changelog")}
               <p style="font-size: 13px; color: ${MUTED_TEXT}; margin: 0;">Questions? Just reply to this email.</p>
             </td>
@@ -214,14 +253,28 @@ ${footerBlock()}
       { key: "edition", label: "Edition", type: "text", placeholder: "March 2026", default: "" },
       { key: "intro", label: "Opening Paragraph", type: "textarea", placeholder: "What's been happening, what's exciting, set the tone..." },
       { key: "tip", label: "Tip of the Month", type: "textarea", placeholder: "Share a practical tip that helps users get more value from TeamPrompt." },
-      { key: "update1", label: "What's New — Item 1", type: "text", placeholder: "e.g. Added team analytics dashboard" },
-      { key: "update2", label: "What's New — Item 2", type: "text", placeholder: "e.g. Improved DLP detection rules" },
-      { key: "update3", label: "What's New — Item 3", type: "text", placeholder: "e.g. New Chrome extension features" },
       { key: "resource", label: "Worth Reading", type: "textarea", placeholder: "Link to a blog post, guide, or resource relevant to your audience." },
       { key: "cta_text", label: "Button Text", type: "text", placeholder: "Visit TeamPrompt", default: "Visit TeamPrompt" },
       { key: "cta_url", label: "Button URL", type: "text", placeholder: "https://teamprompt.app", default: "https://teamprompt.app" },
     ],
+    repeatableGroups: [
+      {
+        key: "updates",
+        label: "What's New",
+        addLabel: "Add Update",
+        min: 1,
+        max: 10,
+        defaultCount: 3,
+        fields: [
+          { suffix: "text", label: "Update", type: "text", placeholder: "e.g. Added team analytics dashboard" },
+        ],
+      },
+    ],
     build(vals) {
+      const count = Math.max(repeatCount(vals, "updates", ["text"]), 1);
+      const items = Array.from({ length: count }, (_, i) =>
+        `                <li>${v(vals, `updates_${i}_text`, "[Update]")}</li>`
+      ).join("\n");
       return wrap(`
 ${headerBlock()}
           <tr>
@@ -236,9 +289,7 @@ ${headerBlock()}
               </div>
               <p style="margin: 0 0 12px; font-size: 16px; font-weight: 700; color: #18181b;">What's New</p>
               <ul style="margin: 0 0 24px; padding-left: 20px; font-size: 14px; color: #3f3f46; line-height: 1.8;">
-                <li>${v(vals, "update1", "[Update 1]")}</li>
-                <li>${v(vals, "update2", "[Update 2]")}</li>
-                <li>${v(vals, "update3", "[Update 3]")}</li>
+${items}
               </ul>
               <p style="margin: 0 0 12px; font-size: 16px; font-weight: 700; color: #18181b;">Worth Reading</p>
               <p style="margin: 0 0 24px; font-size: 14px; color: #3f3f46; line-height: 1.6;">${v(vals, "resource", "[Link to a blog post or resource.]")}</p>
@@ -345,16 +396,28 @@ ${footerBlock()}
     defaultSubject: "We miss you — here's what you're missing",
     previewText: "Your team's AI workflow is waiting for you",
     fields: [
-      { key: "feature1", label: "New Feature 1", type: "text", placeholder: "e.g. Prompt version history" },
-      { key: "benefit1", label: "Benefit 1", type: "text", placeholder: "e.g. track every change" },
-      { key: "feature2", label: "New Feature 2", type: "text", placeholder: "e.g. Team analytics" },
-      { key: "benefit2", label: "Benefit 2", type: "text", placeholder: "e.g. see what's working" },
-      { key: "feature3", label: "New Feature 3", type: "text", placeholder: "e.g. DLP Shield v2" },
-      { key: "benefit3", label: "Benefit 3", type: "text", placeholder: "e.g. smarter data detection" },
       { key: "cta_text", label: "Button Text", type: "text", placeholder: "Come Back", default: "Come Back" },
       { key: "cta_url", label: "Button URL", type: "text", placeholder: "https://teamprompt.app/home", default: "https://teamprompt.app/home" },
     ],
+    repeatableGroups: [
+      {
+        key: "highlights",
+        label: "What's New",
+        addLabel: "Add Highlight",
+        min: 1,
+        max: 10,
+        defaultCount: 3,
+        fields: [
+          { suffix: "feature", label: "Feature", type: "text", placeholder: "e.g. Prompt version history" },
+          { suffix: "benefit", label: "Benefit", type: "text", placeholder: "e.g. track every change" },
+        ],
+      },
+    ],
     build(vals) {
+      const count = Math.max(repeatCount(vals, "highlights", ["feature", "benefit"]), 1);
+      const items = Array.from({ length: count }, (_, i) =>
+        `                  <li><strong>${v(vals, `highlights_${i}_feature`, "[New feature]")}</strong> &mdash; ${v(vals, `highlights_${i}_benefit`, "[brief benefit]")}</li>`
+      ).join("\n");
       return wrap(`
 ${headerBlock()}
           <tr>
@@ -363,9 +426,7 @@ ${headerBlock()}
               <p style="margin: 0 0 20px; font-size: 15px; color: #3f3f46; line-height: 1.6;">Hi {{{FIRST_NAME|there}}}, we noticed you haven't been around lately. A lot has changed since your last visit:</p>
               <div style="background-color: ${LIGHT_BG}; border-radius: 8px; padding: 20px; margin-bottom: 24px;">
                 <ul style="margin: 0; padding-left: 20px; font-size: 14px; color: #3f3f46; line-height: 1.8;">
-                  <li><strong>${v(vals, "feature1", "[New feature 1]")}</strong> &mdash; ${v(vals, "benefit1", "[brief benefit]")}</li>
-                  <li><strong>${v(vals, "feature2", "[New feature 2]")}</strong> &mdash; ${v(vals, "benefit2", "[brief benefit]")}</li>
-                  <li><strong>${v(vals, "feature3", "[New feature 3]")}</strong> &mdash; ${v(vals, "benefit3", "[brief benefit]")}</li>
+${items}
                 </ul>
               </div>
               <p style="margin: 0 0 24px; font-size: 15px; color: #3f3f46; line-height: 1.6;">Your prompts are still there, waiting for you. Jump back in and see what's new.</p>
@@ -391,13 +452,28 @@ ${footerBlock()}
       { key: "eyebrow", label: "Eyebrow Label", type: "text", placeholder: "e.g. NEW FEATURE, LIMITED TIME, JUST LAUNCHED", default: "JUST LAUNCHED" },
       { key: "headline", label: "Headline", type: "text", placeholder: "e.g. Team Analytics is here" },
       { key: "body", label: "Main Message", type: "textarea", placeholder: "2-3 sentences about what this is and why they should care." },
-      { key: "bullet1", label: "Benefit 1", type: "text", placeholder: "e.g. See prompt usage across your org" },
-      { key: "bullet2", label: "Benefit 2", type: "text", placeholder: "e.g. Identify top performers and patterns" },
-      { key: "bullet3", label: "Benefit 3", type: "text", placeholder: "e.g. Export reports for stakeholders" },
       { key: "cta_text", label: "Button Text", type: "text", placeholder: "Try It Now", default: "Try It Now" },
       { key: "cta_url", label: "Button URL", type: "text", placeholder: "https://teamprompt.app/home", default: "https://teamprompt.app/home" },
     ],
+    repeatableGroups: [
+      {
+        key: "benefits",
+        label: "Benefits",
+        addLabel: "Add Benefit",
+        min: 1,
+        max: 10,
+        defaultCount: 3,
+        fields: [
+          { suffix: "text", label: "Benefit", type: "text", placeholder: "e.g. See prompt usage across your org" },
+        ],
+      },
+    ],
     build(vals) {
+      const count = Math.max(repeatCount(vals, "benefits", ["text"]), 1);
+      const bullets = Array.from({ length: count }, (_, i) => {
+        const isLast = i === count - 1;
+        return `                    <p style="margin: 0${isLast ? "" : " 0 6px"}; font-size: 14px; color: #18181b; line-height: 1.6;">&#x2713;&nbsp; ${v(vals, `benefits_${i}_text`, "[Benefit]")}</p>`;
+      }).join("\n");
       return wrap(`
 ${headerBlock()}
           <tr>
@@ -408,9 +484,7 @@ ${headerBlock()}
               <table role="presentation" cellpadding="0" cellspacing="0" style="margin-bottom: 24px; width: 100%;">
                 <tr>
                   <td style="padding: 12px 16px; background-color: ${LIGHT_BG}; border-radius: 8px;">
-                    <p style="margin: 0 0 6px; font-size: 14px; color: #18181b; line-height: 1.6;">&#x2713;&nbsp; ${v(vals, "bullet1", "[Benefit 1]")}</p>
-                    <p style="margin: 0 0 6px; font-size: 14px; color: #18181b; line-height: 1.6;">&#x2713;&nbsp; ${v(vals, "bullet2", "[Benefit 2]")}</p>
-                    <p style="margin: 0; font-size: 14px; color: #18181b; line-height: 1.6;">&#x2713;&nbsp; ${v(vals, "bullet3", "[Benefit 3]")}</p>
+${bullets}
                   </td>
                 </tr>
               </table>

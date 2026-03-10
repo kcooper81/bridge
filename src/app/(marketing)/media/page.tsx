@@ -1526,6 +1526,85 @@ export default function MediaPage() {
             </div>
           </div>
 
+          {/* LinkedIn Image Specs Reference */}
+          <div className="rounded-2xl border border-border bg-card p-6 mb-8">
+            <h3 className="text-lg font-bold flex items-center gap-2 mb-2">
+              <Layers className="h-5 w-5 text-blue-600" />
+              LinkedIn Image Specs Reference
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              All image dimensions per LinkedIn&apos;s latest documentation. Use these specs when creating or resizing assets.
+            </p>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b text-left">
+                    <th className="py-2 pr-4 font-semibold text-xs uppercase tracking-wider text-muted-foreground">Asset Type</th>
+                    <th className="py-2 pr-4 font-semibold text-xs uppercase tracking-wider text-muted-foreground">Dimensions</th>
+                    <th className="py-2 pr-4 font-semibold text-xs uppercase tracking-wider text-muted-foreground">Ratio</th>
+                    <th className="py-2 font-semibold text-xs uppercase tracking-wider text-muted-foreground">Notes</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  <tr>
+                    <td className="py-2.5 pr-4 font-medium">Single Image Ad</td>
+                    <td className="py-2.5 pr-4 font-mono text-xs">1200 x 627</td>
+                    <td className="py-2.5 pr-4 text-xs">1.91:1</td>
+                    <td className="py-2.5 text-xs text-muted-foreground">Sponsored Content — most common ad format. JPG/PNG, max 5 MB.</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2.5 pr-4 font-medium">Company Page Cover</td>
+                    <td className="py-2.5 pr-4 font-mono text-xs">1128 x 191</td>
+                    <td className="py-2.5 pr-4 text-xs">5.9:1</td>
+                    <td className="py-2.5 text-xs text-muted-foreground">Company/org banner. Avoid text in left 25% (overlapped by logo).</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2.5 pr-4 font-medium">Personal Profile Cover</td>
+                    <td className="py-2.5 pr-4 font-mono text-xs">1584 x 396</td>
+                    <td className="py-2.5 pr-4 text-xs">4:1</td>
+                    <td className="py-2.5 text-xs text-muted-foreground">Personal/showcase banner. Profile photo overlaps bottom-left.</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2.5 pr-4 font-medium">Carousel Card</td>
+                    <td className="py-2.5 pr-4 font-mono text-xs">1080 x 1080</td>
+                    <td className="py-2.5 pr-4 text-xs">1:1</td>
+                    <td className="py-2.5 text-xs text-muted-foreground">Carousel ads — 2 to 10 cards. JPG/PNG, max 10 MB per card.</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2.5 pr-4 font-medium">Video Ad Thumbnail</td>
+                    <td className="py-2.5 pr-4 font-mono text-xs">1200 x 627</td>
+                    <td className="py-2.5 pr-4 text-xs">1.91:1</td>
+                    <td className="py-2.5 text-xs text-muted-foreground">Video content thumbnail. Same ratio as single image ads.</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2.5 pr-4 font-medium">Event Image</td>
+                    <td className="py-2.5 pr-4 font-mono text-xs">1600 x 900</td>
+                    <td className="py-2.5 pr-4 text-xs">16:9</td>
+                    <td className="py-2.5 text-xs text-muted-foreground">LinkedIn Events banner image.</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2.5 pr-4 font-medium">Profile Photo</td>
+                    <td className="py-2.5 pr-4 font-mono text-xs">400 x 400</td>
+                    <td className="py-2.5 pr-4 text-xs">1:1</td>
+                    <td className="py-2.5 text-xs text-muted-foreground">Company logo. Displays as circle. PNG with transparency recommended.</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2.5 pr-4 font-medium">Spotlight Ad (Logo)</td>
+                    <td className="py-2.5 pr-4 font-mono text-xs">100 x 100</td>
+                    <td className="py-2.5 pr-4 text-xs">1:1</td>
+                    <td className="py-2.5 text-xs text-muted-foreground">Dynamic Ads — company logo image. JPG/PNG, max 2 MB.</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2.5 pr-4 font-medium">Spotlight Ad (BG)</td>
+                    <td className="py-2.5 pr-4 font-mono text-xs">300 x 250</td>
+                    <td className="py-2.5 pr-4 text-xs">6:5</td>
+                    <td className="py-2.5 text-xs text-muted-foreground">Dynamic Ads — optional background image. JPG/PNG, max 2 MB.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
           {/* Budget Optimization */}
           <div className="rounded-2xl border border-border bg-card p-6 mb-8">
             <h3 className="text-lg font-bold flex items-center gap-2 mb-4">

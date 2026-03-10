@@ -1,0 +1,9 @@
+-- 056: Campaign analytics — track email performance metrics
+
+ALTER TABLE email_campaigns
+  ADD COLUMN IF NOT EXISTS opens INTEGER DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS clicks INTEGER DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS bounces INTEGER DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS complaints INTEGER DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS unsubscribes INTEGER DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS analytics_synced_at TIMESTAMPTZ;

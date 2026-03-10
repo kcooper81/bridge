@@ -19,6 +19,10 @@ import {
   Upload,
   FileText,
   LayoutTemplate,
+  BarChart3,
+  MousePointerClick,
+  MailOpen,
+  Ban,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
@@ -59,6 +63,12 @@ interface Campaign {
   scheduled_at: string | null;
   sent_at: string | null;
   recipient_count: number;
+  opens: number;
+  clicks: number;
+  bounces: number;
+  complaints: number;
+  unsubscribes: number;
+  analytics_synced_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -124,6 +134,10 @@ export default function CampaignsPage() {
   // Template field editing
   const [activeTemplate, setActiveTemplate] = useState<CampaignTemplate | null>(null);
   const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
+  const [groupCounts, setGroupCounts] = useState<Record<string, number>>({});
+
+  // Analytics
+  const [analyticsLoading, setAnalyticsLoading] = useState(false);
 
   const loadCampaigns = useCallback(async () => {
     setLoading(true);
@@ -190,6 +204,34 @@ export default function CampaignsPage() {
     setFieldValues({});
     setEditorTab(c.body_html ? "preview" : "fields");
     setView("editor");
+    // Load analytics for sent campaigns
+    if (c.status !== "draft" && c.resend_broadcast_id) {
+      loadAnalytics(c.id);
+    }
+  }
+
+  async function loadAnalytics(campaignId: string) {
+    setAnalyticsLoading(true);
+    try {
+      const res = await fetch(`/api/admin/campaigns/${campaignId}/analytics`);
+      const data = await res.json();
+      if (res.ok && data.campaign) {
+        setEditingCampaign((prev) => prev ? {
+          ...prev,
+          status: data.campaign.status,
+          opens: data.campaign.opens,
+          clicks: data.campaign.clicks,
+          bounces: data.campaign.bounces,
+          complaints: data.campaign.complaints,
+          unsubscribes: data.campaign.unsubscribes,
+          analytics_synced_at: data.campaign.analytics_synced_at,
+        } : prev);
+      }
+    } catch {
+      // Analytics are non-critical
+    } finally {
+      setAnalyticsLoading(false);
+    }
   }
 
   async function saveCampaign() {
@@ -287,11 +329,19 @@ export default function CampaignsPage() {
 
   function applyTemplate(template: CampaignTemplate) {
     setActiveTemplate(template);
-    setFieldValues({});
     // Pre-fill defaults from template fields
     const defaults: Record<string, string> = {};
     template.fields.forEach((f) => { if (f.default) defaults[f.key] = f.default; });
+    // Init repeatable group counts and seed empty values
+    const counts: Record<string, number> = {};
+    template.repeatableGroups?.forEach((g) => {
+      counts[g.key] = g.defaultCount;
+      for (let i = 0; i < g.defaultCount; i++) {
+        g.fields.forEach((f) => { defaults[`${g.key}_${i}_${f.suffix}`] = ""; });
+      }
+    });
     setFieldValues(defaults);
+    setGroupCounts(counts);
     setFormBody(template.build(defaults));
     if (!formSubject.trim()) setFormSubject(template.defaultSubject);
     if (!formName.trim()) setFormName(template.name + " — " + new Date().toLocaleDateString());
@@ -306,6 +356,37 @@ export default function CampaignsPage() {
     if (activeTemplate) {
       setFormBody(activeTemplate.build(next));
     }
+  }
+
+  function addGroupItem(groupKey: string, max: number) {
+    const current = groupCounts[groupKey] || 1;
+    if (current >= max) return;
+    const nextCounts = { ...groupCounts, [groupKey]: current + 1 };
+    setGroupCounts(nextCounts);
+    // Seed empty values for the new item so repeatCount detects it
+    const nextVals = { ...fieldValues };
+    const group = activeTemplate?.repeatableGroups?.find((g) => g.key === groupKey);
+    group?.fields.forEach((f) => { nextVals[`${groupKey}_${current}_${f.suffix}`] = ""; });
+    setFieldValues(nextVals);
+    if (activeTemplate) setFormBody(activeTemplate.build(nextVals));
+  }
+
+  function removeGroupItem(groupKey: string, index: number, min: number, suffixes: string[]) {
+    const current = groupCounts[groupKey] || 1;
+    if (current <= min) return;
+    // Shift values down to fill the gap
+    const next = { ...fieldValues };
+    for (let i = index; i < current - 1; i++) {
+      suffixes.forEach((s) => {
+        next[`${groupKey}_${i}_${s}`] = next[`${groupKey}_${i + 1}_${s}`] || "";
+      });
+    }
+    // Clear the last item
+    suffixes.forEach((s) => { delete next[`${groupKey}_${current - 1}_${s}`]; });
+    setFieldValues(next);
+    const nextCounts = { ...groupCounts, [groupKey]: current - 1 };
+    setGroupCounts(nextCounts);
+    if (activeTemplate) setFormBody(activeTemplate.build(next));
   }
 
   function detachTemplate() {
@@ -506,6 +587,80 @@ export default function CampaignsPage() {
                       )}
                     </div>
                   ))}
+
+                  {/* Repeatable groups */}
+                  {activeTemplate.repeatableGroups?.map((group) => {
+                    const count = groupCounts[group.key] || group.defaultCount;
+                    const suffixes = group.fields.map((f) => f.suffix);
+                    return (
+                      <div key={group.key} className="pt-3 border-t space-y-3">
+                        <div className="flex items-center justify-between">
+                          <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                            {group.label} ({count})
+                          </Label>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="h-6 text-[11px] px-2"
+                            disabled={count >= group.max}
+                            onClick={() => addGroupItem(group.key, group.max)}
+                          >
+                            <Plus className="h-3 w-3 mr-1" />
+                            {group.addLabel}
+                          </Button>
+                        </div>
+                        {Array.from({ length: count }, (_, i) => (
+                          <div key={i} className="relative bg-slate-50 rounded-lg p-3 space-y-2">
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-[10px] font-medium text-muted-foreground uppercase">
+                                {group.label.replace(/s$/, "")} {i + 1}
+                              </span>
+                              {count > group.min && (
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-5 w-5 p-0 text-muted-foreground hover:text-red-600"
+                                  onClick={() => removeGroupItem(group.key, i, group.min, suffixes)}
+                                >
+                                  <Trash2 className="h-3 w-3" />
+                                </Button>
+                              )}
+                            </div>
+                            {group.fields.map((gf) => {
+                              const fieldKey = `${group.key}_${i}_${gf.suffix}`;
+                              return (
+                                <div key={gf.suffix}>
+                                  <Label htmlFor={`field-${fieldKey}`} className="text-[11px] text-muted-foreground">
+                                    {gf.label}
+                                  </Label>
+                                  {gf.type === "textarea" ? (
+                                    <Textarea
+                                      id={`field-${fieldKey}`}
+                                      value={fieldValues[fieldKey] || ""}
+                                      onChange={(e) => updateFieldValue(fieldKey, e.target.value)}
+                                      placeholder={gf.placeholder}
+                                      className="mt-0.5 text-sm min-h-[60px]"
+                                    />
+                                  ) : (
+                                    <Input
+                                      id={`field-${fieldKey}`}
+                                      value={fieldValues[fieldKey] || ""}
+                                      onChange={(e) => updateFieldValue(fieldKey, e.target.value)}
+                                      placeholder={gf.placeholder}
+                                      className="mt-0.5 text-sm"
+                                    />
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })}
+
                   <div className="pt-2 border-t">
                     <p className="text-xs text-muted-foreground">
                       Personalization: <code className="bg-slate-100 px-1 rounded">{"{{{FIRST_NAME|there}}}"}</code> is auto-inserted.
@@ -555,6 +710,83 @@ export default function CampaignsPage() {
 
           {/* Sidebar */}
           <div className="space-y-4">
+            {/* Analytics — shown for sent campaigns */}
+            {editingCampaign && editingCampaign.status !== "draft" && (
+              <Card className="p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-semibold text-sm flex items-center gap-2">
+                    <BarChart3 className="h-4 w-4" />
+                    Performance
+                  </h3>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6"
+                    onClick={() => loadAnalytics(editingCampaign.id)}
+                    disabled={analyticsLoading}
+                  >
+                    <RefreshCw className={`h-3 w-3 ${analyticsLoading ? "animate-spin" : ""}`} />
+                  </Button>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="rounded-lg bg-blue-50 p-3 text-center">
+                    <Send className="h-4 w-4 text-blue-600 mx-auto mb-1" />
+                    <p className="text-lg font-bold text-blue-700">{editingCampaign.recipient_count}</p>
+                    <p className="text-[10px] text-blue-600/70 uppercase font-medium">Sent</p>
+                  </div>
+                  <div className="rounded-lg bg-green-50 p-3 text-center">
+                    <MailOpen className="h-4 w-4 text-green-600 mx-auto mb-1" />
+                    <p className="text-lg font-bold text-green-700">{editingCampaign.opens || 0}</p>
+                    <p className="text-[10px] text-green-600/70 uppercase font-medium">Opens</p>
+                  </div>
+                  <div className="rounded-lg bg-purple-50 p-3 text-center">
+                    <MousePointerClick className="h-4 w-4 text-purple-600 mx-auto mb-1" />
+                    <p className="text-lg font-bold text-purple-700">{editingCampaign.clicks || 0}</p>
+                    <p className="text-[10px] text-purple-600/70 uppercase font-medium">Clicks</p>
+                  </div>
+                  <div className="rounded-lg bg-red-50 p-3 text-center">
+                    <Ban className="h-4 w-4 text-red-500 mx-auto mb-1" />
+                    <p className="text-lg font-bold text-red-600">{editingCampaign.bounces || 0}</p>
+                    <p className="text-[10px] text-red-500/70 uppercase font-medium">Bounces</p>
+                  </div>
+                </div>
+                {editingCampaign.recipient_count > 0 && (editingCampaign.opens || 0) > 0 && (
+                  <div className="mt-3 pt-3 border-t space-y-1.5">
+                    <div className="flex justify-between text-xs">
+                      <span className="text-muted-foreground">Open rate</span>
+                      <span className="font-medium">
+                        {((editingCampaign.opens / editingCampaign.recipient_count) * 100).toFixed(1)}%
+                      </span>
+                    </div>
+                    {(editingCampaign.clicks || 0) > 0 && (
+                      <div className="flex justify-between text-xs">
+                        <span className="text-muted-foreground">Click rate</span>
+                        <span className="font-medium">
+                          {((editingCampaign.clicks / editingCampaign.recipient_count) * 100).toFixed(1)}%
+                        </span>
+                      </div>
+                    )}
+                    {(editingCampaign.unsubscribes || 0) > 0 && (
+                      <div className="flex justify-between text-xs">
+                        <span className="text-muted-foreground">Unsubscribes</span>
+                        <span className="font-medium text-red-600">{editingCampaign.unsubscribes}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+                {editingCampaign.analytics_synced_at && (
+                  <p className="text-[10px] text-muted-foreground mt-2">
+                    Last synced {timeAgo(editingCampaign.analytics_synced_at)}
+                  </p>
+                )}
+                {(editingCampaign.opens || 0) === 0 && (editingCampaign.clicks || 0) === 0 && (
+                  <p className="text-[10px] text-muted-foreground mt-2 text-center">
+                    Analytics update as Resend webhook events arrive
+                  </p>
+                )}
+              </Card>
+            )}
+
             <Card className="p-4">
               <h3 className="font-semibold text-sm mb-3 flex items-center gap-2">
                 <Users className="h-4 w-4" />
@@ -962,14 +1194,23 @@ function CampaignSection({
               </div>
 
               <div className="flex items-center gap-4 text-xs text-muted-foreground shrink-0">
-                {c.segment_name && (
-                  <span className="flex items-center gap-1">
-                    <Users className="h-3 w-3" />
-                    {c.segment_name}
+                {c.recipient_count > 0 && (
+                  <span className="flex items-center gap-1" title="Recipients">
+                    <Send className="h-3 w-3" />
+                    {c.recipient_count}
                   </span>
                 )}
-                {c.recipient_count > 0 && (
-                  <span>{c.recipient_count} recipients</span>
+                {(c.opens || 0) > 0 && (
+                  <span className="flex items-center gap-1 text-green-600" title="Opens">
+                    <MailOpen className="h-3 w-3" />
+                    {c.opens}
+                  </span>
+                )}
+                {(c.clicks || 0) > 0 && (
+                  <span className="flex items-center gap-1 text-purple-600" title="Clicks">
+                    <MousePointerClick className="h-3 w-3" />
+                    {c.clicks}
+                  </span>
                 )}
                 {c.scheduled_at && (
                   <span className="flex items-center gap-1">
@@ -977,10 +1218,9 @@ function CampaignSection({
                     {new Date(c.scheduled_at).toLocaleDateString()}
                   </span>
                 )}
-                {c.sent_at && (
+                {c.sent_at ? (
                   <span>{timeAgo(c.sent_at)}</span>
-                )}
-                {!c.sent_at && (
+                ) : (
                   <span>{timeAgo(c.created_at)}</span>
                 )}
               </div>

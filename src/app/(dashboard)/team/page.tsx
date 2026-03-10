@@ -1144,198 +1144,204 @@ export default function TeamPage() {
         </div>
       )}
 
-      {/* Org Chart View */}
+      {/* Org Chart View — Tree layout */}
       {teamViewMode === "chart" && (
-        <div className="space-y-6">
-          {/* Unassigned members */}
+        <div className="overflow-x-auto pb-4">
           {(() => {
             const unassigned = filteredMembers.filter((m) => m.teamIds.length === 0);
             const assigned = teams.map((team) => ({
               team,
               members: filteredMembers.filter((m) => m.teamIds.includes(team.id)),
-            })).filter((g) => g.members.length > 0 || true);
+            }));
+            const totalNodes = assigned.length + (unassigned.length > 0 ? 1 : 0);
 
             return (
-              <>
-                {/* Organization header node */}
-                <div className="flex flex-col items-center">
-                  <div className="rounded-xl border-2 border-primary/30 bg-primary/5 px-6 py-3 shadow-sm">
-                    <p className="text-sm font-semibold text-primary">{members.length} Members</p>
-                    <p className="text-xs text-muted-foreground text-center">{teams.length} Teams</p>
+              <div className="flex flex-col items-center min-w-fit">
+                {/* ─── Root: Organization node ─── */}
+                <div
+                  className="rounded-xl border-2 border-primary/30 bg-gradient-to-b from-primary/10 to-primary/5 px-8 py-4 shadow-sm cursor-default select-none"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-lg bg-primary/20 flex items-center justify-center">
+                      <Users className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-primary">Organization</p>
+                      <p className="text-xs text-muted-foreground">{members.length} members &middot; {teams.length} teams</p>
+                    </div>
                   </div>
-                  {/* Connector line */}
-                  <div className="w-px h-6 bg-border" />
                 </div>
 
-                {/* Teams grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+                {/* ─── Vertical line from root ─── */}
+                {totalNodes > 0 && <div className="w-px h-8 bg-border" />}
+
+                {/* ─── Horizontal branch bar ─── */}
+                {totalNodes > 1 && (
+                  <div className="relative w-full flex justify-center">
+                    <div
+                      className="h-px bg-border absolute top-0"
+                      style={{
+                        left: `calc(${100 / totalNodes / 2}% + 0px)`,
+                        right: `calc(${100 / totalNodes / 2}% + 0px)`,
+                      }}
+                    />
+                  </div>
+                )}
+
+                {/* ─── Team nodes ─── */}
+                <div
+                  className="grid gap-6 w-full"
+                  style={{
+                    gridTemplateColumns: `repeat(${Math.min(totalNodes, 4)}, minmax(220px, 1fr))`,
+                  }}
+                >
                   {assigned.map(({ team, members: teamMembers }) => {
-                    const admins = teamMembers.filter((m) => m.role === "admin" || m.teamRoles[team.id] === "admin");
+                    const leads = teamMembers.filter((m) => m.role === "admin" || m.teamRoles[team.id] === "admin");
                     const rest = teamMembers.filter((m) => m.role !== "admin" && m.teamRoles[team.id] !== "admin");
                     return (
-                      <div
-                        key={team.id}
-                        className="group rounded-xl border border-border bg-card shadow-sm hover:shadow-md hover:border-primary/20 transition-all duration-200"
-                      >
-                        {/* Team header — clickable to enter team detail */}
-                        <div
-                          className="flex items-center justify-between border-b border-border/50 px-4 py-3 cursor-pointer hover:bg-muted/30 transition-colors rounded-t-xl"
-                          onClick={() => setSelectedTeam(team)}
-                        >
-                          <div className="min-w-0">
-                            <h3 className="font-semibold text-sm truncate">{team.name}</h3>
-                            {team.description && (
-                              <p className="text-xs text-muted-foreground truncate">{team.description}</p>
-                            )}
-                          </div>
-                          <Badge variant="secondary" className="text-[10px] shrink-0">
-                            {teamMembers.length} {teamMembers.length === 1 ? "member" : "members"}
-                          </Badge>
-                        </div>
+                      <div key={team.id} className="flex flex-col items-center">
+                        {/* Vertical connector to branch */}
+                        {totalNodes > 1 && <div className="w-px h-6 bg-border" />}
 
-                        {/* Team members */}
-                        <div className="p-3 space-y-1">
-                          {teamMembers.length === 0 ? (
-                            <p className="text-xs text-muted-foreground text-center py-4">No members</p>
-                          ) : (
-                            <>
-                              {/* Team leads/admins first */}
-                              {admins.map((m) => {
-                                const initials = m.name?.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2) || "U";
-                                const extStatus = getExtensionStatus(m.last_extension_active);
-                                return (
-                                  <div key={m.id} className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 hover:bg-muted/50 transition-colors">
-                                    <div className="relative">
-                                      <Avatar className="h-8 w-8">
-                                        {m.avatar_url && <AvatarImage src={m.avatar_url} />}
-                                        <AvatarFallback className="bg-primary/20 text-primary text-[10px]">{initials}</AvatarFallback>
-                                      </Avatar>
-                                      <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-card bg-amber-500" title="Team Lead" />
-                                    </div>
-                                    <div className="min-w-0 flex-1">
-                                      <p className="text-xs font-medium truncate">{m.name || m.email}</p>
-                                      <div className="flex items-center gap-1.5">
-                                        <span className={cn("h-1.5 w-1.5 rounded-full shrink-0", extStatus === "active" ? "bg-green-500" : extStatus === "inactive" ? "bg-yellow-500" : "bg-gray-400")} title={`Extension: ${extStatus}`} />
-                                        {!m.shield_disabled && <span title="Shield on"><Shield className="h-2.5 w-2.5 text-green-500" /></span>}
-                                        {m.shield_disabled && <span title="Shield off"><ShieldOff className="h-2.5 w-2.5 text-muted-foreground/50" /></span>}
-                                        <p className="text-[10px] text-muted-foreground truncate">{m.email}</p>
+                        {/* Team card */}
+                        <div className="w-full rounded-xl border border-border bg-card shadow-sm hover:shadow-md hover:border-primary/20 transition-all duration-200 group">
+                          {/* Team header */}
+                          <div
+                            className="flex items-center justify-between border-b border-border/50 px-4 py-3 cursor-pointer hover:bg-muted/30 transition-colors rounded-t-xl"
+                            onClick={() => setSelectedTeam(team)}
+                          >
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-2">
+                                <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                                  <Network className="h-3.5 w-3.5 text-primary" />
+                                </div>
+                                <div className="min-w-0">
+                                  <h3 className="font-semibold text-sm truncate">{team.name}</h3>
+                                  {team.description && (
+                                    <p className="text-[10px] text-muted-foreground truncate">{team.description}</p>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            <Badge variant="secondary" className="text-[10px] shrink-0 ml-2">
+                              {teamMembers.length}
+                            </Badge>
+                          </div>
+
+                          {/* Members list */}
+                          <div className="p-2 space-y-0.5 max-h-[300px] overflow-y-auto">
+                            {teamMembers.length === 0 ? (
+                              <p className="text-xs text-muted-foreground text-center py-6">No members</p>
+                            ) : (
+                              <>
+                                {leads.map((m) => {
+                                  const initials = m.name?.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2) || "U";
+                                  const extStatus = getExtensionStatus(m.last_extension_active);
+                                  return (
+                                    <div key={m.id} className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-muted/50 transition-colors">
+                                      <div className="relative shrink-0">
+                                        <Avatar className="h-7 w-7">
+                                          {m.avatar_url && <AvatarImage src={m.avatar_url} />}
+                                          <AvatarFallback className="bg-primary/20 text-primary text-[9px]">{initials}</AvatarFallback>
+                                        </Avatar>
+                                        <Crown className="absolute -top-1 -right-1 h-3 w-3 text-amber-500" />
+                                      </div>
+                                      <div className="min-w-0 flex-1">
+                                        <p className="text-xs font-medium truncate">{m.name || m.email}</p>
+                                        <div className="flex items-center gap-1">
+                                          <span className={cn("h-1.5 w-1.5 rounded-full shrink-0", extStatus === "active" ? "bg-green-500" : extStatus === "inactive" ? "bg-yellow-500" : "bg-gray-400")} />
+                                          {!m.shield_disabled ? <Shield className="h-2.5 w-2.5 text-green-500 shrink-0" /> : <ShieldOff className="h-2.5 w-2.5 text-muted-foreground/40 shrink-0" />}
+                                        </div>
                                       </div>
                                     </div>
-                                    <Badge variant="outline" className="text-[9px] px-1.5 py-0 capitalize shrink-0">
-                                      {m.teamRoles[team.id] || m.role}
-                                    </Badge>
-                                  </div>
-                                );
-                              })}
-                              {rest.map((m) => {
-                                const initials = m.name?.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2) || "U";
-                                const extStatus = getExtensionStatus(m.last_extension_active);
-                                return (
-                                  <div key={m.id} className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 hover:bg-muted/50 transition-colors">
-                                    <Avatar className="h-8 w-8">
-                                      {m.avatar_url && <AvatarImage src={m.avatar_url} />}
-                                      <AvatarFallback className="bg-muted text-muted-foreground text-[10px]">{initials}</AvatarFallback>
+                                  );
+                                })}
+                                {rest.map((m) => {
+                                  const initials = m.name?.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2) || "U";
+                                  const extStatus = getExtensionStatus(m.last_extension_active);
+                                  return (
+                                    <div key={m.id} className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-muted/50 transition-colors">
+                                      <Avatar className="h-7 w-7 shrink-0">
+                                        {m.avatar_url && <AvatarImage src={m.avatar_url} />}
+                                        <AvatarFallback className="bg-muted text-muted-foreground text-[9px]">{initials}</AvatarFallback>
+                                      </Avatar>
+                                      <div className="min-w-0 flex-1">
+                                        <p className="text-xs font-medium truncate">{m.name || m.email}</p>
+                                        <div className="flex items-center gap-1">
+                                          <span className={cn("h-1.5 w-1.5 rounded-full shrink-0", extStatus === "active" ? "bg-green-500" : extStatus === "inactive" ? "bg-yellow-500" : "bg-gray-400")} />
+                                          {!m.shield_disabled ? <Shield className="h-2.5 w-2.5 text-green-500 shrink-0" /> : <ShieldOff className="h-2.5 w-2.5 text-muted-foreground/40 shrink-0" />}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                                {filteredInvites.filter((inv) => inv.team_id === team.id).map((inv) => (
+                                  <div key={`inv-${inv.id}`} className="flex items-center gap-2 rounded-lg px-2 py-1.5 opacity-50">
+                                    <Avatar className="h-7 w-7 shrink-0">
+                                      <AvatarFallback className="bg-muted text-muted-foreground text-[9px]">
+                                        <Mail className="h-3 w-3" />
+                                      </AvatarFallback>
                                     </Avatar>
                                     <div className="min-w-0 flex-1">
-                                      <p className="text-xs font-medium truncate">{m.name || m.email}</p>
-                                      <div className="flex items-center gap-1.5">
-                                        <span className={cn("h-1.5 w-1.5 rounded-full shrink-0", extStatus === "active" ? "bg-green-500" : extStatus === "inactive" ? "bg-yellow-500" : "bg-gray-400")} title={`Extension: ${extStatus}`} />
-                                        {!m.shield_disabled && <span title="Shield on"><Shield className="h-2.5 w-2.5 text-green-500" /></span>}
-                                        {m.shield_disabled && <span title="Shield off"><ShieldOff className="h-2.5 w-2.5 text-muted-foreground/50" /></span>}
-                                        <p className="text-[10px] text-muted-foreground truncate">{m.email}</p>
-                                      </div>
+                                      <p className="text-[10px] text-muted-foreground truncate">{inv.email}</p>
                                     </div>
-                                    <Badge variant="outline" className="text-[9px] px-1.5 py-0 capitalize shrink-0">
-                                      {m.teamRoles[team.id] || m.role}
+                                    <Badge variant="outline" className="text-[8px] px-1 py-0 border-amber-300 text-amber-600">
+                                      Pending
                                     </Badge>
                                   </div>
-                                );
-                              })}
-                              {/* Pending invites for this team */}
-                              {filteredInvites.filter((inv) => inv.team_id === team.id).map((inv) => (
-                                <div key={`inv-${inv.id}`} className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 opacity-60">
-                                  <Avatar className="h-8 w-8">
-                                    <AvatarFallback className="bg-muted text-muted-foreground text-[10px]">
-                                      <Mail className="h-3 w-3" />
-                                    </AvatarFallback>
-                                  </Avatar>
-                                  <div className="min-w-0 flex-1">
-                                    <p className="text-xs text-muted-foreground truncate">{inv.email}</p>
-                                  </div>
-                                  <Badge variant="outline" className="text-[9px] px-1.5 py-0 shrink-0 border-amber-300 text-amber-600 dark:border-amber-700 dark:text-amber-400">
-                                    Pending
-                                  </Badge>
-                                </div>
-                              ))}
-                            </>
-                          )}
-                        </div>
-
-                        {/* Stacked avatar footer */}
-                        {teamMembers.length > 0 && (
-                          <div className="flex items-center gap-2 border-t border-border/50 px-4 py-2">
-                            <div className="flex -space-x-2">
-                              {teamMembers.slice(0, 5).map((m) => {
-                                const initials = m.name?.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2) || "U";
-                                return (
-                                  <Avatar key={m.id} className="h-6 w-6 border-2 border-card">
-                                    {m.avatar_url && <AvatarImage src={m.avatar_url} />}
-                                    <AvatarFallback className="bg-muted text-[8px]">{initials}</AvatarFallback>
-                                  </Avatar>
-                                );
-                              })}
-                            </div>
-                            {teamMembers.length > 5 && (
-                              <span className="text-[10px] text-muted-foreground">+{teamMembers.length - 5} more</span>
+                                ))}
+                              </>
                             )}
                           </div>
-                        )}
+                        </div>
                       </div>
                     );
                   })}
 
-                  {/* Unassigned card */}
+                  {/* Unassigned node */}
                   {unassigned.length > 0 && (
-                    <div className="rounded-xl border border-dashed border-border bg-muted/20">
-                      <div className="flex items-center justify-between border-b border-border/50 px-4 py-3">
-                        <div>
-                          <h3 className="font-semibold text-sm text-muted-foreground">Unassigned</h3>
-                          <p className="text-xs text-muted-foreground/70">Not on any team</p>
-                        </div>
-                        <Badge variant="outline" className="text-[10px]">
-                          {unassigned.length} {unassigned.length === 1 ? "member" : "members"}
-                        </Badge>
-                      </div>
-                      <div className="p-3 space-y-1">
-                        {unassigned.map((m) => {
-                          const initials = m.name?.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2) || "U";
-                          const extStatus = getExtensionStatus(m.last_extension_active);
-                          return (
-                            <div key={m.id} className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 hover:bg-muted/50 transition-colors">
-                              <Avatar className="h-8 w-8">
-                                {m.avatar_url && <AvatarImage src={m.avatar_url} />}
-                                <AvatarFallback className="bg-muted text-muted-foreground text-[10px]">{initials}</AvatarFallback>
-                              </Avatar>
-                              <div className="min-w-0 flex-1">
-                                <p className="text-xs font-medium truncate">{m.name || m.email}</p>
-                                <div className="flex items-center gap-1.5">
-                                  <span className={cn("h-1.5 w-1.5 rounded-full shrink-0", extStatus === "active" ? "bg-green-500" : extStatus === "inactive" ? "bg-yellow-500" : "bg-gray-400")} title={`Extension: ${extStatus}`} />
-                                  {!m.shield_disabled && <span title="Shield on"><Shield className="h-2.5 w-2.5 text-green-500" /></span>}
-                                  {m.shield_disabled && <span title="Shield off"><ShieldOff className="h-2.5 w-2.5 text-muted-foreground/50" /></span>}
-                                  <p className="text-[10px] text-muted-foreground truncate">{m.email}</p>
-                                </div>
-                              </div>
-                              <Badge variant="outline" className="text-[9px] px-1.5 py-0 capitalize shrink-0">
-                                {m.role}
-                              </Badge>
+                    <div className="flex flex-col items-center">
+                      {totalNodes > 1 && <div className="w-px h-6 bg-border" />}
+                      <div className="w-full rounded-xl border border-dashed border-border bg-muted/20">
+                        <div className="flex items-center justify-between border-b border-border/50 px-4 py-3">
+                          <div className="flex items-center gap-2">
+                            <div className="h-7 w-7 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                              <Users className="h-3.5 w-3.5 text-muted-foreground" />
                             </div>
-                          );
-                        })}
+                            <div>
+                              <h3 className="font-semibold text-sm text-muted-foreground">Unassigned</h3>
+                              <p className="text-[10px] text-muted-foreground/70">Not on any team</p>
+                            </div>
+                          </div>
+                          <Badge variant="outline" className="text-[10px]">{unassigned.length}</Badge>
+                        </div>
+                        <div className="p-2 space-y-0.5 max-h-[300px] overflow-y-auto">
+                          {unassigned.map((m) => {
+                            const initials = m.name?.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2) || "U";
+                            const extStatus = getExtensionStatus(m.last_extension_active);
+                            return (
+                              <div key={m.id} className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-muted/50 transition-colors">
+                                <Avatar className="h-7 w-7 shrink-0">
+                                  {m.avatar_url && <AvatarImage src={m.avatar_url} />}
+                                  <AvatarFallback className="bg-muted text-muted-foreground text-[9px]">{initials}</AvatarFallback>
+                                </Avatar>
+                                <div className="min-w-0 flex-1">
+                                  <p className="text-xs font-medium truncate">{m.name || m.email}</p>
+                                  <div className="flex items-center gap-1">
+                                    <span className={cn("h-1.5 w-1.5 rounded-full shrink-0", extStatus === "active" ? "bg-green-500" : extStatus === "inactive" ? "bg-yellow-500" : "bg-gray-400")} />
+                                    {!m.shield_disabled ? <Shield className="h-2.5 w-2.5 text-green-500 shrink-0" /> : <ShieldOff className="h-2.5 w-2.5 text-muted-foreground/40 shrink-0" />}
+                                  </div>
+                                </div>
+                                <Badge variant="outline" className="text-[9px] px-1.5 py-0 capitalize shrink-0">{m.role}</Badge>
+                              </div>
+                            );
+                          })}
+                        </div>
                       </div>
                     </div>
                   )}
                 </div>
-              </>
+              </div>
             );
           })()}
         </div>

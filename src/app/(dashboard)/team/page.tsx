@@ -154,7 +154,7 @@ export default function TeamPage() {
   const [memberTeamFilter, setMemberTeamFilter] = useState<string>("all");
   const [memberRoleFilter, setMemberRoleFilter] = useState<"all" | "admin" | "manager" | "member">("all");
   const [memberShieldFilter, setMemberShieldFilter] = useState<"all" | "enabled" | "disabled">("all");
-  const [memberSort, setMemberSort] = useState<{ key: "name" | "email" | "role"; dir: "asc" | "desc" }>({ key: "name", dir: "asc" });
+  const [memberSort, setMemberSort] = useState<{ key: "name" | "email" | "role" | "extension" | "shield"; dir: "asc" | "desc" }>({ key: "name", dir: "asc" });
 
   // Members after search/role/shield filters but BEFORE team filter (for accurate chip counts)
   const membersPreTeamFilter = useMemo(() => {
@@ -205,6 +205,14 @@ export default function TeamPage() {
         case "role":
           cmp = a.role.localeCompare(b.role);
           break;
+        case "extension": {
+          const statusOrder = { active: 0, inactive: 1, not_installed: 2 };
+          cmp = statusOrder[getExtensionStatus(a.last_extension_active)] - statusOrder[getExtensionStatus(b.last_extension_active)];
+          break;
+        }
+        case "shield":
+          cmp = (a.shield_disabled ? 1 : 0) - (b.shield_disabled ? 1 : 0);
+          break;
       }
       return memberSort.dir === "asc" ? cmp : -cmp;
     });
@@ -212,7 +220,7 @@ export default function TeamPage() {
     return result;
   }, [membersPreTeamFilter, memberTeamFilter, memberSort]);
 
-  const handleMemberSort = (key: "name" | "email" | "role") => {
+  const handleMemberSort = (key: "name" | "email" | "role" | "extension" | "shield") => {
     setMemberSort((prev) =>
       prev.key === key ? { key, dir: prev.dir === "asc" ? "desc" : "asc" } : { key, dir: "asc" }
     );
@@ -1079,9 +1087,17 @@ export default function TeamPage() {
                         Name <ArrowUpDown className="h-3 w-3" />
                       </button>
                     </th>
-                    <th className="text-left p-3 font-medium hidden sm:table-cell">Extension</th>
+                    <th className="text-left p-3 font-medium hidden sm:table-cell">
+                      <button className="flex items-center gap-1 hover:text-foreground" onClick={() => handleMemberSort("extension")}>
+                        Extension <ArrowUpDown className="h-3 w-3" />
+                      </button>
+                    </th>
                     {currentUserRole === "admin" && (
-                      <th className="text-left p-3 font-medium hidden sm:table-cell">Shield</th>
+                      <th className="text-left p-3 font-medium hidden sm:table-cell">
+                        <button className="flex items-center gap-1 hover:text-foreground" onClick={() => handleMemberSort("shield")}>
+                          Shield <ArrowUpDown className="h-3 w-3" />
+                        </button>
+                      </th>
                     )}
                     <th className="text-left p-3 font-medium">
                       <button className="flex items-center gap-1 hover:text-foreground" onClick={() => handleMemberSort("role")}>

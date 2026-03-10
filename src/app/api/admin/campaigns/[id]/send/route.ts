@@ -122,23 +122,51 @@ async function getOrCreateAudience(): Promise<string> {
 }
 
 /**
- * Sync user profiles to Resend contacts.
- * If segment_name is provided, filter users (e.g., "all", "pro", "team", "business", "free").
+ * Sync contacts to Resend audience.
+ * Supports: "all" (DB users), plan-based segments, "external" (campaign_contacts table),
+ * and "all_combined" (DB users + external contacts).
  */
 async function syncContacts(
   db: ReturnType<typeof createServiceClient>,
   audienceId: string,
   segmentName: string | null
 ): Promise<number> {
-  // Fetch users with email opt-in (or all if no preference column)
+  let synced = 0;
+
+  // Sync external contacts from campaign_contacts table
+  if (segmentName === "external" || segmentName === "all_combined") {
+    const { data: external } = await db
+      .from("campaign_contacts")
+      .select("email, first_name, last_name")
+      .eq("unsubscribed", false);
+
+    for (const contact of external || []) {
+      if (!contact.email) continue;
+      try {
+        await resend.contacts.create({
+          audienceId,
+          email: contact.email,
+          firstName: contact.first_name || "",
+          lastName: contact.last_name || "",
+          unsubscribed: false,
+        });
+        synced++;
+      } catch {
+        synced++;
+      }
+    }
+
+    if (segmentName === "external") return synced;
+  }
+
+  // Sync internal users from profiles
   let query = db
     .from("profiles")
     .select("id, email, name")
     .not("email", "is", null);
 
   // Filter by plan if segment specifies one
-  if (segmentName && segmentName !== "all") {
-    // Join through org membership to filter by plan
+  if (segmentName && segmentName !== "all" && segmentName !== "all_combined") {
     const { data: orgIds } = await db
       .from("subscriptions")
       .select("org_id")
@@ -161,11 +189,8 @@ async function syncContacts(
   }
 
   const { data: users } = await query;
-  if (!users || users.length === 0) return 0;
 
-  // Batch upsert contacts to Resend (they dedupe by email)
-  let synced = 0;
-  for (const user of users) {
+  for (const user of users || []) {
     if (!user.email) continue;
     try {
       await resend.contacts.create({
@@ -177,7 +202,6 @@ async function syncContacts(
       });
       synced++;
     } catch {
-      // Contact may already exist — that's fine
       synced++;
     }
   }

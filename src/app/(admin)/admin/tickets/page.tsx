@@ -255,10 +255,13 @@ function TicketContent({
 
   const starred = isStarred(ticket, userId);
 
+  const [detailsOpen, setDetailsOpen] = useState(false);
+
   return (
     <>
-      {/* Header */}
-      <div className="px-3 sm:px-5 pt-3 sm:pt-4 pb-3 border-b flex-shrink-0 space-y-2">
+      {/* Compact header */}
+      <div className="px-3 sm:px-4 pt-3 pb-2 border-b flex-shrink-0">
+        {/* Subject row */}
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex items-start gap-2">
             <button
@@ -270,17 +273,16 @@ function TicketContent({
               <Star className={cn("h-4 w-4 transition-colors", starred ? "fill-amber-400 text-amber-400" : "text-muted-foreground/40 hover:text-amber-400")} />
             </button>
             <div className="min-w-0">
-              <h2 className="text-sm sm:text-base font-semibold leading-snug line-clamp-2 sm:truncate">
+              <h2 className="text-sm font-semibold leading-snug truncate">
                 {ticket.subject || "No subject"}
               </h2>
-              <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5 truncate">
+              <p className="text-[11px] text-muted-foreground mt-0.5 truncate">
                 {ticket.sender_name && ticket.sender_name !== ticket.user_email
                   ? `${ticket.sender_name} <${ticket.user_email}>`
                   : ticket.user_email || "Anonymous"}
                 {ticket.org_name && ` · ${ticket.org_name}`}
-                <span className="hidden sm:inline">
-                  {" · "}{new Date(ticket.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
-                </span>
+                {ticket.org_plan && ` (${ticket.org_plan})`}
+                {" · "}{new Date(ticket.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
               </p>
             </div>
           </div>
@@ -308,79 +310,80 @@ function TicketContent({
           </div>
         </div>
 
-        {/* Controls */}
-        <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 sm:gap-3">
-          <div className="flex items-center gap-1.5">
-            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider hidden sm:inline">Status</span>
-            <Select value={ticket.status === "resolved" ? "closed" : ticket.status} onValueChange={(val) => updateStatus(ticket.id, val)}>
-              <SelectTrigger className="w-full sm:w-[115px] h-7 text-xs"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="new">New</SelectItem>
-                <SelectItem value="in_progress">In Progress</SelectItem>
-                <SelectItem value="closed">Done</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider hidden sm:inline">Priority</span>
-            <Select value={ticket.priority} onValueChange={(val) => updatePriority(ticket.id, val)}>
-              <SelectTrigger className="w-full sm:w-[95px] h-7 text-xs"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="low">Low</SelectItem>
-                <SelectItem value="normal">Normal</SelectItem>
-                <SelectItem value="high">High</SelectItem>
-                <SelectItem value="urgent">Urgent</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex items-center gap-1.5 col-span-2">
-            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider hidden sm:inline">Assignee</span>
-            <Select value={ticket.assigned_to || "_unassigned"} onValueChange={(val) => assignTicket(ticket.id, val === "_unassigned" ? null : val)}>
-              <SelectTrigger className="w-full sm:w-[140px] h-7 text-xs">
-                <div className="flex items-center gap-1 truncate">
-                  <UserRound className="h-3 w-3 flex-shrink-0 text-muted-foreground" />
-                  <SelectValue placeholder="Unassigned" />
-                </div>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="_unassigned">Unassigned</SelectItem>
-                {staff.map((s) => (
-                  <SelectItem key={s.id} value={s.id}>{s.name || s.email}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {/* Snooze button in header */}
-            <SnoozePopover onSnooze={(until) => onSnooze(ticket.id, until)}>
-              <Button variant="ghost" size="sm" className="h-7 w-7 p-0 ml-auto" title="Snooze">
-                <AlarmClock className="h-3.5 w-3.5 text-muted-foreground" />
-              </Button>
-            </SnoozePopover>
-          </div>
+        {/* Inline controls row — all on one line */}
+        <div className="flex items-center gap-1.5 mt-2">
+          <Select value={ticket.status === "resolved" ? "closed" : ticket.status} onValueChange={(val) => updateStatus(ticket.id, val)}>
+            <SelectTrigger className="w-[100px] h-6 text-[11px]"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="new">New</SelectItem>
+              <SelectItem value="in_progress">In Progress</SelectItem>
+              <SelectItem value="closed">Done</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={ticket.priority} onValueChange={(val) => updatePriority(ticket.id, val)}>
+            <SelectTrigger className="w-[80px] h-6 text-[11px]"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="low">Low</SelectItem>
+              <SelectItem value="normal">Normal</SelectItem>
+              <SelectItem value="high">High</SelectItem>
+              <SelectItem value="urgent">Urgent</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={ticket.assigned_to || "_unassigned"} onValueChange={(val) => assignTicket(ticket.id, val === "_unassigned" ? null : val)}>
+            <SelectTrigger className="w-[120px] h-6 text-[11px]">
+              <div className="flex items-center gap-1 truncate">
+                <UserRound className="h-2.5 w-2.5 flex-shrink-0 text-muted-foreground" />
+                <SelectValue placeholder="Unassigned" />
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="_unassigned">Unassigned</SelectItem>
+              {staff.map((s) => (
+                <SelectItem key={s.id} value={s.id}>{s.name || s.email}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <SnoozePopover onSnooze={(until) => onSnooze(ticket.id, until)}>
+            <Button variant="ghost" size="sm" className="h-6 w-6 p-0" title="Snooze">
+              <AlarmClock className="h-3 w-3 text-muted-foreground" />
+            </Button>
+          </SnoozePopover>
+          <div className="flex-1" />
+          <button
+            type="button"
+            onClick={() => setDetailsOpen(!detailsOpen)}
+            className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ChevronRight className={cn("h-3 w-3 transition-transform", detailsOpen && "rotate-90")} />
+            Details
+          </button>
         </div>
+
+        {/* Collapsible details: contact card + CC */}
+        {detailsOpen && (
+          <div className="mt-2 space-y-2">
+            <ContactCard ticket={ticket} tickets={tickets} />
+            {ticket.cc_emails && ticket.cc_emails.length > 0 && (
+              <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground flex-wrap">
+                <span className="font-medium">CC:</span>
+                {ticket.cc_emails.map((email, i) => (
+                  <span key={i} className="bg-muted rounded px-1.5 py-0.5">{email}</span>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* Scrollable content */}
+      {/* Scrollable content — email body takes primary focus */}
       <ScrollArea className="flex-1">
-        <div className="px-3 sm:px-5 py-3 sm:py-4 space-y-4">
-          {/* Contact card */}
-          <ContactCard ticket={ticket} tickets={tickets} />
-
-          {/* CC recipients */}
-          {ticket.cc_emails && ticket.cc_emails.length > 0 && (
-            <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-              <span className="font-medium">CC:</span>
-              {ticket.cc_emails.map((email, i) => (
-                <span key={i} className="bg-muted rounded px-1.5 py-0.5">{email}</span>
-              ))}
-            </div>
-          )}
-
-          {/* Original message */}
+        <div className="px-3 sm:px-4 py-3 space-y-4">
+          {/* Original message — full width, prominent */}
           <div className="rounded-lg border shadow-sm overflow-hidden">
-            <div className="bg-muted/40 px-4 py-2 text-[11px] flex items-center justify-between border-b">
+            <div className="bg-muted/40 px-3 py-1.5 text-[11px] flex items-center justify-between border-b">
               <div className="flex items-center gap-2">
-                <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <Mail className="h-3 w-3 text-primary" />
+                <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <Mail className="h-2.5 w-2.5 text-primary" />
                 </div>
                 <span className="font-medium text-foreground">
                   {ticket.sender_name || ticket.user_email?.split("@")[0] || "Customer"}
@@ -674,8 +677,11 @@ export default function TicketsPage() {
         body: JSON.stringify({ id, status }),
       });
       if (!res.ok) throw new Error("Failed");
-      setTickets((prev) => prev.map((t) => (t.id === id ? { ...t, status } : t)));
-      setSelectedTicket((prev) => (prev?.id === id ? { ...prev, status } : prev));
+      // Auto-mark as read when marking done
+      const isDone = status === "closed" || status === "resolved";
+      setTickets((prev) => prev.map((t) => (t.id === id ? { ...t, status, ...(isDone ? { is_read: true } : {}) } : t)));
+      setSelectedTicket((prev) => (prev?.id === id ? { ...prev, status, ...(isDone ? { is_read: true } : {}) } : prev));
+      if (isDone) markRead(id);
       if (!silent) {
         toast.success(status === "closed" ? "Marked as done" : `Status → ${status.replace("_", " ")}`);
       }
@@ -806,7 +812,12 @@ export default function TicketsPage() {
         body: JSON.stringify({ ids: Array.from(selected), ...updates }),
       });
       if (!res.ok) throw new Error("Failed");
-      setTickets((prev) => prev.map((t) => (selected.has(t.id) ? { ...t, ...updates } : t)));
+      const isDone = updates.status === "closed" || updates.status === "resolved";
+      setTickets((prev) => prev.map((t) => (selected.has(t.id) ? { ...t, ...updates, ...(isDone ? { is_read: true } : {}) } : t)));
+      // Also mark all as read in the DB when closing
+      if (isDone) {
+        Array.from(selected).forEach((id) => markRead(id));
+      }
       toast.success(`Updated ${selected.size} ticket(s)`);
       setSelected(new Set());
     } catch {
@@ -1795,47 +1806,42 @@ export default function TicketsPage() {
         </div>
       </div>
 
-      {/* Split pane */}
-      <div className="lg:grid lg:grid-cols-[380px_1fr] lg:gap-0 lg:border lg:rounded-lg lg:overflow-hidden lg:bg-card" style={{ height: "calc(100vh - 140px)" }}>
-        {/* Left: Ticket list */}
-        <div className="border rounded-lg lg:rounded-none lg:border-0 lg:border-r bg-card flex flex-col overflow-hidden" style={{ height: "calc(100vh - 140px)" }}>
+      {/* Filter tabs — full width above split pane */}
+      <div className="flex items-center border border-border rounded-lg bg-card overflow-x-auto scrollbar-hide px-2">
+        {primaryTabs.map((tab) => (
+          <button
+            key={tab.key}
+            type="button"
+            onClick={() => handleTabClick(tab.key)}
+            className={cn(
+              "px-3 py-2.5 text-xs font-medium border-b-2 transition-colors -mb-px whitespace-nowrap",
+              activeTabKey === tab.key
+                ? "border-primary text-foreground"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            )}
+          >
+            {tab.label}
+            {tab.count > 0 && (
+              <span className={cn(
+                "ml-1.5 text-[10px] rounded-full px-1.5 py-0.5",
+                activeTabKey === tab.key ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+              )}>
+                {tab.count}
+              </span>
+            )}
+          </button>
+        ))}
 
-          {/* Filter tabs */}
-          <div className="flex items-center border-b overflow-x-auto flex-shrink-0 scrollbar-hide px-1">
-            {primaryTabs.map((tab) => (
-              <button
-                key={tab.key}
-                type="button"
-                onClick={() => handleTabClick(tab.key)}
-                className={cn(
-                  "px-2 py-2 text-[11px] font-medium border-b-2 transition-colors -mb-px whitespace-nowrap",
-                  activeTabKey === tab.key
-                    ? "border-primary text-foreground"
-                    : "border-transparent text-muted-foreground hover:text-foreground"
-                )}
-              >
-                {tab.label}
-                {tab.count > 0 && (
-                  <span className={cn(
-                    "ml-1 text-[10px] rounded-full px-1.5 py-0.5",
-                    activeTabKey === tab.key ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
-                  )}>
-                    {tab.count}
-                  </span>
-                )}
-              </button>
-            ))}
-
-            {/* More dropdown */}
-            <Popover open={showMoreTabs} onOpenChange={setShowMoreTabs}>
-              <PopoverTrigger asChild>
-                <button
-                  type="button"
-                  className={cn(
-                    "px-2 py-2 text-[11px] font-medium border-b-2 -mb-px whitespace-nowrap flex items-center gap-0.5",
-                    secondaryTabs.some((t) => activeTabKey === t.key)
-                      ? "border-primary text-foreground"
-                      : "border-transparent text-muted-foreground hover:text-foreground"
+        {/* More dropdown */}
+        <Popover open={showMoreTabs} onOpenChange={setShowMoreTabs}>
+          <PopoverTrigger asChild>
+            <button
+              type="button"
+              className={cn(
+                "px-3 py-2.5 text-xs font-medium border-b-2 -mb-px whitespace-nowrap flex items-center gap-0.5",
+                secondaryTabs.some((t) => activeTabKey === t.key)
+                  ? "border-primary text-foreground"
+                  : "border-transparent text-muted-foreground hover:text-foreground"
                   )}
                 >
                   More
@@ -1858,7 +1864,12 @@ export default function TicketsPage() {
                 ))}
               </PopoverContent>
             </Popover>
-          </div>
+      </div>
+
+      {/* Split pane */}
+      <div className="lg:grid lg:grid-cols-[380px_1fr] lg:gap-0 lg:border lg:rounded-lg lg:overflow-hidden lg:bg-card" style={{ height: "calc(100vh - 190px)" }}>
+        {/* Left: Ticket list */}
+        <div className="border rounded-lg lg:rounded-none lg:border-0 lg:border-r bg-card flex flex-col overflow-hidden" style={{ height: "calc(100vh - 190px)" }}>
 
           {/* Search + filter bar */}
           <div className="flex items-center gap-1.5 px-3 py-2 border-b flex-shrink-0">
@@ -1993,7 +2004,7 @@ export default function TicketsPage() {
         </div>
 
         {/* Right: Detail panel (desktop only) */}
-        <div className="hidden lg:flex lg:flex-col overflow-hidden" style={{ height: "calc(100vh - 140px)" }}>
+        <div className="hidden lg:flex lg:flex-col overflow-hidden" style={{ height: "calc(100vh - 190px)" }}>
           {selectedTicket ? (
             <>
               <TicketContent

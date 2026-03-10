@@ -108,7 +108,7 @@ export function PitchDeck() {
   });
 
   return (
-    <div ref={containerRef} className="relative bg-zinc-950 text-white -mt-16">
+    <div ref={containerRef} className="relative bg-white text-zinc-900">
       {/* ─── Navigation overlay ─── */}
       {!isScrollMode && (
         <>
@@ -118,20 +118,20 @@ export function PitchDeck() {
             className="fixed left-0 top-0 bottom-0 w-20 z-40 flex items-center justify-start pl-4 opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
             aria-label="Previous slide"
           >
-            <ChevronLeft className="h-8 w-8 text-white/60" />
+            <ChevronLeft className="h-8 w-8 text-zinc-500" />
           </button>
           <button
             onClick={next}
             className="fixed right-0 top-0 bottom-0 w-20 z-40 flex items-center justify-end pr-4 opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
             aria-label="Next slide"
           >
-            <ChevronRight className="h-8 w-8 text-white/60" />
+            <ChevronRight className="h-8 w-8 text-zinc-500" />
           </button>
         </>
       )}
 
       {/* ─── Bottom bar ─── */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-zinc-900/90 backdrop-blur-sm border-t border-white/5">
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-sm border-t border-zinc-200">
         <div className="flex items-center justify-between px-6 py-2">
           {/* Progress dots */}
           <div className="flex items-center gap-1.5">
@@ -142,8 +142,8 @@ export function PitchDeck() {
                 className={cn(
                   "h-1.5 rounded-full transition-all duration-300",
                   i === currentSlide
-                    ? "w-6 bg-blue-500"
-                    : "w-1.5 bg-white/20 hover:bg-white/40"
+                    ? "w-6 bg-blue-600"
+                    : "w-1.5 bg-zinc-300 hover:bg-zinc-400"
                 )}
               />
             ))}
@@ -155,7 +155,7 @@ export function PitchDeck() {
             </span>
             <button
               onClick={() => setIsScrollMode((v) => !v)}
-              className="hover:text-white transition-colors"
+              className="hover:text-zinc-800 transition-colors"
             >
               {isScrollMode ? "Slide mode" : "Scroll mode"}
             </button>
@@ -185,14 +185,14 @@ export function PitchDeck() {
             <h1 className="text-5xl sm:text-7xl font-bold tracking-tight">
               Team<span className="text-blue-500">Prompt</span>
             </h1>
-            <p className="mt-4 text-2xl sm:text-3xl text-zinc-400 font-light">
+            <p className="mt-4 text-2xl sm:text-3xl text-zinc-500 font-light">
               The Git for AI Prompts
             </p>
           </div>
 
-          <div className="bg-zinc-900/60 border border-white/10 rounded-2xl p-8 max-w-2xl mx-auto">
-            <p className="text-lg text-zinc-300 leading-relaxed">
-              Teams waste <span className="text-white font-semibold">40% of AI time</span> recreating the same prompts every week.
+          <div className="bg-zinc-50/60 border border-zinc-200 rounded-2xl p-8 max-w-2xl mx-auto">
+            <p className="text-lg text-zinc-700 leading-relaxed">
+              Teams waste <span className="text-zinc-900 font-semibold">40% of AI time</span> recreating the same prompts every week.
               We built a shared prompt library that works inside ChatGPT, Claude, Gemini, Copilot, and Perplexity.
             </p>
           </div>
@@ -239,7 +239,7 @@ export function PitchDeck() {
             <div className="bg-red-500/5 border border-red-500/20 rounded-2xl p-8 space-y-4">
               <AlertTriangle className="h-8 w-8 text-red-400" />
               <h3 className="text-xl font-semibold">The Real Story</h3>
-              <ul className="space-y-3 text-zinc-300 text-sm leading-relaxed">
+              <ul className="space-y-3 text-zinc-700 text-sm leading-relaxed">
                 <li className="flex gap-2">
                   <span className="text-red-400 shrink-0">&bull;</span>
                   10 lawyers writing different versions of the same &ldquo;contract analysis&rdquo; prompt
@@ -255,8 +255,8 @@ export function PitchDeck() {
               </ul>
             </div>
 
-            <div className="bg-zinc-900/60 border border-white/10 rounded-2xl p-8 space-y-4">
-              <Eye className="h-8 w-8 text-zinc-400" />
+            <div className="bg-zinc-50/60 border border-zinc-200 rounded-2xl p-8 space-y-4">
+              <Eye className="h-8 w-8 text-zinc-500" />
               <h3 className="text-xl font-semibold">Current &ldquo;Solutions&rdquo; Are Broken</h3>
               <div className="space-y-3">
                 {[
@@ -275,9 +275,9 @@ export function PitchDeck() {
             </div>
           </div>
 
-          <div className="bg-zinc-900/40 rounded-xl p-6 text-center">
-            <p className="text-lg text-zinc-300">
-              Result: <span className="text-white font-semibold">Inconsistent AI output</span> + <span className="text-red-400 font-semibold">Security risks</span> + <span className="text-amber-400 font-semibold">Wasted time</span>
+          <div className="bg-zinc-50/40 rounded-xl p-6 text-center">
+            <p className="text-lg text-zinc-700">
+              Result: <span className="text-zinc-900 font-semibold">Inconsistent AI output</span> + <span className="text-red-400 font-semibold">Security risks</span> + <span className="text-amber-400 font-semibold">Wasted time</span>
             </p>
           </div>
         </div>
@@ -295,7 +295,7 @@ export function PitchDeck() {
             <h2 className="text-4xl sm:text-5xl font-bold">
               How TeamPrompt Works
             </h2>
-            <p className="mt-3 text-lg text-zinc-400">3 simple steps. 2-minute setup. Free to start.</p>
+            <p className="mt-3 text-lg text-zinc-500">3 simple steps. 2-minute setup. Free to start.</p>
           </div>
 
           <div className="grid sm:grid-cols-3 gap-6">
@@ -334,7 +334,7 @@ export function PitchDeck() {
                   <s.icon className={cn("h-6 w-6", s.color)} />
                 </div>
                 <h3 className="text-xl font-semibold">{s.title}</h3>
-                <p className="text-sm text-zinc-300 leading-relaxed">{s.desc}</p>
+                <p className="text-sm text-zinc-700 leading-relaxed">{s.desc}</p>
               </div>
             ))}
           </div>
@@ -347,7 +347,7 @@ export function PitchDeck() {
               { icon: BarChart3, label: "Analytics", desc: "Track which prompts work best" },
               { icon: Lock, label: "19 Compliance Packs", desc: "HIPAA, SOC 2, GDPR, PCI-DSS, and more" },
             ].map((f) => (
-              <div key={f.label} className="bg-zinc-900/60 border border-white/5 rounded-xl p-4">
+              <div key={f.label} className="bg-zinc-50/60 border border-zinc-200 rounded-xl p-4">
                 <f.icon className="h-5 w-5 text-blue-400 mb-2" />
                 <p className="font-medium text-sm">{f.label}</p>
                 <p className="text-xs text-zinc-500 mt-1">{f.desc}</p>
@@ -380,9 +380,9 @@ export function PitchDeck() {
 
           <div className="grid sm:grid-cols-2 gap-6">
             <div className="space-y-3">
-              <div className="rounded-xl overflow-hidden border border-white/10">
+              <div className="rounded-xl overflow-hidden border border-zinc-200">
                 <Image
-                  src="/store-assets/screenshot-2-prompt-list.png"
+                  src="/store-assets/screenshot-light-1-prompts.png"
                   alt="Prompt library"
                   width={1280}
                   height={800}
@@ -392,9 +392,9 @@ export function PitchDeck() {
               <p className="text-xs text-zinc-500 text-center">Prompt library with categories, tags, and team sharing</p>
             </div>
             <div className="space-y-3">
-              <div className="rounded-xl overflow-hidden border border-white/10">
+              <div className="rounded-xl overflow-hidden border border-zinc-200">
                 <Image
-                  src="/store-assets/screenshot-11-multi-ai.png"
+                  src="/store-assets/screenshot-light-6-insert.png"
                   alt="Browser extension in multiple AI tools"
                   width={1280}
                   height={800}
@@ -404,9 +404,9 @@ export function PitchDeck() {
               <p className="text-xs text-zinc-500 text-center">Browser extension working across 5 AI platforms</p>
             </div>
             <div className="space-y-3">
-              <div className="rounded-xl overflow-hidden border border-white/10">
+              <div className="rounded-xl overflow-hidden border border-zinc-200">
                 <Image
-                  src="/store-assets/screenshot-6-dlp-block.png"
+                  src="/store-assets/screenshot-light-3-dlp-block.png"
                   alt="DLP protection blocking sensitive data"
                   width={1280}
                   height={800}
@@ -416,9 +416,9 @@ export function PitchDeck() {
               <p className="text-xs text-zinc-500 text-center">Real-time DLP: blocks SSNs, credit cards, API keys</p>
             </div>
             <div className="space-y-3">
-              <div className="rounded-xl overflow-hidden border border-white/10">
+              <div className="rounded-xl overflow-hidden border border-zinc-200">
                 <Image
-                  src="/store-assets/screenshot-9-admin-dashboard.png"
+                  src="/store-assets/screenshot-light-2-dashboard.png"
                   alt="Admin analytics dashboard"
                   width={1280}
                   height={800}
@@ -451,16 +451,16 @@ export function PitchDeck() {
               { value: "87%", label: "Enterprises use 2+ AI tools", trend: "McKinsey AI Survey" },
               { value: "3x", label: "AI adoption growth since 2023", trend: "Gartner 2024" },
             ].map((s) => (
-              <div key={s.label} className="bg-zinc-900/60 border border-white/10 rounded-2xl p-6 text-center">
+              <div key={s.label} className="bg-zinc-50/60 border border-zinc-200 rounded-2xl p-6 text-center">
                 <p className="text-3xl sm:text-4xl font-bold text-blue-400">{s.value}</p>
-                <p className="text-sm text-zinc-300 mt-2">{s.label}</p>
+                <p className="text-sm text-zinc-700 mt-2">{s.label}</p>
                 <p className="text-[10px] text-zinc-600 mt-1">{s.trend}</p>
               </div>
             ))}
           </div>
 
           {/* Market sizing */}
-          <div className="bg-zinc-900/60 border border-white/10 rounded-2xl p-8">
+          <div className="bg-zinc-50/60 border border-zinc-200 rounded-2xl p-8">
             <h3 className="font-semibold mb-6 text-lg">Market Sizing</h3>
             <div className="space-y-4">
               {[
@@ -493,13 +493,13 @@ export function PitchDeck() {
               { icon: Target, title: "Marketing Agencies", pct: "35%", desc: "Need brand voice control across clients and AI tools." },
               { icon: Heart, title: "Healthcare / Finance", pct: "25%", desc: "Need security, audit trails, and regulatory compliance." },
             ].map((seg) => (
-              <div key={seg.title} className="bg-zinc-900/40 border border-white/5 rounded-xl p-6">
+              <div key={seg.title} className="bg-zinc-50/40 border border-zinc-200 rounded-xl p-6">
                 <seg.icon className="h-6 w-6 text-blue-400 mb-3" />
                 <div className="flex items-baseline gap-2 mb-2">
                   <h4 className="font-semibold">{seg.title}</h4>
                   <span className="text-xs text-blue-400">{seg.pct} of revenue</span>
                 </div>
-                <p className="text-xs text-zinc-400 leading-relaxed">{seg.desc}</p>
+                <p className="text-xs text-zinc-500 leading-relaxed">{seg.desc}</p>
               </div>
             ))}
           </div>
@@ -553,12 +553,12 @@ export function PitchDeck() {
                   "rounded-2xl p-6 text-center border",
                   t.highlight
                     ? "bg-blue-500/10 border-blue-500/30 ring-1 ring-blue-500/20"
-                    : "bg-zinc-900/60 border-white/10"
+                    : "bg-zinc-50/60 border-zinc-200"
                 )}
               >
                 <p className="text-xs text-zinc-500 uppercase tracking-wider">{t.tier}</p>
                 <p className="text-3xl font-bold mt-2">{t.price}</p>
-                <p className="text-xs text-zinc-400 mt-1">{t.desc}</p>
+                <p className="text-xs text-zinc-500 mt-1">{t.desc}</p>
                 {t.highlight && (
                   <span className="inline-block mt-3 text-[10px] bg-blue-500 text-white px-2 py-0.5 rounded-full font-bold uppercase">
                     Most popular
@@ -576,7 +576,7 @@ export function PitchDeck() {
               { value: "25%", label: "Free \u2192 Paid", icon: Rocket },
               { value: "<2%", label: "Monthly Churn", icon: Star },
             ].map((m) => (
-              <div key={m.label} className="bg-zinc-900/60 border border-white/10 rounded-xl p-5 text-center">
+              <div key={m.label} className="bg-zinc-50/60 border border-zinc-200 rounded-xl p-5 text-center">
                 <m.icon className="h-5 w-5 text-emerald-400 mx-auto mb-2" />
                 <p className="text-2xl font-bold">{m.value}</p>
                 <p className="text-xs text-zinc-500 mt-1">{m.label}</p>
@@ -584,7 +584,7 @@ export function PitchDeck() {
             ))}
           </div>
 
-          <div className="bg-zinc-900/40 rounded-xl p-6 text-center text-sm text-zinc-400">
+          <div className="bg-zinc-50/40 rounded-xl p-6 text-center text-sm text-zinc-500">
             Reference: Follows Notion&apos;s successful freemium model — free tier drives organic adoption, teams convert when they need collaboration and security.
           </div>
         </div>
@@ -602,7 +602,7 @@ export function PitchDeck() {
             <h2 className="text-4xl sm:text-5xl font-bold">
               Product-Market Fit Proven
             </h2>
-            <p className="mt-3 text-lg text-zinc-400">6 months. Organic growth. Zero ad spend.</p>
+            <p className="mt-3 text-lg text-zinc-500">6 months. Organic growth. Zero ad spend.</p>
           </div>
 
           {/* Metrics */}
@@ -614,16 +614,16 @@ export function PitchDeck() {
               { value: "4.8\u2605", label: "Chrome Store", sub: "500+ reviews" },
               { value: "<2%", label: "Monthly churn", sub: "" },
             ].map((m) => (
-              <div key={m.label} className="bg-zinc-900/60 border border-white/10 rounded-xl p-5 text-center">
+              <div key={m.label} className="bg-zinc-50/60 border border-zinc-200 rounded-xl p-5 text-center">
                 <p className="text-2xl sm:text-3xl font-bold">{m.value}</p>
-                <p className="text-xs text-zinc-400 mt-1">{m.label}</p>
+                <p className="text-xs text-zinc-500 mt-1">{m.label}</p>
                 {m.sub && <p className="text-[10px] text-emerald-400 mt-0.5">{m.sub}</p>}
               </div>
             ))}
           </div>
 
           {/* MRR growth visualization */}
-          <div className="bg-zinc-900/60 border border-white/10 rounded-2xl p-8">
+          <div className="bg-zinc-50/60 border border-zinc-200 rounded-2xl p-8">
             <h3 className="font-semibold mb-6">MRR Growth (40% MoM)</h3>
             <div className="flex items-end gap-2 h-40">
               {[
@@ -667,7 +667,7 @@ export function PitchDeck() {
                 icon: Heart,
               },
             ].map((t) => (
-              <div key={t.from} className="bg-zinc-900/40 border border-white/5 rounded-xl p-5">
+              <div key={t.from} className="bg-zinc-50/40 border border-zinc-200 rounded-xl p-5">
                 <t.icon className="h-5 w-5 text-blue-400 mb-3" />
                 <p className="text-sm font-medium text-zinc-200 mb-2">&ldquo;{t.quote}&rdquo;</p>
                 <p className="text-xs text-zinc-500">— {t.from}</p>
@@ -695,12 +695,12 @@ export function PitchDeck() {
             <h2 className="text-4xl sm:text-5xl font-bold">
               Enterprise-Grade Stack
             </h2>
-            <p className="mt-3 text-lg text-zinc-400">Built for scale, security, and speed.</p>
+            <p className="mt-3 text-lg text-zinc-500">Built for scale, security, and speed.</p>
           </div>
 
           <div className="grid sm:grid-cols-2 gap-6">
             {/* Stack */}
-            <div className="bg-zinc-900/60 border border-white/10 rounded-2xl p-8 space-y-5">
+            <div className="bg-zinc-50/60 border border-zinc-200 rounded-2xl p-8 space-y-5">
               <h3 className="font-semibold text-lg flex items-center gap-2">
                 <Layers className="h-5 w-5 text-blue-400" />
                 Tech Stack
@@ -717,7 +717,7 @@ export function PitchDeck() {
                     <row.icon className="h-4 w-4 text-zinc-500 mt-0.5 shrink-0" />
                     <div>
                       <p className="text-xs text-blue-400 font-semibold">{row.layer}</p>
-                      <p className="text-sm text-zinc-300">{row.tech}</p>
+                      <p className="text-sm text-zinc-700">{row.tech}</p>
                     </div>
                   </div>
                 ))}
@@ -725,7 +725,7 @@ export function PitchDeck() {
             </div>
 
             {/* Security */}
-            <div className="bg-zinc-900/60 border border-white/10 rounded-2xl p-8 space-y-5">
+            <div className="bg-zinc-50/60 border border-zinc-200 rounded-2xl p-8 space-y-5">
               <h3 className="font-semibold text-lg flex items-center gap-2">
                 <Shield className="h-5 w-5 text-emerald-400" />
                 Security & Compliance
@@ -778,7 +778,7 @@ export function PitchDeck() {
                 <div key={m.title}>
                   <m.icon className="h-5 w-5 text-blue-400 mb-2" />
                   <h4 className="font-medium text-sm mb-1">{m.title}</h4>
-                  <p className="text-xs text-zinc-400 leading-relaxed">{m.desc}</p>
+                  <p className="text-xs text-zinc-500 leading-relaxed">{m.desc}</p>
                 </div>
               ))}
             </div>
@@ -804,7 +804,7 @@ export function PitchDeck() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-white/10">
+                <tr className="border-b border-zinc-200">
                   <th className="text-left py-3 px-4 text-zinc-500 font-medium">Feature</th>
                   <th className="text-center py-3 px-4 text-blue-400 font-bold">TeamPrompt</th>
                   <th className="text-center py-3 px-4 text-zinc-500 font-medium">ChatGPT Teams</th>
@@ -825,8 +825,8 @@ export function PitchDeck() {
                   { feature: "Template variables", us: true, chatgpt: false, notion: false, gdocs: false },
                   { feature: "Audit trail", us: true, chatgpt: false, notion: false, gdocs: false },
                 ].map((row) => (
-                  <tr key={row.feature} className="border-b border-white/5">
-                    <td className="py-2.5 px-4 text-zinc-300">{row.feature}</td>
+                  <tr key={row.feature} className="border-b border-zinc-200">
+                    <td className="py-2.5 px-4 text-zinc-700">{row.feature}</td>
                     <td className="text-center py-2.5 px-4">
                       {row.us ? <CheckCircle2 className="h-4 w-4 text-emerald-400 mx-auto" /> : <span className="text-zinc-600">—</span>}
                     </td>
@@ -846,13 +846,13 @@ export function PitchDeck() {
           </div>
 
           {/* Investor FAQ preview */}
-          <div className="bg-zinc-900/60 border border-white/10 rounded-2xl p-8">
+          <div className="bg-zinc-50/60 border border-zinc-200 rounded-2xl p-8">
             <h3 className="font-semibold mb-4 flex items-center gap-2">
               <MessageCircle className="h-5 w-5 text-blue-400" />
               &ldquo;Why won&apos;t ChatGPT just build this?&rdquo;
             </h3>
-            <p className="text-sm text-zinc-300 leading-relaxed">
-              ChatGPT focuses on <span className="text-white font-medium">models</span>, not workflow management.
+            <p className="text-sm text-zinc-700 leading-relaxed">
+              ChatGPT focuses on <span className="text-zinc-900 font-medium">models</span>, not workflow management.
               They optimize inference, not team governance. We&apos;re the <span className="text-blue-400 font-medium">workflow layer</span> that
               makes teams productive and safe across <em>all</em> AI tools — not just one.
               This is the same reason GitHub exists alongside programming languages.
@@ -876,17 +876,17 @@ export function PitchDeck() {
           </div>
 
           <div className="grid sm:grid-cols-2 gap-8">
-            <div className="bg-zinc-900/60 border border-white/10 rounded-2xl p-8 space-y-6">
+            <div className="bg-zinc-50/60 border border-zinc-200 rounded-2xl p-8 space-y-6">
               <div className="flex items-center gap-4">
                 <div className="h-16 w-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-2xl font-bold">
                   F
                 </div>
                 <div>
                   <h3 className="text-xl font-semibold">Founder / CEO</h3>
-                  <p className="text-sm text-zinc-400">Technical founder & product builder</p>
+                  <p className="text-sm text-zinc-500">Technical founder & product builder</p>
                 </div>
               </div>
-              <ul className="space-y-3 text-sm text-zinc-300">
+              <ul className="space-y-3 text-sm text-zinc-700">
                 <li className="flex gap-2">
                   <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
                   Built product solo while consulting with AI teams
@@ -907,9 +907,9 @@ export function PitchDeck() {
             </div>
 
             <div className="space-y-6">
-              <div className="bg-zinc-900/40 border border-white/5 rounded-xl p-6">
+              <div className="bg-zinc-50/40 border border-zinc-200 rounded-xl p-6">
                 <h4 className="font-semibold mb-3">Why Solo Founder Works Here</h4>
-                <ul className="space-y-2 text-sm text-zinc-400">
+                <ul className="space-y-2 text-sm text-zinc-500">
                   <li className="flex gap-2">
                     <Zap className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
                     Faster iteration than big teams — ship weekly
@@ -931,7 +931,7 @@ export function PitchDeck() {
 
               <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-6">
                 <h4 className="font-semibold mb-2 text-emerald-300">First Hire (With Funding)</h4>
-                <p className="text-sm text-zinc-400">
+                <p className="text-sm text-zinc-500">
                   Part-time security engineer for enterprise features (SSO/SAML, SCIM provisioning, SOC 2 certification).
                 </p>
               </div>
@@ -952,31 +952,31 @@ export function PitchDeck() {
             <h2 className="text-4xl sm:text-5xl font-bold">
               $100K for Smart Growth
             </h2>
-            <p className="mt-3 text-lg text-zinc-400">Pre-seed round. Capital efficient.</p>
+            <p className="mt-3 text-lg text-zinc-500">Pre-seed round. Capital efficient.</p>
           </div>
 
           <div className="grid sm:grid-cols-2 gap-8">
             {/* Use of funds */}
-            <div className="bg-zinc-900/60 border border-white/10 rounded-2xl p-8">
+            <div className="bg-zinc-50/60 border border-zinc-200 rounded-2xl p-8">
               <h3 className="font-semibold mb-6 flex items-center gap-2">
                 <Banknote className="h-5 w-5 text-blue-400" />
                 Use of Funds
               </h3>
               <div className="space-y-4">
                 {[
-                  { label: "Security Engineer (PT)", amount: "$40K", pct: "40%", color: "bg-blue-500" },
-                  { label: "Customer Acquisition", amount: "$30K", pct: "30%", color: "bg-emerald-500" },
-                  { label: "Enterprise Features", amount: "$20K", pct: "20%", color: "bg-amber-500" },
-                  { label: "Infrastructure & Tools", amount: "$10K", pct: "10%", color: "bg-purple-500" },
+                  { label: "Marketing & Customer Acquisition", amount: "$50K", pct: "50%", color: "bg-blue-500" },
+                  { label: "Enterprise Features & Security", amount: "$25K", pct: "25%", color: "bg-emerald-500" },
+                  { label: "Engineering & Infrastructure", amount: "$15K", pct: "15%", color: "bg-amber-500" },
+                  { label: "Operations & Tools", amount: "$10K", pct: "10%", color: "bg-purple-500" },
                 ].map((item) => (
                   <div key={item.label}>
                     <div className="flex justify-between text-sm mb-1">
-                      <span className="text-zinc-300">{item.label}</span>
+                      <span className="text-zinc-700">{item.label}</span>
                       <span className="text-zinc-500">
                         {item.amount} ({item.pct})
                       </span>
                     </div>
-                    <div className="h-2 rounded-full bg-zinc-800 overflow-hidden">
+                    <div className="h-2 rounded-full bg-zinc-100 overflow-hidden">
                       <div
                         className={cn("h-full rounded-full", item.color)}
                         style={{ width: item.pct }}
@@ -988,7 +988,7 @@ export function PitchDeck() {
             </div>
 
             {/* 18-month targets */}
-            <div className="bg-zinc-900/60 border border-white/10 rounded-2xl p-8">
+            <div className="bg-zinc-50/60 border border-zinc-200 rounded-2xl p-8">
               <h3 className="font-semibold mb-6 flex items-center gap-2">
                 <Target className="h-5 w-5 text-emerald-400" />
                 18-Month Targets
@@ -1012,7 +1012,7 @@ export function PitchDeck() {
                   </div>
                 ))}
               </div>
-              <div className="mt-6 pt-4 border-t border-white/5">
+              <div className="mt-6 pt-4 border-t border-zinc-200">
                 <p className="text-xs text-zinc-500">
                   $75K MRR = $900K ARR <ArrowRight className="inline h-3 w-3 text-blue-400 mx-1" />
                   Strong seed round position
@@ -1022,7 +1022,7 @@ export function PitchDeck() {
           </div>
 
           <div className="bg-blue-500/5 border border-blue-500/20 rounded-xl p-6 text-center">
-            <p className="text-sm text-zinc-300">
+            <p className="text-sm text-zinc-700">
               <span className="text-blue-400 font-semibold">Runway: 12-18 months</span> to profitability.
               We&apos;re not asking for millions to figure things out. We&apos;re asking for $100K to accelerate what&apos;s already working.
             </p>
@@ -1087,12 +1087,12 @@ export function PitchDeck() {
                 icon: Building2,
               },
             ].map((faq) => (
-              <div key={faq.q} className="bg-zinc-900/60 border border-white/10 rounded-xl p-5">
+              <div key={faq.q} className="bg-zinc-50/60 border border-zinc-200 rounded-xl p-5">
                 <div className="flex items-start gap-3">
                   <faq.icon className="h-5 w-5 text-blue-400 shrink-0 mt-0.5" />
                   <div>
                     <p className="font-medium text-sm text-zinc-200">{faq.q}</p>
-                    <p className="text-xs text-zinc-400 mt-2 leading-relaxed">{faq.a}</p>
+                    <p className="text-xs text-zinc-500 mt-2 leading-relaxed">{faq.a}</p>
                   </div>
                 </div>
               </div>
@@ -1100,8 +1100,8 @@ export function PitchDeck() {
           </div>
 
           {/* Risk assessment */}
-          <div className="bg-zinc-900/40 border border-white/5 rounded-xl p-6">
-            <h3 className="font-semibold text-sm mb-4 text-zinc-400 uppercase tracking-wider">Risk Assessment</h3>
+          <div className="bg-zinc-50/40 border border-zinc-200 rounded-xl p-6">
+            <h3 className="font-semibold text-sm mb-4 text-zinc-500 uppercase tracking-wider">Risk Assessment</h3>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               {[
                 { risk: "Technical", level: "Low", reason: "Product works, scales, ships weekly" },
@@ -1124,20 +1124,20 @@ export function PitchDeck() {
             <div className="grid sm:grid-cols-2 gap-6 text-left max-w-2xl mx-auto">
               <div className="bg-zinc-950/50 rounded-xl p-5">
                 <p className="text-xs text-blue-400 font-semibold uppercase tracking-wider mb-2">Phase 1 — Next 18 Months</p>
-                <p className="text-sm text-zinc-300">
+                <p className="text-sm text-zinc-700">
                   Become the go-to prompt management tool for teams of 10-100 people in regulated industries.
                 </p>
               </div>
               <div className="bg-zinc-950/50 rounded-xl p-5">
                 <p className="text-xs text-blue-400 font-semibold uppercase tracking-wider mb-2">Phase 2 — Future</p>
-                <p className="text-sm text-zinc-300">
+                <p className="text-sm text-zinc-700">
                   Platform for AI workflow orchestration — the control plane for how organizations use AI.
                 </p>
               </div>
             </div>
 
-            <div className="pt-4 border-t border-white/5">
-              <p className="text-lg text-zinc-300 leading-relaxed max-w-2xl mx-auto">
+            <div className="pt-4 border-t border-zinc-200">
+              <p className="text-lg text-zinc-700 leading-relaxed max-w-2xl mx-auto">
                 &ldquo;I built this because I lived this problem. Customers are already paying.
                 With <span className="text-blue-400 font-semibold">$100K</span>, we accelerate what&apos;s already working.&rdquo;
               </p>

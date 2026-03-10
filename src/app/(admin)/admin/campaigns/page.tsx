@@ -16,6 +16,9 @@ import {
   Megaphone,
   Calendar,
   ArrowLeft,
+  Upload,
+  FileText,
+  LayoutTemplate,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
@@ -39,6 +42,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CAMPAIGN_TEMPLATES, type CampaignTemplate } from "@/lib/campaign-templates";
 
 // ─── Types ───────────────────────────────────────────────────────
 
@@ -103,6 +108,11 @@ export default function CampaignsPage() {
   const [sending, setSending] = useState(false);
   const [saving, setSaving] = useState(false);
   const [scheduleDate, setScheduleDate] = useState("");
+  const [showTemplates, setShowTemplates] = useState(false);
+  const [showImport, setShowImport] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const [externalCount, setExternalCount] = useState(0);
+  const [editorTab, setEditorTab] = useState<"visual" | "html">("visual");
 
   // Editor form state
   const [formName, setFormName] = useState("");
@@ -134,10 +144,21 @@ export default function CampaignsPage() {
     }
   }, []);
 
+  const loadExternalCount = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/campaigns/contacts");
+      const data = await res.json();
+      setExternalCount(data.active || 0);
+    } catch {
+      // Non-critical
+    }
+  }, []);
+
   useEffect(() => {
     loadCampaigns();
     loadSegments();
-  }, [loadCampaigns, loadSegments]);
+    loadExternalCount();
+  }, [loadCampaigns, loadSegments, loadExternalCount]);
 
   // ─── Editor actions ──────────────────────────────────────────
 
@@ -254,6 +275,63 @@ export default function CampaignsPage() {
     }
   }
 
+  function applyTemplate(template: CampaignTemplate) {
+    setFormBody(template.html);
+    if (!formSubject.trim()) setFormSubject(template.defaultSubject);
+    if (!formName.trim()) setFormName(template.name + " — " + new Date().toLocaleDateString());
+    setShowTemplates(false);
+    toast.success(`Template "${template.name}" applied`);
+  }
+
+  async function handleCsvImport(file: File) {
+    setImporting(true);
+    try {
+      const text = await file.text();
+      const lines = text.split(/\r?\n/).filter((l) => l.trim());
+      if (lines.length < 2) {
+        toast.error("CSV must have a header row and at least one data row");
+        return;
+      }
+
+      const header = lines[0].toLowerCase().split(",").map((h) => h.trim().replace(/"/g, ""));
+      const emailIdx = header.findIndex((h) => h === "email" || h === "email address" || h === "e-mail");
+      const firstNameIdx = header.findIndex((h) => h === "first_name" || h === "first name" || h === "firstname" || h === "name");
+      const lastNameIdx = header.findIndex((h) => h === "last_name" || h === "last name" || h === "lastname" || h === "surname");
+
+      if (emailIdx === -1) {
+        toast.error("CSV must have an 'email' column");
+        return;
+      }
+
+      const contacts = lines.slice(1).map((line) => {
+        const cols = line.split(",").map((c) => c.trim().replace(/^"|"$/g, ""));
+        return {
+          email: cols[emailIdx] || "",
+          first_name: firstNameIdx >= 0 ? cols[firstNameIdx] || "" : "",
+          last_name: lastNameIdx >= 0 ? cols[lastNameIdx] || "" : "",
+        };
+      }).filter((c) => c.email);
+
+      const res = await fetch("/api/admin/campaigns/contacts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contacts }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      toast.success(`Imported ${data.imported} contacts (${data.skipped} skipped)`);
+      setShowImport(false);
+      await loadSegments();
+      await loadExternalCount();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Import failed");
+    } finally {
+      setImporting(false);
+    }
+  }
+
   // ─── Render ──────────────────────────────────────────────────
 
   if (view === "editor") {
@@ -338,16 +416,62 @@ export default function CampaignsPage() {
               </div>
             </Card>
 
-            <Card className="p-4">
-              <Label htmlFor="campaign-body">Email Body (HTML)</Label>
-              <Textarea
-                id="campaign-body"
-                value={formBody}
-                onChange={(e) => setFormBody(e.target.value)}
-                placeholder="Paste your email HTML here..."
-                className="mt-1 font-mono text-xs min-h-[400px]"
-              />
-              <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
+            <Card className="p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <Label>Email Body</Label>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={() => setShowTemplates(true)}
+                  >
+                    <LayoutTemplate className="h-3 w-3 mr-1.5" />
+                    Use Template
+                  </Button>
+                  <Tabs value={editorTab} onValueChange={(v) => setEditorTab(v as "visual" | "html")}>
+                    <TabsList className="h-7">
+                      <TabsTrigger value="visual" className="text-xs px-2 h-5">Preview</TabsTrigger>
+                      <TabsTrigger value="html" className="text-xs px-2 h-5">HTML</TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                </div>
+              </div>
+
+              {editorTab === "html" ? (
+                <Textarea
+                  id="campaign-body"
+                  value={formBody}
+                  onChange={(e) => setFormBody(e.target.value)}
+                  placeholder="Paste your email HTML here, or choose a template above..."
+                  className="font-mono text-xs min-h-[400px]"
+                />
+              ) : (
+                <div className="border rounded-lg bg-white min-h-[400px] overflow-auto">
+                  {formBody.trim() ? (
+                    <div
+                      dangerouslySetInnerHTML={{ __html: formBody }}
+                      className="p-4 prose prose-sm max-w-none"
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center h-[400px] text-center text-muted-foreground">
+                      <LayoutTemplate className="h-8 w-8 mb-2" />
+                      <p className="text-sm font-medium">No content yet</p>
+                      <p className="text-xs mt-1">Choose a template or switch to HTML to start editing</p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="mt-3"
+                        onClick={() => setShowTemplates(true)}
+                      >
+                        Browse Templates
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className="flex items-center gap-4 text-xs text-muted-foreground">
                 <span>Personalization: <code className="bg-slate-100 px-1 rounded">{`{{{FIRST_NAME|there}}}`}</code></span>
                 <span>Unsubscribe link auto-injected if not present</span>
               </div>
@@ -378,6 +502,20 @@ export default function CampaignsPage() {
                   ? `~${recipientCount} recipients will be synced to Resend`
                   : "Loading audience counts..."}
               </p>
+              {externalCount > 0 && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  {externalCount} external contacts imported
+                </p>
+              )}
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full mt-3 h-8 text-xs"
+                onClick={() => setShowImport(true)}
+              >
+                <Upload className="h-3 w-3 mr-1.5" />
+                Import Contacts (CSV)
+              </Button>
             </Card>
 
             <Card className="p-4">
@@ -488,6 +626,102 @@ export default function CampaignsPage() {
                 Delete
               </Button>
             </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Template Picker Dialog */}
+        <Dialog open={showTemplates} onOpenChange={setShowTemplates}>
+          <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Choose a Template</DialogTitle>
+              <DialogDescription>
+                Spam-safe templates with proper HTML structure. Click to apply, then customize.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {CAMPAIGN_TEMPLATES.map((t) => (
+                <Card
+                  key={t.id}
+                  className="p-4 cursor-pointer hover:ring-2 hover:ring-blue-500 transition-all"
+                  onClick={() => applyTemplate(t)}
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="h-10 w-10 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
+                      <FileText className="h-5 w-5 text-blue-600" />
+                    </div>
+                    <div className="min-w-0">
+                      <h4 className="font-medium text-sm">{t.name}</h4>
+                      <p className="text-xs text-muted-foreground mt-0.5">{t.description}</p>
+                      <p className="text-xs text-muted-foreground mt-1 truncate">
+                        Subject: {t.defaultSubject}
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* CSV Import Dialog */}
+        <Dialog open={showImport} onOpenChange={setShowImport}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Import Contacts</DialogTitle>
+              <DialogDescription>
+                Upload a CSV file with email addresses. Columns: email (required), first_name, last_name.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div
+                className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:bg-slate-50 transition-colors"
+                onClick={() => document.getElementById("csv-file-input")?.click()}
+                onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  const file = e.dataTransfer.files[0];
+                  if (file && file.name.endsWith(".csv")) handleCsvImport(file);
+                  else toast.error("Please drop a .csv file");
+                }}
+              >
+                <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                <p className="text-sm font-medium">
+                  {importing ? "Importing..." : "Click to upload or drag & drop"}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">CSV files only</p>
+                <input
+                  id="csv-file-input"
+                  type="file"
+                  accept=".csv"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleCsvImport(file);
+                    e.target.value = "";
+                  }}
+                />
+              </div>
+              {importing && (
+                <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Importing contacts...
+                </div>
+              )}
+              <div className="bg-slate-50 rounded-lg p-3">
+                <p className="text-xs font-medium mb-1">CSV Format Example:</p>
+                <code className="text-xs text-muted-foreground block">
+                  email,first_name,last_name<br />
+                  john@example.com,John,Doe<br />
+                  jane@example.com,Jane,Smith
+                </code>
+              </div>
+              {externalCount > 0 && (
+                <p className="text-xs text-muted-foreground text-center">
+                  {externalCount} contacts already imported. Duplicates will be skipped.
+                </p>
+              )}
+            </div>
           </DialogContent>
         </Dialog>
       </div>

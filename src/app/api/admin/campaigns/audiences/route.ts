@@ -29,9 +29,17 @@ export async function GET() {
     planOrgMap[sub.plan].push(sub.org_id);
   }
 
-  // Count members per plan
+  // Get external contacts count
+  const { count: externalCount } = await db
+    .from("campaign_contacts")
+    .select("*", { count: "exact", head: true })
+    .eq("unsubscribed", false);
+
+  // Build segments list
   const segments: Array<{ name: string; label: string; count: number }> = [
-    { name: "all", label: "All Users", count: totalUsers || 0 },
+    { name: "all", label: "All Users (Internal)", count: totalUsers || 0 },
+    { name: "external", label: "External Contacts (Imported)", count: externalCount || 0 },
+    { name: "all_combined", label: "Everyone (Users + External)", count: (totalUsers || 0) + (externalCount || 0) },
   ];
 
   for (const [plan, orgIds] of Object.entries(planOrgMap)) {

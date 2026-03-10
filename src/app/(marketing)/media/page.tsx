@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { generatePageMetadata } from "@/lib/seo/metadata";
 import { SectionLabel } from "@/components/marketing/section-label";
-import { Download, Chrome, Globe } from "lucide-react";
+import { Download, Chrome, Globe, Target, DollarSign, BarChart3, Megaphone, CalendarDays, Layers, MousePointerClick, TrendingUp, Lightbulb, Users, CheckCircle2, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DarkSection } from "@/components/marketing/dark-section";
 import { CopyButton } from "./_components/copy-button";
@@ -1175,7 +1175,434 @@ export default function MediaPage() {
           </div>
         </section>
 
-        {/* ── 9. Contact ──────────────────────────── */}
+        {/* ── 10. LinkedIn Campaign Strategy ──────────────────────────── */}
+        <section id="linkedin-campaign">
+          <SectionLabel>LinkedIn Ad Campaign</SectionLabel>
+          <h2 className="text-2xl sm:text-3xl font-bold mt-3 mb-2">LinkedIn Ads Playbook</h2>
+          <p className="text-muted-foreground max-w-2xl mb-8">
+            Complete strategy for running LinkedIn ads on a $50/week budget. Follow these steps to generate qualified B2B leads.
+          </p>
+
+          {/* Campaign Overview */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            {[
+              { icon: DollarSign, label: "Weekly Budget", value: "$50/week", sub: "$200/month" },
+              { icon: Target, label: "Goal", value: "Lead Generation", sub: "Free trial signups + demo requests" },
+              { icon: CalendarDays, label: "Timeline", value: "Ongoing", sub: "Review weekly, optimize monthly" },
+            ].map((item) => (
+              <div key={item.label} className="rounded-2xl border border-border bg-card p-5">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="h-10 w-10 rounded-xl bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center">
+                    <item.icon className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">{item.label}</p>
+                    <p className="font-bold">{item.value}</p>
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground">{item.sub}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Step-by-Step Setup */}
+          <div className="space-y-6 mb-8">
+            <h3 className="text-lg font-bold flex items-center gap-2">
+              <Layers className="h-5 w-5 text-blue-600" />
+              Campaign Setup Steps
+            </h3>
+
+            {/* Step 1: Campaign Type */}
+            <div className="rounded-2xl border border-border bg-card p-6">
+              <div className="flex items-start gap-3">
+                <span className="flex-shrink-0 h-7 w-7 rounded-full bg-blue-600 text-white text-sm font-bold flex items-center justify-center">1</span>
+                <div className="flex-1">
+                  <h4 className="font-semibold mb-1">Create Campaign &mdash; Sponsored Content (Single Image)</h4>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    In LinkedIn Campaign Manager, create a new campaign group. Choose <strong>Lead Generation</strong> as your objective for best ROI at this budget.
+                  </p>
+                  <div className="bg-muted/50 rounded-xl p-4 text-sm space-y-2">
+                    <p><strong>Campaign Type:</strong> Sponsored Content</p>
+                    <p><strong>Ad Format:</strong> Single Image Ad (best CTR at low budgets)</p>
+                    <p><strong>Objective:</strong> Lead Generation (use LinkedIn Lead Gen Forms &mdash; no landing page friction)</p>
+                    <p><strong>Bidding:</strong> Maximum delivery (let LinkedIn optimize) or Manual CPC at $3-5</p>
+                    <p><strong>Daily Budget:</strong> $7.14/day ($50/7 days)</p>
+                    <p><strong>Schedule:</strong> Run continuously, Mon-Fri only (business hours get better engagement)</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Step 2: Audience */}
+            <div className="rounded-2xl border border-border bg-card p-6">
+              <div className="flex items-start gap-3">
+                <span className="flex-shrink-0 h-7 w-7 rounded-full bg-blue-600 text-white text-sm font-bold flex items-center justify-center">2</span>
+                <div className="flex-1">
+                  <h4 className="font-semibold mb-1">Target Audience Setup</h4>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Narrow targeting is critical at $50/week. Start with one audience, test for 2 weeks, then expand.
+                  </p>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    {/* Audience A */}
+                    <div className="border rounded-xl p-4">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Users className="h-4 w-4 text-blue-600" />
+                        <h5 className="font-medium text-sm">Audience A: IT Leaders</h5>
+                        <span className="text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full font-medium">Start Here</span>
+                      </div>
+                      <ul className="text-xs space-y-1.5 text-muted-foreground">
+                        <li><strong>Job Titles:</strong> IT Manager, IT Director, VP of IT, CTO, CISO, Head of Technology</li>
+                        <li><strong>Company Size:</strong> 50-1,000 employees</li>
+                        <li><strong>Industries:</strong> Technology, Financial Services, Healthcare, Professional Services</li>
+                        <li><strong>Geography:</strong> United States (start narrow)</li>
+                        <li><strong>Expected Size:</strong> 20K-80K (ideal range)</li>
+                      </ul>
+                    </div>
+
+                    {/* Audience B */}
+                    <div className="border rounded-xl p-4">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Users className="h-4 w-4 text-purple-600" />
+                        <h5 className="font-medium text-sm">Audience B: Operations Leaders</h5>
+                        <span className="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full font-medium">Test Next</span>
+                      </div>
+                      <ul className="text-xs space-y-1.5 text-muted-foreground">
+                        <li><strong>Job Titles:</strong> COO, VP Operations, Head of Operations, Operations Director, Chief of Staff</li>
+                        <li><strong>Company Size:</strong> 50-5,000 employees</li>
+                        <li><strong>Industries:</strong> Any (operations roles exist everywhere)</li>
+                        <li><strong>Geography:</strong> US + Canada + UK</li>
+                        <li><strong>Expected Size:</strong> 30K-100K</li>
+                      </ul>
+                    </div>
+
+                    {/* Audience C */}
+                    <div className="border rounded-xl p-4">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Users className="h-4 w-4 text-amber-600" />
+                        <h5 className="font-medium text-sm">Audience C: AI Early Adopters</h5>
+                        <span className="text-[10px] bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded-full font-medium">Phase 2</span>
+                      </div>
+                      <ul className="text-xs space-y-1.5 text-muted-foreground">
+                        <li><strong>Job Functions:</strong> Engineering, Product Management</li>
+                        <li><strong>Skills:</strong> Artificial Intelligence, Machine Learning, ChatGPT, Prompt Engineering</li>
+                        <li><strong>Seniority:</strong> Manager+</li>
+                        <li><strong>Company Size:</strong> 200-10,000</li>
+                        <li><strong>Expected Size:</strong> 50K-150K</li>
+                      </ul>
+                    </div>
+
+                    {/* Audience D */}
+                    <div className="border rounded-xl p-4">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Users className="h-4 w-4 text-green-600" />
+                        <h5 className="font-medium text-sm">Audience D: Retargeting</h5>
+                        <span className="text-[10px] bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded-full font-medium">After Pixel Data</span>
+                      </div>
+                      <ul className="text-xs space-y-1.5 text-muted-foreground">
+                        <li><strong>Source:</strong> LinkedIn Insight Tag on teamprompt.app</li>
+                        <li><strong>Retarget:</strong> Website visitors (last 90 days)</li>
+                        <li><strong>Exclude:</strong> Existing customers (upload email list)</li>
+                        <li><strong>Budget Split:</strong> 30% of budget when available</li>
+                        <li><strong>Expected Size:</strong> Grows over time</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Step 3: Ad Creative */}
+            <div className="rounded-2xl border border-border bg-card p-6">
+              <div className="flex items-start gap-3">
+                <span className="flex-shrink-0 h-7 w-7 rounded-full bg-blue-600 text-white text-sm font-bold flex items-center justify-center">3</span>
+                <div className="flex-1">
+                  <h4 className="font-semibold mb-1">Ad Creative &amp; Copy</h4>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Run 2-3 ad variations per audience. Single image ads perform best at this budget. Use the LinkedIn banners from the Media Kit above.
+                  </p>
+
+                  <div className="space-y-4">
+                    {/* Ad Variation A */}
+                    <div className="border rounded-xl p-4 space-y-3">
+                      <div className="flex items-center gap-2">
+                        <Megaphone className="h-4 w-4 text-blue-600" />
+                        <h5 className="font-medium text-sm">Ad A: Problem-Agitate-Solve</h5>
+                        <span className="text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full font-medium">Best Performer</span>
+                      </div>
+                      <div className="bg-muted/50 rounded-lg p-3 text-sm">
+                        <p className="font-medium mb-1">Introductory Text (max 150 chars):</p>
+                        <p className="text-muted-foreground italic">&ldquo;Your team is using AI every day. But are they sharing sensitive data? TeamPrompt gives you visibility and control &mdash; without slowing anyone down.&rdquo;</p>
+                      </div>
+                      <div className="bg-muted/50 rounded-lg p-3 text-sm">
+                        <p className="font-medium mb-1">Headline (under 70 chars):</p>
+                        <p className="text-muted-foreground italic">&ldquo;Control AI Usage Across Your Team&rdquo;</p>
+                      </div>
+                      <div className="bg-muted/50 rounded-lg p-3 text-sm">
+                        <p className="font-medium mb-1">Description:</p>
+                        <p className="text-muted-foreground italic">&ldquo;Free Chrome extension. Set up in 5 minutes. No code required.&rdquo;</p>
+                      </div>
+                      <div className="bg-muted/50 rounded-lg p-3 text-sm">
+                        <p className="font-medium mb-1">CTA Button:</p>
+                        <p className="text-muted-foreground">Sign Up (or Learn More for awareness)</p>
+                      </div>
+                      <p className="text-xs text-muted-foreground">Image: Use LinkedIn Banner (1200x627) &mdash; lifestyle or gradient variant from Media Kit</p>
+                    </div>
+
+                    {/* Ad Variation B */}
+                    <div className="border rounded-xl p-4 space-y-3">
+                      <div className="flex items-center gap-2">
+                        <Megaphone className="h-4 w-4 text-purple-600" />
+                        <h5 className="font-medium text-sm">Ad B: Social Proof / Stats</h5>
+                      </div>
+                      <div className="bg-muted/50 rounded-lg p-3 text-sm">
+                        <p className="font-medium mb-1">Introductory Text:</p>
+                        <p className="text-muted-foreground italic">&ldquo;91% of employees use AI tools at work. Only 12% of companies have any guardrails in place. TeamPrompt bridges that gap.&rdquo;</p>
+                      </div>
+                      <div className="bg-muted/50 rounded-lg p-3 text-sm">
+                        <p className="font-medium mb-1">Headline:</p>
+                        <p className="text-muted-foreground italic">&ldquo;AI Governance Made Simple&rdquo;</p>
+                      </div>
+                      <p className="text-xs text-muted-foreground">Image: Product screenshot showing dashboard or DLP alerts</p>
+                    </div>
+
+                    {/* Ad Variation C */}
+                    <div className="border rounded-xl p-4 space-y-3">
+                      <div className="flex items-center gap-2">
+                        <Megaphone className="h-4 w-4 text-amber-600" />
+                        <h5 className="font-medium text-sm">Ad C: Feature-Led (Prompt Library)</h5>
+                      </div>
+                      <div className="bg-muted/50 rounded-lg p-3 text-sm">
+                        <p className="font-medium mb-1">Introductory Text:</p>
+                        <p className="text-muted-foreground italic">&ldquo;Stop your team from writing bad prompts. Create a shared prompt library with version control, approval workflows, and usage analytics.&rdquo;</p>
+                      </div>
+                      <div className="bg-muted/50 rounded-lg p-3 text-sm">
+                        <p className="font-medium mb-1">Headline:</p>
+                        <p className="text-muted-foreground italic">&ldquo;A Shared Prompt Library for Your Team&rdquo;</p>
+                      </div>
+                      <p className="text-xs text-muted-foreground">Image: Extension screenshot showing prompt picker overlay</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Step 4: Lead Gen Form */}
+            <div className="rounded-2xl border border-border bg-card p-6">
+              <div className="flex items-start gap-3">
+                <span className="flex-shrink-0 h-7 w-7 rounded-full bg-blue-600 text-white text-sm font-bold flex items-center justify-center">4</span>
+                <div className="flex-1">
+                  <h4 className="font-semibold mb-1">LinkedIn Lead Gen Form Setup</h4>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Use LinkedIn&apos;s native Lead Gen Forms instead of sending to a landing page. Forms auto-fill from LinkedIn profiles, giving 2-3x higher conversion rates.
+                  </p>
+                  <div className="bg-muted/50 rounded-xl p-4 text-sm space-y-2">
+                    <p><strong>Form Name:</strong> TeamPrompt Free Trial Signup</p>
+                    <p><strong>Offer Headline:</strong> &ldquo;Try TeamPrompt Free &mdash; No Credit Card Required&rdquo;</p>
+                    <p><strong>Offer Detail:</strong> &ldquo;Get a shared prompt library, AI guardrails, and usage analytics for your team. Works with ChatGPT, Claude, Gemini, and 10+ AI platforms.&rdquo;</p>
+                    <p><strong>Fields (keep minimal):</strong></p>
+                    <ul className="ml-4 space-y-1">
+                      <li>- First Name (pre-filled)</li>
+                      <li>- Last Name (pre-filled)</li>
+                      <li>- Work Email (pre-filled)</li>
+                      <li>- Company Name (pre-filled)</li>
+                      <li>- Company Size (pre-filled)</li>
+                    </ul>
+                    <p><strong>Privacy Policy URL:</strong> https://teamprompt.app/privacy</p>
+                    <p><strong>Thank You Message:</strong> &ldquo;Thanks! We&apos;ll send you an invite to TeamPrompt within 24 hours. In the meantime, install our free Chrome extension.&rdquo;</p>
+                    <p><strong>Thank You URL:</strong> https://teamprompt.app/pricing</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Step 5: Tracking */}
+            <div className="rounded-2xl border border-border bg-card p-6">
+              <div className="flex items-start gap-3">
+                <span className="flex-shrink-0 h-7 w-7 rounded-full bg-blue-600 text-white text-sm font-bold flex items-center justify-center">5</span>
+                <div className="flex-1">
+                  <h4 className="font-semibold mb-1">Install LinkedIn Insight Tag</h4>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Add the Insight Tag to teamprompt.app for conversion tracking and retargeting.
+                  </p>
+                  <div className="bg-muted/50 rounded-xl p-4 text-sm space-y-2">
+                    <p><strong>Where:</strong> LinkedIn Campaign Manager &rarr; Analyze &rarr; Insight Tag</p>
+                    <p><strong>Install:</strong> Add to the &lt;head&gt; of your site (or via Google Tag Manager)</p>
+                    <p><strong>Conversion Events to Track:</strong></p>
+                    <ul className="ml-4 space-y-1">
+                      <li>- Signup page view (/signup)</li>
+                      <li>- Dashboard page view (/dashboard &mdash; means they created an account)</li>
+                      <li>- Pricing page view (/pricing)</li>
+                      <li>- Extension install click</li>
+                    </ul>
+                    <p><strong>Retargeting:</strong> Create audience of site visitors (90 days) after 2 weeks</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Step 6: Image Specs */}
+            <div className="rounded-2xl border border-border bg-card p-6">
+              <div className="flex items-start gap-3">
+                <span className="flex-shrink-0 h-7 w-7 rounded-full bg-blue-600 text-white text-sm font-bold flex items-center justify-center">6</span>
+                <div className="flex-1">
+                  <h4 className="font-semibold mb-1">Image Specs &amp; Best Practices</h4>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    LinkedIn single image ad specifications and tips for maximizing engagement.
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="bg-muted/50 rounded-lg p-3 text-sm">
+                      <p className="font-medium mb-1">Image Size</p>
+                      <p className="text-muted-foreground">1200 x 627px (1.91:1 ratio)</p>
+                    </div>
+                    <div className="bg-muted/50 rounded-lg p-3 text-sm">
+                      <p className="font-medium mb-1">File Type</p>
+                      <p className="text-muted-foreground">JPG or PNG, max 5MB</p>
+                    </div>
+                    <div className="bg-muted/50 rounded-lg p-3 text-sm">
+                      <p className="font-medium mb-1">Text on Image</p>
+                      <p className="text-muted-foreground">Keep under 20% text (like Facebook rule)</p>
+                    </div>
+                    <div className="bg-muted/50 rounded-lg p-3 text-sm">
+                      <p className="font-medium mb-1">Colors</p>
+                      <p className="text-muted-foreground">Use brand blue (#2563EB) on white &mdash; high contrast in LinkedIn feed</p>
+                    </div>
+                  </div>
+                  <div className="mt-3 text-xs text-muted-foreground space-y-1">
+                    <p><CheckCircle2 className="inline h-3 w-3 text-green-500 mr-1" />Use product screenshots &mdash; they outperform illustrations 2x on LinkedIn</p>
+                    <p><CheckCircle2 className="inline h-3 w-3 text-green-500 mr-1" />Show UI, not abstract graphics &mdash; decision-makers want to see the tool</p>
+                    <p><CheckCircle2 className="inline h-3 w-3 text-green-500 mr-1" />Use the LinkedIn lifestyle banners from the Media Kit section above</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Budget Optimization */}
+          <div className="rounded-2xl border border-border bg-card p-6 mb-8">
+            <h3 className="text-lg font-bold flex items-center gap-2 mb-4">
+              <BarChart3 className="h-5 w-5 text-blue-600" />
+              $50/Week Budget Allocation
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <h4 className="font-medium text-sm mb-3">Week 1-2: Testing Phase</h4>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between items-center">
+                    <span>Ad Variation A (Problem-Solve)</span>
+                    <span className="font-mono font-medium">$25/wk</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>Ad Variation B (Social Proof)</span>
+                    <span className="font-mono font-medium">$15/wk</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>Ad Variation C (Feature-Led)</span>
+                    <span className="font-mono font-medium">$10/wk</span>
+                  </div>
+                  <div className="border-t pt-2 flex justify-between font-medium">
+                    <span>Total</span>
+                    <span className="font-mono">$50/wk</span>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <h4 className="font-medium text-sm mb-3">Week 3+: Optimized Phase</h4>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between items-center">
+                    <span>Best performing ad (winner)</span>
+                    <span className="font-mono font-medium">$35/wk</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>Retargeting (site visitors)</span>
+                    <span className="font-mono font-medium">$15/wk</span>
+                  </div>
+                  <div className="border-t pt-2 flex justify-between font-medium">
+                    <span>Total</span>
+                    <span className="font-mono">$50/wk</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Expected Metrics */}
+          <div className="rounded-2xl border border-border bg-card p-6 mb-8">
+            <h3 className="text-lg font-bold flex items-center gap-2 mb-4">
+              <TrendingUp className="h-5 w-5 text-blue-600" />
+              Expected Metrics at $50/Week
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[
+                { label: "Impressions", value: "3K-8K/wk", note: "Depends on audience size" },
+                { label: "Clicks", value: "15-40/wk", note: "0.3-0.8% CTR typical" },
+                { label: "Leads", value: "2-5/wk", note: "5-15% form fill rate" },
+                { label: "Cost per Lead", value: "$10-25", note: "Decreases with optimization" },
+              ].map((metric) => (
+                <div key={metric.label} className="text-center p-3 rounded-xl bg-muted/50">
+                  <p className="text-xl font-bold text-blue-600">{metric.value}</p>
+                  <p className="text-sm font-medium mt-1">{metric.label}</p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">{metric.note}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Pro Tips */}
+          <div className="rounded-2xl border border-border bg-card p-6 mb-8">
+            <h3 className="text-lg font-bold flex items-center gap-2 mb-4">
+              <Lightbulb className="h-5 w-5 text-amber-500" />
+              Pro Tips for $50/Week Budget
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {[
+                { tip: "Run Mon-Fri only", detail: "B2B engagement drops 60% on weekends. Save budget for business hours." },
+                { tip: "Use Lead Gen Forms over landing pages", detail: "Auto-filled forms convert 2-3x higher. At low budgets, every click matters." },
+                { tip: "Start with ONE audience", detail: "Don't split $50 across 3 audiences. Test one for 2 weeks, then expand." },
+                { tip: "Refresh creative every 3-4 weeks", detail: "LinkedIn frequency fatigue hits fast. Rotate between ad variations." },
+                { tip: "Exclude current customers", detail: "Upload your user email list to LinkedIn and exclude them from targeting." },
+                { tip: "Monitor CPL, not impressions", detail: "Cost per Lead is the only metric that matters. Kill ads over $30 CPL." },
+                { tip: "Post organic content alongside ads", detail: "Organic posts build credibility when prospects see your brand from ads." },
+                { tip: "Follow up leads within 24 hours", detail: "LinkedIn leads go cold fast. Set up email automation or personal outreach." },
+              ].map((item) => (
+                <div key={item.tip} className="flex items-start gap-2 p-3 rounded-lg bg-muted/30">
+                  <Zap className="h-4 w-4 text-amber-500 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-medium">{item.tip}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{item.detail}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Weekly Checklist */}
+          <div className="rounded-2xl border border-border bg-card p-6">
+            <h3 className="text-lg font-bold flex items-center gap-2 mb-4">
+              <MousePointerClick className="h-5 w-5 text-blue-600" />
+              Weekly Optimization Checklist
+            </h3>
+            <div className="space-y-2">
+              {[
+                "Review CPL (Cost per Lead) by ad variation &mdash; pause anything over $30",
+                "Check CTR &mdash; below 0.3%? Refresh the creative or headline",
+                "Download new leads from LinkedIn &amp; import into campaigns (email follow-up)",
+                "Review audience demographics &mdash; adjust job titles if needed",
+                "Check frequency &mdash; if over 3x, expand audience or refresh creative",
+                "Post 1-2 organic LinkedIn posts to build brand awareness alongside ads",
+                "Monthly: A/B test new ad copy variations against the winner",
+                "Monthly: Review total spend vs leads generated vs trial conversions",
+              ].map((item, i) => (
+                <div key={i} className="flex items-start gap-2 text-sm">
+                  <CheckCircle2 className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5" />
+                  <span dangerouslySetInnerHTML={{ __html: item }} />
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── 11. Contact ──────────────────────────── */}
         <section>
           <div className="rounded-2xl border border-border bg-muted/30 p-8 text-center max-w-2xl mx-auto">
             <h2 className="text-xl font-bold mb-2">Need something else?</h2>

@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(
           {
             error:
-              "You are the last admin. Transfer ownership before deleting your account.",
+              "You are the last admin. Go to Team page and transfer admin to another member before deleting your account.",
           },
           { status: 400 }
         );

@@ -12,6 +12,8 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -26,7 +28,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { AlertTriangle, ArrowLeft, ArrowUpDown, CheckCircle2, Clock, FileSpreadsheet, LayoutList, Loader2, Mail, Network, Pencil, Plug, Plus, RefreshCw, Search, Send, Shield, ShieldOff, Trash2, UserPlus, Users, X } from "lucide-react";
+import { AlertTriangle, ArrowLeft, ArrowUpDown, CheckCircle2, Clock, Crown, FileSpreadsheet, LayoutList, Loader2, Mail, Network, Pencil, Plug, Plus, RefreshCw, Search, Send, Shield, ShieldOff, Trash2, UserPlus, Users, X } from "lucide-react";
 import { getExtensionStatus } from "@/lib/extension-status";
 import { SelectWithQuickAdd } from "@/components/ui/select-with-quick-add";
 import { ExtensionStatusBadge } from "@/components/dashboard/extension-status-badge";
@@ -100,6 +102,12 @@ export default function TeamPage() {
   const [emailTargetName, setEmailTargetName] = useState("");
   const [emailNewValue, setEmailNewValue] = useState("");
   const [savingEmail, setSavingEmail] = useState(false);
+
+  // Transfer admin
+  const [transferDialogOpen, setTransferDialogOpen] = useState(false);
+  const [transferTargetId, setTransferTargetId] = useState<string>("");
+  const [transferNewRole, setTransferNewRole] = useState<UserRole>("member");
+  const [transferring, setTransferring] = useState(false);
 
   // Google Workspace sync
   const [googleConnected, setGoogleConnected] = useState<boolean | null>(null);
@@ -410,6 +418,38 @@ export default function TeamPage() {
       toast.error("Failed to remove member");
     } finally {
       setRemovingMemberId(null);
+    }
+  }
+
+  const adminMembers = useMemo(() => members.filter((m) => m.role === "admin"), [members]);
+  const isLastAdmin = currentUserRole === "admin" && adminMembers.length <= 1;
+  const nonAdminMembers = useMemo(() => members.filter((m) => m.role !== "admin" && !m.isCurrentUser), [members]);
+
+  async function handleTransferAdmin() {
+    if (!transferTargetId) {
+      toast.error("Please select a member to transfer admin to");
+      return;
+    }
+    setTransferring(true);
+    try {
+      const res = await fetch("/api/org/transfer-admin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          target_user_id: transferTargetId,
+          new_role: transferNewRole,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Transfer failed");
+      toast.success(`Admin transferred to ${data.new_admin?.name || data.new_admin?.email}. Your role is now ${data.your_new_role}.`);
+      setTransferDialogOpen(false);
+      setTransferTargetId("");
+      refresh();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to transfer admin");
+    } finally {
+      setTransferring(false);
     }
   }
 
@@ -1479,7 +1519,23 @@ export default function TeamPage() {
                         </td>
                         {currentUserRole === "admin" && (
                           <td className="p-3">
-                            {!member.isCurrentUser && (
+                            {member.isCurrentUser ? (
+                              isLastAdmin && members.length > 1 && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-7 text-xs gap-1 opacity-0 group-hover:opacity-100"
+                                  onClick={() => {
+                                    setTransferTargetId("");
+                                    setTransferNewRole("member");
+                                    setTransferDialogOpen(true);
+                                  }}
+                                >
+                                  <Crown className="h-3 w-3" />
+                                  Transfer
+                                </Button>
+                              )
+                            ) : (
                               <div className="flex items-center gap-0.5">
                                 {member.role !== "admin" && (
                                   <Button
@@ -1863,6 +1919,75 @@ export default function TeamPage() {
           getInvites().then(setInvites).catch(() => {});
         }}
       />
+
+      {/* Transfer Admin Dialog */}
+      <Dialog open={transferDialogOpen} onOpenChange={setTransferDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Crown className="h-5 w-5 text-amber-500" />
+              Transfer Admin Role
+            </DialogTitle>
+            <DialogDescription>
+              Choose a member to become the new admin. You will be demoted to the role you select below.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>New Admin</Label>
+              <Select value={transferTargetId} onValueChange={setTransferTargetId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a member..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {nonAdminMembers.map((m) => (
+                    <SelectItem key={m.id} value={m.id}>
+                      <div className="flex items-center gap-2">
+                        <span>{m.name || m.email}</span>
+                        <span className="text-muted-foreground text-xs capitalize">({m.role})</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Your New Role</Label>
+              <Select value={transferNewRole} onValueChange={(v) => setTransferNewRole(v as UserRole)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="manager">Manager</SelectItem>
+                  <SelectItem value="member">Member</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 p-3 text-sm">
+              <div className="flex gap-2">
+                <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                <div className="text-amber-800 dark:text-amber-300">
+                  <p className="font-medium">This action cannot be easily undone.</p>
+                  <p className="text-xs mt-1">Once transferred, only the new admin can change roles. Make sure you trust the person you&apos;re transferring to.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setTransferDialogOpen(false)} disabled={transferring}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleTransferAdmin}
+              disabled={transferring || !transferTargetId}
+              className="bg-amber-600 hover:bg-amber-700 text-white"
+            >
+              {transferring && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Transfer Admin
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

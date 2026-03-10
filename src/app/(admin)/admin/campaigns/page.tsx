@@ -43,7 +43,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CAMPAIGN_TEMPLATES, type CampaignTemplate } from "@/lib/campaign-templates";
+import { CAMPAIGN_TEMPLATES, TEMPLATE_CATEGORIES, type CampaignTemplate } from "@/lib/campaign-templates";
 
 // ─── Types ───────────────────────────────────────────────────────
 
@@ -112,7 +112,7 @@ export default function CampaignsPage() {
   const [showImport, setShowImport] = useState(false);
   const [importing, setImporting] = useState(false);
   const [externalCount, setExternalCount] = useState(0);
-  const [editorTab, setEditorTab] = useState<"visual" | "html">("visual");
+  const [editorTab, setEditorTab] = useState<"fields" | "preview" | "html">("fields");
 
   // Editor form state
   const [formName, setFormName] = useState("");
@@ -120,6 +120,10 @@ export default function CampaignsPage() {
   const [formFrom, setFormFrom] = useState("TeamPrompt <hello@teamprompt.app>");
   const [formBody, setFormBody] = useState("");
   const [formSegment, setFormSegment] = useState("all");
+
+  // Template field editing
+  const [activeTemplate, setActiveTemplate] = useState<CampaignTemplate | null>(null);
+  const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
 
   const loadCampaigns = useCallback(async () => {
     setLoading(true);
@@ -169,6 +173,9 @@ export default function CampaignsPage() {
     setFormFrom("TeamPrompt <hello@teamprompt.app>");
     setFormBody("");
     setFormSegment("all");
+    setActiveTemplate(null);
+    setFieldValues({});
+    setEditorTab("fields");
     setView("editor");
   }
 
@@ -179,6 +186,9 @@ export default function CampaignsPage() {
     setFormFrom(c.from_email);
     setFormBody(c.body_html);
     setFormSegment(c.segment_name || "all");
+    setActiveTemplate(null);
+    setFieldValues({});
+    setEditorTab(c.body_html ? "preview" : "fields");
     setView("editor");
   }
 
@@ -276,11 +286,32 @@ export default function CampaignsPage() {
   }
 
   function applyTemplate(template: CampaignTemplate) {
-    setFormBody(template.html);
+    setActiveTemplate(template);
+    setFieldValues({});
+    // Pre-fill defaults from template fields
+    const defaults: Record<string, string> = {};
+    template.fields.forEach((f) => { if (f.default) defaults[f.key] = f.default; });
+    setFieldValues(defaults);
+    setFormBody(template.build(defaults));
     if (!formSubject.trim()) setFormSubject(template.defaultSubject);
     if (!formName.trim()) setFormName(template.name + " — " + new Date().toLocaleDateString());
     setShowTemplates(false);
-    toast.success(`Template "${template.name}" applied`);
+    setEditorTab("fields");
+    toast.success(`Template "${template.name}" applied — fill in the fields`);
+  }
+
+  function updateFieldValue(key: string, value: string) {
+    const next = { ...fieldValues, [key]: value };
+    setFieldValues(next);
+    if (activeTemplate) {
+      setFormBody(activeTemplate.build(next));
+    }
+  }
+
+  function detachTemplate() {
+    setActiveTemplate(null);
+    setEditorTab("html");
+    toast.success("Detached from template — you can now edit the raw HTML");
   }
 
   async function handleCsvImport(file: File) {
@@ -418,7 +449,15 @@ export default function CampaignsPage() {
 
             <Card className="p-4 space-y-3">
               <div className="flex items-center justify-between">
-                <Label>Email Body</Label>
+                <div className="flex items-center gap-2">
+                  <Label>Email Body</Label>
+                  {activeTemplate && (
+                    <Badge variant="secondary" className="text-[10px] h-5">
+                      {activeTemplate.name}
+                      <button type="button" className="ml-1 hover:text-foreground" onClick={detachTemplate}>&times;</button>
+                    </Badge>
+                  )}
+                </div>
                 <div className="flex items-center gap-2">
                   <Button
                     variant="outline"
@@ -427,22 +466,58 @@ export default function CampaignsPage() {
                     onClick={() => setShowTemplates(true)}
                   >
                     <LayoutTemplate className="h-3 w-3 mr-1.5" />
-                    Use Template
+                    {activeTemplate ? "Change" : "Use Template"}
                   </Button>
-                  <Tabs value={editorTab} onValueChange={(v) => setEditorTab(v as "visual" | "html")}>
+                  <Tabs value={editorTab} onValueChange={(val) => setEditorTab(val as "fields" | "preview" | "html")}>
                     <TabsList className="h-7">
-                      <TabsTrigger value="visual" className="text-xs px-2 h-5">Preview</TabsTrigger>
+                      {activeTemplate && (
+                        <TabsTrigger value="fields" className="text-xs px-2 h-5">Edit</TabsTrigger>
+                      )}
+                      <TabsTrigger value="preview" className="text-xs px-2 h-5">Preview</TabsTrigger>
                       <TabsTrigger value="html" className="text-xs px-2 h-5">HTML</TabsTrigger>
                     </TabsList>
                   </Tabs>
                 </div>
               </div>
 
-              {editorTab === "html" ? (
+              {editorTab === "fields" && activeTemplate ? (
+                <div className="space-y-3 max-h-[500px] overflow-y-auto pr-1">
+                  {activeTemplate.fields.map((field) => (
+                    <div key={field.key}>
+                      <Label htmlFor={`field-${field.key}`} className="text-xs font-medium">
+                        {field.label}
+                      </Label>
+                      {field.type === "textarea" ? (
+                        <Textarea
+                          id={`field-${field.key}`}
+                          value={fieldValues[field.key] || ""}
+                          onChange={(e) => updateFieldValue(field.key, e.target.value)}
+                          placeholder={field.placeholder}
+                          className="mt-1 text-sm min-h-[80px]"
+                        />
+                      ) : (
+                        <Input
+                          id={`field-${field.key}`}
+                          value={fieldValues[field.key] || ""}
+                          onChange={(e) => updateFieldValue(field.key, e.target.value)}
+                          placeholder={field.placeholder}
+                          className="mt-1 text-sm"
+                        />
+                      )}
+                    </div>
+                  ))}
+                  <div className="pt-2 border-t">
+                    <p className="text-xs text-muted-foreground">
+                      Personalization: <code className="bg-slate-100 px-1 rounded">{"{{{FIRST_NAME|there}}}"}</code> is auto-inserted.
+                      Switch to Preview to see the result, or HTML for full control.
+                    </p>
+                  </div>
+                </div>
+              ) : editorTab === "html" ? (
                 <Textarea
                   id="campaign-body"
                   value={formBody}
-                  onChange={(e) => setFormBody(e.target.value)}
+                  onChange={(e) => { setFormBody(e.target.value); setActiveTemplate(null); }}
                   placeholder="Paste your email HTML here, or choose a template above..."
                   className="font-mono text-xs min-h-[400px]"
                 />
@@ -457,7 +532,7 @@ export default function CampaignsPage() {
                     <div className="flex flex-col items-center justify-center h-[400px] text-center text-muted-foreground">
                       <LayoutTemplate className="h-8 w-8 mb-2" />
                       <p className="text-sm font-medium">No content yet</p>
-                      <p className="text-xs mt-1">Choose a template or switch to HTML to start editing</p>
+                      <p className="text-xs mt-1">Choose a template to get started, or switch to HTML</p>
                       <Button
                         variant="outline"
                         size="sm"
@@ -635,31 +710,40 @@ export default function CampaignsPage() {
             <DialogHeader>
               <DialogTitle>Choose a Template</DialogTitle>
               <DialogDescription>
-                Spam-safe templates with proper HTML structure. Click to apply, then customize.
+                Pick a template, then fill in the fields. You can always switch to HTML for full control.
               </DialogDescription>
             </DialogHeader>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {CAMPAIGN_TEMPLATES.map((t) => (
-                <Card
-                  key={t.id}
-                  className="p-4 cursor-pointer hover:ring-2 hover:ring-blue-500 transition-all"
-                  onClick={() => applyTemplate(t)}
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="h-10 w-10 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
-                      <FileText className="h-5 w-5 text-blue-600" />
-                    </div>
-                    <div className="min-w-0">
-                      <h4 className="font-medium text-sm">{t.name}</h4>
-                      <p className="text-xs text-muted-foreground mt-0.5">{t.description}</p>
-                      <p className="text-xs text-muted-foreground mt-1 truncate">
-                        Subject: {t.defaultSubject}
-                      </p>
-                    </div>
+            {TEMPLATE_CATEGORIES.map((cat) => {
+              const templates = CAMPAIGN_TEMPLATES.filter((t) => t.category === cat.id);
+              if (templates.length === 0) return null;
+              return (
+                <div key={cat.id} className="space-y-2">
+                  <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{cat.label}</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {templates.map((t) => (
+                      <Card
+                        key={t.id}
+                        className="p-3 cursor-pointer hover:ring-2 hover:ring-blue-500 transition-all"
+                        onClick={() => applyTemplate(t)}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="h-9 w-9 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
+                            <FileText className="h-4 w-4 text-blue-600" />
+                          </div>
+                          <div className="min-w-0">
+                            <h4 className="font-medium text-sm">{t.name}</h4>
+                            <p className="text-xs text-muted-foreground mt-0.5">{t.description}</p>
+                            <p className="text-[10px] text-muted-foreground mt-1">
+                              {t.fields.length} fields &middot; Subject: {t.defaultSubject}
+                            </p>
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
                   </div>
-                </Card>
-              ))}
-            </div>
+                </div>
+              );
+            })}
           </DialogContent>
         </Dialog>
 

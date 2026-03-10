@@ -154,7 +154,7 @@ export default function TeamPage() {
   const [memberTeamFilter, setMemberTeamFilter] = useState<string>("all");
   const [memberRoleFilter, setMemberRoleFilter] = useState<"all" | "admin" | "manager" | "member">("all");
   const [memberShieldFilter, setMemberShieldFilter] = useState<"all" | "enabled" | "disabled">("all");
-  const [memberSort, setMemberSort] = useState<{ key: "name" | "email" | "role" | "extension" | "shield"; dir: "asc" | "desc" }>({ key: "name", dir: "asc" });
+  const [memberSort, setMemberSort] = useState<{ key: "name" | "email" | "role" | "extension" | "shield" | "status"; dir: "asc" | "desc" }>({ key: "name", dir: "asc" });
 
   // Members after search/role/shield filters but BEFORE team filter (for accurate chip counts)
   const membersPreTeamFilter = useMemo(() => {
@@ -220,7 +220,7 @@ export default function TeamPage() {
     return result;
   }, [membersPreTeamFilter, memberTeamFilter, memberSort]);
 
-  const handleMemberSort = (key: "name" | "email" | "role" | "extension" | "shield") => {
+  const handleMemberSort = (key: "name" | "email" | "role" | "extension" | "shield" | "status") => {
     setMemberSort((prev) =>
       prev.key === key ? { key, dir: prev.dir === "asc" ? "desc" : "asc" } : { key, dir: "asc" }
     );
@@ -251,6 +251,33 @@ export default function TeamPage() {
 
     return result;
   }, [pendingInvites, memberSearch, memberRoleFilter, memberTeamFilter]);
+
+  // Unified sorted list: members + pending invites together (for status sort)
+  type TableRow = { type: "member"; data: typeof filteredMembers[0] } | { type: "invite"; data: typeof filteredInvites[0] };
+  const unifiedRows = useMemo((): TableRow[] => {
+    const memberRows: TableRow[] = filteredMembers.map((m) => ({ type: "member", data: m }));
+    const inviteRows: TableRow[] = filteredInvites.map((inv) => ({ type: "invite", data: inv }));
+    const all = [...memberRows, ...inviteRows];
+
+    if (memberSort.key === "status") {
+      all.sort((a, b) => {
+        const aStatus = a.type === "member" ? 0 : 1; // active=0, pending=1
+        const bStatus = b.type === "member" ? 0 : 1;
+        const cmp = aStatus - bStatus;
+        return memberSort.dir === "asc" ? cmp : -cmp;
+      });
+    } else if (memberSort.key === "name") {
+      all.sort((a, b) => {
+        const aName = a.type === "member" ? (a.data as typeof filteredMembers[0]).name || "" : (a.data as typeof filteredInvites[0]).email;
+        const bName = b.type === "member" ? (b.data as typeof filteredMembers[0]).name || "" : (b.data as typeof filteredInvites[0]).email;
+        const cmp = aName.localeCompare(bName);
+        return memberSort.dir === "asc" ? cmp : -cmp;
+      });
+    }
+    // For other sort keys, members are already sorted and invites append at end
+
+    return all;
+  }, [filteredMembers, filteredInvites, memberSort]);
 
   // Check if typed email matches an existing org member
   const existingMemberMatch = useMemo(() => {
@@ -939,6 +966,7 @@ export default function TeamPage() {
                               {/* Team leads/admins first */}
                               {admins.map((m) => {
                                 const initials = m.name?.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2) || "U";
+                                const extStatus = getExtensionStatus(m.last_extension_active);
                                 return (
                                   <div key={m.id} className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 hover:bg-muted/50 transition-colors">
                                     <div className="relative">
@@ -950,7 +978,12 @@ export default function TeamPage() {
                                     </div>
                                     <div className="min-w-0 flex-1">
                                       <p className="text-xs font-medium truncate">{m.name || m.email}</p>
-                                      <p className="text-[10px] text-muted-foreground truncate">{m.email}</p>
+                                      <div className="flex items-center gap-1.5">
+                                        <span className={cn("h-1.5 w-1.5 rounded-full shrink-0", extStatus === "active" ? "bg-green-500" : extStatus === "inactive" ? "bg-yellow-500" : "bg-gray-400")} title={`Extension: ${extStatus}`} />
+                                        {!m.shield_disabled && <span title="Shield on"><Shield className="h-2.5 w-2.5 text-green-500" /></span>}
+                                        {m.shield_disabled && <span title="Shield off"><ShieldOff className="h-2.5 w-2.5 text-muted-foreground/50" /></span>}
+                                        <p className="text-[10px] text-muted-foreground truncate">{m.email}</p>
+                                      </div>
                                     </div>
                                     <Badge variant="outline" className="text-[9px] px-1.5 py-0 capitalize shrink-0">
                                       {m.teamRoles[team.id] || m.role}
@@ -960,6 +993,7 @@ export default function TeamPage() {
                               })}
                               {rest.map((m) => {
                                 const initials = m.name?.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2) || "U";
+                                const extStatus = getExtensionStatus(m.last_extension_active);
                                 return (
                                   <div key={m.id} className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 hover:bg-muted/50 transition-colors">
                                     <Avatar className="h-8 w-8">
@@ -968,7 +1002,12 @@ export default function TeamPage() {
                                     </Avatar>
                                     <div className="min-w-0 flex-1">
                                       <p className="text-xs font-medium truncate">{m.name || m.email}</p>
-                                      <p className="text-[10px] text-muted-foreground truncate">{m.email}</p>
+                                      <div className="flex items-center gap-1.5">
+                                        <span className={cn("h-1.5 w-1.5 rounded-full shrink-0", extStatus === "active" ? "bg-green-500" : extStatus === "inactive" ? "bg-yellow-500" : "bg-gray-400")} title={`Extension: ${extStatus}`} />
+                                        {!m.shield_disabled && <span title="Shield on"><Shield className="h-2.5 w-2.5 text-green-500" /></span>}
+                                        {m.shield_disabled && <span title="Shield off"><ShieldOff className="h-2.5 w-2.5 text-muted-foreground/50" /></span>}
+                                        <p className="text-[10px] text-muted-foreground truncate">{m.email}</p>
+                                      </div>
                                     </div>
                                     <Badge variant="outline" className="text-[9px] px-1.5 py-0 capitalize shrink-0">
                                       {m.teamRoles[team.id] || m.role}
@@ -976,6 +1015,22 @@ export default function TeamPage() {
                                   </div>
                                 );
                               })}
+                              {/* Pending invites for this team */}
+                              {filteredInvites.filter((inv) => inv.team_id === team.id).map((inv) => (
+                                <div key={`inv-${inv.id}`} className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 opacity-60">
+                                  <Avatar className="h-8 w-8">
+                                    <AvatarFallback className="bg-muted text-muted-foreground text-[10px]">
+                                      <Mail className="h-3 w-3" />
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <div className="min-w-0 flex-1">
+                                    <p className="text-xs text-muted-foreground truncate">{inv.email}</p>
+                                  </div>
+                                  <Badge variant="outline" className="text-[9px] px-1.5 py-0 shrink-0 border-amber-300 text-amber-600 dark:border-amber-700 dark:text-amber-400">
+                                    Pending
+                                  </Badge>
+                                </div>
+                              ))}
                             </>
                           )}
                         </div>
@@ -1018,6 +1073,7 @@ export default function TeamPage() {
                       <div className="p-3 space-y-1">
                         {unassigned.map((m) => {
                           const initials = m.name?.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2) || "U";
+                          const extStatus = getExtensionStatus(m.last_extension_active);
                           return (
                             <div key={m.id} className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 hover:bg-muted/50 transition-colors">
                               <Avatar className="h-8 w-8">
@@ -1026,7 +1082,12 @@ export default function TeamPage() {
                               </Avatar>
                               <div className="min-w-0 flex-1">
                                 <p className="text-xs font-medium truncate">{m.name || m.email}</p>
-                                <p className="text-[10px] text-muted-foreground truncate">{m.email}</p>
+                                <div className="flex items-center gap-1.5">
+                                  <span className={cn("h-1.5 w-1.5 rounded-full shrink-0", extStatus === "active" ? "bg-green-500" : extStatus === "inactive" ? "bg-yellow-500" : "bg-gray-400")} title={`Extension: ${extStatus}`} />
+                                  {!m.shield_disabled && <span title="Shield on"><Shield className="h-2.5 w-2.5 text-green-500" /></span>}
+                                  {m.shield_disabled && <span title="Shield off"><ShieldOff className="h-2.5 w-2.5 text-muted-foreground/50" /></span>}
+                                  <p className="text-[10px] text-muted-foreground truncate">{m.email}</p>
+                                </div>
                               </div>
                               <Badge variant="outline" className="text-[9px] px-1.5 py-0 capitalize shrink-0">
                                 {m.role}
@@ -1099,6 +1160,11 @@ export default function TeamPage() {
                         </button>
                       </th>
                     )}
+                    <th className="text-left p-3 font-medium hidden sm:table-cell">
+                      <button className="flex items-center gap-1 hover:text-foreground" onClick={() => handleMemberSort("status")}>
+                        Status <ArrowUpDown className="h-3 w-3" />
+                      </button>
+                    </th>
                     <th className="text-left p-3 font-medium">
                       <button className="flex items-center gap-1 hover:text-foreground" onClick={() => handleMemberSort("role")}>
                         Role <ArrowUpDown className="h-3 w-3" />
@@ -1112,7 +1178,9 @@ export default function TeamPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredMembers.map((member) => {
+                  {unifiedRows.map((row) => {
+                    if (row.type === "member") {
+                      const member = row.data as typeof filteredMembers[0];
                     const initials = member.name?.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2) || "U";
                     return (
                       <tr key={member.id} className={cn("border-b hover:bg-muted/30 transition-colors group", selectedMemberIds.has(member.id) && "bg-primary/5")}>
@@ -1193,6 +1261,12 @@ export default function TeamPage() {
                             </Button>
                           </td>
                         )}
+                        <td className="p-3 hidden sm:table-cell">
+                          <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-green-300 text-green-600 dark:border-green-700 dark:text-green-400">
+                            <CheckCircle2 className="mr-0.5 h-2.5 w-2.5" />
+                            Active
+                          </Badge>
+                        </td>
                         <td className="p-3">
                           {currentUserRole === "admin" && !member.isCurrentUser ? (
                             <Select value={member.role} onValueChange={(v) => handleChangeRole(member.id, v)} disabled={changingRoleId === member.id}>
@@ -1237,80 +1311,80 @@ export default function TeamPage() {
                         )}
                       </tr>
                     );
-                  })}
-                  {/* Pending invite rows */}
-                  {filteredInvites.map((inv) => {
-                    const invTeam = inv.team_id ? teams.find((t) => t.id === inv.team_id) : null;
-                    return (
-                      <tr key={`inv-${inv.id}`} className="border-b bg-muted/10 group">
-                        {currentUserRole === "admin" && canAccess("bulk_role_assignment") && (
-                          <td className="p-3 w-10" />
-                        )}
-                        <td className="p-3">
-                          <div className="flex items-center gap-3">
-                            <Avatar className="h-8 w-8 opacity-50">
-                              <AvatarFallback className="bg-muted text-muted-foreground text-xs">
-                                <Mail className="h-3.5 w-3.5" />
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="min-w-0">
-                              <div className="flex items-center gap-1.5">
+                    } else {
+                      const inv = row.data as typeof filteredInvites[0];
+                      const invTeam = inv.team_id ? teams.find((t) => t.id === inv.team_id) : null;
+                      return (
+                        <tr key={`inv-${inv.id}`} className="border-b bg-muted/10 group">
+                          {currentUserRole === "admin" && canAccess("bulk_role_assignment") && (
+                            <td className="p-3 w-10" />
+                          )}
+                          <td className="p-3">
+                            <div className="flex items-center gap-3">
+                              <Avatar className="h-8 w-8 opacity-50">
+                                <AvatarFallback className="bg-muted text-muted-foreground text-xs">
+                                  <Mail className="h-3.5 w-3.5" />
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="min-w-0">
                                 <p className="text-sm text-muted-foreground truncate">{inv.email}</p>
-                                <Badge variant="outline" className="text-[10px] px-1.5 py-0 shrink-0 border-amber-300 text-amber-600 dark:border-amber-700 dark:text-amber-400">
-                                  <Clock className="mr-0.5 h-2.5 w-2.5" />
-                                  Pending
-                                </Badge>
+                                {invTeam && (
+                                  <p className="text-[11px] text-muted-foreground/70">{invTeam.name}</p>
+                                )}
                               </div>
-                              {invTeam && (
-                                <p className="text-[11px] text-muted-foreground/70">{invTeam.name}</p>
-                              )}
                             </div>
-                          </div>
-                        </td>
-                        <td className="p-3 hidden sm:table-cell">
-                          <span className="text-xs text-muted-foreground">—</span>
-                        </td>
-                        {currentUserRole === "admin" && (
+                          </td>
                           <td className="p-3 hidden sm:table-cell">
                             <span className="text-xs text-muted-foreground">—</span>
                           </td>
-                        )}
-                        <td className="p-3">
-                          <Badge variant="outline" className="text-xs capitalize">{inv.role}</Badge>
-                        </td>
-                        {currentUserRole === "admin" && (
-                          <td className="p-3">
-                            <div className="flex items-center gap-0.5">
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-7 w-7 opacity-0 group-hover:opacity-100"
-                                title="Resend invite"
-                                onClick={() => {
-                                  handleRevokeInvite(inv.id).then(() => {
-                                    setInviteEmail(inv.email);
-                                    setInviteRole(inv.role);
-                                    setInviteTeamId(inv.team_id || "");
-                                    setInviteModalOpen(true);
-                                  });
-                                }}
-                              >
-                                <Send className="h-3.5 w-3.5" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-7 w-7 text-destructive opacity-0 group-hover:opacity-100"
-                                title="Revoke invite"
-                                onClick={() => handleRevokeInvite(inv.id)}
-                              >
-                                <X className="h-3.5 w-3.5" />
-                              </Button>
-                            </div>
+                          {currentUserRole === "admin" && (
+                            <td className="p-3 hidden sm:table-cell">
+                              <span className="text-xs text-muted-foreground">—</span>
+                            </td>
+                          )}
+                          <td className="p-3 hidden sm:table-cell">
+                            <Badge variant="outline" className="text-[10px] px-1.5 py-0 shrink-0 border-amber-300 text-amber-600 dark:border-amber-700 dark:text-amber-400">
+                              <Clock className="mr-0.5 h-2.5 w-2.5" />
+                              Pending
+                            </Badge>
                           </td>
-                        )}
-                      </tr>
-                    );
+                          <td className="p-3">
+                            <Badge variant="outline" className="text-xs capitalize">{inv.role}</Badge>
+                          </td>
+                          {currentUserRole === "admin" && (
+                            <td className="p-3">
+                              <div className="flex items-center gap-0.5">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-7 w-7 opacity-0 group-hover:opacity-100"
+                                  title="Resend invite"
+                                  onClick={() => {
+                                    handleRevokeInvite(inv.id).then(() => {
+                                      setInviteEmail(inv.email);
+                                      setInviteRole(inv.role);
+                                      setInviteTeamId(inv.team_id || "");
+                                      setInviteModalOpen(true);
+                                    });
+                                  }}
+                                >
+                                  <Send className="h-3.5 w-3.5" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-7 w-7 text-destructive opacity-0 group-hover:opacity-100"
+                                  title="Revoke invite"
+                                  onClick={() => handleRevokeInvite(inv.id)}
+                                >
+                                  <X className="h-3.5 w-3.5" />
+                                </Button>
+                              </div>
+                            </td>
+                          )}
+                        </tr>
+                      );
+                    }
                   })}
                 </tbody>
               </table>

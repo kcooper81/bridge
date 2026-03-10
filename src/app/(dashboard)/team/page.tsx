@@ -87,6 +87,7 @@ export default function TeamPage() {
 
   // View mode toggle
   const [teamViewMode, setTeamViewMode] = useState<"table" | "chart">("table");
+  const [manageTeamsOpen, setManageTeamsOpen] = useState(false);
 
   // Bulk role assignment
   const [selectedMemberIds, setSelectedMemberIds] = useState<Set<string>>(new Set());
@@ -742,6 +743,84 @@ export default function TeamPage() {
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Team edit modal (needed here since this is an early return) */}
+        <Dialog open={teamModalOpen} onOpenChange={setTeamModalOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>{editTeam ? "Edit Team" : "New Team"}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Name</Label>
+                <Input value={teamName} onChange={(e) => setTeamName(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Input value={teamDesc} onChange={(e) => setTeamDesc(e.target.value)} />
+              </div>
+            </div>
+            <div className="mt-4 flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setTeamModalOpen(false)} disabled={savingTeam}>Cancel</Button>
+              <Button onClick={handleSaveTeam} disabled={savingTeam || !teamName.trim()}>
+                {savingTeam && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {savingTeam ? "Saving..." : editTeam ? "Save" : "Create"}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete team dialog (needed here since this is an early return) */}
+        <Dialog open={!!deleteTeamTarget} onOpenChange={(open) => { if (!open) setDeleteTeamTarget(null); }}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Delete &ldquo;{deleteTeamTarget?.name}&rdquo;</DialogTitle>
+            </DialogHeader>
+            {deleteTeamTarget && (() => {
+              const affected = members.filter((m) => m.teamIds.includes(deleteTeamTarget.id));
+              const otherTeams = teams.filter((t) => t.id !== deleteTeamTarget.id);
+              return (
+                <div className="space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    This team has <span className="font-medium text-foreground">{affected.length} member{affected.length !== 1 ? "s" : ""}</span>. What should happen to them?
+                  </p>
+                  <div className="space-y-2">
+                    <label className={cn("flex items-start gap-3 rounded-lg border p-3 cursor-pointer transition-colors", deleteTeamAction === "unassign" ? "border-primary bg-primary/5" : "hover:bg-muted/50")}>
+                      <input type="radio" name="deleteAction2" checked={deleteTeamAction === "unassign"} onChange={() => setDeleteTeamAction("unassign")} className="mt-0.5" />
+                      <div>
+                        <p className="text-sm font-medium">Leave unassigned</p>
+                        <p className="text-xs text-muted-foreground">Members will remain in the org but won&apos;t belong to any team</p>
+                      </div>
+                    </label>
+                    {otherTeams.length > 0 && (
+                      <label className={cn("flex items-start gap-3 rounded-lg border p-3 cursor-pointer transition-colors", deleteTeamAction === "move" ? "border-primary bg-primary/5" : "hover:bg-muted/50")}>
+                        <input type="radio" name="deleteAction2" checked={deleteTeamAction === "move"} onChange={() => setDeleteTeamAction("move")} className="mt-0.5" />
+                        <div className="flex-1">
+                          <p className="text-sm font-medium">Move to another team</p>
+                          {deleteTeamAction === "move" && (
+                            <Select value={deleteTeamMoveTo} onValueChange={setDeleteTeamMoveTo}>
+                              <SelectTrigger className="mt-2 h-8 text-xs"><SelectValue placeholder="Select team..." /></SelectTrigger>
+                              <SelectContent>
+                                {otherTeams.map((t) => <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>)}
+                              </SelectContent>
+                            </Select>
+                          )}
+                        </div>
+                      </label>
+                    )}
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Button variant="outline" onClick={() => setDeleteTeamTarget(null)} disabled={deletingTeam}>Cancel</Button>
+                    <Button variant="destructive" onClick={confirmDeleteTeam} disabled={deletingTeam || (deleteTeamAction === "move" && !deleteTeamMoveTo)}>
+                      {deletingTeam && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      Delete Team
+                    </Button>
+                  </div>
+                </div>
+              );
+            })()}
+          </DialogContent>
+        </Dialog>
       </>
     );
   }
@@ -927,40 +1006,30 @@ export default function TeamPage() {
               All teams
             </Button>
             {teams.map((team) => (
-              <div key={team.id} className="relative group/chip inline-flex">
-                <Button
-                  variant={memberTeamFilter === team.id ? "default" : "outline"}
-                  size="sm"
-                  className="h-7 text-xs !transition-colors !duration-150 hover:scale-100 active:scale-100"
-                  onClick={() => setMemberTeamFilter(memberTeamFilter === team.id ? "all" : team.id)}
-                >
-                  {team.name}
-                  <span className="ml-1 text-[10px] opacity-60">
-                    {membersPreTeamFilter.filter((m) => m.teamIds.includes(team.id)).length}
-                  </span>
-                </Button>
-                {currentUserRole === "admin" && (
-                  <div className="absolute -top-1 -right-1 hidden group-hover/chip:flex items-center gap-px bg-card border rounded-md shadow-sm z-10">
-                    <button
-                      type="button"
-                      className="h-5 w-5 flex items-center justify-center hover:bg-muted rounded-l-md transition-colors"
-                      onClick={() => openTeamModal(team)}
-                      title="Edit team"
-                    >
-                      <Pencil className="h-2.5 w-2.5 text-muted-foreground" />
-                    </button>
-                    <button
-                      type="button"
-                      className="h-5 w-5 flex items-center justify-center hover:bg-destructive/10 rounded-r-md transition-colors"
-                      onClick={() => handleDeleteTeam(team)}
-                      title="Delete team"
-                    >
-                      <Trash2 className="h-2.5 w-2.5 text-destructive" />
-                    </button>
-                  </div>
-                )}
-              </div>
+              <Button
+                key={team.id}
+                variant={memberTeamFilter === team.id ? "default" : "outline"}
+                size="sm"
+                className="h-7 text-xs !transition-colors !duration-150 hover:scale-100 active:scale-100"
+                onClick={() => setMemberTeamFilter(memberTeamFilter === team.id ? "all" : team.id)}
+              >
+                {team.name}
+                <span className="ml-1 text-[10px] opacity-60">
+                  {membersPreTeamFilter.filter((m) => m.teamIds.includes(team.id)).length}
+                </span>
+              </Button>
             ))}
+            {currentUserRole === "admin" && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 text-xs gap-1 text-muted-foreground"
+                onClick={() => setManageTeamsOpen(true)}
+              >
+                <Pencil className="h-3 w-3" />
+                Manage Teams
+              </Button>
+            )}
           </div>
         )}
       </div>
@@ -1079,31 +1148,9 @@ export default function TeamPage() {
                               <p className="text-xs text-muted-foreground truncate">{team.description}</p>
                             )}
                           </div>
-                          <div className="flex items-center gap-1.5 shrink-0">
-                            <Badge variant="secondary" className="text-[10px]">
-                              {teamMembers.length} {teamMembers.length === 1 ? "member" : "members"}
-                            </Badge>
-                            {currentUserRole === "admin" && (
-                              <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button
-                                  type="button"
-                                  className="h-6 w-6 rounded flex items-center justify-center hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-                                  onClick={(e) => { e.stopPropagation(); openTeamModal(team); }}
-                                  title="Edit team"
-                                >
-                                  <Pencil className="h-3 w-3" />
-                                </button>
-                                <button
-                                  type="button"
-                                  className="h-6 w-6 rounded flex items-center justify-center hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
-                                  onClick={(e) => { e.stopPropagation(); handleDeleteTeam(team); }}
-                                  title="Delete team"
-                                >
-                                  <Trash2 className="h-3 w-3" />
-                                </button>
-                              </div>
-                            )}
-                          </div>
+                          <Badge variant="secondary" className="text-[10px] shrink-0">
+                            {teamMembers.length} {teamMembers.length === 1 ? "member" : "members"}
+                          </Badge>
                         </div>
 
                         {/* Team members */}
@@ -1541,6 +1588,66 @@ export default function TeamPage() {
           )}
         </CardContent>
       </Card>}
+
+      {/* Manage Teams Modal */}
+      <Dialog open={manageTeamsOpen} onOpenChange={setManageTeamsOpen}>
+        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              Manage Teams
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2 mt-2">
+            {teams.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-6">No teams yet. Create your first team below.</p>
+            ) : (
+              teams.map((team) => {
+                const teamMemberCount = members.filter((m) => m.teamIds.includes(team.id)).length;
+                return (
+                  <div key={team.id} className="flex items-center gap-3 rounded-lg border border-border px-4 py-3 group hover:bg-muted/30 transition-colors">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{team.name}</p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {team.description || `${teamMemberCount} member${teamMemberCount !== 1 ? "s" : ""}`}
+                      </p>
+                    </div>
+                    <Badge variant="secondary" className="text-[10px] shrink-0">
+                      {teamMemberCount}
+                    </Badge>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7"
+                        onClick={() => { setManageTeamsOpen(false); openTeamModal(team); }}
+                        title="Edit team"
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-destructive"
+                        onClick={() => { setManageTeamsOpen(false); handleDeleteTeam(team); }}
+                        title="Delete team"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+          <div className="mt-4 flex justify-end">
+            <Button onClick={() => { setManageTeamsOpen(false); openTeamModal(null); }}>
+              <Plus className="mr-2 h-4 w-4" />
+              New Team
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Team Modal */}
       <Dialog open={teamModalOpen} onOpenChange={setTeamModalOpen}>

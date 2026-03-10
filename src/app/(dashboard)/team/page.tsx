@@ -25,7 +25,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowLeft, ArrowUpDown, CheckCircle2, Clock, FileSpreadsheet, LayoutList, Loader2, Mail, Network, Pencil, Plug, Plus, RefreshCw, Search, Send, Shield, ShieldOff, Trash2, UserPlus, Users, X } from "lucide-react";
+import { AlertTriangle, ArrowLeft, ArrowUpDown, CheckCircle2, Clock, FileSpreadsheet, LayoutList, Loader2, Mail, Network, Pencil, Plug, Plus, RefreshCw, Search, Send, Shield, ShieldOff, Trash2, UserPlus, Users, X } from "lucide-react";
+import { getExtensionStatus } from "@/lib/extension-status";
 import { SelectWithQuickAdd } from "@/components/ui/select-with-quick-add";
 import { ExtensionStatusBadge } from "@/components/dashboard/extension-status-badge";
 import { NoOrgBanner } from "@/components/dashboard/no-org-banner";
@@ -178,6 +179,12 @@ export default function TeamPage() {
 
     return result;
   }, [members, memberSearch, memberRoleFilter, memberShieldFilter]);
+
+  // Members with inactive extensions (for alert banner)
+  const inactiveExtensionMembers = useMemo(() => {
+    if (currentUserRole !== "admin" && currentUserRole !== "manager") return [];
+    return members.filter((m) => getExtensionStatus(m.last_extension_active) === "inactive");
+  }, [members, currentUserRole]);
 
   const filteredMembers = useMemo(() => {
     let result = [...membersPreTeamFilter];
@@ -737,6 +744,17 @@ export default function TeamPage() {
               </Button>
             </>
           )}
+        </div>
+      )}
+
+      {/* Inactive extension alert */}
+      {inactiveExtensionMembers.length > 0 && (
+        <div className="flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50/50 dark:border-amber-800/50 dark:bg-amber-950/20 px-4 py-3 mb-4">
+          <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0" />
+          <p className="text-sm text-amber-700 dark:text-amber-300 flex-1">
+            <span className="font-medium">{inactiveExtensionMembers.length} member{inactiveExtensionMembers.length > 1 ? "s have" : " has"} an inactive extension</span>
+            <span className="text-amber-600/70 dark:text-amber-400/70"> — no activity in 24+ hours ({inactiveExtensionMembers.slice(0, 3).map((m) => m.name || m.email.split("@")[0]).join(", ")}{inactiveExtensionMembers.length > 3 ? ` +${inactiveExtensionMembers.length - 3} more` : ""})</span>
+          </p>
         </div>
       )}
 

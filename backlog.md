@@ -245,6 +245,7 @@
   - `/api/integrations/deprovision` POST endpoint: safely removes directory-synced users
   - `deprovisionUsers()` client helper in vault-api.ts
   - `auto_deprovision_on_sync` org setting in types.ts
+- [ ] Consider upgrading Vercel to Pro plan for more frequent cron jobs (currently daily on Hobby, ideally every 6 hours for extension checks)
 - [ ] How to handle desktop AI clients (Claude Desktop, ChatGPT Desktop, etc.)
   - Evaluate options: desktop companion app, system-level proxy, clipboard monitoring
   - Consider DLP coverage gap — extension only covers browser-based AI tools

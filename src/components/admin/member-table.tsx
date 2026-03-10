@@ -52,7 +52,7 @@ export function MemberTable({ members, showOrgColumn = false, orgMap, onSelectOr
   const [roleFilter, setRoleFilter] = useState("all");
   const [protectionFilter, setProtectionFilter] = useState("all");
   const { sortKey, sortDir, handleSort } = useSortState<string>("name", "asc");
-  const { page, setPage, paginate, resetPage } = usePaginationState();
+  const { page, setPage, pageSize, setPageSize, paginate, resetPage } = usePaginationState();
 
   const filtered = useMemo(() => {
     let result = [...members];
@@ -152,7 +152,7 @@ export function MemberTable({ members, showOrgColumn = false, orgMap, onSelectOr
         emptyMessage="No members found"
       />
 
-      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+      <Pagination page={page} totalPages={totalPages} totalItems={filtered.length} onPageChange={setPage} pageSize={pageSize} onPageSizeChange={setPageSize} />
     </div>
   );
 }

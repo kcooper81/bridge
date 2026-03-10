@@ -136,6 +136,7 @@ export default function VaultPage() {
   const [filterTeam, setFilterTeam] = useState("");
   const [sort, setSort] = useState("recent");
   const [page, setPage] = useState(0);
+  const [vaultPageSize, setVaultPageSize] = useState(VAULT_PAGE_SIZE);
   const [modalOpen, setModalOpen] = useState(false);
   const [importExportOpen, setImportExportOpen] = useState(false);
   const [categoriesOpen, setCategoriesOpen] = useState(false);
@@ -193,10 +194,10 @@ export default function VaultPage() {
     return result;
   }, [visiblePrompts, search, filterFolder, filterTeam, sort, statusFilter]);
 
-  const pageCount = Math.ceil(filtered.length / VAULT_PAGE_SIZE);
+  const pageCount = Math.ceil(filtered.length / vaultPageSize);
   const pageItems = filtered.slice(
-    page * VAULT_PAGE_SIZE,
-    (page + 1) * VAULT_PAGE_SIZE
+    page * vaultPageSize,
+    (page + 1) * vaultPageSize
   );
 
   // Clear selection when navigating to a different page
@@ -940,31 +941,47 @@ export default function VaultPage() {
       )}
 
       {/* Pagination */}
-      {pageCount > 1 && (
+      {(pageCount > 1 || filtered.length > 10) && (
         <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
-          <span>
-            Showing {page * VAULT_PAGE_SIZE + 1}–
-            {Math.min((page + 1) * VAULT_PAGE_SIZE, filtered.length)} of{" "}
-            {filtered.length}
-          </span>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={page === 0}
-              onClick={() => setPage(page - 1)}
-            >
-              Previous
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={page >= pageCount - 1}
-              onClick={() => setPage(page + 1)}
-            >
-              Next
-            </Button>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs">Show</span>
+              <Select value={String(vaultPageSize)} onValueChange={(v) => { setVaultPageSize(Number(v)); setPage(0); }}>
+                <SelectTrigger className="h-7 w-[70px] text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {[10, 25, 50, 100].map((size) => (
+                    <SelectItem key={size} value={String(size)}>{size}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <span>
+              {page * vaultPageSize + 1}–{Math.min((page + 1) * vaultPageSize, filtered.length)} of{" "}
+              {filtered.length}
+            </span>
           </div>
+          {pageCount > 1 && (
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={page === 0}
+                onClick={() => setPage(page - 1)}
+              >
+                Previous
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={page >= pageCount - 1}
+                onClick={() => setPage(page + 1)}
+              >
+                Next
+              </Button>
+            </div>
+          )}
         </div>
       )}
 

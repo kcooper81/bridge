@@ -537,6 +537,9 @@ export default function TicketsPage() {
   const [tickets, setTickets] = useState<TicketRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [staff, setStaff] = useState<StaffMember[]>([]);
+  const [hasMore, setHasMore] = useState(false);
+  const [totalTickets, setTotalTickets] = useState(0);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   // Filters
   const [search, setSearch] = useState("");
@@ -580,24 +583,33 @@ export default function TicketsPage() {
   // More tabs dropdown
   const [showMoreTabs, setShowMoreTabs] = useState(false);
 
-  const loadTickets = useCallback(async () => {
+  const loadTickets = useCallback(async (append = false) => {
+    if (append) setLoadingMore(true);
     try {
-      const res = await fetch(`/api/admin/tickets?folder=${folder}`);
+      const offset = append ? tickets.length : 0;
+      const res = await fetch(`/api/admin/tickets?folder=${folder}&limit=50&offset=${offset}`);
       if (!res.ok) throw new Error("Failed to fetch tickets");
       const data = await res.json();
       const fresh = data.tickets || [];
-      setTickets(fresh);
-      setSelectedTicket((prev) => {
-        if (!prev) return null;
-        const updated = fresh.find((t: TicketRow) => t.id === prev.id);
-        return updated || null;
-      });
+      setHasMore(data.pagination?.hasMore || false);
+      setTotalTickets(data.pagination?.total || fresh.length);
+      if (append) {
+        setTickets((prev) => [...prev, ...fresh]);
+      } else {
+        setTickets(fresh);
+        setSelectedTicket((prev) => {
+          if (!prev) return null;
+          const updated = fresh.find((t: TicketRow) => t.id === prev.id);
+          return updated || null;
+        });
+      }
     } catch {
       toast.error("Failed to load tickets");
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
-  }, [folder]);
+  }, [folder, tickets.length]);
 
   const loadCannedResponses = useCallback(async () => {
     try {
@@ -1384,6 +1396,23 @@ export default function TicketsPage() {
   const renderTicketList = (ticketsList: TicketRow[], isMobile: boolean) => (
     <div className="divide-y">
       {ticketsList.map((ticket, i) => renderTicketRow(ticket, i, isMobile))}
+      {hasMore && (
+        <div className="flex items-center justify-center py-3 border-t">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-xs text-muted-foreground"
+            onClick={() => loadTickets(true)}
+            disabled={loadingMore}
+          >
+            {loadingMore ? (
+              <><Loader2 className="h-3 w-3 mr-1.5 animate-spin" />Loading...</>
+            ) : (
+              <>Load more ({totalTickets - tickets.length} remaining)</>
+            )}
+          </Button>
+        </div>
+      )}
     </div>
   );
 

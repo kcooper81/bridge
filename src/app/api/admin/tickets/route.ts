@@ -10,12 +10,21 @@ export async function GET(request: NextRequest) {
 
   const db = createServiceClient();
   const folder = request.nextUrl.searchParams.get("folder") || "inbox";
+  const limit = Math.min(Number(request.nextUrl.searchParams.get("limit")) || 50, 200);
+  const offset = Number(request.nextUrl.searchParams.get("offset")) || 0;
+
+  // Get total count for pagination
+  const { count: totalCount } = await db
+    .from("feedback")
+    .select("*", { count: "exact", head: true })
+    .eq("folder", folder);
 
   const { data: tickets, error } = await db
     .from("feedback")
     .select("id, type, subject, message, html_body, sender_email, sender_name, status, priority, direction, user_id, org_id, inbox_email, attachments, assigned_to, starred_by, snoozed_until, folder, cc_emails, created_at, updated_at")
     .eq("folder", folder)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .range(offset, offset + limit - 1);
 
   if (error) {
     console.error("Admin tickets fetch error:", error);
@@ -180,7 +189,15 @@ export async function GET(request: NextRequest) {
     };
   });
 
-  return NextResponse.json({ tickets: enriched });
+  return NextResponse.json({
+    tickets: enriched,
+    pagination: {
+      total: totalCount || 0,
+      limit,
+      offset,
+      hasMore: offset + limit < (totalCount || 0),
+    },
+  });
 }
 
 export async function PATCH(request: NextRequest) {

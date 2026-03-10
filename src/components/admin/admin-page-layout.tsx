@@ -282,25 +282,54 @@ export function DataTable<T>({
 
 // ─── Pagination ───
 
-export function Pagination({ page, totalPages, onPageChange }: {
+export function Pagination({ page, totalPages, totalItems, onPageChange, pageSize, onPageSizeChange, pageSizeOptions = [10, 20, 50, 100] }: {
   page: number;
   totalPages: number;
+  totalItems?: number;
   onPageChange: (page: number) => void;
+  pageSize?: number;
+  onPageSizeChange?: (size: number) => void;
+  pageSizeOptions?: number[];
 }) {
-  if (totalPages <= 1) return null;
+  if (totalPages <= 1 && !onPageSizeChange) return null;
+
+  const start = totalItems ? page * (pageSize || 20) + 1 : 0;
+  const end = totalItems ? Math.min(start + (pageSize || 20) - 1, totalItems) : 0;
+
   return (
     <div className="flex items-center justify-between">
-      <p className="text-xs text-muted-foreground">
-        Page {page + 1} of {totalPages}
-      </p>
-      <div className="flex gap-1">
-        <Button variant="outline" size="sm" className="h-7 w-7 p-0" disabled={page === 0} onClick={() => onPageChange(page - 1)}>
-          <ChevronLeft className="h-4 w-4" />
-        </Button>
-        <Button variant="outline" size="sm" className="h-7 w-7 p-0" disabled={page >= totalPages - 1} onClick={() => onPageChange(page + 1)}>
-          <ChevronRight className="h-4 w-4" />
-        </Button>
+      <div className="flex items-center gap-3">
+        {onPageSizeChange && pageSize && (
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs text-muted-foreground">Show</span>
+            <Select value={String(pageSize)} onValueChange={(v) => onPageSizeChange(Number(v))}>
+              <SelectTrigger className="h-7 w-[70px] text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {pageSizeOptions.map((size) => (
+                  <SelectItem key={size} value={String(size)}>{size}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+        <p className="text-xs text-muted-foreground">
+          {totalItems
+            ? `${start}–${end} of ${totalItems.toLocaleString()}`
+            : `Page ${page + 1} of ${totalPages}`}
+        </p>
       </div>
+      {totalPages > 1 && (
+        <div className="flex gap-1">
+          <Button variant="outline" size="sm" className="h-7 w-7 p-0" disabled={page === 0} onClick={() => onPageChange(page - 1)}>
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <Button variant="outline" size="sm" className="h-7 w-7 p-0" disabled={page >= totalPages - 1} onClick={() => onPageChange(page + 1)}>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
@@ -411,8 +440,9 @@ export function useSortState<T extends string>(defaultKey: T, defaultDir: "asc" 
 
 // ─── Pagination Hook ───
 
-export function usePaginationState(pageSize = 20) {
+export function usePaginationState(defaultPageSize = 20) {
   const [page, setPage] = useState(0);
+  const [pageSize, setPageSizeState] = useState(defaultPageSize);
 
   const paginate = <T,>(data: T[]) => {
     const totalPages = Math.ceil(data.length / pageSize);
@@ -421,8 +451,12 @@ export function usePaginationState(pageSize = 20) {
   };
 
   const resetPage = () => setPage(0);
+  const setPageSize = (size: number) => {
+    setPageSizeState(size);
+    setPage(0); // Reset to first page when changing page size
+  };
 
-  return { page, setPage, paginate, resetPage };
+  return { page, setPage, pageSize, setPageSize, paginate, resetPage };
 }
 
 // ─── CSV Export ───

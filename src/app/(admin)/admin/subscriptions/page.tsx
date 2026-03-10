@@ -51,7 +51,7 @@ export default function SubscriptionsPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [planFilter, setPlanFilter] = useState("all");
   const { sortKey, sortDir, handleSort } = useSortState<string>("created_at");
-  const { page, setPage, paginate, resetPage } = usePaginationState();
+  const { page, setPage, pageSize, setPageSize, paginate, resetPage } = usePaginationState();
   const [composeTarget, setComposeTarget] = useState<SubRow | null>(null);
 
   const loadSubs = useCallback(async () => {
@@ -301,7 +301,7 @@ export default function SubscriptionsPage() {
         emptyMessage="No subscriptions found"
       />
 
-      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+      <Pagination page={page} totalPages={totalPages} totalItems={filtered.length} onPageChange={setPage} pageSize={pageSize} onPageSizeChange={setPageSize} />
 
       <ComposeEmailModal
         open={!!composeTarget}

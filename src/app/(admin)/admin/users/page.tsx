@@ -74,7 +74,7 @@ export default function UsersPage() {
   const [filterNewThisWeek, setFilterNewThisWeek] = useState(false);
   const [filterNoExtension, setFilterNoExtension] = useState(false);
   const { sortKey, sortDir, handleSort } = useSortState<string>("created_at");
-  const { page, setPage, paginate, resetPage } = usePaginationState();
+  const { page, setPage, pageSize, setPageSize, paginate, resetPage } = usePaginationState();
   const [composeTarget, setComposeTarget] = useState<UserRow | null>(null);
 
   const loadUsers = useCallback(async () => {
@@ -285,7 +285,7 @@ export default function UsersPage() {
         emptyMessage="No users found"
       />
 
-      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+      <Pagination page={page} totalPages={totalPages} totalItems={filtered.length} onPageChange={setPage} pageSize={pageSize} onPageSizeChange={setPageSize} />
 
       <ComposeEmailModal
         open={!!composeTarget}

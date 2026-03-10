@@ -2,23 +2,40 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { verifyAdminAccess } from "@/lib/admin-auth";
 
-/** GET — list all campaigns */
-export async function GET() {
+/** GET — list campaigns with optional pagination */
+export async function GET(request: NextRequest) {
   const auth = await verifyAdminAccess();
   if (!auth) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
+  const limit = Math.min(Number(request.nextUrl.searchParams.get("limit")) || 50, 200);
+  const offset = Number(request.nextUrl.searchParams.get("offset")) || 0;
+
   const db = createServiceClient();
+
+  const { count: totalCount } = await db
+    .from("email_campaigns")
+    .select("*", { count: "exact", head: true });
+
   const { data, error } = await db
     .from("email_campaigns")
     .select("*")
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .range(offset, offset + limit - 1);
 
   if (error) {
     console.error("Campaigns fetch error:", error);
     return NextResponse.json({ error: "Failed to fetch campaigns" }, { status: 500 });
   }
 
-  return NextResponse.json({ campaigns: data || [] });
+  return NextResponse.json({
+    campaigns: data || [],
+    pagination: {
+      total: totalCount || 0,
+      limit,
+      offset,
+      hasMore: offset + limit < (totalCount || 0),
+    },
+  });
 }
 
 /** POST — create a new campaign draft */

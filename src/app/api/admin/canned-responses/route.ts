@@ -13,7 +13,8 @@ export async function GET() {
     .from("canned_responses")
     .select("id, title, content, category, created_at")
     .order("category")
-    .order("title");
+    .order("title")
+    .limit(500);
 
   if (error) {
     console.error("Canned responses fetch error:", error);

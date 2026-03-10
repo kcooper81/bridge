@@ -171,6 +171,8 @@ export default function GuardrailsPage() {
   const [detectionFilter, setDetectionFilter] = useState<string>("all"); // "all" | DetectionType
   const [showAllPacks, setShowAllPacks] = useState(false);
   const [violationSort, setViolationSort] = useState<{ col: "date" | "user" | "policy" | "detection" | "action"; dir: "asc" | "desc" }>({ col: "date", dir: "desc" });
+  const [violationPage, setViolationPage] = useState(0);
+  const VIOLATION_PAGE_SIZE = 25;
   const [policySort, setPolicySort] = useState<{ col: "name" | "source" | "scope" | "category" | "severity" | "active"; dir: "asc" | "desc" }>({ col: "name", dir: "asc" });
 
   // Form state
@@ -971,7 +973,10 @@ export default function GuardrailsPage() {
                           </TableRow>
                         );
                       }
-                      return sorted.map((v) => (
+                      const totalFiltered = sorted.length;
+                      const totalPages = Math.ceil(totalFiltered / VIOLATION_PAGE_SIZE);
+                      const paged = sorted.slice(violationPage * VIOLATION_PAGE_SIZE, (violationPage + 1) * VIOLATION_PAGE_SIZE);
+                      return (<>{paged.map((v) => (
                         <TableRow key={v.id}>
                           <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
                             {formatDistanceToNow(new Date(v.created_at), { addSuffix: true })}
@@ -1003,7 +1008,31 @@ export default function GuardrailsPage() {
                             </code>
                           </TableCell>
                         </TableRow>
-                      ));
+                      ))}
+                      {totalPages > 1 && (
+                        <TableRow>
+                          <TableCell colSpan={6}>
+                            <div className="flex items-center justify-between py-1">
+                              <p className="text-xs text-muted-foreground">
+                                {violationPage * VIOLATION_PAGE_SIZE + 1}–{Math.min((violationPage + 1) * VIOLATION_PAGE_SIZE, totalFiltered)} of {totalFiltered}
+                              </p>
+                              <div className="flex gap-1">
+                                <button
+                                  className="h-7 w-7 flex items-center justify-center rounded border text-xs disabled:opacity-30"
+                                  disabled={violationPage === 0}
+                                  onClick={() => setViolationPage(violationPage - 1)}
+                                >&lsaquo;</button>
+                                <button
+                                  className="h-7 w-7 flex items-center justify-center rounded border text-xs disabled:opacity-30"
+                                  disabled={violationPage >= totalPages - 1}
+                                  onClick={() => setViolationPage(violationPage + 1)}
+                                >&rsaquo;</button>
+                              </div>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      )}
+                      </>);
                     })()}
                   </TableBody>
                 </Table>

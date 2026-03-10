@@ -11,8 +11,17 @@ import {
   Check,
   ChevronDown,
   ChevronUp,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { toast } from "sonner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface ErrorRow {
   id: string;
@@ -30,20 +39,32 @@ export default function ErrorsPage() {
   const [loading, setLoading] = useState(true);
   const [showResolved, setShowResolved] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(20);
+  const [totalCount, setTotalCount] = useState(0);
 
   useEffect(() => {
     loadErrors();
-  }, [showResolved]);
+  }, [showResolved, page, pageSize]);
 
   const loadErrors = async () => {
     setLoading(true);
     const supabase = createClient();
+    const offset = page * pageSize;
+
+    // Get total count
+    let countQuery = supabase
+      .from("error_logs")
+      .select("*", { count: "exact", head: true });
+    if (!showResolved) countQuery = countQuery.eq("resolved", false);
+    const { count } = await countQuery;
+    setTotalCount(count || 0);
 
     let query = supabase
       .from("error_logs")
       .select("id, message, stack, url, user_id, org_id, resolved, created_at")
       .order("created_at", { ascending: false })
-      .limit(100);
+      .range(offset, offset + pageSize - 1);
 
     if (!showResolved) {
       query = query.eq("resolved", false);
@@ -147,7 +168,7 @@ export default function ErrorsPage() {
         </div>
       ) : (
         <div className="space-y-3">
-          {errors.map((err) => (
+          {errors.map((err: ErrorRow) => (
             <Card key={err.id}>
               <CardContent className="p-4">
                 <div className="flex items-start justify-between gap-4">
@@ -220,6 +241,46 @@ export default function ErrorsPage() {
               </CardContent>
             </Card>
           ))}
+
+          {/* Pagination */}
+          {(() => {
+            const totalPages = Math.ceil(totalCount / pageSize);
+            if (totalPages <= 1 && totalCount <= 20) return null;
+            const start = page * pageSize + 1;
+            const end = Math.min(start + pageSize - 1, totalCount);
+            return (
+              <div className="flex items-center justify-between pt-2">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs text-muted-foreground">Show</span>
+                    <Select value={String(pageSize)} onValueChange={(v) => { setPageSize(Number(v)); setPage(0); }}>
+                      <SelectTrigger className="h-7 w-[70px] text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {[10, 20, 50, 100].map((size) => (
+                          <SelectItem key={size} value={String(size)}>{size}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {start}–{end} of {totalCount.toLocaleString()}
+                  </p>
+                </div>
+                {totalPages > 1 && (
+                  <div className="flex gap-1">
+                    <Button variant="outline" size="sm" className="h-7 w-7 p-0" disabled={page === 0} onClick={() => setPage(page - 1)}>
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <Button variant="outline" size="sm" className="h-7 w-7 p-0" disabled={page >= totalPages - 1} onClick={() => setPage(page + 1)}>
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
         </div>
       )}
     </div>

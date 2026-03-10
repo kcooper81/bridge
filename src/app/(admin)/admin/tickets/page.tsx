@@ -1476,9 +1476,9 @@ export default function TicketsPage() {
       </div>
 
       {/* Split pane: ticket list + detail (desktop) / full-width list (mobile) */}
-      <div className="lg:grid lg:grid-cols-[380px_1fr] lg:gap-0 lg:border lg:rounded-lg lg:overflow-hidden lg:bg-card" style={{ minHeight: "calc(100vh - 120px)" }}>
+      <div className="lg:grid lg:grid-cols-[380px_1fr] lg:gap-0 lg:border lg:rounded-lg lg:overflow-hidden lg:bg-card" style={{ height: "calc(100vh - 140px)" }}>
         {/* Left: Ticket list */}
-        <div className="border rounded-lg lg:rounded-none lg:border-0 lg:border-r bg-card flex flex-col" style={{ maxHeight: "calc(100vh - 120px)" }}>
+        <div className="border rounded-lg lg:rounded-none lg:border-0 lg:border-r bg-card flex flex-col overflow-hidden" style={{ height: "calc(100vh - 140px)" }}>
 
           {/* Filter tabs inside list pane */}
           <div className="flex items-center border-b overflow-x-auto flex-shrink-0 scrollbar-hide px-1">
@@ -1600,7 +1600,7 @@ export default function TicketsPage() {
               )}
             </div>
           )}
-          <ScrollArea className="flex-1">
+          <ScrollArea className="flex-1 [&>div]:overscroll-contain">
             {openTickets.length === 0 && resolvedTickets.length === 0 ? (
               renderEmptyState()
             ) : (
@@ -1639,7 +1639,7 @@ export default function TicketsPage() {
         </div>
 
         {/* Right: Detail panel (desktop only) */}
-        <div className="hidden lg:flex lg:flex-col" style={{ maxHeight: "calc(100vh - 120px)" }}>
+        <div className="hidden lg:flex lg:flex-col overflow-hidden" style={{ height: "calc(100vh - 140px)" }}>
           {selectedTicket ? (
             <>
               <TicketContent

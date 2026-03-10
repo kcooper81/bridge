@@ -25,6 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { AlertTriangle, ArrowLeft, ArrowUpDown, CheckCircle2, Clock, FileSpreadsheet, LayoutList, Loader2, Mail, Network, Pencil, Plug, Plus, RefreshCw, Search, Send, Shield, ShieldOff, Trash2, UserPlus, Users, X } from "lucide-react";
 import { getExtensionStatus } from "@/lib/extension-status";
 import { SelectWithQuickAdd } from "@/components/ui/select-with-quick-add";
@@ -77,6 +78,12 @@ export default function TeamPage() {
   const [removingMemberId, setRemovingMemberId] = useState<string | null>(null);
   const [removingFromTeamId, setRemovingFromTeamId] = useState<string | null>(null);
   const [togglingShieldId, setTogglingShieldId] = useState<string | null>(null);
+
+  // Delete team dialog
+  const [deleteTeamTarget, setDeleteTeamTarget] = useState<Team | null>(null);
+  const [deleteTeamAction, setDeleteTeamAction] = useState<"unassign" | "move">("unassign");
+  const [deleteTeamMoveTo, setDeleteTeamMoveTo] = useState<string>("");
+  const [deletingTeam, setDeletingTeam] = useState(false);
 
   // View mode toggle
   const [teamViewMode, setTeamViewMode] = useState<"table" | "chart">("table");
@@ -577,19 +584,55 @@ export default function TeamPage() {
     }
   }
 
-  async function handleDeleteTeam(team: Team) {
+  function handleDeleteTeam(team: Team) {
     const teamMembers = members.filter((m) => m.teamIds.includes(team.id));
-    const msg = teamMembers.length > 0
-      ? `Delete "${team.name}"? ${teamMembers.length} member(s) will be removed from this team. This cannot be undone.`
-      : `Delete "${team.name}"? This cannot be undone.`;
-    if (!confirm(msg)) return;
-    const ok = await deleteTeamApi(team.id);
-    if (ok) {
-      toast.success("Team deleted");
-      setSelectedTeam(null);
-      refresh();
+    if (teamMembers.length === 0) {
+      // No members — just confirm and delete
+      if (!confirm(`Delete "${team.name}"? This cannot be undone.`)) return;
+      (async () => {
+        const ok = await deleteTeamApi(team.id);
+        if (ok) { toast.success("Team deleted"); setSelectedTeam(null); await refresh(); }
+        else toast.error("Failed to delete team");
+      })();
     } else {
+      // Has members — show dialog with reassignment options
+      setDeleteTeamTarget(team);
+      setDeleteTeamAction("unassign");
+      setDeleteTeamMoveTo("");
+    }
+  }
+
+  async function confirmDeleteTeam() {
+    if (!deleteTeamTarget) return;
+    setDeletingTeam(true);
+    try {
+      const affectedMembers = members.filter((m) => m.teamIds.includes(deleteTeamTarget.id));
+
+      // Move members to another team if requested
+      if (deleteTeamAction === "move" && deleteTeamMoveTo) {
+        for (const m of affectedMembers) {
+          await addTeamMember(deleteTeamMoveTo, m.id);
+        }
+      }
+
+      // Delete the team (removes all team_members rows via cascade)
+      const ok = await deleteTeamApi(deleteTeamTarget.id);
+      if (ok) {
+        toast.success(
+          deleteTeamAction === "move" && deleteTeamMoveTo
+            ? `Team deleted. ${affectedMembers.length} member(s) moved.`
+            : `Team deleted. ${affectedMembers.length} member(s) unassigned.`
+        );
+        setSelectedTeam(null);
+        await refresh();
+      } else {
+        toast.error("Failed to delete team");
+      }
+    } catch {
       toast.error("Failed to delete team");
+    } finally {
+      setDeletingTeam(false);
+      setDeleteTeamTarget(null);
     }
   }
 
@@ -736,46 +779,79 @@ export default function TeamPage() {
       {/* Status pills row */}
       {(currentUserRole === "admin" || inactiveExtensionMembers.length > 0) && (
         <div className="flex flex-wrap items-center gap-2 mb-4">
+          <TooltipProvider>
           {/* Google Workspace status */}
           {currentUserRole === "admin" && canAccess("google_workspace_sync") && googleConnected !== null && (
             googleConnected ? (
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-7 text-xs gap-1.5 border-green-200 text-green-700 bg-green-50/50 hover:bg-green-100 dark:border-green-800 dark:text-green-400 dark:bg-green-950/20"
-                onClick={handleGoogleSync}
-                disabled={syncingGoogle}
-              >
-                {syncingGoogle ? <Loader2 className="h-3 w-3 animate-spin" /> : <CheckCircle2 className="h-3 w-3" />}
-                Google Workspace
-                {lastSyncedAt && <span className="text-green-600/60 dark:text-green-400/60">· synced {new Date(lastSyncedAt).toLocaleDateString(undefined, { month: "short", day: "numeric" })}</span>}
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs gap-1.5 border-green-200 text-green-700 bg-green-50/50 hover:bg-green-100 dark:border-green-800 dark:text-green-400 dark:bg-green-950/20"
+                    onClick={handleGoogleSync}
+                    disabled={syncingGoogle}
+                  >
+                    {syncingGoogle ? <Loader2 className="h-3 w-3 animate-spin" /> : <CheckCircle2 className="h-3 w-3" />}
+                    Google Workspace
+                    {lastSyncedAt && <span className="text-green-600/60 dark:text-green-400/60">· synced {new Date(lastSyncedAt).toLocaleDateString(undefined, { month: "short", day: "numeric" })}</span>}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="text-xs">Click to sync your Google Workspace directory. Imports new users and maps groups to teams.</p>
+                </TooltipContent>
+              </Tooltip>
             ) : (
-              <Button variant="outline" size="sm" className="h-7 text-xs gap-1.5" asChild>
-                <Link href="/settings/integrations">
-                  <Plug className="h-3 w-3" />
-                  Connect Google Workspace
-                </Link>
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="outline" size="sm" className="h-7 text-xs gap-1.5" asChild>
+                    <Link href="/settings/integrations">
+                      <Plug className="h-3 w-3" />
+                      Connect Google Workspace
+                    </Link>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="text-xs">Connect to import users from your company directory automatically.</p>
+                </TooltipContent>
+              </Tooltip>
             )
           )}
           {currentUserRole === "admin" && !canAccess("google_workspace_sync") && (
-            <Button variant="outline" size="sm" className="h-7 text-xs gap-1.5 text-muted-foreground" asChild>
-              <Link href="/settings/billing">
-                <Plug className="h-3 w-3" />
-                Google Workspace
-                <Badge variant="secondary" className="text-[9px] px-1 py-0 ml-0.5">Business</Badge>
-              </Link>
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="outline" size="sm" className="h-7 text-xs gap-1.5 text-muted-foreground" asChild>
+                  <Link href="/settings/billing">
+                    <Plug className="h-3 w-3" />
+                    Google Workspace
+                    <Badge variant="secondary" className="text-[9px] px-1 py-0 ml-0.5">Business</Badge>
+                  </Link>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p className="text-xs">Upgrade to Business to sync your Google Workspace directory.</p>
+              </TooltipContent>
+            </Tooltip>
           )}
 
           {/* Inactive extensions */}
           {inactiveExtensionMembers.length > 0 && (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50/50 dark:border-amber-800/50 dark:bg-amber-950/20 px-3 py-1 text-xs font-medium text-amber-700 dark:text-amber-400">
-              <AlertTriangle className="h-3 w-3" />
-              {inactiveExtensionMembers.length} inactive extension{inactiveExtensionMembers.length > 1 ? "s" : ""}
-            </span>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50/50 dark:border-amber-800/50 dark:bg-amber-950/20 px-3 py-1 text-xs font-medium text-amber-700 dark:text-amber-400 cursor-default">
+                  <AlertTriangle className="h-3 w-3" />
+                  {inactiveExtensionMembers.length} inactive extension{inactiveExtensionMembers.length > 1 ? "s" : ""}
+                </span>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-xs">
+                <p className="text-xs font-medium mb-1">No extension activity in 24+ hours:</p>
+                <p className="text-xs text-muted-foreground">
+                  {inactiveExtensionMembers.map((m) => m.name || m.email.split("@")[0]).join(", ")}
+                </p>
+              </TooltipContent>
+            </Tooltip>
           )}
+          </TooltipProvider>
         </div>
       )}
 
@@ -851,42 +927,109 @@ export default function TeamPage() {
               All teams
             </Button>
             {teams.map((team) => (
-              <Button
-                key={team.id}
-                variant={memberTeamFilter === team.id ? "default" : "outline"}
-                size="sm"
-                className="h-7 text-xs !transition-colors !duration-150 hover:scale-100 active:scale-100"
-                onClick={() => setMemberTeamFilter(memberTeamFilter === team.id ? "all" : team.id)}
-                onDoubleClick={() => { if (currentUserRole === "admin") setSelectedTeam(team); }}
-                title={currentUserRole === "admin" ? "Click to filter, double-click to manage" : undefined}
-              >
-                {team.name}
-                <span className="ml-1 text-[10px] opacity-60">
-                  {membersPreTeamFilter.filter((m) => m.teamIds.includes(team.id)).length}
-                </span>
-              </Button>
+              <div key={team.id} className="relative group/chip inline-flex">
+                <Button
+                  variant={memberTeamFilter === team.id ? "default" : "outline"}
+                  size="sm"
+                  className="h-7 text-xs !transition-colors !duration-150 hover:scale-100 active:scale-100"
+                  onClick={() => setMemberTeamFilter(memberTeamFilter === team.id ? "all" : team.id)}
+                >
+                  {team.name}
+                  <span className="ml-1 text-[10px] opacity-60">
+                    {membersPreTeamFilter.filter((m) => m.teamIds.includes(team.id)).length}
+                  </span>
+                </Button>
+                {currentUserRole === "admin" && (
+                  <div className="absolute -top-1 -right-1 hidden group-hover/chip:flex items-center gap-px bg-card border rounded-md shadow-sm z-10">
+                    <button
+                      type="button"
+                      className="h-5 w-5 flex items-center justify-center hover:bg-muted rounded-l-md transition-colors"
+                      onClick={() => openTeamModal(team)}
+                      title="Edit team"
+                    >
+                      <Pencil className="h-2.5 w-2.5 text-muted-foreground" />
+                    </button>
+                    <button
+                      type="button"
+                      className="h-5 w-5 flex items-center justify-center hover:bg-destructive/10 rounded-r-md transition-colors"
+                      onClick={() => handleDeleteTeam(team)}
+                      title="Delete team"
+                    >
+                      <Trash2 className="h-2.5 w-2.5 text-destructive" />
+                    </button>
+                  </div>
+                )}
+              </div>
             ))}
           </div>
         )}
       </div>
 
       {/* Bulk action bar */}
-      {currentUserRole === "admin" && canAccess("bulk_role_assignment") && selectedMemberIds.size > 0 && (
-        <div className="flex items-center gap-3 rounded-lg border bg-muted/50 px-4 py-2 mb-2">
+      {currentUserRole === "admin" && selectedMemberIds.size > 0 && (
+        <div className="flex flex-wrap items-center gap-2 rounded-lg border bg-muted/50 px-4 py-2 mb-2">
           <span className="text-sm font-medium">{selectedMemberIds.size} selected</span>
-          <Select value={bulkRole} onValueChange={(v) => setBulkRole(v as UserRole)}>
-            <SelectTrigger className="h-8 w-28 text-xs"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="admin">Admin</SelectItem>
-              <SelectItem value="manager">Manager</SelectItem>
-              <SelectItem value="member">Member</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button size="sm" className="h-8" onClick={handleBulkRoleChange} disabled={applyingBulkRole}>
-            {applyingBulkRole && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
-            Apply
+          <div className="h-4 w-px bg-border" />
+          {canAccess("bulk_role_assignment") && (
+            <>
+              <Select value={bulkRole} onValueChange={(v) => setBulkRole(v as UserRole)}>
+                <SelectTrigger className="h-7 w-24 text-xs"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value="manager">Manager</SelectItem>
+                  <SelectItem value="member">Member</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button size="sm" className="h-7 text-xs" onClick={handleBulkRoleChange} disabled={applyingBulkRole}>
+                {applyingBulkRole && <Loader2 className="mr-1.5 h-3 w-3 animate-spin" />}
+                Set Role
+              </Button>
+              <div className="h-4 w-px bg-border" />
+            </>
+          )}
+          <SelectWithQuickAdd
+            value=""
+            onValueChange={async (teamId: string) => {
+              const selected = members.filter((m) => selectedMemberIds.has(m.id));
+              let moved = 0;
+              for (const m of selected) {
+                if (!m.teamIds.includes(teamId)) {
+                  await addTeamMember(teamId, m.id);
+                  moved++;
+                }
+              }
+              if (moved > 0) { toast.success(`${moved} member(s) moved to team`); await refresh(); }
+              setSelectedMemberIds(new Set());
+            }}
+            items={teams.map((t) => ({ id: t.id, name: t.name }))}
+            onQuickCreate={async (name: string) => {
+              const newTeam = await saveTeamApi({ name, description: null });
+              if (newTeam) { await refresh(); return newTeam; }
+              return null;
+            }}
+            placeholder="Move to team..."
+            createLabel="Create team"
+            triggerClassName="h-7 w-36 text-xs"
+          />
+          <div className="h-4 w-px bg-border" />
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 text-xs text-destructive hover:text-destructive"
+            onClick={async () => {
+              const selected = members.filter((m) => selectedMemberIds.has(m.id) && !m.isCurrentUser && m.role !== "admin");
+              if (selected.length === 0) { toast.error("No removable members selected (admins excluded)"); return; }
+              if (!confirm(`Remove ${selected.length} member(s) from the organization? This cannot be undone.`)) return;
+              for (const m of selected) { await removeMember(m.id); }
+              toast.success(`${selected.length} member(s) removed`);
+              setSelectedMemberIds(new Set());
+              await refresh();
+            }}
+          >
+            <Trash2 className="mr-1 h-3 w-3" />
+            Remove
           </Button>
-          <Button variant="ghost" size="sm" className="h-8" onClick={() => setSelectedMemberIds(new Set())}>
+          <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setSelectedMemberIds(new Set())}>
             Clear
           </Button>
         </div>
@@ -940,6 +1083,26 @@ export default function TeamPage() {
                             <Badge variant="secondary" className="text-[10px]">
                               {teamMembers.length} {teamMembers.length === 1 ? "member" : "members"}
                             </Badge>
+                            {currentUserRole === "admin" && (
+                              <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button
+                                  type="button"
+                                  className="h-6 w-6 rounded flex items-center justify-center hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                                  onClick={(e) => { e.stopPropagation(); openTeamModal(team); }}
+                                  title="Edit team"
+                                >
+                                  <Pencil className="h-3 w-3" />
+                                </button>
+                                <button
+                                  type="button"
+                                  className="h-6 w-6 rounded flex items-center justify-center hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+                                  onClick={(e) => { e.stopPropagation(); handleDeleteTeam(team); }}
+                                  title="Delete team"
+                                >
+                                  <Trash2 className="h-3 w-3" />
+                                </button>
+                              </div>
+                            )}
                           </div>
                         </div>
 
@@ -1289,7 +1452,7 @@ export default function TeamPage() {
                                   onClick={() => handleRemoveMember(member.id)}
                                   disabled={removingMemberId === member.id}
                                 >
-                                  {removingMemberId === member.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <X className="h-3.5 w-3.5" />}
+                                  {removingMemberId === member.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
                                 </Button>
                               </div>
                             )}
@@ -1402,6 +1565,67 @@ export default function TeamPage() {
               {savingTeam ? "Saving..." : editTeam ? "Save" : "Create"}
             </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Team Dialog */}
+      <Dialog open={!!deleteTeamTarget} onOpenChange={(open) => { if (!open) setDeleteTeamTarget(null); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Delete &ldquo;{deleteTeamTarget?.name}&rdquo;</DialogTitle>
+          </DialogHeader>
+          {deleteTeamTarget && (() => {
+            const affected = members.filter((m) => m.teamIds.includes(deleteTeamTarget.id));
+            const otherTeams = teams.filter((t) => t.id !== deleteTeamTarget.id);
+            return (
+              <div className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  This team has <span className="font-medium text-foreground">{affected.length} member{affected.length !== 1 ? "s" : ""}</span>. What should happen to them?
+                </p>
+                <div className="space-y-2">
+                  <label className={cn("flex items-start gap-3 rounded-lg border p-3 cursor-pointer transition-colors", deleteTeamAction === "unassign" ? "border-primary bg-primary/5" : "hover:bg-muted/50")}>
+                    <input type="radio" name="deleteAction" checked={deleteTeamAction === "unassign"} onChange={() => setDeleteTeamAction("unassign")} className="mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium">Leave unassigned</p>
+                      <p className="text-xs text-muted-foreground">Members will remain in the org but won&apos;t belong to any team</p>
+                    </div>
+                  </label>
+                  {otherTeams.length > 0 && (
+                    <label className={cn("flex items-start gap-3 rounded-lg border p-3 cursor-pointer transition-colors", deleteTeamAction === "move" ? "border-primary bg-primary/5" : "hover:bg-muted/50")}>
+                      <input type="radio" name="deleteAction" checked={deleteTeamAction === "move"} onChange={() => setDeleteTeamAction("move")} className="mt-0.5" />
+                      <div className="flex-1 space-y-2">
+                        <div>
+                          <p className="text-sm font-medium">Move to another team</p>
+                          <p className="text-xs text-muted-foreground">All members will be added to the selected team</p>
+                        </div>
+                        {deleteTeamAction === "move" && (
+                          <Select value={deleteTeamMoveTo} onValueChange={setDeleteTeamMoveTo}>
+                            <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select team..." /></SelectTrigger>
+                            <SelectContent>
+                              {otherTeams.map((t) => (
+                                <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        )}
+                      </div>
+                    </label>
+                  )}
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" onClick={() => setDeleteTeamTarget(null)} disabled={deletingTeam}>Cancel</Button>
+                  <Button
+                    variant="destructive"
+                    onClick={confirmDeleteTeam}
+                    disabled={deletingTeam || (deleteTeamAction === "move" && !deleteTeamMoveTo)}
+                  >
+                    {deletingTeam && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Delete Team
+                  </Button>
+                </div>
+              </div>
+            );
+          })()}
         </DialogContent>
       </Dialog>
 

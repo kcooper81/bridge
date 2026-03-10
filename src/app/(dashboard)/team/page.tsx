@@ -207,6 +207,13 @@ export default function TeamPage() {
 
   const pendingInvites = invites.filter((i) => i.status === "pending");
 
+  // Check if typed email matches an existing org member
+  const existingMemberMatch = useMemo(() => {
+    const trimmed = inviteEmail.trim().toLowerCase();
+    if (!trimmed) return null;
+    return members.find((m) => m.email.toLowerCase() === trimmed) || null;
+  }, [inviteEmail, members]);
+
   if (loading) {
     return (
       <>
@@ -328,6 +335,37 @@ export default function TeamPage() {
 
   async function handleSendInvite() {
     if (!inviteEmail.trim()) return;
+
+    // If the email belongs to an existing member, add them to the selected team instead
+    if (existingMemberMatch) {
+      if (!inviteTeamId) {
+        toast.error("Please select a team to add this member to");
+        return;
+      }
+      if (existingMemberMatch.teamIds.includes(inviteTeamId)) {
+        toast.error("This member is already on that team");
+        return;
+      }
+      setInviting(true);
+      try {
+        const success = await addTeamMember(inviteTeamId, existingMemberMatch.id);
+        if (success) {
+          toast.success("Member added to team");
+          setInviteEmail("");
+          setInviteTeamId("");
+          setInviteModalOpen(false);
+          refresh();
+        } else {
+          toast.error("Failed to add member to team");
+        }
+      } catch {
+        toast.error("Failed to add member to team");
+      } finally {
+        setInviting(false);
+      }
+      return;
+    }
+
     if (!checkLimit("add_member", members.length)) return;
     setInviting(true);
     try {
@@ -994,26 +1032,48 @@ export default function TeamPage() {
       <Dialog open={inviteModalOpen} onOpenChange={setInviteModalOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Invite Member</DialogTitle>
+            <DialogTitle>{existingMemberMatch ? "Add to Team" : "Invite Member"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>Email</Label>
               <Input type="email" value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} placeholder="colleague@company.com" />
             </div>
+
+            {/* Existing member detected banner */}
+            {existingMemberMatch && (
+              <div className="flex items-center gap-3 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2.5">
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={existingMemberMatch.avatar_url || undefined} />
+                  <AvatarFallback className="text-xs">
+                    {(existingMemberMatch.name || existingMemberMatch.email).slice(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium truncate">{existingMemberMatch.name || existingMemberMatch.email}</p>
+                  <p className="text-xs text-muted-foreground">Already a member &middot; {existingMemberMatch.role}</p>
+                </div>
+                <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
+              </div>
+            )}
+
+            {/* Only show role picker for new invites */}
+            {!existingMemberMatch && (
+              <div className="space-y-2">
+                <Label>Role</Label>
+                <Select value={inviteRole} onValueChange={(v) => setInviteRole(v as UserRole)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="member">Member</SelectItem>
+                    <SelectItem value="manager">Manager</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
             <div className="space-y-2">
-              <Label>Role</Label>
-              <Select value={inviteRole} onValueChange={(v) => setInviteRole(v as UserRole)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="member">Member</SelectItem>
-                  <SelectItem value="manager">Manager</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Add to Team (optional)</Label>
+              <Label>{existingMemberMatch ? "Add to Team" : "Add to Team (optional)"}</Label>
               <SelectWithQuickAdd
                 value={inviteTeamId}
                 onValueChange={setInviteTeamId}
@@ -1026,16 +1086,16 @@ export default function TeamPage() {
                   }
                   return null;
                 }}
-                noneLabel="No team"
+                noneLabel={existingMemberMatch ? "Select a team" : "No team"}
                 createLabel="team"
               />
             </div>
           </div>
           <div className="mt-4 flex justify-end gap-2">
             <Button variant="outline" onClick={() => setInviteModalOpen(false)}>Cancel</Button>
-            <Button onClick={handleSendInvite} disabled={inviting}>
+            <Button onClick={handleSendInvite} disabled={inviting || (!!existingMemberMatch && !inviteTeamId)}>
               {inviting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Send Invite
+              {existingMemberMatch ? "Add to Team" : "Send Invite"}
             </Button>
           </div>
         </DialogContent>

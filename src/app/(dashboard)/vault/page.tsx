@@ -42,8 +42,10 @@ import {
   Copy,
   Files,
   FolderOpen,
+  Grid3X3,
   Heart,
   Import,
+  LayoutList,
   Lightbulb,
   MoreHorizontal,
   Pencil,
@@ -139,6 +141,7 @@ export default function VaultPage() {
   const [categoriesOpen, setCategoriesOpen] = useState(false);
   const [editPrompt, setEditPrompt] = useState<Prompt | null>(null);
   const [fillPrompt, setFillPrompt] = useState<Prompt | null>(null);
+  const [viewMode, setViewMode] = useState<"list" | "grid">("list");
 
   const pendingCount = useMemo(
     () => visiblePrompts.filter((p) => p.status === "pending").length,
@@ -530,6 +533,26 @@ export default function VaultPage() {
             <SelectItem value="rating">Rating</SelectItem>
           </SelectContent>
         </Select>
+        <div className="flex items-center gap-0.5 rounded-lg border border-border p-0.5">
+          <Button
+            variant={viewMode === "list" ? "secondary" : "ghost"}
+            size="icon"
+            className="h-7 w-7"
+            onClick={() => setViewMode("list")}
+            title="List view"
+          >
+            <LayoutList className="h-3.5 w-3.5" />
+          </Button>
+          <Button
+            variant={viewMode === "grid" ? "secondary" : "ghost"}
+            size="icon"
+            className="h-7 w-7"
+            onClick={() => setViewMode("grid")}
+            title="Grid view"
+          >
+            <Grid3X3 className="h-3.5 w-3.5" />
+          </Button>
+        </div>
       </div>
 
       {/* Folder Management */}
@@ -580,57 +603,227 @@ export default function VaultPage() {
         </div>
       )}
 
-      {/* Table */}
-      <div className="rounded-lg border border-border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              {canApprove && (
-                <TableHead className="w-[40px]">
-                  <Checkbox
-                    checked={pageItems.length > 0 && selectedIds.size === pageItems.length}
-                    onCheckedChange={toggleSelectAll}
-                  />
-                </TableHead>
-              )}
-              <TableHead className="w-[40%]">Prompt</TableHead>
-              <TableHead className="hidden md:table-cell">Tags</TableHead>
-              <TableHead className="text-right">Uses</TableHead>
-              <TableHead className="text-right hidden sm:table-cell">Rating</TableHead>
-              <TableHead className="hidden lg:table-cell">Updated</TableHead>
-              <TableHead className="w-[60px]" />
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {pageItems.length === 0 ? (
+      {/* List View */}
+      {viewMode === "list" && (
+        <div className="rounded-lg border border-border">
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={canApprove ? 7 : 6} className="h-32 text-center text-muted-foreground">
-                  {prompts.length === 0
-                    ? "No prompts yet. Create your first one!"
-                    : "No prompts match your filters."}
-                </TableCell>
+                {canApprove && (
+                  <TableHead className="w-[40px]">
+                    <Checkbox
+                      checked={pageItems.length > 0 && selectedIds.size === pageItems.length}
+                      onCheckedChange={toggleSelectAll}
+                    />
+                  </TableHead>
+                )}
+                <TableHead className="w-[40%]">Prompt</TableHead>
+                <TableHead className="hidden md:table-cell">Tags</TableHead>
+                <TableHead className="text-right">Uses</TableHead>
+                <TableHead className="text-right hidden sm:table-cell">Rating</TableHead>
+                <TableHead className="hidden lg:table-cell">Updated</TableHead>
+                <TableHead className="w-[60px]" />
               </TableRow>
-            ) : (
-              pageItems.map((p) => {
+            </TableHeader>
+            <TableBody>
+              {pageItems.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={canApprove ? 7 : 6} className="h-32 text-center text-muted-foreground">
+                    {prompts.length === 0
+                      ? "No prompts yet. Create your first one!"
+                      : "No prompts match your filters."}
+                  </TableCell>
+                </TableRow>
+              ) : (
+                pageItems.map((p) => {
+                  const avgRating = p.rating_count
+                    ? p.rating_total / p.rating_count
+                    : 0;
+                  return (
+                    <TableRow
+                      key={p.id}
+                      className="cursor-pointer hover:bg-muted/50"
+                      onClick={() => openEditPrompt(p)}
+                    >
+                      {canApprove && (
+                        <TableCell onClick={(e) => e.stopPropagation()}>
+                          <Checkbox
+                            checked={selectedIds.has(p.id)}
+                            onCheckedChange={() => toggleSelect(p.id)}
+                          />
+                        </TableCell>
+                      )}
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleToggleFavorite(p.id, p.is_favorite);
+                            }}
+                            className="shrink-0"
+                          >
+                            <Heart
+                              className={`h-4 w-4 ${
+                                p.is_favorite
+                                  ? "fill-destructive text-destructive"
+                                  : "text-muted-foreground"
+                              }`}
+                            />
+                          </button>
+                          {(() => {
+                            const folderColor = p.folder_id ? folders.find((f) => f.id === p.folder_id)?.color : null;
+                            return folderColor ? (
+                              <span
+                                className="h-2.5 w-2.5 rounded-full shrink-0"
+                                style={{ backgroundColor: folderColor }}
+                                title={folders.find((f) => f.id === p.folder_id)?.name}
+                              />
+                            ) : null;
+                          })()}
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-1.5">
+                              <p className="font-medium truncate">{p.title}</p>
+                              {p.is_template && (
+                                <Badge variant="outline" className="text-[10px] gap-0.5 px-1.5 py-0 shrink-0">
+                                  <Braces className="h-2.5 w-2.5" />
+                                  Template
+                                </Badge>
+                              )}
+                              {p.status !== "approved" && (
+                                <Badge
+                                  variant={STATUS_BADGE_VARIANT[p.status]}
+                                  className="text-[10px] px-1.5 py-0 shrink-0 capitalize"
+                                >
+                                  {p.status}
+                                </Badge>
+                              )}
+                            </div>
+                            <p className="text-xs text-muted-foreground truncate max-w-xs">
+                              {p.content.slice(0, 80)}
+                              {p.content.length > 80 ? "..." : ""}
+                            </p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell">
+                        <div className="flex flex-wrap gap-1">
+                          {(p.tags || []).slice(0, 3).map((t) => (
+                            <Badge key={t} variant="secondary" className="text-xs">
+                              {t}
+                            </Badge>
+                          ))}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right tabular-nums">
+                        {p.usage_count || 0}
+                      </TableCell>
+                      <TableCell className="text-right hidden sm:table-cell">
+                        <StarRating
+                          value={avgRating}
+                          userRating={userRatings[p.id]}
+                          onChange={(rating) => handleRate(p.id, rating)}
+                        />
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-sm hidden lg:table-cell">
+                        {formatDistanceToNow(new Date(p.updated_at), {
+                          addSuffix: true,
+                        })}
+                      </TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleCopy(p);
+                              }}
+                            >
+                              <Copy className="mr-2 h-4 w-4" />
+                              Copy
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openEditPrompt(p);
+                              }}
+                            >
+                              <Pencil className="mr-2 h-4 w-4" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDuplicate(p.id);
+                              }}
+                            >
+                              <Files className="mr-2 h-4 w-4" />
+                              Duplicate
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDelete(p.id);
+                              }}
+                              className="text-destructive"
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      )}
+
+      {/* Grid View */}
+      {viewMode === "grid" && (
+        <div>
+          {pageItems.length === 0 ? (
+            <div className="flex h-32 items-center justify-center rounded-lg border border-border text-muted-foreground">
+              {prompts.length === 0
+                ? "No prompts yet. Create your first one!"
+                : "No prompts match your filters."}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {pageItems.map((p) => {
                 const avgRating = p.rating_count
                   ? p.rating_total / p.rating_count
                   : 0;
+                const folder = p.folder_id ? folders.find((f) => f.id === p.folder_id) : null;
                 return (
-                  <TableRow
+                  <div
                     key={p.id}
-                    className="cursor-pointer hover:bg-muted/50"
+                    className="group relative flex flex-col rounded-xl border border-border bg-card p-4 transition-all duration-200 hover:shadow-md hover:border-primary/30 cursor-pointer"
                     onClick={() => openEditPrompt(p)}
                   >
-                    {canApprove && (
-                      <TableCell onClick={(e) => e.stopPropagation()}>
-                        <Checkbox
-                          checked={selectedIds.has(p.id)}
-                          onCheckedChange={() => toggleSelect(p.id)}
-                        />
-                      </TableCell>
-                    )}
-                    <TableCell>
-                      <div className="flex items-center gap-2">
+                    {/* Top row: checkbox, favorite, status, actions */}
+                    <div className="flex items-start justify-between gap-2 mb-3">
+                      <div className="flex items-center gap-2 min-w-0">
+                        {canApprove && (
+                          <div onClick={(e) => e.stopPropagation()}>
+                            <Checkbox
+                              checked={selectedIds.has(p.id)}
+                              onCheckedChange={() => toggleSelect(p.id)}
+                            />
+                          </div>
+                        )}
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -642,129 +835,109 @@ export default function VaultPage() {
                             className={`h-4 w-4 ${
                               p.is_favorite
                                 ? "fill-destructive text-destructive"
-                                : "text-muted-foreground"
+                                : "text-muted-foreground hover:text-destructive"
                             }`}
                           />
                         </button>
-                        {(() => {
-                          const folderColor = p.folder_id ? folders.find((f) => f.id === p.folder_id)?.color : null;
-                          return folderColor ? (
-                            <span
-                              className="h-2.5 w-2.5 rounded-full shrink-0"
-                              style={{ backgroundColor: folderColor }}
-                              title={folders.find((f) => f.id === p.folder_id)?.name}
-                            />
-                          ) : null;
-                        })()}
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-1.5">
-                            <p className="font-medium truncate">{p.title}</p>
-                            {p.is_template && (
-                              <Badge variant="outline" className="text-[10px] gap-0.5 px-1.5 py-0 shrink-0">
-                                <Braces className="h-2.5 w-2.5" />
-                                Template
-                              </Badge>
-                            )}
-                            {p.status !== "approved" && (
-                              <Badge
-                                variant={STATUS_BADGE_VARIANT[p.status]}
-                                className="text-[10px] px-1.5 py-0 shrink-0 capitalize"
-                              >
-                                {p.status}
-                              </Badge>
-                            )}
-                          </div>
-                          <p className="text-xs text-muted-foreground truncate max-w-xs">
-                            {p.content.slice(0, 80)}
-                            {p.content.length > 80 ? "..." : ""}
-                          </p>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell">
-                      <div className="flex flex-wrap gap-1">
-                        {(p.tags || []).slice(0, 3).map((t) => (
-                          <Badge key={t} variant="secondary" className="text-xs">
-                            {t}
+                        {folder?.color && (
+                          <span
+                            className="h-2.5 w-2.5 rounded-full shrink-0"
+                            style={{ backgroundColor: folder.color }}
+                            title={folder.name}
+                          />
+                        )}
+                        {p.is_template && (
+                          <Badge variant="outline" className="text-[10px] gap-0.5 px-1.5 py-0 shrink-0">
+                            <Braces className="h-2.5 w-2.5" />
+                            Template
                           </Badge>
-                        ))}
+                        )}
+                        {p.status !== "approved" && (
+                          <Badge
+                            variant={STATUS_BADGE_VARIANT[p.status]}
+                            className="text-[10px] px-1.5 py-0 shrink-0 capitalize"
+                          >
+                            {p.status}
+                          </Badge>
+                        )}
                       </div>
-                    </TableCell>
-                    <TableCell className="text-right tabular-nums">
-                      {p.usage_count || 0}
-                    </TableCell>
-                    <TableCell className="text-right hidden sm:table-cell">
-                      <StarRating
-                        value={avgRating}
-                        userRating={userRatings[p.id]}
-                        onChange={(rating) => handleRate(p.id, rating)}
-                      />
-                    </TableCell>
-                    <TableCell className="text-muted-foreground text-sm hidden lg:table-cell">
-                      {formatDistanceToNow(new Date(p.updated_at), {
-                        addSuffix: true,
-                      })}
-                    </TableCell>
-                    <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8"
+                            className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
                             onClick={(e) => e.stopPropagation()}
                           >
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleCopy(p);
-                            }}
-                          >
-                            <Copy className="mr-2 h-4 w-4" />
-                            Copy
+                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleCopy(p); }}>
+                            <Copy className="mr-2 h-4 w-4" /> Copy
                           </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              openEditPrompt(p);
-                            }}
-                          >
-                            <Pencil className="mr-2 h-4 w-4" />
-                            Edit
+                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); openEditPrompt(p); }}>
+                            <Pencil className="mr-2 h-4 w-4" /> Edit
                           </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDuplicate(p.id);
-                            }}
-                          >
-                            <Files className="mr-2 h-4 w-4" />
-                            Duplicate
+                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleDuplicate(p.id); }}>
+                            <Files className="mr-2 h-4 w-4" /> Duplicate
                           </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDelete(p.id);
-                            }}
-                            className="text-destructive"
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete
+                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleDelete(p.id); }} className="text-destructive">
+                            <Trash2 className="mr-2 h-4 w-4" /> Delete
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
+                    </div>
+
+                    {/* Title */}
+                    <h3 className="font-semibold text-sm truncate mb-1.5">{p.title}</h3>
+
+                    {/* Content preview */}
+                    <p className="text-xs text-muted-foreground line-clamp-3 mb-3 flex-1">
+                      {p.content.slice(0, 150)}
+                      {p.content.length > 150 ? "..." : ""}
+                    </p>
+
+                    {/* Tags */}
+                    {(p.tags || []).length > 0 && (
+                      <div className="flex flex-wrap gap-1 mb-3">
+                        {(p.tags || []).slice(0, 3).map((t) => (
+                          <Badge key={t} variant="secondary" className="text-[10px] px-1.5 py-0">
+                            {t}
+                          </Badge>
+                        ))}
+                        {(p.tags || []).length > 3 && (
+                          <span className="text-[10px] text-muted-foreground">+{(p.tags || []).length - 3}</span>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Footer: uses, rating, updated */}
+                    <div className="flex items-center justify-between border-t border-border/50 pt-2.5 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-3">
+                        <span className="flex items-center gap-1 tabular-nums">
+                          <BarChart3 className="h-3 w-3" />
+                          {p.usage_count || 0}
+                        </span>
+                        <div onClick={(e) => e.stopPropagation()}>
+                          <StarRating
+                            value={avgRating}
+                            userRating={userRatings[p.id]}
+                            onChange={(rating) => handleRate(p.id, rating)}
+                          />
+                        </div>
+                      </div>
+                      <span>
+                        {formatDistanceToNow(new Date(p.updated_at), { addSuffix: true })}
+                      </span>
+                    </div>
+                  </div>
                 );
-              })
-            )}
-          </TableBody>
-        </Table>
-      </div>
+              })}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Pagination */}
       {pageCount > 1 && (

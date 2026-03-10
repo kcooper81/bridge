@@ -101,6 +101,21 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Check if this email belongs to an existing org member
+    const { data: existingMember } = await db
+      .from("profiles")
+      .select("id")
+      .eq("org_id", profile.org_id)
+      .eq("email", email)
+      .single();
+
+    if (existingMember) {
+      return NextResponse.json(
+        { error: "This person is already a member. Add them to a team instead." },
+        { status: 409 }
+      );
+    }
+
     // Check for existing pending invite
     const { data: existingInvite } = await db
       .from("invites")

@@ -84,7 +84,7 @@ function ToolIcon({ tool }: { tool: string }) {
 }
 
 export default function ActivityPage() {
-  const { currentUserRole, noOrg } = useOrg();
+  const { currentUserRole, noOrg, loading: orgLoading } = useOrg();
   const { canAccess } = useSubscription();
   const [logs, setLogs] = useState<ConversationLog[]>([]);
   const [total, setTotal] = useState(0);
@@ -120,6 +120,19 @@ export default function ActivityPage() {
       <>
         <PageHeader title="Activity Log" />
         <NoOrgBanner />
+      </>
+    );
+  }
+
+  if (orgLoading) {
+    return (
+      <>
+        <PageHeader title="Activity Log" />
+        <div className="space-y-3">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className="h-20 rounded-lg bg-muted animate-pulse" />
+          ))}
+        </div>
       </>
     );
   }

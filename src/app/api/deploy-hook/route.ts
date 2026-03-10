@@ -10,11 +10,20 @@ import { submitToIndexNow, getAllSitemapUrls } from "@/lib/seo/indexnow";
  *   https://teamprompt.app/api/deploy-hook?secret=YOUR_DEPLOY_HOOK_SECRET
  */
 export async function POST(request: NextRequest) {
-  // Verify the deploy hook secret to prevent abuse
-  const secret = request.nextUrl.searchParams.get("secret");
   const expectedSecret = process.env.DEPLOY_HOOK_SECRET;
+  if (!expectedSecret) {
+    return NextResponse.json({ error: "Deploy hook not configured" }, { status: 401 });
+  }
 
-  if (!expectedSecret || secret !== expectedSecret) {
+  // Check Authorization header first, fall back to query param
+  const authHeader = request.headers.get("authorization");
+  const headerSecret = authHeader?.startsWith("Bearer ")
+    ? authHeader.replace("Bearer ", "")
+    : null;
+  const querySecret = request.nextUrl.searchParams.get("secret");
+  const providedSecret = headerSecret || querySecret;
+
+  if (providedSecret !== expectedSecret) {
     return NextResponse.json({ error: "Invalid secret" }, { status: 401 });
   }
 

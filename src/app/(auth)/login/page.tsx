@@ -69,19 +69,28 @@ export default function LoginPage() {
   }
 
   async function handleOAuth(provider: "google" | "github") {
-    const callbackUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`;
-    authDebug.log("provider", `OAuth start: ${provider}`, { redirectTo, callbackUrl, origin: window.location.origin }); // AUTH-DEBUG
-    const supabase = createClient();
-    const { data, error: oauthError } = await supabase.auth.signInWithOAuth({
-      provider,
-      options: {
-        redirectTo: callbackUrl,
-      },
-    });
-    authDebug.log("provider", `OAuth response`, { url: data?.url?.slice(0, 200), error: oauthError?.message }); // AUTH-DEBUG
-    if (oauthError) {
-      authDebug.error("provider", `OAuth error: ${provider}`, { message: oauthError.message }); // AUTH-DEBUG
-      setError(oauthError.message);
+    setLoading(true);
+    setError("");
+    try {
+      const callbackUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`;
+      authDebug.log("provider", `OAuth start: ${provider}`, { redirectTo, callbackUrl, origin: window.location.origin }); // AUTH-DEBUG
+      const supabase = createClient();
+      const { data, error: oauthError } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: callbackUrl,
+        },
+      });
+      authDebug.log("provider", `OAuth response`, { url: data?.url?.slice(0, 200), error: oauthError?.message }); // AUTH-DEBUG
+      if (oauthError) {
+        authDebug.error("provider", `OAuth error: ${provider}`, { message: oauthError.message }); // AUTH-DEBUG
+        setError(oauthError.message);
+      }
+    } catch {
+      authDebug.error("provider", `OAuth unexpected error: ${provider}`); // AUTH-DEBUG
+      setError("An unexpected error occurred");
+    } finally {
+      setLoading(false);
     }
   }
 

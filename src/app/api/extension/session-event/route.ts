@@ -14,6 +14,22 @@ export async function POST(request: NextRequest) {
     const rl = await checkRateLimit(limiters.sessionEvent, ip);
     if (!rl.success) return rl.response;
 
+    // Authenticate the request
+    const authHeader = request.headers.get("authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const token = authHeader.replace("Bearer ", "");
+    const db = createServiceClient();
+    const {
+      data: { user },
+      error: authError,
+    } = await db.auth.getUser(token);
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const body = await request.json();
     const { userId, event } = body;
 
@@ -25,7 +41,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid event" }, { status: 400 });
     }
 
-    const db = createServiceClient();
+    // Ensure the authenticated user matches the userId in the request body
+    if (user.id !== userId) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     await db
       .from("profiles")
       .update({ last_extension_active: new Date().toISOString() })

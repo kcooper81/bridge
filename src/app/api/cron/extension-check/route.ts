@@ -12,9 +12,10 @@ const ACTIVE_THRESHOLD_MS = 24 * 60 * 60 * 1000;
 const ALERT_COOLDOWN_MS = 7 * 24 * 60 * 60 * 1000;
 
 export async function GET(request: NextRequest) {
-  // Verify cron secret
+  // Verify cron secret — if CRON_SECRET is not set, reject all requests
+  // to prevent unauthenticated access when the env var is missing.
   const authHeader = request.headers.get("authorization");
-  if (CRON_SECRET && authHeader !== `Bearer ${CRON_SECRET}`) {
+  if (!CRON_SECRET || authHeader !== `Bearer ${CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

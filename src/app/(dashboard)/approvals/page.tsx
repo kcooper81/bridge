@@ -98,9 +98,8 @@ export default function ApprovalsPage() {
       setSuggestions((suggestionsRes.data as unknown as RuleSuggestion[]) || []);
     } catch (err) {
       console.error("Failed to load approvals:", err);
-    } finally {
-      setLoading(false);
     }
+    setLoading(false);
   }, [org]);
 
   useEffect(() => {
@@ -223,6 +222,19 @@ export default function ApprovalsPage() {
     );
   }
 
+  if (loading) {
+    return (
+      <>
+        <PageHeader title="Approvals" description="Review pending prompts and rule suggestions" />
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-16 rounded-lg bg-muted animate-pulse" />
+          ))}
+        </div>
+      </>
+    );
+  }
+
   if (!canEdit) {
     return (
       <>
@@ -233,19 +245,6 @@ export default function ApprovalsPage() {
           <p className="text-sm text-muted-foreground mt-1">
             Only admins and managers can review approvals.
           </p>
-        </div>
-      </>
-    );
-  }
-
-  if (loading) {
-    return (
-      <>
-        <PageHeader title="Approvals" description="Review pending prompts and rule suggestions" />
-        <div className="space-y-4">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="h-16 rounded-lg bg-muted animate-pulse" />
-          ))}
         </div>
       </>
     );

@@ -192,8 +192,20 @@ export async function POST(request: NextRequest) {
         "TeamPrompt <noreply@teamprompt.app>";
 
       const inviteUrl = `${siteUrl}/invite?token=${invite.token}`;
-      const senderName = profile.name || "A team member";
-      const orgName = org?.name || "their team";
+      const rawSenderName = profile.name || "A team member";
+      const rawOrgName = org?.name || "their team";
+
+      // Escape HTML entities to prevent injection via user-controlled names
+      const escapeHtml = (str: string) =>
+        str
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+
+      const senderName = escapeHtml(rawSenderName);
+      const orgName = escapeHtml(rawOrgName);
 
       // Build optional welcome message block
       const rawWelcome = org?.settings?.invite_welcome_message;
@@ -204,7 +216,7 @@ export async function POST(request: NextRequest) {
       await resend.emails.send({
         from: fromEmail,
         to: email,
-        subject: `You're invited to join ${orgName} on TeamPrompt`,
+        subject: `You're invited to join ${rawOrgName} on TeamPrompt`,
         html: buildEmail({
           heading: "You've been invited!",
           body: `

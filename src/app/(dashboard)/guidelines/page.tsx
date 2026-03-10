@@ -134,6 +134,7 @@ export default function GuidelinesPage() {
   }
 
   async function handleToggleEnforced(g: Guideline) {
+    if (!canEdit) return;
     try {
       await saveGuidelineApi({ id: g.id, enforced: !g.enforced, name: g.name, rules: g.rules });
       refresh();

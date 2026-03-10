@@ -62,7 +62,8 @@ export async function middleware(request: NextRequest) {
   authDebug.log("middleware", "user resolved", user ? { id: user.id, email: user.email } : null);
 
   // Authenticated users on auth pages → redirect to home
-  if (user && isAuthRoute(pathname)) {
+  // Exception: allow /reset-password so recovery token exchange can complete
+  if (user && isAuthRoute(pathname) && pathname !== "/reset-password") {
     authDebug.log("middleware", "redirect: auth page → /home (user is authenticated)");
     const url = request.nextUrl.clone();
     url.pathname = "/home";
@@ -90,7 +91,7 @@ export async function middleware(request: NextRequest) {
     !isAuthRoute(pathname) &&
     !pathname.startsWith("/api/") &&
     !pathname.startsWith("/auth/") &&
-    !pathname.startsWith("/invite") &&
+    pathname !== "/invite" &&
     !pathname.startsWith("/extension/")
   ) {
     const fullPath = pathname + request.nextUrl.search;
@@ -116,7 +117,7 @@ export async function middleware(request: NextRequest) {
     authDebug.log("middleware", "redirect: AAL1 → /verify-mfa (MFA required)");
     const url = request.nextUrl.clone();
     url.pathname = "/verify-mfa";
-    url.searchParams.set("redirect", pathname);
+    url.searchParams.set("redirect", pathname + request.nextUrl.search);
     const resp = NextResponse.redirect(url);
     authDebug.attachToResponse(resp);
     return resp;

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { PLAN_LIMITS } from "@/lib/constants";
+import { limiters, checkRateLimit } from "@/lib/rate-limit";
 import type { BulkImportRow, PlanTier, UserRole } from "@/lib/types";
 
 const MAX_USERS = 2000;
@@ -43,6 +44,9 @@ export async function POST(request: NextRequest) {
     if (authError || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    const rl = await checkRateLimit(limiters.googleSync, user.id);
+    if (!rl.success) return rl.response;
 
     const { data: profile } = await db
       .from("profiles")

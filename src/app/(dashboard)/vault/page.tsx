@@ -307,10 +307,17 @@ export default function VaultPage() {
     if (selectedIds.size === 0) return;
     setBulkLoading(true);
     try {
-      for (const id of Array.from(selectedIds)) {
-        await updatePrompt(id, { status: newStatus });
+      const results = await Promise.allSettled(
+        Array.from(selectedIds).map((id) => updatePrompt(id, { status: newStatus }))
+      );
+      const failed = results.filter((r) => r.status === "rejected").length;
+      if (failed === 0) {
+        toast.success(`${selectedIds.size} prompt(s) updated to ${newStatus}`);
+      } else if (failed < selectedIds.size) {
+        toast.warning(`${selectedIds.size - failed} prompt(s) updated, ${failed} failed`);
+      } else {
+        toast.error("Failed to update prompts");
       }
-      toast.success(`${selectedIds.size} prompt(s) updated to ${newStatus}`);
       setSelectedIds(new Set());
       refresh();
     } catch {
@@ -325,10 +332,17 @@ export default function VaultPage() {
     if (!confirm(`Delete ${selectedIds.size} prompt(s)? This cannot be undone.`)) return;
     setBulkLoading(true);
     try {
-      for (const id of Array.from(selectedIds)) {
-        await deletePrompt(id);
+      const results = await Promise.allSettled(
+        Array.from(selectedIds).map((id) => deletePrompt(id))
+      );
+      const failed = results.filter((r) => r.status === "rejected").length;
+      if (failed === 0) {
+        toast.success(`${selectedIds.size} prompt(s) deleted`);
+      } else if (failed < selectedIds.size) {
+        toast.warning(`${selectedIds.size - failed} prompt(s) deleted, ${failed} failed`);
+      } else {
+        toast.error("Failed to delete prompts");
       }
-      toast.success(`${selectedIds.size} prompt(s) deleted`);
       setSelectedIds(new Set());
       refresh();
     } catch {
@@ -957,10 +971,12 @@ export default function VaultPage() {
                 </SelectContent>
               </Select>
             </div>
-            <span>
-              {page * vaultPageSize + 1}–{Math.min((page + 1) * vaultPageSize, filtered.length)} of{" "}
-              {filtered.length}
-            </span>
+            {filtered.length > 0 && (
+              <span>
+                {page * vaultPageSize + 1}–{Math.min((page + 1) * vaultPageSize, filtered.length)} of{" "}
+                {filtered.length}
+              </span>
+            )}
           </div>
           {pageCount > 1 && (
             <div className="flex gap-2">

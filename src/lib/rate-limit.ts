@@ -44,6 +44,11 @@ export const limiters = {
   stripeWebhook: createLimiter(200, "1 m", "stripe-webhook"),
   sessionEvent: createLimiter(5, "1 m", "session-event"),
   extensionEmail: createLimiter(5, "1 m", "extension-email"),
+  profileEmail: createLimiter(5, "10 m", "profile-email"),
+  avatarUpload: createLimiter(10, "10 m", "avatar-upload"),
+  domainJoin: createLimiter(5, "1 m", "domain-join"),
+  favorite: createLimiter(30, "1 m", "favorite"),
+  googleSync: createLimiter(5, "1 m", "google-sync"),
 };
 
 export async function checkRateLimit(

@@ -26,8 +26,9 @@ export default function VerifyMfaPage() {
       const { data } = await supabase.auth.mfa.listFactors();
       const totp = data?.totp?.find((f) => f.status === "verified");
       if (!totp) {
-        // No verified factor — shouldn't be here
-        window.location.href = redirectTo;
+        // No verified TOTP factor — redirect to settings to set one up
+        // (redirecting to a protected route would loop back here via middleware)
+        window.location.href = "/home?error=no_mfa_factor";
         return;
       }
       setFactorId(totp.id);

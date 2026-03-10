@@ -1,6 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
+import { limiters, checkRateLimit } from "@/lib/rate-limit";
 
+/**
+ * POST /api/profile/email — Change email for self or (admin) another member.
+ *
+ * Security tradeoff: When an admin changes another member's email, no
+ * confirmation email is sent to the old address. This is by design for
+ * admin management workflows (e.g., employee offboarding, domain changes).
+ * The admin role is the trust boundary here — only admins can change
+ * other members' emails, and they cannot change other admins' emails.
+ */
 export async function POST(request: NextRequest) {
   try {
     const authHeader = request.headers.get("authorization");
@@ -17,6 +27,10 @@ export async function POST(request: NextRequest) {
     if (authError || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    // Rate limit by user ID to prevent email enumeration
+    const rl = await checkRateLimit(limiters.profileEmail, user.id);
+    if (!rl.success) return rl.response;
 
     const body = await request.json();
     const { email, targetUserId } = body as {

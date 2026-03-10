@@ -130,6 +130,9 @@ export async function POST(request: NextRequest) {
       (existingTeams || []).map((t) => [t.name.toLowerCase(), t.id])
     );
 
+    const MAX_NEW_TEAMS = 20;
+    let newTeamsCreated = 0;
+
     const result: BulkImportResult = {
       invited: [],
       skipped: [],
@@ -194,7 +197,11 @@ export async function POST(request: NextRequest) {
         if (existing) {
           resolvedTeamIds.push(existing);
         } else {
-          // Auto-create team
+          // Auto-create team (capped to prevent abuse)
+          if (newTeamsCreated >= MAX_NEW_TEAMS) {
+            // Skip this team — cap reached
+            continue;
+          }
           const { data: newTeam, error: teamError } = await db
             .from("teams")
             .insert({
@@ -212,6 +219,7 @@ export async function POST(request: NextRequest) {
           teamNameMap.set(trimmed.toLowerCase(), newTeam.id);
           resolvedTeamIds.push(newTeam.id);
           result.teamsCreated.push(newTeam.name);
+          newTeamsCreated++;
         }
       }
 

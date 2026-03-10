@@ -31,9 +31,10 @@ export default function ResetPasswordPage() {
     );
 
     // Give the hash-based auth state change time to process
+    // Use a generous timeout to account for slow networks
     const timeout = setTimeout(() => {
       setSessionValid((prev) => (prev === null ? false : prev));
-    }, 3000);
+    }, 10000);
 
     return () => {
       subscription.unsubscribe();

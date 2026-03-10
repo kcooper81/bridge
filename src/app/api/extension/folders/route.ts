@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
     if (folderIds.length > 0) {
       const { data: counts } = await db
         .from("prompts")
-        .select("folder_id")
+        .select("id, folder_id")
         .eq("org_id", profile.org_id)
         .eq("status", "approved")
         .in("folder_id", folderIds);

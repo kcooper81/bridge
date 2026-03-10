@@ -29,15 +29,24 @@ export async function POST(
       return NextResponse.json({ error: "No organization" }, { status: 400 });
     }
 
+    // Only admins and managers can install template packs
+    if (!["admin", "manager"].includes(profile.role)) {
+      return NextResponse.json(
+        { error: "Only admins and managers can install template packs" },
+        { status: 403 }
+      );
+    }
+
     const { packId } = params;
     const body = await request.json().catch(() => ({}));
     const folderId = body.folderId || null;
 
-    // Fetch the pack and verify it exists
+    // Fetch the pack and verify it exists AND belongs to the user's org
     const { data: pack } = await db
       .from("template_packs")
       .select("*")
       .eq("id", packId)
+      .eq("org_id", profile.org_id)
       .single();
 
     if (!pack) {

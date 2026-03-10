@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
+import { limiters, checkRateLimit } from "@/lib/rate-limit";
 
 const MAX_SIZE = 2 * 1024 * 1024; // 2 MB
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
@@ -20,6 +21,10 @@ export async function POST(request: NextRequest) {
     if (authError || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    // Rate limit avatar uploads per user
+    const rl = await checkRateLimit(limiters.avatarUpload, user.id);
+    if (!rl.success) return rl.response;
 
     const formData = await request.formData();
     const file = formData.get("file") as File | null;

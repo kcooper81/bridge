@@ -22,17 +22,28 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Decode user ID from state
+    // Decode user ID and nonce from state
     let userId: string;
+    let nonce: string;
     try {
       const decoded = JSON.parse(
         Buffer.from(state, "base64url").toString("utf-8")
       );
       userId = decoded.userId;
+      nonce = decoded.nonce;
       if (!userId) throw new Error("No userId in state");
+      if (!nonce) throw new Error("No nonce in state");
     } catch {
       return NextResponse.redirect(
         `${siteUrl}/settings/integrations?error=invalid_state`
+      );
+    }
+
+    // Validate CSRF nonce against the cookie set during the connect step
+    const cookieNonce = request.cookies.get("google_oauth_nonce")?.value;
+    if (!cookieNonce || cookieNonce !== nonce) {
+      return NextResponse.redirect(
+        `${siteUrl}/settings/integrations?error=invalid_nonce`
       );
     }
 
@@ -126,9 +137,12 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    return NextResponse.redirect(
+    const response = NextResponse.redirect(
       `${siteUrl}/settings/integrations?connected=google`
     );
+    // Clear the nonce cookie after successful use
+    response.cookies.delete("google_oauth_nonce");
+    return response;
   } catch (error) {
     console.error("Google callback error:", error);
     return NextResponse.redirect(

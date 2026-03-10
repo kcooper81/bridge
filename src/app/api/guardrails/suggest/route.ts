@@ -50,6 +50,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const VALID_CATEGORIES = ["api_keys", "credentials", "pii", "secrets", "internal_terms", "internal", "financial", "health", "custom"];
+    if (category && !VALID_CATEGORIES.includes(category)) {
+      return NextResponse.json(
+        { error: `category must be one of: ${VALID_CATEGORIES.join(", ")}` },
+        { status: 400 }
+      );
+    }
+
     const db = createServiceClient();
 
     // Get the user's first team (if any) to auto-associate

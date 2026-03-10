@@ -247,7 +247,7 @@ export default function TeamPage() {
     getInvites().then(setInvites).catch(() => {});
   }, []);
 
-  const pendingInvites = invites.filter((i) => i.status === "pending");
+  const pendingInvites = useMemo(() => invites.filter((i) => i.status === "pending"), [invites]);
 
   // Filtered pending invites (match search, role, and team filters)
   const filteredInvites = useMemo(() => {
@@ -632,9 +632,13 @@ export default function TeamPage() {
       // No members — just confirm and delete
       if (!confirm(`Delete "${team.name}"? This cannot be undone.`)) return;
       (async () => {
-        const ok = await deleteTeamApi(team.id);
-        if (ok) { toast.success("Team deleted"); setSelectedTeam(null); await refresh(); }
-        else toast.error("Failed to delete team");
+        try {
+          const ok = await deleteTeamApi(team.id);
+          if (ok) { toast.success("Team deleted"); setSelectedTeam(null); await refresh(); }
+          else toast.error("Failed to delete team");
+        } catch {
+          toast.error("Failed to delete team");
+        }
       })();
     } else {
       // Has members — show dialog with reassignment options

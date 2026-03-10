@@ -231,9 +231,8 @@ export default function GuardrailsPage() {
       setTeams(teamsRes.data || []);
     } catch (err) {
       console.error("Failed to load guardrails data:", err);
-    } finally {
-      setDataLoading(false);
     }
+    setDataLoading(false);
   }, [org]);
 
   useEffect(() => {
@@ -395,6 +394,7 @@ export default function GuardrailsPage() {
   }
 
   async function handleAiModalOpen() {
+    if (!org) return;
     setAiModalOpen(true);
     setAiRules([]);
     setAiError("");
@@ -406,7 +406,7 @@ export default function GuardrailsPage() {
       const { data: orgData } = await supabase
         .from("organizations")
         .select("security_settings")
-        .eq("id", org!.id)
+        .eq("id", org.id)
         .single();
       const s = orgData?.security_settings || {};
       const hasKey = (s.ai_detection_provider === "openai" || s.ai_detection_provider === "anthropic") && !!s.ai_api_key;

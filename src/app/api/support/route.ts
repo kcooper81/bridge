@@ -40,9 +40,33 @@ export async function POST(request: NextRequest) {
 
     const db = createServiceClient();
 
+    // Validate screenshots: limit count and total size
+    const MAX_SCREENSHOTS = 5;
+    const MAX_TOTAL_SCREENSHOT_SIZE = 10 * 1024 * 1024; // 10 MB total
+    const screenshotList = Array.isArray(screenshots) ? screenshots : [];
+
+    if (screenshotList.length > MAX_SCREENSHOTS) {
+      return NextResponse.json(
+        { error: `Too many screenshots. Maximum is ${MAX_SCREENSHOTS}.` },
+        { status: 400 }
+      );
+    }
+
+    let totalScreenshotSize = 0;
+    for (const s of screenshotList) {
+      if (s?.dataUrl && typeof s.dataUrl === "string") {
+        totalScreenshotSize += s.dataUrl.length;
+      }
+    }
+    if (totalScreenshotSize > MAX_TOTAL_SCREENSHOT_SIZE) {
+      return NextResponse.json(
+        { error: "Screenshots are too large. Please reduce file sizes and try again." },
+        { status: 400 }
+      );
+    }
+
     // Build message body — append screenshot data URLs if provided
     let cleanMessage = message;
-    const screenshotList = Array.isArray(screenshots) ? screenshots : [];
     if (screenshotList.length > 0) {
       cleanMessage += `\n\n--- Screenshots (${screenshotList.length}) ---`;
       for (const s of screenshotList) {

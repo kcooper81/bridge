@@ -224,7 +224,7 @@ export async function GET(request: NextRequest) {
 
     // Server-side search — use parameterized filters (not string interpolation)
     if (query) {
-      const sanitized = query.replace(/[%_]/g, "\\$&");
+      const sanitized = query.replace(/[%_,.*()]/g, "\\$&");
       const pattern = `%${sanitized}%`;
       q = q.or(`title.ilike.${pattern},description.ilike.${pattern}`);
     }

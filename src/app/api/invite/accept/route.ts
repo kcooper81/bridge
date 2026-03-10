@@ -78,10 +78,18 @@ export async function POST(request: NextRequest) {
 
     if (existingProfile?.org_id && existingProfile.org_id !== invite.org_id) {
       // Check if user is the sole member of their current org (auto-created personal org)
-      const { count } = await db
-        .from("profiles")
-        .select("id", { count: "exact", head: true })
-        .eq("org_id", existingProfile.org_id);
+      const [{ count }, { data: userOrgProfile }] = await Promise.all([
+        db
+          .from("profiles")
+          .select("id", { count: "exact", head: true })
+          .eq("org_id", existingProfile.org_id),
+        db
+          .from("profiles")
+          .select("role")
+          .eq("id", user.id)
+          .eq("org_id", existingProfile.org_id)
+          .single(),
+      ]);
 
       if (count && count > 1) {
         // Other members exist — can't silently abandon this org
@@ -89,6 +97,17 @@ export async function POST(request: NextRequest) {
           {
             error:
               "You already belong to an organization with other members. Please leave your current organization before accepting this invite.",
+          },
+          { status: 409 }
+        );
+      }
+
+      // Verify user is admin of the old org before deleting it
+      if (!userOrgProfile || userOrgProfile.role !== "admin") {
+        return NextResponse.json(
+          {
+            error:
+              "You are not the admin of your current organization. Please leave your current organization before accepting this invite.",
           },
           { status: 409 }
         );

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { PLAN_LIMITS } from "@/lib/constants";
+import { limiters, checkRateLimit } from "@/lib/rate-limit";
 import type { PlanTier } from "@/lib/types";
 
 const FREE_PROVIDERS = new Set([
@@ -33,6 +34,15 @@ export async function POST(request: NextRequest) {
     } = await db.auth.getUser(token);
     if (authError || !user) {
       return NextResponse.json({ joined: false }, { status: 401 });
+    }
+
+    // Rate limit
+    const rl = await checkRateLimit(limiters.domainJoin, user.id);
+    if (!rl.success) return rl.response;
+
+    // Verify email is confirmed before allowing domain join
+    if (!user.email_confirmed_at) {
+      return NextResponse.json({ joined: false, error: "Email not verified" }, { status: 403 });
     }
 
     // Get user profile + email domain

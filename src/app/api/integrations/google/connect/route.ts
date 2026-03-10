@@ -85,9 +85,20 @@ export async function GET(request: NextRequest) {
       state,
     });
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       url: `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`,
     });
+
+    // Set nonce in httpOnly cookie so the callback can validate it (CSRF protection)
+    response.cookies.set("google_oauth_nonce", nonce, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "lax",
+      path: "/api/integrations/google/callback",
+      maxAge: 600, // 10 minutes
+    });
+
+    return response;
   } catch (error) {
     console.error("Google connect error:", error);
     return NextResponse.json(

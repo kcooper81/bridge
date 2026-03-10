@@ -169,7 +169,7 @@ export async function POST(request: NextRequest) {
 
         if (cancelSubError) {
           console.error("Webhook customer.subscription.deleted: failed to update subscription", { orgId, error: cancelSubError });
-          return NextResponse.json({ error: "Database error" }, { status: 500 });
+          return NextResponse.json({ error: "Database error", received: true }, { status: 200 });
         }
 
         const { error: cancelOrgError } = await db
@@ -179,7 +179,7 @@ export async function POST(request: NextRequest) {
 
         if (cancelOrgError) {
           console.error("Webhook customer.subscription.deleted: failed to update organization", { orgId, error: cancelOrgError });
-          return NextResponse.json({ error: "Database error" }, { status: 500 });
+          return NextResponse.json({ error: "Database error", received: true }, { status: 200 });
         }
         break;
       }
@@ -200,7 +200,7 @@ export async function POST(request: NextRequest) {
 
         if (invoicePaidError) {
           console.error("Webhook invoice.paid: failed to update subscription", { subId, error: invoicePaidError });
-          return NextResponse.json({ error: "Database error" }, { status: 500 });
+          return NextResponse.json({ error: "Database error", received: true }, { status: 200 });
         }
         break;
       }
@@ -221,7 +221,7 @@ export async function POST(request: NextRequest) {
 
         if (paymentFailedError) {
           console.error("Webhook invoice.payment_failed: failed to update subscription", { subId, error: paymentFailedError });
-          return NextResponse.json({ error: "Database error" }, { status: 500 });
+          return NextResponse.json({ error: "Database error", received: true }, { status: 200 });
         }
         break;
       }
@@ -243,7 +243,7 @@ export async function POST(request: NextRequest) {
 
         if (trialEndError) {
           console.error("Webhook customer.subscription.trial_will_end: failed to update subscription", { orgId, error: trialEndError });
-          return NextResponse.json({ error: "Database error" }, { status: 500 });
+          return NextResponse.json({ error: "Database error", received: true }, { status: 200 });
         }
         break;
       }
@@ -266,7 +266,7 @@ export async function POST(request: NextRequest) {
 
         if (pauseError) {
           console.error("Webhook customer.subscription.paused: failed to update subscription", { orgId, error: pauseError });
-          return NextResponse.json({ error: "Database error" }, { status: 500 });
+          return NextResponse.json({ error: "Database error", received: true }, { status: 200 });
         }
         break;
       }
@@ -310,7 +310,7 @@ export async function POST(request: NextRequest) {
 
         if (disputeUpdateError) {
           console.error(`Webhook ${event.type}: failed to update subscription dispute status`, { subId, error: disputeUpdateError });
-          return NextResponse.json({ error: "Database error" }, { status: 500 });
+          return NextResponse.json({ error: "Database error", received: true }, { status: 200 });
         }
         break;
       }
@@ -336,7 +336,7 @@ export async function POST(request: NextRequest) {
 
         if (disputeCloseError) {
           console.error("Webhook charge.dispute.closed: failed to update subscription dispute status", { subId, error: disputeCloseError });
-          return NextResponse.json({ error: "Database error" }, { status: 500 });
+          return NextResponse.json({ error: "Database error", received: true }, { status: 200 });
         }
         break;
       }
@@ -344,10 +344,12 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ received: true });
   } catch (error) {
+    // Log the error but return 200 to prevent Stripe from retrying indefinitely.
+    // Signature verification failures are already handled above with proper 400 status.
     console.error("Webhook handler error:", error);
     return NextResponse.json(
-      { error: "Webhook handler failed" },
-      { status: 500 }
+      { error: "Webhook handler failed", received: true },
+      { status: 200 }
     );
   }
 }

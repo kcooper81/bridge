@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { limiters, checkRateLimit } from "@/lib/rate-limit";
+import Stripe from "stripe";
 
 export async function POST(request: NextRequest) {
   try {
@@ -59,8 +60,38 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // Sole org member — delete the entire org (CASCADE)
+      // Sole org member — cancel Stripe subscription and delete the entire org (CASCADE)
       if ((memberCount || 0) <= 1) {
+        // Cancel any active Stripe subscriptions before deleting the org
+        if (process.env.STRIPE_SECRET_KEY) {
+          const { data: subscription } = await db
+            .from("subscriptions")
+            .select("stripe_subscription_id, status")
+            .eq("org_id", profile.org_id)
+            .single();
+
+          if (
+            subscription?.stripe_subscription_id &&
+            subscription.status !== "canceled"
+          ) {
+            try {
+              const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+                apiVersion: "2025-02-24.acacia",
+              });
+              await stripe.subscriptions.cancel(
+                subscription.stripe_subscription_id
+              );
+            } catch (stripeError) {
+              console.error(
+                "Failed to cancel Stripe subscription during account deletion:",
+                stripeError
+              );
+              // Continue with deletion — the subscription will be orphaned but
+              // Stripe will eventually cancel it when invoices fail.
+            }
+          }
+        }
+
         await db
           .from("organizations")
           .delete()

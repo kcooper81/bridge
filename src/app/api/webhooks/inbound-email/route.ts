@@ -153,6 +153,23 @@ function htmlToText(html: string): string {
 
 export async function POST(request: NextRequest) {
   try {
+    // Verify webhook authenticity via shared secret.
+    // Resend inbound webhooks don't use Svix signatures, so we use a shared secret
+    // passed as a query parameter or Authorization header.
+    const webhookSecret = process.env.INBOUND_WEBHOOK_SECRET;
+    if (webhookSecret) {
+      const authHeader = request.headers.get("authorization");
+      const querySecret = new URL(request.url).searchParams.get("secret");
+      const providedSecret = authHeader?.replace("Bearer ", "") || querySecret;
+      if (providedSecret !== webhookSecret) {
+        return NextResponse.json({ error: "Invalid webhook secret" }, { status: 401 });
+      }
+    } else {
+      // If no webhook secret is configured, log a warning but still process.
+      // In production, INBOUND_WEBHOOK_SECRET should always be set.
+      console.warn("INBOUND_WEBHOOK_SECRET is not set — webhook endpoint is unprotected");
+    }
+
     const raw = await request.json();
 
     console.log("Inbound email webhook received:", {

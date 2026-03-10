@@ -58,6 +58,8 @@ export default function InvitePage() {
           role: invite.role || "member",
           invitedBy: inviterData?.name || "A team member",
         });
+      } else {
+        setError("This invite link is invalid or has already been used.");
       }
 
       setChecking(false);
@@ -72,19 +74,21 @@ export default function InvitePage() {
     try {
       const supabase = createClient();
       const {
-        data: { session },
-      } = await supabase.auth.getSession();
+        data: { user: currentUser },
+      } = await supabase.auth.getUser();
 
-      if (!session) {
+      if (!currentUser) {
         setError("Not authenticated");
         return;
       }
+
+      const { data: { session } } = await supabase.auth.getSession();
 
       const res = await fetch("/api/invite/accept", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${session.access_token}`,
+          Authorization: `Bearer ${session?.access_token}`,
         },
         body: JSON.stringify({ token }),
       });
@@ -155,7 +159,7 @@ export default function InvitePage() {
         <Button variant="outline" onClick={() => router.push("/")}>
           Decline
         </Button>
-        <Button onClick={handleAccept} disabled={loading}>
+        <Button onClick={handleAccept} disabled={loading || !inviteDetails}>
           {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Accept Invite
         </Button>

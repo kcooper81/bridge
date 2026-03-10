@@ -44,12 +44,12 @@ export default function SignupPage() {
         return;
       }
 
-      // Supabase returns empty identities when the email already exists
+      // Supabase returns empty identities when the email already exists.
+      // Show a generic message to prevent email enumeration.
       if (data.user && data.user.identities?.length === 0) {
         authDebug.warn("signup", "duplicate email detected", { email }); // AUTH-DEBUG
-        setError(
-          "An account with this email already exists. Please sign in instead."
-        );
+        // Don't reveal that the email exists — show the same success state
+        setSuccess(true);
         return;
       }
 
@@ -69,21 +69,30 @@ export default function SignupPage() {
   }
 
   async function handleOAuth(provider: "google" | "github") {
-    authDebug.log("provider", `OAuth start from signup: ${provider}`); // AUTH-DEBUG
-    if (plan) {
-      sessionStorage.setItem("pending_plan", plan);
-    }
-    trackSignUp(provider);
-    const supabase = createClient();
-    const { error: oauthError } = await supabase.auth.signInWithOAuth({
-      provider,
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
-    if (oauthError) {
-      authDebug.error("provider", `OAuth error from signup: ${provider}`, { message: oauthError.message }); // AUTH-DEBUG
-      setError(oauthError.message);
+    setLoading(true);
+    setError("");
+    try {
+      authDebug.log("provider", `OAuth start from signup: ${provider}`); // AUTH-DEBUG
+      if (plan) {
+        sessionStorage.setItem("pending_plan", plan);
+      }
+      trackSignUp(provider);
+      const supabase = createClient();
+      const { error: oauthError } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+      if (oauthError) {
+        authDebug.error("provider", `OAuth error from signup: ${provider}`, { message: oauthError.message }); // AUTH-DEBUG
+        setError(oauthError.message);
+      }
+    } catch {
+      authDebug.error("provider", `OAuth unexpected error from signup: ${provider}`); // AUTH-DEBUG
+      setError("An unexpected error occurred");
+    } finally {
+      setLoading(false);
     }
   }
 

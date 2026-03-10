@@ -20,13 +20,14 @@ export default function DashboardHomePage() {
   const [analyticsLoading, setAnalyticsLoading] = useState(true);
 
   useEffect(() => {
+    if (loading || noOrg) return;
     getAnalytics()
       .then(setAnalytics)
       .catch((err) => {
         console.error("Failed to load analytics:", err);
       })
       .finally(() => setAnalyticsLoading(false));
-  }, []);
+  }, [loading, noOrg]);
 
   // Consume pending plan selection from signup/login flow
   useEffect(() => {

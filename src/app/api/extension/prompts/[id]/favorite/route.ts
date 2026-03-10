@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { handleOptions, withCors } from "../../../cors";
+import { limiters, checkRateLimit } from "@/lib/rate-limit";
 
 export async function OPTIONS(request: NextRequest) { return handleOptions(request); }
 
@@ -26,6 +27,9 @@ export async function PATCH(
     if (authError || !user) {
       return withCors(NextResponse.json({ error: "Unauthorized" }, { status: 401 }), request);
     }
+
+    const rl = await checkRateLimit(limiters.favorite, user.id);
+    if (!rl.success) return withCors(rl.response, request);
 
     // Get user's org
     const { data: profile } = await db

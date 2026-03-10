@@ -79,48 +79,66 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Perform atomic transfer: promote target, demote current user
+  // Perform transfer: promote target, demote current user
   const now = new Date().toISOString();
 
-  const { error: promoteError } = await db
-    .from("profiles")
-    .update({ role: "admin", updated_at: now })
-    .eq("id", target_user_id);
-
-  if (promoteError) {
-    console.error("Transfer admin promote error:", promoteError);
-    return NextResponse.json(
-      { error: "Failed to promote target user" },
-      { status: 500 }
-    );
-  }
-
-  const { error: demoteError } = await db
-    .from("profiles")
-    .update({ role: new_role, updated_at: now })
-    .eq("id", user.id);
-
-  if (demoteError) {
-    // Rollback: demote target back
-    await db
+  try {
+    const { error: promoteError } = await db
       .from("profiles")
-      .update({ role: targetProfile.role, updated_at: now })
+      .update({ role: "admin", updated_at: now })
       .eq("id", target_user_id);
 
-    console.error("Transfer admin demote error:", demoteError);
+    if (promoteError) {
+      console.error("Transfer admin promote error:", promoteError);
+      return NextResponse.json(
+        { error: "Failed to promote target user" },
+        { status: 500 }
+      );
+    }
+
+    const { error: demoteError } = await db
+      .from("profiles")
+      .update({ role: new_role, updated_at: now })
+      .eq("id", user.id);
+
+    if (demoteError) {
+      // Rollback: revert target back to their original role
+      await db
+        .from("profiles")
+        .update({ role: targetProfile.role, updated_at: now })
+        .eq("id", target_user_id);
+
+      console.error("Transfer admin demote error:", demoteError);
+      return NextResponse.json(
+        { error: "Failed to demote current admin. Transfer has been rolled back." },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      new_admin: {
+        id: targetProfile.id,
+        name: targetProfile.name,
+        email: targetProfile.email,
+      },
+      your_new_role: new_role,
+    });
+  } catch (error) {
+    // If an unexpected error occurs after promote but before demote completes,
+    // attempt to rollback the target's role to their original role.
+    console.error("Transfer admin unexpected error:", error);
+    try {
+      await db
+        .from("profiles")
+        .update({ role: targetProfile.role, updated_at: now })
+        .eq("id", target_user_id);
+    } catch (rollbackError) {
+      console.error("Transfer admin rollback also failed:", rollbackError);
+    }
     return NextResponse.json(
-      { error: "Failed to demote current admin" },
+      { error: "Transfer failed. Please verify roles and try again." },
       { status: 500 }
     );
   }
-
-  return NextResponse.json({
-    success: true,
-    new_admin: {
-      id: targetProfile.id,
-      name: targetProfile.name,
-      email: targetProfile.email,
-    },
-    your_new_role: new_role,
-  });
 }

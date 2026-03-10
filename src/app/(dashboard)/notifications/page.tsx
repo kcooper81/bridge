@@ -216,7 +216,7 @@ export default function NotificationsPage() {
                   onClick={(e) => {
                     // Don't mark as read if user clicked a button inside (stopPropagation already handled)
                     if ((e.target as HTMLElement).closest("button")) return;
-                    if (!notification.read) markRead(notification.id);
+                    if (!notification.read) void markRead(notification.id);
                   }}
                 >
                   {content}

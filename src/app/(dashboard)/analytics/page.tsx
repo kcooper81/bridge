@@ -104,7 +104,8 @@ export default function AnalyticsPage() {
   }
 
   const teamNames = new Map(teams.map((t) => [t.id, t.name]));
-  const maxTeamUsage = Math.max(...Object.values(analytics.teamUsage), 1);
+  const teamUsageValues = analytics.teamUsage ? Object.values(analytics.teamUsage) : [];
+  const maxTeamUsage = teamUsageValues.length > 0 ? Math.max(...teamUsageValues, 1) : 1;
 
   // Week-over-week trend
   const weekTrend =

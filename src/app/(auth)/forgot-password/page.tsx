@@ -25,11 +25,18 @@ export default function ForgotPasswordPage() {
         redirectTo: `${window.location.origin}/auth/callback?next=/reset-password`,
       });
 
-      // Show rate limit errors to the user; otherwise always show success
-      // to prevent email enumeration
-      if (resetError && resetError.status === 429) {
-        setError("Too many requests. Please try again later.");
-        return;
+      if (resetError) {
+        // Show rate limit errors to the user
+        if (resetError.status === 429) {
+          setError("Too many requests. Please try again later.");
+          return;
+        }
+        // Server errors (5xx) — show a generic failure message
+        if (resetError.status && resetError.status >= 500) {
+          setError("Something went wrong. Please try again later.");
+          return;
+        }
+        // Client errors (4xx except 429) — show success to prevent email enumeration
       }
 
       setSent(true);

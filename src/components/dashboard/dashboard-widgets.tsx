@@ -6,6 +6,7 @@ import { StatCard } from "@/components/dashboard/stat-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
+  AlertTriangle,
   Archive,
   BarChart3,
   BookOpen,
@@ -15,6 +16,7 @@ import {
   TrendingUp,
   Users,
 } from "lucide-react";
+import { getExtensionStatus } from "@/lib/extension-status";
 import { formatDistanceToNow } from "date-fns";
 import type { Analytics } from "@/lib/types";
 import type { PromptStatus } from "@/lib/types";
@@ -76,8 +78,36 @@ export function DashboardWidgets({ analytics, loading }: DashboardWidgetsProps) 
   const dailyUsage = analytics?.dailyUsage?.slice(-14) || [];
   const maxDaily = Math.max(...dailyUsage.map((d) => d.count), 1);
 
+  const inactiveExtensions = canSeeAll
+    ? members.filter((m) => getExtensionStatus(m.last_extension_active) === "inactive")
+    : [];
+
   return (
     <div className="space-y-6">
+      {/* Inactive extension alert */}
+      {inactiveExtensions.length > 0 && (
+        <Link href="/team" className="block">
+          <Card className="border-amber-200 bg-amber-50/50 dark:border-amber-800/50 dark:bg-amber-950/20 hover:shadow-md transition-shadow cursor-pointer">
+            <CardContent className="flex items-center gap-3 py-4">
+              <div className="h-10 w-10 rounded-xl bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center flex-shrink-0">
+                <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-amber-700 dark:text-amber-300">
+                  {inactiveExtensions.length} member{inactiveExtensions.length > 1 ? "s" : ""} with inactive extension{inactiveExtensions.length > 1 ? "s" : ""}
+                </p>
+                <p className="text-xs text-amber-600/70 dark:text-amber-400/70 truncate">
+                  {inactiveExtensions.slice(0, 3).map((m) => m.name || m.email.split("@")[0]).join(", ")}
+                  {inactiveExtensions.length > 3 ? ` +${inactiveExtensions.length - 3} more` : ""}
+                  {" — no activity in 24+ hours"}
+                </p>
+              </div>
+              <span className="text-xs text-amber-600 dark:text-amber-400 font-medium flex-shrink-0">View Team →</span>
+            </CardContent>
+          </Card>
+        </Link>
+      )}
+
       {/* Quick Stats Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard

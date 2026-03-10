@@ -24,6 +24,7 @@ import {
 import { SupportModal } from "@/components/dashboard/support-modal";
 import { APP_VERSION } from "@/lib/release-notes";
 import { useHasUnseenRelease } from "@/components/dashboard/whats-new-modal";
+import { getExtensionStatus } from "@/lib/extension-status";
 
 interface NavItem {
   label: string;
@@ -55,13 +56,16 @@ const navSections: { title: string; items: NavItem[] }[] = [
 
 function NavContent({ onItemClick }: { onItemClick?: () => void }) {
   const pathname = usePathname();
-  const { currentUserRole, prompts } = useOrg();
+  const { currentUserRole, prompts, members } = useOrg();
   const { theme } = useTheme();
   const [supportOpen, setSupportOpen] = useState(false);
   const [supportTab, setSupportTab] = useState<"help" | "whats-new" | "contact">("help");
   const { unseen } = useHasUnseenRelease();
 
   const pendingCount = prompts.filter((p) => p.status === "pending").length;
+  const inactiveExtensionCount = (currentUserRole === "admin" || currentUserRole === "manager")
+    ? members.filter((m) => getExtensionStatus(m.last_extension_active) === "inactive").length
+    : 0;
 
   return (
     <div className="flex h-full flex-col">
@@ -131,6 +135,12 @@ function NavContent({ onItemClick }: { onItemClick?: () => void }) {
                         <Badge variant="notification" className="ml-auto h-5 min-w-5 px-1.5 text-[10px]">
                           {pendingCount}
                         </Badge>
+                      )}
+                      {item.href === "/team" && inactiveExtensionCount > 0 && (
+                        <span className="ml-auto flex items-center gap-1.5">
+                          <span className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
+                          <span className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">{inactiveExtensionCount}</span>
+                        </span>
                       )}
                     </Link>
                   );

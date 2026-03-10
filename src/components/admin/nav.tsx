@@ -21,6 +21,7 @@ import {
   UserCog,
   Inbox,
   PenLine,
+  Megaphone,
   Menu,
   X,
 } from "lucide-react";
@@ -87,6 +88,7 @@ const navGroups: NavGroup[] = [
     supportVisible: false,
     items: [
       { href: "/admin/content", label: "Content & SEO", icon: PenLine, badgeKey: null, supportVisible: false, superAdminOnly: true },
+      { href: "/admin/campaigns", label: "Campaigns", icon: Megaphone, badgeKey: null, supportVisible: false, superAdminOnly: true },
     ],
   },
   {

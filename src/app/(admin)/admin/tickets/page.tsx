@@ -53,6 +53,16 @@ import {
   X,
   PartyPopper,
   UserRound,
+  Filter,
+  Star,
+  AlarmClock,
+  Forward,
+  ShieldBan,
+  ArchiveRestore,
+  ChevronDown,
+  Building2,
+  CreditCard,
+  TicketCheck,
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
@@ -60,92 +70,34 @@ import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { ComposeEmailModal } from "@/components/admin/compose-email-modal";
 import { useAuth } from "@/components/providers/auth-provider";
+import { SnoozePopover } from "./_components/snooze-popover";
+import type {
+  TicketRow,
+  StaffMember,
+  CannedResponse,
+  NoteRow,
+  QuickFilter,
+} from "./_components/types";
+import {
+  STATUS_COLORS,
+  STATUS_LABELS,
+  PRIORITY_COLORS,
+  timeAgo,
+  formatBytes,
+  lastActivity,
+  slaColor,
+  isStarred,
+  isSnoozed,
+  snoozeLabel,
+} from "./_components/types";
 
-// --- Types ---
-
-interface NoteRow {
-  id: string;
-  content: string;
-  is_internal: boolean;
-  email_sent: boolean;
-  author_email: string | null;
-  created_at: string;
-}
-
-interface AttachmentMeta {
-  filename: string;
-  content_type: string;
-  size: number;
-}
-
-interface TicketRow {
-  id: string;
-  type: string;
-  subject: string | null;
-  message: string;
-  html_body: string | null;
-  sender_name: string | null;
-  status: string;
-  priority: string;
-  direction: "inbound" | "outbound";
-  user_id: string | null;
-  user_email: string | null;
-  org_name: string | null;
-  inbox_email: string | null;
-  assigned_to: string | null;
-  assigned_email: string | null;
-  assigned_name: string | null;
-  attachments: AttachmentMeta[];
-  notes: NoteRow[];
-  notes_count: number;
-  created_at: string;
-  updated_at: string;
-}
-
-interface StaffMember {
-  id: string;
-  email: string;
-  name: string | null;
-  super_admin_role: string | null;
-}
-
-interface CannedResponse {
-  id: string;
-  title: string;
-  content: string;
-  category: string;
-}
-
-// --- Constants ---
+// --- Icon maps ---
 
 const STATUS_ICONS: Record<string, React.ElementType> = {
   new: AlertCircle,
   in_progress: Clock,
   resolved: CheckCircle,
   closed: CheckCircle,
-};
-
-const STATUS_COLORS: Record<string, string> = {
-  new: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
-  in_progress:
-    "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",
-  resolved:
-    "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
-  closed: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
-};
-
-const STATUS_LABELS: Record<string, string> = {
-  new: "new",
-  in_progress: "in progress",
-  resolved: "done",
-  closed: "done",
-};
-
-const PRIORITY_COLORS: Record<string, string> = {
-  low: "text-slate-500",
-  normal: "text-blue-500",
-  high: "text-amber-500",
-  urgent: "text-red-500",
 };
 
 const TYPE_ICONS: Record<string, React.ElementType> = {
@@ -155,63 +107,6 @@ const TYPE_ICONS: Record<string, React.ElementType> = {
   email: Mail,
   sales: DollarSign,
 };
-
-type QuickFilter = "all" | "open" | "mine" | "unassigned" | "resolved" | "closed" | "sent";
-
-// Add Filter icon
-import { Filter } from "lucide-react";
-
-// --- Helpers ---
-
-function timeAgo(dateStr: string): string {
-  const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
-  if (seconds < 60) return "just now";
-  const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m ago`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  if (days < 7) return `${days}d ago`;
-  if (days < 30) return `${Math.floor(days / 7)}w ago`;
-  return new Date(dateStr).toLocaleDateString();
-}
-
-function formatBytes(bytes: number): string {
-  if (bytes === 0) return "0 B";
-  const k = 1024;
-  const sizes = ["B", "KB", "MB", "GB", "TB"];
-  const i = Math.min(Math.floor(Math.log(bytes) / Math.log(k)), sizes.length - 1);
-  return `${Math.round(bytes / Math.pow(k, i))} ${sizes[i]}`;
-}
-
-/** Get the last response/activity time for a ticket */
-function lastActivity(ticket: TicketRow): string {
-  if (ticket.notes.length > 0) {
-    return ticket.notes[ticket.notes.length - 1].created_at;
-  }
-  return ticket.updated_at || ticket.created_at;
-}
-
-/** SLA color based on wait time since last activity */
-function slaColor(dateStr: string): string {
-  const hours = (Date.now() - new Date(dateStr).getTime()) / (1000 * 60 * 60);
-  if (hours < 4) return "text-green-600 dark:text-green-400";
-  if (hours < 24) return "text-amber-600 dark:text-amber-400";
-  return "text-red-600 dark:text-red-400";
-}
-
-/** Smart sort: unread first, then by most recent activity */
-function smartSort(a: TicketRow, b: TicketRow): number {
-  const aIsNew = a.status === "new" ? 1 : 0;
-  const bIsNew = b.status === "new" ? 1 : 0;
-  if (aIsNew !== bIsNew) return bIsNew - aIsNew;
-
-  const aUrgent = a.priority === "urgent" ? 1 : a.priority === "high" ? 0.5 : 0;
-  const bUrgent = b.priority === "urgent" ? 1 : b.priority === "high" ? 0.5 : 0;
-  if (aUrgent !== bUrgent) return bUrgent - aUrgent;
-
-  return new Date(lastActivity(b)).getTime() - new Date(lastActivity(a)).getTime();
-}
 
 // --- Email HTML renderer ---
 
@@ -223,10 +118,8 @@ function EmailHtmlBody({ html }: { html: string }) {
     const iframe = iframeRef.current;
     if (!iframe) return;
 
-    // Revoke previous blob URL
     if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
 
-    // Build a full HTML document with base styles — links open in new tab
     const fullHtml = `<!DOCTYPE html><html><head><base target="_blank"><style>
       body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 14px; line-height: 1.6; color: #374151; margin: 0; padding: 8px 0; word-wrap: break-word; }
       a { color: #2563eb; }
@@ -237,7 +130,6 @@ function EmailHtmlBody({ html }: { html: string }) {
       td, th { padding: 4px 8px; }
     </style></head><body>${html}</body></html>`;
 
-    // Use a blob URL so the iframe gets its own origin, bypassing the parent page's CSP
     const blob = new Blob([fullHtml], { type: "text/html" });
     const url = URL.createObjectURL(blob);
     blobUrlRef.current = url;
@@ -250,7 +142,7 @@ function EmailHtmlBody({ html }: { html: string }) {
         const height = doc.documentElement.scrollHeight || doc.body.scrollHeight;
         if (height > 60) iframe.style.height = `${height}px`;
       } catch {
-        // Cross-origin after blob load — use fallback height
+        // Cross-origin after blob load
       }
     };
 
@@ -279,24 +171,78 @@ function EmailHtmlBody({ html }: { html: string }) {
   );
 }
 
-// --- Read-only ticket content (shared between split pane and sheet) ---
+// --- Contact card ---
+
+function ContactCard({ ticket, tickets }: { ticket: TicketRow; tickets: TicketRow[] }) {
+  const customerTickets = useMemo(() => {
+    if (!ticket.user_email) return [];
+    return tickets.filter((t) => t.user_email === ticket.user_email);
+  }, [tickets, ticket.user_email]);
+
+  if (!ticket.user_email) return null;
+
+  const openCount = customerTickets.filter((t) => t.status === "new" || t.status === "in_progress").length;
+  const totalCount = customerTickets.length;
+
+  return (
+    <div className="border rounded-lg p-3 bg-muted/20 space-y-2">
+      <div className="flex items-center gap-2">
+        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+          <UserRound className="h-4 w-4 text-primary" />
+        </div>
+        <div className="min-w-0">
+          <p className="text-xs font-medium truncate">
+            {ticket.sender_name || ticket.user_email.split("@")[0]}
+          </p>
+          <p className="text-[10px] text-muted-foreground truncate">{ticket.user_email}</p>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-2 text-[10px]">
+        {ticket.org_name && (
+          <div className="flex items-center gap-1 text-muted-foreground">
+            <Building2 className="h-3 w-3" />
+            <span className="truncate">{ticket.org_name}</span>
+          </div>
+        )}
+        {ticket.org_plan && (
+          <div className="flex items-center gap-1 text-muted-foreground">
+            <CreditCard className="h-3 w-3" />
+            <span className="capitalize">{ticket.org_plan}</span>
+          </div>
+        )}
+        <div className="flex items-center gap-1 text-muted-foreground">
+          <TicketCheck className="h-3 w-3" />
+          <span>{totalCount} ticket{totalCount !== 1 ? "s" : ""}{openCount > 0 ? ` (${openCount} open)` : ""}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// --- Ticket detail content ---
 
 function TicketContent({
   ticket,
   tickets,
   staff,
+  userId,
   onSelectTicket,
   updateStatus,
   updatePriority,
   assignTicket,
+  toggleStar,
+  onSnooze,
 }: {
   ticket: TicketRow;
   tickets: TicketRow[];
   staff: StaffMember[];
+  userId: string;
   onSelectTicket: (t: TicketRow) => void;
   updateStatus: (id: string, status: string) => void;
   updatePriority: (id: string, priority: string) => void;
   assignTicket: (id: string, assignedTo: string | null) => void;
+  toggleStar: (id: string) => void;
+  onSnooze: (id: string, until: string | null) => void;
 }) {
   const [historyOpen, setHistoryOpen] = useState(false);
 
@@ -307,26 +253,44 @@ function TicketContent({
     );
   }, [tickets, ticket]);
 
+  const starred = isStarred(ticket, userId);
+
   return (
     <>
-      {/* Header — compact with clear hierarchy */}
+      {/* Header */}
       <div className="px-3 sm:px-5 pt-3 sm:pt-4 pb-3 border-b flex-shrink-0 space-y-2">
         <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0">
-            <h2 className="text-sm sm:text-base font-semibold leading-snug line-clamp-2 sm:truncate">
-              {ticket.subject || "No subject"}
-            </h2>
-            <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5 truncate">
-              {ticket.sender_name && ticket.sender_name !== ticket.user_email
-                ? `${ticket.sender_name} <${ticket.user_email}>`
-                : ticket.user_email || "Anonymous"}
-              {ticket.org_name && ` · ${ticket.org_name}`}
-              <span className="hidden sm:inline">
-                {" · "}{new Date(ticket.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
-              </span>
-            </p>
+          <div className="min-w-0 flex items-start gap-2">
+            <button
+              type="button"
+              onClick={() => toggleStar(ticket.id)}
+              className="mt-0.5 flex-shrink-0"
+              title={starred ? "Unstar" : "Star"}
+            >
+              <Star className={cn("h-4 w-4 transition-colors", starred ? "fill-amber-400 text-amber-400" : "text-muted-foreground/40 hover:text-amber-400")} />
+            </button>
+            <div className="min-w-0">
+              <h2 className="text-sm sm:text-base font-semibold leading-snug line-clamp-2 sm:truncate">
+                {ticket.subject || "No subject"}
+              </h2>
+              <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5 truncate">
+                {ticket.sender_name && ticket.sender_name !== ticket.user_email
+                  ? `${ticket.sender_name} <${ticket.user_email}>`
+                  : ticket.user_email || "Anonymous"}
+                {ticket.org_name && ` · ${ticket.org_name}`}
+                <span className="hidden sm:inline">
+                  {" · "}{new Date(ticket.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
+                </span>
+              </p>
+            </div>
           </div>
           <div className="flex items-center gap-1 flex-shrink-0">
+            {isSnoozed(ticket) && (
+              <Badge variant="outline" className="text-[10px] h-5 gap-0.5 border-purple-300 text-purple-700 dark:border-purple-700 dark:text-purple-400">
+                <AlarmClock className="h-2.5 w-2.5" />
+                {snoozeLabel(ticket.snoozed_until!)}
+              </Badge>
+            )}
             <Badge variant="outline" className="capitalize text-[10px] h-5">
               {ticket.type}
             </Badge>
@@ -344,7 +308,7 @@ function TicketContent({
           </div>
         </div>
 
-        {/* Controls — stacked on mobile, inline on larger */}
+        {/* Controls */}
         <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 sm:gap-3">
           <div className="flex items-center gap-1.5">
             <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider hidden sm:inline">Status</span>
@@ -385,6 +349,12 @@ function TicketContent({
                 ))}
               </SelectContent>
             </Select>
+            {/* Snooze button in header */}
+            <SnoozePopover onSnooze={(until) => onSnooze(ticket.id, until)}>
+              <Button variant="ghost" size="sm" className="h-7 w-7 p-0 ml-auto" title="Snooze">
+                <AlarmClock className="h-3.5 w-3.5 text-muted-foreground" />
+              </Button>
+            </SnoozePopover>
           </div>
         </div>
       </div>
@@ -392,7 +362,20 @@ function TicketContent({
       {/* Scrollable content */}
       <ScrollArea className="flex-1">
         <div className="px-3 sm:px-5 py-3 sm:py-4 space-y-4">
-          {/* Original message — prominent card */}
+          {/* Contact card */}
+          <ContactCard ticket={ticket} tickets={tickets} />
+
+          {/* CC recipients */}
+          {ticket.cc_emails && ticket.cc_emails.length > 0 && (
+            <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+              <span className="font-medium">CC:</span>
+              {ticket.cc_emails.map((email, i) => (
+                <span key={i} className="bg-muted rounded px-1.5 py-0.5">{email}</span>
+              ))}
+            </div>
+          )}
+
+          {/* Original message */}
           <div className="rounded-lg border shadow-sm overflow-hidden">
             <div className="bg-muted/40 px-4 py-2 text-[11px] flex items-center justify-between border-b">
               <div className="flex items-center gap-2">
@@ -421,7 +404,6 @@ function TicketContent({
                 </p>
               )}
             </div>
-            {/* Attachments inline with message */}
             {ticket.attachments && ticket.attachments.length > 0 && (
               <div className="px-4 pb-3 flex flex-wrap gap-1.5">
                 {ticket.attachments.map((att, i) => (
@@ -475,60 +457,11 @@ function TicketContent({
                 <div className="flex-1 h-px bg-border" />
               </div>
 
-              {/* Timeline line */}
               <div className="relative pl-6">
                 <div className="absolute left-[9px] top-2 bottom-2 w-px bg-border" />
-
                 <div className="space-y-3">
                   {ticket.notes.map((note) => (
-                    <div key={note.id} className="relative">
-                      {/* Timeline dot */}
-                      <div className={cn(
-                        "absolute -left-6 top-2.5 h-[18px] w-[18px] rounded-full border-2 flex items-center justify-center",
-                        note.is_internal
-                          ? "bg-amber-50 border-amber-300 dark:bg-amber-950 dark:border-amber-700"
-                          : "bg-blue-50 border-blue-300 dark:bg-blue-950 dark:border-blue-700"
-                      )}>
-                        {note.is_internal ? (
-                          <Lock className="h-2 w-2 text-amber-600 dark:text-amber-400" />
-                        ) : (
-                          <Send className="h-2 w-2 text-blue-600 dark:text-blue-400" />
-                        )}
-                      </div>
-
-                      {/* Note card */}
-                      <div className={cn(
-                        "rounded-lg border text-sm",
-                        note.is_internal
-                          ? "border-amber-200 dark:border-amber-800/50"
-                          : "border-blue-200 dark:border-blue-800/50"
-                      )}>
-                        <div className={cn(
-                          "flex items-center gap-2 px-3 py-1.5 rounded-t-lg text-[11px]",
-                          note.is_internal
-                            ? "bg-amber-50/80 dark:bg-amber-950/30"
-                            : "bg-blue-50/80 dark:bg-blue-950/30"
-                        )}>
-                          <span className="font-medium">{note.author_email || "Admin"}</span>
-                          <span className="text-muted-foreground">{timeAgo(note.created_at)}</span>
-                          {note.is_internal && (
-                            <span className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">Internal</span>
-                          )}
-                          {note.email_sent && (
-                            <span className="text-[10px] text-blue-600 dark:text-blue-400 font-medium flex items-center gap-0.5">
-                              <CheckCircle className="h-2.5 w-2.5" /> Sent
-                            </span>
-                          )}
-                        </div>
-                        <div className="px-3 py-2.5">
-                          {!note.is_internal && note.content.startsWith("<") ? (
-                            <EmailHtmlBody html={note.content} />
-                          ) : (
-                            <p className="whitespace-pre-wrap text-sm">{note.content}</p>
-                          )}
-                        </div>
-                      </div>
-                    </div>
+                    <NoteCard key={note.id} note={note} />
                   ))}
                 </div>
               </div>
@@ -540,10 +473,67 @@ function TicketContent({
   );
 }
 
+function NoteCard({ note }: { note: NoteRow }) {
+  return (
+    <div className="relative">
+      <div className={cn(
+        "absolute -left-6 top-2.5 h-[18px] w-[18px] rounded-full border-2 flex items-center justify-center",
+        note.is_internal
+          ? "bg-amber-50 border-amber-300 dark:bg-amber-950 dark:border-amber-700"
+          : "bg-blue-50 border-blue-300 dark:bg-blue-950 dark:border-blue-700"
+      )}>
+        {note.is_internal ? (
+          <Lock className="h-2 w-2 text-amber-600 dark:text-amber-400" />
+        ) : (
+          <Send className="h-2 w-2 text-blue-600 dark:text-blue-400" />
+        )}
+      </div>
+
+      <div className={cn(
+        "rounded-lg border text-sm",
+        note.is_internal
+          ? "border-amber-200 dark:border-amber-800/50"
+          : "border-blue-200 dark:border-blue-800/50"
+      )}>
+        <div className={cn(
+          "flex items-center gap-2 px-3 py-1.5 rounded-t-lg text-[11px]",
+          note.is_internal
+            ? "bg-amber-50/80 dark:bg-amber-950/30"
+            : "bg-blue-50/80 dark:bg-blue-950/30"
+        )}>
+          <span className="font-medium">{note.author_email || "Admin"}</span>
+          <span className="text-muted-foreground">{timeAgo(note.created_at)}</span>
+          {note.is_internal && (
+            <span className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">Internal</span>
+          )}
+          {note.email_sent && (
+            <span className="text-[10px] text-blue-600 dark:text-blue-400 font-medium flex items-center gap-0.5">
+              <CheckCircle className="h-2.5 w-2.5" /> Sent
+            </span>
+          )}
+          {note.cc_emails && note.cc_emails.length > 0 && (
+            <span className="text-[10px] text-muted-foreground">
+              CC: {note.cc_emails.join(", ")}
+            </span>
+          )}
+        </div>
+        <div className="px-3 py-2.5">
+          {!note.is_internal && note.content.startsWith("<") ? (
+            <EmailHtmlBody html={note.content} />
+          ) : (
+            <p className="whitespace-pre-wrap text-sm">{note.content}</p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // --- Main Component ---
 
 export default function TicketsPage() {
   const { user } = useAuth();
+  const userId = user?.id || "";
   const [tickets, setTickets] = useState<TicketRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [staff, setStaff] = useState<StaffMember[]>([]);
@@ -553,10 +543,11 @@ export default function TicketsPage() {
   const [quickFilter, setQuickFilter] = useState<QuickFilter>("open");
   const [typeFilter, setTypeFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
+  const [folder, setFolder] = useState<"inbox" | "spam" | "trash">("inbox");
 
   // Detail
   const [selectedTicket, setSelectedTicket] = useState<TicketRow | null>(null);
-  const [sheetOpen, setSheetOpen] = useState(false); // mobile only
+  const [sheetOpen, setSheetOpen] = useState(false);
 
   // Selection
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -565,11 +556,15 @@ export default function TicketsPage() {
   // Compose
   const [composeOpen, setComposeOpen] = useState(false);
 
-  // Note form
+  // Note/reply form
   const [noteContent, setNoteContent] = useState("");
-  const [isInternal, setIsInternal] = useState(false);
+  const [replyMode, setReplyMode] = useState<"reply" | "note" | "forward">("reply");
   const [sendingNote, setSendingNote] = useState(false);
   const editorRef = useRef<RichEditorRef>(null);
+  const [ccInput, setCcInput] = useState("");
+  const [ccEmails, setCcEmails] = useState<string[]>([]);
+  const [showCc, setShowCc] = useState(false);
+  const [forwardTo, setForwardTo] = useState("");
 
   // Canned responses
   const [cannedResponses, setCannedResponses] = useState<CannedResponse[]>([]);
@@ -579,12 +574,15 @@ export default function TicketsPage() {
   const [newCannedContent, setNewCannedContent] = useState("");
   const [newCannedCategory, setNewCannedCategory] = useState("general");
 
-  // Track focused index for keyboard nav
+  // Keyboard nav
   const [focusedIndex, setFocusedIndex] = useState(-1);
+
+  // More tabs dropdown
+  const [showMoreTabs, setShowMoreTabs] = useState(false);
 
   const loadTickets = useCallback(async () => {
     try {
-      const res = await fetch("/api/admin/tickets");
+      const res = await fetch(`/api/admin/tickets?folder=${folder}`);
       if (!res.ok) throw new Error("Failed to fetch tickets");
       const data = await res.json();
       const fresh = data.tickets || [];
@@ -599,7 +597,7 @@ export default function TicketsPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [folder]);
 
   const loadCannedResponses = useCallback(async () => {
     try {
@@ -608,9 +606,7 @@ export default function TicketsPage() {
         const data = await res.json();
         setCannedResponses(data.responses || []);
       }
-    } catch {
-      // Non-critical
-    }
+    } catch { /* Non-critical */ }
   }, []);
 
   const loadStaff = useCallback(async () => {
@@ -620,9 +616,7 @@ export default function TicketsPage() {
         const data = await res.json();
         setStaff(data.staff || []);
       }
-    } catch {
-      // Non-critical
-    }
+    } catch { /* Non-critical */ }
   }, []);
 
   useEffect(() => {
@@ -633,21 +627,9 @@ export default function TicketsPage() {
     const supabase = createClient();
     const channel = supabase
       .channel("admin-tickets-realtime")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "feedback" },
-        () => loadTickets()
-      )
-      .on(
-        "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "feedback" },
-        () => loadTickets()
-      )
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "ticket_notes" },
-        () => loadTickets()
-      )
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "feedback" }, () => loadTickets())
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "feedback" }, () => loadTickets())
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "ticket_notes" }, () => loadTickets())
       .subscribe((status) => {
         if (status === "CHANNEL_ERROR") {
           console.warn("Realtime channel error — falling back to polling");
@@ -655,12 +637,10 @@ export default function TicketsPage() {
       });
 
     const pollInterval = setInterval(loadTickets, 10000);
-
     const handleVisibility = () => {
       if (document.visibilityState === "visible") loadTickets();
     };
     document.addEventListener("visibilitychange", handleVisibility);
-
     const handleFocus = () => loadTickets();
     window.addEventListener("focus", handleFocus);
 
@@ -682,9 +662,7 @@ export default function TicketsPage() {
         body: JSON.stringify({ id, status }),
       });
       if (!res.ok) throw new Error("Failed");
-      setTickets((prev) =>
-        prev.map((t) => (t.id === id ? { ...t, status } : t))
-      );
+      setTickets((prev) => prev.map((t) => (t.id === id ? { ...t, status } : t)));
       setSelectedTicket((prev) => (prev?.id === id ? { ...prev, status } : prev));
       if (!silent) {
         toast.success(status === "closed" ? "Marked as done" : `Status → ${status.replace("_", " ")}`);
@@ -702,9 +680,7 @@ export default function TicketsPage() {
         body: JSON.stringify({ id, priority }),
       });
       if (!res.ok) throw new Error("Failed");
-      setTickets((prev) =>
-        prev.map((t) => (t.id === id ? { ...t, priority } : t))
-      );
+      setTickets((prev) => prev.map((t) => (t.id === id ? { ...t, priority } : t)));
       setSelectedTicket((prev) => (prev?.id === id ? { ...prev, priority } : prev));
       toast.success(`Priority updated to ${priority}`);
     } catch {
@@ -739,6 +715,75 @@ export default function TicketsPage() {
     }
   };
 
+  const toggleStar = async (id: string) => {
+    const ticket = tickets.find((t) => t.id === id);
+    if (!ticket) return;
+    const currentlyStarred = isStarred(ticket, userId);
+
+    // Optimistic update
+    setTickets((prev) => prev.map((t) => {
+      if (t.id !== id) return t;
+      const newStarred = currentlyStarred
+        ? t.starred_by.filter((uid) => uid !== userId)
+        : [...t.starred_by, userId];
+      return { ...t, starred_by: newStarred };
+    }));
+    setSelectedTicket((prev) => {
+      if (prev?.id !== id) return prev;
+      const newStarred = currentlyStarred
+        ? prev.starred_by.filter((uid) => uid !== userId)
+        : [...prev.starred_by, userId];
+      return { ...prev, starred_by: newStarred };
+    });
+
+    try {
+      await fetch("/api/admin/tickets", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, starred: !currentlyStarred }),
+      });
+    } catch {
+      // Revert on failure
+      loadTickets();
+    }
+  };
+
+  const snoozeTicket = async (id: string, until: string | null) => {
+    try {
+      await fetch("/api/admin/tickets", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, snoozed_until: until }),
+      });
+      setTickets((prev) => prev.map((t) => (t.id === id ? { ...t, snoozed_until: until } : t)));
+      setSelectedTicket((prev) => (prev?.id === id ? { ...prev, snoozed_until: until } : prev));
+      toast.success(until ? "Snoozed" : "Unsnooze");
+    } catch {
+      toast.error("Failed to snooze ticket");
+    }
+  };
+
+  const moveToFolder = async (ids: string[], targetFolder: string) => {
+    try {
+      const res = await fetch("/api/admin/tickets", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids, folder: targetFolder }),
+      });
+      if (!res.ok) throw new Error("Failed");
+      // Remove from current view
+      setTickets((prev) => prev.filter((t) => !ids.includes(t.id)));
+      if (selectedTicket && ids.includes(selectedTicket.id)) {
+        setSelectedTicket(null);
+      }
+      setSelected(new Set());
+      const label = targetFolder === "inbox" ? "Moved to inbox" : targetFolder === "spam" ? "Marked as spam" : "Moved to trash";
+      toast.success(label);
+    } catch {
+      toast.error("Failed to move ticket");
+    }
+  };
+
   const bulkUpdate = async (updates: { status?: string; priority?: string }) => {
     if (selected.size === 0) return;
     setBulkLoading(true);
@@ -749,9 +794,7 @@ export default function TicketsPage() {
         body: JSON.stringify({ ids: Array.from(selected), ...updates }),
       });
       if (!res.ok) throw new Error("Failed");
-      setTickets((prev) =>
-        prev.map((t) => (selected.has(t.id) ? { ...t, ...updates } : t))
-      );
+      setTickets((prev) => prev.map((t) => (selected.has(t.id) ? { ...t, ...updates } : t)));
       toast.success(`Updated ${selected.size} ticket(s)`);
       setSelected(new Set());
     } catch {
@@ -763,34 +806,48 @@ export default function TicketsPage() {
 
   const bulkDelete = async () => {
     if (selected.size === 0) return;
-    if (!confirm(`Delete ${selected.size} ticket(s)? This cannot be undone.`)) return;
-    setBulkLoading(true);
-    try {
-      const res = await fetch("/api/admin/tickets", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ids: Array.from(selected) }),
-      });
-      if (!res.ok) throw new Error("Failed");
-      setTickets((prev) => prev.filter((t) => !selected.has(t.id)));
-      if (selectedTicket && selected.has(selectedTicket.id)) {
-        setSelectedTicket(null);
+    if (folder === "trash") {
+      if (!confirm(`Permanently delete ${selected.size} ticket(s)? This cannot be undone.`)) return;
+      setBulkLoading(true);
+      try {
+        const res = await fetch("/api/admin/tickets", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ids: Array.from(selected), permanent: true }),
+        });
+        if (!res.ok) throw new Error("Failed");
+        setTickets((prev) => prev.filter((t) => !selected.has(t.id)));
+        if (selectedTicket && selected.has(selectedTicket.id)) setSelectedTicket(null);
+        toast.success(`Permanently deleted ${selected.size} ticket(s)`);
+        setSelected(new Set());
+      } catch {
+        toast.error("Failed to delete tickets");
+      } finally {
+        setBulkLoading(false);
       }
-      toast.success(`Deleted ${selected.size} ticket(s)`);
-      setSelected(new Set());
-    } catch {
-      toast.error("Failed to delete tickets");
-    } finally {
-      setBulkLoading(false);
+    } else {
+      // Soft delete — move to trash
+      await moveToFolder(Array.from(selected), "trash");
     }
   };
 
+  const markRead = async (id: string) => {
+    // Optimistic
+    setTickets((prev) => prev.map((t) => (t.id === id ? { ...t, is_read: true } : t)));
+    setSelectedTicket((prev) => (prev?.id === id ? { ...prev, is_read: true } : prev));
+    try {
+      await fetch(`/api/admin/tickets/${id}/read`, { method: "POST" });
+    } catch { /* Non-critical */ }
+  };
+
   const addNote = async () => {
-    const isReply = !isInternal;
+    const isReply = replyMode === "reply";
+    const isForwardMode = replyMode === "forward";
+    const isInternal = replyMode === "note";
     let content: string;
     let isHtml = false;
 
-    if (isReply && editorRef.current) {
+    if ((isReply || isForwardMode) && editorRef.current) {
       if (editorRef.current.isEmpty()) return;
       content = editorRef.current.getHTML();
       isHtml = true;
@@ -800,6 +857,11 @@ export default function TicketsPage() {
     }
 
     if (!selectedTicket) return;
+    if (isForwardMode && !forwardTo.trim()) {
+      toast.error("Forward-to email is required");
+      return;
+    }
+
     setSendingNote(true);
 
     try {
@@ -812,6 +874,9 @@ export default function TicketsPage() {
             content,
             is_internal: isInternal,
             is_html: isHtml,
+            cc: ccEmails,
+            action: isForwardMode ? "forward" : "reply",
+            forward_to: isForwardMode ? forwardTo.trim() : undefined,
           }),
         }
       );
@@ -821,8 +886,6 @@ export default function TicketsPage() {
       const data = await res.json();
       const newNote: NoteRow = data.note;
 
-      // Auto-assign: if ticket was unassigned, the API auto-assigned to current user
-      // Auto-progress: replying to a "new" ticket marks it as "in_progress" (read but still open)
       const wasUnassigned = !selectedTicket.assigned_to;
       const shouldProgress = isReply && selectedTicket.status === "new";
       const updateTicketNotes = (t: TicketRow): TicketRow => ({
@@ -833,14 +896,18 @@ export default function TicketsPage() {
         ...(wasUnassigned && user ? { assigned_to: user.id, assigned_email: user.email || null, assigned_name: null } : {}),
       });
 
-      setTickets((prev) =>
-        prev.map((t) => (t.id === selectedTicket.id ? updateTicketNotes(t) : t))
-      );
+      setTickets((prev) => prev.map((t) => (t.id === selectedTicket.id ? updateTicketNotes(t) : t)));
       setSelectedTicket((prev) => (prev ? updateTicketNotes(prev) : prev));
       setNoteContent("");
+      setCcEmails([]);
+      setCcInput("");
+      setShowCc(false);
+      setForwardTo("");
       if (editorRef.current) editorRef.current.clear();
       if (isInternal) {
         toast.success("Internal note added");
+      } else if (isForwardMode) {
+        toast.success(data.note?.email_sent ? `Forwarded to ${forwardTo}` : "Forward note saved");
       } else if (data.note?.email_sent) {
         toast.success("Response sent via email");
       } else if (data.recipient_email) {
@@ -858,11 +925,14 @@ export default function TicketsPage() {
   const openTicket = (ticket: TicketRow) => {
     setSelectedTicket(ticket);
     setNoteContent("");
-    setIsInternal(false);
+    setReplyMode("reply");
+    setCcEmails([]);
+    setShowCc(false);
+    setForwardTo("");
 
-    // Auto-mark as read: "new" → "in_progress" on open (like an email inbox)
-    if (ticket.status === "new") {
-      updateStatus(ticket.id, "in_progress", true);
+    // Mark as read (separate from status change)
+    if (!ticket.is_read) {
+      markRead(ticket.id);
     }
   };
 
@@ -890,6 +960,18 @@ export default function TicketsPage() {
   };
 
   const clearSelection = () => setSelected(new Set());
+
+  const addCcEmail = () => {
+    const email = ccInput.trim();
+    if (email && email.includes("@") && !ccEmails.includes(email)) {
+      setCcEmails([...ccEmails, email]);
+      setCcInput("");
+    }
+  };
+
+  const removeCcEmail = (email: string) => {
+    setCcEmails(ccEmails.filter((e) => e !== email));
+  };
 
   const insertCanned = (content: string) => {
     if (editorRef.current) {
@@ -939,6 +1021,25 @@ export default function TicketsPage() {
 
   // --- Filtering & Sorting ---
 
+  const smartSort = useCallback((a: TicketRow, b: TicketRow): number => {
+    // Starred first
+    const aStarred = isStarred(a, userId) ? 1 : 0;
+    const bStarred = isStarred(b, userId) ? 1 : 0;
+    if (aStarred !== bStarred) return bStarred - aStarred;
+
+    // Unread first
+    const aUnread = a.is_read ? 0 : 1;
+    const bUnread = b.is_read ? 0 : 1;
+    if (aUnread !== bUnread) return bUnread - aUnread;
+
+    // Priority
+    const aUrgent = a.priority === "urgent" ? 1 : a.priority === "high" ? 0.5 : 0;
+    const bUrgent = b.priority === "urgent" ? 1 : b.priority === "high" ? 0.5 : 0;
+    if (aUrgent !== bUrgent) return bUrgent - aUrgent;
+
+    return new Date(lastActivity(b)).getTime() - new Date(lastActivity(a)).getTime();
+  }, [userId]);
+
   const filtered = useMemo(() => {
     let result = tickets;
 
@@ -962,26 +1063,37 @@ export default function TicketsPage() {
     return result;
   }, [tickets, typeFilter, priorityFilter, search]);
 
-  // Split into active (new/in_progress) and resolved/closed
   const activeFiltered = useMemo(() => {
     let result = filtered;
 
-    if (quickFilter === "open") {
-      result = result.filter((t) => t.status === "new" || t.status === "in_progress");
-    } else if (quickFilter === "mine") {
-      result = result.filter((t) => t.assigned_to === user?.id && t.status !== "closed");
-    } else if (quickFilter === "unassigned") {
-      result = result.filter((t) => !t.assigned_to && t.status !== "resolved" && t.status !== "closed");
-    } else if (quickFilter === "resolved") {
-      result = result.filter((t) => t.status === "resolved" || t.status === "closed");
-    } else if (quickFilter === "sent") {
-      result = result.filter((t) => t.direction === "outbound");
+    switch (quickFilter) {
+      case "open":
+        result = result.filter((t) => (t.status === "new" || t.status === "in_progress") && !isSnoozed(t));
+        break;
+      case "mine":
+        result = result.filter((t) => t.assigned_to === userId && t.status !== "closed");
+        break;
+      case "starred":
+        result = result.filter((t) => isStarred(t, userId));
+        break;
+      case "unassigned":
+        result = result.filter((t) => !t.assigned_to && t.status !== "resolved" && t.status !== "closed");
+        break;
+      case "resolved":
+        result = result.filter((t) => t.status === "resolved" || t.status === "closed");
+        break;
+      case "sent":
+        result = result.filter((t) => t.direction === "outbound");
+        break;
+      case "snoozed":
+        result = result.filter((t) => isSnoozed(t));
+        break;
+      // "all" / "spam" / "trash" — no extra filtering (folder handles it)
     }
 
     return [...result].sort(smartSort);
-  }, [filtered, quickFilter, user?.id]);
+  }, [filtered, quickFilter, userId, smartSort]);
 
-  // Separate resolved/closed for collapsible section (only shown in "all" view)
   const resolvedTickets = useMemo(() => {
     if (quickFilter !== "all") return [];
     return filtered
@@ -1000,16 +1112,17 @@ export default function TicketsPage() {
       total: tickets.length,
       new: tickets.filter((t) => t.status === "new").length,
       open: tickets.filter((t) => t.status === "in_progress").length,
-      mine: tickets.filter((t) => t.assigned_to === user?.id && t.status !== "closed").length,
+      unread: tickets.filter((t) => !t.is_read).length,
+      mine: tickets.filter((t) => t.assigned_to === userId && t.status !== "closed").length,
+      starred: tickets.filter((t) => isStarred(t, userId)).length,
       unassigned: tickets.filter((t) => !t.assigned_to && t.status !== "resolved" && t.status !== "closed").length,
-      resolved: tickets.filter((t) => t.status === "resolved").length,
-      closed: tickets.filter((t) => t.status === "closed").length,
+      resolved: tickets.filter((t) => t.status === "resolved" || t.status === "closed").length,
       sent: tickets.filter((t) => t.direction === "outbound").length,
+      snoozed: tickets.filter((t) => isSnoozed(t)).length,
     }),
-    [tickets, user?.id]
+    [tickets, userId]
   );
 
-  // Canned responses by category
   const cannedByCategory = useMemo(() => {
     const map = new Map<string, CannedResponse[]>();
     for (const r of cannedResponses) {
@@ -1023,7 +1136,6 @@ export default function TicketsPage() {
   // --- Keyboard shortcuts ---
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
-      // Don't capture if user is typing in an input/textarea
       const tag = (e.target as HTMLElement)?.tagName;
       if (tag === "INPUT" || tag === "TEXTAREA" || (e.target as HTMLElement)?.isContentEditable) return;
 
@@ -1044,20 +1156,17 @@ export default function TicketsPage() {
           return next;
         });
       } else if (e.key === "r") {
-        if (selectedTicket) {
-          e.preventDefault();
-          setIsInternal(false);
-        }
+        if (selectedTicket) { e.preventDefault(); setReplyMode("reply"); }
       } else if (e.key === "n") {
-        if (selectedTicket) {
-          e.preventDefault();
-          setIsInternal(true);
-        }
+        if (selectedTicket) { e.preventDefault(); setReplyMode("note"); }
       } else if (e.key === "e") {
-        if (selectedTicket) {
-          e.preventDefault();
-          updateStatus(selectedTicket.id, "closed");
-        }
+        if (selectedTicket) { e.preventDefault(); updateStatus(selectedTicket.id, "closed"); }
+      } else if (e.key === "s") {
+        if (selectedTicket) { e.preventDefault(); toggleStar(selectedTicket.id); }
+      } else if (e.key === "#") {
+        if (selectedTicket) { e.preventDefault(); moveToFolder([selectedTicket.id], "trash"); }
+      } else if (e.key === "!") {
+        if (selectedTicket) { e.preventDefault(); moveToFolder([selectedTicket.id], "spam"); }
       } else if (e.key === "Escape") {
         if (sheetOpen) {
           setSheetOpen(false);
@@ -1077,10 +1186,10 @@ export default function TicketsPage() {
   const hasAutoSelected = useRef(false);
   useEffect(() => {
     if (!loading && !hasAutoSelected.current && openTickets.length > 0 && !selectedTicket) {
-      // Only auto-select on desktop (lg breakpoint = 1024px)
       if (window.innerWidth >= 1024) {
         setSelectedTicket(openTickets[0]);
         setFocusedIndex(0);
+        if (!openTickets[0].is_read) markRead(openTickets[0].id);
       }
       hasAutoSelected.current = true;
     }
@@ -1099,12 +1208,14 @@ export default function TicketsPage() {
   const renderTicketRow = (ticket: TicketRow, index: number, isMobile: boolean) => {
     const StatusIcon = STATUS_ICONS[ticket.status] || AlertCircle;
     const TypeIcon = TYPE_ICONS[ticket.type] || MessageSquare;
-    const isNew = ticket.status === "new";
+    const isUnread = !ticket.is_read;
     const isSelected = selected.has(ticket.id);
     const isActive = selectedTicket?.id === ticket.id;
     const hasAttachments = ticket.attachments && ticket.attachments.length > 0;
     const activity = lastActivity(ticket);
     const hasReply = ticket.notes.some((n) => !n.is_internal);
+    const starred = isStarred(ticket, userId);
+    const snoozed = isSnoozed(ticket);
 
     return (
       <div
@@ -1113,16 +1224,24 @@ export default function TicketsPage() {
           "group flex gap-2 sm:gap-3 px-3 sm:px-4 py-3 sm:py-3.5 cursor-pointer transition-colors",
           isActive
             ? "bg-primary/10 border-l-2 border-l-primary"
-            : isNew
-              ? "bg-blue-50 dark:bg-blue-950/20 border-l-2 border-l-blue-500 hover:bg-blue-100/70 dark:hover:bg-blue-950/30"
+            : isUnread
+              ? "bg-blue-50/70 dark:bg-blue-950/20 border-l-2 border-l-blue-500 hover:bg-blue-100/70 dark:hover:bg-blue-950/30"
               : "border-l-2 border-l-transparent hover:bg-accent/60",
           isSelected && !isActive && "bg-primary/5",
           focusedIndex === index && !isActive && "ring-1 ring-inset ring-primary/30"
         )}
         onClick={() => isMobile ? openTicketMobile(ticket) : openTicket(ticket)}
       >
-        {/* Left: checkbox + unread dot */}
-        <div className="flex items-center gap-1.5 sm:gap-2 pt-0.5 flex-shrink-0">
+        {/* Left: star + checkbox + unread */}
+        <div className="flex items-center gap-1 sm:gap-1.5 pt-0.5 flex-shrink-0">
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); toggleStar(ticket.id); }}
+            className="flex-shrink-0"
+            title={starred ? "Unstar" : "Star"}
+          >
+            <Star className={cn("h-3.5 w-3.5 transition-colors", starred ? "fill-amber-400 text-amber-400" : "text-muted-foreground/30 hover:text-amber-400")} />
+          </button>
           <Checkbox
             checked={isSelected}
             onCheckedChange={() => toggleSelect(ticket.id)}
@@ -1130,8 +1249,8 @@ export default function TicketsPage() {
             aria-label={`Select ${ticket.subject || ticket.id}`}
             className="hidden sm:inline-flex"
           />
-          <div className="w-2">
-            {isNew && <div className="h-2 w-2 rounded-full bg-blue-500" />}
+          <div className="w-2 hidden sm:block">
+            {isUnread && <div className="h-2 w-2 rounded-full bg-blue-500" />}
           </div>
         </div>
 
@@ -1140,8 +1259,8 @@ export default function TicketsPage() {
           {/* Line 1: sender + time */}
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-1.5 min-w-0">
-              <TypeIcon className={cn("h-3 w-3 flex-shrink-0", isNew ? "text-foreground" : "text-muted-foreground")} />
-              <span className={cn("truncate text-xs", isNew ? "font-semibold" : "text-muted-foreground")}>
+              <TypeIcon className={cn("h-3 w-3 flex-shrink-0", isUnread ? "text-foreground" : "text-muted-foreground")} />
+              <span className={cn("truncate text-xs", isUnread ? "font-semibold" : "text-muted-foreground")}>
                 {ticket.direction === "outbound" ? `To: ${ticket.user_email || ticket.sender_name || "Unknown"}` : (ticket.sender_name || ticket.user_email || "Anonymous")}
               </span>
               {ticket.inbox_email && (
@@ -1157,7 +1276,7 @@ export default function TicketsPage() {
 
           {/* Line 2: subject + preview */}
           <div className="flex items-center gap-2 mt-0.5">
-            <p className={cn("truncate text-xs", isNew ? "font-medium text-foreground" : "text-muted-foreground")}>
+            <p className={cn("truncate text-xs", isUnread ? "font-medium text-foreground" : "text-muted-foreground")}>
               {ticket.subject || "No subject"}
               <span className="hidden sm:inline font-normal text-muted-foreground">
                 {" — "}{ticket.message.replace(/^From:.*?\n\n/, "").slice(0, 50)}
@@ -1167,12 +1286,7 @@ export default function TicketsPage() {
 
           {/* Line 3: badges */}
           <div className="flex items-center gap-1.5 mt-1.5">
-            <span
-              className={cn(
-                "inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-medium",
-                STATUS_COLORS[ticket.status] || ""
-              )}
-            >
+            <span className={cn("inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-medium", STATUS_COLORS[ticket.status] || "")}>
               <StatusIcon className="h-2.5 w-2.5" />
               {STATUS_LABELS[ticket.status] || ticket.status}
             </span>
@@ -1184,14 +1298,18 @@ export default function TicketsPage() {
                 Sent
               </Badge>
             )}
+            {snoozed && (
+              <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 gap-0.5 border-purple-300 text-purple-700 dark:border-purple-700 dark:text-purple-400">
+                <AlarmClock className="h-2.5 w-2.5" />
+                {snoozeLabel(ticket.snoozed_until!)}
+              </Badge>
+            )}
             {ticket.priority !== "normal" && (
               <span className={cn("text-[10px] font-semibold capitalize", PRIORITY_COLORS[ticket.priority])}>
                 {ticket.priority}
               </span>
             )}
-            {hasAttachments && (
-              <Paperclip className="h-3 w-3 text-muted-foreground" />
-            )}
+            {hasAttachments && <Paperclip className="h-3 w-3 text-muted-foreground" />}
             {ticket.notes_count > 0 && (
               <span className="inline-flex items-center gap-0.5 text-[10px] text-muted-foreground">
                 <StickyNote className="h-3 w-3" />
@@ -1204,7 +1322,6 @@ export default function TicketsPage() {
                 {(ticket.assigned_name || ticket.assigned_email || "").split("@")[0]}
               </span>
             )}
-            {/* Waiting indicator: no admin reply yet */}
             {!hasReply && ticket.status !== "closed" && ticket.status !== "resolved" && (
               <span className={cn("text-[10px] font-medium", slaColor(activity))}>
                 Awaiting reply
@@ -1213,17 +1330,53 @@ export default function TicketsPage() {
           </div>
         </div>
 
-        {/* Quick-done button */}
-        {ticket.status !== "closed" && ticket.status !== "resolved" && (
-          <button
-            type="button"
-            title="Mark as done"
-            onClick={(e) => { e.stopPropagation(); updateStatus(ticket.id, "closed"); }}
-            className="self-center flex-shrink-0 h-7 w-7 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-green-100 dark:hover:bg-green-900/30 text-muted-foreground hover:text-green-600 dark:hover:text-green-400 transition-all"
-          >
-            <CheckCircle className="h-4 w-4" />
-          </button>
-        )}
+        {/* Quick hover actions */}
+        <div className="self-center flex-shrink-0 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-all">
+          {folder === "inbox" && (
+            <>
+              {!ticket.assigned_to && (
+                <button
+                  type="button"
+                  title="Assign to me"
+                  onClick={(e) => { e.stopPropagation(); assignTicket(ticket.id, userId); }}
+                  className="h-7 w-7 rounded-full flex items-center justify-center hover:bg-blue-100 dark:hover:bg-blue-900/30 text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400 transition-all"
+                >
+                  <UserRound className="h-3.5 w-3.5" />
+                </button>
+              )}
+              <SnoozePopover onSnooze={(until) => snoozeTicket(ticket.id, until)}>
+                <button
+                  type="button"
+                  title="Snooze"
+                  onClick={(e) => e.stopPropagation()}
+                  className="h-7 w-7 rounded-full flex items-center justify-center hover:bg-purple-100 dark:hover:bg-purple-900/30 text-muted-foreground hover:text-purple-600 dark:hover:text-purple-400 transition-all"
+                >
+                  <AlarmClock className="h-3.5 w-3.5" />
+                </button>
+              </SnoozePopover>
+              {ticket.status !== "closed" && ticket.status !== "resolved" && (
+                <button
+                  type="button"
+                  title="Mark as done"
+                  onClick={(e) => { e.stopPropagation(); updateStatus(ticket.id, "closed"); }}
+                  className="h-7 w-7 rounded-full flex items-center justify-center hover:bg-green-100 dark:hover:bg-green-900/30 text-muted-foreground hover:text-green-600 dark:hover:text-green-400 transition-all"
+                >
+                  <CheckCircle className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </>
+          )}
+          {(folder === "spam" || folder === "trash") && (
+            <button
+              type="button"
+              title="Move to inbox"
+              onClick={(e) => { e.stopPropagation(); moveToFolder([ticket.id], "inbox"); }}
+              className="h-7 w-7 rounded-full flex items-center justify-center hover:bg-blue-100 dark:hover:bg-blue-900/30 text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400 transition-all"
+            >
+              <ArchiveRestore className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
       </div>
     );
   };
@@ -1235,14 +1388,30 @@ export default function TicketsPage() {
   );
 
   const renderEmptyState = () => {
+    if (folder === "spam") {
+      return (
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <ShieldBan className="h-10 w-10 text-muted-foreground mb-3" />
+          <p className="font-medium text-foreground">No spam</p>
+          <p className="text-sm text-muted-foreground mt-1">Spam tickets will appear here.</p>
+        </div>
+      );
+    }
+    if (folder === "trash") {
+      return (
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <Trash2 className="h-10 w-10 text-muted-foreground mb-3" />
+          <p className="font-medium text-foreground">Trash is empty</p>
+          <p className="text-sm text-muted-foreground mt-1">Deleted tickets will appear here.</p>
+        </div>
+      );
+    }
     if (quickFilter === "open" && (stats.new + stats.open) === 0 && stats.total > 0) {
       return (
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <PartyPopper className="h-10 w-10 text-green-500 mb-3" />
           <p className="font-medium text-foreground">Inbox zero!</p>
-          <p className="text-sm text-muted-foreground mt-1">
-            All caught up. No open tickets.
-          </p>
+          <p className="text-sm text-muted-foreground mt-1">All caught up. No open tickets.</p>
         </div>
       );
     }
@@ -1251,9 +1420,16 @@ export default function TicketsPage() {
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <UserRound className="h-10 w-10 text-muted-foreground mb-3" />
           <p className="font-medium text-foreground">No tickets assigned to you</p>
-          <p className="text-sm text-muted-foreground mt-1">
-            Pick up tickets from the Unassigned tab.
-          </p>
+          <p className="text-sm text-muted-foreground mt-1">Pick up tickets from the Unassigned tab.</p>
+        </div>
+      );
+    }
+    if (quickFilter === "starred" && stats.starred === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <Star className="h-10 w-10 text-muted-foreground mb-3" />
+          <p className="font-medium text-foreground">No starred tickets</p>
+          <p className="text-sm text-muted-foreground mt-1">Click the star icon to pin important tickets.</p>
         </div>
       );
     }
@@ -1262,9 +1438,7 @@ export default function TicketsPage() {
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <PartyPopper className="h-10 w-10 text-green-500 mb-3" />
           <p className="font-medium text-foreground">All tickets assigned!</p>
-          <p className="text-sm text-muted-foreground mt-1">
-            Every open ticket has an owner.
-          </p>
+          <p className="text-sm text-muted-foreground mt-1">Every open ticket has an owner.</p>
         </div>
       );
     }
@@ -1273,9 +1447,16 @@ export default function TicketsPage() {
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <Send className="h-10 w-10 text-muted-foreground mb-3" />
           <p className="font-medium text-foreground">No sent emails yet</p>
-          <p className="text-sm text-muted-foreground mt-1">
-            Use the Compose button to send an email.
-          </p>
+          <p className="text-sm text-muted-foreground mt-1">Use the Compose button to send an email.</p>
+        </div>
+      );
+    }
+    if (quickFilter === "snoozed" && stats.snoozed === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <AlarmClock className="h-10 w-10 text-muted-foreground mb-3" />
+          <p className="font-medium text-foreground">No snoozed tickets</p>
+          <p className="text-sm text-muted-foreground mt-1">Snooze a ticket to hide it until later.</p>
         </div>
       );
     }
@@ -1287,18 +1468,18 @@ export default function TicketsPage() {
     );
   };
 
-  // Reply form JSX — rendered inline in the parent so the ref stays connected
+  // Reply form JSX
   const replyForm = selectedTicket && (
     <div className="border-t bg-card flex-shrink-0">
-      {/* Mode tabs — compact pill toggle */}
+      {/* Mode tabs */}
       <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 pt-2.5 sm:pt-3 pb-2">
         <div className="flex gap-0.5 bg-muted rounded-md p-0.5">
           <button
             type="button"
-            onClick={() => setIsInternal(false)}
+            onClick={() => setReplyMode("reply")}
             className={cn(
               "flex items-center gap-1 rounded px-2 sm:px-2.5 py-1.5 text-xs font-medium transition-colors",
-              !isInternal
+              replyMode === "reply"
                 ? "bg-blue-600 text-white shadow-sm"
                 : "text-muted-foreground hover:text-foreground"
             )}
@@ -1308,10 +1489,10 @@ export default function TicketsPage() {
           </button>
           <button
             type="button"
-            onClick={() => setIsInternal(true)}
+            onClick={() => setReplyMode("note")}
             className={cn(
               "flex items-center gap-1 rounded px-2 sm:px-2.5 py-1.5 text-xs font-medium transition-colors",
-              isInternal
+              replyMode === "note"
                 ? "bg-amber-500 text-white shadow-sm"
                 : "text-muted-foreground hover:text-foreground"
             )}
@@ -1319,14 +1500,32 @@ export default function TicketsPage() {
             <Lock className="h-3 w-3" />
             Note
           </button>
+          <button
+            type="button"
+            onClick={() => setReplyMode("forward")}
+            className={cn(
+              "flex items-center gap-1 rounded px-2 sm:px-2.5 py-1.5 text-xs font-medium transition-colors",
+              replyMode === "forward"
+                ? "bg-purple-600 text-white shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <Forward className="h-3 w-3" />
+            Fwd
+          </button>
         </div>
 
-        {/* Reply context inline — hidden on very small screens */}
-        {!isInternal && (
-          <span className="text-[11px] text-muted-foreground truncate hidden sm:inline">
-            to {selectedTicket.user_email || <span className="text-amber-600 dark:text-amber-400">no email</span>}
-            {selectedTicket.inbox_email && <> via {selectedTicket.inbox_email.split("@")[0]}</>}
-          </span>
+        {/* Reply context */}
+        {replyMode === "reply" && (
+          <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground truncate hidden sm:flex">
+            <span>to {selectedTicket.user_email || <span className="text-amber-600 dark:text-amber-400">no email</span>}</span>
+            {selectedTicket.inbox_email && <span>via {selectedTicket.inbox_email.split("@")[0]}</span>}
+            {!showCc && (
+              <button type="button" onClick={() => setShowCc(true)} className="text-primary hover:underline ml-1">
+                CC
+              </button>
+            )}
+          </div>
         )}
 
         <div className="flex-1" />
@@ -1370,12 +1569,12 @@ export default function TicketsPage() {
                         <div key={category}>
                           <p className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{category}</p>
                           {items.map((r) => (
-                            <div key={r.id} className="group flex items-center gap-1 rounded px-2 py-1 cursor-pointer hover:bg-muted transition-colors">
+                            <div key={r.id} className="group/canned flex items-center gap-1 rounded px-2 py-1 cursor-pointer hover:bg-muted transition-colors">
                               <button type="button" className="flex-1 text-left" onClick={() => insertCanned(r.content)}>
                                 <p className="text-xs font-medium">{r.title}</p>
                                 <p className="text-[10px] text-muted-foreground line-clamp-1">{r.content}</p>
                               </button>
-                              <Button variant="ghost" size="sm" className="h-4 w-4 p-0 opacity-0 group-hover:opacity-100" onClick={(e) => { e.stopPropagation(); deleteCannedResponse(r.id); }}>
+                              <Button variant="ghost" size="sm" className="h-4 w-4 p-0 opacity-0 group-hover/canned:opacity-100" onClick={(e) => { e.stopPropagation(); deleteCannedResponse(r.id); }}>
                                 <X className="h-2.5 w-2.5" />
                               </Button>
                             </div>
@@ -1396,9 +1595,55 @@ export default function TicketsPage() {
         </Popover>
       </div>
 
+      {/* Forward-to field */}
+      {replyMode === "forward" && (
+        <div className="px-3 sm:px-4 pb-2">
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-medium text-muted-foreground w-8">To:</span>
+            <Input
+              placeholder="Forward to email..."
+              value={forwardTo}
+              onChange={(e) => setForwardTo(e.target.value)}
+              className="h-7 text-xs flex-1"
+              type="email"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* CC field */}
+      {showCc && replyMode === "reply" && (
+        <div className="px-3 sm:px-4 pb-2">
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-medium text-muted-foreground w-8">CC:</span>
+            <div className="flex-1 flex flex-wrap items-center gap-1 border rounded-md px-2 py-1 min-h-[28px]">
+              {ccEmails.map((email) => (
+                <span key={email} className="inline-flex items-center gap-0.5 bg-muted rounded px-1.5 py-0.5 text-[10px]">
+                  {email}
+                  <button type="button" onClick={() => removeCcEmail(email)}>
+                    <X className="h-2.5 w-2.5" />
+                  </button>
+                </span>
+              ))}
+              <input
+                placeholder="Add CC email..."
+                value={ccInput}
+                onChange={(e) => setCcInput(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === ",") { e.preventDefault(); addCcEmail(); } }}
+                onBlur={addCcEmail}
+                className="flex-1 min-w-[120px] text-xs bg-transparent outline-none"
+              />
+            </div>
+            <Button variant="ghost" size="sm" className="h-5 w-5 p-0" onClick={() => { setShowCc(false); setCcEmails([]); setCcInput(""); }}>
+              <X className="h-3 w-3" />
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Editor area */}
       <div className="px-3 sm:px-4 pb-2 sm:pb-3">
-        {isInternal ? (
+        {replyMode === "note" ? (
           <Textarea
             placeholder="Internal note (only visible to admins)..."
             value={noteContent}
@@ -1407,20 +1652,24 @@ export default function TicketsPage() {
             className="resize-y min-h-[60px] sm:min-h-[72px] text-sm"
           />
         ) : (
-          <RichEditor ref={editorRef} placeholder="Write your reply..." />
+          <RichEditor ref={editorRef} placeholder={replyMode === "forward" ? "Add a message (optional)..." : "Write your reply..."} />
         )}
       </div>
 
       {/* Footer with send */}
       <div className="flex items-center justify-between px-3 sm:px-4 pb-3">
-        {!isInternal && !selectedTicket.user_email ? (
+        {replyMode === "reply" && !selectedTicket.user_email ? (
           <p className="text-[11px] text-amber-600 dark:text-amber-400 flex items-center gap-1">
             <AlertTriangle className="h-3 w-3" />
             No email — saved as note only
           </p>
-        ) : !isInternal ? (
+        ) : replyMode === "reply" ? (
           <p className="text-[11px] text-muted-foreground">
             Signature included automatically
+          </p>
+        ) : replyMode === "forward" ? (
+          <p className="text-[11px] text-muted-foreground">
+            Original message will be included
           </p>
         ) : (
           <div />
@@ -1429,17 +1678,19 @@ export default function TicketsPage() {
           size="sm"
           onClick={addNote}
           disabled={sendingNote}
-          variant={isInternal ? "outline" : "default"}
-          className="gap-1.5"
+          variant={replyMode === "note" ? "outline" : "default"}
+          className={cn("gap-1.5", replyMode === "forward" && "bg-purple-600 hover:bg-purple-700")}
         >
           {sendingNote ? (
             <Loader2 className="h-3.5 w-3.5 animate-spin" />
-          ) : isInternal ? (
+          ) : replyMode === "note" ? (
             <StickyNote className="h-3.5 w-3.5" />
+          ) : replyMode === "forward" ? (
+            <Forward className="h-3.5 w-3.5" />
           ) : (
             <Send className="h-3.5 w-3.5" />
           )}
-          {isInternal ? "Add Note" : "Send"}
+          {replyMode === "note" ? "Add Note" : replyMode === "forward" ? "Forward" : "Send"}
         </Button>
       </div>
     </div>
@@ -1447,15 +1698,53 @@ export default function TicketsPage() {
 
   const hasActiveFilters = typeFilter !== "all" || priorityFilter !== "all";
 
+  // Primary tabs (always shown) and secondary tabs (in dropdown)
+  const primaryTabs: { key: QuickFilter; label: string; count: number }[] = [
+    { key: "open", label: "Open", count: stats.new + stats.open },
+    { key: "mine", label: "Mine", count: stats.mine },
+    { key: "starred", label: "Starred", count: stats.starred },
+    { key: "unassigned", label: "Unassigned", count: stats.unassigned },
+    { key: "resolved", label: "Done", count: stats.resolved },
+    { key: "sent", label: "Sent", count: stats.sent },
+  ];
+
+  const secondaryTabs: { key: QuickFilter | "folder:spam" | "folder:trash"; label: string; count: number; icon: React.ElementType }[] = [
+    { key: "snoozed", label: "Snoozed", count: stats.snoozed, icon: AlarmClock },
+    { key: "all", label: "All", count: stats.total, icon: Inbox },
+    { key: "folder:spam", label: "Spam", count: 0, icon: ShieldBan },
+    { key: "folder:trash", label: "Trash", count: 0, icon: Trash2 },
+  ];
+
+  const handleTabClick = (key: string) => {
+    if (key === "folder:spam") {
+      setFolder("spam");
+      setQuickFilter("all");
+    } else if (key === "folder:trash") {
+      setFolder("trash");
+      setQuickFilter("all");
+    } else {
+      if (folder !== "inbox") setFolder("inbox");
+      setQuickFilter(key as QuickFilter);
+    }
+    setFocusedIndex(-1);
+    setShowMoreTabs(false);
+    setSelected(new Set());
+    setSelectedTicket(null);
+  };
+
+  const activeTabKey = folder !== "inbox" ? `folder:${folder}` : quickFilter;
+
   return (
     <div className="space-y-3">
       {/* Compact header row */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 sm:gap-3">
-          <h1 className="text-lg sm:text-xl font-bold tracking-tight">Inbox</h1>
-          {stats.new > 0 && (
+          <h1 className="text-lg sm:text-xl font-bold tracking-tight">
+            {folder === "spam" ? "Spam" : folder === "trash" ? "Trash" : "Inbox"}
+          </h1>
+          {folder === "inbox" && stats.unread > 0 && (
             <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 px-2 py-0.5 text-xs font-medium">
-              {stats.new} new
+              {stats.unread} unread
             </span>
           )}
         </div>
@@ -1467,6 +1756,8 @@ export default function TicketsPage() {
           <div className="hidden lg:flex items-center gap-1.5 text-[11px] text-muted-foreground">
             <kbd className="px-1 py-0.5 rounded bg-muted border text-[10px]">j</kbd><kbd className="px-1 py-0.5 rounded bg-muted border text-[10px]">k</kbd>
             <span>nav</span>
+            <kbd className="px-1 py-0.5 rounded bg-muted border text-[10px] ml-1.5">s</kbd>
+            <span>star</span>
             <kbd className="px-1 py-0.5 rounded bg-muted border text-[10px] ml-1.5">r</kbd>
             <span>reply</span>
             <kbd className="px-1 py-0.5 rounded bg-muted border text-[10px] ml-1.5">e</kbd>
@@ -1475,28 +1766,21 @@ export default function TicketsPage() {
         </div>
       </div>
 
-      {/* Split pane: ticket list + detail (desktop) / full-width list (mobile) */}
+      {/* Split pane */}
       <div className="lg:grid lg:grid-cols-[380px_1fr] lg:gap-0 lg:border lg:rounded-lg lg:overflow-hidden lg:bg-card" style={{ height: "calc(100vh - 140px)" }}>
         {/* Left: Ticket list */}
         <div className="border rounded-lg lg:rounded-none lg:border-0 lg:border-r bg-card flex flex-col overflow-hidden" style={{ height: "calc(100vh - 140px)" }}>
 
-          {/* Filter tabs inside list pane */}
+          {/* Filter tabs */}
           <div className="flex items-center border-b overflow-x-auto flex-shrink-0 scrollbar-hide px-1">
-            {([
-              { key: "open" as QuickFilter, label: "Open", count: stats.new + stats.open },
-              { key: "mine" as QuickFilter, label: "Mine", count: stats.mine },
-              { key: "unassigned" as QuickFilter, label: "Unassigned", count: stats.unassigned },
-              { key: "resolved" as QuickFilter, label: "Done", count: stats.resolved + stats.closed },
-              { key: "sent" as QuickFilter, label: "Sent", count: stats.sent },
-              { key: "all" as QuickFilter, label: "All", count: stats.total },
-            ]).map((tab) => (
+            {primaryTabs.map((tab) => (
               <button
                 key={tab.key}
                 type="button"
-                onClick={() => { setQuickFilter(tab.key); setFocusedIndex(-1); }}
+                onClick={() => handleTabClick(tab.key)}
                 className={cn(
                   "px-2 py-2 text-[11px] font-medium border-b-2 transition-colors -mb-px whitespace-nowrap",
-                  quickFilter === tab.key
+                  activeTabKey === tab.key
                     ? "border-primary text-foreground"
                     : "border-transparent text-muted-foreground hover:text-foreground"
                 )}
@@ -1505,16 +1789,49 @@ export default function TicketsPage() {
                 {tab.count > 0 && (
                   <span className={cn(
                     "ml-1 text-[10px] rounded-full px-1.5 py-0.5",
-                    quickFilter === tab.key ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+                    activeTabKey === tab.key ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
                   )}>
                     {tab.count}
                   </span>
                 )}
               </button>
             ))}
+
+            {/* More dropdown */}
+            <Popover open={showMoreTabs} onOpenChange={setShowMoreTabs}>
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  className={cn(
+                    "px-2 py-2 text-[11px] font-medium border-b-2 -mb-px whitespace-nowrap flex items-center gap-0.5",
+                    secondaryTabs.some((t) => activeTabKey === t.key)
+                      ? "border-primary text-foreground"
+                      : "border-transparent text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  More
+                  <ChevronDown className="h-3 w-3" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-40 p-1" align="end">
+                {secondaryTabs.map((tab) => (
+                  <Button
+                    key={tab.key}
+                    variant="ghost"
+                    size="sm"
+                    className={cn("w-full justify-start h-7 text-xs gap-2", activeTabKey === tab.key && "bg-muted")}
+                    onClick={() => handleTabClick(tab.key)}
+                  >
+                    <tab.icon className="h-3 w-3" />
+                    {tab.label}
+                    {tab.count > 0 && <span className="ml-auto text-[10px] text-muted-foreground">{tab.count}</span>}
+                  </Button>
+                ))}
+              </PopoverContent>
+            </Popover>
           </div>
 
-          {/* Search + filter bar inside list pane */}
+          {/* Search + filter bar */}
           <div className="flex items-center gap-1.5 px-3 py-2 border-b flex-shrink-0">
             <div className="relative flex-1">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
@@ -1590,22 +1907,35 @@ export default function TicketsPage() {
               </div>
               {selected.size > 0 && (
                 <div className="flex items-center gap-0.5">
-                  <Button variant="ghost" size="sm" className="h-6 text-[11px] px-1.5 gap-1" disabled={bulkLoading} onClick={() => bulkUpdate({ status: "closed" })}>
-                    <CheckCircle className="h-3 w-3" /> Done
-                  </Button>
+                  {folder === "inbox" && (
+                    <>
+                      <Button variant="ghost" size="sm" className="h-6 text-[11px] px-1.5 gap-1" disabled={bulkLoading} onClick={() => bulkUpdate({ status: "closed" })}>
+                        <CheckCircle className="h-3 w-3" /> Done
+                      </Button>
+                      <Button variant="ghost" size="sm" className="h-6 text-[11px] px-1.5 gap-1" disabled={bulkLoading} onClick={() => moveToFolder(Array.from(selected), "spam")}>
+                        <ShieldBan className="h-3 w-3" /> Spam
+                      </Button>
+                    </>
+                  )}
+                  {(folder === "spam" || folder === "trash") && (
+                    <Button variant="ghost" size="sm" className="h-6 text-[11px] px-1.5 gap-1" disabled={bulkLoading} onClick={() => moveToFolder(Array.from(selected), "inbox")}>
+                      <ArchiveRestore className="h-3 w-3" /> Inbox
+                    </Button>
+                  )}
                   <Button variant="ghost" size="sm" className="h-6 text-[11px] px-1.5 text-destructive" disabled={bulkLoading} onClick={bulkDelete}>
                     <Trash2 className="h-3 w-3" />
+                    {folder === "trash" ? " Delete" : ""}
                   </Button>
                 </div>
               )}
             </div>
           )}
+
           <ScrollArea className="flex-1 [&>div]:overscroll-contain">
             {openTickets.length === 0 && resolvedTickets.length === 0 ? (
               renderEmptyState()
             ) : (
               <>
-                {/* Active tickets (visible on mobile too) */}
                 <div className="lg:hidden">
                   {openTickets.length === 0
                     ? renderEmptyState()
@@ -1617,19 +1947,14 @@ export default function TicketsPage() {
                     : renderTicketList(openTickets, false)}
                 </div>
 
-                {/* Done tickets (only in "all" view) */}
                 {quickFilter === "all" && resolvedTickets.length > 0 && (
                   <div className="border-t">
                     <div className="px-4 py-2 text-[11px] font-medium text-muted-foreground uppercase tracking-wider bg-muted/30">
                       Done ({resolvedTickets.length})
                     </div>
                     <div className="opacity-60">
-                      <div className="hidden lg:block">
-                        {renderTicketList(resolvedTickets, false)}
-                      </div>
-                      <div className="lg:hidden">
-                        {renderTicketList(resolvedTickets, true)}
-                      </div>
+                      <div className="hidden lg:block">{renderTicketList(resolvedTickets, false)}</div>
+                      <div className="lg:hidden">{renderTicketList(resolvedTickets, true)}</div>
                     </div>
                   </div>
                 )}
@@ -1646,10 +1971,13 @@ export default function TicketsPage() {
                 ticket={selectedTicket}
                 tickets={tickets}
                 staff={staff}
+                userId={userId}
                 onSelectTicket={openTicket}
                 updateStatus={updateStatus}
                 updatePriority={updatePriority}
                 assignTicket={assignTicket}
+                toggleStar={toggleStar}
+                onSnooze={snoozeTicket}
               />
               {replyForm}
             </>
@@ -1682,10 +2010,13 @@ export default function TicketsPage() {
                 ticket={selectedTicket}
                 tickets={tickets}
                 staff={staff}
+                userId={userId}
                 onSelectTicket={openTicket}
                 updateStatus={updateStatus}
                 updatePriority={updatePriority}
                 assignTicket={assignTicket}
+                toggleStar={toggleStar}
+                onSnooze={snoozeTicket}
               />
               {replyForm}
             </>

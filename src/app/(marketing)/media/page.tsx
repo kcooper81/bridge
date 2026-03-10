@@ -66,6 +66,7 @@ export const metadata: Metadata = generatePageMetadata({
   description:
     "Download TeamPrompt logos, brand colors, extension marketplace assets, and media resources for press, partnerships, and store submissions.",
   path: "/media",
+  noIndex: true,
   keywords: ["brand assets", "press kit", "media resources"],
 });
 

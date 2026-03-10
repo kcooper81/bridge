@@ -15,7 +15,14 @@ export async function POST(
 
   const { ticketId } = await params;
   const body = await request.json();
-  const { content, is_internal = true, is_html = false } = body;
+  const {
+    content,
+    is_internal = true,
+    is_html = false,
+    cc = [],
+    action = "reply", // "reply" | "forward"
+    forward_to,
+  } = body;
 
   if (!content || typeof content !== "string" || !content.trim()) {
     return NextResponse.json(
@@ -29,7 +36,7 @@ export async function POST(
   // Verify ticket exists and get details for potential email
   const { data: ticket, error: ticketError } = await db
     .from("feedback")
-    .select("id, subject, message, status, user_id, inbox_email, sender_email, assigned_to")
+    .select("id, subject, message, html_body, status, user_id, inbox_email, sender_email, sender_name, assigned_to")
     .eq("id", ticketId)
     .single();
 
@@ -54,6 +61,11 @@ export async function POST(
     if (emailMatch) recipientEmail = emailMatch[1];
   }
 
+  // Validate CC emails
+  const validCc = (Array.isArray(cc) ? cc : []).filter(
+    (email: string) => typeof email === "string" && email.includes("@")
+  );
+
   // Insert the note FIRST — ensures we never lose data even if email fails
   const { data: note, error: insertError } = await db
     .from("ticket_notes")
@@ -61,10 +73,11 @@ export async function POST(
       ticket_id: ticketId,
       author_id: auth.userId,
       content: content.trim(),
-      is_internal: is_internal,
+      is_internal: is_internal && action !== "forward",
       email_sent: false,
+      cc_emails: validCc,
     })
-    .select("id, content, is_internal, email_sent, created_at")
+    .select("id, content, is_internal, email_sent, cc_emails, created_at")
     .single();
 
   if (insertError) {
@@ -87,7 +100,11 @@ export async function POST(
 
   // Now send email if public note and we have a recipient
   let emailSent = false;
-  if (!is_internal && recipientEmail && process.env.RESEND_API_KEY) {
+  const isForward = action === "forward" && forward_to;
+  const shouldSendEmail = (!is_internal || isForward) && process.env.RESEND_API_KEY;
+  const targetEmail = isForward ? forward_to : recipientEmail;
+
+  if (shouldSendEmail && targetEmail) {
     try {
       const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -102,21 +119,42 @@ export async function POST(
       const label = mailbox?.display_name || "TeamPrompt";
       const fromEmail = `${label} <${inbox}>`;
 
-      await resend.emails.send({
+      const subjectPrefix = isForward ? "Fwd:" : "Re:";
+      const subjectLine = `${subjectPrefix} ${ticket.subject || "Your support request"} [Ticket#${ticket.id}]`;
+
+      // For forwards, include original message context
+      const originalForForward = isForward
+        ? `${ticket.html_body || ticket.message}`
+        : ticket.message;
+
+      const sendOptions: {
+        from: string;
+        to: string;
+        cc?: string[];
+        subject: string;
+        html: string;
+      } = {
         from: fromEmail,
-        to: recipientEmail,
-        subject: `Re: ${ticket.subject || "Your support request"} [Ticket#${ticket.id}]`,
+        to: targetEmail,
+        subject: subjectLine,
         html: buildTicketResponseEmail({
           ticketSubject: ticket.subject || "Your support request",
           responseBody: content.trim(),
           isHtml: is_html,
-          originalMessage: ticket.message,
+          originalMessage: originalForForward,
           senderLabel: label,
           senderEmail: inbox,
           signatureHtml: mailbox?.signature_html || undefined,
           useBrandedTemplate: mailbox?.use_branded_template !== false,
         }),
-      });
+      };
+
+      // Add CC recipients
+      if (validCc.length > 0 && !isForward) {
+        sendOptions.cc = validCc;
+      }
+
+      await resend.emails.send(sendOptions);
       emailSent = true;
 
       // Update note to reflect email was sent
@@ -135,6 +173,6 @@ export async function POST(
       email_sent: emailSent,
       author_email: auth.email,
     },
-    recipient_email: recipientEmail,
+    recipient_email: targetEmail,
   });
 }

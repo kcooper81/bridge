@@ -207,6 +207,13 @@
   - Configurable support staff page access — ADMIN_PAGES constant, SupportAccessGuard, PATCH endpoint
 
 ## Pending
+- [ ] Customizable dashboard — drag-and-drop widget layout (deferred)
+  - Allow admins/managers to choose which dashboard widgets to show and reorder them
+  - Consider react-grid-layout or dnd-kit for drag-and-drop
+  - Persist layout preference per user (user_preferences table or localStorage)
+- [ ] Role-differentiated dashboards — members vs admin/manager views
+  - Members: personal prompt stats, team prompts, usage, favorites
+  - Admins/Managers: full org overview with guardrails, team activity, compliance
 - [ ] Guardrail security hardening for sensitive pattern data (passwords, secrets)
   - Evaluate encryption-at-rest for custom DLP patterns
   - Assess if admin custom patterns could contain example sensitive data
@@ -276,3 +283,19 @@
   - Settings: scrollable tab bar (`overflow-x-auto scrollbar-hide`), container padding
   - Sidebar: `max-w-[280px]` on mobile sheet
   - Admin views: responsive stat cards, stacking headers, tighter ticket UI on mobile
+
+- [x] Expanded Compliance Packs & Guardrail Enhancements (v1.10.0)
+  - 13 new compliance packs: FERPA, GLBA, NIST 800-171, FedRAMP, NAIC, ITAR, CJIS, COPPA, FTC/Retail, HITECH, SOX, RESPA/TILA, Legal Privilege (19 total, 88 rules)
+  - `source_pack` column on security_rules (migration 052) for tracking which pack each rule came from
+  - Pack filter dropdown on Policies tab (filter by installed pack or "no pack")
+  - Source column on Policies table showing pack badge / Default / Custom
+  - Browse All Packs modal with 8 industry groups (Healthcare, Education, Finance, etc.)
+  - Sortable Policies table (name, source, scope, category, severity, active)
+  - Sortable Violations table (date, user, policy, detection, action)
+  - Enhanced guardrail stats: active/inactive count, week-over-week violation trend, block rate, top triggered rule
+  - Analytics page: Guardrail Activity section (blocks, warnings, block rate, flagged users, triggered rules bar chart, per-member table)
+  - Dashboard: Guardrail Activity widget for admin/manager (blocks/warnings this week, top 3 rules)
+  - Manage Teams modal — centralized team CRUD, removed edit/delete from filter chips
+  - Fixed org chart team detail — edit/delete modals now render in the early return branch
+  - Help docs updated with 4 new articles + updated 4 existing articles
+  - Testing guide updated with 10+ new test steps

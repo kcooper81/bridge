@@ -7,9 +7,25 @@ export interface ReleaseNote {
   badge?: "new" | "fix" | "improvement";
 }
 
-export const APP_VERSION = "1.9.0";
+export const APP_VERSION = "1.10.0";
 
 export const RELEASE_NOTES: ReleaseNote[] = [
+  {
+    version: "1.10.0",
+    date: "2026-03-09",
+    title: "19 Compliance Packs, Sortable Tables & Guardrail Insights",
+    highlights: [
+      "13 new compliance packs — FERPA, GLBA, NIST 800-171, FedRAMP, NAIC, ITAR, CJIS, COPPA, FTC/Retail, HITECH, SOX, RESPA/TILA, and Legal Privilege (19 total across 8 industries)",
+      "Browse All Packs modal — explore compliance packs organized by industry category with install status",
+      "Sortable guardrail tables — click any column header on Policies or Violations to sort ascending/descending",
+      "Pack source tracking & filtering — see which compliance pack each rule came from, filter policies by pack",
+      "Smarter guardrail stats — week-over-week violation trends, block rate, top triggered rule, active/inactive policy counts",
+      "Dashboard & Analytics guardrail widgets — admins and managers see guardrail activity, top triggered rules, and per-user breakdowns",
+      "Manage Teams modal — centralized team management (create, edit, delete) without cluttering filter chips",
+      "Fixed org chart team detail — edit and delete now work correctly from within team drill-down views",
+    ],
+    badge: "new",
+  },
   {
     version: "1.9.0",
     date: "2026-03-09",

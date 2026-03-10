@@ -20,7 +20,7 @@ export interface ComplianceTemplate {
   id: string;
   name: string;
   description: string;
-  framework: "hipaa" | "gdpr" | "pci_dss" | "ccpa" | "sox" | "soc2" | "general" | "ferpa" | "glba" | "nist" | "fedramp" | "naic" | "itar" | "cjis" | "fisma" | "coppa" | "ftc";
+  framework: "hipaa" | "gdpr" | "pci_dss" | "ccpa" | "sox" | "soc2" | "general" | "ferpa" | "glba" | "nist" | "fedramp" | "naic" | "itar" | "cjis" | "coppa" | "ftc";
   rules: ComplianceRule[];
 }
 

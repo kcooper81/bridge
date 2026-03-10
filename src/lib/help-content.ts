@@ -216,8 +216,13 @@ const _RAW_CATEGORIES: RawCategory[] = [
       },
       {
         q: "Where can I see violation history?",
-        a: "All violations are logged automatically. View them on the Activity Log page (under Intelligence in the sidebar), in the Security Rules page's recent violations section, or in the extension's Shield tab. Each entry shows the rule that triggered, the redacted matched text, and the action taken.",
+        a: "All violations are logged automatically. View them on the Activity Log page (under Intelligence in the sidebar), in the Security Rules page's Violations tab, or in the extension's Shield tab. Each entry shows the rule that triggered, the redacted matched text, and the action taken. The Violations table is sortable by date, user, policy, detection type, and action taken.",
         keywords: ["violations", "history", "log", "audit", "activity"],
+      },
+      {
+        q: "What do the guardrail stats show?",
+        a: "The Security Rules page displays four stat cards at the top:\n\n• **Active / Inactive Policies** — how many of your rules are currently enabled vs. disabled.\n• **Violations** — total violation count with a week-over-week trend indicator showing whether violations are increasing or decreasing.\n• **Block Rate** — the percentage of violations that resulted in a hard block (vs. warning).\n• **Top Triggered Rule** — the most frequently triggered rule by name, or a prompt to install packs if no violations exist yet.\n\nThese stats give admins and managers an at-a-glance view of guardrail effectiveness.",
+        keywords: ["guardrail stats", "statistics", "block rate", "trend", "top triggered", "active policies"],
       },
       {
         q: "How do I enable security rules for the first time?",
@@ -231,8 +236,23 @@ const _RAW_CATEGORIES: RawCategory[] = [
       },
       {
         q: "What are compliance policy packs?",
-        a: "Compliance policy packs are pre-built bundles of security rules designed for specific regulatory frameworks. TeamPrompt includes 6 packs: HIPAA (protected health information), GDPR (EU personal data), PCI-DSS (payment card data), CCPA (California consumer privacy), SOC 2 (service organization controls), and General PII (common personally identifiable information). Install any pack with one click from the Security Rules page — all relevant rules activate immediately. You can customize or extend any pack after installation.",
-        keywords: ["compliance", "policy packs", "hipaa", "gdpr", "pci-dss", "ccpa", "soc2", "regulatory"],
+        a: "Compliance policy packs are pre-built bundles of security rules designed for specific regulatory frameworks. TeamPrompt includes 19 packs across 8 industry categories:\n\n• **Healthcare**: HIPAA (protected health information), HITECH (health IT enforcement)\n• **Education**: FERPA (student data privacy)\n• **Finance & Banking**: PCI-DSS (payment card data), GLBA (financial privacy), SOX (financial reporting controls)\n• **Privacy & Consumer**: GDPR (EU personal data), CCPA (California consumer privacy), COPPA (children's online privacy), FTC/Retail (consumer data practices), General PII (common personally identifiable information)\n• **Government & Defense**: NIST 800-171 (controlled unclassified information), FedRAMP (federal cloud security), CJIS (criminal justice information), ITAR (defense trade controls)\n• **Insurance**: NAIC (insurance data security model law)\n• **Real Estate & Legal**: RESPA/TILA (mortgage and lending disclosures), Legal Privilege (attorney-client and litigation hold)\n• **Technology & Operations**: SOC 2 (service organization controls)\n\nInstall any pack with one click from the Security Rules page — all relevant rules activate immediately. You can customize or extend any pack after installation.",
+        keywords: ["compliance", "policy packs", "hipaa", "gdpr", "pci-dss", "ccpa", "soc2", "regulatory", "ferpa", "glba", "nist", "fedramp", "cjis", "itar", "coppa", "hitech", "sox", "naic", "respa", "tila", "legal privilege"],
+      },
+      {
+        q: "How do I browse and install compliance packs?",
+        a: "On the Security Rules page (Policies tab), click \"Browse All Packs\" to open the compliance pack browser. Packs are organized by industry category — Healthcare, Education, Finance, Privacy, Government, Insurance, Real Estate & Legal, and Technology. Each pack shows its name, description, number of rules, and whether it's already installed. Click \"Install\" to add all rules from a pack. Installed packs show a green checkmark. You can install multiple packs — rules from different packs work together seamlessly.",
+        keywords: ["browse packs", "install pack", "compliance browser", "industry packs", "add pack"],
+      },
+      {
+        q: "How do I filter policies by compliance pack?",
+        a: "Once you've installed one or more compliance packs, a \"Pack\" filter dropdown appears on the Policies tab. Use it to filter rules by their source pack (e.g., show only HIPAA rules), show rules with no pack (custom rules), or view all rules. This makes it easy to audit which rules came from which framework.",
+        keywords: ["filter pack", "pack filter", "source pack", "compliance filter", "policy filter"],
+      },
+      {
+        q: "How do I sort the policies and violations tables?",
+        a: "Both the Policies and Violations tables have sortable columns. Click any column header to sort by that column — click again to reverse the direction. The arrow icon indicates the current sort. Policies can be sorted by name, source pack, scope, category, severity, or active status. Violations can be sorted by date, user, policy name, detection type, or action taken.",
+        keywords: ["sort", "sortable", "table sort", "column sort", "order", "policies table", "violations table"],
       },
       {
         q: "How does auto-sanitization work?",
@@ -307,8 +327,8 @@ const _RAW_CATEGORIES: RawCategory[] = [
       },
       {
         q: "How do teams (sub-groups) work?",
-        a: "Teams are sub-groups within your organization — for departments, projects, or functional groups. Create teams on the Team page, then assign members. Guidelines can be scoped to specific teams for targeted content.",
-        keywords: ["teams", "sub-groups", "departments", "organize", "assign"],
+        a: "Teams are sub-groups within your organization — for departments, projects, or functional groups. Create and manage teams using the \"Manage Teams\" button on the Team page (admin only), which opens a modal listing all teams with options to create, edit, or delete. Filter the member list by team using the filter chips. Guidelines and security rules can be scoped to specific teams for targeted content and policies.",
+        keywords: ["teams", "sub-groups", "departments", "organize", "assign", "manage teams"],
       },
       {
         q: "How do I change someone's role?",
@@ -347,8 +367,8 @@ const _RAW_CATEGORIES: RawCategory[] = [
       },
       {
         q: "How does the org chart view work?",
-        a: "Toggle between table and org chart view using the icons in the Team page toolbar. The org chart displays your teams as visual cards with member avatars, roles, and team counts. Click any team card header to manage that team. Members not assigned to any team appear in an 'Unassigned' card.",
-        keywords: ["org chart", "organization chart", "team view", "visual", "cards", "toggle view"],
+        a: "Toggle between table and org chart view using the icons in the Team page toolbar. The org chart displays your teams as visual cards with member avatars, roles, and team counts. Click any team card to drill into a detailed team view showing all members with their roles. From the detail view, admins can edit the team name/description or delete the team using the buttons in the header. Members not assigned to any team appear in an 'Unassigned' card. Use the \"Manage Teams\" button to create, edit, or delete teams from a centralized modal.",
+        keywords: ["org chart", "organization chart", "team view", "visual", "cards", "toggle view", "team detail"],
       },
       {
         q: "How do I add an existing member to another team?",
@@ -365,8 +385,13 @@ const _RAW_CATEGORIES: RawCategory[] = [
     articles: [
       {
         q: "What does the Analytics page show?",
-        a: "Analytics provides an overview of your workspace's AI usage — total interactions, most-used prompts, active users, interactions by AI tool, guardrail statistics, and prompt effectiveness metrics. The effectiveness view shows rating distributions, average scores, and trends over time so you can see which prompts actually deliver results. Use it to understand adoption patterns and identify opportunities.",
-        keywords: ["analytics", "dashboard", "metrics", "usage", "stats", "effectiveness", "ratings"],
+        a: "Analytics provides an overview of your workspace's AI usage — total interactions, most-used prompts, active users, interactions by AI tool, prompt effectiveness metrics, and guardrail activity.\n\nThe effectiveness view shows rating distributions, average scores, and trends over time so you can see which prompts actually deliver results.\n\nThe **Guardrail Activity** section (visible to admins and managers when violations exist) shows total blocks and warnings, block rate percentage, number of flagged users, a bar chart of most-triggered rules by severity, and a per-member violation breakdown table. Use it to understand adoption patterns, identify security risks, and track compliance.",
+        keywords: ["analytics", "dashboard", "metrics", "usage", "stats", "effectiveness", "ratings", "guardrail activity", "violations", "blocks", "warnings"],
+      },
+      {
+        q: "What guardrail data appears on the dashboard?",
+        a: "For admins and managers, the dashboard shows a Guardrail Activity widget when violations have been recorded. It displays blocks and warnings for the current week, total blocks, number of flagged users, and the top 3 most-triggered rules with severity badges and hit counts. Click the widget to navigate to the full Guardrails page for detailed analysis.",
+        keywords: ["dashboard", "guardrail widget", "guardrail summary", "blocks", "warnings", "admin dashboard"],
       },
       {
         q: "What is the Activity Log?",

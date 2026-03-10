@@ -70,7 +70,7 @@ const sections: Section[] = [
       {
         action: "Open the Dashboard",
         expected:
-          "Overview widgets load (total prompts, users, usage chart). Setup wizard appears if onboarding is incomplete.",
+          "Overview widgets load (total prompts, users, usage chart, guardrail activity if violations exist). Setup wizard appears if onboarding is incomplete.",
         priority: "P0",
       },
       {
@@ -116,21 +116,27 @@ const sections: Section[] = [
         priority: "P2",
       },
       {
-        action: "Create a new team",
+        action: "Create a new team via the 'Manage Teams' button on the Team page",
         expected:
-          "Team appears as a filter chip on the Team page.",
+          "Manage Teams modal opens. Click 'New Team' — create modal opens. After saving, team appears in the modal list and as a filter chip.",
         priority: "P0",
       },
       {
-        action: "Double-click a team chip to open team detail view, then click the pencil icon to edit",
+        action: "Edit a team from the Manage Teams modal (pencil icon)",
         expected:
-          "Edit modal opens with name and description pre-filled. Changes save and reflect immediately.",
+          "Edit modal opens with name and description pre-filled. Changes save and reflect immediately in both the modal list and filter chips.",
         priority: "P1",
       },
       {
-        action: "Delete a team from the team detail view (trash icon)",
+        action: "Delete a team from the Manage Teams modal (trash icon)",
         expected:
-          "Confirmation dialog shows member count. Team is removed and members are unlinked from it.",
+          "Confirmation dialog shows member count with reassign/remove options. Team is removed and members are handled per selection.",
+        priority: "P1",
+      },
+      {
+        action: "In org chart view, click a team card to drill into team detail, then click Edit or Delete",
+        expected:
+          "Edit and Delete buttons work from within the team detail view. Edit opens modal, Delete shows confirmation. No need to navigate back first.",
         priority: "P1",
       },
       {
@@ -274,7 +280,7 @@ const sections: Section[] = [
         action:
           "Install a compliance pack (e.g. HIPAA) — click Preview first, then Install",
         expected:
-          "Preview shows example rules and patterns. After install, rules appear in the Guardrails page.",
+          "Preview shows example rules and patterns. After install, rules appear in the Guardrails Policies tab with the pack name in the Source column.",
         priority: "P0",
       },
       {
@@ -283,6 +289,48 @@ const sections: Section[] = [
         expected:
           "Guardrails detection fires (block or warn depending on rule severity).",
         priority: "P0",
+      },
+      {
+        action:
+          'Click "Browse All Packs" on the Guardrails Policies tab',
+        expected:
+          "Modal opens showing 19 compliance packs grouped into 8 industry categories (Healthcare, Education, Finance, etc.). Installed packs show a green checkmark.",
+        priority: "P1",
+      },
+      {
+        action:
+          "Install a pack from the Browse All Packs modal, then check the Policies tab",
+        expected:
+          "Pack installs. Rules appear in the Policies table with the pack name badge in the Source column. Pack filter dropdown now includes the installed pack.",
+        priority: "P1",
+      },
+      {
+        action:
+          "Use the Pack filter dropdown on the Policies tab to filter by an installed pack",
+        expected:
+          "Table filters to show only rules from the selected pack. Selecting 'No Pack' shows custom/default rules. 'All' shows everything.",
+        priority: "P1",
+      },
+      {
+        action:
+          "Click column headers on the Policies table (Name, Source, Scope, Category, Severity, Active)",
+        expected:
+          "Table sorts by the clicked column. Clicking again reverses sort direction. Arrow icon indicates current sort.",
+        priority: "P1",
+      },
+      {
+        action:
+          "Click column headers on the Violations table (Date, User, Policy, Detection, Action)",
+        expected:
+          "Table sorts by the clicked column. Clicking again reverses sort direction.",
+        priority: "P1",
+      },
+      {
+        action:
+          "Check the 4 stat cards at the top of the Guardrails page",
+        expected:
+          "Shows: Active/Inactive policies count, violations with week-over-week trend arrow, block rate percentage, and top triggered rule name. If no violations, shows 'Install packs' prompt.",
+        priority: "P1",
       },
       {
         action:
@@ -314,6 +362,18 @@ const sections: Section[] = [
         action: "View Analytics page",
         expected:
           "Charts render (usage over time, top prompts, user activity). Data is current.",
+        priority: "P1",
+      },
+      {
+        action: "Scroll to the Guardrail Activity section on Analytics (requires violations)",
+        expected:
+          "Shows 4 stat cards (Total Blocks with weekly count, Total Warnings, Block Rate, Users Flagged), most-triggered rules bar chart with severity badges, and per-member violations breakdown table.",
+        priority: "P1",
+      },
+      {
+        action: "Check the Dashboard for Guardrail Activity widget (requires violations)",
+        expected:
+          "Dashboard shows Guardrail Activity card with blocks/warnings this week, total blocks, users flagged, and top 3 triggered rules. Links to /guardrails. Only visible to admin/manager.",
         priority: "P1",
       },
       {

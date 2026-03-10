@@ -130,7 +130,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${baseUrl}/help`, lastModified: today, changeFrequency: "monthly", priority: 0.7 },
     { url: `${baseUrl}/contact`, lastModified: today, changeFrequency: "monthly", priority: 0.7 },
     { url: `${baseUrl}/changelog`, lastModified: today, changeFrequency: "weekly", priority: 0.6 },
-    { url: `${baseUrl}/media`, lastModified: today, changeFrequency: "monthly", priority: 0.6 },
     { url: `${baseUrl}/privacy`, lastModified: today, changeFrequency: "monthly", priority: 0.4 },
     { url: `${baseUrl}/terms`, lastModified: today, changeFrequency: "monthly", priority: 0.4 },
   ];

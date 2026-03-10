@@ -210,6 +210,12 @@ export async function POST(request: NextRequest) {
     const { inboxEmail, ticketType } = detectInbox(toAddresses, headers);
     const body = text || (html ? htmlToText(html) : "");
 
+    // Extract CC addresses from headers
+    const ccHeader = headers.find?.((h: { name: string }) => h.name?.toLowerCase() === "cc")?.value || "";
+    const ccEmails = ccHeader
+      ? ccHeader.split(",").map((addr: string) => extractEmail(addr.trim())).filter((e: string) => e && e.includes("@") && !e.endsWith("@teamprompt.app"))
+      : [];
+
     // Extract attachment metadata
     const rawAttachments = data.attachments || [];
     const attachments = Array.isArray(rawAttachments)
@@ -304,6 +310,7 @@ export async function POST(request: NextRequest) {
         priority: ticketType === "sales" ? "high" : "normal",
         inbox_email: inboxEmail,
         attachments: attachments,
+        cc_emails: ccEmails,
       })
       .select("id")
       .single();

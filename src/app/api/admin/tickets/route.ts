@@ -2,17 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { verifyAdminAccess } from "@/lib/admin-auth";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const auth = await verifyAdminAccess();
   if (!auth) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   const db = createServiceClient();
+  const folder = request.nextUrl.searchParams.get("folder") || "inbox";
 
   const { data: tickets, error } = await db
     .from("feedback")
-    .select("id, type, subject, message, html_body, sender_email, sender_name, status, priority, direction, user_id, org_id, inbox_email, attachments, assigned_to, created_at, updated_at")
+    .select("id, type, subject, message, html_body, sender_email, sender_name, status, priority, direction, user_id, org_id, inbox_email, attachments, assigned_to, starred_by, snoozed_until, folder, cc_emails, created_at, updated_at")
+    .eq("folder", folder)
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -23,7 +25,7 @@ export async function GET() {
   // Collect ticket IDs for batch notes fetch
   const ticketIds = (tickets || []).map((t) => t.id);
 
-  // Resolve user emails, org names, and notes in parallel
+  // Resolve user emails, org names, notes, assignees, and read status in parallel
   const userIds = Array.from(
     new Set((tickets || []).map((t) => t.user_id).filter(Boolean) as string[])
   );
@@ -34,22 +36,25 @@ export async function GET() {
     new Set((tickets || []).map((t) => t.assigned_to).filter(Boolean) as string[])
   );
 
-  const [usersRes, orgsRes, notesRes, assigneesRes] = await Promise.all([
+  const [usersRes, orgsRes, notesRes, assigneesRes, readsRes] = await Promise.all([
     userIds.length > 0
       ? db.from("profiles").select("id, email").in("id", userIds)
       : { data: [] },
     orgIds.length > 0
-      ? db.from("organizations").select("id, name").in("id", orgIds)
+      ? db.from("organizations").select("id, name, plan").in("id", orgIds)
       : { data: [] },
     ticketIds.length > 0
       ? db
           .from("ticket_notes")
-          .select("id, ticket_id, author_id, content, is_internal, email_sent, created_at")
+          .select("id, ticket_id, author_id, content, is_internal, email_sent, cc_emails, created_at")
           .in("ticket_id", ticketIds)
           .order("created_at", { ascending: true })
       : { data: [] },
     assigneeIds.length > 0
       ? db.from("profiles").select("id, email, name").in("id", assigneeIds)
+      : { data: [] },
+    ticketIds.length > 0
+      ? db.from("ticket_reads").select("ticket_id, admin_id, read_at").eq("admin_id", auth.userId).in("ticket_id", ticketIds)
       : { data: [] },
   ]);
 
@@ -77,10 +82,15 @@ export async function GET() {
     (usersRes.data || []).map((u: { id: string; email: string }) => [u.id, u.email])
   );
   const orgMap = new Map(
-    (orgsRes.data || []).map((o: { id: string; name: string }) => [o.id, o.name])
+    (orgsRes.data || []).map((o: { id: string; name: string; plan?: string }) => [o.id, { name: o.name, plan: o.plan }])
   );
   const assigneeMap = new Map(
     (assigneesRes.data || []).map((a: { id: string; email: string; name: string }) => [a.id, { email: a.email, name: a.name }])
+  );
+
+  // Build read status set for current admin
+  const readSet = new Set(
+    (readsRes.data || []).map((r: { ticket_id: string }) => r.ticket_id)
   );
 
   // Combine both maps for author email lookup
@@ -95,6 +105,7 @@ export async function GET() {
     content: string;
     is_internal: boolean;
     email_sent: boolean;
+    cc_emails: string[];
     author_email: string | null;
     created_at: string;
   }>>();
@@ -106,6 +117,7 @@ export async function GET() {
     content: string;
     is_internal: boolean;
     email_sent: boolean;
+    cc_emails: string[] | null;
     created_at: string;
   }>) {
     const arr = notesMap.get(note.ticket_id) || [];
@@ -114,6 +126,7 @@ export async function GET() {
       content: note.content,
       is_internal: note.is_internal,
       email_sent: note.email_sent,
+      cc_emails: note.cc_emails || [],
       author_email: allUserMap.get(note.author_id) ?? null,
       created_at: note.created_at,
     });
@@ -134,6 +147,7 @@ export async function GET() {
 
     // Clean message for display: strip legacy "From: ..." prefix
     const displayMessage = t.message.replace(/^From:.*?\n\n/, "");
+    const orgInfo = t.org_id ? orgMap.get(t.org_id) : null;
 
     return {
       id: t.id,
@@ -147,12 +161,18 @@ export async function GET() {
       direction: t.direction || "inbound",
       user_id: t.user_id || null,
       user_email: senderEmail,
-      org_name: t.org_id ? orgMap.get(t.org_id) || null : null,
+      org_name: orgInfo?.name || null,
+      org_plan: orgInfo?.plan || null,
       inbox_email: t.inbox_email || null,
       assigned_to: t.assigned_to || null,
       assigned_email: t.assigned_to ? assigneeMap.get(t.assigned_to)?.email || null : null,
       assigned_name: t.assigned_to ? assigneeMap.get(t.assigned_to)?.name || null : null,
       attachments: t.attachments || [],
+      starred_by: t.starred_by || [],
+      snoozed_until: t.snoozed_until || null,
+      folder: t.folder || "inbox",
+      cc_emails: t.cc_emails || [],
+      is_read: readSet.has(t.id),
       notes: notesMap.get(t.id) || [],
       notes_count: (notesMap.get(t.id) || []).length,
       created_at: t.created_at,
@@ -170,14 +190,18 @@ export async function PATCH(request: NextRequest) {
   }
 
   const body = await request.json();
-  const { id, ids, status, priority, assigned_to } = body;
+  const { id, ids, status, priority, assigned_to, starred, snoozed_until, folder } = body;
 
   // Support single id or bulk ids
   const ticketIds: string[] = ids || (id ? [id] : []);
-  const hasAssignment = assigned_to !== undefined; // allow null to unassign
-  if (ticketIds.length === 0 || (!status && !priority && !hasAssignment)) {
+  const hasAssignment = assigned_to !== undefined;
+  const hasStar = starred !== undefined;
+  const hasSnooze = snoozed_until !== undefined;
+  const hasFolder = folder !== undefined;
+
+  if (ticketIds.length === 0 || (!status && !priority && !hasAssignment && !hasStar && !hasSnooze && !hasFolder)) {
     return NextResponse.json(
-      { error: "id(s) and at least one of status/priority/assigned_to required" },
+      { error: "id(s) and at least one update field required" },
       { status: 400 }
     );
   }
@@ -192,7 +216,25 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: "Invalid priority" }, { status: 400 });
   }
 
+  const validFolders = ["inbox", "spam", "trash"];
+  if (hasFolder && !validFolders.includes(folder)) {
+    return NextResponse.json({ error: "Invalid folder" }, { status: 400 });
+  }
+
   const db = createServiceClient();
+
+  // Star toggle: fetch current array, add/remove user, update
+  if (hasStar && ticketIds.length === 1) {
+    const ticketId = ticketIds[0];
+    const { data: current } = await db.from("feedback").select("starred_by").eq("id", ticketId).single();
+    const arr = ((current?.starred_by || []) as string[]);
+    const updated = starred
+      ? arr.includes(auth.userId) ? arr : [...arr, auth.userId]
+      : arr.filter((uid: string) => uid !== auth.userId);
+    await db.from("feedback").update({ starred_by: updated, updated_at: new Date().toISOString() }).eq("id", ticketId);
+    return NextResponse.json({ success: true, count: 1 });
+  }
+
   const updates: Record<string, unknown> = {
     updated_at: new Date().toISOString(),
   };
@@ -204,7 +246,13 @@ export async function PATCH(request: NextRequest) {
     updates.priority = priority;
   }
   if (hasAssignment) {
-    updates.assigned_to = assigned_to; // null = unassign
+    updates.assigned_to = assigned_to;
+  }
+  if (hasSnooze) {
+    updates.snoozed_until = snoozed_until; // null to unsnooze
+  }
+  if (hasFolder) {
+    updates.folder = folder;
   }
 
   const { error } = await db.from("feedback").update(updates).in("id", ticketIds);
@@ -224,7 +272,7 @@ export async function DELETE(request: NextRequest) {
   }
 
   const body = await request.json();
-  const { ids } = body;
+  const { ids, permanent } = body;
 
   if (!Array.isArray(ids) || ids.length === 0) {
     return NextResponse.json({ error: "ids array required" }, { status: 400 });
@@ -232,13 +280,22 @@ export async function DELETE(request: NextRequest) {
 
   const db = createServiceClient();
 
-  // Delete notes first (cascade should handle this, but be explicit)
-  await db.from("ticket_notes").delete().in("ticket_id", ids);
-  const { error } = await db.from("feedback").delete().in("id", ids);
-
-  if (error) {
-    console.error("Admin ticket delete error:", error);
-    return NextResponse.json({ error: "Failed to delete tickets" }, { status: 500 });
+  if (permanent) {
+    // Permanently delete (only for items already in trash)
+    await db.from("ticket_notes").delete().in("ticket_id", ids);
+    await db.from("ticket_reads").delete().in("ticket_id", ids);
+    const { error } = await db.from("feedback").delete().in("id", ids);
+    if (error) {
+      console.error("Admin ticket permanent delete error:", error);
+      return NextResponse.json({ error: "Failed to delete tickets" }, { status: 500 });
+    }
+  } else {
+    // Soft delete: move to trash
+    const { error } = await db.from("feedback").update({ folder: "trash", updated_at: new Date().toISOString() }).in("id", ids);
+    if (error) {
+      console.error("Admin ticket trash error:", error);
+      return NextResponse.json({ error: "Failed to trash tickets" }, { status: 500 });
+    }
   }
 
   return NextResponse.json({ success: true, count: ids.length });

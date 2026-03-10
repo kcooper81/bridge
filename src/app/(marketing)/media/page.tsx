@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { DarkSection } from "@/components/marketing/dark-section";
 import { CopyButton } from "./_components/copy-button";
 import { BannerDownloadWrapper } from "./_components/banner-download";
+import { MediaTOC } from "./_components/media-toc";
 import { DownloadAllButton } from "./_components/download-all-button";
 import {
   TwitterBanner,
@@ -359,7 +360,8 @@ Free plan available. No credit card required.`,
 export default function MediaPage() {
   return (
     <div className="py-20 sm:py-28">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+      <MediaTOC />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 xl:pr-52">
         {/* Hero */}
         <div className="max-w-3xl mb-20">
           <SectionLabel>Brand</SectionLabel>
@@ -374,7 +376,7 @@ export default function MediaPage() {
         </div>
 
         {/* ── 1. Logos ──────────────────────────── */}
-        <section className="mb-24">
+        <section id="logos" className="mb-24 scroll-mt-24">
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3">
             Logos
           </h2>
@@ -460,7 +462,7 @@ export default function MediaPage() {
         </section>
 
         {/* ── 2. Colors ──────────────────────────── */}
-        <section className="mb-24">
+        <section id="colors" className="mb-24 scroll-mt-24">
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3">
             Brand Colors
           </h2>
@@ -495,7 +497,7 @@ export default function MediaPage() {
         </section>
 
         {/* ── 3. Typography ──────────────────────────── */}
-        <section className="mb-24">
+        <section id="typography" className="mb-24 scroll-mt-24">
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3">
             Typography
           </h2>
@@ -528,7 +530,7 @@ export default function MediaPage() {
         </section>
 
         {/* ── 4. Product Name & Description ──────────────────────────── */}
-        <section className="mb-24">
+        <section id="product-info" className="mb-24 scroll-mt-24">
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3">
             Product Name & Description
           </h2>
@@ -576,7 +578,7 @@ export default function MediaPage() {
         </section>
 
         {/* ── 5. Social Media Banners (moved up — brand asset) ──────── */}
-        <section className="mb-24">
+        <section id="social-banners" className="mb-24 scroll-mt-24">
           <SectionLabel>Social</SectionLabel>
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3">
             Social Media Banners
@@ -656,7 +658,7 @@ export default function MediaPage() {
         </section>
 
         {/* ── 6. OG / Social Share Card ──────────────────── */}
-        <section className="mb-24">
+        <section id="og-cards" className="mb-24 scroll-mt-24">
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3">
             OG / Social Share Card
           </h2>
@@ -684,7 +686,7 @@ export default function MediaPage() {
         </section>
 
         {/* ── 7. Extension Marketplace Assets (dark) ────────────────── */}
-        <DarkSection gradient="right" className="mb-24">
+        <DarkSection id="extension-assets" gradient="right" className="mb-24 scroll-mt-24">
           <SectionLabel dark>Extension</SectionLabel>
           <h2 className="text-2xl sm:text-3xl font-bold mb-4">
             Extension Marketplace Media
@@ -1087,7 +1089,7 @@ export default function MediaPage() {
         </DarkSection>
 
         {/* ── 8. Store Listing Copy ──────────────────────────── */}
-        <section className="mb-24">
+        <section id="store-copy" className="mb-24 scroll-mt-24">
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3">
             Store Listing Copy
           </h2>
@@ -1179,7 +1181,7 @@ export default function MediaPage() {
         </section>
 
         {/* ── 10. LinkedIn Campaign Strategy ──────────────────────────── */}
-        <section id="linkedin-campaign">
+        <section id="linkedin-campaign" className="scroll-mt-24">
           <SectionLabel>LinkedIn Ad Campaign</SectionLabel>
           <h2 className="text-2xl sm:text-3xl font-bold mt-3 mb-2">LinkedIn Ads Playbook</h2>
           <p className="text-muted-foreground max-w-2xl mb-8">
@@ -1649,7 +1651,7 @@ export default function MediaPage() {
         </section>
 
         {/* ── 11. Contact ──────────────────────────── */}
-        <section>
+        <section id="contact" className="scroll-mt-24">
           <div className="rounded-2xl border border-border bg-muted/30 p-8 text-center max-w-2xl mx-auto">
             <h2 className="text-xl font-bold mb-2">Need something else?</h2>
             <p className="text-muted-foreground text-sm mb-4">

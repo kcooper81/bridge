@@ -4,10 +4,12 @@ export function DarkSection({
   children,
   className,
   gradient = "center",
+  id,
 }: {
   children: React.ReactNode;
   className?: string;
   gradient?: "center" | "left" | "right";
+  id?: string;
 }) {
   const gradientStyle =
     gradient === "left"
@@ -18,6 +20,7 @@ export function DarkSection({
 
   return (
     <div
+      id={id}
       className={cn(
         "rounded-3xl bg-zinc-950 text-white p-8 sm:p-12 relative overflow-hidden",
         className

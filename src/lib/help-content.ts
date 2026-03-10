@@ -287,6 +287,11 @@ const _RAW_CATEGORIES: RawCategory[] = [
         a: "On Chrome and Edge, click the TeamPrompt icon and select \"Open in side panel.\" The side panel stays open alongside the AI tool, giving you persistent access to your prompt library without switching tabs. It includes the same search, insert, and Shield features.",
         keywords: ["side panel", "sidebar", "persistent", "chrome", "edge"],
       },
+      {
+        q: "What are extension inactive alerts?",
+        a: "When a team member's browser extension has been inactive for over 24 hours, all admins and managers in the organization receive an in-app notification and email alert. This helps you stay aware of members who may have disabled or uninstalled the extension. Alerts are sent at most once per member every 7 days to avoid spam.",
+        keywords: ["inactive alert", "extension inactive", "notification", "email alert", "disabled extension", "uninstalled"],
+      },
     ],
   },
   {
@@ -339,6 +344,16 @@ const _RAW_CATEGORIES: RawCategory[] = [
         q: "How do I connect Google Workspace to sync my directory?",
         a: "Go to Settings → Organization → Integrations and click \"Connect\" on the Google Workspace card. You'll be redirected to Google to authorize TeamPrompt to read your directory (users and groups). After authorizing, you're redirected back and the card shows \"Connected\" with the admin email used.\n\nClick \"Sync Now\" to fetch your directory. TeamPrompt pulls all active users (up to 2,000) and groups, filters out anyone who's already a member, and opens the bulk import preview so you can review and send invites. You can sync as often as you like — only new users appear each time.\n\nTo disconnect, click the unplug icon on the Google Workspace card. This revokes the token and removes the connection. Already-synced members are not affected.",
         keywords: ["google workspace", "directory sync", "google admin", "import users", "google groups", "integration", "connect google"],
+      },
+      {
+        q: "How does the org chart view work?",
+        a: "Toggle between table and org chart view using the icons in the Team page toolbar. The org chart displays your teams as visual cards with member avatars, roles, and team counts. Click any team card header to manage that team. Members not assigned to any team appear in an 'Unassigned' card.",
+        keywords: ["org chart", "organization chart", "team view", "visual", "cards", "toggle view"],
+      },
+      {
+        q: "How do I add an existing member to another team?",
+        a: "Click 'Invite Member', type their email — the modal will detect they're already in your org and switch to an 'Add to Team' mode. Select the team and click 'Add to Team'. You can also add members from the team detail view by double-clicking a team filter chip or clicking a team card in org chart view.",
+        keywords: ["add member", "existing member", "another team", "add to team", "move team"],
       },
     ],
   },

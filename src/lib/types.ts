@@ -87,6 +87,7 @@ export interface Profile {
   extension_version: string | null;
   last_extension_active: string | null;
   extension_status: string;
+  invite_source: "manual" | "bulk" | "google" | string;
   created_at: string;
   updated_at: string;
 }
@@ -363,7 +364,8 @@ export type NotificationType =
   | "prompt_rejected"
   | "member_joined"
   | "member_left"
-  | "system";
+  | "system"
+  | "extension_inactive";
 
 export interface Notification {
   id: string;

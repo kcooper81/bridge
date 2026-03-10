@@ -7,9 +7,23 @@ export interface ReleaseNote {
   badge?: "new" | "fix" | "improvement";
 }
 
-export const APP_VERSION = "1.8.0";
+export const APP_VERSION = "1.9.0";
 
 export const RELEASE_NOTES: ReleaseNote[] = [
+  {
+    version: "1.9.0",
+    date: "2026-03-09",
+    title: "Org Chart, Extension Alerts & Team UX Improvements",
+    highlights: [
+      "Visual org chart — toggle between table and org chart view to see teams, members, and roles at a glance",
+      "Extension inactive alerts — admins and managers receive in-app notifications and emails when a member's extension goes inactive for 24+ hours",
+      "Prompt grid view — switch between list and tile layout on the Prompts page",
+      "Smart invite modal — auto-detects existing members and switches to 'Add to Team' instead of sending a duplicate invite",
+      "Pending invites in table — pending invitations now appear inline in the members table with status badges and quick actions",
+      "Member source tracking — see which members were manually invited, bulk imported, or synced from Google Workspace",
+    ],
+    badge: "new",
+  },
   {
     version: "1.8.0",
     date: "2026-03-09",

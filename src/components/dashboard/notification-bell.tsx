@@ -19,6 +19,7 @@ import {
   UserMinus,
   Info,
   Check,
+  Plug,
   Trash2,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
@@ -35,6 +36,7 @@ const NOTIFICATION_ICONS: Record<NotificationType, React.ElementType> = {
   member_joined: UserPlus,
   member_left: UserMinus,
   system: Info,
+  extension_inactive: Plug,
 };
 
 const NOTIFICATION_COLORS: Record<NotificationType, string> = {
@@ -45,6 +47,7 @@ const NOTIFICATION_COLORS: Record<NotificationType, string> = {
   member_joined: "text-primary bg-primary/10",
   member_left: "text-muted-foreground bg-muted",
   system: "text-muted-foreground bg-muted",
+  extension_inactive: "text-tp-yellow bg-tp-yellow/10",
 };
 
 function getNotificationLink(notification: Notification): string | null {
@@ -60,6 +63,8 @@ function getNotificationLink(notification: Notification): string | null {
         return `/vault?prompt=${metadata.prompt_id}`;
       }
       return "/vault";
+    case "extension_inactive":
+      return "/team";
     default:
       return null;
   }

@@ -1119,6 +1119,56 @@ const sections: Section[] = [
       },
     ],
   },
+  {
+    id: "team-notifications-v190",
+    title: "Team & Notification Features (v1.9.0)",
+    icon: UserCheck,
+    description:
+      "Test org chart view, smart invite flow, pending invites in table, extension inactive alerts, and prompt grid view.",
+    preconditions: [
+      "Logged in as Admin or Manager role",
+      "Organization has at least one team with members",
+      "Extension is installed and linked to same account",
+      "At least one prompt exists in the vault",
+    ],
+    steps: [
+      {
+        action:
+          "Go to Team page → click the network icon toggle in the toolbar",
+        expected:
+          "View switches to org chart. Teams display as cards with member avatars, roles, and team counts. Click a team card header to enter detail view.",
+        priority: "P0",
+      },
+      {
+        action:
+          "Click Invite Member → type the email of an existing member in your org",
+        expected:
+          "Modal detects the member is already in the org and switches to 'Add to Team' mode, showing the member's avatar and a badge. Select a team and click 'Add to Team'.",
+        priority: "P0",
+      },
+      {
+        action:
+          "Send an invite to a new email → check the members table",
+        expected:
+          "Pending invite appears as a row in the members table with an amber 'Pending' badge.",
+        priority: "P1",
+      },
+      {
+        action:
+          "(Manual test) Set a member's last_extension_active to >24h ago in DB → trigger /api/cron/extension-check",
+        expected:
+          "Notification appears in the bell icon for all admins and managers. Email alert is also sent. Alerts are throttled to once per member every 7 days.",
+        priority: "P1",
+      },
+      {
+        action:
+          "Go to Prompts → click the grid icon in the toolbar",
+        expected:
+          "View switches to grid layout. Cards display with title, preview, tags, rating, and usage count.",
+        priority: "P1",
+      },
+    ],
+  },
 ];
 
 /* ── Storage key ────────────────────────────────── */

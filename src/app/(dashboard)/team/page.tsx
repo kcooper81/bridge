@@ -25,7 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowLeft, ArrowUpDown, CheckCircle2, FileSpreadsheet, LayoutList, Loader2, Mail, Network, Pencil, Plug, Plus, Search, Shield, ShieldOff, Trash2, UserPlus, Users, X } from "lucide-react";
+import { ArrowLeft, ArrowUpDown, CheckCircle2, Clock, FileSpreadsheet, LayoutList, Loader2, Mail, Network, Pencil, Plug, Plus, RefreshCw, Search, Send, Shield, ShieldOff, Trash2, UserPlus, Users, X } from "lucide-react";
 import { SelectWithQuickAdd } from "@/components/ui/select-with-quick-add";
 import { ExtensionStatusBadge } from "@/components/dashboard/extension-status-badge";
 import { NoOrgBanner } from "@/components/dashboard/no-org-banner";
@@ -216,6 +216,26 @@ export default function TeamPage() {
   }, []);
 
   const pendingInvites = invites.filter((i) => i.status === "pending");
+
+  // Filtered pending invites (match search, role, and team filters)
+  const filteredInvites = useMemo(() => {
+    let result = pendingInvites;
+
+    if (memberSearch.trim()) {
+      const q = memberSearch.toLowerCase();
+      result = result.filter((inv) => inv.email.toLowerCase().includes(q));
+    }
+
+    if (memberRoleFilter !== "all") {
+      result = result.filter((inv) => inv.role === memberRoleFilter);
+    }
+
+    if (memberTeamFilter !== "all") {
+      result = result.filter((inv) => inv.team_id === memberTeamFilter);
+    }
+
+    return result;
+  }, [pendingInvites, memberSearch, memberRoleFilter, memberTeamFilter]);
 
   // Check if typed email matches an existing org member
   const existingMemberMatch = useMemo(() => {
@@ -866,8 +886,11 @@ export default function TeamPage() {
                         key={team.id}
                         className="group rounded-xl border border-border bg-card shadow-sm hover:shadow-md hover:border-primary/20 transition-all duration-200"
                       >
-                        {/* Team header */}
-                        <div className="flex items-center justify-between border-b border-border/50 px-4 py-3">
+                        {/* Team header — clickable to enter team detail */}
+                        <div
+                          className="flex items-center justify-between border-b border-border/50 px-4 py-3 cursor-pointer hover:bg-muted/30 transition-colors rounded-t-xl"
+                          onClick={() => setSelectedTeam(team)}
+                        >
                           <div className="min-w-0">
                             <h3 className="font-semibold text-sm truncate">{team.name}</h3>
                             {team.description && (
@@ -878,17 +901,6 @@ export default function TeamPage() {
                             <Badge variant="secondary" className="text-[10px]">
                               {teamMembers.length} {teamMembers.length === 1 ? "member" : "members"}
                             </Badge>
-                            {currentUserRole === "admin" && (
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
-                                onClick={() => setSelectedTeam(team)}
-                                title="Manage team"
-                              >
-                                <Pencil className="h-3.5 w-3.5" />
-                              </Button>
-                            )}
                           </div>
                         </div>
 
@@ -1010,6 +1022,7 @@ export default function TeamPage() {
       {teamViewMode === "table" && (
         <p className="text-xs text-muted-foreground mb-2">
           {filteredMembers.length} member{filteredMembers.length !== 1 ? "s" : ""}
+          {filteredInvites.length > 0 && ` · ${filteredInvites.length} pending`}
         </p>
       )}
 
@@ -1093,7 +1106,19 @@ export default function TeamPage() {
                               <AvatarFallback className="bg-primary/20 text-primary text-xs">{initials}</AvatarFallback>
                             </Avatar>
                             <div className="min-w-0">
-                              <p className="font-medium truncate">{member.name}</p>
+                              <div className="flex items-center gap-1.5">
+                                <p className="font-medium truncate">{member.name}</p>
+                                {member.invite_source === "google" && (
+                                  <span className="shrink-0" title="Synced from Google Workspace">
+                                    <RefreshCw className="h-3 w-3 text-muted-foreground/60" />
+                                  </span>
+                                )}
+                                {member.invite_source === "bulk" && (
+                                  <span className="shrink-0" title="Bulk imported">
+                                    <FileSpreadsheet className="h-3 w-3 text-muted-foreground/60" />
+                                  </span>
+                                )}
+                              </div>
                               <p className="text-xs text-muted-foreground truncate">{member.email}</p>
                             </div>
                           </div>
@@ -1179,33 +1204,86 @@ export default function TeamPage() {
                       </tr>
                     );
                   })}
+                  {/* Pending invite rows */}
+                  {filteredInvites.map((inv) => {
+                    const invTeam = inv.team_id ? teams.find((t) => t.id === inv.team_id) : null;
+                    return (
+                      <tr key={`inv-${inv.id}`} className="border-b bg-muted/10 group">
+                        {currentUserRole === "admin" && canAccess("bulk_role_assignment") && (
+                          <td className="p-3 w-10" />
+                        )}
+                        <td className="p-3">
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-8 w-8 opacity-50">
+                              <AvatarFallback className="bg-muted text-muted-foreground text-xs">
+                                <Mail className="h-3.5 w-3.5" />
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-1.5">
+                                <p className="text-sm text-muted-foreground truncate">{inv.email}</p>
+                                <Badge variant="outline" className="text-[10px] px-1.5 py-0 shrink-0 border-amber-300 text-amber-600 dark:border-amber-700 dark:text-amber-400">
+                                  <Clock className="mr-0.5 h-2.5 w-2.5" />
+                                  Pending
+                                </Badge>
+                              </div>
+                              {invTeam && (
+                                <p className="text-[11px] text-muted-foreground/70">{invTeam.name}</p>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="p-3 hidden sm:table-cell">
+                          <span className="text-xs text-muted-foreground">—</span>
+                        </td>
+                        {currentUserRole === "admin" && (
+                          <td className="p-3 hidden sm:table-cell">
+                            <span className="text-xs text-muted-foreground">—</span>
+                          </td>
+                        )}
+                        <td className="p-3">
+                          <Badge variant="outline" className="text-xs capitalize">{inv.role}</Badge>
+                        </td>
+                        {currentUserRole === "admin" && (
+                          <td className="p-3">
+                            <div className="flex items-center gap-0.5">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 opacity-0 group-hover:opacity-100"
+                                title="Resend invite"
+                                onClick={() => {
+                                  handleRevokeInvite(inv.id).then(() => {
+                                    setInviteEmail(inv.email);
+                                    setInviteRole(inv.role);
+                                    setInviteTeamId(inv.team_id || "");
+                                    setInviteModalOpen(true);
+                                  });
+                                }}
+                              >
+                                <Send className="h-3.5 w-3.5" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 text-destructive opacity-0 group-hover:opacity-100"
+                                title="Revoke invite"
+                                onClick={() => handleRevokeInvite(inv.id)}
+                              >
+                                <X className="h-3.5 w-3.5" />
+                              </Button>
+                            </div>
+                          </td>
+                        )}
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
           )}
         </CardContent>
       </Card>}
-
-      {/* Pending Invites */}
-      {pendingInvites.length > 0 && (
-        <div className="mt-6">
-          <h3 className="text-sm font-semibold mb-2">Pending Invites</h3>
-          <div className="space-y-2">
-            {pendingInvites.map((inv) => (
-              <div key={inv.id} className="flex items-center gap-3 rounded-lg border border-border/50 bg-muted/30 p-3">
-                <Mail className="h-4 w-4 text-muted-foreground" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm truncate">{inv.email}</p>
-                  <Badge variant="outline" className="text-xs mt-0.5">{inv.role}</Badge>
-                </div>
-                <Button variant="ghost" size="sm" className="text-destructive h-7" onClick={() => handleRevokeInvite(inv.id)}>
-                  Revoke
-                </Button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Team Modal */}
       <Dialog open={teamModalOpen} onOpenChange={setTeamModalOpen}>

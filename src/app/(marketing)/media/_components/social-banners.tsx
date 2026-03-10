@@ -2438,6 +2438,119 @@ export function ProSmallPromo({ accent = "blue" }: { accent?: ProAccent }) {
   );
 }
 
+/* ══════════════════════════════════════════════════
+   LINKEDIN AD CREATIVES — 1200 x 627 (single image ad spec)
+   Three variations matching the LinkedIn Ads Playbook
+   ══════════════════════════════════════════════════ */
+
+/* ── Ad A: Problem-Agitate-Solve ── */
+export function LinkedInAdA() {
+  return (
+    <LifestyleBannerShell aspectRatio="1200/627">
+      <div className="flex items-center h-full gap-4 sm:gap-6">
+        <div className="flex-1 space-y-2.5 sm:space-y-3 max-w-[42%]">
+          <BannerWordmark size="md" />
+          <p className="text-white text-xs sm:text-lg font-bold leading-snug">
+            Control AI Usage
+            <br />
+            Across Your Team
+          </p>
+          <p className="text-white/60 text-[9px] sm:text-xs leading-snug max-w-[220px]">
+            Visibility &amp; guardrails for every AI tool — without slowing anyone down
+          </p>
+          <FeaturePills />
+          <CompatibilityLine />
+        </div>
+        <div className="w-[52%] relative">
+          <div className="flex items-start">
+            <LifestylePhoto
+              src={lifestylePhotos.og}
+              alt="Person working on laptop"
+              className="w-[50%] aspect-[4/3]"
+            />
+            <div className="w-[55%] space-y-2 -ml-8 relative z-10">
+              <VaultScene compact />
+              <DLPBlockScene compact />
+            </div>
+          </div>
+          <FrostedBadge icon={Shield} headline="Data protected" subtitle="Real-time DLP scanning" color="red" className="top-[35%] left-[32%]" />
+          <FrostedBadge icon={Users} headline="Team library" subtitle="Shared prompts" color="blue" className="-bottom-3 left-[5%]" />
+        </div>
+      </div>
+    </LifestyleBannerShell>
+  );
+}
+
+/* ── Ad B: Social Proof / Stats ── */
+export function LinkedInAdB() {
+  return (
+    <MockupBannerShell aspectRatio="1200/627">
+      <div className="flex items-center h-full gap-4 sm:gap-6">
+        <div className="flex-1 space-y-2.5 sm:space-y-3 max-w-[42%]">
+          <BannerWordmark size="md" />
+          <p className="text-white text-xs sm:text-lg font-bold leading-snug">
+            AI Governance
+            <br />
+            Made Simple
+          </p>
+          <div className="space-y-1">
+            <p className="text-blue-300/90 text-[9px] sm:text-xs font-semibold">91% of employees use AI at work</p>
+            <p className="text-white/50 text-[8px] sm:text-[11px]">Only 12% of companies have guardrails</p>
+          </div>
+          <FeaturePills />
+          <CompatibilityLine />
+        </div>
+        <div className="w-[55%]">
+          <StaggeredMockup
+            screenshots={[
+              { src: "/store-assets/screenshot-light-1-prompts.png", alt: "Dashboard showing prompt library" },
+              { src: "/store-assets/screenshot-light-3-dlp-block.png", alt: "DLP alerts and data protection" },
+            ]}
+          />
+        </div>
+      </div>
+    </MockupBannerShell>
+  );
+}
+
+/* ── Ad C: Feature-Led (Prompt Library) ── */
+export function LinkedInAdC() {
+  return (
+    <LifestyleBannerShell aspectRatio="1200/627">
+      <div className="flex items-center h-full gap-4 sm:gap-6">
+        <div className="flex-1 space-y-2.5 sm:space-y-3 max-w-[42%]">
+          <BannerWordmark size="md" />
+          <p className="text-white text-xs sm:text-lg font-bold leading-snug">
+            A Shared Prompt Library
+            <br />
+            for Your Team
+          </p>
+          <p className="text-white/60 text-[9px] sm:text-xs leading-snug max-w-[220px]">
+            Version control &middot; Approval workflows &middot; Usage analytics
+          </p>
+          <FeaturePills />
+          <CompatibilityLine />
+        </div>
+        <div className="w-[52%] relative">
+          <div className="flex items-start">
+            <LifestylePhoto
+              src={lifestylePhotos.twitter}
+              alt="Team collaborating at laptops"
+              className="w-[50%] aspect-[4/3]"
+            />
+            <div className="w-[55%] space-y-2 -ml-8 relative z-10">
+              <VaultScene compact />
+              <AnalyticsScene compact />
+            </div>
+          </div>
+          <FrostedBadge icon={BarChart3} headline="Usage +34%" subtitle="vs last month" color="blue" className="top-[35%] left-[32%]" />
+          <FrostedBadge icon={Zap} headline="142 inserts" subtitle="This week" color="emerald" className="-bottom-3 left-[5%]" />
+        </div>
+      </div>
+    </LifestyleBannerShell>
+  );
+}
+
 /* ── Export map ──────────────────────────────────── */
 
 export const socialBannerComponents = {
@@ -2486,4 +2599,7 @@ export const socialBannerComponents = {
   proMarquee2: { Component: ProMarquee2, label: "Pro Marquee — Data Protection", dims: "1400 x 560" },
   proMarquee3: { Component: ProMarquee3, label: "Pro Marquee — Insert Flow", dims: "1400 x 560" },
   proSmallPromo: { Component: ProSmallPromo, label: "Pro Small Promo Tile", dims: "440 x 280" },
+  linkedinAdA: { Component: LinkedInAdA, label: "LinkedIn Ad — Problem-Solve", dims: "1200 x 627" },
+  linkedinAdB: { Component: LinkedInAdB, label: "LinkedIn Ad — Social Proof", dims: "1200 x 627" },
+  linkedinAdC: { Component: LinkedInAdC, label: "LinkedIn Ad — Feature-Led", dims: "1200 x 627" },
 } as const;

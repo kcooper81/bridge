@@ -59,6 +59,9 @@ import {
   ProMarquee2,
   ProMarquee3,
   ProSmallPromo,
+  LinkedInAdA,
+  LinkedInAdB,
+  LinkedInAdC,
 } from "./_components/social-banners";
 
 export const metadata: Metadata = generatePageMetadata({
@@ -1346,7 +1349,7 @@ export default function MediaPage() {
                         <p className="font-medium mb-1">CTA Button:</p>
                         <p className="text-muted-foreground">Sign Up (or Learn More for awareness)</p>
                       </div>
-                      <p className="text-xs text-muted-foreground">Image: Use LinkedIn Banner (1200x627) &mdash; lifestyle or gradient variant from Media Kit</p>
+                      <p className="text-xs text-muted-foreground">Image: Download from the &ldquo;LinkedIn Ad Images&rdquo; section below (1200x627)</p>
                     </div>
 
                     {/* Ad Variation B */}
@@ -1363,7 +1366,7 @@ export default function MediaPage() {
                         <p className="font-medium mb-1">Headline:</p>
                         <p className="text-muted-foreground italic">&ldquo;AI Governance Made Simple&rdquo;</p>
                       </div>
-                      <p className="text-xs text-muted-foreground">Image: Product screenshot showing dashboard or DLP alerts</p>
+                      <p className="text-xs text-muted-foreground">Image: Use &ldquo;Ad B &mdash; Social Proof&rdquo; from the LinkedIn Ad Images section below</p>
                     </div>
 
                     {/* Ad Variation C */}
@@ -1380,7 +1383,7 @@ export default function MediaPage() {
                         <p className="font-medium mb-1">Headline:</p>
                         <p className="text-muted-foreground italic">&ldquo;A Shared Prompt Library for Your Team&rdquo;</p>
                       </div>
-                      <p className="text-xs text-muted-foreground">Image: Extension screenshot showing prompt picker overlay</p>
+                      <p className="text-xs text-muted-foreground">Image: Use &ldquo;Ad C &mdash; Feature-Led&rdquo; from the LinkedIn Ad Images section below</p>
                     </div>
                   </div>
                 </div>
@@ -1471,9 +1474,52 @@ export default function MediaPage() {
                   <div className="mt-3 text-xs text-muted-foreground space-y-1">
                     <p><CheckCircle2 className="inline h-3 w-3 text-green-500 mr-1" />Use product screenshots &mdash; they outperform illustrations 2x on LinkedIn</p>
                     <p><CheckCircle2 className="inline h-3 w-3 text-green-500 mr-1" />Show UI, not abstract graphics &mdash; decision-makers want to see the tool</p>
-                    <p><CheckCircle2 className="inline h-3 w-3 text-green-500 mr-1" />Use the LinkedIn lifestyle banners from the Media Kit section above</p>
+                    <p><CheckCircle2 className="inline h-3 w-3 text-green-500 mr-1" />Download ready-made ad images from the &ldquo;LinkedIn Ad Images&rdquo; section below</p>
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Downloadable LinkedIn Ad Images */}
+          <div className="rounded-2xl border border-border bg-card p-6 mb-8">
+            <h3 className="text-lg font-bold flex items-center gap-2 mb-2">
+              <Download className="h-5 w-5 text-blue-600" />
+              LinkedIn Ad Images — Ready to Use
+            </h3>
+            <p className="text-sm text-muted-foreground mb-6">
+              1200 x 627px — the exact size for LinkedIn single image ads. Right-click &rarr; Save, or use the download button. Each matches an ad variation above.
+            </p>
+            <div className="space-y-6">
+              {/* Ad A */}
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs font-semibold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Ad A</span>
+                  <span className="text-sm font-medium">Problem-Agitate-Solve — &ldquo;Control AI Usage Across Your Team&rdquo;</span>
+                </div>
+                <BannerDownloadWrapper filename="linkedin-ad-a-problem-solve">
+                  <LinkedInAdA />
+                </BannerDownloadWrapper>
+              </div>
+              {/* Ad B */}
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs font-semibold bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">Ad B</span>
+                  <span className="text-sm font-medium">Social Proof — &ldquo;AI Governance Made Simple&rdquo;</span>
+                </div>
+                <BannerDownloadWrapper filename="linkedin-ad-b-social-proof">
+                  <LinkedInAdB />
+                </BannerDownloadWrapper>
+              </div>
+              {/* Ad C */}
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs font-semibold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">Ad C</span>
+                  <span className="text-sm font-medium">Feature-Led — &ldquo;A Shared Prompt Library for Your Team&rdquo;</span>
+                </div>
+                <BannerDownloadWrapper filename="linkedin-ad-c-feature-led">
+                  <LinkedInAdC />
+                </BannerDownloadWrapper>
               </div>
             </div>
           </div>

@@ -1481,7 +1481,7 @@ export default function TicketsPage() {
         <div className="border rounded-lg lg:rounded-none lg:border-0 lg:border-r bg-card flex flex-col" style={{ maxHeight: "calc(100vh - 120px)" }}>
 
           {/* Filter tabs inside list pane */}
-          <div className="flex items-center border-b overflow-x-auto flex-shrink-0 scrollbar-hide">
+          <div className="flex items-center border-b overflow-x-auto flex-shrink-0 scrollbar-hide px-1">
             {([
               { key: "open" as QuickFilter, label: "Open", count: stats.new + stats.open },
               { key: "mine" as QuickFilter, label: "Mine", count: stats.mine },
@@ -1495,7 +1495,7 @@ export default function TicketsPage() {
                 type="button"
                 onClick={() => { setQuickFilter(tab.key); setFocusedIndex(-1); }}
                 className={cn(
-                  "px-3 py-2 text-xs font-medium border-b-2 transition-colors -mb-px whitespace-nowrap",
+                  "px-2 py-2 text-[11px] font-medium border-b-2 transition-colors -mb-px whitespace-nowrap",
                   quickFilter === tab.key
                     ? "border-primary text-foreground"
                     : "border-transparent text-muted-foreground hover:text-foreground"

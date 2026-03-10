@@ -316,6 +316,24 @@ export default function VaultPage() {
     }
   }
 
+  async function bulkDelete() {
+    if (selectedIds.size === 0) return;
+    if (!confirm(`Delete ${selectedIds.size} prompt(s)? This cannot be undone.`)) return;
+    setBulkLoading(true);
+    try {
+      for (const id of Array.from(selectedIds)) {
+        await deletePrompt(id);
+      }
+      toast.success(`${selectedIds.size} prompt(s) deleted`);
+      setSelectedIds(new Set());
+      refresh();
+    } catch {
+      toast.error("Failed to delete prompts");
+    } finally {
+      setBulkLoading(false);
+    }
+  }
+
   if (loading) return <PageSkeleton />;
 
   if (noOrg) {
@@ -540,6 +558,16 @@ export default function VaultPage() {
           >
             <Archive className="mr-1.5 h-3.5 w-3.5" />
             Archive
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={bulkLoading}
+            onClick={bulkDelete}
+            className="text-destructive hover:text-destructive"
+          >
+            <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+            Delete
           </Button>
           <Button
             size="sm"

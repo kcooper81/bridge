@@ -172,7 +172,7 @@ function NavContent({ onItemClick }: { onItemClick?: () => void }) {
 
 export function Sidebar() {
   return (
-    <aside className="hidden md:flex h-full w-[var(--sidebar-width)] flex-col border-r border-border/50 bg-card/80 backdrop-blur-xl">
+    <aside className="hidden md:flex sticky top-0 h-screen w-[var(--sidebar-width)] flex-col border-r border-border/50 bg-card/80 backdrop-blur-xl">
       <NavContent />
     </aside>
   );

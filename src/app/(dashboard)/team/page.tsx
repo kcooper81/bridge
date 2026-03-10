@@ -733,63 +733,49 @@ export default function TeamPage() {
       )}
       <LimitNudge feature="add_member" current={members.length} max={planLimits.max_members} className="mb-4" />
 
-      {/* Google Workspace sync banner */}
-      {currentUserRole === "admin" && (canAccess("google_workspace_sync") ? googleConnected !== null : true) && (
-        <div className={cn(
-          "flex items-center gap-3 rounded-lg border px-4 py-3 mb-4",
-          googleConnected && canAccess("google_workspace_sync") ? "border-green-200 bg-green-50/50 dark:border-green-800/50 dark:bg-green-950/20" : "bg-muted/30"
-        )}>
-          {!canAccess("google_workspace_sync") ? (
-            <>
-              <Plug className="h-4 w-4 text-muted-foreground shrink-0" />
-              <p className="text-sm text-muted-foreground flex-1">
-                Sync your company directory from Google Workspace.
-              </p>
-              <Badge variant="secondary" className="text-xs shrink-0">Business</Badge>
-              <Button variant="outline" size="sm" asChild>
-                <Link href="/settings/billing">Upgrade</Link>
+      {/* Status pills row */}
+      {(currentUserRole === "admin" || inactiveExtensionMembers.length > 0) && (
+        <div className="flex flex-wrap items-center gap-2 mb-4">
+          {/* Google Workspace status */}
+          {currentUserRole === "admin" && canAccess("google_workspace_sync") && googleConnected !== null && (
+            googleConnected ? (
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 text-xs gap-1.5 border-green-200 text-green-700 bg-green-50/50 hover:bg-green-100 dark:border-green-800 dark:text-green-400 dark:bg-green-950/20"
+                onClick={handleGoogleSync}
+                disabled={syncingGoogle}
+              >
+                {syncingGoogle ? <Loader2 className="h-3 w-3 animate-spin" /> : <CheckCircle2 className="h-3 w-3" />}
+                Google Workspace
+                {lastSyncedAt && <span className="text-green-600/60 dark:text-green-400/60">· synced {new Date(lastSyncedAt).toLocaleDateString(undefined, { month: "short", day: "numeric" })}</span>}
               </Button>
-            </>
-          ) : googleConnected ? (
-            <>
-              <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400 shrink-0" />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-green-700 dark:text-green-300">
-                  Google Workspace connected
-                </p>
-                {lastSyncedAt && (
-                  <p className="text-xs text-green-600/70 dark:text-green-400/70">
-                    Last synced {new Date(lastSyncedAt).toLocaleDateString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
-                  </p>
-                )}
-              </div>
-              <Button variant="outline" size="sm" onClick={handleGoogleSync} disabled={syncingGoogle} className="border-green-200 dark:border-green-800">
-                {syncingGoogle && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
-                Sync Directory
+            ) : (
+              <Button variant="outline" size="sm" className="h-7 text-xs gap-1.5" asChild>
+                <Link href="/settings/integrations">
+                  <Plug className="h-3 w-3" />
+                  Connect Google Workspace
+                </Link>
               </Button>
-            </>
-          ) : (
-            <>
-              <Plug className="h-4 w-4 text-muted-foreground shrink-0" />
-              <p className="text-sm text-muted-foreground flex-1">
-                Connect Google Workspace to import your company directory.
-              </p>
-              <Button variant="outline" size="sm" asChild>
-                <Link href="/settings/integrations">Connect</Link>
-              </Button>
-            </>
+            )
           )}
-        </div>
-      )}
+          {currentUserRole === "admin" && !canAccess("google_workspace_sync") && (
+            <Button variant="outline" size="sm" className="h-7 text-xs gap-1.5 text-muted-foreground" asChild>
+              <Link href="/settings/billing">
+                <Plug className="h-3 w-3" />
+                Google Workspace
+                <Badge variant="secondary" className="text-[9px] px-1 py-0 ml-0.5">Business</Badge>
+              </Link>
+            </Button>
+          )}
 
-      {/* Inactive extension alert */}
-      {inactiveExtensionMembers.length > 0 && (
-        <div className="flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50/50 dark:border-amber-800/50 dark:bg-amber-950/20 px-4 py-3 mb-4">
-          <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0" />
-          <p className="text-sm text-amber-700 dark:text-amber-300 flex-1">
-            <span className="font-medium">{inactiveExtensionMembers.length} member{inactiveExtensionMembers.length > 1 ? "s have" : " has"} an inactive extension</span>
-            <span className="text-amber-600/70 dark:text-amber-400/70"> — no activity in 24+ hours ({inactiveExtensionMembers.slice(0, 3).map((m) => m.name || m.email.split("@")[0]).join(", ")}{inactiveExtensionMembers.length > 3 ? ` +${inactiveExtensionMembers.length - 3} more` : ""})</span>
-          </p>
+          {/* Inactive extensions */}
+          {inactiveExtensionMembers.length > 0 && (
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50/50 dark:border-amber-800/50 dark:bg-amber-950/20 px-3 py-1 text-xs font-medium text-amber-700 dark:text-amber-400">
+              <AlertTriangle className="h-3 w-3" />
+              {inactiveExtensionMembers.length} inactive extension{inactiveExtensionMembers.length > 1 ? "s" : ""}
+            </span>
+          )}
         </div>
       )}
 

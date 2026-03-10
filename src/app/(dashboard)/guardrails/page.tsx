@@ -63,7 +63,6 @@ import {
   Filter,
   TrendingUp,
   TrendingDown,
-  Users,
   ArrowUpDown,
   AlertTriangle,
 } from "lucide-react";

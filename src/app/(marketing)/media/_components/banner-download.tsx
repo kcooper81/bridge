@@ -54,6 +54,7 @@ export function BannerDownloadWrapper({
       { src: string; srcset: string }
     >();
     const savedStyles = new Map<HTMLElement, Record<string, string>>();
+    const savedSvgs = new Map<Element, { parent: Node; nextSibling: Node | null; svg: SVGSVGElement }>();
 
     /** Save an element's current inline style values before patching */
     function saveStyle(el: HTMLElement, props: string[]) {
@@ -69,16 +70,14 @@ export function BannerDownloadWrapper({
     try {
       const { toPng } = await import("html-to-image");
 
-      // ── 1. Convert external images to data URIs ──
+      // ── 1. Convert ALL images to data URIs ──
+      // foreignObject SVG can't resolve local or external URLs reliably,
+      // so every <img> with a non-data src is inlined.
       const imgs = node.querySelectorAll("img");
       await Promise.all(
         Array.from(imgs).map(async (img) => {
           const src = img.currentSrc || img.src;
-          if (
-            src &&
-            /^https?:\/\//.test(src) &&
-            !src.startsWith(window.location.origin)
-          ) {
+          if (src && !src.startsWith("data:")) {
             try {
               savedImgs.set(img, { src: img.src, srcset: img.srcset });
               img.src = await fetchAsDataUri(src);
@@ -89,6 +88,29 @@ export function BannerDownloadWrapper({
           }
         })
       );
+
+      // ── 1b. Convert inline <svg> elements to data-URI <img> ──
+      // SVG inside foreignObject inside SVG can fail to serialize.
+      const svgs = Array.from(node.querySelectorAll("svg"));
+      for (const svg of svgs) {
+        try {
+          const parent = svg.parentNode;
+          if (!parent) continue;
+          const serialized = new XMLSerializer().serializeToString(svg);
+          const dataUri = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(serialized)}`;
+          const img = document.createElement("img");
+          img.src = dataUri;
+          img.style.width = svg.getBoundingClientRect().width + "px";
+          img.style.height = svg.getBoundingClientRect().height + "px";
+          img.style.display = window.getComputedStyle(svg).display === "none" ? "none" : "inline-block";
+          img.style.flexShrink = "0";
+          const nextSibling = svg.nextSibling;
+          savedSvgs.set(img, { parent, nextSibling, svg: svg as SVGSVGElement });
+          parent.replaceChild(img, svg);
+        } catch {
+          /* leave original */
+        }
+      }
 
       // ── 2. Strip rounded corners on banner shell ──
       const shell = node.firstElementChild as HTMLElement | null;
@@ -143,6 +165,16 @@ export function BannerDownloadWrapper({
       savedImgs.forEach(({ src, srcset }, img) => {
         img.src = src;
         img.srcset = srcset;
+      });
+      // Restore inline SVGs
+      savedSvgs.forEach(({ parent, nextSibling, svg }, imgEl) => {
+        if (imgEl.parentNode) {
+          imgEl.parentNode.replaceChild(svg, imgEl);
+        } else if (nextSibling) {
+          parent.insertBefore(svg, nextSibling);
+        } else {
+          parent.appendChild(svg);
+        }
       });
       setLoading(false);
     }

@@ -125,7 +125,28 @@ function killContentScript() {
   if (_pingIntervalId) clearInterval(_pingIntervalId);
   _refreshIntervalId = null;
   _pingIntervalId = null;
-  showReloadBanner();
+  // Remove ALL injected UI — no overlays, banners, or shield when extension is dead
+  removeAllInjectedUI();
+}
+
+/** Remove every DOM element injected by the content script. */
+function removeAllInjectedUI() {
+  const ids = [
+    "tp-shield-indicator",
+    "tp-block-overlay",
+    "tp-scan-block-overlay",
+    "tp-warning-banner",
+    "tp-session-banner",
+    "tp-reload-banner",
+    "tp-toast",
+  ];
+  for (const id of ids) {
+    document.getElementById(id)?.remove();
+  }
+  _shieldEl = null;
+  _shieldStatusEl = null;
+  _shieldLabelEl = null;
+  _shieldDetailTextEl = null;
 }
 
 /** Returns true if the extension context is dead (all browser.* calls will throw). */

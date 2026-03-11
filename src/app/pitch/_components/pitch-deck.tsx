@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 import {
   ChevronLeft,
@@ -809,7 +810,7 @@ export function PitchDeck() {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               {[
                 { value: "14:1", label: "LTV : CAC", icon: TrendingUp, accent: "text-emerald-400" },
-                { value: "92%", label: "Gross margin", icon: DollarSign, accent: "text-emerald-400" },
+                { value: "97%", label: "Gross margin", icon: DollarSign, accent: "text-emerald-400" },
                 { value: "25%", label: "Free → Paid", icon: Rocket, accent: "text-amber-400" },
                 { value: "<2%", label: "Monthly churn", icon: Star, accent: "text-blue-400" },
               ].map((m) => (
@@ -1351,6 +1352,12 @@ export function PitchDeck() {
                 <p className="text-xs text-zinc-500">teamprompt.app</p>
               </div>
             </div>
+            <Link
+              href="/pitch/plan"
+              className="inline-block mt-6 text-sm text-amber-400 hover:text-amber-300 border border-amber-400/20 hover:border-amber-400/40 rounded-full px-6 py-2 transition-colors"
+            >
+              View Full Business Plan & Proforma →
+            </Link>
           </RevealText>
         </div>
       </div>

@@ -231,8 +231,8 @@ const _RAW_CATEGORIES: RawCategory[] = [
       },
       {
         q: "What are admin security settings?",
-        a: "Admin security settings are org-level controls that govern how the browser extension behaves for all members. Admins can configure these from Settings → Security. The 6 settings are:\n\n• **Require Sign-in for Extension** (default: on) — Users must sign in before the extension activates.\n• **Allow All AI Tools** (default: on, Team+) — When disabled, the extension only works on approved AI platforms.\n• **Enable DLP Security Rules** (default: on) — Master switch for all guardrail scanning. Turning this off disables all DLP checks org-wide.\n• **Allow Warning Override** (default: on, Team+) — When disabled, warning-level detections are treated as hard blocks. Users cannot proceed past any guardrail detection.\n• **Auto-Redact Sensitive Data** (default: off, Team+) — Automatically replaces detected sensitive data with {{PLACEHOLDER}} tokens instead of blocking.\n• **Activity Logging** (default: on, Team+) — Logs all AI interactions to the Activity Log. Disabling stops recording but still tracks usage counts.\n\nSome settings are plan-gated and require a Team or Business plan. Changes take effect immediately for all members.",
-        keywords: ["admin security", "security settings", "extension controls", "org settings", "security rules toggle", "activity logging", "auto-redact", "override"],
+        a: "Admin security settings are org-level controls that govern how the browser extension behaves for all members. Admins can configure these from Settings → Security.\n\n**Extension Access:**\n• **Require Sign-in for Extension** (default: on) — Users must sign in before the extension activates.\n• **Allow All AI Tools** (default: on, Team+) — When disabled, the extension only works on approved AI platforms.\n\n**Guardrail Behavior:**\n• **Enable DLP Security Rules** (default: on) — Master switch for all guardrail scanning. Turning this off disables all DLP checks org-wide.\n• **Allow Warning Override** (default: on, Team+) — When disabled, warning-level detections are treated as hard blocks.\n• **Auto-Redact Sensitive Data** (default: off, Team+) — Automatically replaces detected sensitive data with {{PLACEHOLDER}} tokens.\n\n**Activity & Privacy:**\n• **Activity Logging** (default: on, Team+) — Enables the Activity Log. Disabling stops recording but still tracks usage counts.\n• **Logging Detail Level** (default: Metadata Only, Team+) — Choose between metadata-only (tool, action, timestamp — no prompt text) or full logging (includes prompt text). Metadata-only is the privacy-first default.\n• **Log Retention Period** (default: no limit, Team+) — Set an automatic expiration (1–3,650 days) to delete old logs. Leave empty to keep indefinitely.\n\nSome settings are plan-gated and require a Team or Business plan. Changes take effect immediately for all members.",
+        keywords: ["admin security", "security settings", "extension controls", "org settings", "security rules toggle", "activity logging", "auto-redact", "override", "retention", "metadata only", "logging mode"],
       },
       {
         q: "What are compliance policy packs?",
@@ -395,8 +395,23 @@ const _RAW_CATEGORIES: RawCategory[] = [
       },
       {
         q: "What is the Activity Log?",
-        a: "The Activity Log records every AI interaction captured by the extension — which tool was used, what was sent (or blocked), timestamps, and the user. It's your audit trail for compliance and security review.",
-        keywords: ["activity log", "audit", "history", "interactions", "compliance"],
+        a: "The Activity Log records AI interactions captured by the browser extension. Each entry shows the AI tool used, the action taken (sent, blocked, or warned), guardrail flags, and a timestamp.\n\nBy default, TeamPrompt uses **metadata-only mode** — it logs the action, tool, and timestamp but does **not** store the actual prompt text. This protects employee privacy while still giving admins visibility into usage patterns and security events.\n\nAdmins can switch to **full logging mode** in Settings → Security → Activity & Privacy to also capture prompt text, which is useful for compliance-heavy industries that require a complete audit trail.\n\nThe Activity Log is available to admins and managers on the Team plan and above.",
+        keywords: ["activity log", "audit", "history", "interactions", "compliance", "metadata", "logging mode"],
+      },
+      {
+        q: "How do I filter the Activity Log?",
+        a: "The Activity Log supports multiple filters that can be combined:\n\n• **AI Tool** — Filter by ChatGPT, Claude, Gemini, Copilot, Perplexity, or Other.\n• **Action Type** — Filter by Sent, Blocked, or Warned to focus on specific event types.\n• **Date Range** — Choose from presets (Today, Last 7/30/90 Days) or set a custom date range.\n• **Search** — When full logging mode is enabled, search across prompt text to find specific conversations.\n\nActive filters are shown with a count badge. Click \"Clear all\" to reset all filters at once.",
+        keywords: ["filter", "search", "date range", "action filter", "tool filter", "activity log filters"],
+      },
+      {
+        q: "What is the difference between metadata-only and full logging?",
+        a: "**Metadata-only mode** (default) records the AI tool used, action taken (sent/blocked/warned), guardrail violations, and timestamp — but does not store the prompt text itself. This is the privacy-first default.\n\n**Full logging mode** records everything metadata-only does, plus the complete prompt text (up to 2,000 characters). This is useful for compliance, auditing, or organizations that need a complete record of AI interactions.\n\nAdmins can switch between modes in Settings → Security → Activity & Privacy. The change takes effect immediately for new interactions — existing log entries are not modified.",
+        keywords: ["metadata only", "full logging", "logging mode", "privacy", "prompt text", "audit trail"],
+      },
+      {
+        q: "What is the log retention policy?",
+        a: "Admins can set an automatic retention period for activity logs in Settings → Security → Activity & Privacy. Enter the number of days to keep logs (1–3,650 days). Logs older than this are automatically deleted daily.\n\nLeave the field empty to keep logs indefinitely. This is useful for organizations with data retention requirements or storage considerations.\n\nWhen retention is set, a daily cleanup job runs automatically. Deleted logs cannot be recovered.",
+        keywords: ["retention", "expiration", "auto-delete", "cleanup", "data retention", "log expiry"],
       },
       {
         q: "Can I export activity data?",
@@ -489,8 +504,8 @@ const _RAW_CATEGORIES: RawCategory[] = [
       },
       {
         q: "Does TeamPrompt store the text I send to AI tools?",
-        a: "Only if your workspace has activity logging enabled. Logged interactions are stored in your workspace's database and are visible only to admins and managers via the Activity Log. You can disable logging or configure retention policies from the Security Rules settings.",
-        keywords: ["logging", "store", "text", "privacy", "retention", "interactions"],
+        a: "By default, **no** — TeamPrompt uses metadata-only logging, which records the AI tool used, action type (sent/blocked/warned), and timestamp, but does not store the actual prompt text.\n\nAdmins can opt-in to full logging mode from Settings → Security → Activity & Privacy, which also records prompt text for compliance and auditing purposes. Even in full mode, prompt text is capped at 2,000 characters.\n\nAdmins can also set a retention period to automatically delete logs after a specified number of days. Activity logging can be disabled entirely, in which case only usage counts are tracked.\n\nAll logged data is stored in your workspace's database and is visible only to admins and managers via the Activity Log.",
+        keywords: ["logging", "store", "text", "privacy", "retention", "interactions", "metadata only", "prompt text"],
       },
     ],
   },

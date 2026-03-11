@@ -123,7 +123,7 @@ export default function FunnelsPage() {
         supabase.from("prompts").select("id, org_id, owner_id, created_at"),
         supabase.from("subscriptions").select("id, org_id, plan, status, trial_ends_at, created_at"),
         supabase.from("security_rules").select("id, org_id, created_at"),
-        supabase.from("guidelines").select("id, org_id, created_at"),
+        supabase.from("standards").select("id, org_id, created_at"),
         supabase.from("usage_events").select("id, user_id, created_at").gte("created_at", weekAgoISO),
         supabase.from("profiles").select("org_id"),
       ]);

@@ -457,6 +457,292 @@ function AnalyticsScene({ className, compact, hideChrome }: { className?: string
 }
 
 /* ══════════════════════════════════════════════════
+   AI CHAT MOCKUP SCENES — realistic chat interfaces
+   showing DLP blocking, data redaction, prompt insert
+   ══════════════════════════════════════════════════ */
+
+/**
+ * Scene 5: AI Chat with DLP Block
+ * Realistic ChatGPT-style chat where TeamPrompt catches sensitive data
+ */
+function ChatDLPScene({
+  className,
+  compact,
+  variant = "ssn",
+}: {
+  className?: string;
+  compact?: boolean;
+  variant?: "ssn" | "api-key" | "credit-card";
+}) {
+  const labels: Record<string, string> = {
+    ssn: "Social Security Number",
+    "api-key": "API Key / Secret",
+    "credit-card": "Credit Card Number",
+  };
+  return (
+    <div className={cn("relative", className)}>
+      <div className="rounded-lg bg-white border border-zinc-200 overflow-hidden shadow-2xl">
+        {/* Browser chrome */}
+        <div className="flex items-center gap-1.5 px-3 py-1.5 border-b border-zinc-100 bg-zinc-50">
+          <div className="w-1.5 h-1.5 rounded-full bg-red-400/70" />
+          <div className="w-1.5 h-1.5 rounded-full bg-yellow-400/70" />
+          <div className="w-1.5 h-1.5 rounded-full bg-green-400/70" />
+          <div className="ml-2 flex-1 h-3.5 rounded bg-zinc-100 flex items-center px-2">
+            <span className="text-[5px] text-zinc-400 font-medium">chat.openai.com</span>
+          </div>
+        </div>
+        <div className="p-2 space-y-1.5 bg-white">
+          {/* AI greeting */}
+          <div className="flex items-start gap-1">
+            <div className="w-3 h-3 rounded-full bg-emerald-100 flex items-center justify-center shrink-0 mt-0.5">
+              <Zap className="w-1.5 h-1.5 text-emerald-600" />
+            </div>
+            <div className="bg-zinc-100 rounded-lg rounded-tl-none px-2 py-1 max-w-[75%]">
+              <p className="text-[4px] text-zinc-700 leading-relaxed">How can I help you today?</p>
+            </div>
+          </div>
+          {/* User message */}
+          {!compact && (
+            <div className="flex justify-end">
+              <div className="bg-blue-500 rounded-lg rounded-tr-none px-2 py-1 max-w-[75%]">
+                <p className="text-[4px] text-white leading-relaxed">Can you draft an email to our client about the project update?</p>
+              </div>
+            </div>
+          )}
+          {/* AI response */}
+          {!compact && (
+            <div className="flex items-start gap-1">
+              <div className="w-3 h-3 rounded-full bg-emerald-100 flex items-center justify-center shrink-0 mt-0.5">
+                <Zap className="w-1.5 h-1.5 text-emerald-600" />
+              </div>
+              <div className="bg-zinc-100 rounded-lg rounded-tl-none px-2 py-1 max-w-[75%]">
+                <p className="text-[4px] text-zinc-700 leading-relaxed">Sure! Could you share the client details and key points?</p>
+              </div>
+            </div>
+          )}
+          {/* User message with SENSITIVE DATA — DLP blocks it */}
+          <div className="flex justify-end">
+            <div className="relative bg-blue-500 rounded-lg rounded-tr-none px-2 py-1 max-w-[82%]">
+              <p className="text-[4px] text-white leading-relaxed">
+                Sure, the client is John Smith. His{" "}
+                <span className="bg-red-400/40 px-0.5 rounded line-through">492-83-1...</span>
+              </p>
+              <div className="mt-0.5 rounded bg-red-500/95 border border-red-400/60 px-1.5 py-0.5 flex items-center gap-1">
+                <Shield className="w-2 h-2 text-white shrink-0" />
+                <div>
+                  <p className="text-[4px] text-white font-bold leading-none">{labels[variant]} Detected</p>
+                  <p className="text-[3px] text-red-100 mt-[1px]">Blocked by TeamPrompt DLP</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          {/* Input area */}
+          <div className="flex items-center gap-1 pt-1 border-t border-zinc-100">
+            <div className="flex-1 h-3 rounded-full bg-zinc-50 border border-zinc-200 px-2 flex items-center">
+              <span className="text-[3.5px] text-zinc-400">Send a message...</span>
+            </div>
+            <Send className="w-2 h-2 text-zinc-300" />
+          </div>
+        </div>
+      </div>
+      <div className="absolute -top-2 -right-1 sm:-right-2 bg-red-500 text-white rounded-full px-1.5 sm:px-2 py-0.5 shadow-lg shadow-red-500/30 flex items-center gap-1">
+        <Shield className="h-2 w-2 sm:h-2.5 sm:w-2.5" />
+        <span className="text-[5px] sm:text-[6px] font-bold whitespace-nowrap">Blocked</span>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Scene 6: AI Chat with Redacted Data
+ * Chat showing blurred/redacted blocks where sensitive data was
+ */
+function ChatRedactedScene({
+  className,
+  compact,
+}: {
+  className?: string;
+  compact?: boolean;
+}) {
+  return (
+    <div className={cn("relative", className)}>
+      <div className="rounded-lg bg-white border border-zinc-200 overflow-hidden shadow-2xl">
+        <div className="flex items-center gap-1.5 px-3 py-1.5 border-b border-zinc-100 bg-zinc-50">
+          <div className="w-1.5 h-1.5 rounded-full bg-red-400/70" />
+          <div className="w-1.5 h-1.5 rounded-full bg-yellow-400/70" />
+          <div className="w-1.5 h-1.5 rounded-full bg-green-400/70" />
+          <div className="ml-2 flex-1 h-3.5 rounded bg-zinc-100 flex items-center px-2">
+            <span className="text-[5px] text-zinc-400 font-medium">claude.ai</span>
+          </div>
+        </div>
+        <div className="p-2 space-y-1.5 bg-white">
+          {/* User message with redacted data */}
+          <div className="flex justify-end">
+            <div className="bg-blue-500 rounded-lg rounded-tr-none px-2 py-1 max-w-[80%]">
+              <p className="text-[4px] text-white leading-relaxed">
+                Summarize this contract for{" "}
+                <span className="bg-amber-400/60 text-amber-100 px-1 rounded text-[4px] font-mono">████████</span>
+              </p>
+            </div>
+          </div>
+          {/* AI response */}
+          <div className="flex items-start gap-1">
+            <div className="w-3 h-3 rounded-full bg-orange-100 flex items-center justify-center shrink-0 mt-0.5">
+              <span className="text-[5px]">C</span>
+            </div>
+            <div className="bg-zinc-100 rounded-lg rounded-tl-none px-2 py-1 max-w-[75%]">
+              <p className="text-[4px] text-zinc-700 leading-relaxed">Here&apos;s the summary for the client...</p>
+            </div>
+          </div>
+          {!compact && (
+            <div className="flex justify-end">
+              <div className="bg-blue-500 rounded-lg rounded-tr-none px-2 py-1 max-w-[80%]">
+                <p className="text-[4px] text-white leading-relaxed">
+                  Send it to{" "}
+                  <span className="bg-amber-400/60 text-amber-100 px-1 rounded text-[4px] font-mono">████@████.com</span>
+                  {" "}with the account{" "}
+                  <span className="bg-amber-400/60 text-amber-100 px-1 rounded text-[4px] font-mono">████-████</span>
+                </p>
+              </div>
+            </div>
+          )}
+          {/* Protection status */}
+          <div className="flex items-center gap-1 bg-emerald-50 border border-emerald-200/50 rounded px-1.5 py-0.5">
+            <Shield className="w-2 h-2 text-emerald-600 shrink-0" />
+            <p className="text-[3.5px] text-emerald-700 font-medium">3 fields redacted by TeamPrompt</p>
+          </div>
+        </div>
+      </div>
+      <div className="absolute -top-2 -right-1 sm:-right-2 bg-amber-500 text-white rounded-full px-1.5 sm:px-2 py-0.5 shadow-lg shadow-amber-500/30 flex items-center gap-1">
+        <Lock className="h-2 w-2 sm:h-2.5 sm:w-2.5" />
+        <span className="text-[5px] sm:text-[6px] font-bold whitespace-nowrap">Redacted</span>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Scene 7: AI Chat with Prompt Insert
+ * Shows TeamPrompt popup injecting a template prompt into the chat input
+ */
+function ChatInsertScene({
+  className,
+  compact,
+}: {
+  className?: string;
+  compact?: boolean;
+}) {
+  return (
+    <div className={cn("relative", className)}>
+      <div className="rounded-lg bg-white border border-zinc-200 overflow-hidden shadow-2xl">
+        <div className="flex items-center gap-1.5 px-3 py-1.5 border-b border-zinc-100 bg-zinc-50">
+          <div className="w-1.5 h-1.5 rounded-full bg-red-400/70" />
+          <div className="w-1.5 h-1.5 rounded-full bg-yellow-400/70" />
+          <div className="w-1.5 h-1.5 rounded-full bg-green-400/70" />
+          <div className="ml-2 flex-1 h-3.5 rounded bg-zinc-100 flex items-center px-2">
+            <span className="text-[5px] text-zinc-400 font-medium">gemini.google.com</span>
+          </div>
+        </div>
+        <div className="p-2 space-y-1.5 bg-white">
+          {/* Already-inserted prompt filling the input */}
+          <div className="rounded border-2 border-blue-400/40 bg-blue-50/50 px-2 py-1">
+            <p className="text-[3.5px] text-blue-500 font-bold mb-0.5">TeamPrompt — Inserted</p>
+            <p className="text-[4px] text-zinc-700 leading-relaxed">
+              Act as a senior code reviewer. Review the following code for bugs, security issues, and performance...
+            </p>
+            {!compact && (
+              <div className="flex items-center gap-1 mt-0.5">
+                <span className="text-[3px] bg-blue-100 text-blue-600 px-0.5 rounded font-medium">development</span>
+                <span className="text-[3px] bg-blue-100 text-blue-600 px-0.5 rounded font-medium">code-review</span>
+                <span className="text-[3px] bg-emerald-100 text-emerald-600 px-0.5 rounded font-medium">{"{}"} Template</span>
+              </div>
+            )}
+          </div>
+          {/* AI response streaming */}
+          {!compact && (
+            <div className="flex items-start gap-1">
+              <div className="w-3 h-3 rounded-full bg-blue-100 flex items-center justify-center shrink-0 mt-0.5">
+                <span className="text-[5px] text-blue-600 font-bold">G</span>
+              </div>
+              <div className="bg-zinc-100 rounded-lg rounded-tl-none px-2 py-1 max-w-[75%]">
+                <p className="text-[4px] text-zinc-700 leading-relaxed">
+                  I&apos;ll review this code thoroughly. Here are my findings...
+                </p>
+                <div className="w-1 h-2 bg-zinc-400 animate-pulse inline-block" />
+              </div>
+            </div>
+          )}
+          {/* TeamPrompt mini popup */}
+          <div className="rounded bg-white border border-zinc-200 shadow-md p-1.5">
+            <div className="flex items-center gap-1 mb-1">
+              <div className="w-2 h-2 rounded bg-blue-500" />
+              <span className="text-[4px] font-bold text-zinc-800">TeamPrompt</span>
+              <span className="text-[3px] text-emerald-500 font-medium ml-auto">Inserted!</span>
+            </div>
+            <div className="space-y-0.5">
+              {["Code Review Feedback", "Meeting Summary", "Sales Outreach"].map((p, i) => (
+                <div key={p} className={cn("rounded px-1 py-0.5 flex items-center justify-between", i === 0 ? "bg-emerald-50 border border-emerald-200/50" : "bg-zinc-50")}>
+                  <span className={cn("text-[3.5px] font-medium", i === 0 ? "text-emerald-700" : "text-zinc-500")}>{p}</span>
+                  {i === 0 && <Check className="w-1.5 h-1.5 text-emerald-500" />}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="absolute -top-2 -right-1 sm:-right-2 bg-emerald-500 text-white rounded-full px-1.5 sm:px-2 py-0.5 shadow-lg shadow-emerald-500/30 flex items-center gap-1">
+        <Send className="h-2 w-2 sm:h-2.5 sm:w-2.5" />
+        <span className="text-[5px] sm:text-[6px] font-bold whitespace-nowrap">One-click insert</span>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Scene 8: Multi-AI Protection Grid
+ * Shows multiple AI tool windows all protected by TeamPrompt
+ */
+function MultiAIScene({ className }: { className?: string }) {
+  const tools = [
+    { name: "ChatGPT", color: "bg-emerald-500", initial: "G" },
+    { name: "Claude", color: "bg-orange-500", initial: "C" },
+    { name: "Gemini", color: "bg-blue-500", initial: "G" },
+    { name: "Copilot", color: "bg-violet-500", initial: "C" },
+  ];
+  return (
+    <div className={cn("relative", className)}>
+      <div className="grid grid-cols-2 gap-1.5">
+        {tools.map((t) => (
+          <div key={t.name} className="rounded-lg bg-white border border-zinc-200 overflow-hidden shadow-lg">
+            <div className="flex items-center gap-1 px-1.5 py-0.5 border-b border-zinc-100 bg-zinc-50">
+              <div className={cn("w-2 h-2 rounded-full flex items-center justify-center", t.color)}>
+                <span className="text-[3px] text-white font-bold">{t.initial}</span>
+              </div>
+              <span className="text-[4px] font-medium text-zinc-700">{t.name}</span>
+            </div>
+            <div className="p-1 space-y-0.5">
+              <div className="h-1.5 w-[70%] bg-zinc-100 rounded" />
+              <div className="h-1.5 w-[50%] bg-blue-100 rounded ml-auto" />
+              <div className="h-1.5 w-[60%] bg-zinc-100 rounded" />
+            </div>
+            {/* Shield overlay */}
+            <div className="absolute inset-0" />
+            <div className="flex items-center gap-0.5 px-1 py-0.5 bg-emerald-50 border-t border-emerald-200/50">
+              <Shield className="w-1.5 h-1.5 text-emerald-600" />
+              <span className="text-[3px] text-emerald-600 font-medium">Protected</span>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-blue-500 text-white rounded-full px-2 py-0.5 shadow-lg shadow-blue-500/30 flex items-center gap-1 z-10">
+        <Shield className="h-2 w-2" />
+        <span className="text-[5px] font-bold whitespace-nowrap">All AI tools protected</span>
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════
    SHARED COMPONENTS
    ══════════════════════════════════════════════════ */
 
@@ -2470,17 +2756,7 @@ export function LinkedInAdA() {
           <CompatibilityLine />
         </div>
         <div className="w-[52%] relative">
-          <div className="flex items-start">
-            <LifestylePhoto
-              src={lifestylePhotos.og}
-              alt="Person working on laptop"
-              className="w-[50%] aspect-[4/3]"
-            />
-            <div className="w-[55%] space-y-2 -ml-8 relative z-10">
-              <VaultScene compact />
-              <DLPBlockScene compact />
-            </div>
-          </div>
+          <ChatDLPScene compact />
           <FrostedBadge icon={Shield} headline="Data protected" subtitle="Real-time DLP scanning" color="red" className="top-[35%] left-[32%]" />
           <FrostedBadge icon={Users} headline="Team library" subtitle="Shared prompts" color="blue" className="-bottom-3 left-[5%]" />
         </div>
@@ -2540,17 +2816,7 @@ export function LinkedInAdC() {
           <CompatibilityLine />
         </div>
         <div className="w-[52%] relative">
-          <div className="flex items-start">
-            <LifestylePhoto
-              src={lifestylePhotos.twitter}
-              alt="Team collaborating at laptops"
-              className="w-[50%] aspect-[4/3]"
-            />
-            <div className="w-[55%] space-y-2 -ml-8 relative z-10">
-              <VaultScene compact />
-              <AnalyticsScene compact />
-            </div>
-          </div>
+          <ChatInsertScene compact />
           <FrostedBadge icon={BarChart3} headline="Usage +34%" subtitle="vs last month" color="blue" className="top-[35%] left-[32%]" />
           <FrostedBadge icon={Zap} headline="142 inserts" subtitle="This week" color="emerald" className="-bottom-3 left-[5%]" />
         </div>
@@ -2650,18 +2916,7 @@ export function LinkedInAdD() {
           <CompatibilityLine />
         </div>
         <div className="w-[52%] relative">
-          <div className="flex items-start">
-            <LifestylePhoto
-              src={lifestylePhotos.coding}
-              alt="Developer coding on monitor"
-              className="w-[50%] aspect-[4/3]"
-              rotate={-2}
-            />
-            <div className="w-[55%] space-y-2 -ml-10 mt-3 relative z-10">
-              <DLPBlockScene compact />
-              <VaultScene compact />
-            </div>
-          </div>
+          <ChatDLPScene compact variant="api-key" />
           <FrostedBadge icon={Shield} headline="API key blocked" subtitle="Before it reached ChatGPT" color="red" className="top-[30%] left-[28%]" />
           <FrostedBadge icon={Lock} headline="Zero data leaks" subtitle="Real-time scanning" color="emerald" className="-bottom-3 left-[5%]" />
         </div>
@@ -2695,16 +2950,7 @@ export function LinkedInAdE() {
           </div>
         </div>
         <div className="w-[52%] relative">
-          <div className="flex items-start">
-            <LifestylePhoto
-              src={lifestylePhotos.teamScreen}
-              alt="Team analyzing data on screens"
-              className="w-[50%] aspect-[4/3]"
-            />
-            <div className="w-[55%] space-y-2 -ml-6 mt-2 relative z-10">
-              <DLPBlockScene compact />
-            </div>
-          </div>
+          <ChatDLPScene compact />
           <FrostedBadge icon={Shield} headline="PII detected" subtitle="Auto-blocked instantly" color="red" className="top-[40%] left-[30%]" />
           <FrostedBadge icon={Lock} headline="Full audit trail" subtitle="Every AI interaction" color="blue" className="-bottom-3 left-[5%]" />
         </div>
@@ -2738,18 +2984,7 @@ export function LinkedInAdF() {
           <CompatibilityLine />
         </div>
         <div className="w-[52%] relative">
-          <div className="flex items-start">
-            <LifestylePhoto
-              src={lifestylePhotos.team2}
-              alt="Team in meeting room with laptops"
-              className="w-[50%] aspect-[4/3]"
-              rotate={1}
-            />
-            <div className="w-[55%] space-y-2 -ml-8 relative z-10">
-              <VaultScene compact />
-              <AnalyticsScene compact />
-            </div>
-          </div>
+          <ChatInsertScene compact />
           <FrostedBadge icon={Users} headline="148 members" subtitle="Onboarded this week" color="blue" className="top-[35%] left-[32%]" />
           <FrostedBadge icon={Zap} headline="2-min setup" subtitle="No training required" color="emerald" className="-bottom-3 left-[5%]" />
         </div>
@@ -2783,17 +3018,7 @@ export function LinkedInAdG() {
           <CompatibilityLine />
         </div>
         <div className="w-[52%] relative">
-          <div className="flex items-start">
-            <LifestylePhoto
-              src={lifestylePhotos.womanLaptop}
-              alt="Professional at laptop"
-              className="w-[50%] aspect-[4/3]"
-              rotate={-1}
-            />
-            <div className="w-[55%] space-y-2 -ml-10 mt-4 relative z-10">
-              <VaultScene compact />
-            </div>
-          </div>
+          <ChatInsertScene compact />
           <FrostedBadge icon={Zap} headline="One-click insert" subtitle="Into any AI tool" color="emerald" className="top-[35%] left-[30%]" />
           <FrostedBadge icon={BarChart3} headline="5 clients" subtitle="Same quality output" color="blue" className="-bottom-3 left-[5%]" />
         </div>
@@ -2827,17 +3052,7 @@ export function LinkedInAdH() {
           <CompatibilityLine />
         </div>
         <div className="w-[52%] relative">
-          <div className="flex items-start">
-            <LifestylePhoto
-              src={lifestylePhotos.focusedDev}
-              alt="Developer focused on laptop"
-              className="w-[50%] aspect-[4/3]"
-              rotate={2}
-            />
-            <div className="w-[55%] space-y-2 -ml-8 mt-1 relative z-10">
-              <VaultScene compact />
-            </div>
-          </div>
+          <ChatInsertScene compact />
           <FrostedBadge icon={Zap} headline="10x faster" subtitle="Than copy-paste" color="emerald" className="top-[40%] left-[32%]" />
           <FrostedBadge icon={BarChart3} headline="v12 → v13" subtitle="Version history" color="blue" className="-bottom-3 left-[5%]" />
         </div>
@@ -2871,18 +3086,7 @@ export function LinkedInAdI() {
           <CompatibilityLine />
         </div>
         <div className="w-[52%] relative">
-          <div className="flex items-start">
-            <LifestylePhoto
-              src={lifestylePhotos.pairWork}
-              alt="Team collaborating on laptops"
-              className="w-[50%] aspect-[4/3]"
-              rotate={-1}
-            />
-            <div className="w-[55%] space-y-2 -ml-10 mt-2 relative z-10">
-              <VaultScene compact />
-              <AnalyticsScene compact />
-            </div>
-          </div>
+          <ChatInsertScene compact />
           <FrostedBadge icon={TrendingUp} headline="+34% close rate" subtitle="With shared prompts" color="emerald" className="top-[30%] left-[28%]" />
           <FrostedBadge icon={Users} headline="Team playbook" subtitle="12 prompts shared" color="blue" className="-bottom-3 left-[5%]" />
         </div>
@@ -2916,17 +3120,7 @@ export function LinkedInAdJ() {
           <CompatibilityLine />
         </div>
         <div className="w-[52%] relative">
-          <div className="flex items-start">
-            <LifestylePhoto
-              src={lifestylePhotos.teamScreen}
-              alt="Team analyzing data on screens"
-              className="w-[50%] aspect-[4/3]"
-            />
-            <div className="w-[55%] space-y-2 -ml-8 mt-3 relative z-10">
-              <VaultScene compact />
-              <AnalyticsScene compact />
-            </div>
-          </div>
+          <ChatRedactedScene compact />
           <FrostedBadge icon={BarChart3} headline="312 inserts" subtitle="This month" color="blue" className="top-[35%] left-[32%]" />
           <FrostedBadge icon={Users} headline="4 teams" subtitle="Using this template" color="emerald" className="-bottom-3 left-[5%]" />
         </div>
@@ -2960,18 +3154,7 @@ export function LinkedInAdK() {
           </div>
         </div>
         <div className="w-[52%] relative">
-          <div className="flex items-start">
-            <LifestylePhoto
-              src={lifestylePhotos.office}
-              alt="Team collaborating around table"
-              className="w-[50%] aspect-[4/3]"
-              rotate={1}
-            />
-            <div className="w-[55%] space-y-2 -ml-10 mt-2 relative z-10">
-              <AnalyticsScene compact />
-              <VaultScene compact />
-            </div>
-          </div>
+          <ChatRedactedScene compact />
           <FrostedBadge icon={TrendingUp} headline="Usage +48%" subtitle="vs last quarter" color="amber" className="top-[30%] left-[28%]" />
           <FrostedBadge icon={BarChart3} headline="ROI tracked" subtitle="Per team &amp; tool" color="blue" className="-bottom-3 left-[5%]" />
         </div>
@@ -3005,18 +3188,7 @@ export function LinkedInAdL() {
           <CompatibilityLine />
         </div>
         <div className="w-[52%] relative">
-          <div className="flex items-start">
-            <LifestylePhoto
-              src={lifestylePhotos.pairWork}
-              alt="Diverse team collaborating on laptops"
-              className="w-[50%] aspect-[4/3]"
-              rotate={-2}
-            />
-            <div className="w-[55%] space-y-2 -ml-8 mt-1 relative z-10">
-              <VaultScene compact />
-              <DLPBlockScene compact />
-            </div>
-          </div>
+          <ChatInsertScene compact />
           <FrostedBadge icon={Users} headline="92% adopted" subtitle="Within first week" color="emerald" className="top-[35%] left-[32%]" />
           <FrostedBadge icon={Shield} headline="Safe by default" subtitle="Guardrails built-in" color="blue" className="-bottom-3 left-[5%]" />
         </div>
@@ -3051,17 +3223,7 @@ export function LinkedInAdM() {
           </div>
         </div>
         <div className="w-[52%] relative">
-          <div className="flex items-start">
-            <LifestylePhoto
-              src={lifestylePhotos.womanLaptop}
-              alt="Professional working at laptop"
-              className="w-[50%] aspect-[4/3]"
-              rotate={1}
-            />
-            <div className="w-[55%] space-y-2 -ml-6 mt-3 relative z-10">
-              <DLPBlockScene compact />
-            </div>
-          </div>
+          <ChatDLPScene compact variant="credit-card" />
           <FrostedBadge icon={Shield} headline="Compliant" subtitle="SOC 2 &amp; GDPR ready" color="emerald" className="top-[40%] left-[30%]" />
           <FrostedBadge icon={Lock} headline="Every interaction" subtitle="Fully audited" color="blue" className="-bottom-3 left-[5%]" />
         </div>
@@ -3104,18 +3266,7 @@ export function LinkedInAdN() {
           </div>
         </div>
         <div className="w-[52%] relative">
-          <div className="flex items-start">
-            <LifestylePhoto
-              src={lifestylePhotos.office}
-              alt="Executive reviewing analytics"
-              className="w-[50%] aspect-[4/3]"
-              rotate={-1}
-            />
-            <div className="w-[55%] space-y-2 -ml-8 mt-2 relative z-10">
-              <AnalyticsScene compact />
-              <VaultScene compact />
-            </div>
-          </div>
+          <ChatRedactedScene compact />
           <FrostedBadge icon={TrendingUp} headline="$2.4M saved" subtitle="Annual AI efficiency" color="emerald" className="top-[30%] left-[28%]" />
           <FrostedBadge icon={BarChart3} headline="Per-seat ROI" subtitle="Tracked automatically" color="blue" className="-bottom-3 left-[5%]" />
         </div>
@@ -3151,18 +3302,7 @@ export function LinkedInAdO() {
           <CompatibilityLine />
         </div>
         <div className="w-[50%] relative">
-          <div className="flex items-start">
-            <LifestylePhoto
-              src={lifestylePhotos.solo}
-              alt="CEO at desk with laptop"
-              className="w-[50%] aspect-[4/3]"
-              rotate={2}
-            />
-            <div className="w-[55%] space-y-2 -ml-10 mt-3 relative z-10">
-              <VaultScene compact />
-              <AnalyticsScene compact />
-            </div>
-          </div>
+          <ChatInsertScene compact />
           <FrostedBadge icon={TrendingUp} headline="3x faster" subtitle="AI-powered teams" color="emerald" className="top-[30%] left-[28%]" />
           <FrostedBadge icon={Users} headline="Org-wide" subtitle="Prompt governance" color="blue" className="-bottom-3 left-[5%]" />
         </div>
@@ -3199,17 +3339,7 @@ export function LinkedInAdP() {
           </div>
         </div>
         <div className="w-[52%] relative">
-          <div className="flex items-start">
-            <LifestylePhoto
-              src={lifestylePhotos.coding}
-              alt="Developer at multiple screens"
-              className="w-[50%] aspect-[4/3]"
-            />
-            <div className="w-[55%] space-y-2 -ml-10 mt-2 relative z-10">
-              <DLPBlockScene compact />
-              <AnalyticsScene compact />
-            </div>
-          </div>
+          <ChatDLPScene compact variant="api-key" />
           <FrostedBadge icon={AlertTriangle} headline="Shadow AI" subtitle="Now visible" color="amber" className="top-[30%] left-[28%]" />
           <FrostedBadge icon={Shield} headline="Policy active" subtitle="All tools monitored" color="blue" className="-bottom-3 left-[5%]" />
         </div>
@@ -3243,18 +3373,7 @@ export function LinkedInAdQ() {
           <CompatibilityLine />
         </div>
         <div className="w-[52%] relative">
-          <div className="flex items-start">
-            <LifestylePhoto
-              src={lifestylePhotos.pairWork}
-              alt="Team at laptops collaborating"
-              className="w-[50%] aspect-[4/3]"
-              rotate={-1}
-            />
-            <div className="w-[55%] space-y-2 -ml-8 mt-1 relative z-10">
-              <VaultScene compact />
-              <InsertScene />
-            </div>
-          </div>
+          <ChatInsertScene compact />
           <FrostedBadge icon={Zap} headline="Instant insert" subtitle="Into any AI chat" color="emerald" className="top-[35%] left-[32%]" />
           <FrostedBadge icon={Star} headline="4.8★ avg" subtitle="Client satisfaction" color="blue" className="-bottom-3 left-[5%]" />
         </div>
@@ -3290,17 +3409,7 @@ export function LinkedInAdR() {
           </div>
         </div>
         <div className="w-[52%] relative">
-          <div className="flex items-start">
-            <LifestylePhoto
-              src={lifestylePhotos.womanLaptop}
-              alt="Professional reviewing documents"
-              className="w-[50%] aspect-[4/3]"
-              rotate={1}
-            />
-            <div className="w-[55%] space-y-2 -ml-6 mt-3 relative z-10">
-              <DLPBlockScene compact />
-            </div>
-          </div>
+          <ChatDLPScene compact />
           <FrostedBadge icon={AlertTriangle} headline="Contract blocked" subtitle="Before reaching AI" color="red" className="top-[40%] left-[30%]" />
           <FrostedBadge icon={Shield} headline="Zero exposure" subtitle="Legal docs protected" color="blue" className="-bottom-3 left-[5%]" />
         </div>
@@ -3337,18 +3446,7 @@ export function LinkedInAdS() {
           <CompatibilityLine />
         </div>
         <div className="w-[52%] relative">
-          <div className="flex items-start">
-            <LifestylePhoto
-              src={lifestylePhotos.teamScreen}
-              alt="Marketing team reviewing content"
-              className="w-[50%] aspect-[4/3]"
-              rotate={-2}
-            />
-            <div className="w-[55%] space-y-2 -ml-10 mt-2 relative z-10">
-              <VaultScene compact />
-              <InsertScene />
-            </div>
-          </div>
+          <ChatInsertScene compact />
           <FrostedBadge icon={Zap} headline="On-brand every time" subtitle="Consistent output" color="emerald" className="top-[30%] left-[28%]" />
           <FrostedBadge icon={Star} headline="18 templates" subtitle="Ready to use" color="blue" className="-bottom-3 left-[5%]" />
         </div>
@@ -3394,18 +3492,7 @@ export function LinkedInAdT() {
           <CompatibilityLine />
         </div>
         <div className="w-[52%] relative">
-          <div className="flex items-start">
-            <LifestylePhoto
-              src={lifestylePhotos.focusedDev}
-              alt="Remote worker at laptop"
-              className="w-[50%] aspect-[4/3]"
-              rotate={2}
-            />
-            <div className="w-[55%] space-y-2 -ml-8 mt-1 relative z-10">
-              <VaultScene compact />
-              <AnalyticsScene compact />
-            </div>
-          </div>
+          <ChatInsertScene compact />
           <FrostedBadge icon={Users} headline="Global team" subtitle="Prompts synced live" color="blue" className="top-[35%] left-[32%]" />
           <FrostedBadge icon={Zap} headline="Works offline" subtitle="Sync when ready" color="emerald" className="-bottom-3 left-[5%]" />
         </div>
@@ -3442,17 +3529,7 @@ export function LinkedInAdU() {
           </div>
         </div>
         <div className="w-[52%] relative">
-          <div className="flex items-start">
-            <LifestylePhoto
-              src={lifestylePhotos.solo}
-              alt="Healthcare professional at computer"
-              className="w-[50%] aspect-[4/3]"
-              rotate={-1}
-            />
-            <div className="w-[55%] space-y-2 -ml-6 mt-3 relative z-10">
-              <DLPBlockScene compact />
-            </div>
-          </div>
+          <ChatDLPScene compact />
           <FrostedBadge icon={Shield} headline="PHI blocked" subtitle="Before reaching AI" color="red" className="top-[40%] left-[30%]" />
           <FrostedBadge icon={Lock} headline="HIPAA ready" subtitle="Full compliance" color="emerald" className="-bottom-3 left-[5%]" />
         </div>
@@ -3489,17 +3566,7 @@ export function LinkedInAdV() {
           <CompatibilityLine />
         </div>
         <div className="w-[50%] relative">
-          <div className="flex items-start">
-            <LifestylePhoto
-              src={lifestylePhotos.focusedDev}
-              alt="Researcher working at computer"
-              className="w-[50%] aspect-[4/3]"
-            />
-            <div className="w-[55%] space-y-2 -ml-10 mt-2 relative z-10">
-              <VaultScene compact />
-              <DLPBlockScene compact />
-            </div>
-          </div>
+          <ChatRedactedScene compact />
           <FrostedBadge icon={BookOpen} headline="IRB approved" subtitle="Prompt workflows" color="blue" className="top-[30%] left-[28%]" />
           <FrostedBadge icon={Shield} headline="Data protected" subtitle="Unpublished results safe" color="emerald" className="-bottom-3 left-[5%]" />
         </div>
@@ -3553,20 +3620,215 @@ export function LinkedInAdW() {
           <CompatibilityLine />
         </div>
         <div className="w-[50%] relative">
-          <div className="flex items-start">
-            <LifestylePhoto
-              src={lifestylePhotos.team2}
-              alt="Team collaborating productively"
-              className="w-[50%] aspect-[4/3]"
-              rotate={-1}
-            />
-            <div className="w-[55%] space-y-2 -ml-10 mt-2 relative z-10">
-              <VaultScene compact />
-              <DLPBlockScene compact />
-            </div>
-          </div>
+          <ChatDLPScene compact />
           <FrostedBadge icon={Zap} headline="Setup in 2 min" subtitle="No training needed" color="emerald" className="top-[30%] left-[28%]" />
           <FrostedBadge icon={TrendingUp} headline="10x productivity" subtitle="From day one" color="blue" className="-bottom-3 left-[5%]" />
+        </div>
+      </div>
+    </VibrantBannerShell>
+  );
+}
+
+/* ── LinkedIn Square Ads (1200 x 1200) ─────────── */
+
+export function LinkedInSqA() {
+  return (
+    <WhiteBannerShell aspectRatio="1/1">
+      <div className="flex flex-col justify-between h-full space-y-4">
+        <BannerWordmark dark size="md" />
+        <div className="space-y-2">
+          <p className="text-zinc-900 text-sm sm:text-xl font-bold leading-snug">
+            Your AI Assistant Just Blocked
+            <br />
+            A Data Leak.
+          </p>
+          <p className="text-zinc-500 text-[9px] sm:text-xs leading-snug max-w-[320px]">
+            TeamPrompt&apos;s DLP catches sensitive data before it reaches any AI model
+          </p>
+        </div>
+        <div className="flex-1 flex items-center justify-center">
+          <ChatDLPScene />
+        </div>
+        <div className="space-y-2">
+          <FeaturePills dark />
+          <CompatibilityLine dark />
+        </div>
+      </div>
+    </WhiteBannerShell>
+  );
+}
+
+export function LinkedInSqB() {
+  return (
+    <WhiteBannerShell aspectRatio="1/1">
+      <div className="flex flex-col justify-between h-full space-y-4">
+        <BannerWordmark dark size="md" />
+        <div className="space-y-1">
+          <p className="text-zinc-900 text-sm sm:text-xl font-bold leading-snug">
+            See What Your Team
+            <br />
+            <span className="text-red-500">Is Sharing with AI</span>
+          </p>
+        </div>
+        <div className="flex-1 flex items-center justify-center">
+          <ChatRedactedScene />
+        </div>
+        <div className="space-y-2">
+          <FeaturePills dark />
+          <CompatibilityLine dark />
+        </div>
+      </div>
+    </WhiteBannerShell>
+  );
+}
+
+export function LinkedInSqC() {
+  return (
+    <WhiteBannerShell aspectRatio="1/1">
+      <div className="flex flex-col justify-between h-full space-y-4">
+        <BannerWordmark dark size="md" />
+        <div className="grid grid-cols-2 gap-3 flex-1">
+          {/* Without TeamPrompt */}
+          <div className="rounded-xl border border-red-200 bg-red-50/50 p-3 space-y-2">
+            <p className="text-red-600 text-[10px] sm:text-xs font-semibold">Without TeamPrompt</p>
+            <div className="space-y-1.5">
+              <div className="bg-blue-500 text-white text-[8px] sm:text-[10px] rounded-lg px-2 py-1 w-fit">
+                My SSN is 492-83-1044
+              </div>
+              <div className="flex items-center gap-1 text-red-400">
+                <AlertTriangle className="w-3 h-3" />
+                <span className="text-[7px] sm:text-[9px]">Sent to AI unprotected</span>
+              </div>
+            </div>
+          </div>
+          {/* With TeamPrompt */}
+          <div className="rounded-xl border border-emerald-200 bg-emerald-50/50 p-3 space-y-2">
+            <p className="text-emerald-600 text-[10px] sm:text-xs font-semibold">With TeamPrompt</p>
+            <div className="space-y-1.5">
+              <div className="bg-blue-500 text-white text-[8px] sm:text-[10px] rounded-lg px-2 py-1 w-fit">
+                My SSN is ████-██-████
+              </div>
+              <div className="flex items-center gap-1 text-emerald-500">
+                <Shield className="w-3 h-3" />
+                <span className="text-[7px] sm:text-[9px]">PII auto-redacted</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <FeaturePills dark />
+      </div>
+    </WhiteBannerShell>
+  );
+}
+
+export function LinkedInSqD() {
+  return (
+    <WhiteBannerShell aspectRatio="1/1">
+      <div className="flex flex-col justify-between h-full space-y-4">
+        <BannerWordmark dark size="md" />
+        <div className="space-y-2">
+          <p className="text-zinc-900 text-sm sm:text-xl font-bold leading-snug">
+            Stop Rewriting Prompts
+            <br />
+            From Scratch
+          </p>
+          <p className="text-zinc-500 text-[9px] sm:text-xs leading-snug max-w-[320px]">
+            A shared library of proven prompts your team can insert with one click
+          </p>
+        </div>
+        <div className="flex-1 flex items-center justify-center">
+          <ChatInsertScene />
+        </div>
+        <CompatibilityLine dark />
+      </div>
+    </WhiteBannerShell>
+  );
+}
+
+export function LinkedInSqE() {
+  return (
+    <WhiteBannerShell aspectRatio="1/1">
+      <div className="flex flex-col justify-between h-full space-y-4">
+        <BannerWordmark dark size="md" />
+        <p className="text-zinc-900 text-sm sm:text-xl font-bold leading-snug">
+          One Platform.
+          <br />
+          Every AI Tool.
+          <br />
+          Total Protection.
+        </p>
+        <div className="flex-1 flex items-center justify-center">
+          <MultiAIScene />
+        </div>
+        <CompatibilityLine dark />
+      </div>
+    </WhiteBannerShell>
+  );
+}
+
+export function LinkedInSqF() {
+  return (
+    <WhiteBannerShell aspectRatio="1/1">
+      <div className="flex flex-col justify-between h-full space-y-4">
+        <BannerWordmark dark size="md" />
+        <div className="text-center space-y-1">
+          <p className="text-4xl sm:text-6xl font-black text-blue-600">2,847</p>
+          <p className="text-zinc-500 text-[10px] sm:text-sm">data leaks blocked this month</p>
+        </div>
+        <div className="relative flex-1 flex items-center justify-center">
+          <ChatDLPScene compact variant="credit-card" />
+          <FrostedBadge icon={Shield} headline="Auto-blocked" subtitle="Credit card detected" color="red" className="top-[10%] right-[5%]" />
+          <FrostedBadge icon={Lock} headline="Zero exposure" subtitle="Data never left" color="emerald" className="bottom-[10%] left-[5%]" />
+        </div>
+        <FeaturePills dark />
+      </div>
+    </WhiteBannerShell>
+  );
+}
+
+export function LinkedInSqG() {
+  return (
+    <WhiteBannerShell aspectRatio="1/1">
+      <div className="flex flex-col justify-between h-full space-y-4">
+        <BannerWordmark dark size="md" />
+        <p className="text-zinc-900 text-sm sm:text-xl font-bold leading-snug">
+          Full Visibility Into
+          <br />
+          Your Team&apos;s AI Usage
+        </p>
+        <div className="flex-1 grid grid-cols-2 gap-3 items-center">
+          <AnalyticsScene compact hideChrome />
+          <ChatRedactedScene compact />
+        </div>
+        <FeaturePills dark />
+      </div>
+    </WhiteBannerShell>
+  );
+}
+
+export function LinkedInSqH() {
+  return (
+    <VibrantBannerShell aspectRatio="1/1" accent="blue">
+      <div className="flex flex-col justify-between h-full space-y-4">
+        <BannerWordmark size="md" />
+        <div className="space-y-2">
+          <p className="text-white text-sm sm:text-xl font-bold leading-snug">
+            Sensitive Data
+            <br />
+            Meets AI.
+            <br />
+            TeamPrompt Intervenes.
+          </p>
+          <p className="text-white/60 text-[9px] sm:text-xs leading-snug max-w-[320px]">
+            Real-time DLP scanning catches API keys, credentials, and secrets before they reach any model
+          </p>
+        </div>
+        <div className="flex-1 flex items-center justify-center">
+          <ChatDLPScene variant="api-key" />
+        </div>
+        <div className="space-y-2">
+          <FeaturePills />
+          <CompatibilityLine />
         </div>
       </div>
     </VibrantBannerShell>
@@ -3644,4 +3906,12 @@ export const socialBannerComponents = {
   linkedinAdU: { Component: LinkedInAdU, label: "LinkedIn Ad — Healthcare (HIPAA)", dims: "1200 x 627" },
   linkedinAdV: { Component: LinkedInAdV, label: "LinkedIn Ad — Research (Integrity)", dims: "1200 x 627" },
   linkedinAdW: { Component: LinkedInAdW, label: "LinkedIn Ad — Before vs After", dims: "1200 x 627" },
+  linkedinSqA: { Component: LinkedInSqA, label: "LinkedIn Square — DLP Block (Light)", dims: "1200 x 1200" },
+  linkedinSqB: { Component: LinkedInSqB, label: "LinkedIn Square — Redacted Chat (Light)", dims: "1200 x 1200" },
+  linkedinSqC: { Component: LinkedInSqC, label: "LinkedIn Square — Before/After Split (Light)", dims: "1200 x 1200" },
+  linkedinSqD: { Component: LinkedInSqD, label: "LinkedIn Square — Prompt Insert (Light)", dims: "1200 x 1200" },
+  linkedinSqE: { Component: LinkedInSqE, label: "LinkedIn Square — Multi-AI Grid (Light)", dims: "1200 x 1200" },
+  linkedinSqF: { Component: LinkedInSqF, label: "LinkedIn Square — Big Stat + DLP (Light)", dims: "1200 x 1200" },
+  linkedinSqG: { Component: LinkedInSqG, label: "LinkedIn Square — Analytics + Chat (Light)", dims: "1200 x 1200" },
+  linkedinSqH: { Component: LinkedInSqH, label: "LinkedIn Square — DLP Block (Dark)", dims: "1200 x 1200" },
 } as const;

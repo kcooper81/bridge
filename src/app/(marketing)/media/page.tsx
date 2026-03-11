@@ -83,6 +83,14 @@ import {
   LinkedInAdU,
   LinkedInAdV,
   LinkedInAdW,
+  LinkedInSqA,
+  LinkedInSqB,
+  LinkedInSqC,
+  LinkedInSqD,
+  LinkedInSqE,
+  LinkedInSqF,
+  LinkedInSqG,
+  LinkedInSqH,
 } from "./_components/social-banners";
 
 export const metadata: Metadata = generatePageMetadata({
@@ -1773,6 +1781,99 @@ export default function MediaPage() {
                 <p className="text-xs text-muted-foreground mb-2">Target: Any AI decision-maker — visual before/after contrast drives conversions</p>
                 <BannerDownloadWrapper filename="linkedin-ad-w-before-after">
                   <LinkedInAdW />
+                </BannerDownloadWrapper>
+              </div>
+            </div>
+          </div>
+
+          {/* LinkedIn Square Ads (1200×1200) — AI Chat Mockups */}
+          <div className="rounded-2xl border border-border bg-card p-6 mb-8">
+            <h3 className="text-lg font-bold flex items-center gap-2 mb-2">
+              <Target className="h-5 w-5 text-blue-600" />
+              LinkedIn Square Ads — 1200 × 1200 (AI Chat Mockups)
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Square format for maximum mobile feed presence. Features realistic AI chat window mockups showing DLP protection, prompt insert, and data redaction in action.
+            </p>
+            <div className="grid gap-8">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs font-semibold bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Sq A</span>
+                  <span className="text-sm font-medium">DLP Block in AI Chat — Light</span>
+                </div>
+                <p className="text-xs text-muted-foreground mb-2">Shows sensitive data being blocked in real-time inside a ChatGPT-style conversation</p>
+                <BannerDownloadWrapper filename="linkedin-sq-a-dlp-block-light">
+                  <LinkedInSqA />
+                </BannerDownloadWrapper>
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs font-semibold bg-red-100 text-red-700 px-2 py-0.5 rounded-full">Sq B</span>
+                  <span className="text-sm font-medium">Redacted Chat — Light</span>
+                </div>
+                <p className="text-xs text-muted-foreground mb-2">Chat with automatically redacted PII, emails, and account numbers</p>
+                <BannerDownloadWrapper filename="linkedin-sq-b-redacted-chat-light">
+                  <LinkedInSqB />
+                </BannerDownloadWrapper>
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs font-semibold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">Sq C</span>
+                  <span className="text-sm font-medium">Before vs After — Side by Side</span>
+                </div>
+                <p className="text-xs text-muted-foreground mb-2">Visual comparison: unprotected chat vs TeamPrompt-protected chat</p>
+                <BannerDownloadWrapper filename="linkedin-sq-c-before-after">
+                  <LinkedInSqC />
+                </BannerDownloadWrapper>
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs font-semibold bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">Sq D</span>
+                  <span className="text-sm font-medium">Prompt Insert Flow — Light</span>
+                </div>
+                <p className="text-xs text-muted-foreground mb-2">Shows TeamPrompt injecting a shared template into the AI chat input</p>
+                <BannerDownloadWrapper filename="linkedin-sq-d-prompt-insert-light">
+                  <LinkedInSqD />
+                </BannerDownloadWrapper>
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs font-semibold bg-violet-100 text-violet-700 px-2 py-0.5 rounded-full">Sq E</span>
+                  <span className="text-sm font-medium">Multi-AI Protection Grid — Light</span>
+                </div>
+                <p className="text-xs text-muted-foreground mb-2">ChatGPT, Claude, Gemini, Copilot — all protected by one platform</p>
+                <BannerDownloadWrapper filename="linkedin-sq-e-multi-ai-grid">
+                  <LinkedInSqE />
+                </BannerDownloadWrapper>
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs font-semibold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">Sq F</span>
+                  <span className="text-sm font-medium">Big Stat + DLP Chat — Light</span>
+                </div>
+                <p className="text-xs text-muted-foreground mb-2">Bold stat callout with mini chat showing credit card block</p>
+                <BannerDownloadWrapper filename="linkedin-sq-f-stat-dlp-light">
+                  <LinkedInSqF />
+                </BannerDownloadWrapper>
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs font-semibold bg-cyan-100 text-cyan-700 px-2 py-0.5 rounded-full">Sq G</span>
+                  <span className="text-sm font-medium">Analytics + Redacted Chat — Light</span>
+                </div>
+                <p className="text-xs text-muted-foreground mb-2">Side-by-side analytics dashboard and redacted conversation view</p>
+                <BannerDownloadWrapper filename="linkedin-sq-g-analytics-chat-light">
+                  <LinkedInSqG />
+                </BannerDownloadWrapper>
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs font-semibold bg-zinc-800 text-white px-2 py-0.5 rounded-full">Sq H</span>
+                  <span className="text-sm font-medium">DLP Block in AI Chat — Dark</span>
+                </div>
+                <p className="text-xs text-muted-foreground mb-2">Dark variant with API key detection — vibrant blue accent</p>
+                <BannerDownloadWrapper filename="linkedin-sq-h-dlp-block-dark">
+                  <LinkedInSqH />
                 </BannerDownloadWrapper>
               </div>
             </div>

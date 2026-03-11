@@ -13,12 +13,25 @@ interface BannerDownloadWrapperProps {
   downloadWidth?: number;
 }
 
+/** Fetch a URL and return a data: URI */
+async function toDataUri(url: string): Promise<string> {
+  const fullUrl = url.startsWith("http") ? url : new URL(url, window.location.origin).href;
+  const res = await fetch(fullUrl);
+  const blob = await res.blob();
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
 /**
  * Wraps a CSS-rendered banner and provides a "Download PNG" button.
  *
- * Captures the banner by building a standalone SVG foreignObject document
- * with all resources (images, SVGs, fonts, computed styles) fully inlined.
- * This avoids html-to-image's known issues with image cloning and cacheBust.
+ * Patches the live DOM before capture to inline all resources, then uses
+ * html-to-image with cacheBust disabled so it doesn't corrupt our data URIs.
+ * All patches are reverted immediately after capture.
  */
 export function BannerDownloadWrapper({
   children,
@@ -33,85 +46,118 @@ export function BannerDownloadWrapper({
     if (!captureRef.current || loading) return;
     setLoading(true);
 
+    const node = captureRef.current;
+    const savedImgs = new Map<HTMLImageElement, { src: string; srcset: string; sizes: string; loading: string | null }>();
+    const savedStyles = new Map<HTMLElement, Record<string, string>>();
+    const savedSvgs = new Map<HTMLImageElement, { parent: Node; nextSibling: Node | null; svg: SVGSVGElement }>();
+
+    function saveStyle(el: HTMLElement, props: string[]) {
+      const existing = savedStyles.get(el) || {};
+      for (const p of props) {
+        if (!(p in existing)) {
+          existing[p] = (el.style as unknown as Record<string, string>)[p] || "";
+        }
+      }
+      savedStyles.set(el, existing);
+    }
+
     try {
-      const node = captureRef.current;
-      const width = node.offsetWidth;
-      const height = node.offsetHeight;
-      const scale = downloadWidth ? downloadWidth / width : 2;
+      const { toPng } = await import("html-to-image");
 
-      // Deep-clone the node so we can mutate freely without affecting the page
-      const clone = node.cloneNode(true) as HTMLElement;
+      // ── 1. Convert ALL <img> to data URIs on the live DOM ──
+      // This includes local images (e.g. /ads/pandora-box.jpg) which
+      // foreignObject can't resolve on its own.
+      const imgs = Array.from(node.querySelectorAll("img"));
+      await Promise.all(
+        imgs.map(async (img) => {
+          const src = img.currentSrc || img.src;
+          if (src && !src.startsWith("data:")) {
+            try {
+              savedImgs.set(img, {
+                src: img.src,
+                srcset: img.srcset,
+                sizes: img.sizes,
+                loading: img.getAttribute("loading"),
+              });
+              img.src = await toDataUri(src);
+              img.srcset = "";
+              img.sizes = "";
+              img.removeAttribute("loading");
+            } catch {
+              /* leave original */
+            }
+          }
+        })
+      );
 
-      // Inline all computed styles onto every element in the clone
-      await inlineComputedStyles(node, clone);
+      // ── 2. Convert inline <svg> to data-URI <img> on the live DOM ──
+      // SVG-inside-foreignObject-inside-SVG often fails to serialize.
+      const svgs = Array.from(node.querySelectorAll("svg"));
+      for (const svg of svgs) {
+        try {
+          const parent = svg.parentNode;
+          if (!parent) continue;
+          const rect = svg.getBoundingClientRect();
+          if (rect.width === 0 && rect.height === 0) continue;
 
-      // Inline all <img> sources as data URIs
-      await inlineImages(clone);
+          const serialized = new XMLSerializer().serializeToString(svg);
+          const dataUri = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(serialized)}`;
 
-      // Inline all <svg> elements as data-URI <img> tags
-      inlineSvgs(node, clone);
+          const img = document.createElement("img");
+          img.src = dataUri;
+          img.style.width = rect.width + "px";
+          img.style.height = rect.height + "px";
+          img.style.display = window.getComputedStyle(svg).display === "none" ? "none" : "inline-block";
+          img.style.flexShrink = "0";
+          img.style.verticalAlign = "middle";
 
-      // Patch unsupported CSS for SVG foreignObject rendering
-      patchUnsupportedCss(clone);
+          const nextSibling = svg.nextSibling;
+          savedSvgs.set(img, { parent, nextSibling, svg: svg as SVGSVGElement });
+          parent.replaceChild(img, svg);
+        } catch {
+          /* leave original */
+        }
+      }
 
-      // Strip rounded corners on the banner shell for clean export
-      const shell = clone.firstElementChild as HTMLElement | null;
+      // ── 3. Strip rounded corners on banner shell ──
+      const shell = node.firstElementChild as HTMLElement | null;
       if (shell) {
+        saveStyle(shell, ["borderRadius", "overflow"]);
         shell.style.borderRadius = "0";
         shell.style.overflow = "visible";
       }
 
-      // Build SVG foreignObject document
-      const svgNs = "http://www.w3.org/2000/svg";
-      const xhtmlNs = "http://www.w3.org/1999/xhtml";
-      const svg = document.createElementNS(svgNs, "svg");
-      svg.setAttribute("width", String(width));
-      svg.setAttribute("height", String(height));
-      svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+      // ── 4. Patch CSS effects unsupported in foreignObject ──
+      node.querySelectorAll("*").forEach((el) => {
+        const htmlEl = el as HTMLElement;
+        const cs = window.getComputedStyle(htmlEl);
 
-      const fo = document.createElementNS(svgNs, "foreignObject");
-      fo.setAttribute("width", "100%");
-      fo.setAttribute("height", "100%");
+        if (cs.backdropFilter && cs.backdropFilter !== "none") {
+          saveStyle(htmlEl, ["backdropFilter", "WebkitBackdropFilter", "backgroundColor"]);
+          htmlEl.style.backdropFilter = "none";
+          htmlEl.style.setProperty("-webkit-backdrop-filter", "none");
+          htmlEl.style.backgroundColor = "rgba(255,255,255,0.97)";
+        }
 
-      // Wrap clone in an xhtml body
-      const body = document.createElementNS(xhtmlNs, "body");
-      body.setAttribute("xmlns", xhtmlNs);
-      body.style.margin = "0";
-      body.style.padding = "0";
-      body.style.width = width + "px";
-      body.style.height = height + "px";
-      body.appendChild(clone);
-      fo.appendChild(body);
-      svg.appendChild(fo);
-
-      // Serialize SVG → blob → canvas → PNG
-      const svgData = new XMLSerializer().serializeToString(svg);
-      const svgBlob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
-      const svgUrl = URL.createObjectURL(svgBlob);
-
-      const canvas = document.createElement("canvas");
-      canvas.width = Math.round(width * scale);
-      canvas.height = Math.round(height * scale);
-      const ctx = canvas.getContext("2d")!;
-      ctx.scale(scale, scale);
-
-      const img = new Image();
-      img.crossOrigin = "anonymous";
-
-      await new Promise<void>((resolve, reject) => {
-        img.onload = () => {
-          ctx.drawImage(img, 0, 0, width, height);
-          URL.revokeObjectURL(svgUrl);
-          resolve();
-        };
-        img.onerror = (e) => {
-          URL.revokeObjectURL(svgUrl);
-          reject(e);
-        };
-        img.src = svgUrl;
+        if (cs.filter && cs.filter.includes("blur")) {
+          saveStyle(htmlEl, ["filter", "opacity"]);
+          htmlEl.style.filter = "none";
+          htmlEl.style.opacity = "0.25";
+        }
       });
 
-      const dataUrl = canvas.toDataURL("image/png");
+      // ── 5. Capture ──
+      // cacheBust MUST be false — we already inlined everything as data URIs,
+      // and cacheBust appends ?query params that corrupt data: URIs in the clone.
+      const ratio = downloadWidth ? downloadWidth / node.offsetWidth : 2;
+      const dataUrl = await toPng(node, {
+        pixelRatio: ratio,
+        cacheBust: false,
+        skipAutoScale: true,
+        includeQueryParams: true,
+      });
+
+      // ── 6. Trigger download ──
       const a = document.createElement("a");
       a.href = dataUrl;
       a.download = filename.endsWith(".png") ? filename : `${filename}.png`;
@@ -119,6 +165,29 @@ export function BannerDownloadWrapper({
     } catch (err) {
       console.error("Banner download failed:", err);
     } finally {
+      // ── Restore patched styles ──
+      savedStyles.forEach((styles, el) => {
+        for (const [prop, val] of Object.entries(styles)) {
+          (el.style as unknown as Record<string, string>)[prop] = val;
+        }
+      });
+      // Restore images
+      savedImgs.forEach(({ src, srcset, sizes, loading: loadingAttr }, img) => {
+        img.src = src;
+        img.srcset = srcset;
+        img.sizes = sizes;
+        if (loadingAttr) img.setAttribute("loading", loadingAttr);
+      });
+      // Restore inline SVGs
+      savedSvgs.forEach(({ parent, nextSibling, svg }, imgEl) => {
+        if (imgEl.parentNode) {
+          imgEl.parentNode.replaceChild(svg, imgEl);
+        } else if (nextSibling) {
+          parent.insertBefore(svg, nextSibling);
+        } else {
+          parent.appendChild(svg);
+        }
+      });
       setLoading(false);
     }
   }, [filename, loading, downloadWidth]);
@@ -146,130 +215,4 @@ export function BannerDownloadWrapper({
       </div>
     </div>
   );
-}
-
-// ── Helpers ──────────────────────────────────────────────
-
-/** Fetch a URL and return as data: URI */
-async function toDataUri(url: string): Promise<string> {
-  const res = await fetch(url);
-  const blob = await res.blob();
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result as string);
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
-  });
-}
-
-/** Copy computed styles from the live DOM onto the clone so they survive serialization */
-async function inlineComputedStyles(original: HTMLElement, clone: HTMLElement) {
-  const origEls = original.querySelectorAll("*");
-  const cloneEls = clone.querySelectorAll("*");
-
-  // Also style the root
-  copyStyles(original, clone);
-
-  for (let i = 0; i < origEls.length && i < cloneEls.length; i++) {
-    copyStyles(origEls[i] as HTMLElement, cloneEls[i] as HTMLElement);
-  }
-}
-
-function copyStyles(from: HTMLElement, to: HTMLElement) {
-  const cs = window.getComputedStyle(from);
-  // Copy key layout/visual properties that Tailwind classes won't carry into foreignObject
-  const props = [
-    "display", "position", "top", "right", "bottom", "left", "z-index",
-    "width", "height", "min-width", "min-height", "max-width", "max-height",
-    "margin", "padding", "box-sizing", "overflow",
-    "flex-direction", "flex-wrap", "flex-grow", "flex-shrink", "flex-basis",
-    "align-items", "justify-content", "gap",
-    "font-family", "font-size", "font-weight", "font-style", "line-height",
-    "letter-spacing", "text-align", "text-decoration", "text-transform",
-    "color", "background-color", "background-image", "background-size",
-    "background-position", "background-repeat",
-    "border", "border-radius", "border-color", "border-width", "border-style",
-    "box-shadow", "opacity", "white-space", "word-break", "overflow-wrap",
-    "object-fit", "object-position", "aspect-ratio",
-  ];
-  for (const p of props) {
-    try {
-      const val = cs.getPropertyValue(p);
-      if (val) to.style.setProperty(p, val);
-    } catch { /* skip */ }
-  }
-}
-
-/** Convert every <img> in the clone to a data URI */
-async function inlineImages(clone: HTMLElement) {
-  const imgs = Array.from(clone.querySelectorAll("img"));
-  await Promise.all(
-    imgs.map(async (img) => {
-      const src = img.getAttribute("src") || img.src;
-      if (!src || src.startsWith("data:")) return;
-      try {
-        // Resolve relative URLs against the page origin
-        const fullUrl = src.startsWith("http") ? src : new URL(src, window.location.origin).href;
-        img.src = await toDataUri(fullUrl);
-        img.removeAttribute("srcset");
-        img.removeAttribute("sizes");
-        img.removeAttribute("loading");
-      } catch { /* leave original */ }
-    })
-  );
-}
-
-/** Replace inline <svg> elements with data-URI <img> tags in the clone */
-function inlineSvgs(original: HTMLElement, clone: HTMLElement) {
-  const origSvgs = Array.from(original.querySelectorAll("svg"));
-  const cloneSvgs = Array.from(clone.querySelectorAll("svg"));
-
-  for (let i = 0; i < cloneSvgs.length && i < origSvgs.length; i++) {
-    const svg = cloneSvgs[i];
-    const origSvg = origSvgs[i];
-    const parent = svg.parentNode;
-    if (!parent) continue;
-
-    try {
-      // Get dimensions from the live DOM element
-      const rect = origSvg.getBoundingClientRect();
-      const serialized = new XMLSerializer().serializeToString(svg);
-      const dataUri = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(serialized)}`;
-      const img = document.createElement("img");
-      img.src = dataUri;
-      img.style.width = rect.width + "px";
-      img.style.height = rect.height + "px";
-      img.style.display = "inline-block";
-      img.style.flexShrink = "0";
-      img.style.verticalAlign = "middle";
-      parent.replaceChild(img, svg);
-    } catch { /* leave original */ }
-  }
-}
-
-/** Patch CSS effects that don't render in SVG foreignObject */
-function patchUnsupportedCss(clone: HTMLElement) {
-  clone.querySelectorAll("*").forEach((el) => {
-    const htmlEl = el as HTMLElement;
-    const style = htmlEl.style;
-
-    // backdrop-filter: not supported in foreignObject
-    if (style.backdropFilter && style.backdropFilter !== "none") {
-      style.backdropFilter = "none";
-      style.setProperty("-webkit-backdrop-filter", "none");
-      // Ensure the background is opaque to compensate
-      if (!style.backgroundColor || style.backgroundColor === "transparent") {
-        style.backgroundColor = "rgba(255,255,255,0.97)";
-      } else {
-        // Make existing semi-transparent bg more opaque
-        style.backgroundColor = style.backgroundColor.replace(/[\d.]+\)$/, "0.97)");
-      }
-    }
-
-    // filter:blur() can clip or produce hard edges
-    if (style.filter && style.filter.includes("blur")) {
-      style.filter = "none";
-      style.opacity = "0.25";
-    }
-  });
 }

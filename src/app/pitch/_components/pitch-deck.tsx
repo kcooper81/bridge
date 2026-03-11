@@ -132,7 +132,8 @@ export function PitchDeck() {
   const slideProps = (idx: number) => ({
     ref: (el: HTMLDivElement | null) => { slideRefs.current[idx] = el; },
     className: cn(
-      "min-h-screen w-full flex items-center justify-center px-6 py-16 sm:px-12 lg:px-20 relative overflow-hidden",
+      "min-h-screen w-full flex items-center justify-center px-8 py-28 sm:px-16 lg:px-24 relative overflow-hidden",
+      isScrollMode && "border-b border-white/[0.04]",
       !isScrollMode && idx !== currentSlide && "hidden"
     ),
   });
@@ -332,7 +333,7 @@ export function PitchDeck() {
               ].map((s) => (
                 <div key={s.label} className="text-center">
                   <p className="text-2xl sm:text-3xl font-black tracking-tight">{s.value}</p>
-                  <p className="text-[11px] text-zinc-600 mt-1 uppercase tracking-widest">{s.label}</p>
+                  <p className="text-sm text-zinc-600 mt-1 uppercase tracking-widest">{s.label}</p>
                 </div>
               ))}
             </div>
@@ -359,12 +360,12 @@ export function PitchDeck() {
         <div className="absolute inset-0 grain-overlay" />
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500/0 via-red-500/50 to-red-500/0" />
 
-        <div className="relative z-10 max-w-5xl mx-auto space-y-12">
+        <div className="relative z-10 max-w-5xl mx-auto space-y-10">
           <RevealText>
-            <p className="text-xs font-bold uppercase tracking-[0.3em] text-red-400/80 mb-4">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-red-400/80 mb-4">
               The Problem
             </p>
-            <h2 className="text-4xl sm:text-6xl font-black leading-[0.95] tracking-tight">
+            <h2 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight">
               Your team is<br />
               <span className="text-red-400">bleeding AI productivity.</span>
             </h2>
@@ -432,7 +433,7 @@ export function PitchDeck() {
                   <div className="h-1.5 rounded-full bg-white/[0.03] overflow-hidden mb-2">
                     <div className={cn("h-full rounded-full bg-gradient-to-r", s.color)} style={{ width: s.width }} />
                   </div>
-                  <p className="text-[10px] text-zinc-500 leading-relaxed">{s.label}</p>
+                  <p className="text-xs text-zinc-500 leading-relaxed">{s.label}</p>
                 </div>
               ))}
             </div>
@@ -447,12 +448,12 @@ export function PitchDeck() {
         <div className="absolute inset-0 grain-overlay" />
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-amber-500/0 via-amber-500/50 to-amber-500/0" />
 
-        <div className="relative z-10 max-w-5xl mx-auto space-y-12">
+        <div className="relative z-10 max-w-5xl mx-auto space-y-10">
           <RevealText>
-            <p className="text-xs font-bold uppercase tracking-[0.3em] text-amber-400/80 mb-4">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-amber-400/80 mb-4">
               The Solution
             </p>
-            <h2 className="text-4xl sm:text-6xl font-black leading-[0.95] tracking-tight">
+            <h2 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight">
               One shared library.<br />
               Every AI tool.<br />
               <span className="gradient-text">Complete governance.</span>
@@ -510,7 +511,7 @@ export function PitchDeck() {
                 <div key={f.label} className="glow-card rounded-xl p-4">
                   <f.icon className="h-4 w-4 text-amber-400/60 mb-2" />
                   <p className="font-semibold text-xs">{f.label}</p>
-                  <p className="text-[10px] text-zinc-500 mt-1 leading-relaxed">{f.desc}</p>
+                  <p className="text-xs text-zinc-500 mt-1 leading-relaxed">{f.desc}</p>
                 </div>
               ))}
             </div>
@@ -530,13 +531,13 @@ export function PitchDeck() {
       <div {...slideProps(3)}>
         <div className="absolute inset-0 grain-overlay" />
 
-        <div className="relative z-10 max-w-6xl mx-auto space-y-10">
+        <div className="relative z-10 max-w-5xl mx-auto space-y-10">
           <RevealText>
             <div className="text-center">
-              <p className="text-xs font-bold uppercase tracking-[0.3em] text-blue-400/80 mb-4">
+              <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-400/80 mb-4">
                 The Product
               </p>
-              <h2 className="text-4xl sm:text-6xl font-black tracking-tight">
+              <h2 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight">
                 Built. Shipped. <span className="gradient-text-blue">Live.</span>
               </h2>
             </div>
@@ -560,7 +561,7 @@ export function PitchDeck() {
                       className="w-full transition-transform duration-500 group-hover:scale-[1.02]"
                     />
                   </div>
-                  <p className="text-[11px] text-zinc-500 mt-2 text-center">{img.label}</p>
+                  <p className="text-sm text-zinc-500 mt-2 text-center">{img.label}</p>
                 </div>
               </RevealText>
             ))}
@@ -575,12 +576,12 @@ export function PitchDeck() {
         <div className="absolute inset-0 grain-overlay" />
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500/0 via-emerald-500/50 to-emerald-500/0" />
 
-        <div className="relative z-10 max-w-5xl mx-auto space-y-12">
+        <div className="relative z-10 max-w-5xl mx-auto space-y-10">
           <RevealText>
-            <p className="text-xs font-bold uppercase tracking-[0.3em] text-emerald-400/80 mb-4">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-emerald-400/80 mb-4">
               Market Opportunity
             </p>
-            <h2 className="text-4xl sm:text-6xl font-black leading-[0.95] tracking-tight">
+            <h2 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight">
               $50B market.<br />
               <span className="text-emerald-400">No one owns AI governance for teams.</span>
             </h2>
@@ -596,7 +597,7 @@ export function PitchDeck() {
                 <div key={s.label} className="glow-card rounded-2xl p-6 text-center">
                   <p className="text-4xl sm:text-5xl font-black text-emerald-400">{s.value}</p>
                   <p className="text-sm text-zinc-300 mt-2">{s.label}</p>
-                  <p className="text-[10px] text-zinc-600 mt-1">{s.source}</p>
+                  <p className="text-xs text-zinc-600 mt-1">{s.source}</p>
                 </div>
               ))}
             </div>
@@ -622,7 +623,7 @@ export function PitchDeck() {
                           <span className="text-xs font-black whitespace-nowrap">{m.value}</span>
                         </div>
                       </div>
-                      <p className="text-[10px] text-zinc-600 mt-1">{m.desc}</p>
+                      <p className="text-xs text-zinc-600 mt-1">{m.desc}</p>
                     </div>
                   </div>
                 ))}
@@ -641,9 +642,9 @@ export function PitchDeck() {
                   <seg.icon className="h-5 w-5 text-zinc-500 mb-3" />
                   <div className="flex items-baseline gap-2 mb-1">
                     <h4 className="font-bold text-sm">{seg.title}</h4>
-                    <span className="text-[10px] text-amber-400 font-bold">{seg.pct}</span>
+                    <span className="text-xs text-amber-400 font-bold">{seg.pct}</span>
                   </div>
-                  <p className="text-[11px] text-zinc-500 leading-relaxed">{seg.desc}</p>
+                  <p className="text-sm text-zinc-500 leading-relaxed">{seg.desc}</p>
                 </div>
               ))}
             </div>
@@ -660,7 +661,7 @@ export function PitchDeck() {
 
         <div className="relative z-10 max-w-5xl mx-auto space-y-10">
           <RevealText>
-            <p className="text-xs font-bold uppercase tracking-[0.3em] text-amber-400/80 mb-4">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-amber-400/80 mb-4">
               Competitive Edge
             </p>
             <h2 className="text-4xl sm:text-5xl font-black leading-[0.95] tracking-tight">
@@ -759,12 +760,12 @@ export function PitchDeck() {
       <div {...slideProps(6)}>
         <div className="absolute inset-0 grain-overlay" />
 
-        <div className="relative z-10 max-w-5xl mx-auto space-y-12">
+        <div className="relative z-10 max-w-5xl mx-auto space-y-10">
           <RevealText>
-            <p className="text-xs font-bold uppercase tracking-[0.3em] text-blue-400/80 mb-4">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-400/80 mb-4">
               Business Model
             </p>
-            <h2 className="text-4xl sm:text-6xl font-black tracking-tight">
+            <h2 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight">
               Freemium SaaS.
               <br />
               <span className="text-zinc-500">Customers already paying.</span>
@@ -791,11 +792,11 @@ export function PitchDeck() {
                   {t.highlight && (
                     <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-amber-400 to-amber-600" />
                   )}
-                  <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">{t.tier}</p>
+                  <p className="text-xs text-zinc-500 uppercase tracking-widest font-bold">{t.tier}</p>
                   <p className="text-3xl font-black mt-2">{t.price}</p>
-                  <p className="text-[11px] text-zinc-500 mt-1">{t.desc}</p>
+                  <p className="text-sm text-zinc-500 mt-1">{t.desc}</p>
                   {t.highlight && (
-                    <span className="inline-block mt-3 text-[9px] bg-amber-500 text-black px-2.5 py-0.5 rounded-full font-black uppercase tracking-wider">
+                    <span className="inline-block mt-3 text-xs bg-amber-500 text-black px-2.5 py-0.5 rounded-full font-black uppercase tracking-wider">
                       Most popular
                     </span>
                   )}
@@ -815,14 +816,14 @@ export function PitchDeck() {
                 <div key={m.label} className="glow-card rounded-xl p-5 text-center">
                   <m.icon className={cn("h-5 w-5 mx-auto mb-2", m.accent)} />
                   <p className="text-2xl font-black">{m.value}</p>
-                  <p className="text-[10px] text-zinc-500 uppercase tracking-widest mt-1">{m.label}</p>
+                  <p className="text-xs text-zinc-500 uppercase tracking-widest mt-1">{m.label}</p>
                 </div>
               ))}
             </div>
           </RevealText>
 
           <RevealText delay={500}>
-            <p className="text-center text-xs text-zinc-600">
+            <p className="text-center text-sm text-zinc-600">
               Follows Notion&apos;s playbook: free tier drives organic adoption, teams convert when they need collaboration and security.
             </p>
           </RevealText>
@@ -836,16 +837,16 @@ export function PitchDeck() {
         <div className="absolute inset-0 grain-overlay" />
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500/0 via-emerald-500/50 to-emerald-500/0" />
 
-        <div className="relative z-10 max-w-5xl mx-auto space-y-12">
+        <div className="relative z-10 max-w-5xl mx-auto space-y-10">
           <RevealText>
-            <p className="text-xs font-bold uppercase tracking-[0.3em] text-emerald-400/80 mb-4">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-emerald-400/80 mb-4">
               Traction
             </p>
-            <h2 className="text-4xl sm:text-6xl font-black leading-[0.95] tracking-tight">
+            <h2 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight">
               Product-market fit.<br />
               <span className="text-emerald-400">Proven.</span>
             </h2>
-            <p className="mt-3 text-sm text-zinc-500">6 months. Organic growth. Zero ad spend.</p>
+            <p className="mt-3 text-base text-zinc-500">6 months. Organic growth. Zero ad spend.</p>
           </RevealText>
 
           <RevealText delay={200}>
@@ -859,8 +860,8 @@ export function PitchDeck() {
               ].map((m) => (
                 <div key={m.label} className="glow-card rounded-xl p-4 text-center">
                   <p className="text-xl sm:text-2xl font-black">{m.value}</p>
-                  <p className="text-[10px] text-zinc-500 uppercase tracking-widest mt-1">{m.label}</p>
-                  {m.sub && <p className="text-[10px] text-emerald-400 mt-0.5 font-medium">{m.sub}</p>}
+                  <p className="text-xs text-zinc-500 uppercase tracking-widest mt-1">{m.label}</p>
+                  {m.sub && <p className="text-xs text-emerald-400 mt-0.5 font-medium">{m.sub}</p>}
                 </div>
               ))}
             </div>
@@ -881,7 +882,7 @@ export function PitchDeck() {
                   { month: "Now", mrr: 12, h: "80%" },
                 ].map((bar, i) => (
                   <div key={bar.month} className="flex-1 flex flex-col items-center gap-1">
-                    <span className="text-[10px] text-zinc-500 font-mono">${bar.mrr}K</span>
+                    <span className="text-xs text-zinc-500 font-mono">${bar.mrr}K</span>
                     <div
                       className={cn(
                         "w-full rounded-t-md transition-all duration-700",
@@ -891,7 +892,7 @@ export function PitchDeck() {
                       )}
                       style={{ height: bar.h }}
                     />
-                    <span className={cn("text-[10px] font-mono", i === 7 ? "text-emerald-400 font-bold" : "text-zinc-600")}>{bar.month}</span>
+                    <span className={cn("text-xs font-mono", i === 7 ? "text-emerald-400 font-bold" : "text-zinc-600")}>{bar.month}</span>
                   </div>
                 ))}
               </div>
@@ -899,7 +900,7 @@ export function PitchDeck() {
           </RevealText>
 
           <RevealText delay={500}>
-            <p className="text-center text-xs text-zinc-600">
+            <p className="text-center text-sm text-zinc-600">
               Growth engine: Chrome Web Store discovery + word-of-mouth. <span className="text-emerald-400 font-medium">No marketing spend yet.</span>
             </p>
           </RevealText>
@@ -914,10 +915,10 @@ export function PitchDeck() {
 
         <div className="relative z-10 max-w-5xl mx-auto space-y-10">
           <RevealText>
-            <p className="text-xs font-bold uppercase tracking-[0.3em] text-blue-400/80 mb-4">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-400/80 mb-4">
               Architecture
             </p>
-            <h2 className="text-4xl sm:text-5xl font-black tracking-tight">
+            <h2 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight">
               Enterprise-grade. <span className="text-zinc-500">Solo-built.</span>
             </h2>
           </RevealText>
@@ -940,7 +941,7 @@ export function PitchDeck() {
                     <div key={row.layer} className="flex gap-3">
                       <row.icon className="h-4 w-4 text-zinc-600 mt-0.5 shrink-0" />
                       <div>
-                        <p className="text-[10px] text-blue-400 font-bold uppercase tracking-wider">{row.layer}</p>
+                        <p className="text-xs text-blue-400 font-bold uppercase tracking-wider">{row.layer}</p>
                         <p className="text-xs text-zinc-400">{row.tech}</p>
                       </div>
                     </div>
@@ -1001,7 +1002,7 @@ export function PitchDeck() {
                   <div key={m.title}>
                     <m.icon className="h-4 w-4 text-amber-400/60 mb-2" />
                     <h4 className="font-bold text-xs mb-1">{m.title}</h4>
-                    <p className="text-[11px] text-zinc-500 leading-relaxed">{m.desc}</p>
+                    <p className="text-sm text-zinc-500 leading-relaxed">{m.desc}</p>
                   </div>
                 ))}
               </div>
@@ -1017,12 +1018,12 @@ export function PitchDeck() {
         <div className="absolute inset-0 grain-overlay" />
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500/0 via-purple-500/50 to-purple-500/0" />
 
-        <div className="relative z-10 max-w-4xl mx-auto space-y-12">
+        <div className="relative z-10 max-w-4xl mx-auto space-y-10">
           <RevealText>
-            <p className="text-xs font-bold uppercase tracking-[0.3em] text-purple-400/80 mb-4">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-purple-400/80 mb-4">
               The Team
             </p>
-            <h2 className="text-4xl sm:text-6xl font-black leading-[0.95] tracking-tight">
+            <h2 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight">
               Built by someone who<br />
               <span className="text-purple-400">lives the problem.</span>
             </h2>
@@ -1099,13 +1100,13 @@ export function PitchDeck() {
 
         <div className="relative z-10 max-w-5xl mx-auto space-y-10">
           <RevealText>
-            <p className="text-xs font-bold uppercase tracking-[0.3em] text-amber-400/80 mb-4">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-amber-400/80 mb-4">
               The Ask
             </p>
-            <h2 className="text-4xl sm:text-6xl font-black tracking-tight">
+            <h2 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight">
               <span className="gradient-text">$100K</span> pre-seed.
             </h2>
-            <p className="mt-3 text-lg text-zinc-500">Capital efficient. Revenue generating. Tax credit eligible.</p>
+            <p className="mt-3 text-base text-zinc-500">Capital efficient. Revenue generating. Tax credit eligible.</p>
           </RevealText>
 
           <div className="grid sm:grid-cols-2 gap-6">
@@ -1166,7 +1167,7 @@ export function PitchDeck() {
                         <span className="text-2xl font-black text-amber-400">$75,000</span>
                       </div>
                     </div>
-                    <p className="text-[11px] text-zinc-600 leading-relaxed">
+                    <p className="text-sm text-zinc-600 leading-relaxed">
                       Louisiana Economic Development program designed to incentivize investment in Louisiana-based technology startups.
                     </p>
                   </div>
@@ -1194,10 +1195,10 @@ export function PitchDeck() {
 
         <div className="relative z-10 max-w-5xl mx-auto space-y-10">
           <RevealText>
-            <p className="text-xs font-bold uppercase tracking-[0.3em] text-emerald-400/80 mb-4">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-emerald-400/80 mb-4">
               Growth Plan
             </p>
-            <h2 className="text-4xl sm:text-5xl font-black tracking-tight">
+            <h2 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight">
               18-Month Targets
             </h2>
           </RevealText>
@@ -1212,7 +1213,7 @@ export function PitchDeck() {
               ].map((t) => (
                 <div key={t.metric} className="glow-card rounded-xl p-5 text-center">
                   <t.icon className="h-4 w-4 text-zinc-600 mx-auto mb-2" />
-                  <p className="text-[10px] text-zinc-500 uppercase tracking-widest mb-2">{t.metric}</p>
+                  <p className="text-xs text-zinc-500 uppercase tracking-widest mb-2">{t.metric}</p>
                   <div className="flex items-center justify-center gap-2">
                     <span className="text-xs text-zinc-600 font-mono">{t.from}</span>
                     <ArrowRight className="h-3 w-3 text-emerald-400" />
@@ -1263,7 +1264,7 @@ export function PitchDeck() {
                     <faq.icon className="h-4 w-4 text-zinc-600 shrink-0 mt-0.5" />
                     <div>
                       <p className="font-semibold text-xs text-zinc-300">{faq.q}</p>
-                      <p className="text-[11px] text-zinc-500 mt-1 leading-relaxed">{faq.a}</p>
+                      <p className="text-sm text-zinc-500 mt-1 leading-relaxed">{faq.a}</p>
                     </div>
                   </div>
                 ))}
@@ -1272,7 +1273,7 @@ export function PitchDeck() {
           </RevealText>
 
           <RevealText delay={500}>
-            <p className="text-center text-xs text-zinc-600 font-mono">
+            <p className="text-center text-sm text-zinc-600 font-mono">
               $75K MRR = $900K ARR → Strong seed round position
             </p>
           </RevealText>
@@ -1290,7 +1291,7 @@ export function PitchDeck() {
         <div className="relative z-10 max-w-4xl mx-auto text-center space-y-12">
           <RevealText>
             <div className="space-y-6">
-              <p className="text-xs font-bold uppercase tracking-[0.3em] text-amber-400/80">
+              <p className="text-sm font-bold uppercase tracking-[0.3em] text-amber-400/80">
                 The Vision
               </p>
               <h2 className="text-5xl sm:text-7xl font-black leading-[0.85] tracking-tighter">
@@ -1304,7 +1305,7 @@ export function PitchDeck() {
           <RevealText delay={200}>
             <div className="grid sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
               <div className="glow-card rounded-xl p-6 text-left">
-                <p className="text-[10px] text-amber-400 font-bold uppercase tracking-widest mb-2">
+                <p className="text-xs text-amber-400 font-bold uppercase tracking-widest mb-2">
                   Phase 1 — Next 18 months
                 </p>
                 <p className="text-sm text-zinc-400 leading-relaxed">
@@ -1312,7 +1313,7 @@ export function PitchDeck() {
                 </p>
               </div>
               <div className="glow-card rounded-xl p-6 text-left">
-                <p className="text-[10px] text-blue-400 font-bold uppercase tracking-widest mb-2">
+                <p className="text-xs text-blue-400 font-bold uppercase tracking-widest mb-2">
                   Phase 2 — Future
                 </p>
                 <p className="text-sm text-zinc-400 leading-relaxed">

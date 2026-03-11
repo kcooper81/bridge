@@ -287,15 +287,13 @@ export function PitchDeck() {
         <div className="relative z-10 max-w-5xl mx-auto text-center space-y-12">
           <RevealText>
             <div className="flex justify-center">
-              <div className="relative">
+              <div className="relative bg-white rounded-2xl p-3 shadow-xl shadow-black/20">
                 <Image
-                  src="/brand/logo-icon-blue.svg"
+                  src="/brand/logo-icon.svg"
                   alt="TeamPrompt"
-                  width={72}
-                  height={72}
-                  className="rounded-2xl"
+                  width={56}
+                  height={56}
                 />
-                <div className="absolute -inset-2 bg-blue-500/20 rounded-2xl blur-xl -z-10" />
               </div>
             </div>
           </RevealText>
@@ -308,9 +306,9 @@ export function PitchDeck() {
 
           <RevealText delay={300}>
             <p className="text-xl sm:text-2xl text-zinc-400 font-light tracking-wide max-w-xl mx-auto">
-              The prompt management layer for teams
+              Share, govern, and protect your team&apos;s
               <br className="hidden sm:block" />
-              using AI across every platform.
+              AI prompts across every platform.
             </p>
           </RevealText>
 
@@ -379,16 +377,17 @@ export function PitchDeck() {
                   <div className="h-10 w-10 rounded-xl bg-red-500/10 flex items-center justify-center">
                     <AlertTriangle className="h-5 w-5 text-red-400" />
                   </div>
-                  <h3 className="text-lg font-bold">Real story. Real firm.</h3>
+                  <h3 className="text-lg font-bold">Real story. Real team.</h3>
                 </div>
                 <p className="text-zinc-400 text-sm leading-relaxed">
-                  A 50-person law firm. 10 lawyers writing different versions of the same
-                  &ldquo;contract analysis&rdquo; prompt. One accidentally pasted <span className="text-red-400 font-semibold">client Social Security numbers</span> into
-                  ChatGPT. The managing partner said:
+                  A 40-person engineering team. Developers pasting internal API keys, database
+                  connection strings, and proprietary code into ChatGPT and Claude daily.
+                  One engineer accidentally leaked <span className="text-red-400 font-semibold">production AWS credentials</span> into
+                  a prompt. The VP of Engineering said:
                 </p>
                 <blockquote className="border-l-2 border-red-500/40 pl-4 text-zinc-300 italic text-sm">
-                  &ldquo;We pay $30/seat for ChatGPT Enterprise but outputs are
-                  wildly inconsistent and we&apos;re terrified of data leaks.&rdquo;
+                  &ldquo;Everyone uses AI differently. Nobody shares what works.
+                  And we have zero visibility into what&apos;s being sent to these tools.&rdquo;
                 </blockquote>
               </div>
             </RevealText>
@@ -403,10 +402,10 @@ export function PitchDeck() {
                 </div>
                 <div className="space-y-3">
                   {[
-                    { tool: "Google Docs", issue: "No AI tool integration" },
-                    { tool: "ChatGPT Teams", issue: "No prompt library, single platform" },
-                    { tool: "Slack / Notion", issue: "No version control or DLP" },
-                    { tool: "Copy & Paste", issue: "No security, no analytics, chaos" },
+                    { tool: "Google Docs", issue: "No AI integration, no protection" },
+                    { tool: "ChatGPT Teams", issue: "Single platform, no prompt sharing" },
+                    { tool: "Slack / Notion", issue: "No version control, no DLP" },
+                    { tool: "Copy & Paste", issue: "Zero governance, zero visibility" },
                   ].map((row) => (
                     <div key={row.tool} className="flex items-center gap-3 text-sm">
                       <span className="text-zinc-500 w-28 shrink-0 font-medium">{row.tool}</span>
@@ -420,15 +419,20 @@ export function PitchDeck() {
           </div>
 
           <RevealText delay={500}>
-            <div className="flex items-center justify-center gap-6 sm:gap-10 text-center">
+            <div className="grid sm:grid-cols-3 gap-4">
               {[
-                { stat: "40%", label: "of AI time wasted on duplicate prompts" },
-                { stat: "67%", label: "of teams have no prompt governance" },
-                { stat: "87%", label: "of enterprises use 2+ AI tools" },
+                { stat: "40%", label: "AI time wasted recreating the same prompts", width: "40%", color: "from-red-500 to-red-400" },
+                { stat: "67%", label: "Teams have zero AI usage governance", width: "67%", color: "from-red-500 to-amber-400" },
+                { stat: "87%", label: "Enterprises use 2+ AI tools daily", width: "87%", color: "from-amber-500 to-amber-400" },
               ].map((s) => (
-                <div key={s.label}>
-                  <p className="text-3xl sm:text-4xl font-black text-red-400">{s.stat}</p>
-                  <p className="text-[10px] sm:text-xs text-zinc-600 mt-1 max-w-[140px]">{s.label}</p>
+                <div key={s.label} className="glow-card rounded-xl p-4">
+                  <div className="flex items-baseline justify-between mb-2">
+                    <p className="text-2xl sm:text-3xl font-black text-red-400">{s.stat}</p>
+                  </div>
+                  <div className="h-1.5 rounded-full bg-white/[0.03] overflow-hidden mb-2">
+                    <div className={cn("h-full rounded-full bg-gradient-to-r", s.color)} style={{ width: s.width }} />
+                  </div>
+                  <p className="text-[10px] text-zinc-500 leading-relaxed">{s.label}</p>
                 </div>
               ))}
             </div>
@@ -449,9 +453,9 @@ export function PitchDeck() {
               The Solution
             </p>
             <h2 className="text-4xl sm:text-6xl font-black leading-[0.95] tracking-tight">
-              One library.<br />
+              One shared library.<br />
               Every AI tool.<br />
-              <span className="gradient-text">Total control.</span>
+              <span className="gradient-text">Complete governance.</span>
             </h2>
           </RevealText>
 
@@ -498,7 +502,7 @@ export function PitchDeck() {
           <RevealText delay={500}>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
-                { icon: Shield, label: "DLP Protection", desc: "Blocks SSNs, credit cards, API keys in real-time" },
+                { icon: Shield, label: "DLP Protection", desc: "Blocks API keys, credentials, PII, and secrets in real-time" },
                 { icon: Lock, label: "19 Compliance Packs", desc: "HIPAA, SOC 2, GDPR, PCI-DSS, and more" },
                 { icon: BarChart3, label: "Team Analytics", desc: "Track which prompts perform best" },
                 { icon: BadgeCheck, label: "Approval Workflows", desc: "Review & approve before team-wide use" },
@@ -540,10 +544,10 @@ export function PitchDeck() {
 
           <div className="grid sm:grid-cols-2 gap-5">
             {[
-              { src: "/store-assets/screenshot-light-1-prompts.png", alt: "Prompt library", label: "Shared prompt library with categories, tags, and team scopes" },
-              { src: "/store-assets/screenshot-light-6-insert.png", alt: "Browser extension", label: "One-click insert across 5 AI platforms" },
-              { src: "/store-assets/screenshot-light-3-dlp-block.png", alt: "DLP protection", label: "Real-time DLP blocks sensitive data before it reaches AI" },
-              { src: "/store-assets/screenshot-light-2-dashboard.png", alt: "Analytics dashboard", label: "Admin dashboard with usage analytics and security insights" },
+              { src: "/store-assets/screenshot-light-4-popup.png", alt: "Prompt library popup", label: "Browse and search your team's shared prompt library" },
+              { src: "/store-assets/screenshot-light-5-template.png", alt: "Template variables", label: "Template variables — fill in and insert into any AI tool" },
+              { src: "/store-assets/screenshot-light-6-insert.png", alt: "Browser extension", label: "One-click insert across ChatGPT, Claude, Gemini, Copilot, Perplexity" },
+              { src: "/store-assets/screenshot-light-3-dlp-block.png", alt: "DLP protection", label: "Real-time DLP blocks API keys, credentials, and PII before it reaches AI" },
             ].map((img, i) => (
               <RevealText key={img.alt} delay={i * 120}>
                 <div className="group relative">
@@ -578,7 +582,7 @@ export function PitchDeck() {
             </p>
             <h2 className="text-4xl sm:text-6xl font-black leading-[0.95] tracking-tight">
               $50B market.<br />
-              <span className="text-emerald-400">No one owns the workflow layer.</span>
+              <span className="text-emerald-400">No one owns AI governance for teams.</span>
             </h2>
           </RevealText>
 
@@ -732,7 +736,7 @@ export function PitchDeck() {
                 <Brain className="h-5 w-5 text-blue-400 mb-3" />
                 <h4 className="font-bold text-sm mb-1">&ldquo;Why won&apos;t ChatGPT just build this?&rdquo;</h4>
                 <p className="text-xs text-zinc-500 leading-relaxed">
-                  ChatGPT sells models. We sell workflow governance across <em>every</em> AI tool.
+                  ChatGPT sells models. We govern how teams share and use prompts across <em>every</em> AI tool.
                   Same reason GitHub exists alongside programming languages.
                 </p>
               </div>
@@ -954,7 +958,7 @@ export function PitchDeck() {
                 <div className="space-y-2.5">
                   {[
                     "Row-Level Security on every query",
-                    "Client-side DLP — PII never reaches AI",
+                    "Client-side DLP — API keys, credentials, PII never reach AI",
                     "19 compliance packs (HIPAA, SOC 2, GDPR...)",
                     "Full audit trail on every action",
                     "2FA / TOTP for all users",
@@ -1034,7 +1038,7 @@ export function PitchDeck() {
                   <div>
                     <h3 className="text-2xl font-black">Kade Cooper</h3>
                     <p className="text-sm text-zinc-500">Founder & CEO</p>
-                    <p className="text-xs text-zinc-600 mt-1">Technical founder &middot; Full-stack engineer &middot; Product builder</p>
+                    <p className="text-xs text-zinc-600 mt-1">Software engineer &middot; Full-stack developer &middot; Product builder</p>
                   </div>
                 </div>
                 <ul className="space-y-3 text-sm text-zinc-400">
@@ -1290,9 +1294,9 @@ export function PitchDeck() {
                 The Vision
               </p>
               <h2 className="text-5xl sm:text-7xl font-black leading-[0.85] tracking-tighter">
-                The control plane<br />
-                for how teams<br />
-                <span className="gradient-text">use AI.</span>
+                How teams share,<br />
+                govern, and protect<br />
+                <span className="gradient-text">their AI usage.</span>
               </h2>
             </div>
           </RevealText>
@@ -1304,7 +1308,7 @@ export function PitchDeck() {
                   Phase 1 — Next 18 months
                 </p>
                 <p className="text-sm text-zinc-400 leading-relaxed">
-                  The go-to prompt management tool for teams of 10–100 in regulated industries.
+                  The go-to prompt sharing and governance platform for teams of 10–100 in regulated industries.
                 </p>
               </div>
               <div className="glow-card rounded-xl p-6 text-left">
@@ -1312,7 +1316,7 @@ export function PitchDeck() {
                   Phase 2 — Future
                 </p>
                 <p className="text-sm text-zinc-400 leading-relaxed">
-                  Platform for AI workflow orchestration — the control plane for how organizations use AI.
+                  Full AI governance platform — how organizations manage, protect, and optimize every AI interaction.
                 </p>
               </div>
             </div>
@@ -1333,15 +1337,13 @@ export function PitchDeck() {
 
           <RevealText delay={600}>
             <div className="flex items-center justify-center gap-4 pt-4">
-              <div className="relative">
+              <div className="bg-white rounded-xl p-2 shadow-lg shadow-black/20">
                 <Image
-                  src="/brand/logo-icon-blue.svg"
+                  src="/brand/logo-icon.svg"
                   alt="TeamPrompt"
-                  width={48}
-                  height={48}
-                  className="rounded-xl"
+                  width={40}
+                  height={40}
                 />
-                <div className="absolute -inset-1.5 bg-blue-500/15 rounded-xl blur-md -z-10" />
               </div>
               <div className="text-left">
                 <p className="font-black text-lg">TeamPrompt</p>

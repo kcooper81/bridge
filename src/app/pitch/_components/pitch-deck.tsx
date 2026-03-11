@@ -21,7 +21,6 @@ import {
   DollarSign,
   Rocket,
   Star,
-  Eye,
   FileText,
   Layers,
   ArrowRight,
@@ -35,38 +34,14 @@ import {
   Scale,
   Heart,
   Banknote,
-  MessageCircle,
   X as XIcon,
-  Sparkles,
   Award,
-  Clock,
   BadgeCheck,
 } from "lucide-react";
 
 // ─── Constants ──────────────────────────────────────────────────
 
 const TOTAL_SLIDES = 13;
-
-// ─── Animated counter hook ──────────────────────────────────────
-function useCountUp(target: number, duration = 1200, active = true) {
-  const [value, setValue] = useState(0);
-  useEffect(() => {
-    if (!active) return;
-    let start = 0;
-    const step = target / (duration / 16);
-    const id = setInterval(() => {
-      start += step;
-      if (start >= target) {
-        setValue(target);
-        clearInterval(id);
-      } else {
-        setValue(Math.floor(start));
-      }
-    }, 16);
-    return () => clearInterval(id);
-  }, [target, duration, active]);
-  return value;
-}
 
 // ─── Animated text reveal ───────────────────────────────────────
 function RevealText({ children, delay = 0, className }: { children: React.ReactNode; delay?: number; className?: string }) {

@@ -680,11 +680,15 @@ export async function deprovisionUsers(
     data: { session },
   } = await db.auth.getSession();
 
+  if (!session) {
+    throw new Error("Not authenticated");
+  }
+
   const res = await fetch("/api/integrations/deprovision", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      ...(session ? { Authorization: `Bearer ${session.access_token}` } : {}),
+      Authorization: `Bearer ${session.access_token}`,
     },
     body: JSON.stringify({ userIds }),
   });
@@ -1322,9 +1326,16 @@ export async function getPendingPrompts(): Promise<
 
 export async function approvePrompt(id: string): Promise<boolean> {
   try {
+    const db = supabase();
+    const { data: { session } } = await db.auth.getSession();
+    if (!session) return false;
+
     const res = await fetch(`/api/approvals/prompts/${id}`, {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      },
       body: JSON.stringify({ action: "approve" }),
     });
     return res.ok;
@@ -1338,9 +1349,16 @@ export async function rejectPrompt(
   reason?: string
 ): Promise<boolean> {
   try {
+    const db = supabase();
+    const { data: { session } } = await db.auth.getSession();
+    if (!session) return false;
+
     const res = await fetch(`/api/approvals/prompts/${id}`, {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      },
       body: JSON.stringify({ action: "reject", reason }),
     });
     return res.ok;

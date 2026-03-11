@@ -116,16 +116,23 @@ export default defineBackground(() => {
         extAuthDebug.log("bridge", "bg: SESSION_CLEAR received"); // AUTH-DEBUG
         browser.storage.local.get(["user"]).then((data) => {
           const userId = data.user?.id;
-          browser.storage.local.remove(["accessToken", "refreshToken", "user"]);
-          if (userId) {
-            import("../lib/auth").then((m) => m.sendSessionEvent(userId, "session_lost"));
-          }
+          return browser.storage.local.remove(["accessToken", "refreshToken", "user"]).then(() => {
+            if (userId) {
+              return import("../lib/auth").then((m) => m.sendSessionEvent(userId, "session_lost"));
+            }
+          });
+        }).then(() => {
+          sendResponse({ success: true });
         });
-        // Session cleared
-        sendResponse({ success: true });
+        return true; // keep channel open for async response
       } else if (message.type === "QUICK_SAVE") {
         // Content script wants to save selected/input text — store it and open side panel
         const msg = message as unknown as { content: string };
+        const MAX_QUICK_SAVE_SIZE = 100 * 1024; // 100 KB
+        if (typeof msg.content !== "string" || msg.content.length > MAX_QUICK_SAVE_SIZE) {
+          sendResponse({ ok: false, error: "Content too large" });
+          return;
+        }
         browser.storage.local.set({
           quickSaveContent: msg.content,
           quickSaveTimestamp: Date.now(),
@@ -143,6 +150,7 @@ export default defineBackground(() => {
             });
         }
         sendResponse({ success: true });
+        return true; // keep channel open for async response
       } else if (message.type === "OPEN_SIDE_PANEL") {
         const chrome = globalThis as unknown as {
           chrome?: { sidePanel?: { open: (opts: { tabId: number }) => void } };
@@ -157,6 +165,7 @@ export default defineBackground(() => {
             });
         }
         sendResponse({ success: true });
+        return true; // keep channel open for async response
       } else if (message.type === "OPEN_LOGIN") {
         // Fix 3: Content scripts can't use browser.tabs.create, so handle here
         browser.tabs.create({ url: CONFIG.SITE_URL + "/extension/welcome?mode=signin" });
@@ -187,7 +196,13 @@ export default defineBackground(() => {
 
         // Security: Only allow fetches to trusted domains to prevent token exfiltration
         const ALLOWED_ORIGINS = [CONFIG.SITE_URL, CONFIG.SUPABASE_URL];
-        const isAllowedUrl = ALLOWED_ORIGINS.some((origin) => msg.url.startsWith(origin));
+        let isAllowedUrl = false;
+        try {
+          const parsedUrl = new URL(msg.url);
+          isAllowedUrl = ALLOWED_ORIGINS.some((origin) => parsedUrl.origin === new URL(origin).origin);
+        } catch {
+          // Invalid URL — reject
+        }
         if (!isAllowedUrl) {
           sendResponse({ ok: false, status: 403, data: null });
           return;
@@ -247,7 +262,7 @@ export default defineBackground(() => {
   browser.alarms.onAlarm.addListener(async (alarm) => {
     if (alarm.name === "refresh-token") {
       extAuthDebug.log("refresh", "bg: refresh alarm fired"); // AUTH-DEBUG
-      await refreshSession();
+      await safeRefresh();
     }
   });
 });

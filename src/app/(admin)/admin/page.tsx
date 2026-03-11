@@ -72,6 +72,7 @@ export default function AdminDashboardPage() {
   const [alerts, setAlerts] = useState<AlertItem[]>([]);
   const [recentSignups, setRecentSignups] = useState<RecentSignup[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadDashboard();
@@ -233,6 +234,7 @@ export default function AdminDashboardPage() {
     setLoading(false);
     } catch (err) {
       console.error("Dashboard load error:", err);
+      setError(err instanceof Error ? err.message : "Failed to load dashboard data");
       setLoading(false);
     }
   };
@@ -264,6 +266,22 @@ export default function AdminDashboardPage() {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 text-center">
+        <AlertTriangle className="h-10 w-10 text-muted-foreground mb-3" />
+        <p className="text-lg font-medium">Failed to load dashboard</p>
+        <p className="text-sm text-muted-foreground mt-1">{error}</p>
+        <button
+          onClick={() => { setError(null); setLoading(true); loadDashboard(); }}
+          className="mt-4 text-sm text-blue-600 hover:underline"
+        >
+          Try again
+        </button>
       </div>
     );
   }

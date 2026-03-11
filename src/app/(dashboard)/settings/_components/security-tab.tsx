@@ -111,7 +111,11 @@ export function SecurityTab() {
   async function handleToggle(key: string, value: boolean) {
     try {
       const merged = { ...(org?.settings || {}), [key]: value };
-      await saveOrg({ settings: merged });
+      const result = await saveOrg({ settings: merged });
+      if (!result) {
+        toast.error("Failed to update setting");
+        return;
+      }
       toast.success("Setting updated");
       refresh();
     } catch {

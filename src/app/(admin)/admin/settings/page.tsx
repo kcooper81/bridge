@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Settings, Database, Shield, Server, Globe, Loader2, ExternalLink, FileText, Search } from "lucide-react";
+import { toast } from "sonner";
 import { SUPER_ADMIN_EMAILS } from "@/lib/constants";
 
 export default function SettingsPage() {
@@ -31,14 +32,21 @@ export default function SettingsPage() {
 
   async function toggleAutoIndexNow(enabled: boolean) {
     setAutoIndexNowLoading(true);
+    const previousValue = autoIndexNow;
+    setAutoIndexNow(enabled);
     try {
-      await fetch("/api/admin/seo/indexnow", {
+      const res = await fetch("/api/admin/seo/indexnow", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ autoSubmit: enabled }),
       });
-      setAutoIndexNow(enabled);
-    } catch { /* ignore */ }
+      if (!res.ok) {
+        throw new Error("Failed to update setting");
+      }
+    } catch (err) {
+      setAutoIndexNow(previousValue);
+      toast.error(err instanceof Error ? err.message : "Failed to toggle auto-submit");
+    }
     setAutoIndexNowLoading(false);
   }
 

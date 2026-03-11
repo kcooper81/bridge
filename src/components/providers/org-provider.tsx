@@ -5,6 +5,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -51,6 +52,7 @@ export function OrgProvider({ children }: { children: React.ReactNode }) {
   const [currentUserRole, setCurrentUserRole] = useState<UserRole>("member");
   const [loading, setLoading] = useState(true);
   const [noOrg, setNoOrg] = useState(false);
+  const domainJoinAttempted = useRef(false);
 
   const refresh = useCallback(async () => {
     const supabase = createClient();
@@ -111,23 +113,27 @@ export function OrgProvider({ children }: { children: React.ReactNode }) {
     }
     setNoOrg(false);
 
-    // Fire-and-forget domain auto-join check
-    try {
-      const session = await supabase.auth.getSession();
-      const accessToken = session.data.session?.access_token;
-      if (accessToken) {
-        fetch("/api/auth/domain-join", {
-          method: "POST",
-          headers: { Authorization: `Bearer ${accessToken}` },
-        })
-          .then((res) => res.json())
-          .then((data) => {
-            if (data?.joined) refresh();
+    // Fire-and-forget domain auto-join check (run at most once per session
+    // to prevent infinite loops: join -> refresh -> join -> refresh ...)
+    if (!domainJoinAttempted.current) {
+      domainJoinAttempted.current = true;
+      try {
+        const session = await supabase.auth.getSession();
+        const accessToken = session.data.session?.access_token;
+        if (accessToken) {
+          fetch("/api/auth/domain-join", {
+            method: "POST",
+            headers: { Authorization: `Bearer ${accessToken}` },
           })
-          .catch(() => {});
+            .then((res) => res.json())
+            .then((data) => {
+              if (data?.joined) refresh();
+            })
+            .catch(() => {});
+        }
+      } catch {
+        // Non-critical — ignore
       }
-    } catch {
-      // Non-critical — ignore
     }
 
     // Super admins act as admin in any org

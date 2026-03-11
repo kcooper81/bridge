@@ -61,9 +61,21 @@ export async function POST(
     if (emailMatch) recipientEmail = emailMatch[1];
   }
 
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  // Validate forward_to email
+  if (action === "forward" && forward_to) {
+    if (typeof forward_to !== "string" || !emailRegex.test(forward_to.trim())) {
+      return NextResponse.json(
+        { error: "Invalid forward_to email address" },
+        { status: 400 }
+      );
+    }
+  }
+
   // Validate CC emails
   const validCc = (Array.isArray(cc) ? cc : []).filter(
-    (email: string) => typeof email === "string" && email.includes("@")
+    (email: string) => typeof email === "string" && emailRegex.test(email.trim())
   );
 
   // Insert the note FIRST — ensures we never lose data even if email fails

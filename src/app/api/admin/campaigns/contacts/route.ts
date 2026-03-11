@@ -19,6 +19,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "contacts array required" }, { status: 400 });
   }
 
+  const MAX_CONTACTS = 10000;
+  if (contacts.length > MAX_CONTACTS) {
+    return NextResponse.json(
+      { error: `Too many contacts. Maximum is ${MAX_CONTACTS}, received ${contacts.length}` },
+      { status: 400 }
+    );
+  }
+
   // Validate and dedupe emails
   const seen = new Set<string>();
   const valid: Array<{ email: string; first_name: string; last_name: string }> = [];

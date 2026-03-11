@@ -71,6 +71,8 @@ export default function BillingPage() {
       } else {
         toast.error(data.error || "Failed to open billing portal");
       }
+    } catch {
+      toast.error("Failed to open billing portal");
     } finally {
       setLoadingPortal(false);
     }

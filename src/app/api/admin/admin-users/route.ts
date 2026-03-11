@@ -166,7 +166,7 @@ export async function DELETE(request: NextRequest) {
   // Don't allow removing users whose email is in the hardcoded list
   const { data: targetProfile } = await db
     .from("profiles")
-    .select("email")
+    .select("email, is_super_admin")
     .eq("id", userId)
     .single();
 
@@ -175,6 +175,21 @@ export async function DELETE(request: NextRequest) {
       { error: "Cannot remove a hardcoded super admin" },
       { status: 400 }
     );
+  }
+
+  // Don't allow removing the last super admin
+  if (targetProfile?.is_super_admin) {
+    const { count } = await db
+      .from("profiles")
+      .select("id", { count: "exact", head: true })
+      .eq("is_super_admin", true);
+
+    if ((count || 0) <= 1) {
+      return NextResponse.json(
+        { error: "Cannot remove the last super admin. Promote another user first." },
+        { status: 400 }
+      );
+    }
   }
 
   const { error } = await db

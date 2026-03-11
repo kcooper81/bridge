@@ -453,14 +453,14 @@ function buildCardHtml(p: Prompt): string {
     : escapeHtml(p.description || p.content.slice(0, 80));
 
   return `
-    <div class="prompt-card" data-id="${p.id}">
+    <div class="prompt-card" data-id="${escapeHtml(String(p.id))}">
       <div class="prompt-card-header">
         <div class="prompt-card-title">
           ${titleHtml}
           ${p.is_template ? '<span class="badge-template">Template</span>' : ""}
         </div>
         <div class="prompt-card-actions">
-          <button class="btn-fav" data-fav-id="${p.id}" title="${p.is_favorite ? "Remove from favorites" : "Add to favorites"}">${heartSvg(p.is_favorite)}</button>
+          <button class="btn-fav" data-fav-id="${escapeHtml(String(p.id))}" title="${p.is_favorite ? "Remove from favorites" : "Add to favorites"}">${heartSvg(p.is_favorite)}</button>
           <svg class="prompt-card-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="9 18 15 12 9 6" />
           </svg>
@@ -611,12 +611,12 @@ async function openCreatePromptPanel(prefillContent?: string) {
 
   // Build folder options
   const folderOptions = foldersData.folders
-    .map((f: ExtFolder) => `<option value="${f.id}">${escapeHtml(f.name)}</option>`)
+    .map((f: ExtFolder) => `<option value="${escapeHtml(String(f.id))}">${escapeHtml(f.name)}</option>`)
     .join("");
 
   // Build team options
   const teamOptions = teamsData.teams
-    .map((t: ExtTeam) => `<option value="${t.id}">${escapeHtml(t.name)}</option>`)
+    .map((t: ExtTeam) => `<option value="${escapeHtml(String(t.id))}">${escapeHtml(t.name)}</option>`)
     .join("");
 
   // Approval hint based on role
@@ -1395,9 +1395,14 @@ export function initSharedUI(elements: UIElements) {
   els.copyBtn.addEventListener("click", async () => {
     if (hasUnfilledVariables()) flashUnfilledFields();
     const content = getFilledContent();
-    await navigator.clipboard.writeText(content);
-    els.copyBtn.textContent = "Copied!";
-    setTimeout(() => (els.copyBtn.textContent = "Copy to Clipboard"), 1500);
+    try {
+      await navigator.clipboard.writeText(content);
+      els.copyBtn.textContent = "Copied!";
+      setTimeout(() => (els.copyBtn.textContent = "Copy to Clipboard"), 1500);
+    } catch {
+      els.copyBtn.textContent = "Copy failed";
+      setTimeout(() => (els.copyBtn.textContent = "Copy to Clipboard"), 2000);
+    }
     logConversation(content, "clipboard");
   });
 

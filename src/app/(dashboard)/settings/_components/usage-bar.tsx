@@ -1,6 +1,6 @@
 export function UsageBar({ label, current, max }: { label: string; current: number; max: number }) {
   const isUnlimited = max === -1;
-  const pct = isUnlimited ? 0 : Math.min((current / max) * 100, 100);
+  const pct = isUnlimited || max === 0 ? 0 : Math.min((current / max) * 100, 100);
   const color = isUnlimited ? "bg-tp-green" : pct >= 100 ? "bg-destructive" : pct >= 80 ? "bg-tp-yellow" : "bg-tp-green";
   const glowColor = isUnlimited ? "shadow-tp-green/30" : pct >= 100 ? "shadow-destructive/30" : pct >= 80 ? "shadow-tp-yellow/30" : "shadow-tp-green/30";
 

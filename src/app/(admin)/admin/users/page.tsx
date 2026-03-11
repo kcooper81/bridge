@@ -146,14 +146,30 @@ export default function UsersPage() {
     const action = current ? "remove super admin from" : "make super admin";
     if (!confirm(`Are you sure you want to ${action} this user?`)) return;
 
-    const supabase = createClient();
-    const { error } = await supabase.from("profiles").update({ is_super_admin: !current }).eq("id", userId);
-
-    if (error) {
-      toast.error("Failed to update user");
-    } else {
+    try {
+      if (current) {
+        // Remove admin role via API
+        const res = await fetch(`/api/admin/admin-users?userId=${userId}`, {
+          method: "DELETE",
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Failed to update user");
+      } else {
+        // Find user email to grant admin role via API
+        const user = users.find((u) => u.id === userId);
+        if (!user) return;
+        const res = await fetch("/api/admin/admin-users", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: user.email, role: "super_admin" }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Failed to update user");
+      }
       toast.success(`Super admin ${current ? "removed" : "granted"}`);
       setUsers(users.map((u) => (u.id === userId ? { ...u, is_super_admin: !current } : u)));
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to update user");
     }
   };
 

@@ -142,11 +142,11 @@ export function TwoFactorCard() {
     setTimeout(() => setCopied(false), 2000);
   }
 
-  function handleCancelEnroll() {
+  async function handleCancelEnroll() {
     // Unenroll the pending factor
     if (enrollData) {
       const supabase = createClient();
-      supabase.auth.mfa.unenroll({ factorId: enrollData.factorId });
+      await supabase.auth.mfa.unenroll({ factorId: enrollData.factorId });
     }
     setEnrollData(null);
     setCode("");

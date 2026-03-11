@@ -74,7 +74,10 @@ export default function IntegrationsPage() {
     try {
       const supabase = (await import("@/lib/supabase/client")).createClient();
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
+      if (!session) {
+        setLoadingStatus(false);
+        return;
+      }
 
       const res = await fetch("/api/integrations/google/status", {
         headers: { Authorization: `Bearer ${session.access_token}` },
@@ -112,7 +115,11 @@ export default function IntegrationsPage() {
     try {
       const supabase = (await import("@/lib/supabase/client")).createClient();
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
+      if (!session) {
+        toast.error("Session expired. Please sign in again.");
+        setConnecting(false);
+        return;
+      }
 
       const res = await fetch("/api/integrations/google/connect", {
         headers: { Authorization: `Bearer ${session.access_token}` },
@@ -135,7 +142,11 @@ export default function IntegrationsPage() {
     try {
       const supabase = (await import("@/lib/supabase/client")).createClient();
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
+      if (!session) {
+        toast.error("Session expired. Please sign in again.");
+        setSyncing(false);
+        return;
+      }
 
       const res = await fetch("/api/integrations/google/sync", {
         method: "POST",
@@ -174,7 +185,11 @@ export default function IntegrationsPage() {
     try {
       const supabase = (await import("@/lib/supabase/client")).createClient();
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
+      if (!session) {
+        toast.error("Session expired. Please sign in again.");
+        setDisconnecting(false);
+        return;
+      }
 
       await fetch("/api/integrations/google/disconnect", {
         method: "DELETE",

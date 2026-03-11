@@ -22,21 +22,36 @@ export async function POST(
   const { schedule_at } = body; // optional ISO string for scheduling
 
   const db = createServiceClient();
-  const { data: campaign } = await db
-    .from("email_campaigns")
-    .select("*")
-    .eq("id", id)
-    .single();
 
-  if (!campaign) {
-    return NextResponse.json({ error: "Campaign not found" }, { status: 404 });
+  // Atomically transition status from 'draft' to 'sending' to prevent duplicate sends
+  const { data: transitioned, error: transitionError } = await db
+    .from("email_campaigns")
+    .update({ status: "sending", updated_at: new Date().toISOString() })
+    .eq("id", id)
+    .eq("status", "draft")
+    .select("*")
+    .maybeSingle();
+
+  if (transitionError) {
+    console.error("Campaign transition error:", transitionError);
+    return NextResponse.json({ error: "Failed to start campaign send" }, { status: 500 });
   }
-  if (campaign.status !== "draft") {
+  if (!transitioned) {
+    // Either campaign doesn't exist or is no longer a draft (another request already sent it)
+    const { data: existing } = await db
+      .from("email_campaigns")
+      .select("status")
+      .eq("id", id)
+      .single();
+    if (!existing) {
+      return NextResponse.json({ error: "Campaign not found" }, { status: 404 });
+    }
     return NextResponse.json(
-      { error: "Only draft campaigns can be sent" },
-      { status: 400 }
+      { error: "Only draft campaigns can be sent. This campaign is already " + existing.status },
+      { status: 409 }
     );
   }
+  const campaign = transitioned;
   if (!campaign.subject?.trim()) {
     return NextResponse.json({ error: "Subject is required" }, { status: 400 });
   }

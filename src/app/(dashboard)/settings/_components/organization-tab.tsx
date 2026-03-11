@@ -54,7 +54,11 @@ export function OrganizationTab() {
   async function handleSaveOrg() {
     setSaving(true);
     try {
-      await saveOrg({ name: name.trim(), domain: domain.trim() || null });
+      const result = await saveOrg({ name: name.trim(), domain: domain.trim() || null });
+      if (!result) {
+        toast.error("Failed to update organization");
+        return;
+      }
       toast.success("Organization updated");
       setDirty(false);
       refresh();
@@ -75,7 +79,11 @@ export function OrganizationTab() {
         auto_join_domain: autoJoinDomain,
         invite_welcome_message: welcomeMessage.trim() || undefined,
       };
-      await saveOrg({ settings: merged });
+      const result = await saveOrg({ settings: merged });
+      if (!result) {
+        toast.error("Failed to update preferences");
+        return;
+      }
       toast.success("Preferences updated");
       refresh();
     } catch {

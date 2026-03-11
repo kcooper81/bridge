@@ -142,10 +142,15 @@ if (typeof window !== "undefined") {
 
 // ---------- Server-side helpers (middleware/API routes) ----------
 
+// WARNING: _serverLogs is module-level mutable state shared across all requests
+// in the same server process. In dev this is fine, but in production with
+// concurrent requests logs from different requests can leak into each other.
+// This file is a dev-only debugging utility and should not be used in production.
 let _serverEnabled = false;
 let _serverLogs: LogEntry[] = [];
 
 function serverEmit(cat: Category, level: Level, msg: string, data?: unknown) {
+  if (!_serverEnabled) return;
   const entry: LogEntry = {
     ts: new Date().toISOString(),
     cat,
@@ -239,9 +244,12 @@ export const authDebug = {
 
   /** Attach buffered server logs to the response as a cookie (call before returning response) */
   attachToResponse(response: { cookies: { set: (name: string, value: string, options: Record<string, unknown>) => void } }) {
-    if (!_serverEnabled || _serverLogs.length === 0) return;
+    // Clear first to minimize cross-request bleed from concurrent requests
+    const logsToSend = _serverLogs;
+    _serverLogs = [];
+    if (!_serverEnabled || logsToSend.length === 0) return;
     try {
-      const payload = JSON.stringify(_serverLogs);
+      const payload = JSON.stringify(logsToSend);
       response.cookies.set(SERVER_LOG_COOKIE, payload, {
         path: "/",
         maxAge: 30,
@@ -251,6 +259,5 @@ export const authDebug = {
     } catch {
       // Cookie too large — skip
     }
-    _serverLogs = [];
   },
 };

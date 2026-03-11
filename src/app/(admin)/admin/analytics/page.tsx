@@ -29,12 +29,14 @@ export default function AnalyticsPage() {
   const [growthData, setGrowthData] = useState<GrowthData[]>([]);
   const [topOrgs, setTopOrgs] = useState<{ name: string; prompts: number }[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadAnalytics();
   }, []);
 
   const loadAnalytics = async () => {
+    try {
     const supabase = createClient();
 
     // Get all orgs, users, prompts with created_at for monthly grouping
@@ -81,12 +83,33 @@ export default function AnalyticsPage() {
     setTopOrgs(top);
 
     setLoading(false);
+    } catch (err) {
+      console.error("Analytics load error:", err);
+      setError(err instanceof Error ? err.message : "Failed to load analytics data");
+      setLoading(false);
+    }
   };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 text-center">
+        <BarChart3 className="h-10 w-10 text-muted-foreground mb-3" />
+        <p className="text-lg font-medium">Failed to load analytics</p>
+        <p className="text-sm text-muted-foreground mt-1">{error}</p>
+        <button
+          onClick={() => { setError(null); setLoading(true); loadAnalytics(); }}
+          className="mt-4 text-sm text-blue-600 hover:underline"
+        >
+          Try again
+        </button>
       </div>
     );
   }

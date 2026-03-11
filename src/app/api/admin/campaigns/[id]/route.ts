@@ -37,6 +37,10 @@ export async function PATCH(
   const body = await request.json();
   const { name, subject, from_email, body_html, segment_name } = body;
 
+  if (name !== undefined && typeof name === "string" && !name.trim()) {
+    return NextResponse.json({ error: "Campaign name cannot be empty" }, { status: 400 });
+  }
+
   const updates: Record<string, unknown> = {
     updated_at: new Date().toISOString(),
   };

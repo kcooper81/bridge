@@ -23,7 +23,11 @@ export default function SettingsPage() {
     try {
       const supabase = (await import("@/lib/supabase/client")).createClient();
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
+      if (!session) {
+        toast.error("Session expired. Please sign in again.");
+        setDeleting(false);
+        return;
+      }
 
       const res = await fetch("/api/account/delete", {
         method: "POST",

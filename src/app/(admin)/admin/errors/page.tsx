@@ -115,6 +115,23 @@ export default function ErrorsPage() {
 
   const resolveError = async (id: string) => {
     const supabase = createClient();
+
+    // Verify the current user has admin access before updating
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      toast.error("Not authenticated");
+      return;
+    }
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("is_super_admin, super_admin_role")
+      .eq("id", user.id)
+      .single();
+    if (!profile?.is_super_admin && profile?.super_admin_role !== "support") {
+      toast.error("Unauthorized: admin access required");
+      return;
+    }
+
     const { error } = await supabase
       .from("error_logs")
       .update({

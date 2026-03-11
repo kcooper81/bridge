@@ -276,7 +276,7 @@ export default defineContentScript({
 
       const isSecure = location.protocol === "https:";
       const secureFlag = isSecure ? "; Secure" : "";
-      document.cookie = `${name}=${encodeURIComponent(sessionData)}; path=/; max-age=${60 * 60 * 24 * 365}${secureFlag}; SameSite=Lax`;
+      document.cookie = `${name}=${encodeURIComponent(sessionData)}; path=/; max-age=${60 * 60 * 24 * 7}${secureFlag}; SameSite=Lax`;
 
       sessionStorage.setItem("tp-ext-sync", "1");
       window.location.reload();

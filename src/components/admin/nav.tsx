@@ -24,6 +24,7 @@ import {
   Megaphone,
   Menu,
   X,
+  TrendingUp,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -57,6 +58,7 @@ const navGroups: NavGroup[] = [
     items: [
       { href: "/admin", label: "Dashboard", icon: LayoutDashboard, badgeKey: null, supportVisible: false },
       { href: "/admin/analytics", label: "Analytics", icon: BarChart3, badgeKey: null, supportVisible: false },
+      { href: "/admin/funnels", label: "Funnels", icon: TrendingUp, badgeKey: null, supportVisible: false },
     ],
   },
   {

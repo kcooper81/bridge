@@ -20,6 +20,7 @@ const PUBLIC_ROUTES = [
   "/changelog",
   "/extensions",
   "/blog",
+  "/pitch",
 ];
 
 function isPublicRoute(pathname: string) {

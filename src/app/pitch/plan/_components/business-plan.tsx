@@ -7,7 +7,6 @@ import {
   ArrowLeft,
   TrendingUp,
   DollarSign,
-  Users,
   Shield,
   Zap,
   Target,
@@ -15,7 +14,6 @@ import {
   Brain,
   Megaphone,
   HeadphonesIcon,
-  Server,
   Globe,
 } from "lucide-react";
 

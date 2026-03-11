@@ -13,6 +13,7 @@ const TOC_ITEMS = [
   { id: "extension-assets", label: "Extension Assets" },
   { id: "store-copy", label: "Store Copy" },
   { id: "linkedin-campaign", label: "LinkedIn Ads" },
+  { id: "positioning", label: "Positioning" },
   { id: "contact", label: "Contact" },
 ];
 

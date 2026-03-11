@@ -4,6 +4,7 @@ import { generatePageMetadata } from "@/lib/seo/metadata";
 import { SectionLabel } from "@/components/marketing/section-label";
 import { Download, Chrome, Globe, Target, DollarSign, BarChart3, Megaphone, CalendarDays, Layers, MousePointerClick, TrendingUp, Lightbulb, Users, CheckCircle2, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { DarkSection } from "@/components/marketing/dark-section";
 import { CopyButton } from "./_components/copy-button";
 import { BannerDownloadWrapper } from "./_components/banner-download";
@@ -2106,7 +2107,98 @@ export default function MediaPage() {
           </div>
         </section>
 
-        {/* ── 11. Contact ──────────────────────────── */}
+        {/* ── 11. Competitive Positioning ──────────────────────────── */}
+        <section id="positioning" className="scroll-mt-24 space-y-6">
+          <div>
+            <h2 className="text-xl font-bold">Competitive Positioning</h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              How TeamPrompt compares to individual AI subscriptions like ChatGPT Plus and Claude Pro.
+            </p>
+          </div>
+
+          {/* Core positioning */}
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="rounded-2xl border border-border bg-card p-6">
+              <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium mb-2">What they sell</p>
+              <p className="text-lg font-semibold">Better AI for one person</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                ChatGPT Go/Plus/Pro and Claude&apos;s paid plans are individual AI tools.
+              </p>
+            </div>
+            <div className="rounded-2xl border border-primary/30 bg-primary/5 p-6">
+              <p className="text-xs text-primary uppercase tracking-wider font-medium mb-2">What we sell</p>
+              <p className="text-lg font-semibold">AI governance + productivity for teams</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                TeamPrompt is a team layer that wraps around all of them. It&apos;s not a replacement — it&apos;s the guardrail.
+              </p>
+            </div>
+          </div>
+
+          {/* Comparison table */}
+          <div className="rounded-2xl border border-border bg-card overflow-hidden">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border bg-muted/50">
+                  <th className="text-left px-5 py-3 font-medium text-muted-foreground">Their Plans</th>
+                  <th className="text-left px-5 py-3 font-medium text-primary">TeamPrompt</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {[
+                  ["Individual prompt history", "Shared prompt library across the team"],
+                  ["No data protection", "DLP guardrails — block PII, API keys, secrets before they reach AI"],
+                  ["Works with one AI tool", "Works across ChatGPT, Claude, Gemini, Copilot, Perplexity"],
+                  ["No team visibility", "Activity logging — see what your team sends to AI"],
+                  ["No quality control", "Guidelines + approval workflows for prompt quality"],
+                  ["No compliance story", "Audit trail for regulated industries (legal, finance, healthcare)"],
+                ].map(([them, us], i) => (
+                  <tr key={i}>
+                    <td className="px-5 py-3 text-muted-foreground">{them}</td>
+                    <td className="px-5 py-3 font-medium">{us}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* The pitch */}
+          <div className="rounded-2xl border border-border bg-card p-6">
+            <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium mb-3">The Pitch</p>
+            <blockquote className="text-base font-medium italic border-l-2 border-primary pl-4">
+              &ldquo;Your team already pays for ChatGPT/Claude. TeamPrompt makes sure they use it safely, consistently, and without leaking your data. It&apos;s not a replacement — it&apos;s the guardrail.&rdquo;
+            </blockquote>
+          </div>
+
+          {/* Selling angles */}
+          <div className="rounded-2xl border border-border bg-card p-6">
+            <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium mb-4">Key Selling Angles for Ads</p>
+            <div className="grid sm:grid-cols-2 gap-4">
+              {[
+                { angle: "Fear", line: "Your employees are pasting client contracts into ChatGPT right now" },
+                { angle: "Compliance", line: "How do you prove to auditors what your team sent to AI?" },
+                { angle: "ROI", line: "Stop reinventing prompts — share what works across the team" },
+                { angle: "Multi-tool", line: "One dashboard for ChatGPT, Claude, Gemini, Copilot — no vendor lock-in" },
+              ].map(({ angle, line }) => (
+                <div key={angle} className="rounded-xl bg-muted/50 p-4">
+                  <Badge variant="secondary" className="mb-2 text-[10px]">{angle}</Badge>
+                  <p className="text-sm">&ldquo;{line}&rdquo;</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Pricing position */}
+          <div className="rounded-2xl border border-border bg-card p-6">
+            <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium mb-2">Pricing Advantage</p>
+            <p className="text-sm">
+              At <span className="font-semibold">$8–20/seat/month</span>, TeamPrompt is cheaper than upgrading
+              everyone to ChatGPT Plus <span className="font-semibold">and</span> adds data protection, team
+              collaboration, and compliance features they&apos;ll never get from OpenAI or Anthropic directly.
+            </p>
+          </div>
+        </section>
+
+        {/* ── 12. Contact ──────────────────────────── */}
         <section id="contact" className="scroll-mt-24">
           <div className="rounded-2xl border border-border bg-muted/30 p-8 text-center max-w-2xl mx-auto">
             <h2 className="text-xl font-bold mb-2">Need something else?</h2>

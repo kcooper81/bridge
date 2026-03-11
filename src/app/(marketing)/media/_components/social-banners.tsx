@@ -3866,9 +3866,14 @@ export function PandoraBoxAd() {
             </div>
           </div>
           {/* CTA button */}
-          <div className="bg-white text-zinc-900 rounded-lg px-4 sm:px-6 py-2 sm:py-2.5 shadow-xl shadow-black/20 whitespace-nowrap flex flex-col items-center leading-tight">
-            <span className="text-xs sm:text-sm font-bold">Protect Your Team</span>
-            <span className="text-[8px] sm:text-xs text-blue-600 font-semibold">Start Free</span>
+          <div className="bg-white text-zinc-900 rounded-full px-4 sm:px-6 py-2 sm:py-2.5 shadow-xl shadow-black/20 whitespace-nowrap flex items-center gap-2 sm:gap-3">
+            <div className="text-left leading-tight">
+              <p className="text-xs sm:text-sm font-bold">Protect Your Team</p>
+              <p className="text-[8px] sm:text-xs text-blue-600 font-semibold">Start Free</p>
+            </div>
+            <svg className="h-3.5 sm:h-4 w-3.5 sm:w-4 text-blue-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+            </svg>
           </div>
         </div>
       </div>

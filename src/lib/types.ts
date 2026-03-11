@@ -66,6 +66,10 @@ export interface Organization {
     auto_redact_sensitive_data?: boolean;
     allow_external_ai_tools?: boolean;
     activity_logging_enabled?: boolean;
+    /** "metadata_only" = log action/tool/timestamp but not prompt text; "full" = log everything */
+    activity_log_mode?: "metadata_only" | "full";
+    /** Auto-delete logs older than N days. null = keep forever */
+    activity_log_retention_days?: number | null;
     auto_deprovision_on_sync?: boolean;
   } | null;
   security_settings?: Record<string, unknown> | null;

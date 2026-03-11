@@ -1,11 +1,20 @@
 "use client";
 
+import { useState } from "react";
 import { useOrg } from "@/components/providers/org-provider";
 import { useSubscription } from "@/components/providers/subscription-provider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Activity, AlertTriangle, Info, Lock, Puzzle, Shield } from "lucide-react";
 import { saveOrg } from "@/lib/vault-api";
 import { toast } from "sonner";
@@ -83,7 +92,7 @@ const activitySettings: SettingRow[] = [
     key: "activity_logging_enabled",
     label: "Activity Logging",
     description:
-      "Log all AI interactions captured by the extension to the Activity Log. Disabling this stops recording conversations but still tracks usage counts.",
+      "Log AI interactions captured by the extension to the Activity Log. By default, only metadata (tool, action, timestamp) is recorded — enable full logging below to capture prompt text.",
     defaultValue: true,
     featureGate: "audit_log",
     noticeWhenOff:
@@ -226,8 +235,134 @@ export function SecurityTab() {
         </CardHeader>
         <CardContent className="space-y-6">
           {activitySettings.map(renderSettingRow)}
+
+          {/* Logging Mode — only visible when activity logging is enabled */}
+          {getSettingValue("activity_logging_enabled", true) && canAccess("audit_log") && (
+            <ActivityLogSettings
+              settings={settings as Record<string, unknown>}
+              isAdmin={isAdmin}
+              onSave={async (patch) => {
+                try {
+                  const merged = { ...(org?.settings || {}), ...patch };
+                  const result = await saveOrg({ settings: merged });
+                  if (!result) { toast.error("Failed to update setting"); return; }
+                  toast.success("Setting updated");
+                  refresh();
+                } catch { toast.error("Failed to update setting"); }
+              }}
+            />
+          )}
         </CardContent>
       </Card>
+    </div>
+  );
+}
+
+/* ── Activity Log Settings (mode + retention) ── */
+
+function ActivityLogSettings({
+  settings,
+  isAdmin,
+  onSave,
+}: {
+  settings: Record<string, unknown>;
+  isAdmin: boolean;
+  onSave: (patch: Record<string, unknown>) => Promise<void>;
+}) {
+  const currentMode = (settings.activity_log_mode as string) || "metadata_only";
+  const currentRetention = (settings.activity_log_retention_days as number | null) ?? null;
+
+  const [retentionInput, setRetentionInput] = useState(
+    currentRetention ? String(currentRetention) : ""
+  );
+
+  return (
+    <div className="space-y-5 border-t pt-5">
+      {/* Logging Detail Level */}
+      <div className="space-y-2">
+        <div className="space-y-0.5">
+          <Label>Logging Detail Level</Label>
+          <p className="text-sm text-muted-foreground">
+            Controls how much data is recorded in the activity log.
+          </p>
+        </div>
+        <Select
+          value={currentMode}
+          onValueChange={(v) => onSave({ activity_log_mode: v })}
+          disabled={!isAdmin}
+        >
+          <SelectTrigger className="w-[280px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="metadata_only">
+              Metadata Only (default)
+            </SelectItem>
+            <SelectItem value="full">
+              Full Prompt Text
+            </SelectItem>
+          </SelectContent>
+        </Select>
+        {currentMode === "metadata_only" && (
+          <div className="flex items-start gap-2 rounded-lg border border-blue-500/30 bg-blue-500/5 p-2.5">
+            <Info className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" />
+            <p className="text-xs text-blue-700 dark:text-blue-300">
+              Only the AI tool, action type, timestamp, and guardrail flags are recorded. Prompt text is not stored.
+            </p>
+          </div>
+        )}
+        {currentMode === "full" && (
+          <div className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/5 p-2.5">
+            <AlertTriangle className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+            <p className="text-xs text-amber-700 dark:text-amber-300">
+              Full prompt text is recorded. This data may be visible to admins and managers, and is subject to your data retention policy.
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Retention Period */}
+      <div className="space-y-2">
+        <div className="space-y-0.5">
+          <Label>Log Retention Period</Label>
+          <p className="text-sm text-muted-foreground">
+            Automatically delete activity logs older than this many days. Leave empty to keep logs indefinitely.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Input
+            type="number"
+            min={1}
+            max={3650}
+            placeholder="No limit"
+            className="w-[140px]"
+            value={retentionInput}
+            onChange={(e) => setRetentionInput(e.target.value)}
+            disabled={!isAdmin}
+          />
+          <span className="text-sm text-muted-foreground">days</span>
+          <button
+            type="button"
+            className="text-sm text-primary hover:underline disabled:opacity-50"
+            disabled={!isAdmin}
+            onClick={() => {
+              const days = retentionInput ? parseInt(retentionInput, 10) : null;
+              if (retentionInput && (isNaN(days!) || days! < 1 || days! > 3650)) {
+                toast.error("Enter a value between 1 and 3650 days");
+                return;
+              }
+              onSave({ activity_log_retention_days: days });
+            }}
+          >
+            Save
+          </button>
+        </div>
+        {currentRetention && (
+          <p className="text-xs text-muted-foreground">
+            Logs older than {currentRetention} days will be automatically deleted.
+          </p>
+        )}
+      </div>
     </div>
   );
 }

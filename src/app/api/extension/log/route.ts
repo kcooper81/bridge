@@ -79,15 +79,19 @@ export async function POST(request: NextRequest) {
       return withCors(NextResponse.json({ success: true, skipped: true }), request);
     }
 
+    // Determine logging mode: "metadata_only" (default) or "full"
+    const logMode = orgSettings.activity_log_mode || "metadata_only";
+    const storePromptText = logMode === "full";
+
     const { data: log, error: insertError } = await db
       .from("conversation_logs")
       .insert({
         org_id: profile.org_id,
         user_id: user.id,
         ai_tool,
-        prompt_text,
+        prompt_text: storePromptText ? prompt_text : "",
         prompt_id: prompt_id || null,
-        response_text: response_text || null,
+        response_text: storePromptText ? (response_text || null) : null,
         guardrail_flags: guardrail_flags || [],
         action: action || "sent",
         metadata: metadata || {},

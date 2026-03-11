@@ -896,7 +896,16 @@ export async function getAnalytics(): Promise<Analytics | null> {
 // ─── Conversation Logs ───
 
 export async function getConversationLogs(
-  options?: { limit?: number; offset?: number; aiTool?: string }
+  options?: {
+    limit?: number;
+    offset?: number;
+    aiTool?: string;
+    action?: string;
+    dateFrom?: string;
+    dateTo?: string;
+    search?: string;
+    userId?: string;
+  }
 ): Promise<{ logs: ConversationLog[]; total: number }> {
   const orgId = await getOrgId();
   if (!orgId) return { logs: [], total: 0 };
@@ -914,6 +923,23 @@ export async function getConversationLogs(
 
   if (options?.aiTool) {
     q = q.eq("ai_tool", options.aiTool);
+  }
+  if (options?.action) {
+    q = q.eq("action", options.action);
+  }
+  if (options?.dateFrom) {
+    q = q.gte("created_at", options.dateFrom);
+  }
+  if (options?.dateTo) {
+    const toDate = new Date(options.dateTo);
+    toDate.setDate(toDate.getDate() + 1);
+    q = q.lt("created_at", toDate.toISOString());
+  }
+  if (options?.search) {
+    q = q.ilike("prompt_text", `%${options.search}%`);
+  }
+  if (options?.userId) {
+    q = q.eq("user_id", options.userId);
   }
 
   const { data, count, error } = await q;

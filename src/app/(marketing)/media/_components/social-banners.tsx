@@ -3835,6 +3835,44 @@ export function LinkedInSqH() {
   );
 }
 
+/* ── Pandora's Box Ad — branded overlay on external image ── */
+export function PandoraBoxAd() {
+  return (
+    <div className="w-full rounded-xl overflow-hidden relative" style={{ aspectRatio: "1200/627" }}>
+      {/* Background image */}
+      <Image
+        src="/ads/pandora-box.jpg"
+        alt="Your AI Just Opened Pandora's Box"
+        width={1200}
+        height={627}
+        className="w-full h-full object-cover"
+        unoptimized
+      />
+      {/* Bottom-left branding overlay */}
+      <div className="absolute bottom-0 left-0 right-0 z-10">
+        <div className="flex items-end justify-between p-3 sm:p-5">
+          {/* Logo + tagline on frosted white card */}
+          <div className="bg-white/95 backdrop-blur-xl rounded-xl shadow-xl shadow-black/20 border border-white/60 px-3 sm:px-5 py-2 sm:py-3 flex items-center gap-2 sm:gap-3">
+            <svg viewBox="0 0 432 320.9" fill="none" className="h-6 sm:h-8 w-auto shrink-0">
+              <circle cx="157.7" cy="167.7" r="23.2" fill="#0f1d2d" />
+              <circle cx="279.7" cy="167.7" r="23.2" fill="#0f1d2d" />
+              <path fill="#0f1d2d" d="M351.4,68.2c-21.3-10.5-52.4-13.8-77.1-23.6-33-13-46.9-25.1-55.8-25.1s-16.8,8.2-49.1,21.6c-25.9,10.8-49.8,16.2-68,21.1C51.1,72.3,13.2,116.6,13.2,169.8v17.8c0,60.6,49.1,109.7,109.7,109.7h221.8s-12.9-51.6-56.3-51.6h-150c-38.5,0-69.8-31.8-69.8-71.1v-.5c0-39.3,31.2-71.1,69.8-71.1h150.2c38.5,0,69.8,31.8,69.8,71.1v.5c0,1.5,0,2.9-.1,4.3-.9,16-1.4,84.7-1.5,107.8,37.2-17.6,62.9-55.3,62.9-99.1v-17.8c0-46-28.3-85.4-68.5-101.7Z" />
+            </svg>
+            <div>
+              <p className="text-sm sm:text-lg font-bold text-zinc-900 leading-none">TeamPrompt</p>
+              <p className="text-[8px] sm:text-xs text-zinc-500 mt-0.5">Your team&apos;s AI prompt library</p>
+            </div>
+          </div>
+          {/* CTA pill */}
+          <div className="bg-blue-600 text-white rounded-full px-3 sm:px-5 py-1.5 sm:py-2 shadow-lg shadow-blue-600/30 text-[9px] sm:text-sm font-bold whitespace-nowrap">
+            Close the box →
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ── Export map ──────────────────────────────────── */
 
 export const socialBannerComponents = {
@@ -3914,4 +3952,5 @@ export const socialBannerComponents = {
   linkedinSqF: { Component: LinkedInSqF, label: "LinkedIn Square — Big Stat + DLP (Light)", dims: "1200 x 1200" },
   linkedinSqG: { Component: LinkedInSqG, label: "LinkedIn Square — Analytics + Chat (Light)", dims: "1200 x 1200" },
   linkedinSqH: { Component: LinkedInSqH, label: "LinkedIn Square — DLP Block (Dark)", dims: "1200 x 1200" },
+  pandoraBox: { Component: PandoraBoxAd, label: "LinkedIn Ad — Pandora's Box (Branded)", dims: "1200 x 627" },
 } as const;

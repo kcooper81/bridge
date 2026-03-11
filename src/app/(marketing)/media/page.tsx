@@ -91,6 +91,7 @@ import {
   LinkedInSqF,
   LinkedInSqG,
   LinkedInSqH,
+  PandoraBoxAd,
 } from "./_components/social-banners";
 
 export const metadata: Metadata = generatePageMetadata({
@@ -1874,6 +1875,29 @@ export default function MediaPage() {
                 <p className="text-xs text-muted-foreground mb-2">Dark variant with API key detection — vibrant blue accent</p>
                 <BannerDownloadWrapper filename="linkedin-sq-h-dlp-block-dark">
                   <LinkedInSqH />
+                </BannerDownloadWrapper>
+              </div>
+            </div>
+          </div>
+
+          {/* Custom / Creative LinkedIn Ads */}
+          <div className="rounded-2xl border border-border bg-card p-6 mb-8">
+            <h3 className="text-lg font-bold flex items-center gap-2 mb-2">
+              <Lightbulb className="h-5 w-5 text-amber-500" />
+              Creative LinkedIn Ads
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Quirky, attention-grabbing ad creatives designed to stop the scroll.
+            </p>
+            <div className="grid gap-8">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs font-semibold bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">Creative</span>
+                  <span className="text-sm font-medium">Pandora&apos;s Box — AI Risk Awareness</span>
+                </div>
+                <p className="text-xs text-muted-foreground mb-2">Eye-catching creative highlighting uncontrolled AI usage risks</p>
+                <BannerDownloadWrapper filename="linkedin-ad-pandora-box">
+                  <PandoraBoxAd />
                 </BannerDownloadWrapper>
               </div>
             </div>

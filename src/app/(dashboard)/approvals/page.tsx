@@ -40,6 +40,7 @@ import {
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { getPendingPrompts, approvePrompt, rejectPrompt } from "@/lib/vault-api";
+import { trackPromptApproved, trackPromptRejected } from "@/lib/analytics";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { NoOrgBanner } from "@/components/dashboard/no-org-banner";
@@ -111,6 +112,7 @@ export default function ApprovalsPage() {
     try {
       const ok = await approvePrompt(id);
       if (ok) {
+        trackPromptApproved();
         toast.success("Prompt approved");
         setPendingPrompts((prev) => prev.filter((p) => p.id !== id));
       } else {
@@ -135,6 +137,7 @@ export default function ApprovalsPage() {
     try {
       const ok = await rejectPrompt(targetId, rejectReason || undefined);
       if (ok) {
+        trackPromptRejected();
         toast.success("Prompt returned to draft");
         setPendingPrompts((prev) => prev.filter((p) => p.id !== targetId));
       } else {

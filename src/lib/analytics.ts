@@ -47,6 +47,7 @@ export function trackPageView(url: string) {
 
 export function trackSignUp(method: "email" | "google" | "github") {
   trackEvent({ action: "sign_up", method });
+  trackLinkedInSignUp();
 }
 
 export function trackLogin(method: "email" | "google" | "github") {
@@ -97,6 +98,7 @@ export function trackPurchase(plan: string) {
       },
     ],
   });
+  trackLinkedInConversion();
 }
 
 /** Fire when a user starts a free trial */
@@ -157,6 +159,82 @@ export function trackImport(count: number) {
 }
 
 // ---------------------------------------------------------------------------
+// Onboarding milestone events
+// ---------------------------------------------------------------------------
+
+export function trackOnboardingComplete() {
+  trackEvent({ action: "onboarding_complete", category: "activation" });
+}
+
+export function trackFirstPromptCreated() {
+  trackEvent({ action: "first_prompt_created", category: "activation" });
+}
+
+export function trackFirstGuardrailCreated() {
+  trackEvent({ action: "first_guardrail_created", category: "activation" });
+}
+
+export function trackTeamCreated() {
+  trackEvent({ action: "team_created", category: "activation" });
+}
+
+// ---------------------------------------------------------------------------
+// Guideline events
+// ---------------------------------------------------------------------------
+
+export function trackGuidelineCreated() {
+  trackEvent({ action: "guideline_created", category: "engagement" });
+}
+
+export function trackGuidelineUpdated() {
+  trackEvent({ action: "guideline_updated", category: "engagement" });
+}
+
+export function trackGuidelineDeleted() {
+  trackEvent({ action: "guideline_deleted", category: "engagement" });
+}
+
+// ---------------------------------------------------------------------------
+// Prompt lifecycle events
+// ---------------------------------------------------------------------------
+
+export function trackPromptEdited() {
+  trackEvent({ action: "prompt_edited", category: "engagement" });
+}
+
+export function trackPromptDeleted() {
+  trackEvent({ action: "prompt_deleted", category: "engagement" });
+}
+
+export function trackPromptApproved() {
+  trackEvent({ action: "prompt_approved", category: "engagement" });
+}
+
+export function trackPromptRejected() {
+  trackEvent({ action: "prompt_rejected", category: "engagement" });
+}
+
+// ---------------------------------------------------------------------------
+// LinkedIn Insight Tag conversion tracking
+// ---------------------------------------------------------------------------
+
+function linkedInConversion(conversionId: number) {
+  if (typeof window !== "undefined" && typeof window.lintrk === "function") {
+    window.lintrk("track", { conversion_id: conversionId });
+  }
+}
+
+/** Fire LinkedIn conversion on sign-up */
+export function trackLinkedInSignUp() {
+  linkedInConversion(19489666);
+}
+
+/** Fire LinkedIn conversion on purchase/trial start */
+export function trackLinkedInConversion() {
+  linkedInConversion(19489674);
+}
+
+// ---------------------------------------------------------------------------
 // Util
 // ---------------------------------------------------------------------------
 
@@ -169,5 +247,6 @@ declare global {
   interface Window {
     dataLayer: unknown[];
     gtag: (...args: unknown[]) => void;
+    lintrk: (...args: unknown[]) => void;
   }
 }

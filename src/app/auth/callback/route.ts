@@ -43,6 +43,22 @@ export async function GET(request: NextRequest) {
 
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
+      // Pass auth tracking params to the destination so the client can fire GA4/LinkedIn events
+      const authEvent = searchParams.get("auth_event");
+      const authMethod = searchParams.get("auth_method");
+      if (authEvent && authMethod) {
+        const redirectUrl = new URL(`${origin}${next}`);
+        redirectUrl.searchParams.set("auth_event", authEvent);
+        redirectUrl.searchParams.set("auth_method", authMethod);
+        const trackingResponse = NextResponse.redirect(redirectUrl.toString());
+        // Copy cookies from the supabase response
+        supabaseResponse.cookies.getAll().forEach(({ name: n, value: v }) => {
+          trackingResponse.cookies.set(n, v);
+        });
+        authDebug.log("callback", "code exchange success with tracking, redirecting to", redirectUrl.toString());
+        authDebug.attachToResponse(trackingResponse); // AUTH-DEBUG
+        return trackingResponse;
+      }
       authDebug.log("callback", "code exchange success, redirecting to", next);
       authDebug.attachToResponse(supabaseResponse); // AUTH-DEBUG
       return supabaseResponse;

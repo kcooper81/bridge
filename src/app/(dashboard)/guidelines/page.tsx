@@ -29,6 +29,7 @@ import {
   installDefaultGuidelines,
 } from "@/lib/vault-api";
 import { toast } from "sonner";
+import { trackGuidelineCreated, trackGuidelineUpdated, trackGuidelineDeleted } from "@/lib/analytics";
 import type { Guideline, GuidelineRules } from "@/lib/types";
 
 export default function GuidelinesPage() {
@@ -123,6 +124,7 @@ export default function GuidelinesPage() {
         rules,
         enforced: editGuideline?.enforced ?? false,
       });
+      if (editGuideline) { trackGuidelineUpdated(); } else { trackGuidelineCreated(); }
       toast.success(editGuideline ? "Guideline updated" : "Guideline created");
       setModalOpen(false);
       refresh();
@@ -148,6 +150,7 @@ export default function GuidelinesPage() {
     setDeletingId(id);
     try {
       await deleteGuidelineApi(id);
+      trackGuidelineDeleted();
       toast.success("Guideline deleted");
       refresh();
     } catch {

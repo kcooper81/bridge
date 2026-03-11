@@ -47,7 +47,7 @@ import {
 import type { Prompt, PromptStatus, PromptVersion, SecurityRule, ValidationResult, VariableConfig } from "@/lib/types";
 import type { ScanResult } from "@/lib/security/types";
 import { toast } from "sonner";
-import { trackPromptCreated, trackGuardrailViolation } from "@/lib/analytics";
+import { trackPromptCreated, trackPromptEdited, trackGuardrailViolation } from "@/lib/analytics";
 import { computeLineDiff, type DiffLine } from "@/lib/diff";
 import { formatDistanceToNow } from "date-fns";
 
@@ -311,6 +311,7 @@ export function PromptModal({
 
       if (prompt) {
         await updatePrompt(prompt.id, fields as Partial<Prompt>);
+        trackPromptEdited();
         toast.success("Prompt updated");
       } else {
         await createPrompt(fields);

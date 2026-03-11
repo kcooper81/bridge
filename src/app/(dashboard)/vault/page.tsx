@@ -67,7 +67,7 @@ import {
 } from "@/lib/vault-api";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
-import { trackPurchase, trackPromptUsed } from "@/lib/analytics";
+import { trackPurchase, trackPromptUsed, trackPromptDeleted } from "@/lib/analytics";
 import type { Prompt, PromptStatus } from "@/lib/types";
 import { PageSkeleton } from "@/components/dashboard/skeleton-loader";
 import { NoOrgBanner } from "@/components/dashboard/no-org-banner";
@@ -225,6 +225,7 @@ export default function VaultPage() {
       if (!confirm("Delete this prompt?")) return;
       try {
         await deletePrompt(id);
+        trackPromptDeleted();
         toast.success("Prompt deleted");
         refresh();
       } catch {

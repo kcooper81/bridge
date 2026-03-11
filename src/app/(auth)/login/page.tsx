@@ -72,7 +72,7 @@ export default function LoginPage() {
     setLoading(true);
     setError("");
     try {
-      const callbackUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`;
+      const callbackUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}&auth_event=login&auth_method=${provider}`;
       authDebug.log("provider", `OAuth start: ${provider}`, { redirectTo, callbackUrl, origin: window.location.origin }); // AUTH-DEBUG
       const supabase = createClient();
       const { data, error: oauthError } = await supabase.auth.signInWithOAuth({

@@ -3864,8 +3864,8 @@ export function PandoraBoxAd() {
             </div>
           </div>
           {/* CTA pill */}
-          <div className="bg-blue-600 text-white rounded-full px-3 sm:px-5 py-1.5 sm:py-2 shadow-lg shadow-blue-600/30 text-[9px] sm:text-sm font-bold whitespace-nowrap">
-            Close the box →
+          <div className="bg-blue-600 text-white rounded-full px-4 sm:px-8 py-2 sm:py-3 shadow-xl shadow-blue-600/40 text-xs sm:text-base font-black uppercase tracking-wide whitespace-nowrap">
+            Protect Your Team — Free →
           </div>
         </div>
       </div>

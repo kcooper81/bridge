@@ -36,11 +36,70 @@ import {
   Heart,
   Banknote,
   MessageCircle,
+  X as XIcon,
+  Sparkles,
+  Award,
+  Clock,
+  BadgeCheck,
 } from "lucide-react";
 
-// ─── Slide Data ──────────────────────────────────────────────────
+// ─── Constants ──────────────────────────────────────────────────
 
-const TOTAL_SLIDES = 12;
+const TOTAL_SLIDES = 13;
+
+// ─── Animated counter hook ──────────────────────────────────────
+function useCountUp(target: number, duration = 1200, active = true) {
+  const [value, setValue] = useState(0);
+  useEffect(() => {
+    if (!active) return;
+    let start = 0;
+    const step = target / (duration / 16);
+    const id = setInterval(() => {
+      start += step;
+      if (start >= target) {
+        setValue(target);
+        clearInterval(id);
+      } else {
+        setValue(Math.floor(start));
+      }
+    }, 16);
+    return () => clearInterval(id);
+  }, [target, duration, active]);
+  return value;
+}
+
+// ─── Animated text reveal ───────────────────────────────────────
+function RevealText({ children, delay = 0, className }: { children: React.ReactNode; delay?: number; className?: string }) {
+  const [visible, setVisible] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setVisible(true); },
+      { threshold: 0.2 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div
+      ref={ref}
+      className={cn(
+        "transition-all duration-700 ease-out",
+        visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8",
+        className
+      )}
+      style={{ transitionDelay: `${delay}ms` }}
+    >
+      {children}
+    </div>
+  );
+}
+
+// ─── Main Component ─────────────────────────────────────────────
 
 export function PitchDeck() {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -62,7 +121,6 @@ export function PitchDeck() {
   const next = useCallback(() => goTo(currentSlide + 1), [currentSlide, goTo]);
   const prev = useCallback(() => goTo(currentSlide - 1), [currentSlide, goTo]);
 
-  // Keyboard nav
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === "ArrowRight" || e.key === " " || e.key === "Enter") {
@@ -79,7 +137,6 @@ export function PitchDeck() {
     return () => window.removeEventListener("keydown", onKey);
   }, [next, prev]);
 
-  // Scroll-mode intersection observer
   useEffect(() => {
     if (!isScrollMode) return;
     const observer = new IntersectionObserver(
@@ -98,21 +155,97 @@ export function PitchDeck() {
   }, [isScrollMode]);
 
   const slideProps = (idx: number) => ({
-    ref: (el: HTMLDivElement | null) => {
-      slideRefs.current[idx] = el;
-    },
+    ref: (el: HTMLDivElement | null) => { slideRefs.current[idx] = el; },
     className: cn(
-      "min-h-screen w-full flex items-center justify-center px-6 py-12 sm:px-12 lg:px-20",
+      "min-h-screen w-full flex items-center justify-center px-6 py-16 sm:px-12 lg:px-20 relative overflow-hidden",
       !isScrollMode && idx !== currentSlide && "hidden"
     ),
   });
 
+  // Slide label for progress
+  const slideLabels = [
+    "", "Problem", "Solution", "Product", "Why Now", "Competitive Edge",
+    "Business Model", "Traction", "Architecture", "Team", "The Ask", "Growth Plan", "Vision",
+  ];
+
   return (
-    <div ref={containerRef} className="relative bg-white text-zinc-900">
+    <div ref={containerRef} className="relative bg-[#09090b] text-white selection:bg-amber-500/30 selection:text-white">
+      {/* ─── CSS animations ─── */}
+      <style jsx global>{`
+        @keyframes grain {
+          0%, 100% { transform: translate(0, 0); }
+          10% { transform: translate(-5%, -10%); }
+          30% { transform: translate(3%, -15%); }
+          50% { transform: translate(12%, 9%); }
+          70% { transform: translate(9%, 4%); }
+          90% { transform: translate(-1%, 7%); }
+        }
+        @keyframes float {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-12px); }
+        }
+        @keyframes pulse-glow {
+          0%, 100% { opacity: 0.4; }
+          50% { opacity: 0.8; }
+        }
+        @keyframes gradient-shift {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+        .grain-overlay::before {
+          content: '';
+          position: absolute;
+          inset: -50%;
+          width: 200%;
+          height: 200%;
+          background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+          animation: grain 8s steps(10) infinite;
+          pointer-events: none;
+          z-index: 1;
+        }
+        .gradient-text {
+          background: linear-gradient(135deg, #f59e0b 0%, #ef4444 50%, #8b5cf6 100%);
+          background-size: 200% 200%;
+          animation: gradient-shift 6s ease infinite;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+        .gradient-text-blue {
+          background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 50%, #8b5cf6 100%);
+          background-size: 200% 200%;
+          animation: gradient-shift 5s ease infinite;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+        .glow-card {
+          background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+          border: 1px solid rgba(255,255,255,0.06);
+          backdrop-filter: blur(12px);
+        }
+        .glow-card-amber {
+          background: linear-gradient(135deg, rgba(245,158,11,0.08) 0%, rgba(245,158,11,0.02) 100%);
+          border: 1px solid rgba(245,158,11,0.15);
+        }
+        .glow-card-blue {
+          background: linear-gradient(135deg, rgba(59,130,246,0.08) 0%, rgba(59,130,246,0.02) 100%);
+          border: 1px solid rgba(59,130,246,0.15);
+        }
+        .glow-card-emerald {
+          background: linear-gradient(135deg, rgba(16,185,129,0.08) 0%, rgba(16,185,129,0.02) 100%);
+          border: 1px solid rgba(16,185,129,0.15);
+        }
+        .glow-card-red {
+          background: linear-gradient(135deg, rgba(239,68,68,0.08) 0%, rgba(239,68,68,0.02) 100%);
+          border: 1px solid rgba(239,68,68,0.15);
+        }
+      `}</style>
+
       {/* ─── Navigation overlay ─── */}
       {!isScrollMode && (
         <>
-          {/* Side click zones */}
           <button
             onClick={prev}
             className="fixed left-0 top-0 bottom-0 w-20 z-40 flex items-center justify-start pl-4 opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
@@ -131,733 +264,770 @@ export function PitchDeck() {
       )}
 
       {/* ─── Bottom bar ─── */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-sm border-t border-zinc-200">
-        <div className="flex items-center justify-between px-6 py-2">
-          {/* Progress dots */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#09090b]/90 backdrop-blur-md border-t border-white/5">
+        <div className="flex items-center justify-between px-6 py-2.5">
           <div className="flex items-center gap-1.5">
             {Array.from({ length: TOTAL_SLIDES }).map((_, i) => (
               <button
                 key={i}
                 onClick={() => goTo(i)}
                 className={cn(
-                  "h-1.5 rounded-full transition-all duration-300",
+                  "h-1 rounded-full transition-all duration-500",
                   i === currentSlide
-                    ? "w-6 bg-blue-600"
-                    : "w-1.5 bg-zinc-300 hover:bg-zinc-400"
+                    ? "w-8 bg-gradient-to-r from-amber-400 to-amber-600"
+                    : i < currentSlide
+                      ? "w-1.5 bg-amber-400/30"
+                      : "w-1.5 bg-zinc-700 hover:bg-zinc-500"
                 )}
               />
             ))}
           </div>
 
-          <div className="flex items-center gap-3 text-xs text-zinc-500">
-            <span>
-              {currentSlide + 1}/{TOTAL_SLIDES}
+          <div className="flex items-center gap-4 text-xs text-zinc-500">
+            {slideLabels[currentSlide] && (
+              <span className="text-zinc-400 font-medium">{slideLabels[currentSlide]}</span>
+            )}
+            <span className="font-mono">
+              {String(currentSlide + 1).padStart(2, "0")}/{TOTAL_SLIDES}
             </span>
             <button
               onClick={() => setIsScrollMode((v) => !v)}
-              className="hover:text-zinc-800 transition-colors"
+              className="hover:text-zinc-300 transition-colors border border-zinc-800 rounded px-2 py-0.5"
             >
-              {isScrollMode ? "Slide mode" : "Scroll mode"}
+              {isScrollMode ? "Slides" : "Scroll"}
             </button>
-            <span className="hidden sm:inline">
-              Arrow keys / Click / Space
-            </span>
           </div>
         </div>
       </div>
 
       {/* ═══════════════════════════════════════════════════════════
-          SLIDE 1: TITLE
+          SLIDE 1: TITLE — HERO
       ═══════════════════════════════════════════════════════════ */}
       <div {...slideProps(0)}>
-        <div className="max-w-5xl mx-auto text-center space-y-10">
-          <div className="flex justify-center">
-            <Image
-              src="/brand/logo-icon-blue.svg"
-              alt="TeamPrompt"
-              width={80}
-              height={80}
-              className="rounded-2xl"
-            />
-          </div>
+        {/* Background elements */}
+        <div className="absolute inset-0 grain-overlay" />
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-amber-500/5 rounded-full blur-[120px] animate-pulse" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: "1s" }} />
 
-          <div>
-            <h1 className="text-5xl sm:text-7xl font-bold tracking-tight">
-              Team<span className="text-blue-500">Prompt</span>
-            </h1>
-            <p className="mt-4 text-2xl sm:text-3xl text-zinc-500 font-light">
-              The Git for AI Prompts
-            </p>
-          </div>
-
-          <div className="bg-zinc-50/60 border border-zinc-200 rounded-2xl p-8 max-w-2xl mx-auto">
-            <p className="text-lg text-zinc-700 leading-relaxed">
-              Teams waste <span className="text-zinc-900 font-semibold">40% of AI time</span> recreating the same prompts every week.
-              We built a shared prompt library that works inside ChatGPT, Claude, Gemini, Copilot, and Perplexity.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 max-w-2xl mx-auto">
-            {[
-              { value: "1,200+", label: "Active users" },
-              { value: "$12K", label: "MRR" },
-              { value: "85", label: "Paying teams" },
-              { value: "4.8\u2605", label: "Chrome Store" },
-            ].map((s) => (
-              <div key={s.label}>
-                <p className="text-2xl sm:text-3xl font-bold">{s.value}</p>
-                <p className="text-xs text-zinc-500 mt-1">{s.label}</p>
+        <div className="relative z-10 max-w-5xl mx-auto text-center space-y-12">
+          <RevealText>
+            <div className="flex justify-center">
+              <div className="relative">
+                <Image
+                  src="/brand/logo-icon-blue.svg"
+                  alt="TeamPrompt"
+                  width={72}
+                  height={72}
+                  className="rounded-2xl"
+                />
+                <div className="absolute -inset-2 bg-blue-500/20 rounded-2xl blur-xl -z-10" />
               </div>
-            ))}
-          </div>
+            </div>
+          </RevealText>
 
-          <p className="text-zinc-600 text-sm">All organic growth. Zero marketing spend.</p>
+          <RevealText delay={150}>
+            <h1 className="text-6xl sm:text-8xl lg:text-9xl font-black tracking-tighter leading-[0.85]">
+              Team<span className="gradient-text">Prompt</span>
+            </h1>
+          </RevealText>
+
+          <RevealText delay={300}>
+            <p className="text-xl sm:text-2xl text-zinc-400 font-light tracking-wide max-w-xl mx-auto">
+              The prompt management layer for teams
+              <br className="hidden sm:block" />
+              using AI across every platform.
+            </p>
+          </RevealText>
+
+          <RevealText delay={450}>
+            <div className="flex flex-wrap justify-center gap-3 text-xs text-zinc-500 max-w-md mx-auto">
+              {["ChatGPT", "Claude", "Gemini", "Copilot", "Perplexity"].map((ai) => (
+                <span key={ai} className="border border-zinc-800 rounded-full px-3 py-1.5 hover:border-zinc-600 transition-colors">
+                  {ai}
+                </span>
+              ))}
+            </div>
+          </RevealText>
+
+          <RevealText delay={600}>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 max-w-2xl mx-auto pt-4">
+              {[
+                { value: "1,200+", label: "Active users" },
+                { value: "$12K", label: "MRR" },
+                { value: "85", label: "Paying teams" },
+                { value: "4.8★", label: "Chrome Store" },
+              ].map((s) => (
+                <div key={s.label} className="text-center">
+                  <p className="text-2xl sm:text-3xl font-black tracking-tight">{s.value}</p>
+                  <p className="text-[11px] text-zinc-600 mt-1 uppercase tracking-widest">{s.label}</p>
+                </div>
+              ))}
+            </div>
+          </RevealText>
+
+          <RevealText delay={700}>
+            <p className="text-zinc-600 text-xs tracking-widest uppercase">
+              All organic growth &middot; Zero marketing spend
+            </p>
+          </RevealText>
 
           {!isScrollMode && (
-            <button onClick={next} className="animate-bounce mt-4">
-              <ChevronDown className="h-6 w-6 text-zinc-600 mx-auto" />
+            <button onClick={next} className="animate-bounce mt-2" style={{ animation: "float 2s ease-in-out infinite" }}>
+              <ChevronDown className="h-5 w-5 text-zinc-600 mx-auto" />
             </button>
           )}
         </div>
       </div>
 
       {/* ═══════════════════════════════════════════════════════════
-          SLIDE 2: THE PAIN
+          SLIDE 2: THE PROBLEM
       ═══════════════════════════════════════════════════════════ */}
       <div {...slideProps(1)}>
-        <div className="max-w-5xl mx-auto space-y-10">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-widest text-blue-400 mb-3">
+        <div className="absolute inset-0 grain-overlay" />
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500/0 via-red-500/50 to-red-500/0" />
+
+        <div className="relative z-10 max-w-5xl mx-auto space-y-12">
+          <RevealText>
+            <p className="text-xs font-bold uppercase tracking-[0.3em] text-red-400/80 mb-4">
               The Problem
             </p>
-            <h2 className="text-4xl sm:text-5xl font-bold leading-tight">
-              &ldquo;I watched a 50-person law firm<br className="hidden sm:block" /> waste hours every week&rdquo;
+            <h2 className="text-4xl sm:text-6xl font-black leading-[0.95] tracking-tight">
+              Your team is<br />
+              <span className="text-red-400">bleeding AI productivity.</span>
             </h2>
-          </div>
-
-          <div className="grid sm:grid-cols-2 gap-8">
-            <div className="bg-red-500/5 border border-red-500/20 rounded-2xl p-8 space-y-4">
-              <AlertTriangle className="h-8 w-8 text-red-400" />
-              <h3 className="text-xl font-semibold">The Real Story</h3>
-              <ul className="space-y-3 text-zinc-700 text-sm leading-relaxed">
-                <li className="flex gap-2">
-                  <span className="text-red-400 shrink-0">&bull;</span>
-                  10 lawyers writing different versions of the same &ldquo;contract analysis&rdquo; prompt
-                </li>
-                <li className="flex gap-2">
-                  <span className="text-red-400 shrink-0">&bull;</span>
-                  One accidentally included <span className="text-red-300 font-medium">client SSNs</span> in their prompt
-                </li>
-                <li className="flex gap-2">
-                  <span className="text-red-400 shrink-0">&bull;</span>
-                  Partner: &ldquo;We pay for ChatGPT Enterprise but outputs are inconsistent and we&apos;re terrified of data leaks&rdquo;
-                </li>
-              </ul>
-            </div>
-
-            <div className="bg-zinc-50/60 border border-zinc-200 rounded-2xl p-8 space-y-4">
-              <Eye className="h-8 w-8 text-zinc-500" />
-              <h3 className="text-xl font-semibold">Current &ldquo;Solutions&rdquo; Are Broken</h3>
-              <div className="space-y-3">
-                {[
-                  { tool: "Google Docs", issue: "No AI tool integration" },
-                  { tool: "ChatGPT Teams", issue: "No prompt library" },
-                  { tool: "Slack / Notion", issue: "No version control" },
-                  { tool: "Copy & Paste", issue: "No security or analytics" },
-                ].map((row) => (
-                  <div key={row.tool} className="flex items-center gap-3 text-sm">
-                    <span className="text-zinc-500 w-28 shrink-0">{row.tool}</span>
-                    <ArrowRight className="h-3 w-3 text-zinc-600 shrink-0" />
-                    <span className="text-red-300">{row.issue}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-zinc-50/40 rounded-xl p-6 text-center">
-            <p className="text-lg text-zinc-700">
-              Result: <span className="text-zinc-900 font-semibold">Inconsistent AI output</span> + <span className="text-red-400 font-semibold">Security risks</span> + <span className="text-amber-400 font-semibold">Wasted time</span>
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* ═══════════════════════════════════════════════════════════
-          SLIDE 3: HOW IT WORKS
-      ═══════════════════════════════════════════════════════════ */}
-      <div {...slideProps(2)}>
-        <div className="max-w-5xl mx-auto space-y-10">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-widest text-blue-400 mb-3">
-              The Solution
-            </p>
-            <h2 className="text-4xl sm:text-5xl font-bold">
-              How TeamPrompt Works
-            </h2>
-            <p className="mt-3 text-lg text-zinc-500">3 simple steps. 2-minute setup. Free to start.</p>
-          </div>
-
-          <div className="grid sm:grid-cols-3 gap-6">
-            {[
-              {
-                step: "1",
-                title: "Create",
-                desc: "Build prompts with templates, variables, and version control. Set quality guidelines per team.",
-                icon: FileText,
-                color: "text-blue-400",
-                bg: "bg-blue-500/10 border-blue-500/20",
-              },
-              {
-                step: "2",
-                title: "Share",
-                desc: "Distribute to your team with role-based access. Organize by category, tag, and team scope.",
-                icon: Users,
-                color: "text-emerald-400",
-                bg: "bg-emerald-500/10 border-emerald-500/20",
-              },
-              {
-                step: "3",
-                title: "Use Everywhere",
-                desc: "One-click insert via browser extension in ChatGPT, Claude, Gemini, Copilot, and Perplexity.",
-                icon: Globe,
-                color: "text-amber-400",
-                bg: "bg-amber-500/10 border-amber-500/20",
-              },
-            ].map((s) => (
-              <div
-                key={s.step}
-                className={cn("rounded-2xl border p-8 space-y-4", s.bg)}
-              >
-                <div className="flex items-center gap-3">
-                  <span className={cn("text-3xl font-bold", s.color)}>{s.step}</span>
-                  <s.icon className={cn("h-6 w-6", s.color)} />
-                </div>
-                <h3 className="text-xl font-semibold">{s.title}</h3>
-                <p className="text-sm text-zinc-700 leading-relaxed">{s.desc}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Key features grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {[
-              { icon: Shield, label: "DLP Protection", desc: "Blocks SSNs, credit cards, API keys" },
-              { icon: Globe, label: "5 AI Tools", desc: "ChatGPT, Claude, Gemini, Copilot, Perplexity" },
-              { icon: BarChart3, label: "Analytics", desc: "Track which prompts work best" },
-              { icon: Lock, label: "19 Compliance Packs", desc: "HIPAA, SOC 2, GDPR, PCI-DSS, and more" },
-            ].map((f) => (
-              <div key={f.label} className="bg-zinc-50/60 border border-zinc-200 rounded-xl p-4">
-                <f.icon className="h-5 w-5 text-blue-400 mb-2" />
-                <p className="font-medium text-sm">{f.label}</p>
-                <p className="text-xs text-zinc-500 mt-1">{f.desc}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-6 text-center">
-            <p className="text-emerald-300 font-medium">
-              &ldquo;40% time savings in our legal department&rdquo;
-              <span className="text-zinc-500 text-sm ml-2">— 200-lawyer firm</span>
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* ═══════════════════════════════════════════════════════════
-          SLIDE 4: PRODUCT SCREENSHOTS
-      ═══════════════════════════════════════════════════════════ */}
-      <div {...slideProps(3)}>
-        <div className="max-w-6xl mx-auto space-y-8">
-          <div className="text-center">
-            <p className="text-sm font-semibold uppercase tracking-widest text-blue-400 mb-3">
-              The Product
-            </p>
-            <h2 className="text-4xl sm:text-5xl font-bold">
-              Built & Shipping
-            </h2>
-          </div>
+          </RevealText>
 
           <div className="grid sm:grid-cols-2 gap-6">
-            <div className="space-y-3">
-              <div className="rounded-xl overflow-hidden border border-zinc-200">
-                <Image
-                  src="/store-assets/screenshot-light-1-prompts.png"
-                  alt="Prompt library"
-                  width={1280}
-                  height={800}
-                  className="w-full"
-                />
-              </div>
-              <p className="text-xs text-zinc-500 text-center">Prompt library with categories, tags, and team sharing</p>
-            </div>
-            <div className="space-y-3">
-              <div className="rounded-xl overflow-hidden border border-zinc-200">
-                <Image
-                  src="/store-assets/screenshot-light-6-insert.png"
-                  alt="Browser extension in multiple AI tools"
-                  width={1280}
-                  height={800}
-                  className="w-full"
-                />
-              </div>
-              <p className="text-xs text-zinc-500 text-center">Browser extension working across 5 AI platforms</p>
-            </div>
-            <div className="space-y-3">
-              <div className="rounded-xl overflow-hidden border border-zinc-200">
-                <Image
-                  src="/store-assets/screenshot-light-3-dlp-block.png"
-                  alt="DLP protection blocking sensitive data"
-                  width={1280}
-                  height={800}
-                  className="w-full"
-                />
-              </div>
-              <p className="text-xs text-zinc-500 text-center">Real-time DLP: blocks SSNs, credit cards, API keys</p>
-            </div>
-            <div className="space-y-3">
-              <div className="rounded-xl overflow-hidden border border-zinc-200">
-                <Image
-                  src="/store-assets/screenshot-light-2-dashboard.png"
-                  alt="Admin analytics dashboard"
-                  width={1280}
-                  height={800}
-                  className="w-full"
-                />
-              </div>
-              <p className="text-xs text-zinc-500 text-center">Admin dashboard with usage analytics and security insights</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ═══════════════════════════════════════════════════════════
-          SLIDE 5: MARKET
-      ═══════════════════════════════════════════════════════════ */}
-      <div {...slideProps(4)}>
-        <div className="max-w-5xl mx-auto space-y-10">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-widest text-blue-400 mb-3">
-              Market Opportunity
-            </p>
-            <h2 className="text-4xl sm:text-5xl font-bold">
-              $50B AI Productivity Market
-            </h2>
-          </div>
-
-          <div className="grid sm:grid-cols-3 gap-6">
-            {[
-              { value: "180M+", label: "Business ChatGPT users", trend: "OpenAI Enterprise 2024" },
-              { value: "87%", label: "Enterprises use 2+ AI tools", trend: "McKinsey AI Survey" },
-              { value: "3x", label: "AI adoption growth since 2023", trend: "Gartner 2024" },
-            ].map((s) => (
-              <div key={s.label} className="bg-zinc-50/60 border border-zinc-200 rounded-2xl p-6 text-center">
-                <p className="text-3xl sm:text-4xl font-bold text-blue-400">{s.value}</p>
-                <p className="text-sm text-zinc-700 mt-2">{s.label}</p>
-                <p className="text-[10px] text-zinc-600 mt-1">{s.trend}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Market sizing */}
-          <div className="bg-zinc-50/60 border border-zinc-200 rounded-2xl p-8">
-            <h3 className="font-semibold mb-6 text-lg">Market Sizing</h3>
-            <div className="space-y-4">
-              {[
-                { label: "TAM", value: "$50B", desc: "AI productivity software", width: "100%" },
-                { label: "SAM", value: "$12B", desc: "Teams using ChatGPT/Claude for business", width: "24%" },
-                { label: "SOM", value: "$300M", desc: "Early adopters in regulated industries", width: "6%" },
-              ].map((m) => (
-                <div key={m.label} className="flex items-center gap-4">
-                  <span className="text-xs text-zinc-500 w-10 shrink-0 font-mono">{m.label}</span>
-                  <div className="flex-1">
-                    <div className="h-8 rounded-lg bg-blue-500/10 relative overflow-hidden">
-                      <div
-                        className="h-full rounded-lg bg-gradient-to-r from-blue-600 to-blue-400 flex items-center px-3"
-                        style={{ width: m.width }}
-                      >
-                        <span className="text-xs font-bold whitespace-nowrap">{m.value}</span>
-                      </div>
-                    </div>
-                    <p className="text-xs text-zinc-500 mt-1">{m.desc}</p>
+            <RevealText delay={200}>
+              <div className="glow-card-red rounded-2xl p-8 space-y-5 h-full">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-red-500/10 flex items-center justify-center">
+                    <AlertTriangle className="h-5 w-5 text-red-400" />
                   </div>
+                  <h3 className="text-lg font-bold">Real story. Real firm.</h3>
                 </div>
-              ))}
-            </div>
-          </div>
+                <p className="text-zinc-400 text-sm leading-relaxed">
+                  A 50-person law firm. 10 lawyers writing different versions of the same
+                  &ldquo;contract analysis&rdquo; prompt. One accidentally pasted <span className="text-red-400 font-semibold">client Social Security numbers</span> into
+                  ChatGPT. The managing partner said:
+                </p>
+                <blockquote className="border-l-2 border-red-500/40 pl-4 text-zinc-300 italic text-sm">
+                  &ldquo;We pay $30/seat for ChatGPT Enterprise but outputs are
+                  wildly inconsistent and we&apos;re terrified of data leaks.&rdquo;
+                </blockquote>
+              </div>
+            </RevealText>
 
-          {/* Target customers */}
-          <div className="grid sm:grid-cols-3 gap-6">
-            {[
-              { icon: Scale, title: "Legal Teams", pct: "40%", desc: "Need compliance + consistency. Highest willingness to pay." },
-              { icon: Target, title: "Marketing Agencies", pct: "35%", desc: "Need brand voice control across clients and AI tools." },
-              { icon: Heart, title: "Healthcare / Finance", pct: "25%", desc: "Need security, audit trails, and regulatory compliance." },
-            ].map((seg) => (
-              <div key={seg.title} className="bg-zinc-50/40 border border-zinc-200 rounded-xl p-6">
-                <seg.icon className="h-6 w-6 text-blue-400 mb-3" />
-                <div className="flex items-baseline gap-2 mb-2">
-                  <h4 className="font-semibold">{seg.title}</h4>
-                  <span className="text-xs text-blue-400">{seg.pct} of revenue</span>
+            <RevealText delay={350}>
+              <div className="glow-card rounded-2xl p-8 space-y-5 h-full">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-zinc-800 flex items-center justify-center">
+                    <XIcon className="h-5 w-5 text-zinc-400" />
+                  </div>
+                  <h3 className="text-lg font-bold">Current &ldquo;solutions&rdquo;</h3>
                 </div>
-                <p className="text-xs text-zinc-500 leading-relaxed">{seg.desc}</p>
+                <div className="space-y-3">
+                  {[
+                    { tool: "Google Docs", issue: "No AI tool integration" },
+                    { tool: "ChatGPT Teams", issue: "No prompt library, single platform" },
+                    { tool: "Slack / Notion", issue: "No version control or DLP" },
+                    { tool: "Copy & Paste", issue: "No security, no analytics, chaos" },
+                  ].map((row) => (
+                    <div key={row.tool} className="flex items-center gap-3 text-sm">
+                      <span className="text-zinc-500 w-28 shrink-0 font-medium">{row.tool}</span>
+                      <ArrowRight className="h-3 w-3 text-zinc-700 shrink-0" />
+                      <span className="text-red-400/80">{row.issue}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* ═══════════════════════════════════════════════════════════
-          SLIDE 6: BUSINESS MODEL
-      ═══════════════════════════════════════════════════════════ */}
-      <div {...slideProps(5)}>
-        <div className="max-w-5xl mx-auto space-y-10">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-widest text-blue-400 mb-3">
-              Business Model
-            </p>
-            <h2 className="text-4xl sm:text-5xl font-bold">
-              Freemium SaaS — Customers Already Paying
-            </h2>
+            </RevealText>
           </div>
 
-          <div className="grid sm:grid-cols-4 gap-4">
-            {[
-              {
-                tier: "Free",
-                price: "$0",
-                desc: "5 users, core features",
-                highlight: false,
-              },
-              {
-                tier: "Pro",
-                price: "$9",
-                desc: "/user/month — Analytics, unlimited prompts",
-                highlight: false,
-              },
-              {
-                tier: "Team",
-                price: "$7",
-                desc: "/user/month — Collaboration + compliance",
-                highlight: true,
-              },
-              {
-                tier: "Business",
-                price: "$12",
-                desc: "/user/month — Enterprise security + SLA",
-                highlight: false,
-              },
-            ].map((t) => (
-              <div
-                key={t.tier}
-                className={cn(
-                  "rounded-2xl p-6 text-center border",
-                  t.highlight
-                    ? "bg-blue-500/10 border-blue-500/30 ring-1 ring-blue-500/20"
-                    : "bg-zinc-50/60 border-zinc-200"
-                )}
-              >
-                <p className="text-xs text-zinc-500 uppercase tracking-wider">{t.tier}</p>
-                <p className="text-3xl font-bold mt-2">{t.price}</p>
-                <p className="text-xs text-zinc-500 mt-1">{t.desc}</p>
-                {t.highlight && (
-                  <span className="inline-block mt-3 text-[10px] bg-blue-500 text-white px-2 py-0.5 rounded-full font-bold uppercase">
-                    Most popular
-                  </span>
-                )}
-              </div>
-            ))}
-          </div>
-
-          {/* Unit economics */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
-            {[
-              { value: "14:1", label: "LTV : CAC", icon: TrendingUp },
-              { value: "92%", label: "Gross Margin", icon: DollarSign },
-              { value: "25%", label: "Free \u2192 Paid", icon: Rocket },
-              { value: "<2%", label: "Monthly Churn", icon: Star },
-            ].map((m) => (
-              <div key={m.label} className="bg-zinc-50/60 border border-zinc-200 rounded-xl p-5 text-center">
-                <m.icon className="h-5 w-5 text-emerald-400 mx-auto mb-2" />
-                <p className="text-2xl font-bold">{m.value}</p>
-                <p className="text-xs text-zinc-500 mt-1">{m.label}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="bg-zinc-50/40 rounded-xl p-6 text-center text-sm text-zinc-500">
-            Reference: Follows Notion&apos;s successful freemium model — free tier drives organic adoption, teams convert when they need collaboration and security.
-          </div>
-        </div>
-      </div>
-
-      {/* ═══════════════════════════════════════════════════════════
-          SLIDE 7: TRACTION
-      ═══════════════════════════════════════════════════════════ */}
-      <div {...slideProps(6)}>
-        <div className="max-w-5xl mx-auto space-y-10">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-widest text-blue-400 mb-3">
-              Traction
-            </p>
-            <h2 className="text-4xl sm:text-5xl font-bold">
-              Product-Market Fit Proven
-            </h2>
-            <p className="mt-3 text-lg text-zinc-500">6 months. Organic growth. Zero ad spend.</p>
-          </div>
-
-          {/* Metrics */}
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
-            {[
-              { value: "1,200+", label: "Active users", sub: "organic" },
-              { value: "85", label: "Paying teams", sub: "" },
-              { value: "$12K", label: "MRR", sub: "40% MoM" },
-              { value: "4.8\u2605", label: "Chrome Store", sub: "500+ reviews" },
-              { value: "<2%", label: "Monthly churn", sub: "" },
-            ].map((m) => (
-              <div key={m.label} className="bg-zinc-50/60 border border-zinc-200 rounded-xl p-5 text-center">
-                <p className="text-2xl sm:text-3xl font-bold">{m.value}</p>
-                <p className="text-xs text-zinc-500 mt-1">{m.label}</p>
-                {m.sub && <p className="text-[10px] text-emerald-400 mt-0.5">{m.sub}</p>}
-              </div>
-            ))}
-          </div>
-
-          {/* MRR growth visualization */}
-          <div className="bg-zinc-50/60 border border-zinc-200 rounded-2xl p-8">
-            <h3 className="font-semibold mb-6">MRR Growth (40% MoM)</h3>
-            <div className="flex items-end gap-2 h-40">
+          <RevealText delay={500}>
+            <div className="flex items-center justify-center gap-6 sm:gap-10 text-center">
               {[
-                { month: "M1", mrr: 1.2, h: "8%" },
-                { month: "M2", mrr: 1.7, h: "11%" },
-                { month: "M3", mrr: 2.4, h: "16%" },
-                { month: "M4", mrr: 3.4, h: "22%" },
-                { month: "M5", mrr: 4.7, h: "31%" },
-                { month: "M6", mrr: 6.6, h: "44%" },
-                { month: "M7", mrr: 8.5, h: "57%" },
-                { month: "Now", mrr: 12, h: "80%" },
-              ].map((bar) => (
-                <div key={bar.month} className="flex-1 flex flex-col items-center gap-1">
-                  <span className="text-[10px] text-zinc-500">${bar.mrr}K</span>
-                  <div
-                    className="w-full bg-gradient-to-t from-blue-600 to-blue-400 rounded-t-md transition-all"
-                    style={{ height: bar.h }}
-                  />
-                  <span className="text-[10px] text-zinc-600">{bar.month}</span>
+                { stat: "40%", label: "of AI time wasted on duplicate prompts" },
+                { stat: "67%", label: "of teams have no prompt governance" },
+                { stat: "87%", label: "of enterprises use 2+ AI tools" },
+              ].map((s) => (
+                <div key={s.label}>
+                  <p className="text-3xl sm:text-4xl font-black text-red-400">{s.stat}</p>
+                  <p className="text-[10px] sm:text-xs text-zinc-600 mt-1 max-w-[140px]">{s.label}</p>
                 </div>
               ))}
             </div>
-          </div>
+          </RevealText>
+        </div>
+      </div>
 
-          {/* Testimonials */}
+      {/* ═══════════════════════════════════════════════════════════
+          SLIDE 3: THE SOLUTION
+      ═══════════════════════════════════════════════════════════ */}
+      <div {...slideProps(2)}>
+        <div className="absolute inset-0 grain-overlay" />
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-amber-500/0 via-amber-500/50 to-amber-500/0" />
+
+        <div className="relative z-10 max-w-5xl mx-auto space-y-12">
+          <RevealText>
+            <p className="text-xs font-bold uppercase tracking-[0.3em] text-amber-400/80 mb-4">
+              The Solution
+            </p>
+            <h2 className="text-4xl sm:text-6xl font-black leading-[0.95] tracking-tight">
+              One library.<br />
+              Every AI tool.<br />
+              <span className="gradient-text">Total control.</span>
+            </h2>
+          </RevealText>
+
           <div className="grid sm:grid-cols-3 gap-4">
             {[
               {
-                quote: "40% time savings in our legal department",
-                from: "200-lawyer firm",
-                icon: Scale,
+                step: "01",
+                title: "Create",
+                desc: "Build prompts with templates, variables, and version history. Set quality guidelines per team.",
+                icon: FileText,
+                accent: "text-blue-400",
+                card: "glow-card-blue",
               },
               {
-                quote: "Consistent AI output across 50 marketers",
-                from: "Digital agency",
-                icon: Target,
+                step: "02",
+                title: "Share",
+                desc: "Distribute with role-based access. Organize by category, tag, and scope. Approval workflows built-in.",
+                icon: Users,
+                accent: "text-emerald-400",
+                card: "glow-card-emerald",
               },
               {
-                quote: "HIPAA compliance we can trust",
-                from: "Healthcare provider",
-                icon: Heart,
+                step: "03",
+                title: "Use Everywhere",
+                desc: "One-click insert via browser extension across ChatGPT, Claude, Gemini, Copilot, and Perplexity.",
+                icon: Globe,
+                accent: "text-amber-400",
+                card: "glow-card-amber",
               },
-            ].map((t) => (
-              <div key={t.from} className="bg-zinc-50/40 border border-zinc-200 rounded-xl p-5">
-                <t.icon className="h-5 w-5 text-blue-400 mb-3" />
-                <p className="text-sm font-medium text-zinc-200 mb-2">&ldquo;{t.quote}&rdquo;</p>
-                <p className="text-xs text-zinc-500">— {t.from}</p>
-              </div>
+            ].map((s) => (
+              <RevealText key={s.step} delay={parseInt(s.step) * 150}>
+                <div className={cn("rounded-2xl p-7 space-y-4 h-full", s.card)}>
+                  <div className="flex items-center justify-between">
+                    <span className={cn("text-4xl font-black opacity-20", s.accent)}>{s.step}</span>
+                    <s.icon className={cn("h-6 w-6", s.accent)} />
+                  </div>
+                  <h3 className="text-xl font-bold">{s.title}</h3>
+                  <p className="text-sm text-zinc-400 leading-relaxed">{s.desc}</p>
+                </div>
+              </RevealText>
             ))}
           </div>
 
-          <div className="text-center">
-            <p className="text-sm text-zinc-500">
-              Growth engine: Chrome Web Store discovery + word-of-mouth. <span className="text-emerald-400">No marketing spend yet.</span>
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* ═══════════════════════════════════════════════════════════
-          SLIDE 8: TECHNICAL ARCHITECTURE
-      ═══════════════════════════════════════════════════════════ */}
-      <div {...slideProps(7)}>
-        <div className="max-w-5xl mx-auto space-y-10">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-widest text-blue-400 mb-3">
-              Technical Architecture
-            </p>
-            <h2 className="text-4xl sm:text-5xl font-bold">
-              Enterprise-Grade Stack
-            </h2>
-            <p className="mt-3 text-lg text-zinc-500">Built for scale, security, and speed.</p>
-          </div>
-
-          <div className="grid sm:grid-cols-2 gap-6">
-            {/* Stack */}
-            <div className="bg-zinc-50/60 border border-zinc-200 rounded-2xl p-8 space-y-5">
-              <h3 className="font-semibold text-lg flex items-center gap-2">
-                <Layers className="h-5 w-5 text-blue-400" />
-                Tech Stack
-              </h3>
-              <div className="space-y-3">
-                {[
-                  { layer: "Frontend", tech: "Next.js 14 (App Router), React, TypeScript, Tailwind CSS", icon: Monitor },
-                  { layer: "Backend", tech: "Next.js API Routes, Edge Functions, Supabase (Postgres + Auth + Realtime)", icon: Server },
-                  { layer: "Database", tech: "Supabase (Postgres) with Row-Level Security, real-time subscriptions", icon: Database },
-                  { layer: "Extension", tech: "Chrome MV3 extension — vanilla JS, works across 5 AI platforms", icon: Puzzle },
-                  { layer: "Infra", tech: "Vercel (auto-scaling), Supabase Cloud, Resend (email), Stripe", icon: Globe },
-                ].map((row) => (
-                  <div key={row.layer} className="flex gap-3">
-                    <row.icon className="h-4 w-4 text-zinc-500 mt-0.5 shrink-0" />
-                    <div>
-                      <p className="text-xs text-blue-400 font-semibold">{row.layer}</p>
-                      <p className="text-sm text-zinc-700">{row.tech}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Security */}
-            <div className="bg-zinc-50/60 border border-zinc-200 rounded-2xl p-8 space-y-5">
-              <h3 className="font-semibold text-lg flex items-center gap-2">
-                <Shield className="h-5 w-5 text-emerald-400" />
-                Security & Compliance
-              </h3>
-              <div className="space-y-3">
-                {[
-                  { feature: "Row-Level Security", desc: "Every DB query enforced at Postgres level — no data leaks between orgs" },
-                  { feature: "Real-time DLP", desc: "Client-side + server-side scanning blocks PII, credit cards, API keys before they reach AI" },
-                  { feature: "19 Compliance Packs", desc: "Pre-built rule sets for HIPAA, SOC 2, GDPR, PCI-DSS, FERPA, GLBA, NIST, and more" },
-                  { feature: "Audit Logging", desc: "Full activity trail — every prompt use, edit, and security event tracked" },
-                  { feature: "2FA / TOTP", desc: "Two-factor authentication for all users, enforced at org level" },
-                  { feature: "Domain Auto-Join", desc: "SSO-like experience — users auto-join org by verified email domain" },
-                ].map((row) => (
-                  <div key={row.feature} className="flex gap-2">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 mt-0.5 shrink-0" />
-                    <div>
-                      <p className="text-sm text-zinc-200 font-medium">{row.feature}</p>
-                      <p className="text-xs text-zinc-500">{row.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Technical moat */}
-          <div className="bg-blue-500/5 border border-blue-500/20 rounded-2xl p-8">
-            <h3 className="font-semibold mb-4 flex items-center gap-2">
-              <Code2 className="h-5 w-5 text-blue-400" />
-              Technical Moat
-            </h3>
-            <div className="grid sm:grid-cols-3 gap-6">
+          <RevealText delay={500}>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
-                {
-                  title: "Universal Extension",
-                  desc: "Single Chrome extension integrates with ChatGPT, Claude, Gemini, Copilot, and Perplexity simultaneously. This is hard to replicate — each AI tool has a different DOM structure, session model, and injection point.",
-                  icon: Puzzle,
-                },
-                {
-                  title: "Client-Side DLP Engine",
-                  desc: "Sensitive data is caught before it leaves the browser. No server-side processing of PII means data never hits a third-party API. Real-time regex + pattern matching with configurable compliance packs.",
-                  icon: Shield,
-                },
-                {
-                  title: "Real-Time Collaboration",
-                  desc: "Supabase Realtime enables instant prompt sharing, live analytics, and team-wide security policy enforcement. Changes propagate in <500ms across all connected users.",
-                  icon: Zap,
-                },
-              ].map((m) => (
-                <div key={m.title}>
-                  <m.icon className="h-5 w-5 text-blue-400 mb-2" />
-                  <h4 className="font-medium text-sm mb-1">{m.title}</h4>
-                  <p className="text-xs text-zinc-500 leading-relaxed">{m.desc}</p>
+                { icon: Shield, label: "DLP Protection", desc: "Blocks SSNs, credit cards, API keys in real-time" },
+                { icon: Lock, label: "19 Compliance Packs", desc: "HIPAA, SOC 2, GDPR, PCI-DSS, and more" },
+                { icon: BarChart3, label: "Team Analytics", desc: "Track which prompts perform best" },
+                { icon: BadgeCheck, label: "Approval Workflows", desc: "Review & approve before team-wide use" },
+              ].map((f) => (
+                <div key={f.label} className="glow-card rounded-xl p-4">
+                  <f.icon className="h-4 w-4 text-amber-400/60 mb-2" />
+                  <p className="font-semibold text-xs">{f.label}</p>
+                  <p className="text-[10px] text-zinc-500 mt-1 leading-relaxed">{f.desc}</p>
                 </div>
               ))}
             </div>
+          </RevealText>
+
+          <RevealText delay={600}>
+            <p className="text-center text-sm text-zinc-500">
+              2-minute setup &middot; Free to start &middot; No credit card required
+            </p>
+          </RevealText>
+        </div>
+      </div>
+
+      {/* ═══════════════════════════════════════════════════════════
+          SLIDE 4: PRODUCT
+      ═══════════════════════════════════════════════════════════ */}
+      <div {...slideProps(3)}>
+        <div className="absolute inset-0 grain-overlay" />
+
+        <div className="relative z-10 max-w-6xl mx-auto space-y-10">
+          <RevealText>
+            <div className="text-center">
+              <p className="text-xs font-bold uppercase tracking-[0.3em] text-blue-400/80 mb-4">
+                The Product
+              </p>
+              <h2 className="text-4xl sm:text-6xl font-black tracking-tight">
+                Built. Shipped. <span className="gradient-text-blue">Live.</span>
+              </h2>
+            </div>
+          </RevealText>
+
+          <div className="grid sm:grid-cols-2 gap-5">
+            {[
+              { src: "/store-assets/screenshot-light-1-prompts.png", alt: "Prompt library", label: "Shared prompt library with categories, tags, and team scopes" },
+              { src: "/store-assets/screenshot-light-6-insert.png", alt: "Browser extension", label: "One-click insert across 5 AI platforms" },
+              { src: "/store-assets/screenshot-light-3-dlp-block.png", alt: "DLP protection", label: "Real-time DLP blocks sensitive data before it reaches AI" },
+              { src: "/store-assets/screenshot-light-2-dashboard.png", alt: "Analytics dashboard", label: "Admin dashboard with usage analytics and security insights" },
+            ].map((img, i) => (
+              <RevealText key={img.alt} delay={i * 120}>
+                <div className="group relative">
+                  <div className="rounded-xl overflow-hidden border border-white/10 bg-zinc-900">
+                    <Image
+                      src={img.src}
+                      alt={img.alt}
+                      width={1280}
+                      height={800}
+                      className="w-full transition-transform duration-500 group-hover:scale-[1.02]"
+                    />
+                  </div>
+                  <p className="text-[11px] text-zinc-500 mt-2 text-center">{img.label}</p>
+                </div>
+              </RevealText>
+            ))}
           </div>
         </div>
       </div>
 
       {/* ═══════════════════════════════════════════════════════════
-          SLIDE 9: COMPETITIVE LANDSCAPE
+          SLIDE 5: WHY NOW — MARKET TIMING
+      ═══════════════════════════════════════════════════════════ */}
+      <div {...slideProps(4)}>
+        <div className="absolute inset-0 grain-overlay" />
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500/0 via-emerald-500/50 to-emerald-500/0" />
+
+        <div className="relative z-10 max-w-5xl mx-auto space-y-12">
+          <RevealText>
+            <p className="text-xs font-bold uppercase tracking-[0.3em] text-emerald-400/80 mb-4">
+              Market Opportunity
+            </p>
+            <h2 className="text-4xl sm:text-6xl font-black leading-[0.95] tracking-tight">
+              $50B market.<br />
+              <span className="text-emerald-400">No one owns the workflow layer.</span>
+            </h2>
+          </RevealText>
+
+          <RevealText delay={200}>
+            <div className="grid sm:grid-cols-3 gap-4">
+              {[
+                { value: "180M+", label: "Business AI users globally", source: "OpenAI 2024" },
+                { value: "87%", label: "Enterprises use 2+ AI tools", source: "McKinsey" },
+                { value: "3x", label: "AI adoption growth since 2023", source: "Gartner" },
+              ].map((s) => (
+                <div key={s.label} className="glow-card rounded-2xl p-6 text-center">
+                  <p className="text-4xl sm:text-5xl font-black text-emerald-400">{s.value}</p>
+                  <p className="text-sm text-zinc-300 mt-2">{s.label}</p>
+                  <p className="text-[10px] text-zinc-600 mt-1">{s.source}</p>
+                </div>
+              ))}
+            </div>
+          </RevealText>
+
+          <RevealText delay={350}>
+            <div className="glow-card rounded-2xl p-8">
+              <h3 className="font-bold mb-6 text-sm uppercase tracking-widest text-zinc-500">Market Sizing</h3>
+              <div className="space-y-5">
+                {[
+                  { label: "TAM", value: "$50B", desc: "AI productivity software", width: "100%", color: "from-emerald-600 to-emerald-400" },
+                  { label: "SAM", value: "$12B", desc: "Teams using AI for business workflows", width: "24%", color: "from-blue-600 to-blue-400" },
+                  { label: "SOM", value: "$300M", desc: "Regulated industries, early adopters", width: "6%", color: "from-amber-600 to-amber-400" },
+                ].map((m) => (
+                  <div key={m.label} className="flex items-center gap-4">
+                    <span className="text-xs text-zinc-600 w-10 shrink-0 font-mono font-bold">{m.label}</span>
+                    <div className="flex-1">
+                      <div className="h-10 rounded-lg bg-white/[0.03] relative overflow-hidden">
+                        <div
+                          className={cn("h-full rounded-lg bg-gradient-to-r flex items-center px-4", m.color)}
+                          style={{ width: m.width }}
+                        >
+                          <span className="text-xs font-black whitespace-nowrap">{m.value}</span>
+                        </div>
+                      </div>
+                      <p className="text-[10px] text-zinc-600 mt-1">{m.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </RevealText>
+
+          <RevealText delay={500}>
+            <div className="grid sm:grid-cols-3 gap-4">
+              {[
+                { icon: Scale, title: "Legal & Compliance", pct: "40%", desc: "Highest willingness to pay. Needs consistency + audit trails." },
+                { icon: Target, title: "Marketing & Agencies", pct: "35%", desc: "Brand voice control across clients and AI tools." },
+                { icon: Heart, title: "Healthcare & Finance", pct: "25%", desc: "Regulatory requirements. HIPAA, SOC 2, PCI-DSS." },
+              ].map((seg) => (
+                <div key={seg.title} className="glow-card rounded-xl p-5">
+                  <seg.icon className="h-5 w-5 text-zinc-500 mb-3" />
+                  <div className="flex items-baseline gap-2 mb-1">
+                    <h4 className="font-bold text-sm">{seg.title}</h4>
+                    <span className="text-[10px] text-amber-400 font-bold">{seg.pct}</span>
+                  </div>
+                  <p className="text-[11px] text-zinc-500 leading-relaxed">{seg.desc}</p>
+                </div>
+              ))}
+            </div>
+          </RevealText>
+        </div>
+      </div>
+
+      {/* ═══════════════════════════════════════════════════════════
+          SLIDE 6: COMPETITIVE EDGE — vs ChatGPT/Claude paid plans
+      ═══════════════════════════════════════════════════════════ */}
+      <div {...slideProps(5)}>
+        <div className="absolute inset-0 grain-overlay" />
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-amber-500/0 via-amber-500/50 to-amber-500/0" />
+
+        <div className="relative z-10 max-w-5xl mx-auto space-y-10">
+          <RevealText>
+            <p className="text-xs font-bold uppercase tracking-[0.3em] text-amber-400/80 mb-4">
+              Competitive Edge
+            </p>
+            <h2 className="text-4xl sm:text-5xl font-black leading-[0.95] tracking-tight">
+              They sell AI access.<br />
+              <span className="gradient-text">We sell AI governance.</span>
+            </h2>
+          </RevealText>
+
+          <RevealText delay={200}>
+            <div className="glow-card rounded-2xl p-6 sm:p-8 overflow-x-auto">
+              <h3 className="font-bold text-sm uppercase tracking-widest text-zinc-500 mb-6">
+                What teams actually pay for AI today
+              </h3>
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-white/10">
+                    <th className="text-left py-3 px-3 text-zinc-500 font-medium text-xs">Plan</th>
+                    <th className="text-center py-3 px-3 text-zinc-500 font-medium text-xs">Price/user/mo</th>
+                    <th className="text-center py-3 px-3 text-zinc-500 font-medium text-xs">Prompt Library</th>
+                    <th className="text-center py-3 px-3 text-zinc-500 font-medium text-xs">Multi-AI</th>
+                    <th className="text-center py-3 px-3 text-zinc-500 font-medium text-xs">DLP</th>
+                    <th className="text-center py-3 px-3 text-zinc-500 font-medium text-xs">Compliance</th>
+                  </tr>
+                </thead>
+                <tbody className="text-xs">
+                  {[
+                    { plan: "ChatGPT Plus", price: "$20", lib: false, multi: false, dlp: false, comp: false },
+                    { plan: "ChatGPT Team", price: "$25", lib: false, multi: false, dlp: false, comp: false },
+                    { plan: "ChatGPT Enterprise", price: "$60+", lib: false, multi: false, dlp: false, comp: false },
+                    { plan: "Claude Pro", price: "$20", lib: false, multi: false, dlp: false, comp: false },
+                    { plan: "Claude Team", price: "$25", lib: false, multi: false, dlp: false, comp: false },
+                    { plan: "Gemini Advanced", price: "$20", lib: false, multi: false, dlp: false, comp: false },
+                  ].map((row) => (
+                    <tr key={row.plan} className="border-b border-white/5">
+                      <td className="py-2.5 px-3 text-zinc-400">{row.plan}</td>
+                      <td className="text-center py-2.5 px-3 text-zinc-300 font-mono">{row.price}</td>
+                      <td className="text-center py-2.5 px-3"><span className="text-zinc-700">&mdash;</span></td>
+                      <td className="text-center py-2.5 px-3"><span className="text-zinc-700">&mdash;</span></td>
+                      <td className="text-center py-2.5 px-3"><span className="text-zinc-700">&mdash;</span></td>
+                      <td className="text-center py-2.5 px-3"><span className="text-zinc-700">&mdash;</span></td>
+                    </tr>
+                  ))}
+                  <tr className="border-t-2 border-amber-500/30 bg-amber-500/5">
+                    <td className="py-3 px-3 text-amber-400 font-bold">TeamPrompt Team</td>
+                    <td className="text-center py-3 px-3 text-amber-400 font-mono font-bold">$7</td>
+                    <td className="text-center py-3 px-3"><CheckCircle2 className="h-4 w-4 text-emerald-400 mx-auto" /></td>
+                    <td className="text-center py-3 px-3"><CheckCircle2 className="h-4 w-4 text-emerald-400 mx-auto" /></td>
+                    <td className="text-center py-3 px-3"><CheckCircle2 className="h-4 w-4 text-emerald-400 mx-auto" /></td>
+                    <td className="text-center py-3 px-3"><CheckCircle2 className="h-4 w-4 text-emerald-400 mx-auto" /></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </RevealText>
+
+          <RevealText delay={350}>
+            <div className="glow-card-amber rounded-2xl p-6 sm:p-8">
+              <h3 className="font-bold text-sm uppercase tracking-widest text-zinc-500 mb-5">
+                The pitch
+              </h3>
+              <blockquote className="text-lg sm:text-xl text-zinc-200 leading-relaxed italic">
+                &ldquo;You&apos;re already paying $20–60/user for ChatGPT and Claude.
+                For <span className="text-amber-400 font-bold not-italic">$7/user</span>, TeamPrompt
+                makes every seat more productive, compliant, and consistent —
+                across <span className="text-amber-400 font-bold not-italic">all five AI platforms</span> at once.&rdquo;
+              </blockquote>
+            </div>
+          </RevealText>
+
+          <RevealText delay={500}>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div className="glow-card rounded-xl p-5">
+                <Brain className="h-5 w-5 text-blue-400 mb-3" />
+                <h4 className="font-bold text-sm mb-1">&ldquo;Why won&apos;t ChatGPT just build this?&rdquo;</h4>
+                <p className="text-xs text-zinc-500 leading-relaxed">
+                  ChatGPT sells models. We sell workflow governance across <em>every</em> AI tool.
+                  Same reason GitHub exists alongside programming languages.
+                </p>
+              </div>
+              <div className="glow-card rounded-xl p-5">
+                <Puzzle className="h-5 w-5 text-amber-400 mb-3" />
+                <h4 className="font-bold text-sm mb-1">&ldquo;What if AI tools add prompt libraries?&rdquo;</h4>
+                <p className="text-xs text-zinc-500 leading-relaxed">
+                  They&apos;ll optimize for their own platform. We&apos;re the cross-platform standard —
+                  like 1Password works across browsers. Teams use 2+ AI tools.
+                </p>
+              </div>
+            </div>
+          </RevealText>
+        </div>
+      </div>
+
+      {/* ═══════════════════════════════════════════════════════════
+          SLIDE 7: BUSINESS MODEL
+      ═══════════════════════════════════════════════════════════ */}
+      <div {...slideProps(6)}>
+        <div className="absolute inset-0 grain-overlay" />
+
+        <div className="relative z-10 max-w-5xl mx-auto space-y-12">
+          <RevealText>
+            <p className="text-xs font-bold uppercase tracking-[0.3em] text-blue-400/80 mb-4">
+              Business Model
+            </p>
+            <h2 className="text-4xl sm:text-6xl font-black tracking-tight">
+              Freemium SaaS.
+              <br />
+              <span className="text-zinc-500">Customers already paying.</span>
+            </h2>
+          </RevealText>
+
+          <RevealText delay={200}>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {[
+                { tier: "Free", price: "$0", desc: "5 users, core features", highlight: false },
+                { tier: "Pro", price: "$9", desc: "/user/mo — Analytics, unlimited", highlight: false },
+                { tier: "Team", price: "$7", desc: "/user/mo — Collaboration + compliance", highlight: true },
+                { tier: "Business", price: "$12", desc: "/user/mo — Enterprise security + SLA", highlight: false },
+              ].map((t) => (
+                <div
+                  key={t.tier}
+                  className={cn(
+                    "rounded-2xl p-5 text-center relative overflow-hidden",
+                    t.highlight
+                      ? "glow-card-amber"
+                      : "glow-card"
+                  )}
+                >
+                  {t.highlight && (
+                    <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-amber-400 to-amber-600" />
+                  )}
+                  <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">{t.tier}</p>
+                  <p className="text-3xl font-black mt-2">{t.price}</p>
+                  <p className="text-[11px] text-zinc-500 mt-1">{t.desc}</p>
+                  {t.highlight && (
+                    <span className="inline-block mt-3 text-[9px] bg-amber-500 text-black px-2.5 py-0.5 rounded-full font-black uppercase tracking-wider">
+                      Most popular
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </RevealText>
+
+          <RevealText delay={350}>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {[
+                { value: "14:1", label: "LTV : CAC", icon: TrendingUp, accent: "text-emerald-400" },
+                { value: "92%", label: "Gross margin", icon: DollarSign, accent: "text-emerald-400" },
+                { value: "25%", label: "Free → Paid", icon: Rocket, accent: "text-amber-400" },
+                { value: "<2%", label: "Monthly churn", icon: Star, accent: "text-blue-400" },
+              ].map((m) => (
+                <div key={m.label} className="glow-card rounded-xl p-5 text-center">
+                  <m.icon className={cn("h-5 w-5 mx-auto mb-2", m.accent)} />
+                  <p className="text-2xl font-black">{m.value}</p>
+                  <p className="text-[10px] text-zinc-500 uppercase tracking-widest mt-1">{m.label}</p>
+                </div>
+              ))}
+            </div>
+          </RevealText>
+
+          <RevealText delay={500}>
+            <p className="text-center text-xs text-zinc-600">
+              Follows Notion&apos;s playbook: free tier drives organic adoption, teams convert when they need collaboration and security.
+            </p>
+          </RevealText>
+        </div>
+      </div>
+
+      {/* ═══════════════════════════════════════════════════════════
+          SLIDE 8: TRACTION
+      ═══════════════════════════════════════════════════════════ */}
+      <div {...slideProps(7)}>
+        <div className="absolute inset-0 grain-overlay" />
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500/0 via-emerald-500/50 to-emerald-500/0" />
+
+        <div className="relative z-10 max-w-5xl mx-auto space-y-12">
+          <RevealText>
+            <p className="text-xs font-bold uppercase tracking-[0.3em] text-emerald-400/80 mb-4">
+              Traction
+            </p>
+            <h2 className="text-4xl sm:text-6xl font-black leading-[0.95] tracking-tight">
+              Product-market fit.<br />
+              <span className="text-emerald-400">Proven.</span>
+            </h2>
+            <p className="mt-3 text-sm text-zinc-500">6 months. Organic growth. Zero ad spend.</p>
+          </RevealText>
+
+          <RevealText delay={200}>
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+              {[
+                { value: "1,200+", label: "Active users", sub: "organic" },
+                { value: "85", label: "Paying teams", sub: "" },
+                { value: "$12K", label: "MRR", sub: "40% MoM" },
+                { value: "4.8★", label: "Chrome Store", sub: "500+ reviews" },
+                { value: "<2%", label: "Monthly churn", sub: "" },
+              ].map((m) => (
+                <div key={m.label} className="glow-card rounded-xl p-4 text-center">
+                  <p className="text-xl sm:text-2xl font-black">{m.value}</p>
+                  <p className="text-[10px] text-zinc-500 uppercase tracking-widest mt-1">{m.label}</p>
+                  {m.sub && <p className="text-[10px] text-emerald-400 mt-0.5 font-medium">{m.sub}</p>}
+                </div>
+              ))}
+            </div>
+          </RevealText>
+
+          <RevealText delay={350}>
+            <div className="glow-card rounded-2xl p-8">
+              <h3 className="font-bold text-xs uppercase tracking-widest text-zinc-500 mb-6">MRR Growth — 40% Month-over-Month</h3>
+              <div className="flex items-end gap-2 h-44">
+                {[
+                  { month: "M1", mrr: 1.2, h: "8%" },
+                  { month: "M2", mrr: 1.7, h: "11%" },
+                  { month: "M3", mrr: 2.4, h: "16%" },
+                  { month: "M4", mrr: 3.4, h: "22%" },
+                  { month: "M5", mrr: 4.7, h: "31%" },
+                  { month: "M6", mrr: 6.6, h: "44%" },
+                  { month: "M7", mrr: 8.5, h: "57%" },
+                  { month: "Now", mrr: 12, h: "80%" },
+                ].map((bar, i) => (
+                  <div key={bar.month} className="flex-1 flex flex-col items-center gap-1">
+                    <span className="text-[10px] text-zinc-500 font-mono">${bar.mrr}K</span>
+                    <div
+                      className={cn(
+                        "w-full rounded-t-md transition-all duration-700",
+                        i === 7
+                          ? "bg-gradient-to-t from-emerald-600 to-emerald-400"
+                          : "bg-gradient-to-t from-emerald-600/40 to-emerald-400/40"
+                      )}
+                      style={{ height: bar.h }}
+                    />
+                    <span className={cn("text-[10px] font-mono", i === 7 ? "text-emerald-400 font-bold" : "text-zinc-600")}>{bar.month}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </RevealText>
+
+          <RevealText delay={500}>
+            <p className="text-center text-xs text-zinc-600">
+              Growth engine: Chrome Web Store discovery + word-of-mouth. <span className="text-emerald-400 font-medium">No marketing spend yet.</span>
+            </p>
+          </RevealText>
+        </div>
+      </div>
+
+      {/* ═══════════════════════════════════════════════════════════
+          SLIDE 9: TECHNICAL ARCHITECTURE
       ═══════════════════════════════════════════════════════════ */}
       <div {...slideProps(8)}>
-        <div className="max-w-5xl mx-auto space-y-10">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-widest text-blue-400 mb-3">
-              Competitive Landscape
+        <div className="absolute inset-0 grain-overlay" />
+
+        <div className="relative z-10 max-w-5xl mx-auto space-y-10">
+          <RevealText>
+            <p className="text-xs font-bold uppercase tracking-[0.3em] text-blue-400/80 mb-4">
+              Architecture
             </p>
-            <h2 className="text-4xl sm:text-5xl font-bold">
-              Why We Win
+            <h2 className="text-4xl sm:text-5xl font-black tracking-tight">
+              Enterprise-grade. <span className="text-zinc-500">Solo-built.</span>
             </h2>
+          </RevealText>
+
+          <div className="grid sm:grid-cols-2 gap-5">
+            <RevealText delay={200}>
+              <div className="glow-card-blue rounded-2xl p-7 space-y-4 h-full">
+                <div className="flex items-center gap-2">
+                  <Layers className="h-5 w-5 text-blue-400" />
+                  <h3 className="font-bold">Tech Stack</h3>
+                </div>
+                <div className="space-y-3">
+                  {[
+                    { layer: "Frontend", tech: "Next.js 14, React, TypeScript, Tailwind", icon: Monitor },
+                    { layer: "Backend", tech: "Next.js API Routes, Edge Functions, Supabase", icon: Server },
+                    { layer: "Database", tech: "Postgres + Row-Level Security + Realtime", icon: Database },
+                    { layer: "Extension", tech: "Chrome/Firefox/Edge MV3, works across 5 AI tools", icon: Puzzle },
+                    { layer: "Infra", tech: "Vercel (auto-scaling), Supabase Cloud, Stripe", icon: Globe },
+                  ].map((row) => (
+                    <div key={row.layer} className="flex gap-3">
+                      <row.icon className="h-4 w-4 text-zinc-600 mt-0.5 shrink-0" />
+                      <div>
+                        <p className="text-[10px] text-blue-400 font-bold uppercase tracking-wider">{row.layer}</p>
+                        <p className="text-xs text-zinc-400">{row.tech}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </RevealText>
+
+            <RevealText delay={350}>
+              <div className="glow-card-emerald rounded-2xl p-7 space-y-4 h-full">
+                <div className="flex items-center gap-2">
+                  <Shield className="h-5 w-5 text-emerald-400" />
+                  <h3 className="font-bold">Security & Compliance</h3>
+                </div>
+                <div className="space-y-2.5">
+                  {[
+                    "Row-Level Security on every query",
+                    "Client-side DLP — PII never reaches AI",
+                    "19 compliance packs (HIPAA, SOC 2, GDPR...)",
+                    "Full audit trail on every action",
+                    "2FA / TOTP for all users",
+                    "Domain auto-join (SSO-like experience)",
+                  ].map((feat) => (
+                    <div key={feat} className="flex gap-2 items-start">
+                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                      <p className="text-xs text-zinc-400">{feat}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </RevealText>
           </div>
 
-          {/* Comparison table */}
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-zinc-200">
-                  <th className="text-left py-3 px-4 text-zinc-500 font-medium">Feature</th>
-                  <th className="text-center py-3 px-4 text-blue-400 font-bold">TeamPrompt</th>
-                  <th className="text-center py-3 px-4 text-zinc-500 font-medium">ChatGPT Teams</th>
-                  <th className="text-center py-3 px-4 text-zinc-500 font-medium">Notion AI</th>
-                  <th className="text-center py-3 px-4 text-zinc-500 font-medium">Google Docs</th>
-                </tr>
-              </thead>
-              <tbody className="text-xs">
+          <RevealText delay={500}>
+            <div className="glow-card rounded-2xl p-7">
+              <div className="flex items-center gap-2 mb-5">
+                <Code2 className="h-5 w-5 text-amber-400" />
+                <h3 className="font-bold text-sm">Technical Moat</h3>
+              </div>
+              <div className="grid sm:grid-cols-3 gap-5">
                 {[
-                  { feature: "Prompt library", us: true, chatgpt: false, notion: false, gdocs: false },
-                  { feature: "Multi-AI integration", us: true, chatgpt: false, notion: false, gdocs: false },
-                  { feature: "Browser extension", us: true, chatgpt: false, notion: false, gdocs: false },
-                  { feature: "DLP / Data protection", us: true, chatgpt: false, notion: false, gdocs: false },
-                  { feature: "Compliance packs", us: true, chatgpt: false, notion: false, gdocs: false },
-                  { feature: "Version control", us: true, chatgpt: false, notion: true, gdocs: true },
-                  { feature: "Team analytics", us: true, chatgpt: true, notion: false, gdocs: false },
-                  { feature: "Role-based access", us: true, chatgpt: true, notion: true, gdocs: true },
-                  { feature: "Template variables", us: true, chatgpt: false, notion: false, gdocs: false },
-                  { feature: "Audit trail", us: true, chatgpt: false, notion: false, gdocs: false },
-                ].map((row) => (
-                  <tr key={row.feature} className="border-b border-zinc-200">
-                    <td className="py-2.5 px-4 text-zinc-700">{row.feature}</td>
-                    <td className="text-center py-2.5 px-4">
-                      {row.us ? <CheckCircle2 className="h-4 w-4 text-emerald-400 mx-auto" /> : <span className="text-zinc-600">—</span>}
-                    </td>
-                    <td className="text-center py-2.5 px-4">
-                      {row.chatgpt ? <CheckCircle2 className="h-4 w-4 text-zinc-500 mx-auto" /> : <span className="text-zinc-700">—</span>}
-                    </td>
-                    <td className="text-center py-2.5 px-4">
-                      {row.notion ? <CheckCircle2 className="h-4 w-4 text-zinc-500 mx-auto" /> : <span className="text-zinc-700">—</span>}
-                    </td>
-                    <td className="text-center py-2.5 px-4">
-                      {row.gdocs ? <CheckCircle2 className="h-4 w-4 text-zinc-500 mx-auto" /> : <span className="text-zinc-700">—</span>}
-                    </td>
-                  </tr>
+                  {
+                    title: "Universal Extension",
+                    desc: "Single extension integrates with 5 AI tools, each with unique DOM, auth, and injection points. Hard to replicate.",
+                    icon: Puzzle,
+                  },
+                  {
+                    title: "Client-Side DLP",
+                    desc: "Sensitive data caught before it leaves the browser. No server-side PII processing. Configurable compliance packs.",
+                    icon: Shield,
+                  },
+                  {
+                    title: "Real-Time Sync",
+                    desc: "Supabase Realtime for instant sharing, live analytics, and policy enforcement. <500ms propagation.",
+                    icon: Zap,
+                  },
+                ].map((m) => (
+                  <div key={m.title}>
+                    <m.icon className="h-4 w-4 text-amber-400/60 mb-2" />
+                    <h4 className="font-bold text-xs mb-1">{m.title}</h4>
+                    <p className="text-[11px] text-zinc-500 leading-relaxed">{m.desc}</p>
+                  </div>
                 ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Investor FAQ preview */}
-          <div className="bg-zinc-50/60 border border-zinc-200 rounded-2xl p-8">
-            <h3 className="font-semibold mb-4 flex items-center gap-2">
-              <MessageCircle className="h-5 w-5 text-blue-400" />
-              &ldquo;Why won&apos;t ChatGPT just build this?&rdquo;
-            </h3>
-            <p className="text-sm text-zinc-700 leading-relaxed">
-              ChatGPT focuses on <span className="text-zinc-900 font-medium">models</span>, not workflow management.
-              They optimize inference, not team governance. We&apos;re the <span className="text-blue-400 font-medium">workflow layer</span> that
-              makes teams productive and safe across <em>all</em> AI tools — not just one.
-              This is the same reason GitHub exists alongside programming languages.
-            </p>
-          </div>
+              </div>
+            </div>
+          </RevealText>
         </div>
       </div>
 
@@ -865,298 +1035,345 @@ export function PitchDeck() {
           SLIDE 10: TEAM
       ═══════════════════════════════════════════════════════════ */}
       <div {...slideProps(9)}>
-        <div className="max-w-5xl mx-auto space-y-10">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-widest text-blue-400 mb-3">
+        <div className="absolute inset-0 grain-overlay" />
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500/0 via-purple-500/50 to-purple-500/0" />
+
+        <div className="relative z-10 max-w-4xl mx-auto space-y-12">
+          <RevealText>
+            <p className="text-xs font-bold uppercase tracking-[0.3em] text-purple-400/80 mb-4">
               The Team
             </p>
-            <h2 className="text-4xl sm:text-5xl font-bold">
-              Built by Someone Who Lives the Problem
+            <h2 className="text-4xl sm:text-6xl font-black leading-[0.95] tracking-tight">
+              Built by someone who<br />
+              <span className="text-purple-400">lives the problem.</span>
             </h2>
-          </div>
+          </RevealText>
 
-          <div className="grid sm:grid-cols-2 gap-8">
-            <div className="bg-zinc-50/60 border border-zinc-200 rounded-2xl p-8 space-y-6">
-              <div className="flex items-center gap-4">
-                <div className="h-16 w-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-2xl font-bold">
-                  F
+          <div className="grid sm:grid-cols-5 gap-6">
+            <RevealText delay={200} className="sm:col-span-3">
+              <div className="glow-card rounded-2xl p-8 space-y-6 h-full">
+                <div className="flex items-center gap-5">
+                  <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center text-3xl font-black shrink-0">
+                    KC
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-black">Kade Cooper</h3>
+                    <p className="text-sm text-zinc-500">Founder & CEO</p>
+                    <p className="text-xs text-zinc-600 mt-1">Technical founder &middot; Full-stack engineer &middot; Product builder</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-xl font-semibold">Founder / CEO</h3>
-                  <p className="text-sm text-zinc-500">Technical founder & product builder</p>
-                </div>
-              </div>
-              <ul className="space-y-3 text-sm text-zinc-700">
-                <li className="flex gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
-                  Built product solo while consulting with AI teams
-                </li>
-                <li className="flex gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
-                  Deep customer insights from 50+ team interviews
-                </li>
-                <li className="flex gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
-                  Understands enterprise security requirements firsthand
-                </li>
-                <li className="flex gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
-                  Shipped working product with real revenue — solo
-                </li>
-              </ul>
-            </div>
-
-            <div className="space-y-6">
-              <div className="bg-zinc-50/40 border border-zinc-200 rounded-xl p-6">
-                <h4 className="font-semibold mb-3">Why Solo Founder Works Here</h4>
-                <ul className="space-y-2 text-sm text-zinc-500">
-                  <li className="flex gap-2">
-                    <Zap className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
-                    Faster iteration than big teams — ship weekly
+                <ul className="space-y-3 text-sm text-zinc-400">
+                  <li className="flex gap-3">
+                    <CheckCircle2 className="h-4 w-4 text-purple-400 shrink-0 mt-0.5" />
+                    <span>Built entire product solo — frontend, backend, extension, infra</span>
                   </li>
-                  <li className="flex gap-2">
-                    <Users className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
-                    Stay close to customers — handles support personally
+                  <li className="flex gap-3">
+                    <CheckCircle2 className="h-4 w-4 text-purple-400 shrink-0 mt-0.5" />
+                    <span>$0 to $12K MRR with zero funding, zero marketing spend</span>
                   </li>
-                  <li className="flex gap-2">
-                    <DollarSign className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
-                    Capital efficient — $0 to $12K MRR with no funding
+                  <li className="flex gap-3">
+                    <CheckCircle2 className="h-4 w-4 text-purple-400 shrink-0 mt-0.5" />
+                    <span>Deep customer insights from 50+ team interviews</span>
                   </li>
-                  <li className="flex gap-2">
-                    <Rocket className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
-                    Proven ability to ship and iterate on complex systems
+                  <li className="flex gap-3">
+                    <CheckCircle2 className="h-4 w-4 text-purple-400 shrink-0 mt-0.5" />
+                    <span>Ships weekly. Handles support personally. Close to every customer.</span>
                   </li>
                 </ul>
               </div>
+            </RevealText>
 
-              <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-6">
-                <h4 className="font-semibold mb-2 text-emerald-300">First Hire (With Funding)</h4>
-                <p className="text-sm text-zinc-500">
-                  Part-time security engineer for enterprise features (SSO/SAML, SCIM provisioning, SOC 2 certification).
+            <RevealText delay={350} className="sm:col-span-2 space-y-4">
+              <div className="glow-card rounded-xl p-5">
+                <h4 className="font-bold text-sm mb-3">Why solo works here</h4>
+                <div className="space-y-2.5">
+                  {[
+                    { icon: Zap, text: "Faster iteration — ships weekly" },
+                    { icon: Users, text: "Close to customers" },
+                    { icon: DollarSign, text: "Capital efficient execution" },
+                    { icon: Rocket, text: "Proven ability to ship complex systems" },
+                  ].map((item) => (
+                    <div key={item.text} className="flex gap-2 items-start text-xs text-zinc-500">
+                      <item.icon className="h-3.5 w-3.5 text-amber-400 shrink-0 mt-0.5" />
+                      <span>{item.text}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="glow-card-emerald rounded-xl p-5">
+                <h4 className="font-bold text-sm text-emerald-400 mb-2">First hire (with funding)</h4>
+                <p className="text-xs text-zinc-500 leading-relaxed">
+                  Part-time security engineer for enterprise features — SSO/SAML, SCIM, SOC 2 certification.
                 </p>
               </div>
-            </div>
+            </RevealText>
           </div>
         </div>
       </div>
 
       {/* ═══════════════════════════════════════════════════════════
-          SLIDE 11: THE ASK
+          SLIDE 11: THE ASK + LOUISIANA LEB
       ═══════════════════════════════════════════════════════════ */}
       <div {...slideProps(10)}>
-        <div className="max-w-5xl mx-auto space-y-10">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-widest text-blue-400 mb-3">
+        <div className="absolute inset-0 grain-overlay" />
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-amber-500/0 via-amber-500/50 to-amber-500/0" />
+
+        <div className="relative z-10 max-w-5xl mx-auto space-y-10">
+          <RevealText>
+            <p className="text-xs font-bold uppercase tracking-[0.3em] text-amber-400/80 mb-4">
               The Ask
             </p>
-            <h2 className="text-4xl sm:text-5xl font-bold">
-              $100K for Smart Growth
+            <h2 className="text-4xl sm:text-6xl font-black tracking-tight">
+              <span className="gradient-text">$100K</span> pre-seed.
             </h2>
-            <p className="mt-3 text-lg text-zinc-500">Pre-seed round. Capital efficient.</p>
-          </div>
+            <p className="mt-3 text-lg text-zinc-500">Capital efficient. Revenue generating. Tax credit eligible.</p>
+          </RevealText>
 
-          <div className="grid sm:grid-cols-2 gap-8">
-            {/* Use of funds */}
-            <div className="bg-zinc-50/60 border border-zinc-200 rounded-2xl p-8">
-              <h3 className="font-semibold mb-6 flex items-center gap-2">
-                <Banknote className="h-5 w-5 text-blue-400" />
-                Use of Funds
-              </h3>
-              <div className="space-y-4">
-                {[
-                  { label: "Marketing & Customer Acquisition", amount: "$50K", pct: "50%", color: "bg-blue-500" },
-                  { label: "Enterprise Features & Security", amount: "$25K", pct: "25%", color: "bg-emerald-500" },
-                  { label: "Engineering & Infrastructure", amount: "$15K", pct: "15%", color: "bg-amber-500" },
-                  { label: "Operations & Tools", amount: "$10K", pct: "10%", color: "bg-purple-500" },
-                ].map((item) => (
-                  <div key={item.label}>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="text-zinc-700">{item.label}</span>
-                      <span className="text-zinc-500">
-                        {item.amount} ({item.pct})
-                      </span>
-                    </div>
-                    <div className="h-2 rounded-full bg-zinc-100 overflow-hidden">
-                      <div
-                        className={cn("h-full rounded-full", item.color)}
-                        style={{ width: item.pct }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* 18-month targets */}
-            <div className="bg-zinc-50/60 border border-zinc-200 rounded-2xl p-8">
-              <h3 className="font-semibold mb-6 flex items-center gap-2">
-                <Target className="h-5 w-5 text-emerald-400" />
-                18-Month Targets
-              </h3>
-              <div className="space-y-6">
-                {[
-                  { metric: "Active Users", from: "1,200", to: "5,000" },
-                  { metric: "MRR", from: "$12K", to: "$75K" },
-                  { metric: "Paying Teams", from: "85", to: "200" },
-                  { metric: "ARR Run Rate", from: "$144K", to: "$900K" },
-                ].map((t) => (
-                  <div key={t.metric} className="flex items-center gap-3">
-                    <div className="flex-1">
-                      <p className="text-xs text-zinc-500">{t.metric}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-sm text-zinc-500">{t.from}</span>
-                        <ArrowRight className="h-3 w-3 text-blue-400" />
-                        <span className="text-lg font-bold text-emerald-400">{t.to}</span>
+          <div className="grid sm:grid-cols-2 gap-6">
+            <RevealText delay={200}>
+              <div className="glow-card rounded-2xl p-7 h-full">
+                <div className="flex items-center gap-2 mb-6">
+                  <Banknote className="h-5 w-5 text-amber-400" />
+                  <h3 className="font-bold">Use of Funds</h3>
+                </div>
+                <div className="space-y-4">
+                  {[
+                    { label: "Marketing & Acquisition", amount: "$50K", pct: "50%", color: "from-amber-500 to-amber-400" },
+                    { label: "Enterprise Features", amount: "$25K", pct: "25%", color: "from-blue-500 to-blue-400" },
+                    { label: "Engineering & Infra", amount: "$15K", pct: "15%", color: "from-emerald-500 to-emerald-400" },
+                    { label: "Operations", amount: "$10K", pct: "10%", color: "from-purple-500 to-purple-400" },
+                  ].map((item) => (
+                    <div key={item.label}>
+                      <div className="flex justify-between text-xs mb-1.5">
+                        <span className="text-zinc-400">{item.label}</span>
+                        <span className="text-zinc-500 font-mono">{item.amount}</span>
+                      </div>
+                      <div className="h-2 rounded-full bg-white/[0.03] overflow-hidden">
+                        <div
+                          className={cn("h-full rounded-full bg-gradient-to-r", item.color)}
+                          style={{ width: item.pct }}
+                        />
                       </div>
                     </div>
+                  ))}
+                </div>
+              </div>
+            </RevealText>
+
+            <RevealText delay={350}>
+              <div className="glow-card-amber rounded-2xl p-7 h-full relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-[60px]" />
+                <div className="relative">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Award className="h-5 w-5 text-amber-400" />
+                    <h3 className="font-bold">Louisiana LEB Tax Credit</h3>
                   </div>
-                ))}
-              </div>
-              <div className="mt-6 pt-4 border-t border-zinc-200">
-                <p className="text-xs text-zinc-500">
-                  $75K MRR = $900K ARR <ArrowRight className="inline h-3 w-3 text-blue-400 mx-1" />
-                  Strong seed round position
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-blue-500/5 border border-blue-500/20 rounded-xl p-6 text-center">
-            <p className="text-sm text-zinc-700">
-              <span className="text-blue-400 font-semibold">Runway: 12-18 months</span> to profitability.
-              We&apos;re not asking for millions to figure things out. We&apos;re asking for $100K to accelerate what&apos;s already working.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* ═══════════════════════════════════════════════════════════
-          SLIDE 12: INVESTOR Q&A + CLOSING
-      ═══════════════════════════════════════════════════════════ */}
-      <div {...slideProps(11)}>
-        <div className="max-w-5xl mx-auto space-y-10">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-widest text-blue-400 mb-3">
-              Q&A & Vision
-            </p>
-            <h2 className="text-4xl sm:text-5xl font-bold">
-              Anticipated Questions
-            </h2>
-          </div>
-
-          <div className="grid sm:grid-cols-2 gap-4">
-            {[
-              {
-                q: "Why won't ChatGPT just build this?",
-                a: "ChatGPT focuses on models, not workflow management. We're the governance layer across ALL AI tools. GitHub exists alongside programming languages for the same reason.",
-                icon: Brain,
-              },
-              {
-                q: "How do you compete with free solutions?",
-                a: "Free solutions lack security, multi-AI integration, and analytics. Teams pay for consistency, compliance, and audit trails — not just storage.",
-                icon: Briefcase,
-              },
-              {
-                q: "Why not raise more money?",
-                a: "We're capital efficient. $100K gives us 18 months to hit $75K MRR, positioning us for a larger seed round on strong terms.",
-                icon: DollarSign,
-              },
-              {
-                q: "What's your biggest risk?",
-                a: "Execution risk — but we've proven we can ship and acquire customers with zero marketing spend. The product is live with paying customers.",
-                icon: AlertTriangle,
-              },
-              {
-                q: "What if AI tools add prompt libraries?",
-                a: "They'll optimize for their own platform. We're the cross-platform standard — like 1Password works across browsers. Teams use 2+ AI tools on average.",
-                icon: Puzzle,
-              },
-              {
-                q: "How defensible is the extension?",
-                a: "Each AI tool requires unique DOM integration, auth bridge, and injection logic. We maintain compatibility across 5 platforms with different update cycles. It's a deep technical moat.",
-                icon: Code2,
-              },
-              {
-                q: "Can this scale without a big team?",
-                a: "Architecture is serverless (Vercel + Supabase). Infra auto-scales. The extension runs client-side. We can serve 100K users on current infrastructure with minimal cost increase.",
-                icon: Server,
-              },
-              {
-                q: "What about enterprise sales cycles?",
-                a: "We start bottom-up: one team member installs the extension, team adopts, then org upgrades. No enterprise sales needed — it's a product-led motion like Slack and Notion.",
-                icon: Building2,
-              },
-            ].map((faq) => (
-              <div key={faq.q} className="bg-zinc-50/60 border border-zinc-200 rounded-xl p-5">
-                <div className="flex items-start gap-3">
-                  <faq.icon className="h-5 w-5 text-blue-400 shrink-0 mt-0.5" />
-                  <div>
-                    <p className="font-medium text-sm text-zinc-200">{faq.q}</p>
-                    <p className="text-xs text-zinc-500 mt-2 leading-relaxed">{faq.a}</p>
+                  <div className="space-y-4">
+                    <p className="text-sm text-zinc-400 leading-relaxed">
+                      TeamPrompt qualifies for the <span className="text-amber-400 font-semibold">Louisiana Enterprise Zone / LEB program</span>.
+                      Investors receive a <span className="text-amber-400 font-semibold">25% state tax credit</span> on their investment.
+                    </p>
+                    <div className="glow-card rounded-xl p-5 space-y-3">
+                      <div className="flex justify-between items-baseline">
+                        <span className="text-xs text-zinc-500">Investment</span>
+                        <span className="text-lg font-black">$100,000</span>
+                      </div>
+                      <div className="flex justify-between items-baseline">
+                        <span className="text-xs text-zinc-500">Tax credit (25%)</span>
+                        <span className="text-lg font-black text-emerald-400">−$25,000</span>
+                      </div>
+                      <div className="border-t border-white/10 pt-3 flex justify-between items-baseline">
+                        <span className="text-xs text-amber-400 font-bold uppercase tracking-wider">Effective cost</span>
+                        <span className="text-2xl font-black text-amber-400">$75,000</span>
+                      </div>
+                    </div>
+                    <p className="text-[11px] text-zinc-600 leading-relaxed">
+                      Louisiana Economic Development program designed to incentivize investment in Louisiana-based technology startups.
+                    </p>
                   </div>
                 </div>
               </div>
-            ))}
+            </RevealText>
           </div>
 
-          {/* Risk assessment */}
-          <div className="bg-zinc-50/40 border border-zinc-200 rounded-xl p-6">
-            <h3 className="font-semibold text-sm mb-4 text-zinc-500 uppercase tracking-wider">Risk Assessment</h3>
+          <RevealText delay={500}>
+            <div className="glow-card rounded-xl p-5 text-center">
+              <p className="text-sm text-zinc-400">
+                <span className="text-amber-400 font-bold">Runway: 12–18 months</span> to profitability.
+                Not asking for millions to figure things out — accelerating what&apos;s already working.
+              </p>
+            </div>
+          </RevealText>
+        </div>
+      </div>
+
+      {/* ═══════════════════════════════════════════════════════════
+          SLIDE 12: GROWTH PLAN — 18 MONTH TARGETS
+      ═══════════════════════════════════════════════════════════ */}
+      <div {...slideProps(11)}>
+        <div className="absolute inset-0 grain-overlay" />
+
+        <div className="relative z-10 max-w-5xl mx-auto space-y-10">
+          <RevealText>
+            <p className="text-xs font-bold uppercase tracking-[0.3em] text-emerald-400/80 mb-4">
+              Growth Plan
+            </p>
+            <h2 className="text-4xl sm:text-5xl font-black tracking-tight">
+              18-Month Targets
+            </h2>
+          </RevealText>
+
+          <RevealText delay={200}>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               {[
-                { risk: "Technical", level: "Low", reason: "Product works, scales, ships weekly" },
-                { risk: "Market", level: "Low", reason: "Paying customers, growing 40% MoM" },
-                { risk: "Team", level: "Low", reason: "Proven solo execution to revenue" },
-                { risk: "Capital", level: "Low", reason: "18-month runway to profitability" },
-              ].map((r) => (
-                <div key={r.risk} className="text-center">
-                  <p className="text-xs text-zinc-500">{r.risk} Risk</p>
-                  <p className="text-emerald-400 font-bold text-lg mt-1">{r.level}</p>
-                  <p className="text-[10px] text-zinc-600 mt-1">{r.reason}</p>
+                { metric: "Active Users", from: "1,200", to: "5,000", icon: Users },
+                { metric: "MRR", from: "$12K", to: "$75K", icon: TrendingUp },
+                { metric: "Paying Teams", from: "85", to: "200", icon: Building2 },
+                { metric: "ARR Run Rate", from: "$144K", to: "$900K", icon: DollarSign },
+              ].map((t) => (
+                <div key={t.metric} className="glow-card rounded-xl p-5 text-center">
+                  <t.icon className="h-4 w-4 text-zinc-600 mx-auto mb-2" />
+                  <p className="text-[10px] text-zinc-500 uppercase tracking-widest mb-2">{t.metric}</p>
+                  <div className="flex items-center justify-center gap-2">
+                    <span className="text-xs text-zinc-600 font-mono">{t.from}</span>
+                    <ArrowRight className="h-3 w-3 text-emerald-400" />
+                    <span className="text-lg font-black text-emerald-400">{t.to}</span>
+                  </div>
                 </div>
               ))}
             </div>
-          </div>
+          </RevealText>
 
-          {/* Vision */}
-          <div className="bg-gradient-to-br from-blue-500/10 to-blue-900/10 border border-blue-500/20 rounded-2xl p-8 text-center space-y-6">
-            <h3 className="text-2xl font-bold">The Vision</h3>
-            <div className="grid sm:grid-cols-2 gap-6 text-left max-w-2xl mx-auto">
-              <div className="bg-zinc-950/50 rounded-xl p-5">
-                <p className="text-xs text-blue-400 font-semibold uppercase tracking-wider mb-2">Phase 1 — Next 18 Months</p>
-                <p className="text-sm text-zinc-700">
-                  Become the go-to prompt management tool for teams of 10-100 people in regulated industries.
+          <RevealText delay={350}>
+            <div className="glow-card rounded-2xl p-7">
+              <h3 className="font-bold text-xs uppercase tracking-widest text-zinc-500 mb-6">Investor FAQ</h3>
+              <div className="grid sm:grid-cols-2 gap-4">
+                {[
+                  {
+                    q: "How do you compete with free solutions?",
+                    a: "Free solutions lack security, multi-AI integration, and analytics. Teams pay for compliance and consistency.",
+                    icon: Briefcase,
+                  },
+                  {
+                    q: "Why not raise more money?",
+                    a: "Capital efficient. $100K gives us 18 months to $75K MRR — a strong seed round position.",
+                    icon: DollarSign,
+                  },
+                  {
+                    q: "What's your biggest risk?",
+                    a: "Execution risk — mitigated by 6 months of proven shipping, paying customers, and 40% MoM growth.",
+                    icon: AlertTriangle,
+                  },
+                  {
+                    q: "Can this scale without a big team?",
+                    a: "Serverless architecture. Extension runs client-side. Can serve 100K users with minimal cost increase.",
+                    icon: Server,
+                  },
+                  {
+                    q: "How defensible is the extension?",
+                    a: "5 different AI tools, each with unique DOM integration. Deep technical moat with constant platform updates.",
+                    icon: Code2,
+                  },
+                  {
+                    q: "Enterprise sales cycles?",
+                    a: "Product-led: one person installs, team adopts, org upgrades. No enterprise sales needed. Slack/Notion playbook.",
+                    icon: Building2,
+                  },
+                ].map((faq) => (
+                  <div key={faq.q} className="flex gap-3">
+                    <faq.icon className="h-4 w-4 text-zinc-600 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-semibold text-xs text-zinc-300">{faq.q}</p>
+                      <p className="text-[11px] text-zinc-500 mt-1 leading-relaxed">{faq.a}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </RevealText>
+
+          <RevealText delay={500}>
+            <p className="text-center text-xs text-zinc-600 font-mono">
+              $75K MRR = $900K ARR → Strong seed round position
+            </p>
+          </RevealText>
+        </div>
+      </div>
+
+      {/* ═══════════════════════════════════════════════════════════
+          SLIDE 13: VISION — CLOSING
+      ═══════════════════════════════════════════════════════════ */}
+      <div {...slideProps(12)}>
+        <div className="absolute inset-0 grain-overlay" />
+        <div className="absolute top-1/3 left-1/3 w-[500px] h-[500px] bg-amber-500/5 rounded-full blur-[150px]" />
+        <div className="absolute bottom-1/3 right-1/3 w-[400px] h-[400px] bg-blue-500/5 rounded-full blur-[120px]" />
+
+        <div className="relative z-10 max-w-4xl mx-auto text-center space-y-12">
+          <RevealText>
+            <div className="space-y-6">
+              <p className="text-xs font-bold uppercase tracking-[0.3em] text-amber-400/80">
+                The Vision
+              </p>
+              <h2 className="text-5xl sm:text-7xl font-black leading-[0.85] tracking-tighter">
+                The control plane<br />
+                for how teams<br />
+                <span className="gradient-text">use AI.</span>
+              </h2>
+            </div>
+          </RevealText>
+
+          <RevealText delay={200}>
+            <div className="grid sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
+              <div className="glow-card rounded-xl p-6 text-left">
+                <p className="text-[10px] text-amber-400 font-bold uppercase tracking-widest mb-2">
+                  Phase 1 — Next 18 months
+                </p>
+                <p className="text-sm text-zinc-400 leading-relaxed">
+                  The go-to prompt management tool for teams of 10–100 in regulated industries.
                 </p>
               </div>
-              <div className="bg-zinc-950/50 rounded-xl p-5">
-                <p className="text-xs text-blue-400 font-semibold uppercase tracking-wider mb-2">Phase 2 — Future</p>
-                <p className="text-sm text-zinc-700">
+              <div className="glow-card rounded-xl p-6 text-left">
+                <p className="text-[10px] text-blue-400 font-bold uppercase tracking-widest mb-2">
+                  Phase 2 — Future
+                </p>
+                <p className="text-sm text-zinc-400 leading-relaxed">
                   Platform for AI workflow orchestration — the control plane for how organizations use AI.
                 </p>
               </div>
             </div>
+          </RevealText>
 
-            <div className="pt-4 border-t border-zinc-200">
-              <p className="text-lg text-zinc-700 leading-relaxed max-w-2xl mx-auto">
-                &ldquo;I built this because I lived this problem. Customers are already paying.
-                With <span className="text-blue-400 font-semibold">$100K</span>, we accelerate what&apos;s already working.&rdquo;
-              </p>
+          <RevealText delay={400}>
+            <div className="max-w-2xl mx-auto border-t border-white/5 pt-10">
+              <blockquote className="text-xl sm:text-2xl text-zinc-300 leading-relaxed font-light">
+                &ldquo;I built this because I lived this problem.
+                <br className="hidden sm:block" />
+                Customers are already paying.
+                <br className="hidden sm:block" />
+                With <span className="text-amber-400 font-bold">$100K</span>, we accelerate what&apos;s already working.&rdquo;
+              </blockquote>
+              <p className="text-sm text-zinc-500 mt-4">— Kade Cooper, Founder</p>
             </div>
+          </RevealText>
 
-            <div className="flex items-center justify-center gap-4">
-              <Image
-                src="/brand/logo-icon-blue.svg"
-                alt="TeamPrompt"
-                width={40}
-                height={40}
-                className="rounded-lg"
-              />
+          <RevealText delay={600}>
+            <div className="flex items-center justify-center gap-4 pt-4">
+              <div className="relative">
+                <Image
+                  src="/brand/logo-icon-blue.svg"
+                  alt="TeamPrompt"
+                  width={48}
+                  height={48}
+                  className="rounded-xl"
+                />
+                <div className="absolute -inset-1.5 bg-blue-500/15 rounded-xl blur-md -z-10" />
+              </div>
               <div className="text-left">
-                <p className="font-bold">TeamPrompt</p>
+                <p className="font-black text-lg">TeamPrompt</p>
                 <p className="text-xs text-zinc-500">teamprompt.app</p>
               </div>
             </div>
-          </div>
+          </RevealText>
         </div>
       </div>
 

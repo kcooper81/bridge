@@ -1140,9 +1140,9 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               {[
                 { metric: "Active Users", from: "1,200", to: "5,000", icon: Users },
-                { metric: "MRR", from: "$13.5K", to: "$82K", icon: TrendingUp },
+                { metric: "MRR", from: "$13.5K", to: "$50K", icon: TrendingUp },
                 { metric: "Paying Teams", from: "85", to: "200", icon: Building2 },
-                { metric: "ARR Run Rate", from: "$162K", to: "$984K", icon: DollarSign },
+                { metric: "ARR Run Rate", from: "$162K", to: "$600K", icon: DollarSign },
               ].map((t) => (
                 <div key={t.metric} className="bg-white rounded-xl border border-zinc-200 shadow-sm p-5 text-center">
                   <t.icon className="h-4 w-4 text-zinc-400 mx-auto mb-2" />
@@ -1169,7 +1169,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
                   },
                   {
                     q: "Why not raise more money?",
-                    a: "Capital efficient. $100K gives us 18 months to $82K MRR — a strong seed round position.",
+                    a: "Capital efficient. $100K gives us 18 months to $50K MRR — a strong seed round position.",
                     icon: DollarSign,
                   },
                   {
@@ -1207,7 +1207,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
 
           <RevealText delay={500}>
             <p className="text-center text-sm text-zinc-400 font-mono">
-              $82K MRR = $984K ARR → Strong seed round position
+              $50K MRR = $600K ARR → Strong seed round position
             </p>
           </RevealText>
         </div>

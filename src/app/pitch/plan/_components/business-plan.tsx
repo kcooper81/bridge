@@ -21,56 +21,63 @@ import {
 } from "lucide-react";
 
 // ─── Proforma data (18 months) — two scenarios ─────────────────
+// Stripe fees = 3.5% of MRR (2.9% + $0.30 blended)
+// Opex = infra ($50-200) + people + marketing (funded only)
 
-// Organic-only: no paid marketing, slower growth from SEO + Chrome Store + WOM
+// Organic-only: no paid marketing, no marketing contractor
+// Growth: ~7-8% MoM slowing to ~4-5% (SEO + Chrome Store + WOM)
+// People: support person M4+ ($2,500), security engineer M7+ ($4,500)
 const PROFORMA_ORGANIC = [
-  { month: "M1",  mrr: 13500,  opex: 2050,  stripe: 473 },
-  { month: "M2",  mrr: 14500,  opex: 2050,  stripe: 508 },
-  { month: "M3",  mrr: 15500,  opex: 2550,  stripe: 543 },
-  { month: "M4",  mrr: 17000,  opex: 4550,  stripe: 595 },
-  { month: "M5",  mrr: 18500,  opex: 4550,  stripe: 648 },
-  { month: "M6",  mrr: 20000,  opex: 4560,  stripe: 700 },
-  { month: "M7",  mrr: 22000,  opex: 9060,  stripe: 770 },
-  { month: "M8",  mrr: 24000,  opex: 9110,  stripe: 840 },
-  { month: "M9",  mrr: 26000,  opex: 9160,  stripe: 910 },
-  { month: "M10", mrr: 28500,  opex: 9660,  stripe: 998 },
-  { month: "M11", mrr: 31000,  opex: 9660,  stripe: 1085 },
-  { month: "M12", mrr: 33500,  opex: 9660,  stripe: 1173 },
-  { month: "M13", mrr: 36000,  opex: 10160, stripe: 1260 },
-  { month: "M14", mrr: 38500,  opex: 10160, stripe: 1348 },
-  { month: "M15", mrr: 41000,  opex: 10160, stripe: 1435 },
-  { month: "M16", mrr: 43000,  opex: 10160, stripe: 1505 },
-  { month: "M17", mrr: 45000,  opex: 10160, stripe: 1575 },
-  { month: "M18", mrr: 47000,  opex: 10160, stripe: 1645 },
+  { month: "M1",  mrr: 13500,  opex: 2000,  stripe: 473 },
+  { month: "M2",  mrr: 14600,  opex: 2000,  stripe: 511 },
+  { month: "M3",  mrr: 15700,  opex: 2000,  stripe: 550 },
+  { month: "M4",  mrr: 16900,  opex: 4500,  stripe: 592 },
+  { month: "M5",  mrr: 18200,  opex: 4500,  stripe: 637 },
+  { month: "M6",  mrr: 19600,  opex: 4500,  stripe: 686 },
+  { month: "M7",  mrr: 21000,  opex: 9000,  stripe: 735 },
+  { month: "M8",  mrr: 22500,  opex: 9000,  stripe: 788 },
+  { month: "M9",  mrr: 24000,  opex: 9000,  stripe: 840 },
+  { month: "M10", mrr: 25500,  opex: 9000,  stripe: 893 },
+  { month: "M11", mrr: 27000,  opex: 9000,  stripe: 945 },
+  { month: "M12", mrr: 28500,  opex: 9000,  stripe: 998 },
+  { month: "M13", mrr: 30000,  opex: 9500,  stripe: 1050 },
+  { month: "M14", mrr: 31500,  opex: 9500,  stripe: 1103 },
+  { month: "M15", mrr: 33000,  opex: 9500,  stripe: 1155 },
+  { month: "M16", mrr: 34500,  opex: 9500,  stripe: 1208 },
+  { month: "M17", mrr: 36000,  opex: 9500,  stripe: 1260 },
+  { month: "M18", mrr: 37500,  opex: 9500,  stripe: 1313 },
 ];
 
-// With paid marketing: ad spend accelerates acquisition, faster growth
+// With paid marketing: ad spend + marketing contractor accelerate acquisition
+// Growth: ~15-20% MoM (M3-6) as ads kick in, moderating to 5-8% by M13+
+// People: marketing contractor M2+ ($3,500), support M4+ ($2,500→$3,000),
+//         security engineer M7+ ($4,500), ad spend M2+ ($2K→$7K)
 const PROFORMA_FUNDED = [
-  { month: "M1",  mrr: 13500,  opex: 2050,  stripe: 473 },
-  { month: "M2",  mrr: 15500,  opex: 3050,  stripe: 543 },
-  { month: "M3",  mrr: 18000,  opex: 3550,  stripe: 630 },
-  { month: "M4",  mrr: 21000,  opex: 7550,  stripe: 735 },
-  { month: "M5",  mrr: 25000,  opex: 7560,  stripe: 875 },
-  { month: "M6",  mrr: 30000,  opex: 10560, stripe: 1050 },
-  { month: "M7",  mrr: 34000,  opex: 14560, stripe: 1190 },
-  { month: "M8",  mrr: 38000,  opex: 14610, stripe: 1330 },
-  { month: "M9",  mrr: 42000,  opex: 14660, stripe: 1470 },
-  { month: "M10", mrr: 47000,  opex: 15160, stripe: 1645 },
-  { month: "M11", mrr: 53000,  opex: 15660, stripe: 1855 },
-  { month: "M12", mrr: 58000,  opex: 16160, stripe: 2030 },
-  { month: "M13", mrr: 62000,  opex: 16660, stripe: 2170 },
-  { month: "M14", mrr: 66000,  opex: 17160, stripe: 2310 },
-  { month: "M15", mrr: 69000,  opex: 17160, stripe: 2415 },
-  { month: "M16", mrr: 71000,  opex: 17160, stripe: 2485 },
-  { month: "M17", mrr: 73000,  opex: 17160, stripe: 2555 },
-  { month: "M18", mrr: 75000,  opex: 17160, stripe: 2625 },
+  { month: "M1",  mrr: 13500,  opex: 2000,  stripe: 473 },
+  { month: "M2",  mrr: 15500,  opex: 7500,  stripe: 543 },
+  { month: "M3",  mrr: 18000,  opex: 9000,  stripe: 630 },
+  { month: "M4",  mrr: 21000,  opex: 13000, stripe: 735 },
+  { month: "M5",  mrr: 25000,  opex: 13000, stripe: 875 },
+  { month: "M6",  mrr: 30000,  opex: 13000, stripe: 1050 },
+  { month: "M7",  mrr: 34500,  opex: 20000, stripe: 1208 },
+  { month: "M8",  mrr: 39000,  opex: 20000, stripe: 1365 },
+  { month: "M9",  mrr: 43500,  opex: 20000, stripe: 1523 },
+  { month: "M10", mrr: 48000,  opex: 20500, stripe: 1680 },
+  { month: "M11", mrr: 52500,  opex: 20500, stripe: 1838 },
+  { month: "M12", mrr: 57000,  opex: 21000, stripe: 1995 },
+  { month: "M13", mrr: 61000,  opex: 21500, stripe: 2135 },
+  { month: "M14", mrr: 64500,  opex: 21500, stripe: 2258 },
+  { month: "M15", mrr: 67500,  opex: 21500, stripe: 2363 },
+  { month: "M16", mrr: 70000,  opex: 21500, stripe: 2450 },
+  { month: "M17", mrr: 72500,  opex: 21500, stripe: 2538 },
+  { month: "M18", mrr: 75000,  opex: 21500, stripe: 2625 },
 ];
 
 // ─── Monthly operating costs at scale tiers ─────────────────────
 
 const COST_BREAKDOWN = {
   current: {
-    label: "Current (~$12K MRR)",
+    label: "Current (~$13.5K MRR)",
     items: [
       { name: "Supabase Pro", cost: 25, note: "" },
       { name: "Vercel Pro", cost: 20, note: "" },
@@ -79,7 +86,7 @@ const COST_BREAKDOWN = {
       { name: "Google Analytics", cost: 0, note: "Free" },
       { name: "LinkedIn Insight Tag", cost: 0, note: "Free" },
       { name: "Domain + DNS", cost: 2, note: "" },
-      { name: "Stripe (2.9% + $0.30)", cost: 380, note: "" },
+      { name: "Stripe (3.5%)", cost: 473, note: "$13,500 x 3.5%" },
     ],
   },
   mid: {
@@ -90,9 +97,11 @@ const COST_BREAKDOWN = {
       { name: "Upstash Redis", cost: 10, note: "" },
       { name: "Resend Pro", cost: 20, note: "" },
       { name: "Domain + DNS", cost: 2, note: "" },
-      { name: "Stripe (2.9% + $0.30)", cost: 1260, note: "" },
-      { name: "Part-Time Support", cost: 2500, note: "" },
-      { name: "Marketing / Ads", cost: 5000, note: "" },
+      { name: "Stripe (3.5%)", cost: 1400, note: "$40,000 x 3.5%" },
+      { name: "Support Person (PT)", cost: 3000, note: "" },
+      { name: "Security Engineer (PT)", cost: 4500, note: "" },
+      { name: "Marketing Contractor", cost: 3500, note: "" },
+      { name: "Ad Spend", cost: 7000, note: "" },
     ],
   },
   scale: {
@@ -103,10 +112,11 @@ const COST_BREAKDOWN = {
       { name: "Upstash Redis", cost: 20, note: "" },
       { name: "Resend Pro", cost: 20, note: "" },
       { name: "Domain + DNS", cost: 2, note: "" },
-      { name: "Stripe (2.9% + $0.30)", cost: 2325, note: "" },
-      { name: "Support Person (PT)", cost: 3500, note: "" },
-      { name: "Security Engineer (PT)", cost: 5000, note: "" },
-      { name: "Marketing / Ads", cost: 7500, note: "" },
+      { name: "Stripe (3.5%)", cost: 2625, note: "$75,000 x 3.5%" },
+      { name: "Support Person (PT)", cost: 3000, note: "" },
+      { name: "Security Engineer (PT)", cost: 4500, note: "" },
+      { name: "Marketing Contractor", cost: 3500, note: "" },
+      { name: "Ad Spend", cost: 7000, note: "" },
       { name: "AI Research Tools", cost: 500, note: "" },
     ],
   },
@@ -200,10 +210,8 @@ export function BusinessPlan({ shareToken }: { shareToken: string }) {
             <Link href={getBackHref()} className="text-zinc-500 hover:text-zinc-900 transition-colors">
               <ArrowLeft className="h-5 w-5" />
             </Link>
-            <div className="flex items-center gap-3">
-              <div className="bg-white rounded-lg p-1.5 shadow-sm">
-                <Image src="/brand/logo-icon.svg" alt="TeamPrompt" width={24} height={24} />
-              </div>
+            <div className="flex items-center gap-2.5">
+              <Image src="/logo.svg" alt="TeamPrompt" width={28} height={28} className="rounded-lg" />
               <div>
                 <p className="font-bold text-sm text-zinc-900">TeamPrompt</p>
                 <p className="text-xs text-zinc-500">Business Plan &amp; Proforma</p>
@@ -258,14 +266,14 @@ export function BusinessPlan({ shareToken }: { shareToken: string }) {
         {/* ═══════════════════════════════════════════
             SECTION 1: 18-MONTH PROFORMA
         ═══════════════════════════════════════════ */}
-        <Section id="proforma" title="18-Month Revenue Proforma" subtitle="Conservative growth trajectory with monthly operating costs">
+        <Section id="proforma" title="18-Month Revenue Proforma" subtitle="Two scenarios: organic growth vs. funded growth with paid marketing">
           {/* Summary cards */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
             {[
-              { label: "Starting MRR", value: "$12K", sub: "Current" },
-              { label: "Organic M18", value: fmt(organicRows[organicRows.length - 1].mrr), sub: "Without paid ads" },
-              { label: "Funded M18", value: fmt(fundedRows[fundedRows.length - 1].mrr), sub: "With paid ads" },
-              { label: "Funded ARR", value: "$900K", sub: "Run rate" },
+              { label: "Starting MRR", value: "$13.5K", sub: "Current" },
+              { label: "Organic M18", value: fmt(organicRows[organicRows.length - 1].mrr), sub: "$450K ARR" },
+              { label: "Funded M18", value: fmt(fundedRows[fundedRows.length - 1].mrr), sub: "$900K ARR" },
+              { label: "M18 Net (Funded)", value: fmt(fundedRows[fundedRows.length - 1].net), sub: "/month" },
             ].map((s) => (
               <Card key={s.label}>
                 <p className="text-xs text-zinc-500 uppercase tracking-widest">{s.label}</p>
@@ -504,7 +512,7 @@ export function BusinessPlan({ shareToken }: { shareToken: string }) {
             {(["current", "mid", "scale"] as const).map((tier) => {
               const data = COST_BREAKDOWN[tier];
               const total = sumCosts(data.items);
-              const revenue = tier === "current" ? 12000 : tier === "mid" ? 40000 : 75000;
+              const revenue = tier === "current" ? 13500 : tier === "mid" ? 40000 : 75000;
               const margin = ((1 - total / revenue) * 100).toFixed(0);
 
               return (
@@ -540,12 +548,13 @@ export function BusinessPlan({ shareToken }: { shareToken: string }) {
             <div className="flex items-start gap-4">
               <DollarSign className="h-6 w-6 text-zinc-500 shrink-0 mt-1" />
               <div>
-                <h4 className="font-bold mb-2 text-zinc-900">Gross Margin: 96-97%</h4>
+                <h4 className="font-bold mb-2 text-zinc-900">Software Gross Margin: 96%+</h4>
                 <p className="text-sm text-zinc-600 leading-relaxed">
                   TeamPrompt has near-zero marginal cost per user. The product stores text data (prompts) in Postgres,
                   the browser extension runs client-side, and there are no server-side AI API costs.
-                  The primary cost at scale is Stripe&apos;s transaction fee (2.9% + $0.30) which is unavoidable
-                  with any payment processor. Infrastructure costs remain under $200/mo even at 6,000 users.
+                  Infrastructure costs (Supabase, Vercel, Redis) stay under $200/mo even at 6,000 users.
+                  Stripe&apos;s 3.5% blended transaction fee is the primary variable cost. People and marketing
+                  are growth investments, not cost-of-goods — the underlying software margin remains 96%+.
                 </p>
               </div>
             </div>
@@ -610,10 +619,11 @@ export function BusinessPlan({ shareToken }: { shareToken: string }) {
                 </thead>
                 <tbody>
                   {[
-                    { phase: "M1-3 (Solo)", mrr: "$13-18K", cost: "$0", pct: "0%" },
-                    { phase: "M4-6 (Support + Marketing)", mrr: "$21-30K", cost: "$5,500", pct: "18-26%" },
-                    { phase: "M7-12 (+ Security Eng)", mrr: "$34-58K", cost: "$11,500", pct: "20-34%" },
-                    { phase: "M13-18 (Full team)", mrr: "$62-75K", cost: "$12,000", pct: "16-19%" },
+                    { phase: "M1 (Solo)", mrr: "$13.5K", cost: "$0", pct: "0%" },
+                    { phase: "M2-3 (+ Mktg contractor)", mrr: "$15.5-18K", cost: "$3,500", pct: "19-23%" },
+                    { phase: "M4-6 (+ Support person)", mrr: "$21-30K", cost: "$9,000", pct: "30-43%" },
+                    { phase: "M7-12 (+ Security eng)", mrr: "$34.5-57K", cost: "$13,500", pct: "24-39%" },
+                    { phase: "M13-18 (Full team)", mrr: "$61-75K", cost: "$13,500", pct: "18-22%" },
                   ].map((row) => (
                     <tr key={row.phase} className="border-b border-zinc-100">
                       <td className="py-2.5 px-3 text-zinc-600">{row.phase}</td>
@@ -881,11 +891,11 @@ export function BusinessPlan({ shareToken }: { shareToken: string }) {
                 <h4 className="font-bold mb-4 text-zinc-900">Runway Analysis</h4>
                 <div className="space-y-3">
                   {[
-                    { metric: "Monthly burn (M1-3)", value: "$3,000", note: "Solo + marketing ramp" },
-                    { metric: "Monthly burn (M4-6)", value: "$8,500", note: "+ Support + marketing" },
-                    { metric: "Monthly burn (M7-12)", value: "$14,000", note: "+ Security engineer" },
-                    { metric: "Cash-flow positive", value: "Month 8-10", note: "Revenue > expenses" },
-                    { metric: "Total runway", value: "12-18 months", note: "Conservative" },
+                    { metric: "Monthly burn (M1)", value: "$2,000", note: "Infra + overhead only" },
+                    { metric: "Monthly burn (M2-3)", value: "$7.5-9K", note: "+ Marketing contractor + ads" },
+                    { metric: "Monthly burn (M4-6)", value: "$13,000", note: "+ Support person" },
+                    { metric: "Monthly burn (M7+)", value: "$20-21.5K", note: "+ Security engineer + ad scale" },
+                    { metric: "Cash-flow positive", value: "Month 1", note: "Revenue > expenses from day 1" },
                   ].map((row) => (
                     <div key={row.metric} className="flex items-baseline justify-between">
                       <div>
@@ -911,28 +921,28 @@ export function BusinessPlan({ shareToken }: { shareToken: string }) {
                 {
                   phase: "Phase 1: Foundation",
                   months: "Month 1-3",
-                  mrr: "$13K to $18K",
-                  focus: "Set up marketing infrastructure, start LinkedIn/Google ad campaigns, hire support person, optimize conversion funnel",
+                  mrr: "$13.5K to $18K",
+                  focus: "Hire marketing contractor, launch LinkedIn/Google ad campaigns, optimize conversion funnel, ramp ad spend",
                   milestone: "$18K MRR, marketing engine running",
                 },
                 {
                   phase: "Phase 2: Accelerate",
                   months: "Month 4-6",
                   mrr: "$21K to $30K",
-                  focus: "Scale paid acquisition, publish case studies, begin enterprise feature development (SSO/SAML), hire security engineer",
-                  milestone: "$30K MRR, enterprise features in beta",
+                  focus: "Hire support person, scale paid acquisition, publish case studies, begin enterprise feature development (SSO/SAML)",
+                  milestone: "$30K MRR, 15-20% MoM growth",
                 },
                 {
                   phase: "Phase 3: Scale",
                   months: "Month 7-12",
-                  mrr: "$34K to $58K",
-                  focus: "Launch Business tier with enterprise features, SOC 2 compliance, expand to larger teams, refine marketing spend",
-                  milestone: "$58K MRR, cash-flow positive",
+                  mrr: "$34.5K to $57K",
+                  focus: "Hire security engineer, launch Business tier with enterprise features, SOC 2 compliance, scale ad spend to $7K/mo",
+                  milestone: "$57K MRR, $50K+/mo net income",
                 },
                 {
                   phase: "Phase 4: Position for Seed",
                   months: "Month 13-18",
-                  mrr: "$62K to $75K",
+                  mrr: "$61K to $75K",
                   focus: "Hit $900K ARR run rate, build case for seed round, explore strategic partnerships, expand internationally",
                   milestone: "$75K MRR / $900K ARR — seed round ready",
                 },
@@ -964,10 +974,8 @@ export function BusinessPlan({ shareToken }: { shareToken: string }) {
 
         {/* Footer */}
         <div className="py-16 text-center space-y-4">
-          <div className="flex items-center justify-center gap-3">
-            <div className="bg-white rounded-lg p-1.5 shadow-sm">
-              <Image src="/brand/logo-icon.svg" alt="TeamPrompt" width={28} height={28} />
-            </div>
+          <div className="flex items-center justify-center gap-2.5">
+            <Image src="/logo.svg" alt="TeamPrompt" width={28} height={28} className="rounded-lg" />
             <div className="text-left">
               <p className="font-bold text-zinc-900">TeamPrompt</p>
               <p className="text-xs text-zinc-500">teamprompt.app</p>

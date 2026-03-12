@@ -155,14 +155,6 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
         !isScrollMode && "h-screen overflow-hidden"
       )}
     >
-      {/* ─── CSS animations ─── */}
-      <style jsx global>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-12px); }
-        }
-      `}</style>
-
       {/* ─── Navigation overlay ─── */}
       {!isScrollMode && (
         <>
@@ -243,22 +235,18 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
 
         <div className="relative z-10 max-w-5xl mx-auto text-center space-y-8 pt-8">
           <RevealText>
-            <div className="flex justify-center">
-              <div className="relative bg-white rounded-2xl p-3 shadow-md border border-zinc-200">
-                <Image
-                  src="/brand/logo-icon.svg"
-                  alt="TeamPrompt"
-                  width={56}
-                  height={56}
-                />
-              </div>
+            <div className="flex items-center justify-center gap-3">
+              <Image
+                src="/logo.svg"
+                alt="TeamPrompt"
+                width={48}
+                height={48}
+                className="rounded-lg"
+              />
+              <h1 className="text-5xl sm:text-7xl font-bold tracking-tight leading-[0.85]">
+                TeamPrompt
+              </h1>
             </div>
-          </RevealText>
-
-          <RevealText delay={150}>
-            <h1 className="text-5xl sm:text-7xl font-black tracking-tighter leading-[0.85]">
-              Team<span className="text-blue-600">Prompt</span>
-            </h1>
           </RevealText>
 
           <RevealText delay={300}>
@@ -302,7 +290,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
           </RevealText>
 
           {!isScrollMode && (
-            <button onClick={next} className="animate-bounce mt-2" style={{ animation: "float 2s ease-in-out infinite" }}>
+            <button onClick={next} className="animate-bounce mt-2">
               <ChevronDown className="h-5 w-5 text-zinc-400 mx-auto" />
             </button>
           )}
@@ -313,16 +301,16 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
           SLIDE 2: THE PROBLEM
       ═══════════════════════════════════════════════════════════ */}
       <div {...slideProps(1)}>
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500/0 via-red-500/50 to-red-500/0" />
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500/0 via-blue-500/50 to-blue-500/0" />
 
         <div className="relative z-10 max-w-5xl mx-auto space-y-8">
           <RevealText>
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-red-600/80 mb-4">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-600 mb-4">
               The Problem
             </p>
-            <h2 className="text-3xl sm:text-4xl font-black leading-tight tracking-tight">
+            <h2 className="text-3xl sm:text-4xl font-black leading-tight tracking-tight text-zinc-900">
               Your team is<br />
-              <span className="text-red-600">bleeding AI productivity.</span>
+              <span className="text-zinc-500">bleeding AI productivity.</span>
             </h2>
           </RevealText>
 
@@ -404,13 +392,13 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
 
         <div className="relative z-10 max-w-5xl mx-auto space-y-8">
           <RevealText>
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-600/80 mb-4">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-600 mb-4">
               The Solution
             </p>
-            <h2 className="text-3xl sm:text-4xl font-black leading-tight tracking-tight">
+            <h2 className="text-3xl sm:text-4xl font-black leading-tight tracking-tight text-zinc-900">
               One shared library.<br />
               Every AI tool.<br />
-              <span className="text-blue-600">Complete governance.</span>
+              <span className="text-zinc-500">Complete governance.</span>
             </h2>
           </RevealText>
 
@@ -486,11 +474,12 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
         <div className="relative z-10 max-w-5xl mx-auto space-y-8">
           <RevealText>
             <div className="text-center">
-              <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-600/80 mb-4">
+              <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-600 mb-4">
                 The Product
               </p>
-              <h2 className="text-3xl sm:text-4xl font-black leading-tight tracking-tight">
-                Built. Shipped. <span className="text-blue-600">Live.</span>
+              <h2 className="text-3xl sm:text-4xl font-black leading-tight tracking-tight text-zinc-900">
+                Built. Shipped.<br />
+                <span className="text-zinc-500">Live.</span>
               </h2>
             </div>
           </RevealText>
@@ -525,16 +514,16 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
           SLIDE 5: WHY NOW — MARKET TIMING
       ═══════════════════════════════════════════════════════════ */}
       <div {...slideProps(4)}>
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500/0 via-emerald-500/50 to-emerald-500/0" />
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500/0 via-blue-500/50 to-blue-500/0" />
 
         <div className="relative z-10 max-w-5xl mx-auto space-y-8">
           <RevealText>
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-emerald-600/80 mb-4">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-600 mb-4">
               Market Opportunity
             </p>
-            <h2 className="text-3xl sm:text-4xl font-black leading-tight tracking-tight">
+            <h2 className="text-3xl sm:text-4xl font-black leading-tight tracking-tight text-zinc-900">
               $50B market.<br />
-              <span className="text-emerald-600">No one owns AI governance for teams.</span>
+              <span className="text-zinc-500">No one owns AI governance for teams.</span>
             </h2>
           </RevealText>
 
@@ -546,7 +535,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
                 { value: "3x", label: "AI adoption growth since 2023", source: "Gartner" },
               ].map((s) => (
                 <div key={s.label} className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-6 text-center">
-                  <p className="text-4xl sm:text-5xl font-black text-emerald-600">{s.value}</p>
+                  <p className="text-4xl sm:text-5xl font-black text-blue-600">{s.value}</p>
                   <p className="text-sm text-zinc-700 mt-2">{s.label}</p>
                   <p className="text-xs text-zinc-400 mt-1">{s.source}</p>
                 </div>
@@ -611,12 +600,12 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
 
         <div className="relative z-10 max-w-5xl mx-auto space-y-8">
           <RevealText>
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-600/80 mb-4">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-600 mb-4">
               Competitive Edge
             </p>
-            <h2 className="text-4xl sm:text-5xl font-black leading-[0.95] tracking-tight">
+            <h2 className="text-4xl sm:text-5xl font-black leading-[0.95] tracking-tight text-zinc-900">
               They sell AI access.<br />
-              <span className="text-blue-600">We sell AI governance.</span>
+              <span className="text-zinc-500">We sell AI governance.</span>
             </h2>
           </RevealText>
 
@@ -710,12 +699,11 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
       <div {...slideProps(6)}>
         <div className="relative z-10 max-w-5xl mx-auto space-y-8">
           <RevealText>
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-600/80 mb-4">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-600 mb-4">
               Business Model
             </p>
-            <h2 className="text-3xl sm:text-4xl font-black leading-tight tracking-tight">
-              Freemium SaaS.
-              <br />
+            <h2 className="text-3xl sm:text-4xl font-black leading-tight tracking-tight text-zinc-900">
+              Freemium SaaS.<br />
               <span className="text-zinc-500">Customers already paying.</span>
             </h2>
           </RevealText>
@@ -782,16 +770,16 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
           SLIDE 8: TRACTION
       ═══════════════════════════════════════════════════════════ */}
       <div {...slideProps(7)}>
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500/0 via-emerald-500/50 to-emerald-500/0" />
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500/0 via-blue-500/50 to-blue-500/0" />
 
         <div className="relative z-10 max-w-5xl mx-auto space-y-8">
           <RevealText>
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-emerald-600/80 mb-4">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-600 mb-4">
               Traction
             </p>
-            <h2 className="text-3xl sm:text-4xl font-black leading-tight tracking-tight">
+            <h2 className="text-3xl sm:text-4xl font-black leading-tight tracking-tight text-zinc-900">
               Product-market fit.<br />
-              <span className="text-emerald-600">Proven.</span>
+              <span className="text-zinc-500">Proven.</span>
             </h2>
             <p className="mt-3 text-base text-zinc-500">6 months. Organic growth. Zero ad spend.</p>
           </RevealText>
@@ -860,11 +848,12 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
       <div {...slideProps(8)}>
         <div className="relative z-10 max-w-5xl mx-auto space-y-8">
           <RevealText>
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-600/80 mb-4">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-600 mb-4">
               Architecture
             </p>
-            <h2 className="text-3xl sm:text-4xl font-black leading-tight tracking-tight">
-              Enterprise-grade. <span className="text-zinc-500">Solo-built.</span>
+            <h2 className="text-3xl sm:text-4xl font-black leading-tight tracking-tight text-zinc-900">
+              Enterprise-grade.<br />
+              <span className="text-zinc-500">Solo-built.</span>
             </h2>
           </RevealText>
 
@@ -960,16 +949,16 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
           SLIDE 10: TEAM
       ═══════════════════════════════════════════════════════════ */}
       <div {...slideProps(9)}>
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500/0 via-purple-500/50 to-purple-500/0" />
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500/0 via-blue-500/50 to-blue-500/0" />
 
         <div className="relative z-10 max-w-4xl mx-auto space-y-8">
           <RevealText>
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-purple-600/80 mb-4">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-600 mb-4">
               The Team
             </p>
-            <h2 className="text-3xl sm:text-4xl font-black leading-tight tracking-tight">
+            <h2 className="text-3xl sm:text-4xl font-black leading-tight tracking-tight text-zinc-900">
               Built by someone who<br />
-              <span className="text-purple-600">lives the problem.</span>
+              <span className="text-zinc-500">lives the problem.</span>
             </h2>
           </RevealText>
 
@@ -977,7 +966,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
             <RevealText delay={200} className="sm:col-span-3">
               <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-8 space-y-6 h-full">
                 <div className="flex items-center gap-5">
-                  <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center text-3xl font-black text-white shrink-0">
+                  <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-3xl font-black text-white shrink-0">
                     KC
                   </div>
                   <div>
@@ -1043,13 +1032,13 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
 
         <div className="relative z-10 max-w-5xl mx-auto space-y-8">
           <RevealText>
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-600/80 mb-4">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-600 mb-4">
               The Ask
             </p>
-            <h2 className="text-3xl sm:text-4xl font-black leading-tight tracking-tight">
-              <span className="text-blue-600">$100K</span> pre-seed.
+            <h2 className="text-3xl sm:text-4xl font-black leading-tight tracking-tight text-zinc-900">
+              $100K pre-seed.<br />
+              <span className="text-zinc-500">Capital efficient. Tax credit eligible.</span>
             </h2>
-            <p className="mt-3 text-base text-zinc-500">Capital efficient. Revenue generating. Tax credit eligible.</p>
           </RevealText>
 
           <div className="grid sm:grid-cols-2 gap-6">
@@ -1136,11 +1125,12 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
       <div {...slideProps(11)}>
         <div className="relative z-10 max-w-5xl mx-auto space-y-8">
           <RevealText>
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-emerald-600/80 mb-4">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-600 mb-4">
               Growth Plan
             </p>
-            <h2 className="text-3xl sm:text-4xl font-black leading-tight tracking-tight">
-              18-Month Targets
+            <h2 className="text-3xl sm:text-4xl font-black leading-tight tracking-tight text-zinc-900">
+              18-Month Targets<br />
+              <span className="text-zinc-500">& Growth Trajectory</span>
             </h2>
           </RevealText>
 
@@ -1231,13 +1221,13 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
         <div className="relative z-10 max-w-4xl mx-auto text-center space-y-12">
           <RevealText>
             <div className="space-y-6">
-              <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-600/80">
+              <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-600">
                 The Vision
               </p>
-              <h2 className="text-4xl sm:text-5xl font-black leading-tight tracking-tighter">
+              <h2 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight text-zinc-900">
                 How teams share,<br />
                 govern, and protect<br />
-                <span className="text-blue-600">their AI usage.</span>
+                <span className="text-zinc-500">their AI usage.</span>
               </h2>
             </div>
           </RevealText>
@@ -1277,17 +1267,16 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
           </RevealText>
 
           <RevealText delay={600}>
-            <div className="flex items-center justify-center gap-4 pt-4">
-              <div className="bg-white rounded-xl p-2 shadow-md border border-zinc-200">
-                <Image
-                  src="/brand/logo-icon.svg"
-                  alt="TeamPrompt"
-                  width={40}
-                  height={40}
-                />
-              </div>
+            <div className="flex items-center justify-center gap-3 pt-4">
+              <Image
+                src="/logo.svg"
+                alt="TeamPrompt"
+                width={32}
+                height={32}
+                className="rounded-lg"
+              />
               <div className="text-left">
-                <p className="font-black text-lg">TeamPrompt</p>
+                <p className="font-bold text-lg">TeamPrompt</p>
                 <p className="text-xs text-zinc-500">teamprompt.app</p>
               </div>
             </div>

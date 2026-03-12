@@ -20,9 +20,32 @@ import {
   Check,
 } from "lucide-react";
 
-// ─── Proforma data (18 months) with operating costs ─────────────
+// ─── Proforma data (18 months) — two scenarios ─────────────────
 
-const PROFORMA = [
+// Organic-only: no paid marketing, slower growth from SEO + Chrome Store + WOM
+const PROFORMA_ORGANIC = [
+  { month: "M1",  mrr: 13500,  opex: 2050,  stripe: 473 },
+  { month: "M2",  mrr: 14500,  opex: 2050,  stripe: 508 },
+  { month: "M3",  mrr: 15500,  opex: 2550,  stripe: 543 },
+  { month: "M4",  mrr: 17000,  opex: 4550,  stripe: 595 },
+  { month: "M5",  mrr: 18500,  opex: 4550,  stripe: 648 },
+  { month: "M6",  mrr: 20000,  opex: 4560,  stripe: 700 },
+  { month: "M7",  mrr: 22000,  opex: 9060,  stripe: 770 },
+  { month: "M8",  mrr: 24000,  opex: 9110,  stripe: 840 },
+  { month: "M9",  mrr: 26000,  opex: 9160,  stripe: 910 },
+  { month: "M10", mrr: 28500,  opex: 9660,  stripe: 998 },
+  { month: "M11", mrr: 31000,  opex: 9660,  stripe: 1085 },
+  { month: "M12", mrr: 33500,  opex: 9660,  stripe: 1173 },
+  { month: "M13", mrr: 36000,  opex: 10160, stripe: 1260 },
+  { month: "M14", mrr: 38500,  opex: 10160, stripe: 1348 },
+  { month: "M15", mrr: 41000,  opex: 10160, stripe: 1435 },
+  { month: "M16", mrr: 43000,  opex: 10160, stripe: 1505 },
+  { month: "M17", mrr: 45000,  opex: 10160, stripe: 1575 },
+  { month: "M18", mrr: 47000,  opex: 10160, stripe: 1645 },
+];
+
+// With paid marketing: ad spend accelerates acquisition, faster growth
+const PROFORMA_FUNDED = [
   { month: "M1",  mrr: 13500,  opex: 2050,  stripe: 473 },
   { month: "M2",  mrr: 15500,  opex: 3050,  stripe: 543 },
   { month: "M3",  mrr: 18000,  opex: 3550,  stripe: 630 },
@@ -134,7 +157,7 @@ function Card({ children, className }: { children: React.ReactNode; className?: 
 
 export function BusinessPlan({ shareToken }: { shareToken: string }) {
   const [copied, setCopied] = useState(false);
-  const maxMrr = PROFORMA[PROFORMA.length - 1].mrr;
+  const maxMrr = PROFORMA_FUNDED[PROFORMA_FUNDED.length - 1].mrr;
 
   function handleCopyLink() {
     const url = `${window.location.origin}/pitch/plan?share=${shareToken}`;
@@ -153,12 +176,19 @@ export function BusinessPlan({ shareToken }: { shareToken: string }) {
     return "/pitch";
   }
 
-  // Compute cumulative net for proforma table
-  let cumulative = 0;
-  const proformaRows = PROFORMA.map((row) => {
+  // Compute cumulative net for both scenarios
+  let cumOrg = 0;
+  const organicRows = PROFORMA_ORGANIC.map((row) => {
     const net = row.mrr - row.opex - row.stripe;
-    cumulative += net;
-    return { ...row, net, cumulative };
+    cumOrg += net;
+    return { ...row, net, cumulative: cumOrg };
+  });
+
+  let cumFund = 0;
+  const fundedRows = PROFORMA_FUNDED.map((row) => {
+    const net = row.mrr - row.opex - row.stripe;
+    cumFund += net;
+    return { ...row, net, cumulative: cumFund };
   });
 
   return (
@@ -233,9 +263,9 @@ export function BusinessPlan({ shareToken }: { shareToken: string }) {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
             {[
               { label: "Starting MRR", value: "$12K", sub: "Current" },
-              { label: "Target MRR", value: "$75K", sub: "Month 18" },
-              { label: "Target ARR", value: "$900K", sub: "Run rate" },
-              { label: "M18 Net Income", value: fmt(proformaRows[proformaRows.length - 1].net), sub: "Monthly" },
+              { label: "Organic M18", value: fmt(organicRows[organicRows.length - 1].mrr), sub: "Without paid ads" },
+              { label: "Funded M18", value: fmt(fundedRows[fundedRows.length - 1].mrr), sub: "With paid ads" },
+              { label: "Funded ARR", value: "$900K", sub: "Run rate" },
             ].map((s) => (
               <Card key={s.label}>
                 <p className="text-xs text-zinc-500 uppercase tracking-widest">{s.label}</p>
@@ -245,40 +275,91 @@ export function BusinessPlan({ shareToken }: { shareToken: string }) {
             ))}
           </div>
 
-          {/* MRR Growth Chart */}
+          {/* MRR Growth Chart — dual line */}
           <Card className="mb-8">
-            <h3 className="font-bold text-sm uppercase tracking-widest text-zinc-500 mb-6">
-              Monthly Recurring Revenue
-            </h3>
-            <div className="flex items-end gap-1.5 h-56">
-              {PROFORMA.map((row, i) => (
-                <div key={row.month} className="flex-1 flex flex-col items-center gap-1">
-                  <span className="text-xs text-zinc-500 font-mono">{fmt(row.mrr)}</span>
-                  <div
-                    className={cn(
-                      "w-full rounded-t transition-all",
-                      i === PROFORMA.length - 1
-                        ? "bg-gradient-to-t from-blue-700 to-blue-500"
-                        : "bg-gradient-to-t from-blue-600/30 to-blue-400/30"
-                    )}
-                    style={{ height: `${(row.mrr / maxMrr) * 100}%` }}
-                  />
-                  <span className={cn(
-                    "text-xs font-mono",
-                    i === PROFORMA.length - 1 ? "text-blue-600 font-bold" : "text-zinc-500"
-                  )}>
-                    {row.month}
-                  </span>
-                </div>
-              ))}
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="font-bold text-sm uppercase tracking-widest text-zinc-500">
+                Monthly Recurring Revenue
+              </h3>
+              <div className="flex items-center gap-4 text-xs">
+                <span className="flex items-center gap-1.5">
+                  <span className="w-3 h-0.5 rounded bg-blue-600 inline-block" />
+                  <span className="text-zinc-600">With Paid Ads</span>
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="w-3 h-0.5 rounded bg-zinc-400 inline-block" />
+                  <span className="text-zinc-500">Organic Only</span>
+                </span>
+              </div>
             </div>
+            {(() => {
+              const W = 800;
+              const H = 280;
+              const PAD = { top: 30, right: 20, bottom: 40, left: 60 };
+              const cW = W - PAD.left - PAD.right;
+              const cH = H - PAD.top - PAD.bottom;
+              const n = PROFORMA_FUNDED.length;
+              const yMax = maxMrr;
+              const yTicks = [0, 15000, 30000, 45000, 60000, 75000];
+
+              function x(i: number) { return PAD.left + (i / (n - 1)) * cW; }
+              function y(v: number) { return PAD.top + cH - (v / yMax) * cH; }
+
+              const fundedLine = PROFORMA_FUNDED.map((r, i) => `${i === 0 ? "M" : "L"}${x(i).toFixed(1)},${y(r.mrr).toFixed(1)}`).join(" ");
+              const organicLine = PROFORMA_ORGANIC.map((r, i) => `${i === 0 ? "M" : "L"}${x(i).toFixed(1)},${y(r.mrr).toFixed(1)}`).join(" ");
+              // Fill area between lines
+              const areaPath = [
+                ...PROFORMA_FUNDED.map((r, i) => `${i === 0 ? "M" : "L"}${x(i).toFixed(1)},${y(r.mrr).toFixed(1)}`),
+                ...PROFORMA_ORGANIC.slice().reverse().map((r, i) => `L${x(n - 1 - i).toFixed(1)},${y(r.mrr).toFixed(1)}`),
+                "Z",
+              ].join(" ");
+
+              return (
+                <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto">
+                  {/* Y-axis grid lines & labels */}
+                  {yTicks.map((tick) => (
+                    <g key={tick}>
+                      <line x1={PAD.left} x2={W - PAD.right} y1={y(tick)} y2={y(tick)} stroke="#e4e4e7" strokeWidth={1} />
+                      <text x={PAD.left - 8} y={y(tick) + 4} textAnchor="end" className="fill-zinc-400 text-[11px] font-mono">
+                        {fmt(tick)}
+                      </text>
+                    </g>
+                  ))}
+                  {/* X-axis labels */}
+                  {PROFORMA_FUNDED.map((r, i) => (
+                    <text key={r.month} x={x(i)} y={H - 8} textAnchor="middle" className={cn("text-[11px] font-mono", i === n - 1 ? "fill-blue-600 font-bold" : "fill-zinc-400")}>
+                      {r.month}
+                    </text>
+                  ))}
+                  {/* Shaded area between lines */}
+                  <path d={areaPath} fill="#2563eb" fillOpacity={0.06} />
+                  {/* Organic line */}
+                  <path d={organicLine} fill="none" stroke="#a1a1aa" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
+                  {/* Funded line */}
+                  <path d={fundedLine} fill="none" stroke="#2563eb" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
+                  {/* End dots */}
+                  <circle cx={x(n - 1)} cy={y(PROFORMA_FUNDED[n - 1].mrr)} r={5} fill="#2563eb" />
+                  <circle cx={x(n - 1)} cy={y(PROFORMA_ORGANIC[n - 1].mrr)} r={5} fill="#a1a1aa" />
+                  {/* End labels */}
+                  <text x={x(n - 1) - 8} y={y(PROFORMA_FUNDED[n - 1].mrr) - 10} textAnchor="end" className="fill-blue-600 text-[12px] font-mono font-bold">
+                    {fmt(PROFORMA_FUNDED[n - 1].mrr)}
+                  </text>
+                  <text x={x(n - 1) - 8} y={y(PROFORMA_ORGANIC[n - 1].mrr) - 10} textAnchor="end" className="fill-zinc-500 text-[12px] font-mono font-bold">
+                    {fmt(PROFORMA_ORGANIC[n - 1].mrr)}
+                  </text>
+                </svg>
+              );
+            })()}
           </Card>
 
-          {/* Full table with operating costs */}
-          <Card>
-            <h3 className="font-bold text-sm uppercase tracking-widest text-zinc-500 mb-4">
-              Detailed Projections with Operating Costs
-            </h3>
+          {/* Full table with operating costs — WITH paid ads */}
+          <Card className="mb-8">
+            <div className="flex items-center gap-3 mb-4">
+              <h3 className="font-bold text-sm uppercase tracking-widest text-zinc-500">
+                Detailed Projections — With Paid Ads
+              </h3>
+              <span className="text-xs bg-blue-50 text-blue-600 font-bold px-2 py-0.5 rounded">Funded</span>
+            </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
@@ -292,7 +373,53 @@ export function BusinessPlan({ shareToken }: { shareToken: string }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {proformaRows.map((row) => (
+                  {fundedRows.map((row) => (
+                    <tr key={row.month} className="border-b border-zinc-100 hover:bg-zinc-50">
+                      <td className="py-2.5 px-3 font-mono text-zinc-600">{row.month}</td>
+                      <td className="text-right py-2.5 px-3 font-mono text-zinc-900">{fmtFull(row.mrr)}</td>
+                      <td className="text-right py-2.5 px-3 font-mono text-zinc-600">{fmtFull(row.opex)}</td>
+                      <td className="text-right py-2.5 px-3 font-mono text-zinc-500">{fmtFull(row.stripe)}</td>
+                      <td className={cn(
+                        "text-right py-2.5 px-3 font-mono",
+                        row.net >= 0 ? "text-emerald-600" : "text-zinc-500"
+                      )}>
+                        {row.net >= 0 ? "+" : ""}{fmtFull(row.net)}
+                      </td>
+                      <td className={cn(
+                        "text-right py-2.5 px-3 font-mono",
+                        row.cumulative >= 0 ? "text-emerald-600" : "text-zinc-500"
+                      )}>
+                        {row.cumulative >= 0 ? "+" : ""}{fmtFull(row.cumulative)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+
+          {/* Full table — WITHOUT paid ads (organic only) */}
+          <Card>
+            <div className="flex items-center gap-3 mb-4">
+              <h3 className="font-bold text-sm uppercase tracking-widest text-zinc-500">
+                Detailed Projections — Organic Only
+              </h3>
+              <span className="text-xs bg-zinc-100 text-zinc-500 font-bold px-2 py-0.5 rounded">No Ads</span>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-zinc-200">
+                    <th className="text-left py-2 px-3 text-zinc-500 font-medium">Month</th>
+                    <th className="text-right py-2 px-3 text-zinc-500 font-medium">MRR</th>
+                    <th className="text-right py-2 px-3 text-zinc-500 font-medium">Operating Costs</th>
+                    <th className="text-right py-2 px-3 text-zinc-500 font-medium">Stripe Fees</th>
+                    <th className="text-right py-2 px-3 text-zinc-500 font-medium">Net Income</th>
+                    <th className="text-right py-2 px-3 text-zinc-500 font-medium">Cumulative Net</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {organicRows.map((row) => (
                     <tr key={row.month} className="border-b border-zinc-100 hover:bg-zinc-50">
                       <td className="py-2.5 px-3 font-mono text-zinc-600">{row.month}</td>
                       <td className="text-right py-2.5 px-3 font-mono text-zinc-900">{fmtFull(row.mrr)}</td>

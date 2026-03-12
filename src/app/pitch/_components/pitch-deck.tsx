@@ -905,7 +905,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
                   {[
                     "Row-Level Security on every query",
                     "Client-side DLP — API keys, credentials, PII never reach AI",
-                    "19 compliance packs (HIPAA, SOC 2, GDPR...)",
+                    "23 compliance packs (HIPAA, SOC 2, GDPR...)",
                     "Full audit trail on every action",
                     "2FA / TOTP for all users",
                     "Domain auto-join (SSO-like experience)",

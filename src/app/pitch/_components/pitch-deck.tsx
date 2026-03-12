@@ -483,76 +483,156 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
             </div>
           </RevealText>
 
-          {/* Bento grid — large left + stacked right */}
-          <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
-            {/* Large featured screenshot — ChatGPT with extension sidebar */}
-            <RevealText className="sm:col-span-3">
-              <div className="group relative h-full">
-                <div className="rounded-2xl overflow-hidden border border-zinc-800 bg-zinc-900 shadow-2xl h-full">
-                  <Image
-                    src="/store-assets/screenshot-3-insert.png"
-                    alt="Extension sidebar in ChatGPT"
-                    width={1280}
-                    height={800}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-                  />
+          {/* Three feature mockups — staggered card layout */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-5 items-start">
+
+            {/* 1. Extension Sidebar — Prompt Library */}
+            <RevealText delay={100}>
+              <div className="sm:-rotate-2 sm:translate-y-4 transition-transform hover:rotate-0 hover:translate-y-0 duration-500">
+                <div className="rounded-2xl bg-[#1a1a2e] border border-white/10 shadow-2xl overflow-hidden">
+                  {/* Header */}
+                  <div className="px-4 pt-4 pb-3 flex items-center gap-2 border-b border-white/5">
+                    <div className="w-5 h-5 rounded bg-blue-600 flex items-center justify-center">
+                      <Layers className="h-3 w-3 text-white" />
+                    </div>
+                    <span className="text-white text-xs font-semibold">TeamPrompt</span>
+                  </div>
+                  {/* Search */}
+                  <div className="px-4 pt-3">
+                    <div className="h-7 rounded-lg bg-white/5 border border-white/10 px-3 flex items-center">
+                      <span className="text-white/30 text-[10px]">Search prompts...</span>
+                    </div>
+                  </div>
+                  {/* Tabs */}
+                  <div className="px-4 pt-2 flex gap-4 text-[10px] border-b border-white/5 pb-2">
+                    <span className="text-blue-400 font-semibold border-b border-blue-400 pb-1">All</span>
+                    <span className="text-white/40">Templates</span>
+                    <span className="text-white/40">Recent</span>
+                  </div>
+                  {/* Prompt rows */}
+                  <div className="px-4 py-2 space-y-1">
+                    {[
+                      { name: "Sales Outreach Email", tag: "Sales", tagColor: "bg-blue-500/20 text-blue-400" },
+                      { name: "Code Review Assistant", tag: "Engineering", tagColor: "bg-emerald-500/20 text-emerald-400" },
+                      { name: "Compliance Review", tag: "Legal", tagColor: "bg-amber-500/20 text-amber-400" },
+                      { name: "Meeting Summary", tag: "Ops", tagColor: "bg-violet-500/20 text-violet-400" },
+                    ].map((p) => (
+                      <div key={p.name} className="flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-white/5">
+                        <div>
+                          <p className="text-white text-[11px] font-medium">{p.name}</p>
+                          <span className={cn("text-[8px] font-semibold px-1.5 py-0.5 rounded-full mt-0.5 inline-block", p.tagColor)}>{p.tag}</span>
+                        </div>
+                        <div className="text-[9px] text-blue-400 font-medium bg-blue-500/10 px-2 py-0.5 rounded">Use</div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="px-4 pb-3 pt-1 text-[9px] text-white/30">4 prompts shared</div>
                 </div>
-                <span className="absolute top-3 left-3 text-[10px] font-bold uppercase tracking-widest bg-blue-600 text-white px-2.5 py-1 rounded-full shadow-lg">
-                  Prompt Library
-                </span>
+                <p className="text-center text-xs font-bold text-zinc-600 mt-3">Shared Prompt Library</p>
+                <p className="text-center text-[10px] text-zinc-400">Browse, search, one-click insert</p>
               </div>
             </RevealText>
 
-            {/* Stacked right — Claude sidebar + DLP block */}
-            <div className="sm:col-span-2 flex flex-col gap-4">
-              <RevealText delay={150}>
-                <div className="group relative">
-                  <div className="rounded-2xl overflow-hidden border border-zinc-800 bg-zinc-900 shadow-2xl">
-                    <Image
-                      src="/store-assets/screenshot-5-sidepanel.png"
-                      alt="Extension sidebar in Claude"
-                      width={1280}
-                      height={800}
-                      className="w-full transition-transform duration-500 group-hover:scale-[1.02]"
-                    />
+            {/* 2. DLP Block — center, elevated */}
+            <RevealText delay={200}>
+              <div className="sm:-translate-y-2 transition-transform hover:-translate-y-4 duration-500">
+                <div className="rounded-2xl bg-[#1a1a2e] border border-white/10 shadow-2xl overflow-hidden">
+                  {/* Fake chat context */}
+                  <div className="px-4 pt-4 pb-2">
+                    <div className="flex items-center gap-2 text-[10px] text-white/40 mb-3">
+                      <span className="font-semibold text-white/60">ChatGPT</span>
+                      <span className="text-white/20">GPT-4</span>
+                    </div>
+                    <div className="bg-blue-600 rounded-xl rounded-br-sm px-3 py-2 text-white text-[10px] leading-relaxed mb-2 ml-8">
+                      Help me draft a follow-up email for our client Acme Corp...
+                    </div>
+                    <div className="bg-white/5 rounded-xl rounded-bl-sm px-3 py-2 text-white/50 text-[10px] leading-relaxed mr-8 line-through decoration-red-400/50">
+                      Sure! The API key is <span className="text-red-400">sk-proj-abc123...</span> and Sarah&apos;s email is <span className="text-red-400">sarah@acme.com</span>
+                    </div>
                   </div>
-                  <span className="absolute top-3 left-3 text-[10px] font-bold uppercase tracking-widest bg-white/90 text-zinc-900 px-2.5 py-1 rounded-full shadow-lg">
-                    Multi-AI
-                  </span>
+                  {/* DLP Block modal */}
+                  <div className="mx-4 mb-4 rounded-xl border-2 border-red-500/30 bg-red-500/5 p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Shield className="h-4 w-4 text-red-400" />
+                      <span className="text-red-400 font-bold text-xs">Message Blocked</span>
+                    </div>
+                    <p className="text-white/50 text-[10px] mb-3">Sensitive data detected in your message:</p>
+                    <div className="space-y-1.5">
+                      {[
+                        { type: "API Key", value: "sk-proj-abc123...", color: "bg-red-500/10 border-red-500/20" },
+                        { type: "Email (PII)", value: "sarah@acme.com", color: "bg-red-500/10 border-red-500/20" },
+                        { type: "Financial", value: "$4.2M ARR", color: "bg-red-500/10 border-red-500/20" },
+                      ].map((d) => (
+                        <div key={d.type} className={cn("rounded-lg border px-3 py-1.5 text-[10px]", d.color)}>
+                          <span className="text-red-400 font-semibold">{d.type}:</span>{" "}
+                          <span className="text-white/60">{d.value}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <button className="mt-3 bg-blue-600 text-white text-[10px] font-semibold px-4 py-1.5 rounded-lg">Got it</button>
+                  </div>
                 </div>
-              </RevealText>
+                <p className="text-center text-xs font-bold text-zinc-600 mt-3">Real-Time DLP Shield</p>
+                <p className="text-center text-[10px] text-zinc-400">Blocks API keys, PII, financials</p>
+              </div>
+            </RevealText>
 
-              <RevealText delay={300}>
-                <div className="group relative">
-                  <div className="rounded-2xl overflow-hidden border border-zinc-800 bg-zinc-900 shadow-2xl">
-                    <Image
-                      src="/store-assets/screenshot-6-dlp-block.png"
-                      alt="DLP blocking sensitive data"
-                      width={1280}
-                      height={800}
-                      className="w-full transition-transform duration-500 group-hover:scale-[1.02]"
-                    />
+            {/* 3. Template Variables */}
+            <RevealText delay={300}>
+              <div className="sm:rotate-2 sm:translate-y-4 transition-transform hover:rotate-0 hover:translate-y-0 duration-500">
+                <div className="rounded-2xl bg-[#1a1a2e] border border-white/10 shadow-2xl overflow-hidden">
+                  {/* Header */}
+                  <div className="px-4 pt-4 pb-3 border-b border-white/5">
+                    <div className="flex items-center gap-2 text-white/40 text-[10px] mb-1">
+                      <ChevronLeft className="h-3 w-3" />
+                      <span className="text-white font-semibold text-xs">Customer Onboarding</span>
+                    </div>
                   </div>
-                  <span className="absolute top-3 left-3 text-[10px] font-bold uppercase tracking-widest bg-red-500 text-white px-2.5 py-1 rounded-full shadow-lg">
-                    DLP Shield
-                  </span>
+                  {/* Template preview */}
+                  <div className="px-4 pt-3">
+                    <div className="bg-white/5 rounded-lg p-3 text-[10px] text-white/60 leading-relaxed border border-white/5">
+                      You are a customer success specialist at{" "}
+                      <span className="text-blue-400 bg-blue-500/10 px-1 rounded">{"{{company}}"}</span>.
+                      Guide the new customer through their first week for the{" "}
+                      <span className="text-blue-400 bg-blue-500/10 px-1 rounded">{"{{industry}}"}</span>{" "}
+                      use case.
+                    </div>
+                  </div>
+                  {/* Variable fields */}
+                  <div className="px-4 pt-3 space-y-2">
+                    {[
+                      { label: "company", value: "Acme Corp" },
+                      { label: "industry", value: "SaaS" },
+                      { label: "tone", value: "Friendly" },
+                    ].map((v) => (
+                      <div key={v.label}>
+                        <label className="text-[9px] text-blue-400 font-mono">{v.label}</label>
+                        <div className="h-7 rounded-lg bg-white/5 border border-white/10 px-3 flex items-center text-white text-[11px]">
+                          {v.value}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  {/* Actions */}
+                  <div className="px-4 py-3 flex gap-2">
+                    <button className="flex-1 bg-blue-600 text-white text-[10px] font-semibold py-2 rounded-lg">Insert into AI Tool</button>
+                    <button className="flex-1 bg-white/5 text-white/60 text-[10px] font-semibold py-2 rounded-lg border border-white/10">Copy</button>
+                  </div>
                 </div>
-              </RevealText>
-            </div>
+                <p className="text-center text-xs font-bold text-zinc-600 mt-3">Smart Templates</p>
+                <p className="text-center text-[10px] text-zinc-400">Variables, fill-in, one-click insert</p>
+              </div>
+            </RevealText>
           </div>
 
-          {/* Full-width multi-AI banner */}
+          {/* Platform strip */}
           <RevealText delay={400}>
-            <div className="mt-4 rounded-2xl overflow-hidden border border-zinc-800 bg-zinc-900 shadow-2xl">
-              <Image
-                src="/store-assets/screenshot-11-multi-ai.png"
-                alt="Works across ChatGPT, Claude, Gemini, Copilot, and Perplexity"
-                width={1400}
-                height={560}
-                className="w-full"
-              />
+            <div className="flex items-center justify-center gap-6 pt-2">
+              {["ChatGPT", "Claude", "Gemini", "Copilot", "Perplexity"].map((name) => (
+                <span key={name} className="text-xs text-zinc-400 font-medium">{name}</span>
+              ))}
             </div>
-            <p className="text-xs text-zinc-500 mt-2 text-center">One extension. Five AI platforms. Full DLP protection on every tool.</p>
+            <p className="text-[10px] text-zinc-400 text-center mt-1">One extension. Five platforms. Full protection.</p>
           </RevealText>
         </div>
       </div>

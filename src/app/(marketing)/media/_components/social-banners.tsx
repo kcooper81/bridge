@@ -3629,6 +3629,32 @@ export function LinkedInAdW() {
   );
 }
 
+/* ── Ad X: Telephone Game — Image-based with CTA overlay ── */
+export function LinkedInAdX() {
+  return (
+    <div className="w-full rounded-xl overflow-hidden relative" style={{ aspectRatio: "1200/627" }}>
+      <Image
+        src="/store-assets/ad-shared-prompts.jpg"
+        alt="Same Task. Same AI. 12 Different Prompts."
+        fill
+        className="object-cover"
+      />
+      {/* CTA banner overlay at bottom */}
+      <div className="absolute bottom-0 left-0 right-0 z-10 bg-gradient-to-t from-black/90 via-black/70 to-transparent pt-8 pb-4 px-4 sm:px-6 flex items-end justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-5 h-5 rounded bg-blue-500 flex items-center justify-center shrink-0">
+            <Zap className="w-3 h-3 text-white" />
+          </div>
+          <span className="text-white/70 text-[10px] sm:text-sm font-medium">TeamPrompt</span>
+        </div>
+        <div className="bg-blue-600 hover:bg-blue-700 text-white text-[10px] sm:text-sm font-bold px-3 sm:px-5 py-1.5 sm:py-2 rounded-lg shadow-lg">
+          Fix the Inconsistency — Start Free
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ── LinkedIn Square Ads (1200 x 1200) ─────────── */
 
 export function LinkedInSqA() {

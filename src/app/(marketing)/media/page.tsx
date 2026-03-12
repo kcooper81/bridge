@@ -84,6 +84,7 @@ import {
   LinkedInAdU,
   LinkedInAdV,
   LinkedInAdW,
+  LinkedInAdX,
   LinkedInSqA,
   LinkedInSqB,
   LinkedInSqC,
@@ -1646,6 +1647,16 @@ export default function MediaPage() {
                 <p className="text-xs text-muted-foreground mb-2">Target: Product Managers, PMs who use AI for specs, research, analysis</p>
                 <BannerDownloadWrapper filename="linkedin-ad-j-product-managers">
                   <LinkedInAdJ />
+                </BannerDownloadWrapper>
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs font-semibold bg-pink-100 text-pink-700 px-2 py-0.5 rounded-full">Ad X</span>
+                  <span className="text-sm font-medium">Telephone Game — &ldquo;Same Task. Same AI. 12 Different Prompts.&rdquo;</span>
+                </div>
+                <p className="text-xs text-muted-foreground mb-2">Image-based ad with CTA overlay. Target: Team leads, managers frustrated by inconsistent AI output</p>
+                <BannerDownloadWrapper filename="linkedin-ad-x-telephone-game">
+                  <LinkedInAdX />
                 </BannerDownloadWrapper>
               </div>
             </div>

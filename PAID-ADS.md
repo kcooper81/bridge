@@ -7,7 +7,7 @@ LinkedIn analogy-based ads targeting IT/security leaders, CISOs, compliance offi
 | Setting          | Value                                                                                                  |
 | ---------------- | ------------------------------------------------------------------------------------------------------ |
 | Campaign type    | Accelerate                                                                                             |
-| Objective        | Website visits or Lead gen                                                                             |
+| Objective        | Website conversions                                                                                    |
 | Audience signals | CISO, VP Engineering, IT Director, CTO, Head of Security, Compliance Officer, Chief Privacy Officer    |
 | Seniority        | Director, VP, C-Suite                                                                                  |
 | Industries       | Technology, Financial Services, Healthcare, Legal Services, Insurance                                  |
@@ -164,10 +164,228 @@ TeamPrompt brings law to the land — one shared prompt library, real-time DLP p
 
 ---
 
+---
+
+## Ad 5: The Recipe Book
+
+### Image Prompt
+
+```
+A beautiful open recipe book on a clean modern kitchen counter, but the
+recipes are glowing holographic prompt templates floating off the pages.
+Each page shows structured prompts with highlighted {{variables}} in blue.
+Around the book, multiple team members' hands reach in to grab different
+recipes — one labeled "Sales Outreach", another "Legal Review", another
+"Code Audit". Clean, bright, collaborative feeling. Warm professional
+lighting with soft blues and whites. Bold white text overlay: "Your Best
+Prompts Shouldn't Live in Someone's Head". 1200x627 landscape format.
+```
+
+### LinkedIn Copy
+
+**Headline:** Your Best Prompts Shouldn't Live in Someone's Head
+
+**Primary Text:**
+Your top performer writes prompts that get 3x better AI output.
+The rest of the team? They're winging it.
+
+Every team has prompt heroes — people who've figured out exactly how to get AI to produce great work. But that knowledge is trapped in their clipboard. Their notes app. Their browser history.
+
+TeamPrompt turns individual tricks into team-wide systems. One shared prompt library across ChatGPT, Claude, Gemini, Copilot & Perplexity.
+
+Templates with variables. Categories by department. Usage analytics. One-click insert.
+
+Stop reinventing prompts. Start reusing what works.
+
+**CTA:** Share What Works — Start Free
+
+---
+
+## Ad 6: The Telephone Game
+
+### Image Prompt
+
+```
+A line of diverse office workers whispering to each other like the
+telephone game, but instead of words, glowing AI prompts transform and
+degrade as they pass from person to person. The first person holds a
+perfect structured prompt glowing blue, but by the end of the line the
+prompt has become garbled, red, and chaotic. Clean modern office
+background, slightly surreal style. The contrast between the perfect
+start and messy end is dramatic. Bold white text overlay: "Same Task.
+Same AI. 12 Different Prompts." 1200x627 landscape format.
+```
+
+### LinkedIn Copy
+
+**Headline:** Same Task. Same AI. 12 Different Prompts.
+
+**Primary Text:**
+Your sales team writes outreach emails with AI.
+Every rep prompts it differently. Every output is different quality.
+
+One writes "draft a cold email." Another writes a detailed prompt with tone, context, and constraints that gets 3x the reply rate.
+
+You don't have an AI problem. You have a consistency problem.
+
+TeamPrompt gives every team member access to the same proven prompts — with templates, variables, and one-click insert into any AI tool.
+
+Same input. Same quality. Every time.
+
+**CTA:** Fix the Inconsistency — Start Free
+
+---
+
+## Ad 7: The Invisible Sieve
+
+### Image Prompt
+
+```
+A sleek modern office desk with a laptop screen showing a ChatGPT-like
+interface. Above the laptop, sensitive data — credit card numbers, API
+keys, social security numbers, medical records — floats upward like
+glowing particles being siphoned out through an invisible sieve in the
+ceiling. The data particles transform from blue (safe) to red (exposed)
+as they pass through. Dark dramatic background, clean minimalist style.
+The employee at the desk is oblivious, smiling. Bold white text overlay:
+"Every Prompt Is a Data Decision Your Team Makes Alone". 1200x627.
+```
+
+### LinkedIn Copy
+
+**Headline:** Every Prompt Is a Data Decision Your Team Makes Alone
+
+**Primary Text:**
+Your employee just pasted a client contract into Claude.
+It had names, deal terms, and a social security number.
+
+They didn't mean to. They were just trying to get a summary.
+
+This happens hundreds of times a day at companies with no AI guardrails. Not maliciously — just carelessly. And there's no log, no alert, no way to know it happened.
+
+TeamPrompt scans every prompt in real time. API keys, credentials, PII, financial data, health records — blocked before they leave the browser.
+
+Works silently across ChatGPT, Claude, Gemini, Copilot & Perplexity.
+
+Your team stays productive. Your data stays put.
+
+**CTA:** See What You're Leaking — Start Free
+
+---
+
+## Ad 8: The Glass Office
+
+### Image Prompt
+
+```
+A modern glass-walled office building at night, fully transparent. Inside
+every office and meeting room, you can see employees at laptops with AI
+chat interfaces on their screens. Floating above each desk, their prompts
+are visible as glowing text bubbles containing sensitive fragments:
+"merger with Acme Corp", "patient diagnosis", "salary data $185K". A
+figure outside the building observes everything casually. The building
+is beautiful but the transparency is unsettling. Cinematic night
+photography feel, blue and amber tones. Bold white text overlay: "Your
+AI Prompts Are More Visible Than You Think". 1200x627 landscape format.
+```
+
+### LinkedIn Copy
+
+**Headline:** Your AI Prompts Are More Visible Than You Think
+
+**Primary Text:**
+Would you let employees shout confidential data across an open office?
+
+That's what's happening every time someone pastes sensitive info into a public AI model.
+
+API keys. Client names. Revenue numbers. Source code. Medical records.
+
+It's not encrypted. It's not private. And in most cases, it's being used to train the next version of the model.
+
+TeamPrompt puts a security layer between your team and every AI tool they use. Real-time scanning catches 50+ sensitive data patterns before they're sent — silently, without slowing anyone down.
+
+One browser extension. Five AI platforms. Full protection.
+
+**CTA:** Stop the Exposure — Start Free
+
+---
+
+## Ad 9: The Shared Brain
+
+### Image Prompt
+
+```
+A glowing translucent human brain floating above a modern conference
+table where a diverse team collaborates. The brain is made of
+interconnected prompt cards and template nodes, all linked by blue light
+streams. Each team member has a thin light beam connecting them to the
+shared brain. The cards inside show prompt titles: "Customer Onboarding",
+"Contract Review", "Sprint Retro", "Sales Follow-up". Clean, aspirational,
+futuristic but warm. Bright background with soft blue and white tones.
+Bold white text overlay: "One Team Brain for AI". 1200x627 landscape.
+```
+
+### LinkedIn Copy
+
+**Headline:** One Team Brain for AI
+
+**Primary Text:**
+What if every person on your team had access to your best AI prompts — instantly?
+
+Not bookmarks. Not Slack threads. Not "ask Sarah, she has a good one."
+
+A shared, searchable library of proven prompts — organized by department, tagged by use case, with templates that auto-fill for each situation.
+
+TeamPrompt is the shared brain your team didn't know it needed. One extension that works inside ChatGPT, Claude, Gemini, Copilot & Perplexity.
+
+Your best people's knowledge. Everyone's fingertips.
+
+**CTA:** Build Your Team Brain — Start Free
+
+---
+
+## Ad 10: The Compliance Blind Spot
+
+### Image Prompt
+
+```
+A corporate security operations center with multiple monitor screens
+showing green "SECURE" dashboards — firewalls, endpoints, email, cloud.
+But one monitor in the center shows a bright red blind spot with a
+magnifying glass revealing an AI chat window with sensitive data being
+typed. The contrast between all the green security screens and the one
+red blind spot is dramatic. Dark, moody SOC atmosphere with blue screen
+glow. Bold white text overlay: "Your Security Stack Has a Blind Spot".
+1200x627 landscape format.
+```
+
+### LinkedIn Copy
+
+**Headline:** Your Security Stack Has a Blind Spot
+
+**Primary Text:**
+You monitor email. You scan endpoints. You log every file download.
+
+But when your team pastes client data into ChatGPT? Nothing.
+
+No DLP. No alert. No audit trail.
+
+AI tools sit in the biggest blind spot in enterprise security — the browser. And every day, employees send API keys, PII, financial data, and trade secrets through prompts you can't see.
+
+TeamPrompt is the missing layer. Real-time DLP scanning across ChatGPT, Claude, Gemini, Copilot & Perplexity. Catches 50+ sensitive data patterns. Full audit log. Zero friction.
+
+Close the blind spot before your next audit finds it.
+
+**CTA:** Close the Gap — Start Free
+
+---
+
 ## Backlog Ideas
 
-| Analogy              | Emotion           | Best Audience            |
-| -------------------- | ----------------- | ------------------------ |
-| Trojan Horse         | Betrayal          | IT / Security            |
-| Surgeon w/o Gloves   | Visceral disgust  | Healthcare / Legal       |
-| The Invisible Leak   | Paranoia          | Compliance / Risk        |
+| Analogy              | Emotion           | Best Audience            | Theme              |
+| -------------------- | ----------------- | ------------------------ | ------------------ |
+| Trojan Horse         | Betrayal          | IT / Security            | Data protection    |
+| Surgeon w/o Gloves   | Visceral disgust  | Healthcare / Legal       | Data protection    |
+| The Invisible Leak   | Paranoia          | Compliance / Risk        | Data protection    |
+| The Copy Machine     | Frustration       | Ops / Management         | Prompt sharing     |
+| The Playbook         | Aspiration        | Sales / RevOps           | Prompt sharing     |

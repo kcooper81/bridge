@@ -58,10 +58,13 @@ export async function POST(request: NextRequest) {
     // Verify invite email matches authenticated user
     if (invite.email !== user.email) {
       // Roll back the status change since this user cannot accept it
-      await db
+      const { error: rollbackError } = await db
         .from("invites")
         .update({ status: "pending", accepted_at: null })
         .eq("id", invite.id);
+      if (rollbackError) {
+        console.error("Failed to rollback invite status:", rollbackError.message);
+      }
       return NextResponse.json(
         { error: "This invite was sent to a different email" },
         { status: 403 }

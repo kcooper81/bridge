@@ -115,6 +115,25 @@ export async function middleware(request: NextRequest) {
     return resp;
   }
 
+  // Email verification: block unverified users from protected routes
+  if (
+    user &&
+    !user.email_confirmed_at &&
+    !isAuthRoute(pathname) &&
+    !isPublicRoute(pathname) &&
+    !pathname.startsWith("/api/") &&
+    !pathname.startsWith("/auth/") &&
+    !pathname.startsWith("/extension/")
+  ) {
+    authDebug.log("middleware", "redirect: unverified email → /login");
+    const url = request.nextUrl.clone();
+    url.pathname = "/login";
+    url.searchParams.set("error", "email_not_verified");
+    const resp = NextResponse.redirect(url);
+    authDebug.attachToResponse(resp);
+    return resp;
+  }
+
   // MFA step-up: user has MFA enrolled but hasn't verified yet this session
   if (
     user &&

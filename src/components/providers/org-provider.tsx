@@ -129,7 +129,7 @@ export function OrgProvider({ children }: { children: React.ReactNode }) {
             .then((data) => {
               if (data?.joined) refresh();
             })
-            .catch(() => {});
+            .catch(() => { /* non-critical: domain auto-join is best-effort */ });
         }
       } catch {
         // Non-critical — ignore

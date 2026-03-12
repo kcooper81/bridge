@@ -166,10 +166,8 @@ export async function POST(request: NextRequest) {
       if (providedSecret !== webhookSecret) {
         return NextResponse.json({ error: "Invalid webhook secret" }, { status: 401 });
       }
-    } else {
-      // If no webhook secret is configured, log a warning but still process.
-      // In production, INBOUND_WEBHOOK_SECRET should always be set.
-      console.warn("INBOUND_WEBHOOK_SECRET is not set — webhook endpoint is unprotected");
+    } else if (process.env.NODE_ENV === "production") {
+      return NextResponse.json({ error: "Webhook secret not configured" }, { status: 500 });
     }
 
     const raw = await request.json();

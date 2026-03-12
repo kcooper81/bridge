@@ -244,7 +244,7 @@ export default function TeamPage() {
   };
 
   useEffect(() => {
-    getInvites().then(setInvites).catch(() => {});
+    getInvites().then(setInvites).catch(() => { /* non-critical: invites load on next refresh */ });
   }, []);
 
   const pendingInvites = useMemo(() => invites.filter((i) => i.status === "pending"), [invites]);
@@ -433,9 +433,14 @@ export default function TeamPage() {
     }
     setTransferring(true);
     try {
+      const supabase = (await import("@/lib/supabase/client")).createClient();
+      const { data: { session: sess } } = await supabase.auth.getSession();
       const res = await fetch("/api/org/transfer-admin", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(sess?.access_token ? { Authorization: `Bearer ${sess.access_token}` } : {}),
+        },
         body: JSON.stringify({
           target_user_id: transferTargetId,
           new_role: transferNewRole,
@@ -2063,7 +2068,7 @@ export default function TeamPage() {
         pendingInvites={invites}
         onComplete={() => {
           refresh();
-          getInvites().then(setInvites).catch(() => {});
+          getInvites().then(setInvites).catch(() => { /* non-critical: invites load on next refresh */ });
         }}
       />
 
@@ -2078,7 +2083,7 @@ export default function TeamPage() {
         onComplete={() => {
           refresh();
           setSyncedRows([]);
-          getInvites().then(setInvites).catch(() => {});
+          getInvites().then(setInvites).catch(() => { /* non-critical: invites load on next refresh */ });
         }}
       />
 

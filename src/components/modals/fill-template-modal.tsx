@@ -60,7 +60,7 @@ export function FillTemplateModal({
       await navigator.clipboard.writeText(preview);
       toast.success("Copied filled prompt to clipboard");
       trackPromptUsed("copy");
-      recordUsage(prompt.id).catch(() => {});
+      recordUsage(prompt.id).catch(() => { /* non-critical: usage tracking is best-effort */ });
       onOpenChange(false);
     } catch {
       toast.error("Failed to copy to clipboard");
@@ -73,7 +73,7 @@ export function FillTemplateModal({
       await navigator.clipboard.writeText(prompt.content);
       toast.success("Copied raw template to clipboard");
       trackPromptUsed("copy");
-      recordUsage(prompt.id).catch(() => {});
+      recordUsage(prompt.id).catch(() => { /* non-critical: usage tracking is best-effort */ });
       onOpenChange(false);
     } catch {
       toast.error("Failed to copy to clipboard");

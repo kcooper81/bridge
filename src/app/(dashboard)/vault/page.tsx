@@ -129,7 +129,7 @@ export default function VaultPage() {
 
   // Load user ratings
   useEffect(() => {
-    getUserRatingsForOrg().then(setUserRatings).catch(() => {});
+    getUserRatingsForOrg().then(setUserRatings).catch(() => { /* non-critical: ratings are optional */ });
   }, []);
 
   const [filterFolder, setFilterFolder] = useState("");
@@ -270,7 +270,7 @@ export default function VaultPage() {
       await navigator.clipboard.writeText(prompt.content);
       toast.success("Copied to clipboard");
       trackPromptUsed("copy");
-      recordUsage(prompt.id).catch(() => {});
+      recordUsage(prompt.id).catch(() => { /* non-critical: usage tracking is best-effort */ });
     } catch {
       toast.error("Failed to copy to clipboard");
     }
@@ -479,6 +479,7 @@ export default function VaultPage() {
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Search prompts..."
+            aria-label="Search prompts"
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
@@ -677,6 +678,7 @@ export default function VaultPage() {
                               handleToggleFavorite(p.id, p.is_favorite);
                             }}
                             className="shrink-0"
+                            aria-label={p.is_favorite ? "Remove from favorites" : "Add to favorites"}
                           >
                             <Heart
                               className={`h-4 w-4 ${
@@ -714,7 +716,7 @@ export default function VaultPage() {
                                 </Badge>
                               )}
                             </div>
-                            <p className="text-xs text-muted-foreground truncate max-w-xs">
+                            <p className="text-xs text-muted-foreground truncate max-w-xs" title={p.content.length > 80 ? p.content.slice(0, 200) : undefined}>
                               {p.content.slice(0, 80)}
                               {p.content.length > 80 ? "..." : ""}
                             </p>
@@ -753,6 +755,7 @@ export default function VaultPage() {
                               size="icon"
                               className="h-8 w-8"
                               onClick={(e) => e.stopPropagation()}
+                              aria-label="Prompt actions"
                             >
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
@@ -846,6 +849,7 @@ export default function VaultPage() {
                             handleToggleFavorite(p.id, p.is_favorite);
                           }}
                           className="shrink-0"
+                          aria-label={p.is_favorite ? "Remove from favorites" : "Add to favorites"}
                         >
                           <Heart
                             className={`h-4 w-4 ${
@@ -884,6 +888,7 @@ export default function VaultPage() {
                             size="icon"
                             className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
                             onClick={(e) => e.stopPropagation()}
+                            aria-label="Prompt actions"
                           >
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>

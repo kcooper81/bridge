@@ -113,7 +113,7 @@ export const DEFAULT_SECURITY_RULES: DefaultRule[] = [
     pattern_type: "regex",
     category: "pii",
     severity: "block",
-    is_active: false,
+    is_active: true,
   },
   {
     name: "Credit Card Number",
@@ -122,7 +122,7 @@ export const DEFAULT_SECURITY_RULES: DefaultRule[] = [
     pattern_type: "regex",
     category: "pii",
     severity: "block",
-    is_active: false,
+    is_active: true,
   },
   {
     name: "Email Address",

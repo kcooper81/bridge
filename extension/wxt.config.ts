@@ -102,7 +102,7 @@ export default defineConfig({
               ],
             },
             content_security_policy: {
-              extension_pages: "script-src 'self'; object-src 'self'; connect-src 'self' https://teamprompt.app https://www.teamprompt.app https://vafybxyxmpehrpqbztrc.supabase.co;",
+              extension_pages: "default-src 'self'; script-src 'self'; object-src 'self'; connect-src 'self' https://teamprompt.app https://www.teamprompt.app https://vafybxyxmpehrpqbztrc.supabase.co;",
             },
           }),
     };

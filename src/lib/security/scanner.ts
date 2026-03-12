@@ -64,8 +64,8 @@ function matchPattern(
 }
 
 function redactMatch(text: string): string {
-  if (text.length <= 4) return "****";
-  return text.slice(0, 2) + "*".repeat(Math.min(text.length - 4, 20)) + text.slice(-2);
+  if (text.length <= 8) return "*".repeat(text.length);
+  return text.slice(0, 3) + "*".repeat(Math.min(text.length - 3, 24));
 }
 
 export interface ScanOptions {

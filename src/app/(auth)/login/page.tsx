@@ -43,6 +43,15 @@ export default function LoginPage() {
         return;
       }
 
+      // Verify email is confirmed
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (authUser && !authUser.email_confirmed_at) {
+        authDebug.log("login", "email not verified, signing out"); // AUTH-DEBUG
+        await supabase.auth.signOut();
+        setError("Please verify your email address before signing in. Check your inbox for a confirmation link.");
+        return;
+      }
+
       // Check if MFA verification is needed
       const { data: aalData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
       if (aalData?.nextLevel === "aal2" && aalData?.currentLevel === "aal1") {

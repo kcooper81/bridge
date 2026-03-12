@@ -36,11 +36,15 @@ export function ImportExportModal({
   const [importing, setImporting] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
+  const [exporting, setExporting] = useState(false);
+
   async function handleExport() {
     if (selectedIds.length === 0) {
       toast.error("Select at least one prompt to export");
       return;
     }
+    setExporting(true);
+    try {
     const pack = await exportPack(selectedIds, packName.trim() || "Prompt Pack");
     const blob = new Blob([JSON.stringify(pack, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -52,6 +56,11 @@ export function ImportExportModal({
     trackExport(selectedIds.length);
     toast.success(`Exported ${selectedIds.length} prompts`);
     onOpenChange(false);
+    } catch {
+      toast.error("Failed to export prompts");
+    } finally {
+      setExporting(false);
+    }
   }
 
   async function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
@@ -149,9 +158,9 @@ export function ImportExportModal({
                 )}
               </div>
             </div>
-            <Button onClick={handleExport} disabled={selectedIds.length === 0} className="w-full">
-              <Download className="mr-2 h-4 w-4" />
-              Export {selectedIds.length} Prompt{selectedIds.length !== 1 ? "s" : ""}
+            <Button onClick={handleExport} disabled={selectedIds.length === 0 || exporting} className="w-full">
+              {exporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+              {exporting ? "Exporting..." : `Export ${selectedIds.length} Prompt${selectedIds.length !== 1 ? "s" : ""}`}
             </Button>
           </div>
         ) : (

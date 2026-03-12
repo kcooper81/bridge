@@ -27,7 +27,7 @@ export default function SettingsPage() {
     fetch("/api/admin/seo/indexnow?setting=auto")
       .then((r) => r.json())
       .then((d) => { if (d.autoSubmit !== undefined) setAutoIndexNow(d.autoSubmit); })
-      .catch(() => {});
+      .catch(() => { /* non-critical: settings load on next refresh */ });
   }, []);
 
   async function toggleAutoIndexNow(enabled: boolean) {

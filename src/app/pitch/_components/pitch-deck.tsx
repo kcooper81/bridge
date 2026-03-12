@@ -29,7 +29,6 @@ import {
   Server,
   Database,
   Code2,
-  Brain,
   Puzzle,
   Briefcase,
   Scale,

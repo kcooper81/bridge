@@ -49,28 +49,28 @@ const PROFORMA_ORGANIC = [
 ];
 
 // With paid marketing: ad spend + marketing contractor accelerate acquisition
-// Growth: ~15-20% MoM (M3-6) as ads kick in, moderating to 5-8% by M13+
+// Growth: ~18-23% MoM (M3-6) as ads kick in, moderating to 3-7% by M13+
 // People: marketing contractor M2+ ($3,500), support M4+ ($2,500→$3,000),
 //         security engineer M7+ ($4,500), ad spend M2+ ($2K→$7K)
 const PROFORMA_FUNDED = [
   { month: "M1",  mrr: 13500,  opex: 2000,  stripe: 473 },
-  { month: "M2",  mrr: 15500,  opex: 7500,  stripe: 543 },
-  { month: "M3",  mrr: 18000,  opex: 9000,  stripe: 630 },
-  { month: "M4",  mrr: 21000,  opex: 13000, stripe: 735 },
-  { month: "M5",  mrr: 25000,  opex: 13000, stripe: 875 },
-  { month: "M6",  mrr: 30000,  opex: 13000, stripe: 1050 },
-  { month: "M7",  mrr: 34500,  opex: 20000, stripe: 1208 },
-  { month: "M8",  mrr: 39000,  opex: 20000, stripe: 1365 },
-  { month: "M9",  mrr: 43500,  opex: 20000, stripe: 1523 },
-  { month: "M10", mrr: 48000,  opex: 20500, stripe: 1680 },
-  { month: "M11", mrr: 52500,  opex: 20500, stripe: 1838 },
-  { month: "M12", mrr: 57000,  opex: 21000, stripe: 1995 },
-  { month: "M13", mrr: 61000,  opex: 21500, stripe: 2135 },
-  { month: "M14", mrr: 64500,  opex: 21500, stripe: 2258 },
-  { month: "M15", mrr: 67500,  opex: 21500, stripe: 2363 },
-  { month: "M16", mrr: 70000,  opex: 21500, stripe: 2450 },
-  { month: "M17", mrr: 72500,  opex: 21500, stripe: 2538 },
-  { month: "M18", mrr: 75000,  opex: 21500, stripe: 2625 },
+  { month: "M2",  mrr: 16000,  opex: 7500,  stripe: 560 },
+  { month: "M3",  mrr: 19500,  opex: 9000,  stripe: 683 },
+  { month: "M4",  mrr: 24000,  opex: 13000, stripe: 840 },
+  { month: "M5",  mrr: 29500,  opex: 13500, stripe: 1033 },
+  { month: "M6",  mrr: 35500,  opex: 14000, stripe: 1243 },
+  { month: "M7",  mrr: 41500,  opex: 20500, stripe: 1453 },
+  { month: "M8",  mrr: 47000,  opex: 21000, stripe: 1645 },
+  { month: "M9",  mrr: 52000,  opex: 21000, stripe: 1820 },
+  { month: "M10", mrr: 56500,  opex: 21500, stripe: 1978 },
+  { month: "M11", mrr: 61000,  opex: 21500, stripe: 2135 },
+  { month: "M12", mrr: 65000,  opex: 22000, stripe: 2275 },
+  { month: "M13", mrr: 69000,  opex: 22000, stripe: 2415 },
+  { month: "M14", mrr: 72500,  opex: 22000, stripe: 2538 },
+  { month: "M15", mrr: 75500,  opex: 22000, stripe: 2643 },
+  { month: "M16", mrr: 78000,  opex: 22000, stripe: 2730 },
+  { month: "M17", mrr: 80000,  opex: 22000, stripe: 2800 },
+  { month: "M18", mrr: 82000,  opex: 22000, stripe: 2870 },
 ];
 
 // ─── Monthly operating costs at scale tiers ─────────────────────
@@ -259,7 +259,7 @@ export function BusinessPlan({ shareToken }: { shareToken: string }) {
           </h1>
           <p className="text-base text-zinc-600 max-w-2xl">
             Detailed financial projections, unit economics, cost structure, hiring plan,
-            and strategy for scaling TeamPrompt from $12K to $75K MRR.
+            and strategy for scaling TeamPrompt from $13.5K to $82K MRR.
           </p>
         </div>
 
@@ -272,7 +272,7 @@ export function BusinessPlan({ shareToken }: { shareToken: string }) {
             {[
               { label: "Starting MRR", value: "$13.5K", sub: "Current" },
               { label: "Organic M18", value: fmt(organicRows[organicRows.length - 1].mrr), sub: "$450K ARR" },
-              { label: "Funded M18", value: fmt(fundedRows[fundedRows.length - 1].mrr), sub: "$900K ARR" },
+              { label: "Funded M18", value: fmt(fundedRows[fundedRows.length - 1].mrr), sub: "$984K ARR" },
               { label: "M18 Net (Funded)", value: fmt(fundedRows[fundedRows.length - 1].net), sub: "/month" },
             ].map((s) => (
               <Card key={s.label}>
@@ -622,8 +622,8 @@ export function BusinessPlan({ shareToken }: { shareToken: string }) {
                     { phase: "M1 (Solo)", mrr: "$13.5K", cost: "$0", pct: "0%" },
                     { phase: "M2-3 (+ Mktg contractor)", mrr: "$15.5-18K", cost: "$3,500", pct: "19-23%" },
                     { phase: "M4-6 (+ Support person)", mrr: "$21-30K", cost: "$9,000", pct: "30-43%" },
-                    { phase: "M7-12 (+ Security eng)", mrr: "$34.5-57K", cost: "$13,500", pct: "24-39%" },
-                    { phase: "M13-18 (Full team)", mrr: "$61-75K", cost: "$13,500", pct: "18-22%" },
+                    { phase: "M7-12 (+ Security eng)", mrr: "$41.5-65K", cost: "$13,500", pct: "21-33%" },
+                    { phase: "M13-18 (Full team)", mrr: "$69-82K", cost: "$13,500", pct: "16-20%" },
                   ].map((row) => (
                     <tr key={row.phase} className="border-b border-zinc-100">
                       <td className="py-2.5 px-3 text-zinc-600">{row.phase}</td>
@@ -935,16 +935,16 @@ export function BusinessPlan({ shareToken }: { shareToken: string }) {
                 {
                   phase: "Phase 3: Scale",
                   months: "Month 7-12",
-                  mrr: "$34.5K to $57K",
+                  mrr: "$41.5K to $65K",
                   focus: "Hire security engineer, launch Business tier with enterprise features, SOC 2 compliance, scale ad spend to $7K/mo",
-                  milestone: "$57K MRR, $50K+/mo net income",
+                  milestone: "$65K MRR, $40K+/mo net income",
                 },
                 {
                   phase: "Phase 4: Position for Seed",
                   months: "Month 13-18",
-                  mrr: "$61K to $75K",
-                  focus: "Hit $900K ARR run rate, build case for seed round, explore strategic partnerships, expand internationally",
-                  milestone: "$75K MRR / $900K ARR — seed round ready",
+                  mrr: "$69K to $82K",
+                  focus: "Hit $1M ARR run rate, build case for seed round, explore strategic partnerships, expand internationally",
+                  milestone: "$82K MRR / ~$1M ARR — seed round ready",
                 },
               ].map((p, i) => (
                 <div key={p.phase} className={cn(

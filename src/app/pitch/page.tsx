@@ -10,5 +10,6 @@ export const metadata: Metadata = generatePageMetadata({
 });
 
 export default function PitchPage() {
-  return <PitchDeck />;
+  const shareToken = process.env.PITCH_SHARE_TOKEN ?? "";
+  return <PitchDeck shareToken={shareToken} />;
 }

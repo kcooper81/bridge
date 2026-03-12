@@ -34,6 +34,7 @@ interface NavBadgeCounts {
   pastDueSubs: number;
   newSubs: number;
   newSignups: number;
+  newUsers: number;
 }
 
 interface NavItem {
@@ -74,7 +75,7 @@ const navGroups: NavGroup[] = [
     supportVisible: false,
     items: [
       { href: "/admin/organizations", label: "Organizations", icon: Building2, badgeKey: "newSignups" as const, supportVisible: false },
-      { href: "/admin/users", label: "Users", icon: Users, badgeKey: null, supportVisible: false },
+      { href: "/admin/users", label: "Users", icon: Users, badgeKey: "newUsers" as const, supportVisible: false },
       { href: "/admin/subscriptions", label: "Subscriptions", icon: CreditCard, badgeKey: "newSubs" as const, supportVisible: false },
     ],
   },
@@ -114,6 +115,7 @@ export function AdminNav({ superAdminRole, supportAllowedPages }: { superAdminRo
     pastDueSubs: 0,
     newSubs: 0,
     newSignups: 0,
+    newUsers: 0,
   });
   const prevTicketCount = useRef(0);
 
@@ -138,54 +140,85 @@ export function AdminNav({ superAdminRole, supportAllowedPages }: { superAdminRo
 
   const loadBadgeCounts = useCallback(async () => {
     const supabase = createClient();
-    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const fallbackDate = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 
-    const [ticketsResult, errorsResult, pastDueResult, newSubsResult, newSignupsResult] = await Promise.all([
-      supabase
+    // Get current admin for per-user read tracking
+    const { data: { user } } = await supabase.auth.getUser();
+    const adminId = user?.id;
+
+    // ── Tickets: count unread inbox tickets for this admin ──
+    let unreadTicketCount = 0;
+    if (adminId) {
+      // Get ticket IDs this admin has already read
+      const { data: readTickets } = await supabase
+        .from("ticket_reads")
+        .select("ticket_id")
+        .eq("admin_id", adminId);
+      const readIds = (readTickets || []).map((r) => r.ticket_id);
+
+      // Count inbox tickets not yet read by this admin
+      let ticketQuery = supabase
         .from("feedback")
         .select("*", { count: "exact", head: true })
-        .eq("status", "new"),
-      supabase
-        .from("error_logs")
-        .select("*", { count: "exact", head: true })
-        .eq("resolved", false),
-      supabase
-        .from("subscriptions")
-        .select("*", { count: "exact", head: true })
-        .eq("status", "past_due"),
-      supabase
-        .from("subscriptions")
-        .select("*", { count: "exact", head: true })
-        .gte("created_at", oneDayAgo),
-      supabase
-        .from("organizations")
-        .select("*", { count: "exact", head: true })
-        .gte("created_at", oneDayAgo),
-    ]);
+        .eq("folder", "inbox")
+        .in("status", ["new", "in_progress"]);
+      if (readIds.length > 0) {
+        ticketQuery = ticketQuery.not("id", "in", `(${readIds.join(",")})`);
+      }
+      const { count } = await ticketQuery;
+      unreadTicketCount = count || 0;
+    }
 
-    const newTicketCount = ticketsResult.count || 0;
-    const prevCount = prevTicketCount.current;
+    // ── Errors: unchanged ──
+    const { count: errorCount } = await supabase
+      .from("error_logs")
+      .select("*", { count: "exact", head: true })
+      .eq("resolved", false);
+
+    // ── Subscriptions: past_due always shown; new subs since last viewed ──
+    const lastViewedSubs = (typeof window !== "undefined" && localStorage.getItem("admin_last_viewed_subs")) || fallbackDate;
+    const [pastDueResult, newSubsResult] = await Promise.all([
+      supabase.from("subscriptions").select("*", { count: "exact", head: true }).eq("status", "past_due"),
+      supabase.from("subscriptions").select("*", { count: "exact", head: true }).gte("created_at", lastViewedSubs),
+    ]);
     const pastDueCount = pastDueResult.count || 0;
     const newSubsCount = newSubsResult.count || 0;
 
+    // ── Organizations: new signups since last viewed ──
+    const lastViewedOrgs = (typeof window !== "undefined" && localStorage.getItem("admin_last_viewed_orgs")) || fallbackDate;
+    const { count: newSignupsCount } = await supabase
+      .from("organizations")
+      .select("*", { count: "exact", head: true })
+      .gte("created_at", lastViewedOrgs);
+
+    // ── Users: new signups since last viewed ──
+    const lastViewedUsers = (typeof window !== "undefined" && localStorage.getItem("admin_last_viewed_users")) || fallbackDate;
+    const { count: newUsersCount } = await supabase
+      .from("profiles")
+      .select("*", { count: "exact", head: true })
+      .gte("created_at", lastViewedUsers);
+
+    const prevCount = prevTicketCount.current;
+
     setBadges({
-      newTickets: newTicketCount,
-      unresolvedErrors: errorsResult.count || 0,
+      newTickets: unreadTicketCount,
+      unresolvedErrors: errorCount || 0,
       pastDueSubs: pastDueCount,
       newSubs: pastDueCount > 0 ? pastDueCount : newSubsCount,
-      newSignups: newSignupsResult.count || 0,
+      newSignups: newSignupsCount || 0,
+      newUsers: newUsersCount || 0,
     });
 
     // Browser notification if ticket count increased (and not first load)
-    if (prevCount > 0 && newTicketCount > prevCount) {
-      const diff = newTicketCount - prevCount;
+    if (prevCount > 0 && unreadTicketCount > prevCount) {
+      const diff = unreadTicketCount - prevCount;
       showBrowserNotification(
         `${diff} new ticket${diff > 1 ? "s" : ""}`,
         "New support ticket received in TeamPrompt"
       );
     }
 
-    prevTicketCount.current = newTicketCount;
+    prevTicketCount.current = unreadTicketCount;
   }, []);
 
   useEffect(() => {
@@ -211,6 +244,8 @@ export function AdminNav({ superAdminRole, supportAllowedPages }: { superAdminRo
         loadBadgeCounts();
         showBrowserNotification("New signup", "A new organization signed up for TeamPrompt");
       })
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "ticket_reads" }, () => loadBadgeCounts())
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "profiles" }, () => loadBadgeCounts())
       .subscribe();
 
     // Request notification permission on mount
@@ -223,6 +258,24 @@ export function AdminNav({ superAdminRole, supportAllowedPages }: { superAdminRo
       supabase.removeChannel(feedbackChannel);
     };
   }, [loadBadgeCounts]);
+
+  // Mark pages as "viewed" when navigating to them — clears badge counts
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    if (pathname === "/admin/organizations" || pathname.startsWith("/admin/organizations/")) {
+      localStorage.setItem("admin_last_viewed_orgs", new Date().toISOString());
+      setBadges((prev) => ({ ...prev, newSignups: 0 }));
+    }
+    if (pathname === "/admin/subscriptions" || pathname.startsWith("/admin/subscriptions/")) {
+      localStorage.setItem("admin_last_viewed_subs", new Date().toISOString());
+      setBadges((prev) => ({ ...prev, newSubs: prev.pastDueSubs }));
+    }
+    if (pathname === "/admin/users" || pathname.startsWith("/admin/users/")) {
+      localStorage.setItem("admin_last_viewed_users", new Date().toISOString());
+      setBadges((prev) => ({ ...prev, newUsers: 0 }));
+    }
+  }, [pathname]);
 
   const renderNavItem = (item: NavItem, mobile?: boolean) => {
     const isActive =
@@ -250,11 +303,9 @@ export function AdminNav({ superAdminRole, supportAllowedPages }: { superAdminRo
             "ml-auto flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] font-medium",
             item.badgeKey === "newSubs" && badges.pastDueSubs > 0
               ? "bg-red-500/15 text-red-400"
-              : item.badgeKey === "newSubs"
+              : item.badgeKey === "newSubs" || item.badgeKey === "newSignups" || item.badgeKey === "newUsers"
                 ? "bg-green-500/15 text-green-400"
-                : item.badgeKey === "newSignups"
-                  ? "bg-green-500/15 text-green-400"
-                  : "bg-blue-500/15 text-blue-400"
+                : "bg-blue-500/15 text-blue-400"
           )}>
             {badgeCount > 99 ? "99+" : badgeCount}
           </span>

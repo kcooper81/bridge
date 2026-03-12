@@ -38,6 +38,7 @@ import {
   X as XIcon,
   Award,
   BadgeCheck,
+  Link2,
 } from "lucide-react";
 
 // ─── Constants ──────────────────────────────────────────────────
@@ -77,9 +78,10 @@ function RevealText({ children, delay = 0, className }: { children: React.ReactN
 
 // ─── Main Component ─────────────────────────────────────────────
 
-export function PitchDeck() {
+export function PitchDeck({ shareToken }: { shareToken: string }) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isScrollMode, setIsScrollMode] = useState(false);
+  const [copied, setCopied] = useState(false);
   const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -133,8 +135,8 @@ export function PitchDeck() {
   const slideProps = (idx: number) => ({
     ref: (el: HTMLDivElement | null) => { slideRefs.current[idx] = el; },
     className: cn(
-      "min-h-screen w-full flex items-center justify-center px-8 py-28 sm:px-16 lg:px-24 relative overflow-hidden",
-      isScrollMode && "border-b border-white/[0.04]",
+      "w-full flex items-center justify-center px-8 sm:px-16 lg:px-24 relative overflow-hidden",
+      isScrollMode ? "min-h-screen py-28 border-b border-white/[0.06]" : "h-screen py-20 overflow-y-auto",
       !isScrollMode && idx !== currentSlide && "hidden"
     ),
   });
@@ -146,7 +148,13 @@ export function PitchDeck() {
   ];
 
   return (
-    <div ref={containerRef} className="relative bg-[#09090b] text-white selection:bg-amber-500/30 selection:text-white">
+    <div
+      ref={containerRef}
+      className={cn(
+        "relative bg-[#09090b] text-white selection:bg-amber-500/30 selection:text-white",
+        !isScrollMode && "h-screen overflow-hidden"
+      )}
+    >
       {/* ─── CSS animations ─── */}
       <style jsx global>{`
         @keyframes grain {
@@ -273,6 +281,19 @@ export function PitchDeck() {
             >
               {isScrollMode ? "Slides" : "Scroll"}
             </button>
+            {shareToken && (
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(`${window.location.origin}/pitch?share=${shareToken}`);
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 2000);
+                }}
+                className="flex items-center gap-1 hover:text-zinc-300 transition-colors border border-zinc-800 rounded px-2 py-0.5"
+              >
+                <Link2 className="h-3 w-3" />
+                {copied ? "Copied!" : "Copy Investor Link"}
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -286,7 +307,7 @@ export function PitchDeck() {
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-amber-500/5 rounded-full blur-[120px] animate-pulse" />
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: "1s" }} />
 
-        <div className="relative z-10 max-w-5xl mx-auto text-center space-y-12">
+        <div className="relative z-10 max-w-5xl mx-auto text-center space-y-8 pt-8">
           <RevealText>
             <div className="flex justify-center">
               <div className="relative bg-white rounded-2xl p-3 shadow-xl shadow-black/20">
@@ -301,7 +322,7 @@ export function PitchDeck() {
           </RevealText>
 
           <RevealText delay={150}>
-            <h1 className="text-6xl sm:text-8xl lg:text-9xl font-black tracking-tighter leading-[0.85]">
+            <h1 className="text-5xl sm:text-7xl font-black tracking-tighter leading-[0.85]">
               Team<span className="gradient-text">Prompt</span>
             </h1>
           </RevealText>
@@ -315,7 +336,7 @@ export function PitchDeck() {
           </RevealText>
 
           <RevealText delay={450}>
-            <div className="flex flex-wrap justify-center gap-3 text-xs text-zinc-500 max-w-md mx-auto">
+            <div className="flex flex-wrap justify-center gap-3 text-sm text-zinc-500 max-w-md mx-auto">
               {["ChatGPT", "Claude", "Gemini", "Copilot", "Perplexity"].map((ai) => (
                 <span key={ai} className="border border-zinc-800 rounded-full px-3 py-1.5 hover:border-zinc-600 transition-colors">
                   {ai}
@@ -341,7 +362,7 @@ export function PitchDeck() {
           </RevealText>
 
           <RevealText delay={700}>
-            <p className="text-zinc-600 text-xs tracking-widest uppercase">
+            <p className="text-zinc-600 text-sm tracking-widest uppercase">
               All organic growth &middot; Zero marketing spend
             </p>
           </RevealText>
@@ -361,12 +382,12 @@ export function PitchDeck() {
         <div className="absolute inset-0 grain-overlay" />
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500/0 via-red-500/50 to-red-500/0" />
 
-        <div className="relative z-10 max-w-5xl mx-auto space-y-10">
+        <div className="relative z-10 max-w-5xl mx-auto space-y-8">
           <RevealText>
             <p className="text-sm font-bold uppercase tracking-[0.3em] text-red-400/80 mb-4">
               The Problem
             </p>
-            <h2 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight">
+            <h2 className="text-3xl sm:text-4xl font-black leading-tight tracking-tight">
               Your team is<br />
               <span className="text-red-400">bleeding AI productivity.</span>
             </h2>
@@ -434,7 +455,7 @@ export function PitchDeck() {
                   <div className="h-1.5 rounded-full bg-white/[0.03] overflow-hidden mb-2">
                     <div className={cn("h-full rounded-full bg-gradient-to-r", s.color)} style={{ width: s.width }} />
                   </div>
-                  <p className="text-xs text-zinc-500 leading-relaxed">{s.label}</p>
+                  <p className="text-sm text-zinc-500 leading-relaxed">{s.label}</p>
                 </div>
               ))}
             </div>
@@ -449,12 +470,12 @@ export function PitchDeck() {
         <div className="absolute inset-0 grain-overlay" />
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-amber-500/0 via-amber-500/50 to-amber-500/0" />
 
-        <div className="relative z-10 max-w-5xl mx-auto space-y-10">
+        <div className="relative z-10 max-w-5xl mx-auto space-y-8">
           <RevealText>
             <p className="text-sm font-bold uppercase tracking-[0.3em] text-amber-400/80 mb-4">
               The Solution
             </p>
-            <h2 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight">
+            <h2 className="text-3xl sm:text-4xl font-black leading-tight tracking-tight">
               One shared library.<br />
               Every AI tool.<br />
               <span className="gradient-text">Complete governance.</span>
@@ -512,7 +533,7 @@ export function PitchDeck() {
                 <div key={f.label} className="glow-card rounded-xl p-4">
                   <f.icon className="h-4 w-4 text-amber-400/60 mb-2" />
                   <p className="font-semibold text-xs">{f.label}</p>
-                  <p className="text-xs text-zinc-500 mt-1 leading-relaxed">{f.desc}</p>
+                  <p className="text-sm text-zinc-500 mt-1 leading-relaxed">{f.desc}</p>
                 </div>
               ))}
             </div>
@@ -532,13 +553,13 @@ export function PitchDeck() {
       <div {...slideProps(3)}>
         <div className="absolute inset-0 grain-overlay" />
 
-        <div className="relative z-10 max-w-5xl mx-auto space-y-10">
+        <div className="relative z-10 max-w-5xl mx-auto space-y-8">
           <RevealText>
             <div className="text-center">
               <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-400/80 mb-4">
                 The Product
               </p>
-              <h2 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight">
+              <h2 className="text-3xl sm:text-4xl font-black leading-tight tracking-tight">
                 Built. Shipped. <span className="gradient-text-blue">Live.</span>
               </h2>
             </div>
@@ -577,12 +598,12 @@ export function PitchDeck() {
         <div className="absolute inset-0 grain-overlay" />
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500/0 via-emerald-500/50 to-emerald-500/0" />
 
-        <div className="relative z-10 max-w-5xl mx-auto space-y-10">
+        <div className="relative z-10 max-w-5xl mx-auto space-y-8">
           <RevealText>
             <p className="text-sm font-bold uppercase tracking-[0.3em] text-emerald-400/80 mb-4">
               Market Opportunity
             </p>
-            <h2 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight">
+            <h2 className="text-3xl sm:text-4xl font-black leading-tight tracking-tight">
               $50B market.<br />
               <span className="text-emerald-400">No one owns AI governance for teams.</span>
             </h2>
@@ -660,7 +681,7 @@ export function PitchDeck() {
         <div className="absolute inset-0 grain-overlay" />
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-amber-500/0 via-amber-500/50 to-amber-500/0" />
 
-        <div className="relative z-10 max-w-5xl mx-auto space-y-10">
+        <div className="relative z-10 max-w-5xl mx-auto space-y-8">
           <RevealText>
             <p className="text-sm font-bold uppercase tracking-[0.3em] text-amber-400/80 mb-4">
               Competitive Edge
@@ -761,12 +782,12 @@ export function PitchDeck() {
       <div {...slideProps(6)}>
         <div className="absolute inset-0 grain-overlay" />
 
-        <div className="relative z-10 max-w-5xl mx-auto space-y-10">
+        <div className="relative z-10 max-w-5xl mx-auto space-y-8">
           <RevealText>
             <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-400/80 mb-4">
               Business Model
             </p>
-            <h2 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight">
+            <h2 className="text-3xl sm:text-4xl font-black leading-tight tracking-tight">
               Freemium SaaS.
               <br />
               <span className="text-zinc-500">Customers already paying.</span>
@@ -838,12 +859,12 @@ export function PitchDeck() {
         <div className="absolute inset-0 grain-overlay" />
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500/0 via-emerald-500/50 to-emerald-500/0" />
 
-        <div className="relative z-10 max-w-5xl mx-auto space-y-10">
+        <div className="relative z-10 max-w-5xl mx-auto space-y-8">
           <RevealText>
             <p className="text-sm font-bold uppercase tracking-[0.3em] text-emerald-400/80 mb-4">
               Traction
             </p>
-            <h2 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight">
+            <h2 className="text-3xl sm:text-4xl font-black leading-tight tracking-tight">
               Product-market fit.<br />
               <span className="text-emerald-400">Proven.</span>
             </h2>
@@ -914,12 +935,12 @@ export function PitchDeck() {
       <div {...slideProps(8)}>
         <div className="absolute inset-0 grain-overlay" />
 
-        <div className="relative z-10 max-w-5xl mx-auto space-y-10">
+        <div className="relative z-10 max-w-5xl mx-auto space-y-8">
           <RevealText>
             <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-400/80 mb-4">
               Architecture
             </p>
-            <h2 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight">
+            <h2 className="text-3xl sm:text-4xl font-black leading-tight tracking-tight">
               Enterprise-grade. <span className="text-zinc-500">Solo-built.</span>
             </h2>
           </RevealText>
@@ -968,7 +989,7 @@ export function PitchDeck() {
                   ].map((feat) => (
                     <div key={feat} className="flex gap-2 items-start">
                       <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 shrink-0 mt-0.5" />
-                      <p className="text-xs text-zinc-400">{feat}</p>
+                      <p className="text-sm text-zinc-400">{feat}</p>
                     </div>
                   ))}
                 </div>
@@ -1019,12 +1040,12 @@ export function PitchDeck() {
         <div className="absolute inset-0 grain-overlay" />
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500/0 via-purple-500/50 to-purple-500/0" />
 
-        <div className="relative z-10 max-w-4xl mx-auto space-y-10">
+        <div className="relative z-10 max-w-4xl mx-auto space-y-8">
           <RevealText>
             <p className="text-sm font-bold uppercase tracking-[0.3em] text-purple-400/80 mb-4">
               The Team
             </p>
-            <h2 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight">
+            <h2 className="text-3xl sm:text-4xl font-black leading-tight tracking-tight">
               Built by someone who<br />
               <span className="text-purple-400">lives the problem.</span>
             </h2>
@@ -1074,7 +1095,7 @@ export function PitchDeck() {
                     { icon: DollarSign, text: "Capital efficient execution" },
                     { icon: Rocket, text: "Proven ability to ship complex systems" },
                   ].map((item) => (
-                    <div key={item.text} className="flex gap-2 items-start text-xs text-zinc-500">
+                    <div key={item.text} className="flex gap-2 items-start text-sm text-zinc-500">
                       <item.icon className="h-3.5 w-3.5 text-amber-400 shrink-0 mt-0.5" />
                       <span>{item.text}</span>
                     </div>
@@ -1099,12 +1120,12 @@ export function PitchDeck() {
         <div className="absolute inset-0 grain-overlay" />
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-amber-500/0 via-amber-500/50 to-amber-500/0" />
 
-        <div className="relative z-10 max-w-5xl mx-auto space-y-10">
+        <div className="relative z-10 max-w-5xl mx-auto space-y-8">
           <RevealText>
             <p className="text-sm font-bold uppercase tracking-[0.3em] text-amber-400/80 mb-4">
               The Ask
             </p>
-            <h2 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight">
+            <h2 className="text-3xl sm:text-4xl font-black leading-tight tracking-tight">
               <span className="gradient-text">$100K</span> pre-seed.
             </h2>
             <p className="mt-3 text-base text-zinc-500">Capital efficient. Revenue generating. Tax credit eligible.</p>
@@ -1194,12 +1215,12 @@ export function PitchDeck() {
       <div {...slideProps(11)}>
         <div className="absolute inset-0 grain-overlay" />
 
-        <div className="relative z-10 max-w-5xl mx-auto space-y-10">
+        <div className="relative z-10 max-w-5xl mx-auto space-y-8">
           <RevealText>
             <p className="text-sm font-bold uppercase tracking-[0.3em] text-emerald-400/80 mb-4">
               Growth Plan
             </p>
-            <h2 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight">
+            <h2 className="text-3xl sm:text-4xl font-black leading-tight tracking-tight">
               18-Month Targets
             </h2>
           </RevealText>
@@ -1295,7 +1316,7 @@ export function PitchDeck() {
               <p className="text-sm font-bold uppercase tracking-[0.3em] text-amber-400/80">
                 The Vision
               </p>
-              <h2 className="text-5xl sm:text-7xl font-black leading-[0.85] tracking-tighter">
+              <h2 className="text-4xl sm:text-5xl font-black leading-tight tracking-tighter">
                 How teams share,<br />
                 govern, and protect<br />
                 <span className="gradient-text">their AI usage.</span>
@@ -1353,7 +1374,7 @@ export function PitchDeck() {
               </div>
             </div>
             <Link
-              href="/pitch/plan"
+              href={shareToken ? `/pitch/plan?share=${shareToken}` : "/pitch/plan"}
               className="inline-block mt-6 text-sm text-amber-400 hover:text-amber-300 border border-amber-400/20 hover:border-amber-400/40 rounded-full px-6 py-2 transition-colors"
             >
               View Full Business Plan & Proforma →

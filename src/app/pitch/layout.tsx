@@ -3,5 +3,5 @@ export default function PitchLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return <div className="bg-[#09090b] min-h-screen">{children}</div>;
 }

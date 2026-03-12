@@ -85,11 +85,21 @@ export async function middleware(request: NextRequest) {
     return resp;
   }
 
+  // Pitch share token: allow investors to view /pitch pages with a valid token
+  const isPitchShareValid =
+    pathname.startsWith("/pitch") &&
+    (() => {
+      const shareToken = request.nextUrl.searchParams.get("share");
+      const validToken = process.env.PITCH_SHARE_TOKEN;
+      return !!(shareToken && validToken && shareToken === validToken);
+    })();
+
   // Unauthenticated users on protected pages → redirect to login
   if (
     !user &&
     !isPublicRoute(pathname) &&
     !isAuthRoute(pathname) &&
+    !isPitchShareValid &&
     !pathname.startsWith("/api/") &&
     !pathname.startsWith("/auth/") &&
     pathname !== "/invite" &&

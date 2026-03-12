@@ -270,7 +270,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 max-w-2xl mx-auto pt-4">
               {[
                 { value: "1,200+", label: "Active users" },
-                { value: "$12K", label: "MRR" },
+                { value: "$13.5K", label: "MRR" },
                 { value: "85", label: "Paying teams" },
                 { value: "4.8★", label: "Chrome Store" },
               ].map((s) => (
@@ -485,9 +485,9 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
 
           <div className="grid sm:grid-cols-2 gap-5">
             {[
-              { src: "/store-assets/screenshot-light-1-prompts.png", alt: "Prompt library", label: "Shared prompt library with usage analytics and categories" },
-              { src: "/store-assets/screenshot-light-2-dashboard.png", alt: "Admin dashboard", label: "Admin dashboard — MRR, users, protection coverage at a glance" },
-              { src: "/store-assets/screenshot-light-6-insert.png", alt: "One-click insert", label: "One-click insert into ChatGPT, Claude, Gemini, Copilot, Perplexity" },
+              { src: "/store-assets/promo-marquee.png", alt: "TeamPrompt overview", label: "Secure prompt sharing and AI governance for teams" },
+              { src: "/store-assets/screenshot-light-1-prompts.png", alt: "Prompt library", label: "Shared prompt library with categories and one-click insert" },
+              { src: "/store-assets/screenshot-light-5-template.png", alt: "Template variables", label: "Dynamic templates with fill-in variables for consistent team workflows" },
               { src: "/store-assets/screenshot-light-3-dlp-block.png", alt: "DLP protection", label: "Real-time DLP blocks API keys, credentials, and PII before it reaches AI" },
             ].map((img, i) => (
               <RevealText key={img.alt} delay={i * 120}>
@@ -984,7 +984,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
                   </li>
                   <li className="flex gap-3">
                     <CheckCircle2 className="h-4 w-4 text-blue-600 shrink-0 mt-0.5" />
-                    <span>$0 to $12K MRR with zero funding, zero marketing spend</span>
+                    <span>$0 to $13.5K MRR with zero funding, zero marketing spend</span>
                   </li>
                   <li className="flex gap-3">
                     <CheckCircle2 className="h-4 w-4 text-blue-600 shrink-0 mt-0.5" />
@@ -1140,9 +1140,9 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               {[
                 { metric: "Active Users", from: "1,200", to: "5,000", icon: Users },
-                { metric: "MRR", from: "$12K", to: "$75K", icon: TrendingUp },
+                { metric: "MRR", from: "$13.5K", to: "$82K", icon: TrendingUp },
                 { metric: "Paying Teams", from: "85", to: "200", icon: Building2 },
-                { metric: "ARR Run Rate", from: "$144K", to: "$900K", icon: DollarSign },
+                { metric: "ARR Run Rate", from: "$162K", to: "$984K", icon: DollarSign },
               ].map((t) => (
                 <div key={t.metric} className="bg-white rounded-xl border border-zinc-200 shadow-sm p-5 text-center">
                   <t.icon className="h-4 w-4 text-zinc-400 mx-auto mb-2" />
@@ -1169,7 +1169,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
                   },
                   {
                     q: "Why not raise more money?",
-                    a: "Capital efficient. $100K gives us 18 months to $75K MRR — a strong seed round position.",
+                    a: "Capital efficient. $100K gives us 18 months to $82K MRR — a strong seed round position.",
                     icon: DollarSign,
                   },
                   {
@@ -1207,7 +1207,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
 
           <RevealText delay={500}>
             <p className="text-center text-sm text-zinc-400 font-mono">
-              $75K MRR = $900K ARR → Strong seed round position
+              $82K MRR = $984K ARR → Strong seed round position
             </p>
           </RevealText>
         </div>

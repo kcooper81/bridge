@@ -28,49 +28,51 @@ import {
 // Growth: ~7-8% MoM slowing to ~4-5% (SEO + Chrome Store + WOM)
 // People: support person M4+ ($2,500), security engineer M7+ ($4,500)
 const PROFORMA_ORGANIC = [
-  { month: "M1",  mrr: 13500,  opex: 2000,  stripe: 473 },
-  { month: "M2",  mrr: 14600,  opex: 2000,  stripe: 511 },
-  { month: "M3",  mrr: 15700,  opex: 2000,  stripe: 550 },
-  { month: "M4",  mrr: 16900,  opex: 4500,  stripe: 592 },
-  { month: "M5",  mrr: 18200,  opex: 4500,  stripe: 637 },
-  { month: "M6",  mrr: 19600,  opex: 4500,  stripe: 686 },
-  { month: "M7",  mrr: 21000,  opex: 9000,  stripe: 735 },
-  { month: "M8",  mrr: 22500,  opex: 9000,  stripe: 788 },
-  { month: "M9",  mrr: 24000,  opex: 9000,  stripe: 840 },
-  { month: "M10", mrr: 25500,  opex: 9000,  stripe: 893 },
-  { month: "M11", mrr: 27000,  opex: 9000,  stripe: 945 },
-  { month: "M12", mrr: 28500,  opex: 9000,  stripe: 998 },
-  { month: "M13", mrr: 30000,  opex: 9500,  stripe: 1050 },
-  { month: "M14", mrr: 31500,  opex: 9500,  stripe: 1103 },
-  { month: "M15", mrr: 33000,  opex: 9500,  stripe: 1155 },
-  { month: "M16", mrr: 34500,  opex: 9500,  stripe: 1208 },
-  { month: "M17", mrr: 36000,  opex: 9500,  stripe: 1260 },
-  { month: "M18", mrr: 37500,  opex: 9500,  stripe: 1313 },
+  { month: "M1",  mrr: 13500,  opex: 2000,  adSpend: 0, stripe: 473 },
+  { month: "M2",  mrr: 14600,  opex: 2000,  adSpend: 0, stripe: 511 },
+  { month: "M3",  mrr: 15700,  opex: 2000,  adSpend: 0, stripe: 550 },
+  { month: "M4",  mrr: 16900,  opex: 4500,  adSpend: 0, stripe: 592 },
+  { month: "M5",  mrr: 18200,  opex: 4500,  adSpend: 0, stripe: 637 },
+  { month: "M6",  mrr: 19600,  opex: 4500,  adSpend: 0, stripe: 686 },
+  { month: "M7",  mrr: 21000,  opex: 9000,  adSpend: 0, stripe: 735 },
+  { month: "M8",  mrr: 22500,  opex: 9000,  adSpend: 0, stripe: 788 },
+  { month: "M9",  mrr: 24000,  opex: 9000,  adSpend: 0, stripe: 840 },
+  { month: "M10", mrr: 25500,  opex: 9000,  adSpend: 0, stripe: 893 },
+  { month: "M11", mrr: 27000,  opex: 9000,  adSpend: 0, stripe: 945 },
+  { month: "M12", mrr: 28500,  opex: 9000,  adSpend: 0, stripe: 998 },
+  { month: "M13", mrr: 30000,  opex: 9500,  adSpend: 0, stripe: 1050 },
+  { month: "M14", mrr: 31500,  opex: 9500,  adSpend: 0, stripe: 1103 },
+  { month: "M15", mrr: 33000,  opex: 9500,  adSpend: 0, stripe: 1155 },
+  { month: "M16", mrr: 34500,  opex: 9500,  adSpend: 0, stripe: 1208 },
+  { month: "M17", mrr: 36000,  opex: 9500,  adSpend: 0, stripe: 1260 },
+  { month: "M18", mrr: 37500,  opex: 9500,  adSpend: 0, stripe: 1313 },
 ];
 
 // With paid marketing: ad spend + marketing contractor accelerate acquisition
 // Growth: ~18-23% MoM (M3-6) as ads kick in, moderating to 3-7% by M13+
 // People: marketing contractor M2+ ($3,500), support M4+ ($2,500→$3,000),
-//         security engineer M7+ ($4,500), ad spend M2+ ($2K→$7K)
+//         security engineer M7+ ($4,500)
+// Ad spend: M2 $2K → M6 $6K → M7+ $7.5-8K (LinkedIn, Google, retargeting)
+// opex = infra + people (excludes ad spend); adSpend shown separately
 const PROFORMA_FUNDED = [
-  { month: "M1",  mrr: 13500,  opex: 2000,  stripe: 473 },
-  { month: "M2",  mrr: 16000,  opex: 7500,  stripe: 560 },
-  { month: "M3",  mrr: 19500,  opex: 9000,  stripe: 683 },
-  { month: "M4",  mrr: 24000,  opex: 13000, stripe: 840 },
-  { month: "M5",  mrr: 29500,  opex: 13500, stripe: 1033 },
-  { month: "M6",  mrr: 35500,  opex: 14000, stripe: 1243 },
-  { month: "M7",  mrr: 41500,  opex: 20500, stripe: 1453 },
-  { month: "M8",  mrr: 47000,  opex: 21000, stripe: 1645 },
-  { month: "M9",  mrr: 52000,  opex: 21000, stripe: 1820 },
-  { month: "M10", mrr: 56500,  opex: 21500, stripe: 1978 },
-  { month: "M11", mrr: 61000,  opex: 21500, stripe: 2135 },
-  { month: "M12", mrr: 65000,  opex: 22000, stripe: 2275 },
-  { month: "M13", mrr: 69000,  opex: 22000, stripe: 2415 },
-  { month: "M14", mrr: 72500,  opex: 22000, stripe: 2538 },
-  { month: "M15", mrr: 75500,  opex: 22000, stripe: 2643 },
-  { month: "M16", mrr: 78000,  opex: 22000, stripe: 2730 },
-  { month: "M17", mrr: 80000,  opex: 22000, stripe: 2800 },
-  { month: "M18", mrr: 82000,  opex: 22000, stripe: 2870 },
+  { month: "M1",  mrr: 13500,  opex: 2000,   adSpend: 0,    stripe: 473 },
+  { month: "M2",  mrr: 16000,  opex: 5500,   adSpend: 2000, stripe: 560 },
+  { month: "M3",  mrr: 19500,  opex: 5500,   adSpend: 3500, stripe: 683 },
+  { month: "M4",  mrr: 24000,  opex: 8000,   adSpend: 5000, stripe: 840 },
+  { month: "M5",  mrr: 29500,  opex: 8000,   adSpend: 5500, stripe: 1033 },
+  { month: "M6",  mrr: 35500,  opex: 8000,   adSpend: 6000, stripe: 1243 },
+  { month: "M7",  mrr: 41500,  opex: 13000,  adSpend: 7500, stripe: 1453 },
+  { month: "M8",  mrr: 47000,  opex: 13000,  adSpend: 8000, stripe: 1645 },
+  { month: "M9",  mrr: 52000,  opex: 13000,  adSpend: 8000, stripe: 1820 },
+  { month: "M10", mrr: 56500,  opex: 13500,  adSpend: 8000, stripe: 1978 },
+  { month: "M11", mrr: 61000,  opex: 13500,  adSpend: 8000, stripe: 2135 },
+  { month: "M12", mrr: 65000,  opex: 14000,  adSpend: 8000, stripe: 2275 },
+  { month: "M13", mrr: 69000,  opex: 14000,  adSpend: 8000, stripe: 2415 },
+  { month: "M14", mrr: 72500,  opex: 14000,  adSpend: 8000, stripe: 2538 },
+  { month: "M15", mrr: 75500,  opex: 14000,  adSpend: 8000, stripe: 2643 },
+  { month: "M16", mrr: 78000,  opex: 14000,  adSpend: 8000, stripe: 2730 },
+  { month: "M17", mrr: 80000,  opex: 14000,  adSpend: 8000, stripe: 2800 },
+  { month: "M18", mrr: 82000,  opex: 14000,  adSpend: 8000, stripe: 2870 },
 ];
 
 // ─── Monthly operating costs at scale tiers ─────────────────────
@@ -189,14 +191,14 @@ export function BusinessPlan({ shareToken }: { shareToken: string }) {
   // Compute cumulative net for both scenarios
   let cumOrg = 0;
   const organicRows = PROFORMA_ORGANIC.map((row) => {
-    const net = row.mrr - row.opex - row.stripe;
+    const net = row.mrr - row.opex - row.adSpend - row.stripe;
     cumOrg += net;
     return { ...row, net, cumulative: cumOrg };
   });
 
   let cumFund = 0;
   const fundedRows = PROFORMA_FUNDED.map((row) => {
-    const net = row.mrr - row.opex - row.stripe;
+    const net = row.mrr - row.opex - row.adSpend - row.stripe;
     cumFund += net;
     return { ...row, net, cumulative: cumFund };
   });
@@ -374,10 +376,11 @@ export function BusinessPlan({ shareToken }: { shareToken: string }) {
                   <tr className="border-b border-zinc-200">
                     <th className="text-left py-2 px-3 text-zinc-500 font-medium">Month</th>
                     <th className="text-right py-2 px-3 text-zinc-500 font-medium">MRR</th>
-                    <th className="text-right py-2 px-3 text-zinc-500 font-medium">Operating Costs</th>
-                    <th className="text-right py-2 px-3 text-zinc-500 font-medium">Stripe Fees</th>
+                    <th className="text-right py-2 px-3 text-zinc-500 font-medium">Opex</th>
+                    <th className="text-right py-2 px-3 text-zinc-500 font-medium">Ad Spend</th>
+                    <th className="text-right py-2 px-3 text-zinc-500 font-medium">Stripe</th>
                     <th className="text-right py-2 px-3 text-zinc-500 font-medium">Net Income</th>
-                    <th className="text-right py-2 px-3 text-zinc-500 font-medium">Cumulative Net</th>
+                    <th className="text-right py-2 px-3 text-zinc-500 font-medium">Cumulative</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -386,6 +389,7 @@ export function BusinessPlan({ shareToken }: { shareToken: string }) {
                       <td className="py-2.5 px-3 font-mono text-zinc-600">{row.month}</td>
                       <td className="text-right py-2.5 px-3 font-mono text-zinc-900">{fmtFull(row.mrr)}</td>
                       <td className="text-right py-2.5 px-3 font-mono text-zinc-600">{fmtFull(row.opex)}</td>
+                      <td className="text-right py-2.5 px-3 font-mono text-blue-600">{row.adSpend > 0 ? fmtFull(row.adSpend) : "—"}</td>
                       <td className="text-right py-2.5 px-3 font-mono text-zinc-500">{fmtFull(row.stripe)}</td>
                       <td className={cn(
                         "text-right py-2.5 px-3 font-mono",
@@ -420,10 +424,11 @@ export function BusinessPlan({ shareToken }: { shareToken: string }) {
                   <tr className="border-b border-zinc-200">
                     <th className="text-left py-2 px-3 text-zinc-500 font-medium">Month</th>
                     <th className="text-right py-2 px-3 text-zinc-500 font-medium">MRR</th>
-                    <th className="text-right py-2 px-3 text-zinc-500 font-medium">Operating Costs</th>
-                    <th className="text-right py-2 px-3 text-zinc-500 font-medium">Stripe Fees</th>
+                    <th className="text-right py-2 px-3 text-zinc-500 font-medium">Opex</th>
+                    <th className="text-right py-2 px-3 text-zinc-500 font-medium">Ad Spend</th>
+                    <th className="text-right py-2 px-3 text-zinc-500 font-medium">Stripe</th>
                     <th className="text-right py-2 px-3 text-zinc-500 font-medium">Net Income</th>
-                    <th className="text-right py-2 px-3 text-zinc-500 font-medium">Cumulative Net</th>
+                    <th className="text-right py-2 px-3 text-zinc-500 font-medium">Cumulative</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -432,6 +437,7 @@ export function BusinessPlan({ shareToken }: { shareToken: string }) {
                       <td className="py-2.5 px-3 font-mono text-zinc-600">{row.month}</td>
                       <td className="text-right py-2.5 px-3 font-mono text-zinc-900">{fmtFull(row.mrr)}</td>
                       <td className="text-right py-2.5 px-3 font-mono text-zinc-600">{fmtFull(row.opex)}</td>
+                      <td className="text-right py-2.5 px-3 font-mono text-zinc-400">—</td>
                       <td className="text-right py-2.5 px-3 font-mono text-zinc-500">{fmtFull(row.stripe)}</td>
                       <td className={cn(
                         "text-right py-2.5 px-3 font-mono",
@@ -620,10 +626,10 @@ export function BusinessPlan({ shareToken }: { shareToken: string }) {
                 <tbody>
                   {[
                     { phase: "M1 (Solo)", mrr: "$13.5K", cost: "$0", pct: "0%" },
-                    { phase: "M2-3 (+ Mktg contractor)", mrr: "$15.5-18K", cost: "$3,500", pct: "19-23%" },
-                    { phase: "M4-6 (+ Support person)", mrr: "$21-30K", cost: "$9,000", pct: "30-43%" },
-                    { phase: "M7-12 (+ Security eng)", mrr: "$41.5-65K", cost: "$13,500", pct: "21-33%" },
-                    { phase: "M13-18 (Full team)", mrr: "$69-82K", cost: "$13,500", pct: "16-20%" },
+                    { phase: "M2-3 (+ Mktg contractor)", mrr: "$16-19.5K", cost: "$3,500", pct: "18-22%" },
+                    { phase: "M4-6 (+ Support person)", mrr: "$24-35.5K", cost: "$6,000", pct: "17-25%" },
+                    { phase: "M7-12 (+ Security eng)", mrr: "$41.5-65K", cost: "$11,000", pct: "17-27%" },
+                    { phase: "M13-18 (Full team)", mrr: "$69-82K", cost: "$11,000", pct: "13-16%" },
                   ].map((row) => (
                     <tr key={row.phase} className="border-b border-zinc-100">
                       <td className="py-2.5 px-3 text-zinc-600">{row.phase}</td>
@@ -666,7 +672,7 @@ export function BusinessPlan({ shareToken }: { shareToken: string }) {
             <Card>
               <div className="flex items-center gap-2 mb-4">
                 <Megaphone className="h-5 w-5 text-zinc-500" />
-                <h4 className="font-bold text-zinc-900">Paid (Funded — $5-7.5K/mo)</h4>
+                <h4 className="font-bold text-zinc-900">Paid (Funded — $2-8K/mo)</h4>
               </div>
               <div className="space-y-3">
                 {[

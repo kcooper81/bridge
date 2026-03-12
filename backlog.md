@@ -254,9 +254,24 @@
   - `auto_deprovision_on_sync` org setting in types.ts
 - [ ] Consider upgrading Vercel to Pro plan for more frequent cron jobs (currently daily on Hobby, ideally every 6 hours for extension checks)
 - [ ] How to handle desktop AI clients (Claude Desktop, ChatGPT Desktop, etc.)
-  - Evaluate options: desktop companion app, system-level proxy, clipboard monitoring
+  - **Not building a full desktop client yet** — ROI doesn't work at solo-founder stage (3 platforms = hiring dependency)
+  - Browser is still dominant; buyers (IT leaders, compliance officers) manage browser envs, not desktops
+  - Evaluate lighter-weight options instead:
+    - System-tray clipboard monitor (Tauri) — scans clipboard before paste into any desktop AI app
+    - OS-level proxy — intercept API calls from desktop clients at network level
+    - MCP Server integration — see below
   - Consider DLP coverage gap — extension only covers browser-based AI tools
   - Research OS-level APIs for input interception on Windows/macOS
+- [ ] **MCP Server for Claude Desktop**
+  - Build a TeamPrompt MCP server that provides prompt library access + DLP scanning inside Claude Desktop
+  - Claude Desktop supports MCP natively — no UI needed, just a server
+  - Low effort, high signal to investors — shows platform extensibility
+  - Could expand to other MCP-compatible clients as ecosystem grows
+- [ ] **Clipboard monitor companion app**
+  - Lightweight Tauri/Electron system-tray app for desktop AI coverage
+  - Monitors clipboard for sensitive data before paste into any desktop AI client
+  - Simpler than a full desktop client — covers the DLP gap without building a whole product
+  - Pairs with the browser extension for complete coverage
 - [x] AI-Powered Guardrail Rule Generation
   - API: `POST /api/guardrails/generate` — OpenAI + Anthropic (Claude) support
   - Anthropic provider added to Detection Settings (type, UI, API key field, info text)

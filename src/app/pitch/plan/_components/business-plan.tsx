@@ -50,29 +50,29 @@ const PROFORMA_ORGANIC = [
 
 // With paid marketing: ad spend + marketing contractor accelerate acquisition
 // Growth: ~10-15% MoM (M3-5) as ads ramp, moderating to 3-5% by M13+
-// People: marketing contractor M2+ ($3,500), support M4+ ($2,500),
-//         security engineer M7+ ($4,500)
-// Ad spend: M2 $2K → M6 $5.5K → M7+ $6-7K (LinkedIn, Google, retargeting)
+// People: marketing contractor M2+ ($2,500), support M5+ ($2,000),
+//         security consultant M10+ ($3,000)
+// Ad spend: M2 $2K → M6 $5K → M9+ $6K (LinkedIn, Google, retargeting)
 // opex = infra + people (excludes ad spend); adSpend shown separately
 const PROFORMA_FUNDED = [
-  { month: "M1",  mrr: 13500,  opex: 2000,   adSpend: 0,    stripe: 473 },
-  { month: "M2",  mrr: 14800,  opex: 5500,   adSpend: 2000, stripe: 518 },
-  { month: "M3",  mrr: 17000,  opex: 5500,   adSpend: 3500, stripe: 595 },
-  { month: "M4",  mrr: 19500,  opex: 8000,   adSpend: 4500, stripe: 683 },
-  { month: "M5",  mrr: 22000,  opex: 8000,   adSpend: 5000, stripe: 770 },
-  { month: "M6",  mrr: 24500,  opex: 8000,   adSpend: 5500, stripe: 858 },
-  { month: "M7",  mrr: 27000,  opex: 13000,  adSpend: 6000, stripe: 945 },
-  { month: "M8",  mrr: 29500,  opex: 13000,  adSpend: 6500, stripe: 1033 },
-  { month: "M9",  mrr: 32000,  opex: 13000,  adSpend: 7000, stripe: 1120 },
-  { month: "M10", mrr: 34500,  opex: 13500,  adSpend: 7000, stripe: 1208 },
-  { month: "M11", mrr: 37000,  opex: 13500,  adSpend: 7000, stripe: 1295 },
-  { month: "M12", mrr: 39000,  opex: 14000,  adSpend: 7000, stripe: 1365 },
-  { month: "M13", mrr: 41000,  opex: 14000,  adSpend: 7000, stripe: 1435 },
-  { month: "M14", mrr: 43000,  opex: 14000,  adSpend: 7000, stripe: 1505 },
-  { month: "M15", mrr: 45000,  opex: 14000,  adSpend: 7000, stripe: 1575 },
-  { month: "M16", mrr: 47000,  opex: 14000,  adSpend: 7000, stripe: 1645 },
-  { month: "M17", mrr: 48500,  opex: 14000,  adSpend: 7000, stripe: 1698 },
-  { month: "M18", mrr: 50000,  opex: 14000,  adSpend: 7000, stripe: 1750 },
+  { month: "M1",  mrr: 13500,  opex: 500,    adSpend: 0,    stripe: 473 },
+  { month: "M2",  mrr: 14800,  opex: 3000,   adSpend: 2000, stripe: 518 },
+  { month: "M3",  mrr: 17000,  opex: 3000,   adSpend: 3000, stripe: 595 },
+  { month: "M4",  mrr: 19500,  opex: 3000,   adSpend: 4000, stripe: 683 },
+  { month: "M5",  mrr: 22000,  opex: 5000,   adSpend: 4000, stripe: 770 },
+  { month: "M6",  mrr: 24500,  opex: 5000,   adSpend: 5000, stripe: 858 },
+  { month: "M7",  mrr: 27000,  opex: 5000,   adSpend: 5000, stripe: 945 },
+  { month: "M8",  mrr: 29500,  opex: 5000,   adSpend: 5000, stripe: 1033 },
+  { month: "M9",  mrr: 32000,  opex: 5000,   adSpend: 6000, stripe: 1120 },
+  { month: "M10", mrr: 34500,  opex: 8000,   adSpend: 6000, stripe: 1208 },
+  { month: "M11", mrr: 37000,  opex: 8000,   adSpend: 6000, stripe: 1295 },
+  { month: "M12", mrr: 39000,  opex: 8000,   adSpend: 6000, stripe: 1365 },
+  { month: "M13", mrr: 41000,  opex: 8000,   adSpend: 6000, stripe: 1435 },
+  { month: "M14", mrr: 43000,  opex: 8000,   adSpend: 6000, stripe: 1505 },
+  { month: "M15", mrr: 45000,  opex: 8000,   adSpend: 6000, stripe: 1575 },
+  { month: "M16", mrr: 47000,  opex: 8000,   adSpend: 6000, stripe: 1645 },
+  { month: "M17", mrr: 48500,  opex: 8000,   adSpend: 6000, stripe: 1698 },
+  { month: "M18", mrr: 50000,  opex: 8000,   adSpend: 6000, stripe: 1750 },
 ];
 
 // ─── Monthly operating costs at scale tiers ─────────────────────
@@ -99,10 +99,9 @@ const COST_BREAKDOWN = {
       { name: "Upstash Redis", cost: 10, note: "" },
       { name: "Domain + DNS", cost: 2, note: "" },
       { name: "Stripe (3.5%)", cost: 1050, note: "$30,000 x 3.5%" },
-      { name: "Support Person (PT)", cost: 2500, note: "" },
-      { name: "Security Engineer (PT)", cost: 4500, note: "" },
-      { name: "Marketing Contractor", cost: 3500, note: "" },
-      { name: "Ad Spend", cost: 6500, note: "" },
+      { name: "Marketing Contractor", cost: 2500, note: "" },
+      { name: "Support Person (PT)", cost: 2000, note: "" },
+      { name: "Ad Spend", cost: 5000, note: "" },
     ],
   },
   scale: {
@@ -114,10 +113,10 @@ const COST_BREAKDOWN = {
       { name: "Resend Pro", cost: 20, note: "" },
       { name: "Domain + DNS", cost: 2, note: "" },
       { name: "Stripe (3.5%)", cost: 1750, note: "$50,000 x 3.5%" },
-      { name: "Support Person (PT)", cost: 2500, note: "" },
-      { name: "Security Engineer (PT)", cost: 4500, note: "" },
-      { name: "Marketing Contractor", cost: 3500, note: "" },
-      { name: "Ad Spend", cost: 7000, note: "" },
+      { name: "Marketing Contractor", cost: 2500, note: "" },
+      { name: "Support Person (PT)", cost: 2000, note: "" },
+      { name: "Security Consultant (PT)", cost: 3000, note: "" },
+      { name: "Ad Spend", cost: 6000, note: "" },
     ],
   },
 };
@@ -574,22 +573,22 @@ export function BusinessPlan({ shareToken }: { shareToken: string }) {
               {
                 role: "Marketing Contractor",
                 when: "Month 2 (~$15K MRR)",
-                cost: "$3,000-5,000/mo",
+                cost: "$2,000-3,000/mo",
                 why: "Manages the full paid acquisition funnel: LinkedIn and Google ad campaigns (creative, targeting, A/B testing, budget optimization), writes SEO blog content and landing pages, produces customer case studies for legal/healthcare/finance verticals, and builds email nurture sequences for free-tier users. This role is the bridge from $0 organic-only growth to a repeatable, scalable acquisition engine that targets $150 CAC.",
                 icon: Megaphone,
               },
               {
                 role: "Part-Time Support Person",
-                when: "Month 4 (~$19.5K MRR)",
-                cost: "$2,000-3,000/mo",
+                when: "Month 5 (~$22K MRR)",
+                cost: "$1,500-2,500/mo",
                 why: "As the user base grows past 1,500 users, support ticket volume will exceed what a solo founder can handle while still shipping product. This person handles inbound tickets, runs onboarding calls with new teams, writes and maintains help documentation, monitors community feedback, and triages bug reports. Frees up 15–20 hours/week of founder time for product development and growth strategy.",
                 icon: HeadphonesIcon,
               },
               {
-                role: "Part-Time Security Engineer",
-                when: "Month 7 (~$27K MRR)",
-                cost: "$4,000-5,000/mo",
-                why: "Enterprise buyers require SSO/SAML integration, SCIM directory provisioning, and SOC 2 Type II certification before they sign. This engineer builds those features, conducts penetration testing, implements advanced audit logging, and manages the SOC 2 certification process with our compliance partner. Directly unlocks the $12/seat Business tier — the highest-margin plan — and removes the #1 objection from 50+ seat organizations.",
+                role: "Part-Time Security Consultant",
+                when: "Month 10 (~$34.5K MRR)",
+                cost: "$2,500-3,500/mo",
+                why: "Enterprise buyers require SSO/SAML integration, SCIM directory provisioning, and SOC 2 Type II certification before they sign. This consultant builds those features, conducts penetration testing, implements advanced audit logging, and manages the SOC 2 certification process with our compliance partner. Directly unlocks the $12/seat Business tier — the highest-margin plan — and removes the #1 objection from 50+ seat organizations.",
                 icon: Shield,
               },
             ].map((hire) => (
@@ -624,10 +623,9 @@ export function BusinessPlan({ shareToken }: { shareToken: string }) {
                 <tbody>
                   {[
                     { phase: "M1 (Solo)", mrr: "$13.5K", cost: "$0", pct: "0%" },
-                    { phase: "M2-3 (+ Mktg contractor)", mrr: "$14.8-17K", cost: "$3,500", pct: "21-24%" },
-                    { phase: "M4-6 (+ Support person)", mrr: "$19.5-24.5K", cost: "$6,000", pct: "24-31%" },
-                    { phase: "M7-12 (+ Security eng)", mrr: "$27-39K", cost: "$10,500", pct: "27-39%" },
-                    { phase: "M13-18 (Full team)", mrr: "$41-50K", cost: "$10,500", pct: "21-26%" },
+                    { phase: "M2-4 (+ Mktg contractor)", mrr: "$14.8-19.5K", cost: "$2,500", pct: "13-17%" },
+                    { phase: "M5-9 (+ Support person)", mrr: "$22-32K", cost: "$4,500", pct: "14-20%" },
+                    { phase: "M10-18 (+ Security consultant)", mrr: "$34.5-50K", cost: "$7,500", pct: "15-22%" },
                   ].map((row) => (
                     <tr key={row.phase} className="border-b border-zinc-100">
                       <td className="py-2.5 px-3 text-zinc-600">{row.phase}</td>
@@ -825,13 +823,13 @@ export function BusinessPlan({ shareToken }: { shareToken: string }) {
                     category: "Marketing & Customer Acquisition",
                     amount: 50000,
                     pct: "50%",
-                    details: "LinkedIn Accelerate campaigns targeting CISOs and IT leaders ($3–5K/mo), Google Ads on high-intent keywords like \"AI prompt management\" and \"ChatGPT for teams\" ($2–3K/mo), marketing contractor salary ($3–5K/mo), customer case study production for legal/healthcare/finance verticals, conference sponsorship at 1–2 industry events, and landing page A/B testing tools.",
+                    details: "LinkedIn Accelerate campaigns targeting CISOs and IT leaders ($2–4K/mo), Google Ads on high-intent keywords like \"AI prompt management\" and \"ChatGPT for teams\" ($1–2K/mo), marketing contractor salary ($2–3K/mo), customer case study production for legal/healthcare/finance verticals, conference sponsorship at 1–2 industry events, and landing page A/B testing tools.",
                   },
                   {
                     category: "Enterprise Features & Security",
                     amount: 25000,
                     pct: "25%",
-                    details: "Part-time security engineer salary for 5–6 months ($4–5K/mo) to build SSO/SAML single sign-on, SCIM directory provisioning for automated user management, SOC 2 Type II certification (audit partner fees ~$5K, tooling ~$2K), penetration testing engagement, and advanced audit logging required by enterprise procurement teams.",
+                    details: "Part-time security consultant for 9 months ($2.5–3.5K/mo) to build SSO/SAML single sign-on, SCIM directory provisioning for automated user management, SOC 2 Type II certification (audit partner fees ~$5K, tooling ~$2K), penetration testing engagement, and advanced audit logging required by enterprise procurement teams.",
                   },
                   {
                     category: "Engineering & Infrastructure",
@@ -843,7 +841,7 @@ export function BusinessPlan({ shareToken }: { shareToken: string }) {
                     category: "Operations & Tools",
                     amount: 10000,
                     pct: "10%",
-                    details: "Business incorporation and legal counsel for investor agreements and terms of service updates, accounting and bookkeeping software, support ticketing and CRM tooling, help documentation platform, part-time support person salary bridge for months 3–4 ($2.5–3.5K/mo), and business insurance.",
+                    details: "Business incorporation and legal counsel for investor agreements and terms of service updates, accounting and bookkeeping software, support ticketing and CRM tooling, help documentation platform, part-time support person salary ($1.5–2.5K/mo starting M5), and business insurance.",
                   },
                 ].map((item) => (
                   <div key={item.category}>
@@ -926,22 +924,22 @@ export function BusinessPlan({ shareToken }: { shareToken: string }) {
                   phase: "Phase 1: Foundation",
                   months: "Month 1-3",
                   mrr: "$13.5K to $17K",
-                  focus: "Hire marketing contractor, launch LinkedIn/Google ad campaigns, optimize conversion funnel, ramp ad spend from $2K to $3.5K/mo",
+                  focus: "Hire marketing contractor, launch LinkedIn/Google ad campaigns, optimize conversion funnel, ramp ad spend from $2K to $3K/mo",
                   milestone: "$17K MRR, marketing engine running",
                 },
                 {
                   phase: "Phase 2: Accelerate",
                   months: "Month 4-6",
                   mrr: "$19.5K to $24.5K",
-                  focus: "Hire support person, scale paid acquisition to $5.5K/mo, publish case studies, begin enterprise feature development (SSO/SAML)",
+                  focus: "Hire support person (M5), scale paid acquisition to $5K/mo, publish case studies, begin enterprise feature development (SSO/SAML)",
                   milestone: "$24.5K MRR, 10-15% MoM growth",
                 },
                 {
                   phase: "Phase 3: Scale",
                   months: "Month 7-12",
                   mrr: "$27K to $39K",
-                  focus: "Hire security engineer, launch Business tier with enterprise features, SOC 2 compliance, scale ad spend to $7K/mo",
-                  milestone: "$39K MRR, team fully ramped",
+                  focus: "Scale ad spend to $6K/mo, bring on security consultant (M10), launch Business tier with enterprise features, begin SOC 2 compliance",
+                  milestone: "$39K MRR, enterprise pipeline building",
                 },
                 {
                   phase: "Phase 4: Position for Seed",

@@ -10,7 +10,7 @@ import {
   DollarSign,
   Shield,
   Zap,
-  Target,
+
   BarChart3,
   Brain,
   Megaphone,

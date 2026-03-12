@@ -1,8 +1,260 @@
 # TeamPrompt — Paid Ad Campaigns
 
+Multi-channel paid acquisition: Google Search (bottom-funnel, high intent) + LinkedIn (top-funnel, awareness).
+
+---
+
+# Google Search Ads
+
+High-intent search campaigns targeting people actively looking for AI governance, prompt management, and data protection solutions.
+
+## Account Settings
+
+| Setting             | Value                                                    |
+| ------------------- | -------------------------------------------------------- |
+| Campaign type       | Search                                                   |
+| Bidding strategy    | Maximize conversions (switch to Target CPA after 30 conversions) |
+| Budget              | $20–30/day                                               |
+| Networks            | Google Search only (disable Display & Search Partners)   |
+| Geography           | US (expand to UK/CA/AU after testing)                    |
+| Ad schedule         | Mon–Fri 7am–8pm (business hours — adjust after data)     |
+| Conversion tracking | Signup completed event                                   |
+
+## Negative Keywords (Apply to all ad groups)
+
+```
+free, open source, tutorial, how to, course, certification, what is,
+learn, training, chatgpt login, chatgpt free, claude free, ai free,
+download, github, reddit, salary, job, career, interview
+```
+
+---
+
+## Ad Group 1: AI Prompt Management (Core Product)
+
+**Match types:** Phrase match + Exact match
+
+**Keywords:**
+```
+"ai prompt management tool"
+"shared prompt library"
+"prompt template software"
+"team prompt management"
+"ai prompt organizer for teams"
+"prompt library for business"
+"prompt management platform"
+[ai prompt management]
+[shared prompt library for teams]
+[team prompt templates]
+```
+
+**Ad 1:**
+
+```
+Headline 1: Team Prompt Library for AI Tools
+Headline 2: Share Prompts Across ChatGPT, Claude & More
+Headline 3: Free Plan Available — Start in 2 Min
+Description 1: Stop reinventing prompts. One shared library with templates, variables, and one-click insert into ChatGPT, Claude, Gemini, Copilot & Perplexity.
+Description 2: Used by teams at 50+ companies. Shared prompts, usage analytics, and real-time data protection. Works as a browser extension.
+Display URL: teamprompt.app/prompt-library
+```
+
+**Ad 2:**
+
+```
+Headline 1: Prompt Templates for Your Whole Team
+Headline 2: One Library — 5 AI Platforms — One Click
+Headline 3: No Training Needed — Setup in Minutes
+Description 1: Your best prompts shouldn't live in someone's head. Build a shared library with variables, categories, and one-click insert into any AI tool.
+Description 2: Template variables auto-fill for each situation. Usage analytics show what works. Free tier available — upgrade when you're ready.
+Display URL: teamprompt.app/templates
+```
+
+**Landing page:** /features (or dedicated /prompt-library LP)
+
+---
+
+## Ad Group 2: AI Data Protection / DLP
+
+**Match types:** Phrase match + Exact match
+
+**Keywords:**
+```
+"prevent data leaks chatgpt"
+"ai data loss prevention"
+"chatgpt dlp"
+"ai security for enterprise"
+"stop employees sharing data ai"
+"chatgpt data protection"
+"ai prompt scanning"
+"block sensitive data ai tools"
+"enterprise ai security tool"
+[ai dlp tool]
+[chatgpt data leak prevention]
+[prevent pii in chatgpt]
+```
+
+**Ad 1:**
+
+```
+Headline 1: Stop Data Leaks in AI Tools
+Headline 2: Real-Time DLP for ChatGPT & Claude
+Headline 3: Catches API Keys, PII & Secrets Instantly
+Description 1: Your team pastes sensitive data into AI tools daily. TeamPrompt scans every prompt in real time — blocks API keys, SSNs, credentials, and PII before they leave the browser.
+Description 2: Works silently across ChatGPT, Claude, Gemini, Copilot & Perplexity. Full audit trail. Zero friction. Browser extension installs in 2 minutes.
+Display URL: teamprompt.app/security
+```
+
+**Ad 2:**
+
+```
+Headline 1: AI Security Your Stack Is Missing
+Headline 2: DLP Scanning Across 5 AI Platforms
+Headline 3: Full Audit Trail — See Every Prompt
+Description 1: Firewalls protect the perimeter. TeamPrompt protects the browser. Catch sensitive data before your team sends it to ChatGPT, Claude, or any AI tool.
+Description 2: 50+ detection patterns for API keys, PII, credentials, and financial data. Real-time blocking. No slowdowns. Free tier to start.
+Display URL: teamprompt.app/security
+```
+
+**Landing page:** /security
+
+---
+
+## Ad Group 3: AI Governance / Compliance
+
+**Match types:** Phrase match + Exact match
+
+**Keywords:**
+```
+"ai governance tool"
+"ai usage policy enforcement"
+"ai compliance software"
+"manage ai usage enterprise"
+"ai audit trail"
+"ai tool governance"
+"chatgpt enterprise governance"
+"ai policy management"
+[ai governance platform]
+[enterprise ai compliance]
+```
+
+**Ad 1:**
+
+```
+Headline 1: AI Governance Made Simple
+Headline 2: Policy Enforcement + Audit Trail + DLP
+Headline 3: See Exactly How Your Team Uses AI
+Description 1: 50 employees. 5 AI tools. Zero visibility. TeamPrompt gives you governance — prompt libraries, usage analytics, data protection, and full audit trails across every AI platform.
+Description 2: Enforce AI usage policies without slowing anyone down. Browser extension works inside ChatGPT, Claude, Gemini, Copilot & Perplexity.
+Display URL: teamprompt.app/enterprise
+```
+
+**Ad 2:**
+
+```
+Headline 1: Control AI Usage Across Your Org
+Headline 2: Usage Analytics + DLP + Shared Prompts
+Headline 3: SOC 2 Ready — Enterprise Features
+Description 1: Your team uses AI every day — but who's tracking what they share? TeamPrompt gives IT and security teams full visibility with real-time DLP scanning and audit logs.
+Description 2: Standardize AI usage with shared prompt libraries. Enforce data protection policies. Works across all major AI platforms. Start free.
+Display URL: teamprompt.app/enterprise
+```
+
+**Landing page:** /enterprise
+
+---
+
+## Ad Group 4: ChatGPT for Teams / Business
+
+**Match types:** Phrase match + Exact match
+
+**Keywords:**
+```
+"chatgpt for teams"
+"chatgpt for business"
+"ai tools for teams"
+"chatgpt team management"
+"claude for business"
+"ai tool for enterprise teams"
+"team ai platform"
+[chatgpt for teams alternative]
+[ai platform for business teams]
+```
+
+**Ad 1:**
+
+```
+Headline 1: Better Than ChatGPT Team — Here's Why
+Headline 2: Works With ChatGPT, Claude, Gemini & More
+Headline 3: One Tool for All Your AI Platforms
+Description 1: Don't lock your team into one AI vendor. TeamPrompt works across ChatGPT, Claude, Gemini, Copilot & Perplexity — shared prompts, data protection, and analytics in one extension.
+Description 2: Shared prompt library with templates. Real-time DLP scanning. Usage analytics. Works with every major AI tool — not just one. Free plan available.
+Display URL: teamprompt.app
+```
+
+**Landing page:** / (homepage)
+
+---
+
+## Ad Group 5: Competitor / Alternative Searches
+
+**Match types:** Exact match only (tight control)
+
+**Keywords:**
+```
+[chatgpt enterprise alternative]
+[prompt management tool]
+[ai prompt sharing tool]
+[team prompt library software]
+[enterprise ai tool management]
+```
+
+**Ad 1:**
+
+```
+Headline 1: The AI Tool Your Team Actually Needs
+Headline 2: Prompts + Protection + Analytics
+Headline 3: Works Across 5 AI Platforms
+Description 1: One browser extension for shared prompts, real-time data protection, and usage analytics. Works inside ChatGPT, Claude, Gemini, Copilot & Perplexity.
+Description 2: No vendor lock-in. No per-seat AI licensing. Just better, safer, more consistent AI usage across your entire team. Start free today.
+Display URL: teamprompt.app
+```
+
+**Landing page:** /pricing
+
+---
+
+## Google Ads Run Strategy
+
+- **Week 1–2:** Launch all 5 ad groups with $4–6/day each. Let Google's algorithm learn.
+- **Metric to watch:** Cost per conversion — pause keywords with CPC > $10 and no conversions after 50 clicks
+- **Week 3–4:** Pause underperforming ad groups. Double budget on best converters.
+- **Month 2+:** Add Remarketing campaign ($5–10/day) targeting LinkedIn + Google clickers who didn't convert
+- **Target CPA:** $15–30 per signup (switch from Maximize Conversions after 30 conversions)
+
+## Sitelink Extensions (Apply to all campaigns)
+
+```
+Sitelink 1: Shared Prompt Library → /features
+Sitelink 2: Real-Time Data Protection → /security
+Sitelink 3: See Pricing → /pricing
+Sitelink 4: Enterprise Features → /enterprise
+```
+
+## Callout Extensions
+
+```
+Free Plan Available | Browser Extension | Works With 5 AI Platforms | Setup in 2 Minutes | No Credit Card Required
+```
+
+---
+---
+
+# LinkedIn Ads
+
 LinkedIn analogy-based ads targeting IT/security leaders, CISOs, compliance officers.
 
-## Targeting (All Ads)
+## LinkedIn Targeting (All Ads)
 
 | Setting          | Value                                                                                                  |
 | ---------------- | ------------------------------------------------------------------------------------------------------ |
@@ -14,10 +266,10 @@ LinkedIn analogy-based ads targeting IT/security leaders, CISOs, compliance offi
 | Company size     | 50–5,000 employees                                                                                     |
 | Geography        | US (expand to UK/CA/AU after testing)                                                                  |
 
-## Run Strategy
+## LinkedIn Run Strategy
 
 - **Week 1–2:** Run all ads simultaneously with equal budget split
-- **Budget:** $30–50/day total ($10–17 each)
+- **Budget:** $10–15/day total (awareness — conversions will come from Google)
 - **Metric to watch:** CTR — kill the lowest performer after 1,000 impressions each
 - **Week 3+:** Double down on the winner, test a carousel version of it
 

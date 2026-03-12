@@ -483,29 +483,77 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
             </div>
           </RevealText>
 
-          <div className="grid sm:grid-cols-2 gap-5">
-            {[
-              { src: "/store-assets/promo-marquee.png", alt: "TeamPrompt overview", label: "Secure prompt sharing and AI governance for teams" },
-              { src: "/store-assets/screenshot-light-1-prompts.png", alt: "Prompt library", label: "Shared prompt library with categories and one-click insert" },
-              { src: "/store-assets/screenshot-light-5-template.png", alt: "Template variables", label: "Dynamic templates with fill-in variables for consistent team workflows" },
-              { src: "/store-assets/screenshot-light-3-dlp-block.png", alt: "DLP protection", label: "Real-time DLP blocks API keys, credentials, and PII before it reaches AI" },
-            ].map((img, i) => (
-              <RevealText key={img.alt} delay={i * 120}>
+          {/* Bento grid — large left + stacked right */}
+          <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
+            {/* Large featured screenshot — ChatGPT with extension sidebar */}
+            <RevealText className="sm:col-span-3">
+              <div className="group relative h-full">
+                <div className="rounded-2xl overflow-hidden border border-zinc-800 bg-zinc-900 shadow-2xl h-full">
+                  <Image
+                    src="/store-assets/screenshot-3-insert.png"
+                    alt="Extension sidebar in ChatGPT"
+                    width={1280}
+                    height={800}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                  />
+                </div>
+                <span className="absolute top-3 left-3 text-[10px] font-bold uppercase tracking-widest bg-blue-600 text-white px-2.5 py-1 rounded-full shadow-lg">
+                  Prompt Library
+                </span>
+              </div>
+            </RevealText>
+
+            {/* Stacked right — Claude sidebar + DLP block */}
+            <div className="sm:col-span-2 flex flex-col gap-4">
+              <RevealText delay={150}>
                 <div className="group relative">
-                  <div className="rounded-xl overflow-hidden border border-zinc-200 bg-white shadow-sm">
+                  <div className="rounded-2xl overflow-hidden border border-zinc-800 bg-zinc-900 shadow-2xl">
                     <Image
-                      src={img.src}
-                      alt={img.alt}
+                      src="/store-assets/screenshot-5-sidepanel.png"
+                      alt="Extension sidebar in Claude"
                       width={1280}
                       height={800}
                       className="w-full transition-transform duration-500 group-hover:scale-[1.02]"
                     />
                   </div>
-                  <p className="text-xs text-zinc-500 mt-1.5 text-center">{img.label}</p>
+                  <span className="absolute top-3 left-3 text-[10px] font-bold uppercase tracking-widest bg-white/90 text-zinc-900 px-2.5 py-1 rounded-full shadow-lg">
+                    Multi-AI
+                  </span>
                 </div>
               </RevealText>
-            ))}
+
+              <RevealText delay={300}>
+                <div className="group relative">
+                  <div className="rounded-2xl overflow-hidden border border-zinc-800 bg-zinc-900 shadow-2xl">
+                    <Image
+                      src="/store-assets/screenshot-6-dlp-block.png"
+                      alt="DLP blocking sensitive data"
+                      width={1280}
+                      height={800}
+                      className="w-full transition-transform duration-500 group-hover:scale-[1.02]"
+                    />
+                  </div>
+                  <span className="absolute top-3 left-3 text-[10px] font-bold uppercase tracking-widest bg-red-500 text-white px-2.5 py-1 rounded-full shadow-lg">
+                    DLP Shield
+                  </span>
+                </div>
+              </RevealText>
+            </div>
           </div>
+
+          {/* Full-width multi-AI banner */}
+          <RevealText delay={400}>
+            <div className="mt-4 rounded-2xl overflow-hidden border border-zinc-800 bg-zinc-900 shadow-2xl">
+              <Image
+                src="/store-assets/screenshot-11-multi-ai.png"
+                alt="Works across ChatGPT, Claude, Gemini, Copilot, and Perplexity"
+                width={1400}
+                height={560}
+                className="w-full"
+              />
+            </div>
+            <p className="text-xs text-zinc-500 mt-2 text-center">One extension. Five AI platforms. Full DLP protection on every tool.</p>
+          </RevealText>
         </div>
       </div>
 

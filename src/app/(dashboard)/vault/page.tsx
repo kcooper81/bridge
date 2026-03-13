@@ -72,6 +72,7 @@ import type { Prompt, PromptStatus } from "@/lib/types";
 import { PageSkeleton } from "@/components/dashboard/skeleton-loader";
 import { NoOrgBanner } from "@/components/dashboard/no-org-banner";
 import { UpgradePrompt, LimitNudge } from "@/components/upgrade";
+import { UsageIndicator } from "@/components/dashboard/usage-indicator";
 import { ImportExportModal } from "@/components/dashboard/import-export-modal";
 import { FolderManager } from "@/components/dashboard/folder-manager";
 import { ManageCategoriesModal } from "@/components/dashboard/manage-categories-modal";
@@ -389,6 +390,11 @@ export default function VaultPage() {
         <UpgradePrompt feature="create_prompt" current={prompts.length} max={planLimits.max_prompts} className="mb-6" />
       )}
       <LimitNudge feature="create_prompt" current={prompts.length} max={planLimits.max_prompts} className="mb-4" />
+
+      {/* Usage cap indicator */}
+      {checkLimit("create_prompt", prompts.length) && (
+        <UsageIndicator label="Prompts" current={prompts.length} max={planLimits.max_prompts} className="mb-4" />
+      )}
 
       {/* Stats */}
       <div className="mb-6 grid grid-cols-2 lg:grid-cols-4 gap-4">

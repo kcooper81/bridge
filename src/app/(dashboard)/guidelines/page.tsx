@@ -23,6 +23,7 @@ import { CategoryCombobox } from "@/components/ui/category-combobox";
 import { BookOpen, Download, Loader2, Pencil, Plus, Trash2 } from "lucide-react";
 import { NoOrgBanner } from "@/components/dashboard/no-org-banner";
 import { UpgradePrompt, LimitNudge } from "@/components/upgrade";
+import { UsageIndicator } from "@/components/dashboard/usage-indicator";
 import {
   saveGuidelineApi,
   deleteGuidelineApi,
@@ -223,6 +224,11 @@ export default function GuidelinesPage() {
         <UpgradePrompt feature="add_guideline" current={guidelines.length} max={planLimits.max_guidelines} className="mb-6" />
       )}
       <LimitNudge feature="add_guideline" current={guidelines.length} max={planLimits.max_guidelines} className="mb-4" />
+
+      {/* Usage cap indicator */}
+      {checkLimit("add_guideline", guidelines.length) && (
+        <UsageIndicator label="Guidelines" current={guidelines.length} max={planLimits.max_guidelines} className="mb-4" />
+      )}
 
       {guidelines.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center">

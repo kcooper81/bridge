@@ -51,6 +51,7 @@ import { toast } from "sonner";
 import { trackInviteSent } from "@/lib/analytics";
 import type { BulkImportRow, Invite, Team, UserRole } from "@/lib/types";
 import { UpgradePrompt, LimitNudge } from "@/components/upgrade";
+import { UsageIndicator } from "@/components/dashboard/usage-indicator";
 import Link from "next/link";
 
 export default function TeamPage() {
@@ -910,6 +911,11 @@ export default function TeamPage() {
         <UpgradePrompt feature="add_member" current={members.length} max={planLimits.max_members} className="mb-6" />
       )}
       <LimitNudge feature="add_member" current={members.length} max={planLimits.max_members} className="mb-4" />
+
+      {/* Usage cap indicator */}
+      {checkLimit("add_member", members.length) && (
+        <UsageIndicator label="Members" current={members.length} max={planLimits.max_members} className="mb-4" />
+      )}
 
       {/* Status pills row */}
       {(currentUserRole === "admin" || inactiveExtensionMembers.length > 0) && (

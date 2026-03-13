@@ -1,5 +1,6 @@
 import { Resend } from "resend";
 import { buildEmail, escapeHtml } from "./email-template";
+import { logServiceError } from "@/lib/log-error";
 
 interface AutoAckOptions {
   recipientEmail: string;
@@ -57,5 +58,6 @@ export async function sendAutoAck(options: AutoAckOptions) {
     });
   } catch (error) {
     console.error("Auto-ack email failed:", error);
+    logServiceError("resend", error, { url: "auto-ack", metadata: { ticketId } });
   }
 }

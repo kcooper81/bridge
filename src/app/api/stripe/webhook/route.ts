@@ -3,6 +3,7 @@ import Stripe from "stripe";
 import { createServiceClient } from "@/lib/supabase/server";
 import { limiters, checkRateLimit } from "@/lib/rate-limit";
 import { notifyAdminsOfNewSubscription } from "@/lib/notify-admins";
+import { logServiceError } from "@/lib/log-error";
 
 function getStripe() {
   return new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -347,6 +348,7 @@ export async function POST(request: NextRequest) {
     // Log the error but return 200 to prevent Stripe from retrying indefinitely.
     // Signature verification failures are already handled above with proper 400 status.
     console.error("Webhook handler error:", error);
+    logServiceError("stripe", error, { url: "/api/stripe/webhook" });
     return NextResponse.json(
       { error: "Webhook handler failed", received: true },
       { status: 200 }

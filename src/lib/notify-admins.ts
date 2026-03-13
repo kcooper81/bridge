@@ -1,6 +1,7 @@
 import { Resend } from "resend";
 import { SUPER_ADMIN_EMAILS } from "@/lib/constants";
 import { buildEmail, escapeHtml } from "@/lib/email-template";
+import { logServiceError } from "@/lib/log-error";
 
 /**
  * Send an email notification to all super admins when a new subscription is created.
@@ -48,6 +49,7 @@ export async function notifyAdminsOfNewSubscription({
     });
   } catch (err) {
     console.error("Failed to notify admins of new subscription:", err);
+    logServiceError("resend", err, { url: "notify-admins/subscription", metadata: { orgId } });
   }
 }
 
@@ -99,6 +101,7 @@ export async function notifyAdminsOfTicketReply({
     });
   } catch (err) {
     console.error("Failed to notify admins of ticket reply:", err);
+    logServiceError("resend", err, { url: "notify-admins/ticket-reply", metadata: { ticketId } });
   }
 }
 
@@ -152,5 +155,6 @@ export async function notifyAdminsOfNewTicket({
     });
   } catch (err) {
     console.error("Failed to notify admins of new ticket:", err);
+    logServiceError("resend", err, { url: "notify-admins/new-ticket", metadata: { ticketId } });
   }
 }

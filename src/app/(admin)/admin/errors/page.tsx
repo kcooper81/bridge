@@ -13,6 +13,13 @@ import {
   ChevronUp,
   ChevronLeft,
   ChevronRight,
+  Mail,
+  CreditCard,
+  Database,
+  Globe,
+  Server,
+  AppWindow,
+  Zap,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -22,16 +29,35 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+const SERVICE_TABS = [
+  { value: "all", label: "All", icon: AppWindow },
+  { value: "app", label: "App", icon: Globe },
+  { value: "resend", label: "Resend", icon: Mail },
+  { value: "stripe", label: "Stripe", icon: CreditCard },
+  { value: "supabase", label: "Supabase", icon: Database },
+  { value: "upstash", label: "Upstash", icon: Zap },
+  { value: "vercel", label: "Vercel", icon: Server },
+] as const;
+
+type ServiceFilter = (typeof SERVICE_TABS)[number]["value"];
 
 interface ErrorRow {
   id: string;
   message: string;
   stack: string | null;
   url: string | null;
+  service: string;
   user_email: string | null;
   org_name: string | null;
   resolved: boolean;
   created_at: string;
+}
+
+interface ServiceCount {
+  service: string;
+  count: number;
 }
 
 export default function ErrorsPage() {
@@ -42,32 +68,67 @@ export default function ErrorsPage() {
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(20);
   const [totalCount, setTotalCount] = useState(0);
+  const [serviceFilter, setServiceFilter] = useState<ServiceFilter>("all");
+  const [serviceCounts, setServiceCounts] = useState<ServiceCount[]>([]);
 
   useEffect(() => {
     loadErrors();
-  }, [showResolved, page, pageSize]);
+  }, [showResolved, page, pageSize, serviceFilter]);
+
+  useEffect(() => {
+    loadServiceCounts();
+  }, [showResolved]);
+
+  const loadServiceCounts = async () => {
+    const supabase = createClient();
+    // Get unresolved counts per service
+    let query = supabase
+      .from("error_logs")
+      .select("service");
+    if (!showResolved) query = query.eq("resolved", false);
+    const { data } = await query;
+    if (!data) return;
+
+    const counts = new Map<string, number>();
+    for (const row of data) {
+      const svc = row.service || "app";
+      counts.set(svc, (counts.get(svc) || 0) + 1);
+    }
+    setServiceCounts(
+      Array.from(counts.entries()).map(([service, count]) => ({ service, count }))
+    );
+  };
+
+  const getServiceCount = (service: string): number => {
+    if (service === "all") return serviceCounts.reduce((sum, s) => sum + s.count, 0);
+    return serviceCounts.find((s) => s.service === service)?.count || 0;
+  };
 
   const loadErrors = async () => {
     setLoading(true);
     const supabase = createClient();
     const offset = page * pageSize;
 
-    // Get total count
+    // Get total count for current filters
     let countQuery = supabase
       .from("error_logs")
       .select("*", { count: "exact", head: true });
     if (!showResolved) countQuery = countQuery.eq("resolved", false);
+    if (serviceFilter !== "all") countQuery = countQuery.eq("service", serviceFilter);
     const { count } = await countQuery;
     setTotalCount(count || 0);
 
     let query = supabase
       .from("error_logs")
-      .select("id, message, stack, url, user_id, org_id, resolved, created_at")
+      .select("id, message, stack, url, service, user_id, org_id, resolved, created_at")
       .order("created_at", { ascending: false })
       .range(offset, offset + pageSize - 1);
 
     if (!showResolved) {
       query = query.eq("resolved", false);
+    }
+    if (serviceFilter !== "all") {
+      query = query.eq("service", serviceFilter);
     }
 
     const { data: rawErrors } = await query;
@@ -98,11 +159,12 @@ export default function ErrorsPage() {
     );
 
     setErrors(
-      rawErrors.map((e: { id: string; message: string; stack: string | null; url: string | null; user_id: string | null; org_id: string | null; resolved: boolean; created_at: string }) => ({
+      rawErrors.map((e: { id: string; message: string; stack: string | null; url: string | null; service: string | null; user_id: string | null; org_id: string | null; resolved: boolean; created_at: string }) => ({
         id: e.id,
         message: e.message,
         stack: e.stack,
         url: e.url,
+        service: e.service || "app",
         user_email: e.user_id ? userMap.get(e.user_id) || null : null,
         org_name: e.org_id ? orgMap.get(e.org_id) || null : null,
         resolved: e.resolved,
@@ -116,7 +178,6 @@ export default function ErrorsPage() {
   const resolveError = async (id: string) => {
     const supabase = createClient();
 
-    // Verify the current user has admin access before updating
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       toast.error("Not authenticated");
@@ -148,11 +209,22 @@ export default function ErrorsPage() {
         setErrors(errors.map((e) => (e.id === id ? { ...e, resolved: true } : e)));
       } else {
         setErrors(errors.filter((e) => e.id !== id));
+        setTotalCount((c) => c - 1);
       }
+      loadServiceCounts();
     }
   };
 
-  const unresolvedCount = errors.filter((e) => !e.resolved).length;
+  const serviceBadgeColor = (service: string) => {
+    switch (service) {
+      case "resend": return "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400";
+      case "stripe": return "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400";
+      case "supabase": return "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400";
+      case "upstash": return "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400";
+      case "vercel": return "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300";
+      default: return "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400";
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -160,19 +232,46 @@ export default function ErrorsPage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Error Logs</h1>
           <p className="text-muted-foreground">
-            {showResolved
-              ? `${errors.length} errors total`
-              : `${unresolvedCount} unresolved errors`}
+            {totalCount} {showResolved ? "total" : "unresolved"} error{totalCount !== 1 ? "s" : ""}
+            {serviceFilter !== "all" && ` in ${serviceFilter}`}
           </p>
         </div>
         <Button
           variant="outline"
           size="sm"
-          onClick={() => setShowResolved(!showResolved)}
+          onClick={() => { setShowResolved(!showResolved); setPage(0); }}
         >
           {showResolved ? "Hide Resolved" : "Show Resolved"}
         </Button>
       </div>
+
+      {/* Service tabs */}
+      <Tabs
+        value={serviceFilter}
+        onValueChange={(v) => { setServiceFilter(v as ServiceFilter); setPage(0); }}
+      >
+        <TabsList className="h-auto flex-wrap">
+          {SERVICE_TABS.map((tab) => {
+            const Icon = tab.icon;
+            const count = getServiceCount(tab.value);
+            return (
+              <TabsTrigger
+                key={tab.value}
+                value={tab.value}
+                className="gap-1.5 text-xs"
+              >
+                <Icon className="h-3.5 w-3.5" />
+                {tab.label}
+                {count > 0 && (
+                  <span className="ml-1 rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-medium leading-none">
+                    {count}
+                  </span>
+                )}
+              </TabsTrigger>
+            );
+          })}
+        </TabsList>
+      </Tabs>
 
       {loading ? (
         <div className="flex items-center justify-center h-32">
@@ -181,7 +280,9 @@ export default function ErrorsPage() {
       ) : errors.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12 text-center">
           <AlertTriangle className="h-10 w-10 text-muted-foreground mb-3" />
-          <p className="text-muted-foreground">No errors found</p>
+          <p className="text-muted-foreground">
+            No {serviceFilter !== "all" ? `${serviceFilter} ` : ""}errors found
+          </p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -203,6 +304,9 @@ export default function ErrorsPage() {
                           Unresolved
                         </Badge>
                       )}
+                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${serviceBadgeColor(err.service)}`}>
+                        {err.service}
+                      </span>
                       <span className="text-xs text-muted-foreground">
                         {new Date(err.created_at).toLocaleString()}
                       </span>

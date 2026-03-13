@@ -587,6 +587,7 @@ export default function TicketsPage() {
 
   // More tabs dropdown
   const [showMoreTabs, setShowMoreTabs] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
   const loadTickets = useCallback(async (append = false) => {
     if (append) setLoadingMore(true);
@@ -1249,12 +1250,112 @@ export default function TicketsPage() {
     const hasReply = ticket.notes.some((n) => !n.is_internal);
     const starred = isStarred(ticket, userId);
     const snoozed = isSnoozed(ticket);
+    const preview = ticket.message.replace(/^From:.*?\n\n/, "").slice(0, 80);
 
+    // Gmail-style mobile row
+    if (isMobile) {
+      return (
+        <div
+          key={ticket.id}
+          className={cn(
+            "flex gap-3 px-4 py-3 cursor-pointer transition-colors active:bg-accent/80",
+            isUnread
+              ? "bg-blue-50/50 dark:bg-blue-950/15"
+              : "hover:bg-accent/40"
+          )}
+          onClick={() => openTicketMobile(ticket)}
+        >
+          {/* Avatar / type icon */}
+          <div className="flex-shrink-0 pt-0.5">
+            <div className={cn(
+              "h-10 w-10 rounded-full flex items-center justify-center text-sm font-semibold",
+              isUnread
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted text-muted-foreground"
+            )}>
+              {(ticket.sender_name || ticket.user_email || "?")[0].toUpperCase()}
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className="flex-1 min-w-0">
+            {/* Line 1: sender + time */}
+            <div className="flex items-center justify-between gap-2">
+              <span className={cn("truncate text-sm", isUnread ? "font-semibold text-foreground" : "text-foreground")}>
+                {ticket.direction === "outbound"
+                  ? `To: ${ticket.user_email?.split("@")[0] || "Unknown"}`
+                  : (ticket.sender_name || ticket.user_email?.split("@")[0] || "Anonymous")}
+              </span>
+              <div className="flex items-center gap-1.5 flex-shrink-0">
+                {hasAttachments && <Paperclip className="h-3 w-3 text-muted-foreground" />}
+                <span className={cn("text-xs", isUnread ? "font-semibold text-foreground" : "text-muted-foreground")}>
+                  {timeAgo(activity)}
+                </span>
+              </div>
+            </div>
+
+            {/* Line 2: subject */}
+            <p className={cn("truncate text-[13px] mt-0.5", isUnread ? "font-medium text-foreground" : "text-muted-foreground")}>
+              {ticket.subject || "No subject"}
+            </p>
+
+            {/* Line 3: preview + badges */}
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <p className="truncate text-xs text-muted-foreground flex-1">
+                {preview}
+              </p>
+              {ticket.priority === "urgent" && (
+                <span className="text-[10px] font-semibold text-red-600 dark:text-red-400 flex-shrink-0">!</span>
+              )}
+              {ticket.priority === "high" && (
+                <span className="text-[10px] font-semibold text-orange-600 dark:text-orange-400 flex-shrink-0">!</span>
+              )}
+            </div>
+
+            {/* Line 4: minimal status indicators */}
+            <div className="flex items-center gap-2 mt-1">
+              {snoozed && (
+                <span className="inline-flex items-center gap-0.5 text-[10px] text-purple-600 dark:text-purple-400">
+                  <AlarmClock className="h-2.5 w-2.5" />
+                  {snoozeLabel(ticket.snoozed_until!)}
+                </span>
+              )}
+              {ticket.direction === "outbound" && (
+                <span className="text-[10px] text-purple-600 dark:text-purple-400 font-medium">Sent</span>
+              )}
+              {ticket.notes_count > 0 && (
+                <span className="inline-flex items-center gap-0.5 text-[10px] text-muted-foreground">
+                  <MessageSquare className="h-2.5 w-2.5" />
+                  {ticket.notes_count}
+                </span>
+              )}
+              {!hasReply && ticket.status !== "closed" && ticket.status !== "resolved" && (
+                <span className={cn("text-[10px] font-medium", slaColor(activity))}>
+                  Needs reply
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Star */}
+          <div className="flex-shrink-0 pt-0.5">
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); toggleStar(ticket.id); }}
+            >
+              <Star className={cn("h-4 w-4 transition-colors", starred ? "fill-amber-400 text-amber-400" : "text-muted-foreground/25")} />
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    // Desktop row (unchanged)
     return (
       <div
         key={ticket.id}
         className={cn(
-          "group flex gap-2 sm:gap-3 px-3 sm:px-4 py-3 sm:py-3.5 cursor-pointer transition-colors",
+          "group flex gap-3 px-4 py-3.5 cursor-pointer transition-colors",
           isActive
             ? "bg-primary/10 border-l-2 border-l-primary"
             : isUnread
@@ -1263,10 +1364,10 @@ export default function TicketsPage() {
           isSelected && !isActive && "bg-primary/5",
           focusedIndex === index && !isActive && "ring-1 ring-inset ring-primary/30"
         )}
-        onClick={() => isMobile ? openTicketMobile(ticket) : openTicket(ticket)}
+        onClick={() => openTicket(ticket)}
       >
         {/* Left: star + checkbox + unread */}
-        <div className="flex items-center gap-1 sm:gap-1.5 pt-0.5 flex-shrink-0">
+        <div className="flex items-center gap-1.5 pt-0.5 flex-shrink-0">
           <button
             type="button"
             onClick={(e) => { e.stopPropagation(); toggleStar(ticket.id); }}
@@ -1280,9 +1381,8 @@ export default function TicketsPage() {
             onCheckedChange={() => toggleSelect(ticket.id)}
             onClick={(e) => e.stopPropagation()}
             aria-label={`Select ${ticket.subject || ticket.id}`}
-            className="hidden sm:inline-flex"
           />
-          <div className="w-2 hidden sm:block">
+          <div className="w-2">
             {isUnread && <div className="h-2 w-2 rounded-full bg-blue-500" />}
           </div>
         </div>
@@ -1297,7 +1397,7 @@ export default function TicketsPage() {
                 {ticket.direction === "outbound" ? `To: ${ticket.user_email || ticket.sender_name || "Unknown"}` : (ticket.sender_name || ticket.user_email || "Anonymous")}
               </span>
               {ticket.inbox_email && (
-                <span className="hidden sm:inline text-[10px] text-muted-foreground bg-muted rounded px-1 py-0.5 flex-shrink-0">
+                <span className="text-[10px] text-muted-foreground bg-muted rounded px-1 py-0.5 flex-shrink-0">
                   {ticket.inbox_email.split("@")[0]}
                 </span>
               )}
@@ -1311,8 +1411,8 @@ export default function TicketsPage() {
           <div className="flex items-center gap-2 mt-0.5">
             <p className={cn("truncate text-xs", isUnread ? "font-medium text-foreground" : "text-muted-foreground")}>
               {ticket.subject || "No subject"}
-              <span className="hidden sm:inline font-normal text-muted-foreground">
-                {" — "}{ticket.message.replace(/^From:.*?\n\n/, "").slice(0, 50)}
+              <span className="font-normal text-muted-foreground">
+                {" — "}{preview.slice(0, 50)}
               </span>
             </p>
           </div>
@@ -1818,8 +1918,17 @@ export default function TicketsPage() {
             </span>
           )}
         </div>
-        <div className="flex items-center gap-3">
-          <Button size="sm" onClick={() => setComposeOpen(true)}>
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* Mobile search toggle */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="lg:hidden h-8 w-8 p-0"
+            onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
+          >
+            <Search className="h-4 w-4" />
+          </Button>
+          <Button size="sm" onClick={() => setComposeOpen(true)} className="hidden sm:inline-flex">
             <Plus className="mr-1.5 h-3.5 w-3.5" />
             Compose
           </Button>
@@ -1836,8 +1945,57 @@ export default function TicketsPage() {
         </div>
       </div>
 
-      {/* Filter tabs — full width above split pane */}
-      <div className="flex items-center border border-border rounded-lg bg-card overflow-x-auto scrollbar-hide px-2">
+      {/* Mobile search bar (collapsible) */}
+      {mobileSearchOpen && (
+        <div className="lg:hidden flex items-center gap-2 px-1">
+          <div className="relative flex-1">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+            <Input
+              placeholder="Search tickets..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="h-9 pl-8 text-sm rounded-full bg-muted/50 border-0 focus-visible:ring-1"
+              autoFocus
+            />
+          </div>
+          <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => { setMobileSearchOpen(false); setSearch(""); }}>
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
+
+      {/* Filter tabs — mobile: scrollable pills, desktop: border-bottom tabs */}
+      {/* Mobile pill tabs */}
+      <div className="lg:hidden overflow-x-auto scrollbar-hide -mx-1 px-1">
+        <div className="flex gap-1.5 pb-1">
+          {[...primaryTabs, ...secondaryTabs].map((tab) => (
+            <button
+              key={tab.key}
+              type="button"
+              onClick={() => handleTabClick(tab.key)}
+              className={cn(
+                "flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-colors",
+                activeTabKey === tab.key
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "bg-muted/60 text-muted-foreground active:bg-muted"
+              )}
+            >
+              {tab.label}
+              {tab.count > 0 && (
+                <span className={cn(
+                  "text-[10px] rounded-full px-1 min-w-[16px] text-center",
+                  activeTabKey === tab.key ? "bg-primary-foreground/20" : "bg-background/60"
+                )}>
+                  {tab.count}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Desktop border-bottom tabs */}
+      <div className="hidden lg:flex items-center border border-border rounded-lg bg-card overflow-x-auto scrollbar-hide px-2">
         {primaryTabs.map((tab) => (
           <button
             key={tab.key}
@@ -1873,37 +2031,37 @@ export default function TicketsPage() {
                 secondaryTabs.some((t) => activeTabKey === t.key)
                   ? "border-primary text-foreground"
                   : "border-transparent text-muted-foreground hover:text-foreground"
-                  )}
-                >
-                  More
-                  <ChevronDown className="h-3 w-3" />
-                </button>
-              </PopoverTrigger>
-              <PopoverContent className="w-40 p-1" align="end">
-                {secondaryTabs.map((tab) => (
-                  <Button
-                    key={tab.key}
-                    variant="ghost"
-                    size="sm"
-                    className={cn("w-full justify-start h-7 text-xs gap-2", activeTabKey === tab.key && "bg-muted")}
-                    onClick={() => handleTabClick(tab.key)}
-                  >
-                    <tab.icon className="h-3 w-3" />
-                    {tab.label}
-                    {tab.count > 0 && <span className="ml-auto text-[10px] text-muted-foreground">{tab.count}</span>}
-                  </Button>
-                ))}
-              </PopoverContent>
-            </Popover>
+              )}
+            >
+              More
+              <ChevronDown className="h-3 w-3" />
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-40 p-1" align="end">
+            {secondaryTabs.map((tab) => (
+              <Button
+                key={tab.key}
+                variant="ghost"
+                size="sm"
+                className={cn("w-full justify-start h-7 text-xs gap-2", activeTabKey === tab.key && "bg-muted")}
+                onClick={() => handleTabClick(tab.key)}
+              >
+                <tab.icon className="h-3 w-3" />
+                {tab.label}
+                {tab.count > 0 && <span className="ml-auto text-[10px] text-muted-foreground">{tab.count}</span>}
+              </Button>
+            ))}
+          </PopoverContent>
+        </Popover>
       </div>
 
       {/* Split pane */}
       <div className="lg:grid lg:grid-cols-[380px_1fr] lg:gap-0 lg:border lg:rounded-lg lg:overflow-hidden lg:bg-card" style={{ height: "calc(100vh - 190px)" }}>
         {/* Left: Ticket list */}
-        <div className="border rounded-lg lg:rounded-none lg:border-0 lg:border-r bg-card flex flex-col overflow-hidden" style={{ height: "calc(100vh - 190px)" }}>
+        <div className="border-0 lg:border rounded-none lg:rounded-none lg:border-0 lg:border-r bg-card flex flex-col overflow-hidden" style={{ height: "calc(100vh - 230px)" }}>
 
-          {/* Search + filter bar */}
-          <div className="flex items-center gap-1.5 px-3 py-2 border-b flex-shrink-0">
+          {/* Search + filter bar (desktop only — mobile has collapsible search in header) */}
+          <div className="hidden lg:flex items-center gap-1.5 px-3 py-2 border-b flex-shrink-0">
             <div className="relative flex-1">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
               <Input
@@ -1957,9 +2115,9 @@ export default function TicketsPage() {
             </Popover>
           </div>
 
-          {/* Select all + bulk actions */}
+          {/* Select all + bulk actions (desktop only) */}
           {(selected.size > 0 || openTickets.length > 0) && (
-            <div className="flex items-center justify-between gap-1 px-3 py-1.5 border-b flex-shrink-0 bg-muted/30">
+            <div className="hidden lg:flex items-center justify-between gap-1 px-3 py-1.5 border-b flex-shrink-0 bg-muted/30">
               <div className="flex items-center gap-2">
                 <Checkbox
                   checked={selected.size === activeFiltered.length && activeFiltered.length > 0}
@@ -2100,6 +2258,16 @@ export default function TicketsPage() {
         onOpenChange={setComposeOpen}
         onSent={() => loadTickets()}
       />
+
+      {/* Mobile FAB — compose button */}
+      <button
+        type="button"
+        onClick={() => setComposeOpen(true)}
+        className="sm:hidden fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center active:scale-95 transition-transform"
+        aria-label="Compose"
+      >
+        <Plus className="h-6 w-6" />
+      </button>
     </div>
   );
 }

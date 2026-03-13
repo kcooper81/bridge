@@ -560,6 +560,250 @@ export default function MediaPage() {
           </div>
         </section>
 
+        {/* ── 3b. Brand Guidelines ──────────────────────────── */}
+        <section id="brand-guidelines" className="mb-24 scroll-mt-24">
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3">
+            Brand Guidelines
+          </h2>
+          <p className="text-muted-foreground mb-8 max-w-2xl">
+            Rules and patterns for consistent brand representation across all
+            marketing materials, social posts, and partner content.
+          </p>
+
+          {/* Logo usage rules */}
+          <div className="space-y-6">
+            <div className="rounded-2xl border border-border bg-card p-6">
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">
+                Logo Usage
+              </h3>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-3">
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                    <p className="text-sm">Use the blue icon mark on light backgrounds</p>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                    <p className="text-sm">Use the white icon or wordmark on dark backgrounds</p>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                    <p className="text-sm">Maintain minimum clear space of 1x the logo height around all edges</p>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                    <p className="text-sm">Minimum logo size: 24px for icon, 80px for wordmark</p>
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <div className="flex items-start gap-2">
+                    <span className="h-4 w-4 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-500 text-[10px] font-bold mt-0.5 flex-shrink-0">&times;</span>
+                    <p className="text-sm">Don&apos;t stretch, rotate, or skew the logo</p>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="h-4 w-4 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-500 text-[10px] font-bold mt-0.5 flex-shrink-0">&times;</span>
+                    <p className="text-sm">Don&apos;t change the logo colors or add effects</p>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="h-4 w-4 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-500 text-[10px] font-bold mt-0.5 flex-shrink-0">&times;</span>
+                    <p className="text-sm">Don&apos;t place the logo on busy or low-contrast backgrounds</p>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="h-4 w-4 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-500 text-[10px] font-bold mt-0.5 flex-shrink-0">&times;</span>
+                    <p className="text-sm">Don&apos;t add a drop shadow, outline, or glow to the logo</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Color usage */}
+            <div className="rounded-2xl border border-border bg-card p-6">
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">
+                Color Usage
+              </h3>
+              <div className="space-y-4">
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <div className="rounded-xl border p-4">
+                    <div className="h-10 w-10 rounded-lg mb-3" style={{ backgroundColor: "#2563EB" }} />
+                    <p className="text-sm font-semibold">Primary Blue</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Use for CTAs, links, and key interactive elements. Limit to 10-15% of any layout for maximum impact.
+                    </p>
+                  </div>
+                  <div className="rounded-xl border p-4">
+                    <div className="h-10 w-10 rounded-lg mb-3 border" style={{ backgroundColor: "#FFFFFF" }} />
+                    <p className="text-sm font-semibold">White / Light Zinc</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Primary backgrounds. Use white (#FFF) for cards, Zinc 100 (#F4F4F5) for page backgrounds.
+                    </p>
+                  </div>
+                  <div className="rounded-xl border p-4">
+                    <div className="h-10 w-10 rounded-lg mb-3" style={{ backgroundColor: "#0F1117" }} />
+                    <p className="text-sm font-semibold">Dark Navy / Zinc 950</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Use for hero sections, feature showcases, and dark-mode banners. Never pure black (#000).
+                    </p>
+                  </div>
+                </div>
+                <div className="rounded-xl border border-amber-200 dark:border-amber-800/50 bg-amber-50/50 dark:bg-amber-950/20 p-4">
+                  <p className="text-sm font-medium text-amber-800 dark:text-amber-300">Accessible contrast</p>
+                  <p className="text-xs text-amber-700 dark:text-amber-400 mt-1">
+                    Always ensure a minimum contrast ratio of 4.5:1 for body text and 3:1 for large text (18px+ bold or 24px+ regular). Test with the WebAIM contrast checker.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Typography guidelines */}
+            <div className="rounded-2xl border border-border bg-card p-6">
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">
+                Typography Scale
+              </h3>
+              <div className="space-y-4">
+                <div className="border rounded-xl overflow-hidden">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b bg-muted/30">
+                        <th className="text-left p-3 font-medium text-xs">Element</th>
+                        <th className="text-left p-3 font-medium text-xs">Size</th>
+                        <th className="text-left p-3 font-medium text-xs">Weight</th>
+                        <th className="text-left p-3 font-medium text-xs hidden sm:table-cell">Line Height</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr className="border-b"><td className="p-3 font-semibold text-3xl">H1</td><td className="p-3 text-muted-foreground">36-48px</td><td className="p-3 text-muted-foreground">Bold (700)</td><td className="p-3 text-muted-foreground hidden sm:table-cell">1.1</td></tr>
+                      <tr className="border-b"><td className="p-3 font-semibold text-2xl">H2</td><td className="p-3 text-muted-foreground">24-30px</td><td className="p-3 text-muted-foreground">Bold (700)</td><td className="p-3 text-muted-foreground hidden sm:table-cell">1.2</td></tr>
+                      <tr className="border-b"><td className="p-3 font-semibold text-xl">H3</td><td className="p-3 text-muted-foreground">20px</td><td className="p-3 text-muted-foreground">Semibold (600)</td><td className="p-3 text-muted-foreground hidden sm:table-cell">1.3</td></tr>
+                      <tr className="border-b"><td className="p-3">Body</td><td className="p-3 text-muted-foreground">14-16px</td><td className="p-3 text-muted-foreground">Regular (400)</td><td className="p-3 text-muted-foreground hidden sm:table-cell">1.5-1.6</td></tr>
+                      <tr className="border-b"><td className="p-3 text-sm">Small</td><td className="p-3 text-muted-foreground">12-13px</td><td className="p-3 text-muted-foreground">Regular (400)</td><td className="p-3 text-muted-foreground hidden sm:table-cell">1.4</td></tr>
+                      <tr><td className="p-3 font-mono text-sm">Code</td><td className="p-3 text-muted-foreground">13-14px</td><td className="p-3 text-muted-foreground">Regular (400)</td><td className="p-3 text-muted-foreground hidden sm:table-cell">1.5</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            {/* Tone of voice */}
+            <div className="rounded-2xl border border-border bg-card p-6">
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">
+                Tone of Voice
+              </h3>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-3">
+                  <p className="text-sm font-semibold">We are</p>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-primary flex-shrink-0" /> Professional but approachable</li>
+                    <li className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-primary flex-shrink-0" /> Clear and concise, no jargon</li>
+                    <li className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-primary flex-shrink-0" /> Confident without being aggressive</li>
+                    <li className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-primary flex-shrink-0" /> Security-conscious, trust-building</li>
+                  </ul>
+                </div>
+                <div className="space-y-3">
+                  <p className="text-sm font-semibold">We avoid</p>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/30 flex-shrink-0" /> Overly casual or slang language</li>
+                    <li className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/30 flex-shrink-0" /> Fear-based security messaging</li>
+                    <li className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/30 flex-shrink-0" /> Vague claims without substance</li>
+                    <li className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/30 flex-shrink-0" /> Excessive emojis or exclamation marks</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* Spacing & layout */}
+            <div className="rounded-2xl border border-border bg-card p-6">
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">
+                Spacing & Layout
+              </h3>
+              <div className="grid gap-4 sm:grid-cols-3">
+                <div>
+                  <p className="text-sm font-semibold mb-2">Border Radius</p>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-3">
+                      <div className="h-8 w-8 border-2 border-primary rounded-sm" />
+                      <span className="text-xs text-muted-foreground">Small: 4px</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="h-8 w-8 border-2 border-primary rounded-lg" />
+                      <span className="text-xs text-muted-foreground">Medium: 8px</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="h-8 w-8 border-2 border-primary rounded-2xl" />
+                      <span className="text-xs text-muted-foreground">Large: 16px (default)</span>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold mb-2">Spacing Scale</p>
+                  <p className="text-xs text-muted-foreground">
+                    Based on a 4px grid. Common values: 4, 8, 12, 16, 24, 32, 48, 64, 96px. Use consistent spacing throughout designs.
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold mb-2">Shadows</p>
+                  <div className="space-y-2">
+                    <div className="h-8 rounded-lg bg-card border shadow-sm flex items-center justify-center text-[10px] text-muted-foreground">sm</div>
+                    <div className="h-8 rounded-lg bg-card border shadow-md flex items-center justify-center text-[10px] text-muted-foreground">md</div>
+                    <div className="h-8 rounded-lg bg-card border shadow-lg flex items-center justify-center text-[10px] text-muted-foreground">lg</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Button styles */}
+            <div className="rounded-2xl border border-border bg-card p-6">
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">
+                Button Styles
+              </h3>
+              <div className="flex flex-wrap gap-3 items-center">
+                <Button>Primary Action</Button>
+                <Button variant="outline">Secondary</Button>
+                <Button variant="ghost">Ghost</Button>
+                <Button variant="destructive">Destructive</Button>
+                <Button size="sm">Small</Button>
+                <Button size="lg">Large</Button>
+              </div>
+              <p className="text-xs text-muted-foreground mt-4">
+                Primary buttons use the brand blue. Limit to one primary CTA per section. Use outline or ghost variants for secondary actions.
+              </p>
+            </div>
+
+            {/* Badge & iconography */}
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="rounded-2xl border border-border bg-card p-6">
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">
+                  Badges & Labels
+                </h3>
+                <div className="flex flex-wrap gap-2 mb-3">
+                  <Badge>Default</Badge>
+                  <Badge variant="secondary">Secondary</Badge>
+                  <Badge variant="outline">Outline</Badge>
+                  <Badge variant="destructive">Destructive</Badge>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Use badges for status indicators, categories, and feature labels. Keep text short (1-2 words).
+                </p>
+              </div>
+              <div className="rounded-2xl border border-border bg-card p-6">
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">
+                  Iconography
+                </h3>
+                <div className="flex flex-wrap gap-3 mb-3">
+                  <div className="h-9 w-9 rounded-lg bg-muted flex items-center justify-center"><Zap className="h-4 w-4" /></div>
+                  <div className="h-9 w-9 rounded-lg bg-muted flex items-center justify-center"><Users className="h-4 w-4" /></div>
+                  <div className="h-9 w-9 rounded-lg bg-muted flex items-center justify-center"><CheckCircle2 className="h-4 w-4" /></div>
+                  <div className="h-9 w-9 rounded-lg bg-muted flex items-center justify-center"><Lightbulb className="h-4 w-4" /></div>
+                  <div className="h-9 w-9 rounded-lg bg-muted flex items-center justify-center"><Target className="h-4 w-4" /></div>
+                  <div className="h-9 w-9 rounded-lg bg-muted flex items-center justify-center"><Layers className="h-4 w-4" /></div>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  We use <span className="font-medium">Lucide</span> icons. 16-20px for inline, 24px for feature cards. Stroke width 2. Always use the same icon family — never mix icon sets.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* ── 4. Product Name & Description ──────────────────────────── */}
         <section id="product-info" className="mb-24 scroll-mt-24">
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3">

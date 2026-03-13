@@ -7,6 +7,7 @@ const TOC_ITEMS = [
   { id: "logos", label: "Logos" },
   { id: "colors", label: "Colors" },
   { id: "typography", label: "Typography" },
+  { id: "brand-guidelines", label: "Brand Guidelines" },
   { id: "product-info", label: "Product Info" },
   { id: "social-banners", label: "Social Banners" },
   { id: "og-cards", label: "OG Cards" },

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { notifyAdminsOfNewTicket, notifyAdminsOfTicketReply } from "@/lib/notify-admins";
 import { sendAutoAck } from "@/lib/auto-ack";
+import { logServiceError } from "@/lib/log-error";
 
 /**
  * Resend Inbound Email Webhook
@@ -89,6 +90,7 @@ async function fetchEmailContent(emailId: string): Promise<{ text: string; html:
     };
   } catch (err) {
     console.error("Error fetching email content from Resend:", err);
+    logServiceError("resend", err, { url: "/api/webhooks/inbound-email" });
     return { text: "", html: "" };
   }
 }

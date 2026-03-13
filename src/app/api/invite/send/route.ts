@@ -4,6 +4,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { PLAN_LIMITS } from "@/lib/constants";
 import { limiters, checkRateLimit } from "@/lib/rate-limit";
 import { buildEmail } from "@/lib/email-template";
+import { logServiceError } from "@/lib/log-error";
 
 export async function POST(request: NextRequest) {
   try {
@@ -231,6 +232,7 @@ export async function POST(request: NextRequest) {
       });
     } catch (emailError) {
       console.error("Failed to send invite email:", emailError);
+      logServiceError("resend", emailError, { url: "/api/invite/send" });
       // Delete the invite row to prevent stuck invites
       await db.from("invites").delete().eq("id", invite.id);
       return NextResponse.json(

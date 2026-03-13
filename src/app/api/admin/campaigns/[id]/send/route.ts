@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { verifyAdminAccess } from "@/lib/admin-auth";
 import { Resend } from "resend";
+import { logServiceError } from "@/lib/log-error";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -110,6 +111,7 @@ export async function POST(
     });
   } catch (err) {
     console.error("Campaign send error:", err);
+    logServiceError("resend", err, { url: "/api/admin/campaigns/[id]/send" });
     await db
       .from("email_campaigns")
       .update({ status: "failed", updated_at: new Date().toISOString() })

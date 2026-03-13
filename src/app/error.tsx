@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { reportError } from "@/lib/report-error";
 
 export default function GlobalError({
   error,
@@ -13,6 +14,7 @@ export default function GlobalError({
 }) {
   useEffect(() => {
     console.error("Unhandled error:", error);
+    reportError(error, { boundary: "global" });
   }, [error]);
 
   return (

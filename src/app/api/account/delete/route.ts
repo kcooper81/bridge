@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { limiters, checkRateLimit } from "@/lib/rate-limit";
+import { logServiceError } from "@/lib/log-error";
 import Stripe from "stripe";
 
 export async function POST(request: NextRequest) {
@@ -86,6 +87,7 @@ export async function POST(request: NextRequest) {
                 "Failed to cancel Stripe subscription during account deletion:",
                 stripeError
               );
+              logServiceError("stripe", stripeError, { userId: user.id, metadata: { action: "cancel-subscription-on-delete" } });
               // Continue with deletion — the subscription will be orphaned but
               // Stripe will eventually cancel it when invoices fail.
             }
@@ -108,6 +110,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Delete account error:", error);
+    logServiceError("app", error, { url: "account/delete" });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

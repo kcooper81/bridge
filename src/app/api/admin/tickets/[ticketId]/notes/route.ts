@@ -3,6 +3,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { verifyAdminAccess } from "@/lib/admin-auth";
 import { Resend } from "resend";
 import { buildTicketResponseEmail } from "@/lib/email-template";
+import { logServiceError } from "@/lib/log-error";
 
 export async function POST(
   request: NextRequest,
@@ -176,6 +177,7 @@ export async function POST(
         .eq("id", note.id);
     } catch (emailError) {
       console.error("Failed to send ticket response email:", emailError);
+      logServiceError("resend", emailError, { url: "/api/admin/tickets/[ticketId]/notes" });
     }
   }
 

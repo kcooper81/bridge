@@ -90,6 +90,13 @@ export function OrganizationsView() {
 
   useEffect(() => { loadData(); }, [loadData]);
 
+  // Auto-select first org on desktop when none is selected
+  useEffect(() => {
+    if (!loading && orgs.length > 0 && !selectedOrgId && activeTab === "teams" && window.innerWidth >= 1024) {
+      setSelectedOrgId(orgs[0].id);
+    }
+  }, [loading, orgs, selectedOrgId, activeTab]);
+
   const subMap = useMemo(() => new Map(subscriptions.map((s) => [s.org_id, s])), [subscriptions]);
 
   const membersByOrg = useMemo(() => {

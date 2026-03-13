@@ -1,6 +1,7 @@
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import { NextResponse } from "next/server";
+import { logServiceError } from "@/lib/log-error";
 
 // No-op when Redis env vars are not set (dev environments)
 function createRedis(): Redis | null {
@@ -84,6 +85,7 @@ export async function checkRateLimit(
   } catch (error) {
     // Fail open on Redis errors
     console.error("Rate limit check failed:", error);
+    logServiceError("upstash", error, { url: "rate-limit" });
     return { success: true };
   }
 }

@@ -3,6 +3,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { verifyAdminAccess } from "@/lib/admin-auth";
 import { Resend } from "resend";
 import { buildTicketResponseEmail } from "@/lib/email-template";
+import { logServiceError } from "@/lib/log-error";
 
 /**
  * POST /api/admin/tickets/compose
@@ -122,6 +123,7 @@ export async function POST(request: NextRequest) {
         .eq("id", note.id);
     } catch (emailError) {
       console.error("Failed to send compose email:", emailError);
+      logServiceError("resend", emailError, { url: "/api/admin/tickets/compose" });
     }
   }
 

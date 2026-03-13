@@ -5,6 +5,7 @@ import { limiters, checkRateLimit } from "@/lib/rate-limit";
 import { PLAN_LIMITS } from "@/lib/constants";
 import { buildEmail } from "@/lib/email-template";
 import type { PlanTier } from "@/lib/types";
+import { logServiceError } from "@/lib/log-error";
 
 export async function POST(request: NextRequest) {
   try {
@@ -272,12 +273,14 @@ export async function POST(request: NextRequest) {
               footerNote: "Available for Chrome, Edge, and Firefox.",
             }),
           })
-          .catch((err) =>
-            console.error("Failed to send extension install email:", err)
-          );
+          .catch((err) => {
+            console.error("Failed to send extension install email:", err);
+            logServiceError("resend", err, { url: "/api/invite/accept" });
+          });
       }
     } catch (emailErr) {
       console.error("Extension email setup error:", emailErr);
+      logServiceError("resend", emailErr, { url: "/api/invite/accept" });
     }
 
     return NextResponse.json({ success: true, orgId: invite.org_id });

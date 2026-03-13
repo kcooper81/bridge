@@ -4,6 +4,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { STRIPE_PLAN_CONFIG, TRIAL_DAYS } from "@/lib/billing/plans";
 import { PLAN_LIMITS } from "@/lib/constants";
 import { limiters, checkRateLimit } from "@/lib/rate-limit";
+import { logServiceError } from "@/lib/log-error";
 import type { PlanTier } from "@/lib/types";
 
 function getStripe() {
@@ -160,6 +161,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ url: session.url });
   } catch (error) {
     console.error("Checkout error:", error);
+    logServiceError("stripe", error, { url: "/api/stripe/checkout" });
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

@@ -2259,14 +2259,14 @@ export default function TicketsPage() {
         onSent={() => loadTickets()}
       />
 
-      {/* Mobile FAB — compose button */}
+      {/* Mobile FAB — compose button (above admin nav menu button) */}
       <button
         type="button"
         onClick={() => setComposeOpen(true)}
-        className="sm:hidden fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center active:scale-95 transition-transform"
+        className="sm:hidden fixed bottom-24 right-4 z-40 h-12 w-12 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center active:scale-95 transition-transform"
         aria-label="Compose"
       >
-        <Plus className="h-6 w-6" />
+        <Plus className="h-5 w-5" />
       </button>
     </div>
   );

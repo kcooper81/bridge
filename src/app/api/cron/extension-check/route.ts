@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { Resend } from "resend";
 import { buildEmail } from "@/lib/email-template";
+import { logServiceError } from "@/lib/log-error";
 
 // Vercel cron jobs send this header for authentication
 const CRON_SECRET = process.env.CRON_SECRET;
@@ -120,6 +121,7 @@ export async function GET(request: NextRequest) {
           });
         } catch (emailError) {
           console.error(`Failed to send extension alert email for ${member.email}:`, emailError);
+          logServiceError("resend", emailError, { url: "/api/cron/extension-check" });
         }
       }
 

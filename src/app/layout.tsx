@@ -4,6 +4,7 @@ import { Inter } from "next/font/google";
 import { Suspense } from "react";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/providers/theme-provider";
+import { ErrorReporter } from "@/components/providers/error-reporter";
 import { GA4RouteTracker } from "@/components/analytics/ga4";
 import { AuthEventTracker } from "@/components/analytics/auth-event-tracker";
 import "./globals.css";
@@ -117,7 +118,9 @@ export default function RootLayout({
           <AuthEventTracker />
         </Suspense>
         <ThemeProvider>
-          {children}
+          <ErrorReporter>
+            {children}
+          </ErrorReporter>
         </ThemeProvider>
         <Toaster
           position="bottom-right"

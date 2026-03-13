@@ -3,6 +3,7 @@ import { Resend } from "resend";
 import { createServiceClient } from "@/lib/supabase/server";
 import { limiters, checkRateLimit } from "@/lib/rate-limit";
 import { buildEmail } from "@/lib/email-template";
+import { logServiceError } from "@/lib/log-error";
 
 export async function POST(request: NextRequest) {
   try {
@@ -163,6 +164,7 @@ export async function POST(request: NextRequest) {
           sent++;
         } else {
           console.error("Failed to send extension email:", result.reason);
+          logServiceError("resend", result.reason, { url: "/api/invite/extension-email" });
         }
       }
     }

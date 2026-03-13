@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { verifyAdminAccess } from "@/lib/admin-auth";
+import { logServiceError } from "@/lib/log-error";
 
 /** Server-side HTML sanitizer — strips scripts, event handlers, and dangerous elements */
 function sanitizeContent(html: string): string {
@@ -112,6 +113,7 @@ category must be one of: guide, insight, comparison, tutorial`;
   if (!claudeRes.ok) {
     const err = await claudeRes.text();
     console.error("Claude API error:", claudeRes.status, err);
+    logServiceError("app", new Error(`Claude API ${claudeRes.status}: ${err}`), { url: "admin/content/generate", metadata: { provider: "anthropic", status: claudeRes.status } });
     return NextResponse.json({ error: "AI generation failed" }, { status: 502 });
   }
 
@@ -134,6 +136,7 @@ category must be one of: guide, insight, comparison, tutorial`;
     generated = JSON.parse(cleaned);
   } catch {
     console.error("Failed to parse Claude response:", rawText.slice(0, 500));
+    logServiceError("app", new Error("Failed to parse Claude response"), { url: "admin/content/generate", metadata: { provider: "anthropic", responsePreview: rawText.slice(0, 200) } });
     return NextResponse.json({ error: "Failed to parse AI response" }, { status: 500 });
   }
 
@@ -197,6 +200,7 @@ category must be one of: guide, insight, comparison, tutorial`;
 
   if (insertError) {
     console.error("Blog post insert error:", insertError);
+    logServiceError("supabase", insertError, { url: "admin/content/generate", metadata: { action: "blog-post-insert" } });
     return NextResponse.json({ error: "Failed to save draft" }, { status: 500 });
   }
 

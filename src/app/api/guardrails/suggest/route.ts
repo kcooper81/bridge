@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { limiters, checkRateLimit } from "@/lib/rate-limit";
+import { logServiceError } from "@/lib/log-error";
 
 async function getAuthUser(request: NextRequest) {
   const authHeader = request.headers.get("authorization");
@@ -90,6 +91,7 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error("Rule suggestion insert error:", error);
+      logServiceError("supabase", error, { url: "guardrails/suggest", metadata: { action: "insert" } });
       return NextResponse.json({ error: "Failed to submit suggestion" }, { status: 500 });
     }
 
@@ -99,6 +101,7 @@ export async function POST(request: NextRequest) {
     );
   } catch (error) {
     console.error("Rule suggestion POST error:", error);
+    logServiceError("app", error, { url: "guardrails/suggest" });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -133,6 +136,7 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error("Rule suggestions fetch error:", error);
+      logServiceError("supabase", error, { url: "guardrails/suggest", metadata: { action: "fetch" } });
       return NextResponse.json({ error: "Failed to fetch suggestions" }, { status: 500 });
     }
 
@@ -159,6 +163,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(enriched);
   } catch (error) {
     console.error("Rule suggestion GET error:", error);
+    logServiceError("app", error, { url: "guardrails/suggest" });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

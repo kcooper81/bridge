@@ -1,7 +1,9 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { reportError } from "@/lib/report-error";
 
 export default function MarketingError({
   error,
@@ -10,6 +12,10 @@ export default function MarketingError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  useEffect(() => {
+    reportError(error, { boundary: "marketing" });
+  }, [error]);
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-background">
       <div

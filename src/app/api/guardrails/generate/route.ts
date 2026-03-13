@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { limiters, checkRateLimit } from "@/lib/rate-limit";
+import { logServiceError } from "@/lib/log-error";
 import type { SecurityCategory, SecurityPatternType, SecuritySeverity } from "@/lib/types";
 
 interface GeneratedRule {
@@ -60,6 +61,7 @@ async function callOpenAI(apiKey: string, prompt: string): Promise<string> {
     if (response.status === 401) throw new Error("INVALID_KEY");
     if (response.status === 429) throw new Error("RATE_LIMITED");
     console.error("OpenAI API error:", err);
+    logServiceError("app", err, { url: "guardrails/generate", metadata: { provider: "openai" } });
     throw new Error("PROVIDER_ERROR");
   }
 
@@ -90,6 +92,7 @@ async function callAnthropic(apiKey: string, prompt: string): Promise<string> {
     if (response.status === 401) throw new Error("INVALID_KEY");
     if (response.status === 429) throw new Error("RATE_LIMITED");
     console.error("Anthropic API error:", err);
+    logServiceError("app", err, { url: "guardrails/generate", metadata: { provider: "anthropic" } });
     throw new Error("PROVIDER_ERROR");
   }
 
@@ -175,6 +178,7 @@ export async function POST(request: NextRequest) {
       rules = JSON.parse(cleaned);
     } catch {
       console.error("Failed to parse AI response:", content);
+      logServiceError("app", new Error("Failed to parse AI response"), { url: "guardrails/generate", metadata: { provider, responsePreview: content.slice(0, 200) } });
       return NextResponse.json({ error: "AI returned invalid format. Try rephrasing." }, { status: 500 });
     }
 
@@ -207,6 +211,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Rate limit reached. Try again in a moment." }, { status: 429 });
     }
     console.error("AI rule generation error:", err);
+    logServiceError("app", err, { url: "guardrails/generate", metadata: { provider, action: "ai-rule-generation" } });
     return NextResponse.json({ error: "Failed to connect to AI provider." }, { status: 500 });
   }
 }

@@ -5,6 +5,7 @@ import { PLAN_LIMITS } from "@/lib/constants";
 import { limiters, checkRateLimit } from "@/lib/rate-limit";
 import { buildEmail } from "@/lib/email-template";
 import type { BulkImportRow, BulkImportResult, UserRole } from "@/lib/types";
+import { logServiceError } from "@/lib/log-error";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const VALID_ROLES: UserRole[] = ["admin", "manager", "member"];
@@ -324,6 +325,7 @@ export async function POST(request: NextRequest) {
           await resend.batch.send(emailPayloads);
         } catch (emailError) {
           console.error("Bulk email batch error:", emailError);
+          logServiceError("resend", emailError, { url: "/api/invite/bulk" });
           // Non-fatal — invites are already created, emails just failed
         }
       }

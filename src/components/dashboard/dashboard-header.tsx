@@ -51,9 +51,12 @@ export function DashboardHeader() {
       {/* Left: mobile hamburger */}
       <div className="md:hidden">
         <MobileSidebarSheet open={mobileOpen} onOpenChange={setMobileOpen}>
-          <Button variant="ghost" size="icon" className="h-9 w-9">
-            <Menu className="h-5 w-5" />
-          </Button>
+          <button
+            type="button"
+            className="h-9 w-9 rounded-full bg-primary flex items-center justify-center shadow-sm active:scale-95 transition-transform"
+          >
+            <Menu className="h-[18px] w-[18px] text-primary-foreground" />
+          </button>
         </MobileSidebarSheet>
       </div>
       <div className="hidden md:block" />

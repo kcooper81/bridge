@@ -46,9 +46,9 @@ export const LIMIT_CONFIG: Record<LimitAction, LimitMeta> = {
     icon: Users,
     noun: "member",
     nounPlural: "members",
-    upgradeValue: "up to 50 members",
-    unlockPlan: "team",
-    unlockPlanName: "Team",
+    upgradeValue: "up to 12 members",
+    unlockPlan: "pro",
+    unlockPlanName: "Pro",
   },
   add_guideline: {
     icon: BookOpen,

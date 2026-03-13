@@ -25,7 +25,7 @@ export const STRIPE_PLAN_CONFIG = {
   pro: {
     priceEnv: { monthly: "STRIPE_PRICE_PRO", annual: "STRIPE_PRICE_PRO_ANNUAL" },
     minSeats: 1,
-    maxSeats: 1,
+    maxSeats: 12,
     trial: true,
   },
   team: {

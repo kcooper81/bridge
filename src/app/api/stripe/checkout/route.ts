@@ -116,18 +116,15 @@ export async function POST(request: NextRequest) {
       Math.min(seats || planConfig.minSeats, planConfig.maxSeats)
     );
 
-    const lineItem: Stripe.Checkout.SessionCreateParams.LineItem =
-      planConfig.maxSeats === 1
-        ? { price: priceId, quantity: 1 }
-        : {
-            price: priceId,
-            quantity: seatCount,
-            adjustable_quantity: {
-              enabled: true,
-              minimum: planConfig.minSeats,
-              maximum: planConfig.maxSeats,
-            },
-          };
+    const lineItem: Stripe.Checkout.SessionCreateParams.LineItem = {
+      price: priceId,
+      quantity: seatCount,
+      adjustable_quantity: {
+        enabled: true,
+        minimum: planConfig.minSeats,
+        maximum: planConfig.maxSeats,
+      },
+    };
 
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
       mode: "subscription",

@@ -55,7 +55,7 @@ export const PLAN_LIMITS: Record<PlanTier, PlanLimits> = {
   free: {
     plan: "free",
     max_prompts: 25,
-    max_members: 1,
+    max_members: 3,
     max_ai_tools: 3,
     max_guidelines: 5,
     analytics: false,
@@ -74,7 +74,7 @@ export const PLAN_LIMITS: Record<PlanTier, PlanLimits> = {
   pro: {
     plan: "pro",
     max_prompts: -1,
-    max_members: 1,
+    max_members: 12,
     max_ai_tools: -1,
     max_guidelines: 14,
     analytics: true,
@@ -170,7 +170,7 @@ export const PLAN_DISPLAY: Record<PlanTier, PlanDisplayInfo> = {
     href: "/signup",
     features: {
       Prompts: "25",
-      Members: "1",
+      Members: "3",
       Guidelines: "5",
       "Basic Data Protection": true,
       "Custom Security Rules": false,
@@ -198,12 +198,12 @@ export const PLAN_DISPLAY: Record<PlanTier, PlanDisplayInfo> = {
     annualMonthlyPrice: "$7",
     period: "/month",
     annualPeriod: "/month",
-    description: "For solo power users",
+    description: "For individuals & small teams",
     cta: "Start 14-Day Trial",
     href: "/signup?plan=pro",
     features: {
       Prompts: "Unlimited",
-      Members: "1",
+      Members: "Up to 12",
       Guidelines: "All 14",
       "Basic Data Protection": true,
       "Custom Security Rules": false,

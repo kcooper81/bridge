@@ -1007,8 +1007,8 @@ INSERT INTO mailbox_settings (email, display_name, signature_html) VALUES
 -- ---------------------------------------------------------------------------
 CREATE OR REPLACE VIEW plan_limits WITH (security_invoker = true) AS
 SELECT * FROM (VALUES
-  ('free',     25, 1,   3,  5,  false, false, true,  false, false, false, false, false, false, false, false, false),
-  ('pro',      -1, 1,  -1, 14,  true,  true,  true,  false, false, false, false, false, false, false, false, false),
+  ('free',     25, 3,   3,  5,  false, false, true,  false, false, false, false, false, false, false, false, false),
+  ('pro',      -1, 12, -1, 14,  true,  true,  true,  false, false, false, false, false, false, false, false, false),
   ('team',     -1, 50, -1, 14,  true,  true,  true,  true,  true,  true,  true,  true,  false, false, false, false),
   ('business', -1, 500,-1, -1,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true)
 ) AS t(

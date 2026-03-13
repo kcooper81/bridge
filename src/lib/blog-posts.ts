@@ -447,7 +447,7 @@ const _POSTS: BlogPost[] = [
   <li><strong>Check the analytics dashboard</strong> — After a week of usage, review the analytics page to see which prompts your team uses most and where there are gaps.</li>
 </ul>
 
-<p>The free plan includes one member and 25 prompts, which is enough to validate the workflow. When you are ready to add more team members or unlock advanced features like custom security rules and analytics, upgrade from Settings. Every paid plan starts with a 14-day free trial and no credit card is required upfront.</p>
+<p>The free plan includes up to 3 members and 25 prompts, which is enough to validate the workflow. When you are ready to add more team members or unlock advanced features like custom security rules and analytics, upgrade from Settings. Every paid plan starts with a 14-day free trial and no credit card is required upfront.</p>
 `,
   },
 

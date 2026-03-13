@@ -40,7 +40,7 @@ const FEATURE_ROWS: {
   business: string | boolean;
 }[] = [
   { label: "Prompts",           type: "number",  free: "25",        pro: "Unlimited",  team: "Unlimited",  business: "Unlimited" },
-  { label: "Members",           type: "number",  free: "3",         pro: "1 (solo)",   team: "50",         business: "500" },
+  { label: "Members",           type: "number",  free: "3",         pro: "12",   team: "50",         business: "500" },
   { label: "AI Tools",          type: "number",  free: "3",         pro: "Unlimited",  team: "Unlimited",  business: "Unlimited" },
   { label: "Guidelines",        type: "number",  free: "5",         pro: "14",         team: "14",         business: "Unlimited" },
   { label: "Analytics",         type: "boolean", free: false,       pro: true,         team: true,         business: true },

@@ -456,7 +456,7 @@ const _RAW_CATEGORIES: RawCategory[] = [
     articles: [
       {
         q: "What plans are available?",
-        a: "Free: 1 member and 25 prompts with core features. Pro ($9/mo): unlimited prompts, 1 member, analytics, and all 14 guidelines. Team ($7/user/mo): up to 50 members, custom security rules, audit log, and import/export. Business ($12/user/mo): up to 500 members, unlimited guidelines, priority support, and SLA guarantee. See the pricing page for full details.",
+        a: "Free: up to 3 members and 25 prompts with core features. Pro ($9/mo): unlimited prompts, up to 12 members, analytics, and all 14 guidelines. Team ($7/user/mo): up to 50 members, custom security rules, audit log, and import/export. Business ($12/user/mo): up to 500 members, unlimited guidelines, priority support, and SLA guarantee. See the pricing page for full details.",
         keywords: ["plans", "pricing", "free", "team", "business", "cost"],
       },
       {
@@ -543,7 +543,7 @@ export const HELP_FAQS: FAQ[] = [
   {
     question: "Is TeamPrompt free to use?",
     answer:
-      "Yes. The free plan includes 1 member, 25 prompts, and core features like the browser extension. Paid plans unlock higher limits and advanced features like data protection, analytics, and compliance packs.",
+      "Yes. The free plan includes up to 3 members, 25 prompts, and core features like the browser extension. Paid plans unlock higher limits and advanced features like data protection, analytics, and compliance packs.",
   },
   {
     question: "Which AI tools does the browser extension support?",

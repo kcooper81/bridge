@@ -1465,8 +1465,56 @@ export function initSharedUI(elements: UIElements) {
         cachedShieldStatus = status;
         updateShieldIndicator(status);
       });
+      // Show "Rate us" banner after 7 days (non-blocking)
+      maybeShowRateBanner();
     } else {
       showLoginView();
     }
   });
+}
+
+// ─── Rate Us Banner ───
+const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+
+async function maybeShowRateBanner() {
+  try {
+    const data = await browser.storage.local.get(["installDate", "rateDismissed"]);
+    if (data.rateDismissed) return;
+    if (!data.installDate) return;
+    if (Date.now() - data.installDate < SEVEN_DAYS_MS) return;
+
+    const toolbar = document.querySelector(".toolbar");
+    if (!toolbar) return;
+
+    const banner = document.createElement("div");
+    banner.className = "rate-banner";
+    banner.innerHTML = `
+      <span class="rate-banner-star">\u2B50</span>
+      <span class="rate-banner-text"><strong>Enjoying TeamPrompt?</strong> A quick rating helps others find us!</span>
+      <span class="rate-banner-actions">
+        <button class="rate-banner-btn rate-yes">Rate</button>
+        <button class="rate-banner-btn rate-dismiss">Later</button>
+      </span>
+    `;
+
+    toolbar.insertAdjacentElement("afterend", banner);
+
+    banner.querySelector(".rate-yes")?.addEventListener("click", () => {
+      browser.storage.local.set({ rateDismissed: true });
+      const extId = browser.runtime.id;
+      const isFirefox = navigator.userAgent.includes("Firefox");
+      const reviewUrl = isFirefox
+        ? "https://addons.mozilla.org/en-US/firefox/addon/teamprompt/reviews/"
+        : `https://chromewebstore.google.com/detail/teamprompt/${extId}/reviews`;
+      browser.tabs.create({ url: reviewUrl });
+      banner.remove();
+    });
+
+    banner.querySelector(".rate-dismiss")?.addEventListener("click", () => {
+      browser.storage.local.set({ rateDismissed: true });
+      banner.remove();
+    });
+  } catch {
+    // Non-critical — silently ignore
+  }
 }

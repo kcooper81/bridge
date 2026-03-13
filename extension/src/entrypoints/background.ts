@@ -40,6 +40,7 @@ export default defineBackground(() => {
 
     // Open welcome page on first install (not on updates)
     if (details.reason === "install") {
+      browser.storage.local.set({ installDate: Date.now() });
       browser.tabs.create({ url: CONFIG.SITE_URL + "/extension/welcome" });
     }
 

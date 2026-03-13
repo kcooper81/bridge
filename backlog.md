@@ -206,7 +206,18 @@
   - Fixed missing DialogDescription warnings — added sr-only fallback in dialog.tsx
   - Configurable support staff page access — ADMIN_PAGES constant, SupportAccessGuard, PATCH endpoint
 
+- [x] Chrome Web Store listing optimization (CHROME-STORE-OPTIMIZATION.md)
+- [x] "Rate Us" banner after 7 days of use (v1.0.9)
+- [x] Google Ads campaign structure (PAID-ADS.md)
+- [x] Comprehensive QA pass — 25 issues found/fixed across auth, dashboard, team, marketing, API, extension, DLP
+- [x] DLP default rules enabled (SSN, Credit Card active by default)
+- [x] Email verification enforcement (login + middleware)
+
 ## Pending
+- [ ] **AI Response Clipper + Team Knowledge Base** — One-click save any AI response. Tagged, searchable, shareable. Builds a team "second brain" from AI conversations.
+- [ ] **Universal Prompt Palette (Cmd+Shift+P anywhere)** — Search and insert prompts into any text field (Docs, Slack, email), not just AI sites.
+- [ ] **AI Usage Dashboard ("Wrapped for AI")** — Team analytics: usage frequency, hours saved, top prompts, reuse rates. ROI justification for managers.
+- [ ] **Prompt Chains / Workflows** — Chain prompts together (summarize → extract → draft). One-click multi-step workflows, shareable like Zapier zaps.
 - [ ] Customizable dashboard — drag-and-drop widget layout (deferred)
   - Allow admins/managers to choose which dashboard widgets to show and reorder them
   - Consider react-grid-layout or dnd-kit for drag-and-drop

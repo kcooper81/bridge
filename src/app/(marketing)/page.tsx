@@ -40,6 +40,18 @@ import {
   Star,
   Users,
   Zap,
+  GraduationCap,
+  Landmark,
+  Scale,
+  Cpu,
+  DollarSign,
+  ShieldCheck,
+  BookMarked,
+  HelpCircle,
+  History,
+  Plug,
+  Lock,
+  Building,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PLAN_DISPLAY, PLAN_ORDER } from "@/lib/constants";
@@ -746,6 +758,88 @@ export default function LandingPage() {
               Compare all features &rarr;
             </Link>
           </p>
+        </div>
+      </section>
+
+      {/* ━━━ EXPLORE BY INDUSTRY ━━━ */}
+      <section className="py-16 sm:py-20 border-t border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-10">
+            <SectionLabel>Industries</SectionLabel>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
+              Explore by Industry
+            </h2>
+            <p className="mt-3 text-muted-foreground">
+              See how teams in your industry use TeamPrompt to manage AI prompts.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-center gap-3 max-w-3xl mx-auto">
+            {[
+              { name: "Healthcare", href: "/industries/healthcare", icon: Heart },
+              { name: "Legal", href: "/industries/legal", icon: Scale },
+              { name: "Technology", href: "/industries/technology", icon: Cpu },
+              { name: "Finance", href: "/industries/finance", icon: DollarSign },
+              { name: "Government", href: "/industries/government", icon: Landmark },
+              { name: "Education", href: "/industries/education", icon: GraduationCap },
+              { name: "Insurance", href: "/industries/insurance", icon: ShieldCheck },
+            ].map((industry) => (
+              <Link
+                key={industry.name}
+                href={industry.href}
+                className="group inline-flex items-center gap-2 rounded-full border border-border bg-card px-5 py-2.5 text-sm font-medium hover:border-primary/30 hover:bg-primary/5 transition-all duration-200"
+              >
+                <industry.icon className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                {industry.name}
+                <ArrowRight className="h-3 w-3 text-muted-foreground opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200" />
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ━━━ RESOURCES ━━━ */}
+      <section className="py-16 sm:py-20 border-t border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-10">
+            <SectionLabel>Resources</SectionLabel>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
+              Resources
+            </h2>
+            <p className="mt-3 text-muted-foreground">
+              Guides, updates, and everything you need to get the most from TeamPrompt.
+            </p>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 max-w-4xl mx-auto">
+            {[
+              { title: "Blog", desc: "Learn best practices for AI prompt management", href: "/blog", icon: BookMarked },
+              { title: "Help Center", desc: "Get started with guides and tutorials", href: "/help", icon: HelpCircle },
+              { title: "Changelog", desc: "See what's new in TeamPrompt", href: "/changelog", icon: History },
+              { title: "Integrations", desc: "Connect with your favorite AI tools", href: "/integrations", icon: Plug },
+              { title: "Security", desc: "Enterprise-grade data protection", href: "/security", icon: Lock },
+              { title: "Enterprise", desc: "Solutions for large organizations", href: "/enterprise", icon: Building },
+            ].map((resource) => (
+              <Link
+                key={resource.title}
+                href={resource.href}
+                className="group flex items-start gap-4 rounded-xl border border-border bg-card p-5 hover:border-primary/30 hover:shadow-sm transition-all duration-200"
+              >
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                  <resource.icon className="h-4 w-4 text-primary" />
+                </div>
+                <div className="min-w-0">
+                  <h3 className="text-sm font-semibold flex items-center gap-1.5">
+                    {resource.title}
+                    <ArrowRight className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all duration-200" />
+                  </h3>
+                  <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                    {resource.desc}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
 

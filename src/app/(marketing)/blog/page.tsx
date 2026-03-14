@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { generatePageMetadata } from "@/lib/seo/metadata";
 import { generateBreadcrumbSchema } from "@/lib/seo/schemas";
 import { SectionLabel } from "@/components/marketing/section-label";
+import Link from "next/link";
 import { CTASection } from "@/components/marketing/cta-section";
 import { DarkSection } from "@/components/marketing/dark-section";
 import { getAllBlogPosts } from "@/lib/blog-posts.server";
@@ -60,6 +61,27 @@ export default async function BlogPage() {
 
           {/* Filter + Grid (client component) */}
           <BlogFilter posts={posts} />
+
+          {/* Related Resources */}
+          <nav className="mt-16 text-center" aria-label="Related resources">
+            <p className="text-sm text-muted-foreground mb-3">Related Resources</p>
+            <div className="flex flex-wrap justify-center gap-2">
+              {[
+                { href: "/features", label: "Features" },
+                { href: "/solutions", label: "Solutions" },
+                { href: "/help", label: "Help Center" },
+                { href: "/pricing", label: "Pricing" },
+              ].map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="inline-flex items-center rounded-full border border-border bg-card px-4 py-1.5 text-sm font-medium text-muted-foreground hover:text-primary hover:border-primary/30 transition-colors"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          </nav>
 
           {/* CTA */}
           <div className="mt-20">

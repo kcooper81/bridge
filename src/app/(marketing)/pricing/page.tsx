@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { generatePageMetadata } from "@/lib/seo/metadata";
 import { FAQSection } from "@/components/marketing/faq-section";
 import { CTASection } from "@/components/marketing/cta-section";
@@ -93,6 +94,36 @@ export default function PricingPage() {
             </a>{" "}
             for custom enterprise pricing.
           </p>
+        </div>
+
+        {/* Learn More */}
+        <div className="mt-24">
+          <h2 className="text-2xl font-semibold tracking-tight text-center mb-8">
+            Learn More
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto">
+            {[
+              { href: "/features", title: "See all features", subtitle: "Everything included in each plan" },
+              { href: "/security", title: "Data protection", subtitle: "Enterprise-grade security for your AI usage" },
+              { href: "/help", title: "Help center", subtitle: "Guides, tutorials, and FAQs" },
+              { href: "/blog", title: "Blog", subtitle: "Tips for AI prompt management" },
+              { href: "/integrations", title: "Integrations", subtitle: "Works with ChatGPT, Claude, Gemini & more" },
+              { href: "/enterprise", title: "Enterprise", subtitle: "Custom solutions for large teams" },
+            ].map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="group rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary/40 hover:bg-accent/50"
+              >
+                <p className="text-sm font-medium group-hover:text-primary transition-colors">
+                  {link.title}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                  {link.subtitle}
+                </p>
+              </Link>
+            ))}
+          </div>
         </div>
 
         {/* FAQ */}

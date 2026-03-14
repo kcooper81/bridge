@@ -238,6 +238,27 @@ export default async function BlogPostPage({ params }: Props) {
             </div>
           )}
 
+          {/* Contextual links */}
+          <nav className="max-w-3xl mx-auto mt-14 pt-8 border-t border-border" aria-label="Explore more">
+            <p className="text-sm text-muted-foreground mb-3">Explore more</p>
+            <div className="flex flex-wrap gap-x-5 gap-y-1">
+              {[
+                { href: "/features", label: "Features" },
+                { href: "/solutions", label: "Solutions" },
+                { href: "/help", label: "Help Center" },
+                { href: "/pricing", label: "Pricing" },
+              ].map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          </nav>
+
           {/* CTA */}
           <div className="mt-20">
             <CTASection

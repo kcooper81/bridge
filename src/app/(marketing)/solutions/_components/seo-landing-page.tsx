@@ -360,6 +360,9 @@ export function SeoLandingPage({ data }: { data: SeoPageData }) {
       {/* ━━━ RELATED SOLUTIONS ━━━ */}
       <RelatedSolutions slug={data.slug} />
 
+      {/* ━━━ EXPLORE MORE ━━━ */}
+      <ExploreMoreLinks />
+
       {/* ━━━ CTA ━━━ */}
       <section className="py-20 sm:py-28 border-t border-border">
         <div className="max-w-3xl mx-auto px-4 sm:px-6">
@@ -375,7 +378,7 @@ export function SeoLandingPage({ data }: { data: SeoPageData }) {
 }
 
 function RelatedSolutions({ slug }: { slug: string }) {
-  const related = getRelatedPages(slug, 6);
+  const related = getRelatedPages(slug, 4);
   if (related.length === 0) return null;
 
   return (
@@ -387,7 +390,7 @@ function RelatedSolutions({ slug }: { slug: string }) {
             Explore more solutions
           </h2>
         </div>
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 max-w-5xl mx-auto">
           {related.map((page) => (
             <Link
               key={page.slug}
@@ -404,6 +407,40 @@ function RelatedSolutions({ slug }: { slug: string }) {
                 Learn more
                 <ArrowRight className="ml-1.5 h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
               </span>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+const exploreMoreLinks = [
+  { href: "/features", label: "Features" },
+  { href: "/pricing", label: "Pricing" },
+  { href: "/blog", label: "Blog" },
+  { href: "/help", label: "Help Center" },
+  { href: "/industries/healthcare", label: "Healthcare" },
+  { href: "/industries/finance", label: "Finance" },
+  { href: "/industries/legal", label: "Legal" },
+  { href: "/industries/technology", label: "Technology" },
+];
+
+function ExploreMoreLinks() {
+  return (
+    <section className="py-14 sm:py-16 border-t border-border">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6">
+        <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-6">
+          Explore More
+        </h3>
+        <div className="flex flex-wrap gap-x-6 gap-y-3">
+          {exploreMoreLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="text-sm text-muted-foreground hover:text-primary transition-colors"
+            >
+              {link.label}
             </Link>
           ))}
         </div>

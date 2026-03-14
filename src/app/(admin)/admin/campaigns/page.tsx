@@ -1346,6 +1346,48 @@ export default function CampaignsPage() {
         </Card>
       ) : (
         <div className="space-y-6">
+          {/* Analytics Overview */}
+          {sent.length > 0 && (() => {
+            const totalSent = sent.reduce((s, c) => s + c.recipient_count, 0);
+            const totalOpens = sent.reduce((s, c) => s + (c.opens || 0), 0);
+            const totalClicks = sent.reduce((s, c) => s + (c.clicks || 0), 0);
+            const totalBounces = sent.reduce((s, c) => s + (c.bounces || 0), 0);
+            const totalUnsubs = sent.reduce((s, c) => s + (c.unsubscribes || 0), 0);
+            const openRate = totalSent > 0 ? ((totalOpens / totalSent) * 100).toFixed(1) : "0";
+            const clickRate = totalSent > 0 ? ((totalClicks / totalSent) * 100).toFixed(1) : "0";
+            return (
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                <Card className="p-3 text-center">
+                  <Send className="h-4 w-4 text-blue-600 mx-auto mb-1" />
+                  <p className="text-lg font-bold">{totalSent.toLocaleString()}</p>
+                  <p className="text-[10px] text-muted-foreground uppercase font-medium">Total Sent</p>
+                </Card>
+                <Card className="p-3 text-center">
+                  <MailOpen className="h-4 w-4 text-green-600 mx-auto mb-1" />
+                  <p className="text-lg font-bold text-green-700">{openRate}%</p>
+                  <p className="text-[10px] text-muted-foreground uppercase font-medium">Open Rate</p>
+                  <p className="text-[10px] text-muted-foreground">{totalOpens.toLocaleString()} opens</p>
+                </Card>
+                <Card className="p-3 text-center">
+                  <MousePointerClick className="h-4 w-4 text-purple-600 mx-auto mb-1" />
+                  <p className="text-lg font-bold text-purple-700">{clickRate}%</p>
+                  <p className="text-[10px] text-muted-foreground uppercase font-medium">Click Rate</p>
+                  <p className="text-[10px] text-muted-foreground">{totalClicks.toLocaleString()} clicks</p>
+                </Card>
+                <Card className="p-3 text-center">
+                  <AlertCircle className="h-4 w-4 text-amber-500 mx-auto mb-1" />
+                  <p className="text-lg font-bold text-amber-600">{totalBounces}</p>
+                  <p className="text-[10px] text-muted-foreground uppercase font-medium">Bounces</p>
+                </Card>
+                <Card className="p-3 text-center">
+                  <Ban className="h-4 w-4 text-red-500 mx-auto mb-1" />
+                  <p className="text-lg font-bold text-red-600">{totalUnsubs}</p>
+                  <p className="text-[10px] text-muted-foreground uppercase font-medium">Unsubscribes</p>
+                </Card>
+              </div>
+            );
+          })()}
+
           {/* Drafts */}
           {drafts.length > 0 && (
             <CampaignSection
@@ -1444,23 +1486,29 @@ function CampaignSection({
                 </p>
               </div>
 
-              <div className="flex items-center gap-4 text-xs text-muted-foreground shrink-0">
+              <div className="flex items-center gap-3 text-xs text-muted-foreground shrink-0">
                 {c.recipient_count > 0 && (
                   <span className="flex items-center gap-1" title="Recipients">
                     <Send className="h-3 w-3" />
-                    {c.recipient_count}
+                    {c.recipient_count.toLocaleString()}
                   </span>
                 )}
-                {(c.opens || 0) > 0 && (
-                  <span className="flex items-center gap-1 text-green-600" title="Opens">
+                {c.recipient_count > 0 && (c.opens || 0) > 0 && (
+                  <span className="flex items-center gap-1 text-green-600" title={`${c.opens} opens`}>
                     <MailOpen className="h-3 w-3" />
-                    {c.opens}
+                    {((c.opens / c.recipient_count) * 100).toFixed(1)}%
                   </span>
                 )}
-                {(c.clicks || 0) > 0 && (
-                  <span className="flex items-center gap-1 text-purple-600" title="Clicks">
+                {c.recipient_count > 0 && (c.clicks || 0) > 0 && (
+                  <span className="flex items-center gap-1 text-purple-600" title={`${c.clicks} clicks`}>
                     <MousePointerClick className="h-3 w-3" />
-                    {c.clicks}
+                    {((c.clicks / c.recipient_count) * 100).toFixed(1)}%
+                  </span>
+                )}
+                {(c.bounces || 0) > 0 && (
+                  <span className="flex items-center gap-1 text-amber-600" title={`${c.bounces} bounces`}>
+                    <AlertCircle className="h-3 w-3" />
+                    {c.bounces}
                   </span>
                 )}
                 {c.scheduled_at && (

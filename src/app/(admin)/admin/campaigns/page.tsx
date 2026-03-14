@@ -135,6 +135,10 @@ export default function CampaignsPage() {
   const [importListName, setImportListName] = useState("");
   const [importListDesc, setImportListDesc] = useState("");
   const [audienceLists, setAudienceLists] = useState<AudienceList[]>([]);
+  const [editingList, setEditingList] = useState<AudienceList | null>(null);
+  const [editListName, setEditListName] = useState("");
+  const [editListDesc, setEditListDesc] = useState("");
+  const [savingList, setSavingList] = useState(false);
   const [editorTab, setEditorTab] = useState<"fields" | "preview" | "html">("fields");
 
   // Editor form state
@@ -488,6 +492,36 @@ export default function CampaignsPage() {
       await Promise.all([loadSegments(), loadAudienceLists()]);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to delete list");
+    }
+  }
+
+  function openEditList(list: AudienceList) {
+    setEditingList(list);
+    setEditListName(list.name);
+    setEditListDesc(list.description || "");
+  }
+
+  async function saveListEdits() {
+    if (!editingList || !editListName.trim()) return;
+    setSavingList(true);
+    try {
+      const res = await fetch("/api/admin/campaigns/lists", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: editingList.id,
+          name: editListName.trim(),
+          description: editListDesc.trim(),
+        }),
+      });
+      if (!res.ok) throw new Error("Failed to update list");
+      toast.success("List updated");
+      setEditingList(null);
+      await Promise.all([loadSegments(), loadAudienceLists()]);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to update list");
+    } finally {
+      setSavingList(false);
     }
   }
 
@@ -893,6 +927,49 @@ export default function CampaignsPage() {
               </Button>
             </Card>
 
+            {/* Audience Lists management */}
+            {audienceLists.length > 0 && (
+              <Card className="p-4">
+                <h3 className="font-semibold text-sm mb-3 flex items-center gap-2">
+                  <List className="h-4 w-4" />
+                  Audience Lists
+                </h3>
+                <div className="space-y-2">
+                  {audienceLists.map((list) => (
+                    <div key={list.id} className="rounded-lg border p-2.5 space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium truncate">{list.name}</span>
+                        <div className="flex items-center gap-1 shrink-0">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 w-6 p-0"
+                            onClick={() => openEditList(list)}
+                          >
+                            <Pencil className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 w-6 p-0 text-muted-foreground hover:text-red-600"
+                            onClick={() => deleteAudienceList(list.id)}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                      {list.description && (
+                        <p className="text-[11px] text-muted-foreground">{list.description}</p>
+                      )}
+                      <p className="text-[10px] text-muted-foreground">
+                        {list.contact_count} contact{list.contact_count !== 1 ? "s" : ""} &middot; {timeAgo(list.created_at)}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            )}
+
             <Card className="p-4">
               <h3 className="font-semibold text-sm mb-3">Tips</h3>
               <ul className="text-xs text-muted-foreground space-y-2">
@@ -1164,6 +1241,54 @@ export default function CampaignsPage() {
                 </div>
               )}
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Audience List Dialog */}
+        <Dialog open={!!editingList} onOpenChange={(open) => { if (!open) setEditingList(null); }}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit Audience List</DialogTitle>
+              <DialogDescription>
+                Update the name and description for this audience list.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="edit-list-name">List Name</Label>
+                <Input
+                  id="edit-list-name"
+                  value={editListName}
+                  onChange={(e) => setEditListName(e.target.value)}
+                  placeholder="e.g. Partner Leads March 2026"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-list-desc">Description / Notes</Label>
+                <Textarea
+                  id="edit-list-desc"
+                  value={editListDesc}
+                  onChange={(e) => setEditListDesc(e.target.value)}
+                  placeholder="e.g. SaaS founders from LinkedIn outreach, imported from Apollo export"
+                  className="mt-1 min-h-[80px]"
+                />
+              </div>
+              {editingList && (
+                <p className="text-xs text-muted-foreground">
+                  {editingList.contact_count} contact{editingList.contact_count !== 1 ? "s" : ""} &middot; Created {timeAgo(editingList.created_at)}
+                </p>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setEditingList(null)}>
+                Cancel
+              </Button>
+              <Button onClick={saveListEdits} disabled={savingList || !editListName.trim()}>
+                {savingList && <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />}
+                Save
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>

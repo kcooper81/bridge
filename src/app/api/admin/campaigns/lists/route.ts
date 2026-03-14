@@ -25,6 +25,37 @@ export async function GET() {
 }
 
 /**
+ * PATCH — update an audience list's name or description.
+ */
+export async function PATCH(request: NextRequest) {
+  const auth = await verifyAdminAccess();
+  if (!auth) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
+  const { id, name, description } = await request.json();
+  if (!id) return NextResponse.json({ error: "id required" }, { status: 400 });
+
+  const db = createServiceClient();
+
+  const updates: Record<string, string> = { updated_at: new Date().toISOString() };
+  if (name !== undefined) updates.name = name.trim();
+  if (description !== undefined) updates.description = description.trim();
+
+  const { data, error } = await db
+    .from("audience_lists")
+    .update(updates)
+    .eq("id", id)
+    .select("id, name, description, contact_count, created_at")
+    .single();
+
+  if (error) {
+    console.error("Failed to update list:", error);
+    return NextResponse.json({ error: "Failed to update list" }, { status: 500 });
+  }
+
+  return NextResponse.json({ list: data });
+}
+
+/**
  * DELETE — delete an audience list (does not delete the contacts themselves).
  */
 export async function DELETE(request: NextRequest) {

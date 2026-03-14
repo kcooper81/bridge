@@ -141,7 +141,7 @@ async function getOrCreateAudience(): Promise<string> {
 /**
  * Sync contacts to Resend audience.
  * Supports: "all" (DB users), plan-based segments, "external" (campaign_contacts table),
- * and "all_combined" (DB users + external contacts).
+ * "all_combined" (DB users + external contacts), and "list:<id>" (specific audience list).
  */
 async function syncContacts(
   db: ReturnType<typeof createServiceClient>,
@@ -150,11 +150,46 @@ async function syncContacts(
 ): Promise<number> {
   let synced = 0;
 
+  // Handle audience list segments (list:<uuid>)
+  if (segmentName?.startsWith("list:")) {
+    const listId = segmentName.replace("list:", "");
+    const { data: listContacts } = await db
+      .from("audience_list_contacts")
+      .select("contact_id")
+      .eq("list_id", listId);
+
+    if (!listContacts || listContacts.length === 0) return 0;
+
+    const contactIds = listContacts.map((lc) => lc.contact_id);
+    const { data: contacts } = await db
+      .from("campaign_contacts")
+      .select("email, first_name, last_name, company")
+      .in("id", contactIds)
+      .eq("unsubscribed", false);
+
+    for (const contact of contacts || []) {
+      if (!contact.email) continue;
+      try {
+        await resend.contacts.create({
+          audienceId,
+          email: contact.email,
+          firstName: contact.first_name || "",
+          lastName: contact.last_name || "",
+          unsubscribed: false,
+        });
+        synced++;
+      } catch {
+        synced++;
+      }
+    }
+    return synced;
+  }
+
   // Sync external contacts from campaign_contacts table
   if (segmentName === "external" || segmentName === "all_combined") {
     const { data: external } = await db
       .from("campaign_contacts")
-      .select("email, first_name, last_name")
+      .select("email, first_name, last_name, company")
       .eq("unsubscribed", false);
 
     for (const contact of external || []) {

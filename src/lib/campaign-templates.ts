@@ -714,8 +714,57 @@ ${closing}
   },
 ];
 
+// ─── Outreach templates ──────────────────────────────────────────
+
+CAMPAIGN_TEMPLATES.push({
+  id: "partner-outreach",
+  name: "Partner Outreach",
+  category: "Outreach",
+  description: "Clean cold email for potential partners — conversational, not salesy",
+  defaultSubject: "Quick question about {{{COMPANY|your team}}}",
+  previewText: "Saw what you're building and thought there might be a fit",
+  fields: [
+    { key: "opener", label: "Opening Line", type: "textarea", placeholder: "What caught your attention about them? Be specific. e.g. 'I saw your recent post about scaling prompt workflows...'" },
+    { key: "pitch", label: "What You Offer (1-2 sentences)", type: "textarea", placeholder: "Brief, honest description of what you do and why it's relevant. No buzzwords." },
+    { key: "ask", label: "The Ask", type: "textarea", placeholder: "What would you like from them? Keep it low-friction. e.g. 'Would you be open to a 15-minute call next week?'", default: "Would you be open to a quick chat sometime this week?" },
+    { key: "signoff", label: "Sign-off Name", type: "text", placeholder: "Your name", default: "Kade" },
+    { key: "title", label: "Your Title", type: "text", placeholder: "e.g. Founder, TeamPrompt", default: "Founder, TeamPrompt" },
+  ],
+  build(vals) {
+    const opener = vals.opener?.trim()
+      ? vals.opener.trim().split(/\n\n+/).map(p =>
+        `              <p style="margin: 0 0 14px; font-size: 15px; color: #3f3f46; line-height: 1.65;">${esc(p)}</p>`
+      ).join("\n")
+      : `              <p style="margin: 0 0 14px; font-size: 15px; color: #3f3f46; line-height: 1.65;">[Your opening line — what caught your eye about them.]</p>`;
+
+    const pitch = vals.pitch?.trim()
+      ? vals.pitch.trim().split(/\n\n+/).map(p =>
+        `              <p style="margin: 0 0 14px; font-size: 15px; color: #3f3f46; line-height: 1.65;">${esc(p)}</p>`
+      ).join("\n")
+      : `              <p style="margin: 0 0 14px; font-size: 15px; color: #3f3f46; line-height: 1.65;">[Brief pitch — what you do, why it matters to them.]</p>`;
+
+    return wrap(`
+          <tr>
+            <td class="content-padding" style="background-color: #ffffff; padding: 32px; border-radius: 12px;">
+              <p style="margin: 0 0 14px; font-size: 15px; color: #3f3f46; line-height: 1.65;">Hi {{{FIRST_NAME|there}}},</p>
+${opener}
+${pitch}
+              <p style="margin: 0 0 14px; font-size: 15px; color: #3f3f46; line-height: 1.65;">${v(vals, "ask", "Would you be open to a quick chat sometime this week?")}</p>
+              <p style="margin: 0; font-size: 15px; color: #3f3f46; line-height: 1.65;">
+                Best,<br />
+                ${v(vals, "signoff", "[Your Name]")}
+                ${vals.title?.trim() ? `<br /><span style="font-size: 13px; color: ${MUTED_TEXT};">${esc(vals.title.trim())}</span>` : ""}
+              </p>
+            </td>
+          </tr>
+`, "");
+  },
+  get html() { return this.build({}); },
+});
+
 export const TEMPLATE_CATEGORIES = [
   { id: "Product", label: "Product" },
   { id: "Marketing", label: "Marketing" },
+  { id: "Outreach", label: "Outreach" },
   { id: "Plain", label: "Plain / Natural" },
 ] as const;

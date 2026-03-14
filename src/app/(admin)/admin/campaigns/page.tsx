@@ -23,6 +23,7 @@ import {
   MousePointerClick,
   MailOpen,
   Ban,
+  List,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
@@ -77,6 +78,15 @@ interface Segment {
   name: string;
   label: string;
   count: number;
+  type?: string;
+}
+
+interface AudienceList {
+  id: string;
+  name: string;
+  description: string;
+  contact_count: number;
+  created_at: string;
 }
 
 type View = "list" | "editor";
@@ -122,6 +132,9 @@ export default function CampaignsPage() {
   const [showImport, setShowImport] = useState(false);
   const [importing, setImporting] = useState(false);
   const [externalCount, setExternalCount] = useState(0);
+  const [importListName, setImportListName] = useState("");
+  const [importListDesc, setImportListDesc] = useState("");
+  const [audienceLists, setAudienceLists] = useState<AudienceList[]>([]);
   const [editorTab, setEditorTab] = useState<"fields" | "preview" | "html">("fields");
 
   // Editor form state
@@ -172,11 +185,22 @@ export default function CampaignsPage() {
     }
   }, []);
 
+  const loadAudienceLists = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/campaigns/lists");
+      const data = await res.json();
+      setAudienceLists(data.lists || []);
+    } catch {
+      // Non-critical
+    }
+  }, []);
+
   useEffect(() => {
     loadCampaigns();
     loadSegments();
     loadExternalCount();
-  }, [loadCampaigns, loadSegments, loadExternalCount]);
+    loadAudienceLists();
+  }, [loadCampaigns, loadSegments, loadExternalCount, loadAudienceLists]);
 
   // ─── Editor actions ──────────────────────────────────────────
 
@@ -409,6 +433,7 @@ export default function CampaignsPage() {
       const emailIdx = header.findIndex((h) => h === "email" || h === "email address" || h === "e-mail");
       const firstNameIdx = header.findIndex((h) => h === "first_name" || h === "first name" || h === "firstname" || h === "name");
       const lastNameIdx = header.findIndex((h) => h === "last_name" || h === "last name" || h === "lastname" || h === "surname");
+      const companyIdx = header.findIndex((h) => h === "company" || h === "company_name" || h === "company name" || h === "organization" || h === "org");
 
       if (emailIdx === -1) {
         toast.error("CSV must have an 'email' column");
@@ -421,26 +446,48 @@ export default function CampaignsPage() {
           email: cols[emailIdx] || "",
           first_name: firstNameIdx >= 0 ? cols[firstNameIdx] || "" : "",
           last_name: lastNameIdx >= 0 ? cols[lastNameIdx] || "" : "",
+          company: companyIdx >= 0 ? cols[companyIdx] || "" : "",
         };
       }).filter((c) => c.email);
 
       const res = await fetch("/api/admin/campaigns/contacts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contacts }),
+        body: JSON.stringify({
+          contacts,
+          list_name: importListName.trim() || undefined,
+          list_description: importListDesc.trim() || undefined,
+        }),
       });
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
 
-      toast.success(`Imported ${data.imported} contacts (${data.skipped} skipped)`);
+      const listMsg = importListName.trim() ? ` → "${importListName.trim()}" list` : "";
+      toast.success(`Imported ${data.imported} contacts (${data.skipped} skipped)${listMsg}`);
       setShowImport(false);
-      await loadSegments();
-      await loadExternalCount();
+      setImportListName("");
+      setImportListDesc("");
+      await Promise.all([loadSegments(), loadExternalCount(), loadAudienceLists()]);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Import failed");
     } finally {
       setImporting(false);
+    }
+  }
+
+  async function deleteAudienceList(listId: string) {
+    try {
+      const res = await fetch("/api/admin/campaigns/lists", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: listId }),
+      });
+      if (!res.ok) throw new Error("Failed to delete list");
+      toast.success("Audience list deleted");
+      await Promise.all([loadSegments(), loadAudienceLists()]);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to delete list");
     }
   }
 
@@ -663,8 +710,10 @@ export default function CampaignsPage() {
 
                   <div className="pt-2 border-t">
                     <p className="text-xs text-muted-foreground">
-                      Personalization: <code className="bg-slate-100 px-1 rounded">{"{{{FIRST_NAME|there}}}"}</code> is auto-inserted.
-                      Switch to Preview to see the result, or HTML for full control.
+                      Variables: <code className="bg-slate-100 px-1 rounded">{"{{{FIRST_NAME|there}}}"}</code>{" "}
+                      <code className="bg-slate-100 px-1 rounded">{"{{{LAST_NAME}}}"}</code>{" "}
+                      <code className="bg-slate-100 px-1 rounded">{"{{{COMPANY|your team}}}"}</code>{" "}
+                      — Switch to Preview to see the result, or HTML for full control.
                     </p>
                   </div>
                 </div>
@@ -701,9 +750,13 @@ export default function CampaignsPage() {
                 </div>
               )}
 
-              <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                <span>Personalization: <code className="bg-slate-100 px-1 rounded">{`{{{FIRST_NAME|there}}}`}</code></span>
-                <span>Unsubscribe link auto-injected if not present</span>
+              <div className="space-y-1 text-xs text-muted-foreground">
+                <p>
+                  Variables: <code className="bg-slate-100 px-1 rounded">{`{{{FIRST_NAME|there}}}`}</code>{" "}
+                  <code className="bg-slate-100 px-1 rounded">{`{{{LAST_NAME}}}`}</code>{" "}
+                  <code className="bg-slate-100 px-1 rounded">{`{{{COMPANY|your team}}}`}</code>
+                </p>
+                <p>Unsubscribe link auto-injected if not present</p>
               </div>
             </Card>
           </div>
@@ -797,11 +850,26 @@ export default function CampaignsPage() {
                   <SelectValue placeholder="Select audience" />
                 </SelectTrigger>
                 <SelectContent>
-                  {segments.map((seg) => (
+                  {segments.filter((s) => !s.type).map((seg) => (
                     <SelectItem key={seg.name} value={seg.name}>
                       {seg.label} ({seg.count})
                     </SelectItem>
                   ))}
+                  {segments.some((s) => s.type === "list") && (
+                    <>
+                      <div className="px-2 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+                        Audience Lists
+                      </div>
+                      {segments.filter((s) => s.type === "list").map((seg) => (
+                        <SelectItem key={seg.name} value={seg.name}>
+                          <span className="flex items-center gap-1.5">
+                            <List className="h-3 w-3" />
+                            {seg.label} ({seg.count})
+                          </span>
+                        </SelectItem>
+                      ))}
+                    </>
+                  )}
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground mt-2">
@@ -831,7 +899,7 @@ export default function CampaignsPage() {
                 <li>&bull; Save as draft first, then Send</li>
                 <li>&bull; Contacts are synced to Resend when you send</li>
                 <li>&bull; Unsubscribe link is automatically added</li>
-                <li>&bull; Use <code className="bg-slate-100 px-1 rounded">{`{{{FIRST_NAME|Friend}}}`}</code> for personalization</li>
+                <li>&bull; Variables: <code className="bg-slate-100 px-1 rounded">{`{{{FIRST_NAME}}}`}</code>, <code className="bg-slate-100 px-1 rounded">{`{{{LAST_NAME}}}`}</code>, <code className="bg-slate-100 px-1 rounded">{`{{{COMPANY}}}`}</code></li>
                 <li>&bull; Schedule sends by picking a date/time before sending</li>
               </ul>
             </Card>
@@ -980,15 +1048,40 @@ export default function CampaignsPage() {
         </Dialog>
 
         {/* CSV Import Dialog */}
-        <Dialog open={showImport} onOpenChange={setShowImport}>
-          <DialogContent>
+        <Dialog open={showImport} onOpenChange={(open) => { setShowImport(open); if (!open) { setImportListName(""); setImportListDesc(""); } }}>
+          <DialogContent className="max-w-lg">
             <DialogHeader>
               <DialogTitle>Import Contacts</DialogTitle>
               <DialogDescription>
-                Upload a CSV file with email addresses. Columns: email (required), first_name, last_name.
+                Upload a CSV with contacts. Columns: email (required), first_name, last_name, company.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
+              <div>
+                <Label htmlFor="import-list-name">List Name</Label>
+                <Input
+                  id="import-list-name"
+                  value={importListName}
+                  onChange={(e) => setImportListName(e.target.value)}
+                  placeholder="e.g. Partner Leads March 2026"
+                  className="mt-1"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Creates a reusable audience list you can select when sending campaigns
+                </p>
+              </div>
+              {importListName.trim() && (
+                <div>
+                  <Label htmlFor="import-list-desc">List Description (optional)</Label>
+                  <Input
+                    id="import-list-desc"
+                    value={importListDesc}
+                    onChange={(e) => setImportListDesc(e.target.value)}
+                    placeholder="e.g. SaaS founders from LinkedIn outreach"
+                    className="mt-1"
+                  />
+                </div>
+              )}
               <div
                 className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:bg-slate-50 transition-colors"
                 onClick={() => document.getElementById("csv-file-input")?.click()}
@@ -1027,15 +1120,48 @@ export default function CampaignsPage() {
               <div className="bg-slate-50 rounded-lg p-3">
                 <p className="text-xs font-medium mb-1">CSV Format Example:</p>
                 <code className="text-xs text-muted-foreground block">
-                  email,first_name,last_name<br />
-                  john@example.com,John,Doe<br />
-                  jane@example.com,Jane,Smith
+                  email,first_name,last_name,company<br />
+                  john@example.com,John,Doe,Acme Inc<br />
+                  jane@example.com,Jane,Smith,TechCorp
                 </code>
               </div>
               {externalCount > 0 && (
                 <p className="text-xs text-muted-foreground text-center">
-                  {externalCount} contacts already imported. Duplicates will be skipped.
+                  {externalCount} contacts already imported. Duplicates will be updated.
                 </p>
+              )}
+
+              {/* Existing audience lists */}
+              {audienceLists.length > 0 && (
+                <div className="border-t pt-3">
+                  <p className="text-xs font-medium mb-2 flex items-center gap-1.5">
+                    <List className="h-3.5 w-3.5" />
+                    Existing Audience Lists
+                  </p>
+                  <div className="space-y-1.5 max-h-32 overflow-y-auto">
+                    {audienceLists.map((list) => (
+                      <div key={list.id} className="flex items-center justify-between bg-slate-50 rounded px-2.5 py-1.5">
+                        <div className="min-w-0">
+                          <span className="text-xs font-medium truncate block">{list.name}</span>
+                          {list.description && (
+                            <span className="text-[10px] text-muted-foreground truncate block">{list.description}</span>
+                          )}
+                          <span className="text-[10px] text-muted-foreground">
+                            {list.contact_count} contact{list.contact_count !== 1 ? "s" : ""} &middot; {timeAgo(list.created_at)}
+                          </span>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 w-6 p-0 text-muted-foreground hover:text-red-600"
+                          onClick={() => deleteAudienceList(list.id)}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               )}
             </div>
           </DialogContent>

@@ -3,7 +3,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { verifyAdminAccess } from "@/lib/admin-auth";
 
 /**
- * GET — return audience segments (plan-based counts from our DB).
+ * GET — return audience segments (plan-based counts + audience lists from our DB).
  * These are logical segments we use when syncing contacts to Resend.
  */
 export async function GET() {
@@ -35,12 +35,28 @@ export async function GET() {
     .select("*", { count: "exact", head: true })
     .eq("unsubscribed", false);
 
+  // Get audience lists
+  const { data: lists } = await db
+    .from("audience_lists")
+    .select("id, name, contact_count")
+    .order("name");
+
   // Build segments list
-  const segments: Array<{ name: string; label: string; count: number }> = [
+  const segments: Array<{ name: string; label: string; count: number; type?: string }> = [
     { name: "all", label: "All Users (Internal)", count: totalUsers || 0 },
-    { name: "external", label: "External Contacts (Imported)", count: externalCount || 0 },
+    { name: "external", label: "External Contacts (All Imported)", count: externalCount || 0 },
     { name: "all_combined", label: "Everyone (Users + External)", count: (totalUsers || 0) + (externalCount || 0) },
   ];
+
+  // Add audience lists as segments
+  for (const list of lists || []) {
+    segments.push({
+      name: `list:${list.id}`,
+      label: `${list.name}`,
+      count: list.contact_count || 0,
+      type: "list",
+    });
+  }
 
   for (const [plan, orgIds] of Object.entries(planOrgMap)) {
     if (orgIds.length === 0) continue;

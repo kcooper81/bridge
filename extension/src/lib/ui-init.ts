@@ -54,12 +54,14 @@ function showLoginView() {
   els.loginView.classList.remove("hidden");
   els.mainView.classList.add("hidden");
   els.detailView.classList.add("hidden");
+  document.getElementById("status-bar")?.classList.add("hidden");
 }
 
 function showMainView() {
   els.loginView.classList.add("hidden");
   els.mainView.classList.remove("hidden");
   els.detailView.classList.add("hidden");
+  document.getElementById("status-bar")?.classList.remove("hidden");
 }
 
 function showDetailView(prompt: Prompt) {
@@ -67,6 +69,7 @@ function showDetailView(prompt: Prompt) {
   els.loginView.classList.add("hidden");
   els.mainView.classList.add("hidden");
   els.detailView.classList.remove("hidden");
+  document.getElementById("status-bar")?.classList.remove("hidden");
 
   els.detailTitle.textContent = prompt.title;
 
@@ -595,8 +598,8 @@ async function handleQuickSaveFromStorage() {
 }
 
 async function openCreatePromptPanel(prefillContent?: string) {
-  const contentArea = document.getElementById("content-area");
-  if (!contentArea) return;
+  const appRoot = document.getElementById("app");
+  if (!appRoot) return;
 
   // Remove existing panel if any
   document.getElementById("create-prompt-panel")?.remove();
@@ -675,7 +678,7 @@ async function openCreatePromptPanel(prefillContent?: string) {
     </div>
   `;
 
-  contentArea.appendChild(panel);
+  appRoot.appendChild(panel);
 
   // Wire events
   panel.querySelector(".panel-close")?.addEventListener("click", closeCreatePromptPanel);
@@ -749,6 +752,12 @@ async function handleCreatePrompt() {
 
     if (result.success) {
       closeCreatePromptPanel();
+      // Switch to "Prompts" tab so the newly created prompt is visible
+      // (Faves/Recent tabs would filter it out since it's not favorited/used yet)
+      activeFilter = "prompts";
+      document.querySelectorAll(".tab").forEach((t) => {
+        t.classList.toggle("active", (t as HTMLElement).dataset.filter === "prompts");
+      });
       reloadCurrentTab();
       const statusMsg = result.prompt?.status === "pending"
         ? "Prompt submitted for approval!"
@@ -796,7 +805,7 @@ function filterShieldViolations(container: HTMLElement, query: string) {
     const ruleName = v.querySelector(".shield-violation-rule")?.textContent?.toLowerCase() || "";
     const matchedText = v.querySelector(".shield-violation-match")?.textContent?.toLowerCase() || "";
     const visible = !q || ruleName.includes(q) || matchedText.includes(q);
-    v.style.display = visible ? "" : "none";
+    v.classList.toggle("hidden", !visible);
   });
 }
 

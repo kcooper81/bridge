@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
 /* ─── TeamPrompt Extension — Matches web app theme ─── */
 
 * {
@@ -58,15 +56,33 @@
   --destructive: #dc2626;
 }
 
+html, body {
+  height: 600px;
+}
+
 body {
   width: 380px;
-  min-height: 500px;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background: var(--bg);
   color: var(--text);
   font-size: 14px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+}
+
+.view {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
 }
 
 .hidden { display: none !important; }
@@ -394,7 +410,7 @@ input:focus {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  max-height: 340px;
+  min-height: 0;
 }
 
 /* ─── Prompt List ─── */
@@ -679,6 +695,7 @@ input:focus {
   display: flex;
   align-items: center;
   gap: 6px;
+  flex-shrink: 0;
 }
 
 button.shield-indicator {
@@ -728,7 +745,7 @@ button.shield-indicator:hover {
   padding: 14px;
 }
 
-/* ─── Create Prompt Panel (overlay) ─── */
+/* ─── Create Prompt Panel (overlay — fills entire extension) ─── */
 .create-prompt-panel {
   position: absolute;
   top: 0;

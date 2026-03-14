@@ -1,5 +1,8 @@
 /* TeamPrompt Extension — Content Script Styles */
 
+/* ─── Utility ─── */
+.tp-hidden { display: none !important; }
+
 /* ─── Shield Indicator ─── */
 
 .tp-shield {
@@ -514,6 +517,57 @@
 }
 .tp-session-banner-btn:hover {
   background: #b91c1c;
+}
+
+/* ─── Save Prompt Button (hover on user messages) ─── */
+
+.tp-save-parent {
+  position: relative;
+}
+
+.tp-save-btn-wrap {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* Show on hover of the parent message container */
+*:hover > .tp-save-btn-wrap,
+.tp-save-btn-wrap:hover {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.tp-save-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: rgba(24, 24, 27, 0.85);
+  color: #a1a1aa;
+  border: 1px solid rgba(63, 63, 70, 0.6);
+  border-radius: 6px;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  transition: all 0.15s ease;
+}
+
+.tp-save-btn:hover {
+  background: #27272a;
+  color: #e4e4e7;
+  border-color: #3b82f6;
+  box-shadow: 0 1px 6px rgba(59, 130, 246, 0.25);
+}
+
+.tp-save-btn-done {
+  border-color: #22c55e !important;
+  color: #4ade80 !important;
 }
 
 /* ─── Reload Banner (Fix 4) ─── */

@@ -395,7 +395,10 @@ export default defineContentScript({
           if (loggedOut !== true) return;
           clearWebSession().then(() => {
             sessionStorage.setItem("tp-ext-sync", "1");
-            window.location.reload();
+            // Redirect to the sign-out API endpoint which clears the server
+            // session, then redirects to /login. A plain reload would loop
+            // because the middleware still sees a valid server session.
+            window.location.href = "/auth/signout";
           });
         }).catch(() => {
           // Context invalidated during async call

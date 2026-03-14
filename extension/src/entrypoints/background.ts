@@ -26,6 +26,35 @@ export default defineBackground(() => {
     }
   }
 
+  // ─── Open Extension Popup Helper ───
+  // Chrome 127+: action.openPopup() works from background without user gesture.
+  // Older Chrome: falls back to opening a popup window.
+  function openExtensionPopup() {
+    const chrome = globalThis as unknown as {
+      chrome?: { action?: { openPopup?: () => Promise<void> } };
+    };
+    if (chrome.chrome?.action?.openPopup) {
+      chrome.chrome.action.openPopup().catch(() => {
+        // Fallback: open as a popup window
+        browser.windows.create({
+          url: browser.runtime.getURL("popup.html"),
+          type: "popup",
+          width: 400,
+          height: 620,
+          focused: true,
+        });
+      });
+    } else {
+      browser.windows.create({
+        url: browser.runtime.getURL("popup.html"),
+        type: "popup",
+        width: 400,
+        height: 620,
+        focused: true,
+      });
+    }
+  }
+
   // ─── Install Handler ───
   browser.runtime.onInstalled.addListener((details) => {
     // Extension installed — sync config to storage
@@ -50,18 +79,20 @@ export default defineBackground(() => {
     });
 
     // ─── Context Menu: "Save to TeamPrompt" ───
-    browser.contextMenus.create({
-      id: "tp-save-prompt",
-      title: "Save to TeamPrompt",
-      contexts: ["selection"],
-      documentUrlPatterns: [
-        "https://chat.openai.com/*",
-        "https://chatgpt.com/*",
-        "https://claude.ai/*",
-        "https://gemini.google.com/*",
-        "https://copilot.microsoft.com/*",
-        "https://www.perplexity.ai/*",
-      ],
+    browser.contextMenus.removeAll().then(() => {
+      browser.contextMenus.create({
+        id: "tp-save-prompt",
+        title: "Save to TeamPrompt",
+        contexts: ["selection"],
+        documentUrlPatterns: [
+          "https://chat.openai.com/*",
+          "https://chatgpt.com/*",
+          "https://claude.ai/*",
+          "https://gemini.google.com/*",
+          "https://copilot.microsoft.com/*",
+          "https://www.perplexity.ai/*",
+        ],
+      });
     });
   });
 
@@ -127,7 +158,7 @@ export default defineBackground(() => {
         });
         return true; // keep channel open for async response
       } else if (message.type === "QUICK_SAVE") {
-        // Content script wants to save selected/input text — store it and open side panel
+        // Content script wants to save selected/input text — store it and open popup
         const msg = message as unknown as { content: string };
         const MAX_QUICK_SAVE_SIZE = 100 * 1024; // 100 KB
         if (typeof msg.content !== "string" || msg.content.length > MAX_QUICK_SAVE_SIZE) {
@@ -138,33 +169,13 @@ export default defineBackground(() => {
           quickSaveContent: msg.content,
           quickSaveTimestamp: Date.now(),
         });
-        const chrome = globalThis as unknown as {
-          chrome?: { sidePanel?: { open: (opts: { tabId: number }) => void } };
-        };
-        if (chrome.chrome?.sidePanel) {
-          browser.tabs
-            .query({ active: true, currentWindow: true })
-            .then((tabs) => {
-              if (tabs[0]?.id) {
-                chrome.chrome!.sidePanel!.open({ tabId: tabs[0].id });
-              }
-            });
-        }
+        // Try opening the extension popup (Chrome 127+ supports this without user gesture)
+        // Falls back to a popup window if not supported
+        openExtensionPopup();
         sendResponse({ success: true });
         return true; // keep channel open for async response
       } else if (message.type === "OPEN_SIDE_PANEL") {
-        const chrome = globalThis as unknown as {
-          chrome?: { sidePanel?: { open: (opts: { tabId: number }) => void } };
-        };
-        if (chrome.chrome?.sidePanel) {
-          browser.tabs
-            .query({ active: true, currentWindow: true })
-            .then((tabs) => {
-              if (tabs[0]?.id) {
-                chrome.chrome!.sidePanel!.open({ tabId: tabs[0].id });
-              }
-            });
-        }
+        openExtensionPopup();
         sendResponse({ success: true });
         return true; // keep channel open for async response
       } else if (message.type === "OPEN_LOGIN") {

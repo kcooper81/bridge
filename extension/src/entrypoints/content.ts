@@ -645,6 +645,11 @@ async function initShieldIndicator() {
   }
 
   createShieldElement();
+
+  // Start observing for user messages to add save buttons
+  if (_isAuthenticated) {
+    startSaveButtonObserver();
+  }
 }
 
 function createShieldElement() {
@@ -754,6 +759,94 @@ function pulseShield(type: "block" | "warn") {
   setTimeout(() => _shieldEl?.classList.remove(cls), 1500);
 }
 
+// ─── Save Prompt Button (hover on user messages) ───
+
+const USER_MESSAGE_SELECTORS: Record<string, string> = {
+  chatgpt: '[data-message-author-role="user"]',
+  claude: '[data-testid="user-message"]',
+  gemini: '.query-content',
+  copilot: '.user-message',
+  perplexity: '[data-testid="user-query"]',
+};
+
+// Fallback: try common patterns
+const USER_MESSAGE_FALLBACKS = [
+  '[data-message-author-role="user"]',
+  '[data-testid="user-message"]',
+];
+
+let _saveObserver: MutationObserver | null = null;
+
+function getUserMessageSelector(): string {
+  const tool = detectAiTool(window.location.href);
+  return USER_MESSAGE_SELECTORS[tool] || USER_MESSAGE_FALLBACKS[0];
+}
+
+function getMessageText(el: HTMLElement): string {
+  // Get the text content, stripping any nested UI elements
+  const clone = el.cloneNode(true) as HTMLElement;
+  clone.querySelectorAll("button, .tp-save-btn-wrap").forEach((b) => b.remove());
+  return (clone.textContent || clone.innerText || "").trim();
+}
+
+function injectSaveButtons() {
+  if (!_isAuthenticated || _contextDead) return;
+
+  const selector = getUserMessageSelector();
+  const messages = document.querySelectorAll<HTMLElement>(selector);
+
+  messages.forEach((msg) => {
+    // Skip if already processed
+    if (msg.dataset.tpSave) return;
+    msg.dataset.tpSave = "1";
+
+    // Make the message container position:relative for the button
+    const wrapper = msg.closest("div[class]") || msg;
+    if (getComputedStyle(wrapper).position === "static") {
+      (wrapper as HTMLElement).classList.add("tp-save-parent");
+    }
+
+    const btnWrap = document.createElement("div");
+    btnWrap.className = "tp-save-btn-wrap";
+    btnWrap.innerHTML = `<button class="tp-save-btn" title="Save to TeamPrompt"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg></button>`;
+
+    const btn = btnWrap.querySelector("button")!;
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      const text = getMessageText(msg);
+      if (!text || text.length < 3) return;
+      // Store content and open popup window via background
+      safeSendMessage({ type: "QUICK_SAVE", content: text });
+      btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+      btn.classList.add("tp-save-btn-done");
+      setTimeout(() => {
+        btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>`;
+        btn.classList.remove("tp-save-btn-done");
+      }, 2000);
+    });
+
+    (wrapper as HTMLElement).appendChild(btnWrap);
+  });
+}
+
+function startSaveButtonObserver() {
+  if (_saveObserver || _contextDead) return;
+
+  // Initial scan
+  injectSaveButtons();
+
+  // Watch for new messages
+  _saveObserver = new MutationObserver(() => {
+    injectSaveButtons();
+  });
+
+  _saveObserver.observe(document.body, {
+    childList: true,
+    subtree: true,
+  });
+}
+
 // ─── UI Helpers ───
 
 function showToast(message: string, isError = false) {
@@ -790,7 +883,7 @@ function showBlockOverlay(violations: ScanResult["violations"], sanitizedContent
         ${hasSanitized ? `<button id="tp-block-sanitize" class="tp-block-btn tp-block-btn-sanitize">Send Sanitized Version</button>` : ""}
       </div>
       ${hasSanitized ? `
-      <div id="tp-sanitized-preview" class="tp-sanitized-preview" style="display:none;">
+      <div id="tp-sanitized-preview" class="tp-sanitized-preview tp-hidden">
         <p class="tp-sanitized-label">Preview — sensitive data replaced with placeholders:</p>
         <pre class="tp-sanitized-content">${escapeHtml(sanitizedContent!)}</pre>
         <button id="tp-sanitized-confirm" class="tp-block-btn tp-block-btn-confirm">Confirm &amp; Insert</button>
@@ -806,7 +899,7 @@ function showBlockOverlay(violations: ScanResult["violations"], sanitizedContent
   if (hasSanitized) {
     document.getElementById("tp-block-sanitize")!.addEventListener("click", () => {
       const preview = document.getElementById("tp-sanitized-preview")!;
-      preview.style.display = preview.style.display === "none" ? "block" : "none";
+      preview.classList.toggle("tp-hidden");
     });
     document.getElementById("tp-sanitized-confirm")!.addEventListener("click", () => {
       overlay.remove();

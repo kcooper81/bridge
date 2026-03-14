@@ -37,7 +37,7 @@ export default defineConfig({
 
     return {
       name: "TeamPrompt — AI Prompt Manager & DLP Shield",
-      version: "1.0.8",
+      version: "1.0.10",
       description:
         "Access your team's prompt library, scan for sensitive data, and log AI conversations.",
       icons: {

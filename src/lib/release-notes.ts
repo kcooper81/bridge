@@ -7,9 +7,25 @@ export interface ReleaseNote {
   badge?: "new" | "fix" | "improvement";
 }
 
-export const APP_VERSION = "1.10.0";
+export const APP_VERSION = "1.11.0";
 
 export const RELEASE_NOTES: ReleaseNote[] = [
+  {
+    version: "1.11.0",
+    date: "2026-03-13",
+    title: "Updated Plan Limits, Save Button & Extension Improvements",
+    highlights: [
+      "Updated plan limits — Free plans now support up to 3 members, Pro plans up to 12 members",
+      "Save button on AI tools — hover over any prompt you sent in ChatGPT, Claude, Gemini, Copilot, or Perplexity to save it directly to your library",
+      "Auto-open extension on save — clicking save opens the extension popup with the create form pre-filled",
+      "Full-height create prompt form — the form now fills the entire extension window instead of a tiny scrollable area",
+      "Persistent guardrails footer — the guardrails status bar now shows on all extension views",
+      "Usage cap indicators — admins see member, prompt, and guideline usage vs plan limits on Team, Vault, and Guidelines pages",
+      "SEO cross-linking — improved internal linking across marketing pages for better Google indexing",
+      "Fixed CSP violations, auth sign-out loop, and duplicate context menu entries in the extension",
+    ],
+    badge: "new",
+  },
   {
     version: "1.10.0",
     date: "2026-03-09",

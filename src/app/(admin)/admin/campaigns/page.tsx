@@ -9,6 +9,8 @@ import {
   Pencil,
   Send,
   Clock,
+  Search,
+  Download,
   CheckCircle2,
   AlertCircle,
   Eye,
@@ -142,6 +144,17 @@ export default function CampaignsPage() {
   const [editListDesc, setEditListDesc] = useState("");
   const [savingList, setSavingList] = useState(false);
   const [deleteListConfirm, setDeleteListConfirm] = useState<string | null>(null);
+  const [showCreateList, setShowCreateList] = useState(false);
+  const [createListName, setCreateListName] = useState("");
+  const [createListDesc, setCreateListDesc] = useState("");
+  const [createListAddAll, setCreateListAddAll] = useState(true);
+  const [creatingList, setCreatingList] = useState(false);
+  const [contactsList, setContactsList] = useState<Array<{ id: string; email: string; first_name: string; last_name: string; company: string; unsubscribed: boolean; created_at: string }>>([]);
+  const [contactsTotal, setContactsTotal] = useState(0);
+  const [contactsSearch, setContactsSearch] = useState("");
+  const [contactsLoading, setContactsLoading] = useState(false);
+  const [contactsPage, setContactsPage] = useState(0);
+  const [viewingListId, setViewingListId] = useState<string | null>(null);
   const [editorTab, setEditorTab] = useState<"fields" | "preview" | "html">("fields");
 
   // Editor form state
@@ -529,6 +542,67 @@ export default function CampaignsPage() {
     } finally {
       setSavingList(false);
     }
+  }
+
+  async function loadContacts(search?: string, listId?: string | null, page = 0) {
+    setContactsLoading(true);
+    try {
+      const params = new URLSearchParams({ detail: "true", limit: "50", offset: String(page * 50) });
+      if (search?.trim()) params.set("search", search.trim());
+      if (listId) params.set("list_id", listId);
+      const res = await fetch(`/api/admin/campaigns/contacts?${params}`);
+      const data = await res.json();
+      setContactsList(data.contacts || []);
+      setContactsTotal(data.total || 0);
+    } catch {
+      toast.error("Failed to load contacts");
+    } finally {
+      setContactsLoading(false);
+    }
+  }
+
+  async function createNewList() {
+    if (!createListName.trim()) return;
+    setCreatingList(true);
+    try {
+      const res = await fetch("/api/admin/campaigns/lists", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: createListName.trim(),
+          description: createListDesc.trim(),
+          add_all_contacts: createListAddAll,
+        }),
+      });
+      if (!res.ok) throw new Error("Failed to create list");
+      const data = await res.json();
+      toast.success(`List "${data.list.name}" created with ${data.list.contact_count} contacts`);
+      setShowCreateList(false);
+      setCreateListName("");
+      setCreateListDesc("");
+      setCreateListAddAll(true);
+      await Promise.all([loadSegments(), loadAudienceLists()]);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to create list");
+    } finally {
+      setCreatingList(false);
+    }
+  }
+
+  function exportContactsCsv() {
+    if (contactsList.length === 0) return;
+    const header = "email,first_name,last_name,company,unsubscribed";
+    const rows = contactsList.map((c) =>
+      [c.email, c.first_name, c.last_name, c.company, c.unsubscribed].map((v) => `"${String(v).replace(/"/g, '""')}"`).join(",")
+    );
+    const csv = [header, ...rows].join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `contacts-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
   }
 
   // ─── Render ──────────────────────────────────────────────────
@@ -1366,7 +1440,7 @@ export default function CampaignsPage() {
       </div>
 
       {/* Tabs */}
-      <Tabs value={listTab} onValueChange={(v) => setListTab(v as ListTab)}>
+      <Tabs value={listTab} onValueChange={(v) => { setListTab(v as ListTab); if (v === "audiences" && contactsList.length === 0 && externalCount > 0) loadContacts(); }}>
         <TabsList>
           <TabsTrigger value="campaigns" className="gap-1.5">
             <Megaphone className="h-3.5 w-3.5" />
@@ -1489,49 +1563,62 @@ export default function CampaignsPage() {
         /* ─── Audiences Tab ─── */
         <div className="space-y-6">
           {/* Built-in segments */}
-          <div>
-            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-              Built-in Segments
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {segments.filter((s) => !s.type).map((seg) => (
-                <Card key={seg.name} className="p-4">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Users className="h-4 w-4 text-muted-foreground" />
-                    <h3 className="font-medium text-sm">{seg.label}</h3>
-                  </div>
-                  <p className="text-2xl font-bold">{seg.count.toLocaleString()}</p>
-                  <p className="text-[10px] text-muted-foreground uppercase">contacts</p>
-                </Card>
-              ))}
-            </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {segments.filter((s) => !s.type).map((seg) => (
+              <Card key={seg.name} className="p-3 text-center">
+                <p className="text-lg font-bold">{seg.count.toLocaleString()}</p>
+                <p className="text-[10px] text-muted-foreground uppercase font-medium">{seg.label.replace(/ \(.*\)/, "")}</p>
+              </Card>
+            ))}
+            <Card className="p-3 text-center">
+              <p className="text-lg font-bold">{audienceLists.length}</p>
+              <p className="text-[10px] text-muted-foreground uppercase font-medium">Custom Lists</p>
+            </Card>
           </div>
 
           {/* Audience lists */}
           <div>
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-                Custom Lists ({audienceLists.length})
+                Audience Lists
               </h2>
-            </div>
-            {audienceLists.length === 0 ? (
-              <Card className="flex flex-col items-center justify-center py-12 text-center">
-                <List className="h-8 w-8 text-muted-foreground mb-2" />
-                <h3 className="font-semibold text-sm mb-1">No custom lists yet</h3>
-                <p className="text-xs text-muted-foreground mb-3">
-                  Import a CSV to create your first audience list
-                </p>
+              <div className="flex items-center gap-2">
+                <Button size="sm" variant="outline" onClick={() => setShowCreateList(true)}>
+                  <Plus className="h-3.5 w-3.5 mr-1.5" />
+                  Create List
+                </Button>
                 <Button size="sm" variant="outline" onClick={() => setShowImport(true)}>
                   <Upload className="h-3.5 w-3.5 mr-1.5" />
-                  Import Contacts
+                  Import CSV
                 </Button>
+              </div>
+            </div>
+            {audienceLists.length === 0 ? (
+              <Card className="flex flex-col items-center justify-center py-10 text-center">
+                <List className="h-8 w-8 text-muted-foreground mb-2" />
+                <h3 className="font-semibold text-sm mb-1">No audience lists yet</h3>
+                <p className="text-xs text-muted-foreground mb-3">
+                  {externalCount > 0
+                    ? `You have ${externalCount} contacts — create a list to organize them`
+                    : "Import contacts or create an empty list to get started"}
+                </p>
+                {externalCount > 0 && (
+                  <Button size="sm" onClick={() => { setCreateListAddAll(true); setShowCreateList(true); }}>
+                    <Plus className="h-3.5 w-3.5 mr-1.5" />
+                    Create List from {externalCount} Contacts
+                  </Button>
+                )}
               </Card>
             ) : (
               <div className="space-y-2">
                 {audienceLists.map((list) => (
                   <Card
                     key={list.id}
-                    className="p-4 hover:bg-slate-50 transition-colors"
+                    className={`p-4 hover:bg-slate-50 cursor-pointer transition-colors ${viewingListId === list.id ? "ring-2 ring-primary/50" : ""}`}
+                    onClick={() => {
+                      if (viewingListId === list.id) { setViewingListId(null); setContactsList([]); }
+                      else { setViewingListId(list.id); setContactsSearch(""); setContactsPage(0); loadContacts("", list.id); }
+                    }}
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1 min-w-0">
@@ -1549,23 +1636,11 @@ export default function CampaignsPage() {
                           Created {timeAgo(list.created_at)}
                         </p>
                       </div>
-                      <div className="flex items-center gap-1 shrink-0">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() => openEditList(list)}
-                          title="Edit list"
-                        >
+                      <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEditList(list)} title="Edit list">
                           <Pencil className="h-3.5 w-3.5" />
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-muted-foreground hover:text-red-600"
-                          onClick={() => setDeleteListConfirm(list.id)}
-                          title="Delete list"
-                        >
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-red-600" onClick={() => setDeleteListConfirm(list.id)} title="Delete list">
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
                       </div>
@@ -1573,6 +1648,109 @@ export default function CampaignsPage() {
                   </Card>
                 ))}
               </div>
+            )}
+          </div>
+
+          {/* Contacts Browser */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                {viewingListId
+                  ? `Contacts in "${audienceLists.find((l) => l.id === viewingListId)?.name || "List"}"`
+                  : "All External Contacts"}
+              </h2>
+              <div className="flex items-center gap-2">
+                {viewingListId && (
+                  <Button size="sm" variant="ghost" onClick={() => { setViewingListId(null); setContactsList([]); }}>
+                    View All
+                  </Button>
+                )}
+                {!contactsLoading && contactsList.length === 0 && !contactsSearch && !viewingListId && (
+                  <Button size="sm" variant="outline" onClick={() => { setContactsPage(0); loadContacts(); }}>
+                    Load Contacts
+                  </Button>
+                )}
+                {contactsList.length > 0 && (
+                  <Button size="sm" variant="outline" onClick={exportContactsCsv}>
+                    <Download className="h-3.5 w-3.5 mr-1.5" />
+                    Export
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            {(contactsList.length > 0 || contactsSearch || viewingListId) && (
+              <>
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                    <Input
+                      placeholder="Search by email, name, or company..."
+                      value={contactsSearch}
+                      onChange={(e) => setContactsSearch(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === "Enter") { setContactsPage(0); loadContacts(contactsSearch, viewingListId); } }}
+                      className="pl-8 h-8 text-sm"
+                    />
+                  </div>
+                  <Button size="sm" variant="outline" className="h-8" onClick={() => { setContactsPage(0); loadContacts(contactsSearch, viewingListId); }}>
+                    Search
+                  </Button>
+                </div>
+
+                {contactsLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                  </div>
+                ) : contactsList.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-8">
+                    {contactsSearch ? "No contacts match your search" : "No contacts found"}
+                  </p>
+                ) : (
+                  <>
+                    <div className="border rounded-lg overflow-hidden">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="bg-slate-50 border-b">
+                            <th className="text-left p-2.5 font-medium text-muted-foreground">Email</th>
+                            <th className="text-left p-2.5 font-medium text-muted-foreground">Name</th>
+                            <th className="text-left p-2.5 font-medium text-muted-foreground">Company</th>
+                            <th className="text-left p-2.5 font-medium text-muted-foreground">Status</th>
+                            <th className="text-left p-2.5 font-medium text-muted-foreground">Added</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {contactsList.map((c) => (
+                            <tr key={c.id} className="border-b last:border-b-0">
+                              <td className="p-2.5 font-mono text-xs">{c.email}</td>
+                              <td className="p-2.5">{[c.first_name, c.last_name].filter(Boolean).join(" ") || <span className="text-muted-foreground">&mdash;</span>}</td>
+                              <td className="p-2.5">{c.company || <span className="text-muted-foreground">&mdash;</span>}</td>
+                              <td className="p-2.5">
+                                {c.unsubscribed
+                                  ? <Badge variant="outline" className="text-[10px] text-red-600">Unsubscribed</Badge>
+                                  : <Badge variant="outline" className="text-[10px] text-green-600">Active</Badge>}
+                              </td>
+                              <td className="p-2.5 text-muted-foreground text-xs">{timeAgo(c.created_at)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                    <div className="flex items-center justify-between mt-2">
+                      <p className="text-xs text-muted-foreground">
+                        {contactsPage * 50 + 1}&ndash;{Math.min((contactsPage + 1) * 50, contactsTotal)} of {contactsTotal.toLocaleString()}
+                      </p>
+                      <div className="flex gap-1">
+                        <Button variant="outline" size="sm" className="h-7" disabled={contactsPage === 0} onClick={() => { setContactsPage(contactsPage - 1); loadContacts(contactsSearch, viewingListId, contactsPage - 1); }}>
+                          Prev
+                        </Button>
+                        <Button variant="outline" size="sm" className="h-7" disabled={(contactsPage + 1) * 50 >= contactsTotal} onClick={() => { setContactsPage(contactsPage + 1); loadContacts(contactsSearch, viewingListId, contactsPage + 1); }}>
+                          Next
+                        </Button>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </>
             )}
           </div>
         </div>
@@ -1792,6 +1970,61 @@ export default function CampaignsPage() {
             <Button onClick={saveListEdits} disabled={savingList || !editListName.trim()}>
               {savingList && <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />}
               Save
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create List Dialog */}
+      <Dialog open={showCreateList} onOpenChange={(open) => { setShowCreateList(open); if (!open) { setCreateListName(""); setCreateListDesc(""); setCreateListAddAll(true); } }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create Audience List</DialogTitle>
+            <DialogDescription>
+              Create a new list to organize contacts for targeted campaigns.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="create-list-name">List Name <span className="text-red-500">*</span></Label>
+              <Input
+                id="create-list-name"
+                value={createListName}
+                onChange={(e) => setCreateListName(e.target.value)}
+                placeholder="e.g. Partner Leads, Newsletter Subscribers"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="create-list-desc">Description (optional)</Label>
+              <Input
+                id="create-list-desc"
+                value={createListDesc}
+                onChange={(e) => setCreateListDesc(e.target.value)}
+                placeholder="e.g. SaaS founders from LinkedIn outreach"
+                className="mt-1"
+              />
+            </div>
+            {externalCount > 0 && (
+              <div className="flex items-center gap-2 bg-slate-50 rounded-lg p-3">
+                <input
+                  type="checkbox"
+                  id="add-all-contacts"
+                  checked={createListAddAll}
+                  onChange={(e) => setCreateListAddAll(e.target.checked)}
+                  className="rounded"
+                />
+                <label htmlFor="add-all-contacts" className="text-sm cursor-pointer">
+                  Add all {externalCount} existing contacts to this list
+                </label>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreateList(false)}>Cancel</Button>
+            <Button onClick={createNewList} disabled={creatingList || !createListName.trim()}>
+              {creatingList && <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />}
+              Create List
             </Button>
           </DialogFooter>
         </DialogContent>

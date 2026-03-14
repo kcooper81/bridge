@@ -151,27 +151,88 @@ export async function POST(request: NextRequest) {
 }
 
 /**
- * GET — list imported external contacts with counts.
+ * GET — list imported external contacts with counts and optional full listing.
+ * Query params:
+ *   ?detail=true  — return full contact list (paginated)
+ *   &limit=50     — page size (default 50, max 200)
+ *   &offset=0     — pagination offset
+ *   &search=...   — filter by email, first_name, last_name, or company
+ *   &list_id=...  — filter to contacts in a specific audience list
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
   const auth = await verifyAdminAccess();
   if (!auth) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const db = createServiceClient();
+  const url = new URL(request.url);
+  const detail = url.searchParams.get("detail") === "true";
 
-  const { count: totalContacts } = await db
-    .from("campaign_contacts")
-    .select("*", { count: "exact", head: true })
-    .eq("unsubscribed", false);
+  if (!detail) {
+    // Summary mode (backwards compatible)
+    const { count: totalContacts } = await db
+      .from("campaign_contacts")
+      .select("*", { count: "exact", head: true })
+      .eq("unsubscribed", false);
 
-  const { count: totalUnsubscribed } = await db
+    const { count: totalUnsubscribed } = await db
+      .from("campaign_contacts")
+      .select("*", { count: "exact", head: true })
+      .eq("unsubscribed", true);
+
+    return NextResponse.json({
+      total: totalContacts || 0,
+      unsubscribed: totalUnsubscribed || 0,
+      active: (totalContacts || 0) - (totalUnsubscribed || 0),
+    });
+  }
+
+  // Detail mode — return actual contacts
+  const limit = Math.min(Number(url.searchParams.get("limit")) || 50, 200);
+  const offset = Number(url.searchParams.get("offset")) || 0;
+  const search = url.searchParams.get("search")?.trim().toLowerCase();
+  const listId = url.searchParams.get("list_id");
+
+  // If filtering by list, get contact IDs first
+  let listContactIds: string[] | null = null;
+  if (listId) {
+    const { data: linked } = await db
+      .from("audience_list_contacts")
+      .select("contact_id")
+      .eq("list_id", listId);
+    listContactIds = (linked || []).map((l) => l.contact_id);
+    if (listContactIds.length === 0) {
+      return NextResponse.json({ contacts: [], total: 0, limit, offset });
+    }
+  }
+
+  // Build query
+  let countQuery = db
     .from("campaign_contacts")
-    .select("*", { count: "exact", head: true })
-    .eq("unsubscribed", true);
+    .select("*", { count: "exact", head: true });
+
+  let dataQuery = db
+    .from("campaign_contacts")
+    .select("id, email, first_name, last_name, company, unsubscribed, source, created_at")
+    .order("created_at", { ascending: false })
+    .range(offset, offset + limit - 1);
+
+  if (listContactIds) {
+    countQuery = countQuery.in("id", listContactIds);
+    dataQuery = dataQuery.in("id", listContactIds);
+  }
+
+  if (search) {
+    const filter = `email.ilike.%${search}%,first_name.ilike.%${search}%,last_name.ilike.%${search}%,company.ilike.%${search}%`;
+    countQuery = countQuery.or(filter);
+    dataQuery = dataQuery.or(filter);
+  }
+
+  const [{ count }, { data: contacts }] = await Promise.all([countQuery, dataQuery]);
 
   return NextResponse.json({
-    total: totalContacts || 0,
-    unsubscribed: totalUnsubscribed || 0,
-    active: (totalContacts || 0) - (totalUnsubscribed || 0),
+    contacts: contacts || [],
+    total: count || 0,
+    limit,
+    offset,
   });
 }

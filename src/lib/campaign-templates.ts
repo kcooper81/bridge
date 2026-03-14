@@ -107,13 +107,13 @@ function headerBlock(): string {
   return `          <!-- Header -->
           <tr>
             <td style="background-color: #ffffff; padding: 24px 32px; border-radius: 12px 12px 0 0; border-bottom: 1px solid #e4e4e7;">
-              <table role="presentation" cellpadding="0" cellspacing="0">
+              <table role="presentation" cellpadding="0" cellspacing="0" style="width: 100%;">
                 <tr>
-                  <td style="width: 32px; height: 32px; vertical-align: middle;">
-                    <img src="https://teamprompt.app/brand/social-profile-512.png" alt="TeamPrompt" width="32" height="32" style="display: block; border-radius: 8px;" />
+                  <td style="vertical-align: middle; width: 28px;">
+                    <img src="https://teamprompt.app/brand/social-profile-512.png" alt="TeamPrompt" width="28" height="28" style="display: block; border-radius: 6px;" />
                   </td>
-                  <td style="padding-left: 12px;">
-                    <span style="color: #18181b; font-size: 18px; font-weight: 700;">TeamPrompt</span>
+                  <td style="vertical-align: middle; padding-left: 10px;">
+                    <span style="color: #18181b; font-size: 16px; font-weight: 700; line-height: 28px;">TeamPrompt</span>
                   </td>
                 </tr>
               </table>
@@ -125,10 +125,18 @@ function footerBlock(): string {
   return `          <!-- Footer -->
           <tr>
             <td style="background-color: #fafafa; padding: 20px 32px; border-radius: 0 0 12px 12px; border-top: 1px solid #e4e4e7;">
-              <p style="margin: 0 0 4px; font-size: 13px; color: ${MUTED_TEXT};">
-                TeamPrompt &mdash; Your team's AI prompt library
-              </p>
-              <a href="https://teamprompt.app" style="font-size: 13px; color: ${BRAND_COLOR}; text-decoration: none;">teamprompt.app</a>
+              <table role="presentation" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="vertical-align: middle; width: 16px;">
+                    <img src="https://teamprompt.app/brand/social-profile-512.png" alt="" width="16" height="16" style="display: block; border-radius: 4px;" />
+                  </td>
+                  <td style="vertical-align: middle; padding-left: 8px;">
+                    <span style="font-size: 13px; color: ${MUTED_TEXT};">TeamPrompt</span>
+                    <span style="font-size: 13px; color: #d4d4d8;"> &middot; </span>
+                    <a href="https://teamprompt.app" style="font-size: 13px; color: ${BRAND_COLOR}; text-decoration: none;">teamprompt.app</a>
+                  </td>
+                </tr>
+              </table>
             </td>
           </tr>`;
 }

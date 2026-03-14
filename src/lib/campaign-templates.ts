@@ -143,6 +143,41 @@ function ctaButton(text: string, url: string): string {
               </table>`;
 }
 
+/** Standalone branded footer — can be appended to any email */
+export function teamPromptFooterHtml(): string {
+  return `
+<!-- TeamPrompt Footer -->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding: 0 16px;">
+  <tr>
+    <td align="center">
+      <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width: 560px; width: 100%;">
+        <tr>
+          <td style="padding: 24px 32px; text-align: center;">
+            <table role="presentation" cellpadding="0" cellspacing="0" style="margin: 0 auto;">
+              <tr>
+                <td style="width: 20px; height: 20px; vertical-align: middle;">
+                  <img src="https://teamprompt.app/brand/social-profile-512.png" alt="TeamPrompt" width="20" height="20" style="display: block; border-radius: 4px;" />
+                </td>
+                <td style="padding-left: 8px; vertical-align: middle;">
+                  <span style="font-size: 13px; color: ${MUTED_TEXT};">Sent with </span>
+                  <a href="https://teamprompt.app" style="font-size: 13px; color: ${BRAND_COLOR}; text-decoration: none; font-weight: 500;">TeamPrompt</a>
+                </td>
+              </tr>
+            </table>
+            <p style="margin: 8px 0 0; font-size: 11px; color: #a1a1aa;">
+              Your team&rsquo;s AI prompt library &middot; <a href="https://teamprompt.app" style="color: #a1a1aa; text-decoration: underline;">teamprompt.app</a>
+            </p>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>`;
+}
+
+/** Marker comment used to detect if the footer is already present */
+export const FOOTER_MARKER = "<!-- TeamPrompt Footer -->";
+
 /** Escape HTML entities in user input */
 function esc(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -167,11 +202,11 @@ function repeatCount(values: Record<string, string>, groupKey: string, suffixes:
 
 // ─── Feature block helper ────────────────────────────────────
 
-function featureBlock(emoji: string, bgColor: string, title: string, desc: string): string {
+function featureBlock(icon: string, bgColor: string, title: string, desc: string): string {
   return `              <table role="presentation" cellpadding="0" cellspacing="0" style="margin-bottom: 20px; width: 100%;">
                 <tr>
                   <td style="width: 40px; vertical-align: top; padding-top: 2px;">
-                    <div style="width: 32px; height: 32px; background-color: ${bgColor}; border-radius: 8px; text-align: center; line-height: 32px; font-size: 16px;">${emoji}</div>
+                    <div style="width: 32px; height: 32px; background-color: ${bgColor}; border-radius: 8px; text-align: center; line-height: 32px; font-size: 16px; color: ${BRAND_COLOR}; font-weight: bold;">${icon}</div>
                   </td>
                   <td style="padding-left: 12px;">
                     <p style="margin: 0 0 4px; font-size: 15px; font-weight: 600; color: #18181b;">${title}</p>
@@ -213,13 +248,11 @@ export const CAMPAIGN_TEMPLATES: CampaignTemplate[] = [
       },
     ],
     build(vals) {
-      const emojis = ["&#x2728;", "&#x1F6E1;", "&#x26A1;", "&#x1F680;", "&#x2705;", "&#x1F4CA;", "&#x1F50D;", "&#x1F4A1;", "&#x1F3AF;", "&#x2B50;"];
-      const colors = ["#EFF6FF", "#F0FDF4", "#FEF3C7", "#FEF2F2", "#F0F9FF", "#FDF4FF", "#F0FDF4", "#FFF7ED", "#ECFDF5", "#EFF6FF"];
       const count = Math.max(repeatCount(vals, "features", ["name", "desc"]), 1);
       const blocks = Array.from({ length: count }, (_, i) =>
         featureBlock(
-          emojis[i % emojis.length],
-          colors[i % colors.length],
+          "&#x2713;",
+          ["#EFF6FF", "#F0FDF4", "#FEF3C7", "#F0F9FF", "#ECFDF5"][i % 5],
           v(vals, `features_${i}_name`, "[Feature Name]"),
           v(vals, `features_${i}_desc`, "[Describe the feature.]"),
         )
@@ -323,7 +356,7 @@ ${footerBlock()}
 ${headerBlock()}
           <tr>
             <td class="content-padding" style="background-color: #ffffff; padding: 32px; text-align: center;">
-              <div style="width: 64px; height: 64px; background-color: #EFF6FF; border-radius: 16px; margin: 0 auto 20px; text-align: center; line-height: 64px; font-size: 32px;">&#x1F389;</div>
+              <div style="width: 64px; height: 64px; background-color: #EFF6FF; border-radius: 16px; margin: 0 auto 20px; text-align: center; line-height: 64px; font-size: 28px; color: ${BRAND_COLOR};">&#x2605;</div>
               <h1 style="margin: 0 0 12px; font-size: 26px; font-weight: 700; color: #18181b;">${v(vals, "headline", "[Announcement Headline]")}</h1>
               <p style="margin: 0 0 24px; font-size: 16px; color: #3f3f46; line-height: 1.6; max-width: 440px; margin-left: auto; margin-right: auto;">${v(vals, "body", "[2-3 sentences explaining the announcement.]")}</p>
 ${ctaButton(v(vals, "cta_text", "Learn More"), vals.cta_url?.trim() || "https://teamprompt.app")}
@@ -637,6 +670,8 @@ ${link}
     previewText: "",
     fields: [
       { key: "body", label: "Email Body", type: "textarea", placeholder: "Write your full email here. Use blank lines between paragraphs. This will render as plain-looking text with no branding, headers, or design elements — just like typing in Gmail." },
+      { key: "signoff", label: "Sign-off", type: "text", placeholder: "e.g. Best, Kade", default: "Best,\nKade" },
+      { key: "title", label: "Title (optional)", type: "text", placeholder: "e.g. Founder, TeamPrompt" },
     ],
     build(vals) {
       const bodyText = vals.body?.trim()
@@ -644,6 +679,12 @@ ${link}
           `<p style="margin: 0 0 16px; font-size: 14px; color: #1a1a1a; line-height: 1.7; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">${esc(p)}</p>`
         ).join("\n")
         : `<p style="margin: 0 0 16px; font-size: 14px; color: #1a1a1a; line-height: 1.7;">[Your email body here. Write naturally — this looks like a plain text email.]</p>`;
+      const sig = vals.signoff?.trim()
+        ? `<p style="margin: 0 0 4px; font-size: 14px; color: #1a1a1a; line-height: 1.7;">${esc(vals.signoff.trim()).replace(/\n/g, "<br />")}</p>`
+        : "";
+      const titleLine = vals.title?.trim()
+        ? `<p style="margin: 0; font-size: 13px; color: #71717a; line-height: 1.5;">${esc(vals.title.trim())}</p>`
+        : "";
       // Minimal wrapper — no header, no footer, no background color
       return `<!DOCTYPE html>
 <html lang="en">
@@ -662,6 +703,8 @@ ${link}
           <tr>
             <td style="padding: 20px 0;">
 ${bodyText}
+${sig}
+${titleLine}
             </td>
           </tr>
         </table>

@@ -48,7 +48,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CAMPAIGN_TEMPLATES, TEMPLATE_CATEGORIES, type CampaignTemplate } from "@/lib/campaign-templates";
+import { CAMPAIGN_TEMPLATES, TEMPLATE_CATEGORIES, type CampaignTemplate, teamPromptFooterHtml, FOOTER_MARKER } from "@/lib/campaign-templates";
+import { Checkbox } from "@/components/ui/checkbox";
 
 // ─── Types ───────────────────────────────────────────────────────
 
@@ -153,6 +154,7 @@ export default function CampaignsPage() {
 
   // Template field editing
   const [activeTemplate, setActiveTemplate] = useState<CampaignTemplate | null>(null);
+  const [showBrandedFooter, setShowBrandedFooter] = useState(true);
   const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
   const [groupCounts, setGroupCounts] = useState<Record<string, number>>({});
 
@@ -211,6 +213,20 @@ export default function CampaignsPage() {
 
   // ─── Editor actions ──────────────────────────────────────────
 
+  /** Get the final HTML with footer applied or stripped based on toggle */
+  function applyFooter(html: string, includeFooter: boolean): string {
+    // Strip any existing footer first
+    const stripped = html.replace(new RegExp(`\\s*${FOOTER_MARKER}[\\s\\S]*?<!-- \\/TeamPrompt Footer -->`, "g"), "")
+      .replace(new RegExp(`\\s*${FOOTER_MARKER}[\\s\\S]*$`), "");
+    if (!includeFooter) return stripped;
+    // Inject before </body> or append
+    const footer = teamPromptFooterHtml() + "\n<!-- /TeamPrompt Footer -->";
+    if (stripped.includes("</body>")) {
+      return stripped.replace("</body>", `${footer}\n</body>`);
+    }
+    return stripped + footer;
+  }
+
   function openNewCampaign() {
     setEditingCampaign(null);
     setFormName("");
@@ -221,6 +237,7 @@ export default function CampaignsPage() {
     setActiveTemplate(null);
     setFieldValues({});
     setEditorTab("fields");
+    setShowBrandedFooter(true);
     setView("editor");
   }
 
@@ -229,6 +246,7 @@ export default function CampaignsPage() {
     setFormName(c.name);
     setFormSubject(c.subject);
     setFormFrom(c.from_email);
+    setShowBrandedFooter(c.body_html?.includes(FOOTER_MARKER) ?? true);
     setFormBody(c.body_html);
     setFormSegment(c.segment_name || "all");
     setActiveTemplate(null);
@@ -276,7 +294,7 @@ export default function CampaignsPage() {
         name: formName,
         subject: formSubject,
         from_email: formFrom,
-        body_html: formBody,
+        body_html: applyFooter(formBody, showBrandedFooter),
         segment_name: formSegment === "all" ? null : formSegment,
       };
 
@@ -790,13 +808,25 @@ export default function CampaignsPage() {
                 </div>
               )}
 
-              <div className="space-y-1 text-xs text-muted-foreground">
-                <p>
-                  Variables: <code className="bg-slate-100 px-1 rounded">{`{{{FIRST_NAME|there}}}`}</code>{" "}
-                  <code className="bg-slate-100 px-1 rounded">{`{{{LAST_NAME}}}`}</code>{" "}
-                  <code className="bg-slate-100 px-1 rounded">{`{{{COMPANY|your team}}}`}</code>
-                </p>
-                <p>Unsubscribe link auto-injected if not present</p>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id="branded-footer"
+                    checked={showBrandedFooter}
+                    onCheckedChange={(checked) => setShowBrandedFooter(checked === true)}
+                  />
+                  <label htmlFor="branded-footer" className="text-xs text-muted-foreground cursor-pointer">
+                    Include TeamPrompt branded footer
+                  </label>
+                </div>
+                <div className="text-xs text-muted-foreground space-y-1">
+                  <p>
+                    Variables: <code className="bg-slate-100 px-1 rounded">{`{{{FIRST_NAME|there}}}`}</code>{" "}
+                    <code className="bg-slate-100 px-1 rounded">{`{{{LAST_NAME}}}`}</code>{" "}
+                    <code className="bg-slate-100 px-1 rounded">{`{{{COMPANY|your team}}}`}</code>
+                  </p>
+                  <p>Unsubscribe link auto-injected if not present</p>
+                </div>
               </div>
             </Card>
           </div>

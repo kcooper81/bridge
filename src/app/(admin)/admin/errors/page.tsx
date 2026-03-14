@@ -20,6 +20,8 @@ import {
   Server,
   AppWindow,
   Zap,
+  Trash2,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -30,6 +32,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const SERVICE_TABS = [
   { value: "all", label: "All", icon: AppWindow },
@@ -70,9 +73,12 @@ export default function ErrorsPage() {
   const [totalCount, setTotalCount] = useState(0);
   const [serviceFilter, setServiceFilter] = useState<ServiceFilter>("all");
   const [serviceCounts, setServiceCounts] = useState<ServiceCount[]>([]);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkLoading, setBulkLoading] = useState(false);
 
   useEffect(() => {
     loadErrors();
+    setSelectedIds(new Set());
   }, [showResolved, page, pageSize, serviceFilter]);
 
   useEffect(() => {
@@ -215,6 +221,95 @@ export default function ErrorsPage() {
     }
   };
 
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === errors.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(errors.map((e) => e.id)));
+    }
+  };
+
+  const getAdminAuth = async () => {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      toast.error("Not authenticated");
+      return null;
+    }
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("is_super_admin, super_admin_role")
+      .eq("id", user.id)
+      .single();
+    if (!profile?.is_super_admin && profile?.super_admin_role !== "support") {
+      toast.error("Unauthorized: admin access required");
+      return null;
+    }
+    return supabase;
+  };
+
+  const bulkResolve = async () => {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+    setBulkLoading(true);
+    const supabase = await getAdminAuth();
+    if (!supabase) { setBulkLoading(false); return; }
+
+    const { error } = await supabase
+      .from("error_logs")
+      .update({ resolved: true, resolved_at: new Date().toISOString() })
+      .in("id", ids);
+
+    if (error) {
+      toast.error("Failed to resolve errors");
+    } else {
+      toast.success(`Resolved ${ids.length} error${ids.length !== 1 ? "s" : ""}`);
+      if (showResolved) {
+        setErrors(errors.map((e) => selectedIds.has(e.id) ? { ...e, resolved: true } : e));
+      } else {
+        setErrors(errors.filter((e) => !selectedIds.has(e.id)));
+        setTotalCount((c) => c - ids.length);
+      }
+      loadServiceCounts();
+    }
+    setSelectedIds(new Set());
+    setBulkLoading(false);
+  };
+
+  const bulkDelete = async () => {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+    if (!confirm(`Permanently delete ${ids.length} error log${ids.length !== 1 ? "s" : ""}? This cannot be undone.`)) return;
+    setBulkLoading(true);
+    const supabase = await getAdminAuth();
+    if (!supabase) { setBulkLoading(false); return; }
+
+    const { error } = await supabase
+      .from("error_logs")
+      .delete()
+      .in("id", ids);
+
+    if (error) {
+      toast.error("Failed to delete errors");
+    } else {
+      toast.success(`Deleted ${ids.length} error${ids.length !== 1 ? "s" : ""}`);
+      setErrors(errors.filter((e) => !selectedIds.has(e.id)));
+      setTotalCount((c) => c - ids.length);
+      loadServiceCounts();
+    }
+    setSelectedIds(new Set());
+    setBulkLoading(false);
+  };
+
   const serviceBadgeColor = (service: string) => {
     switch (service) {
       case "resend": return "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400";
@@ -273,6 +368,47 @@ export default function ErrorsPage() {
         </TabsList>
       </Tabs>
 
+      {/* Bulk action bar */}
+      {selectedIds.size > 0 && (
+        <div className="sticky top-0 z-10 flex items-center gap-3 rounded-lg border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 p-3 shadow-sm">
+          <Checkbox
+            checked={selectedIds.size === errors.length}
+            onCheckedChange={toggleSelectAll}
+          />
+          <span className="text-sm font-medium">
+            {selectedIds.size} selected
+          </span>
+          <div className="flex items-center gap-2 ml-auto">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={bulkResolve}
+              disabled={bulkLoading}
+            >
+              {bulkLoading ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <Check className="mr-1 h-3 w-3" />}
+              Resolve
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={bulkDelete}
+              disabled={bulkLoading}
+            >
+              {bulkLoading ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <Trash2 className="mr-1 h-3 w-3" />}
+              Delete
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setSelectedIds(new Set())}
+              className="h-7 w-7 p-0"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
+
       {loading ? (
         <div className="flex items-center justify-center h-32">
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
@@ -286,10 +422,27 @@ export default function ErrorsPage() {
         </div>
       ) : (
         <div className="space-y-3">
+          {/* Select all row */}
+          <div className="flex items-center gap-3 px-1">
+            <Checkbox
+              checked={errors.length > 0 && selectedIds.size === errors.length}
+              onCheckedChange={toggleSelectAll}
+            />
+            <span className="text-xs text-muted-foreground">
+              Select all on this page
+            </span>
+          </div>
+
           {errors.map((err: ErrorRow) => (
-            <Card key={err.id}>
+            <Card key={err.id} className={selectedIds.has(err.id) ? "ring-2 ring-primary/50" : ""}>
               <CardContent className="p-4">
                 <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start gap-3 flex-1 min-w-0">
+                    <Checkbox
+                      checked={selectedIds.has(err.id)}
+                      onCheckedChange={() => toggleSelect(err.id)}
+                      className="mt-0.5"
+                    />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       {err.resolved ? (
@@ -346,6 +499,7 @@ export default function ErrorsPage() {
                         )}
                       </div>
                     )}
+                  </div>
                   </div>
                   {!err.resolved && (
                     <Button

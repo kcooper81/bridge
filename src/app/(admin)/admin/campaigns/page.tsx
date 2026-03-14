@@ -1801,14 +1801,14 @@ export default function CampaignsPage() {
       <Dialog open={showImport && listTab === "audiences"} onOpenChange={(open) => { setShowImport(open); if (!open) { setImportListName(""); setImportListDesc(""); } }}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Import Contacts</DialogTitle>
+            <DialogTitle>Import Contacts to List</DialogTitle>
             <DialogDescription>
-              Upload a CSV with contacts. Columns: email (required), first_name, last_name, company.
+              Name your list, then upload a CSV. Columns: email (required), first_name, last_name, company.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label htmlFor="import-list-name-lv">List Name</Label>
+              <Label htmlFor="import-list-name-lv">List Name <span className="text-red-500">*</span></Label>
               <Input
                 id="import-list-name-lv"
                 value={importListName}
@@ -1816,13 +1816,10 @@ export default function CampaignsPage() {
                 placeholder="e.g. Partner Leads March 2026"
                 className="mt-1"
               />
-              <p className="text-xs text-muted-foreground mt-1">
-                Creates a reusable audience list you can select when sending campaigns
-              </p>
             </div>
             {importListName.trim() && (
               <div>
-                <Label htmlFor="import-list-desc-lv">List Description (optional)</Label>
+                <Label htmlFor="import-list-desc-lv">Description (optional)</Label>
                 <Input
                   id="import-list-desc-lv"
                   value={importListDesc}
@@ -1833,12 +1830,13 @@ export default function CampaignsPage() {
               </div>
             )}
             <div
-              className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:bg-slate-50 transition-colors"
-              onClick={() => document.getElementById("csv-file-input-lv")?.click()}
+              className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${importListName.trim() ? "cursor-pointer hover:bg-slate-50" : "opacity-50 cursor-not-allowed"}`}
+              onClick={() => { if (importListName.trim()) document.getElementById("csv-file-input-lv")?.click(); else toast.error("Enter a list name first"); }}
               onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
               onDrop={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
+                if (!importListName.trim()) { toast.error("Enter a list name first"); return; }
                 const file = e.dataTransfer.files[0];
                 if (file && file.name.endsWith(".csv")) handleCsvImport(file);
                 else toast.error("Please drop a .csv file");
@@ -1846,7 +1844,7 @@ export default function CampaignsPage() {
             >
               <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
               <p className="text-sm font-medium">
-                {importing ? "Importing..." : "Click to upload or drag & drop"}
+                {importing ? "Importing..." : importListName.trim() ? "Click to upload or drag & drop" : "Enter a list name above to upload"}
               </p>
               <p className="text-xs text-muted-foreground mt-1">CSV files only</p>
               <input

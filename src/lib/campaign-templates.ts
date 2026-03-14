@@ -143,41 +143,6 @@ function ctaButton(text: string, url: string): string {
               </table>`;
 }
 
-/** Standalone branded footer — can be appended to any email */
-export function teamPromptFooterHtml(): string {
-  return `
-<!-- TeamPrompt Footer -->
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding: 0 16px;">
-  <tr>
-    <td align="center">
-      <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width: 560px; width: 100%;">
-        <tr>
-          <td style="padding: 24px 32px; text-align: center;">
-            <table role="presentation" cellpadding="0" cellspacing="0" style="margin: 0 auto;">
-              <tr>
-                <td style="width: 20px; height: 20px; vertical-align: middle;">
-                  <img src="https://teamprompt.app/brand/social-profile-512.png" alt="TeamPrompt" width="20" height="20" style="display: block; border-radius: 4px;" />
-                </td>
-                <td style="padding-left: 8px; vertical-align: middle;">
-                  <span style="font-size: 13px; color: ${MUTED_TEXT};">Sent with </span>
-                  <a href="https://teamprompt.app" style="font-size: 13px; color: ${BRAND_COLOR}; text-decoration: none; font-weight: 500;">TeamPrompt</a>
-                </td>
-              </tr>
-            </table>
-            <p style="margin: 8px 0 0; font-size: 11px; color: #a1a1aa;">
-              Your team&rsquo;s AI prompt library &middot; <a href="https://teamprompt.app" style="color: #a1a1aa; text-decoration: underline;">teamprompt.app</a>
-            </p>
-          </td>
-        </tr>
-      </table>
-    </td>
-  </tr>
-</table>`;
-}
-
-/** Marker comment used to detect if the footer is already present */
-export const FOOTER_MARKER = "<!-- TeamPrompt Footer -->";
-
 /** Escape HTML entities in user input */
 function esc(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");

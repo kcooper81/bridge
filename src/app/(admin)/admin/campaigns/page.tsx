@@ -90,6 +90,7 @@ interface AudienceList {
 }
 
 type View = "list" | "editor";
+type ListTab = "campaigns" | "audiences";
 
 // ─── Helpers ─────────────────────────────────────────────────────
 
@@ -121,6 +122,7 @@ export default function CampaignsPage() {
   const [segments, setSegments] = useState<Segment[]>([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<View>("list");
+  const [listTab, setListTab] = useState<ListTab>("campaigns");
   const [editingCampaign, setEditingCampaign] = useState<Campaign | null>(null);
   const [showPreview, setShowPreview] = useState(false);
   const [showSendConfirm, setShowSendConfirm] = useState(false);
@@ -1344,108 +1346,209 @@ export default function CampaignsPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={loadCampaigns} disabled={loading}>
+          <Button variant="outline" size="sm" onClick={() => { loadCampaigns(); loadAudienceLists(); }} disabled={loading}>
             <RefreshCw className={`h-3.5 w-3.5 mr-1.5 ${loading ? "animate-spin" : ""}`} />
             Refresh
           </Button>
-          <Button size="sm" onClick={openNewCampaign}>
-            <Plus className="h-3.5 w-3.5 mr-1.5" />
-            New Campaign
-          </Button>
+          {listTab === "campaigns" && (
+            <Button size="sm" onClick={openNewCampaign}>
+              <Plus className="h-3.5 w-3.5 mr-1.5" />
+              New Campaign
+            </Button>
+          )}
+          {listTab === "audiences" && (
+            <Button size="sm" onClick={() => setShowImport(true)}>
+              <Upload className="h-3.5 w-3.5 mr-1.5" />
+              Import Contacts
+            </Button>
+          )}
         </div>
       </div>
 
-      {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-        </div>
-      ) : campaigns.length === 0 ? (
-        <Card className="flex flex-col items-center justify-center py-20 text-center">
-          <Megaphone className="h-10 w-10 text-muted-foreground mb-3" />
-          <h3 className="font-semibold mb-1">No campaigns yet</h3>
-          <p className="text-sm text-muted-foreground mb-4">
-            Create your first email campaign to reach your users
-          </p>
-          <Button size="sm" onClick={openNewCampaign}>
-            <Plus className="h-3.5 w-3.5 mr-1.5" />
-            Create Campaign
-          </Button>
-        </Card>
+      {/* Tabs */}
+      <Tabs value={listTab} onValueChange={(v) => setListTab(v as ListTab)}>
+        <TabsList>
+          <TabsTrigger value="campaigns" className="gap-1.5">
+            <Megaphone className="h-3.5 w-3.5" />
+            Campaigns
+            {campaigns.length > 0 && (
+              <span className="ml-1 rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-medium leading-none">
+                {campaigns.length}
+              </span>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="audiences" className="gap-1.5">
+            <Users className="h-3.5 w-3.5" />
+            Audience Lists
+            {audienceLists.length > 0 && (
+              <span className="ml-1 rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-medium leading-none">
+                {audienceLists.length}
+              </span>
+            )}
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
+
+      {listTab === "campaigns" ? (
+        <>
+          {loading ? (
+            <div className="flex items-center justify-center py-20">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : campaigns.length === 0 ? (
+            <Card className="flex flex-col items-center justify-center py-20 text-center">
+              <Megaphone className="h-10 w-10 text-muted-foreground mb-3" />
+              <h3 className="font-semibold mb-1">No campaigns yet</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Create your first email campaign to reach your users
+              </p>
+              <Button size="sm" onClick={openNewCampaign}>
+                <Plus className="h-3.5 w-3.5 mr-1.5" />
+                Create Campaign
+              </Button>
+            </Card>
+          ) : (
+            <div className="space-y-6">
+              {/* Analytics Overview */}
+              {sent.length > 0 && (() => {
+                const totalSent = sent.reduce((s, c) => s + c.recipient_count, 0);
+                const totalOpens = sent.reduce((s, c) => s + (c.opens || 0), 0);
+                const totalClicks = sent.reduce((s, c) => s + (c.clicks || 0), 0);
+                const totalBounces = sent.reduce((s, c) => s + (c.bounces || 0), 0);
+                const totalUnsubs = sent.reduce((s, c) => s + (c.unsubscribes || 0), 0);
+                const openRate = totalSent > 0 ? ((totalOpens / totalSent) * 100).toFixed(1) : "0";
+                const clickRate = totalSent > 0 ? ((totalClicks / totalSent) * 100).toFixed(1) : "0";
+                return (
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                    <Card className="p-3 text-center">
+                      <Send className="h-4 w-4 text-blue-600 mx-auto mb-1" />
+                      <p className="text-lg font-bold">{totalSent.toLocaleString()}</p>
+                      <p className="text-[10px] text-muted-foreground uppercase font-medium">Total Sent</p>
+                    </Card>
+                    <Card className="p-3 text-center">
+                      <MailOpen className="h-4 w-4 text-green-600 mx-auto mb-1" />
+                      <p className="text-lg font-bold text-green-700">{openRate}%</p>
+                      <p className="text-[10px] text-muted-foreground uppercase font-medium">Open Rate</p>
+                      <p className="text-[10px] text-muted-foreground">{totalOpens.toLocaleString()} opens</p>
+                    </Card>
+                    <Card className="p-3 text-center">
+                      <MousePointerClick className="h-4 w-4 text-purple-600 mx-auto mb-1" />
+                      <p className="text-lg font-bold text-purple-700">{clickRate}%</p>
+                      <p className="text-[10px] text-muted-foreground uppercase font-medium">Click Rate</p>
+                      <p className="text-[10px] text-muted-foreground">{totalClicks.toLocaleString()} clicks</p>
+                    </Card>
+                    <Card className="p-3 text-center">
+                      <AlertCircle className="h-4 w-4 text-amber-500 mx-auto mb-1" />
+                      <p className="text-lg font-bold text-amber-600">{totalBounces}</p>
+                      <p className="text-[10px] text-muted-foreground uppercase font-medium">Bounces</p>
+                    </Card>
+                    <Card className="p-3 text-center">
+                      <Ban className="h-4 w-4 text-red-500 mx-auto mb-1" />
+                      <p className="text-lg font-bold text-red-600">{totalUnsubs}</p>
+                      <p className="text-[10px] text-muted-foreground uppercase font-medium">Unsubscribes</p>
+                    </Card>
+                  </div>
+                );
+              })()}
+
+              {/* Drafts */}
+              {drafts.length > 0 && (
+                <CampaignSection
+                  title="Drafts"
+                  campaigns={drafts}
+                  onEdit={openEditCampaign}
+                  onDelete={(id) => setShowDeleteConfirm(id)}
+                />
+              )}
+
+              {/* Scheduled */}
+              {scheduled.length > 0 && (
+                <CampaignSection
+                  title="Scheduled"
+                  campaigns={scheduled}
+                  onEdit={openEditCampaign}
+                />
+              )}
+
+              {/* Sent */}
+              {sent.length > 0 && (
+                <CampaignSection
+                  title="Sent"
+                  campaigns={sent}
+                  onEdit={openEditCampaign}
+                />
+              )}
+            </div>
+          )}
+        </>
       ) : (
-        <div className="space-y-6">
-          {/* Analytics Overview */}
-          {sent.length > 0 && (() => {
-            const totalSent = sent.reduce((s, c) => s + c.recipient_count, 0);
-            const totalOpens = sent.reduce((s, c) => s + (c.opens || 0), 0);
-            const totalClicks = sent.reduce((s, c) => s + (c.clicks || 0), 0);
-            const totalBounces = sent.reduce((s, c) => s + (c.bounces || 0), 0);
-            const totalUnsubs = sent.reduce((s, c) => s + (c.unsubscribes || 0), 0);
-            const openRate = totalSent > 0 ? ((totalOpens / totalSent) * 100).toFixed(1) : "0";
-            const clickRate = totalSent > 0 ? ((totalClicks / totalSent) * 100).toFixed(1) : "0";
-            return (
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                <Card className="p-3 text-center">
-                  <Send className="h-4 w-4 text-blue-600 mx-auto mb-1" />
-                  <p className="text-lg font-bold">{totalSent.toLocaleString()}</p>
-                  <p className="text-[10px] text-muted-foreground uppercase font-medium">Total Sent</p>
-                </Card>
-                <Card className="p-3 text-center">
-                  <MailOpen className="h-4 w-4 text-green-600 mx-auto mb-1" />
-                  <p className="text-lg font-bold text-green-700">{openRate}%</p>
-                  <p className="text-[10px] text-muted-foreground uppercase font-medium">Open Rate</p>
-                  <p className="text-[10px] text-muted-foreground">{totalOpens.toLocaleString()} opens</p>
-                </Card>
-                <Card className="p-3 text-center">
-                  <MousePointerClick className="h-4 w-4 text-purple-600 mx-auto mb-1" />
-                  <p className="text-lg font-bold text-purple-700">{clickRate}%</p>
-                  <p className="text-[10px] text-muted-foreground uppercase font-medium">Click Rate</p>
-                  <p className="text-[10px] text-muted-foreground">{totalClicks.toLocaleString()} clicks</p>
-                </Card>
-                <Card className="p-3 text-center">
-                  <AlertCircle className="h-4 w-4 text-amber-500 mx-auto mb-1" />
-                  <p className="text-lg font-bold text-amber-600">{totalBounces}</p>
-                  <p className="text-[10px] text-muted-foreground uppercase font-medium">Bounces</p>
-                </Card>
-                <Card className="p-3 text-center">
-                  <Ban className="h-4 w-4 text-red-500 mx-auto mb-1" />
-                  <p className="text-lg font-bold text-red-600">{totalUnsubs}</p>
-                  <p className="text-[10px] text-muted-foreground uppercase font-medium">Unsubscribes</p>
-                </Card>
-              </div>
-            );
-          })()}
-
-          {/* Drafts */}
-          {drafts.length > 0 && (
-            <CampaignSection
-              title="Drafts"
-              campaigns={drafts}
-              onEdit={openEditCampaign}
-              onDelete={(id) => setShowDeleteConfirm(id)}
-            />
-          )}
-
-          {/* Scheduled */}
-          {scheduled.length > 0 && (
-            <CampaignSection
-              title="Scheduled"
-              campaigns={scheduled}
-              onEdit={openEditCampaign}
-            />
-          )}
-
-          {/* Sent */}
-          {sent.length > 0 && (
-            <CampaignSection
-              title="Sent"
-              campaigns={sent}
-              onEdit={openEditCampaign}
-            />
-          )}
-        </div>
+        /* ─── Audience Lists Tab ─── */
+        audienceLists.length === 0 ? (
+          <Card className="flex flex-col items-center justify-center py-20 text-center">
+            <Users className="h-10 w-10 text-muted-foreground mb-3" />
+            <h3 className="font-semibold mb-1">No audience lists yet</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Import a CSV to create your first audience list
+            </p>
+            <Button size="sm" onClick={() => setShowImport(true)}>
+              <Upload className="h-3.5 w-3.5 mr-1.5" />
+              Import Contacts
+            </Button>
+          </Card>
+        ) : (
+          <div className="space-y-3">
+            <p className="text-xs text-muted-foreground">
+              {audienceLists.length} list{audienceLists.length !== 1 ? "s" : ""} &middot; {externalCount} total external contacts
+            </p>
+            {audienceLists.map((list) => (
+              <Card
+                key={list.id}
+                className="p-4 hover:bg-slate-50 transition-colors"
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <List className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <h3 className="font-medium text-sm truncate">{list.name}</h3>
+                      <Badge variant="secondary" className="text-[10px] shrink-0">
+                        {list.contact_count} contact{list.contact_count !== 1 ? "s" : ""}
+                      </Badge>
+                    </div>
+                    {list.description && (
+                      <p className="text-xs text-muted-foreground mt-1 ml-6">{list.description}</p>
+                    )}
+                    <p className="text-[10px] text-muted-foreground mt-1 ml-6">
+                      Created {timeAgo(list.created_at)}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() => openEditList(list)}
+                      title="Edit list"
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-muted-foreground hover:text-red-600"
+                      onClick={() => setDeleteListConfirm(list.id)}
+                      title="Delete list"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        )
       )}
 
-      {/* Delete Confirmation */}
+      {/* Delete Campaign Confirmation */}
       <Dialog open={!!showDeleteConfirm} onOpenChange={() => setShowDeleteConfirm(null)}>
         <DialogContent>
           <DialogHeader>
@@ -1465,6 +1568,159 @@ export default function CampaignsPage() {
               Delete
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Audience List Confirmation (list view) */}
+      <Dialog open={!!deleteListConfirm} onOpenChange={() => setDeleteListConfirm(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Audience List?</DialogTitle>
+            <DialogDescription>
+              This will remove the list. The contacts themselves will not be deleted.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteListConfirm(null)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => deleteListConfirm && deleteAudienceList(deleteListConfirm)}
+            >
+              Delete List
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Audience List Dialog (list view) */}
+      <Dialog open={!!editingList} onOpenChange={(open) => { if (!open) setEditingList(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Audience List</DialogTitle>
+            <DialogDescription>
+              Update the name and description for this audience list.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="edit-list-name-lv">List Name</Label>
+              <Input
+                id="edit-list-name-lv"
+                value={editListName}
+                onChange={(e) => setEditListName(e.target.value)}
+                placeholder="e.g. Partner Leads March 2026"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-list-desc-lv">Description / Notes</Label>
+              <Textarea
+                id="edit-list-desc-lv"
+                value={editListDesc}
+                onChange={(e) => setEditListDesc(e.target.value)}
+                placeholder="e.g. SaaS founders from LinkedIn outreach"
+                className="mt-1 min-h-[80px]"
+              />
+            </div>
+            {editingList && (
+              <p className="text-xs text-muted-foreground">
+                {editingList.contact_count} contact{editingList.contact_count !== 1 ? "s" : ""} &middot; Created {timeAgo(editingList.created_at)}
+              </p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingList(null)}>
+              Cancel
+            </Button>
+            <Button onClick={saveListEdits} disabled={savingList || !editListName.trim()}>
+              {savingList && <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />}
+              Save
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* CSV Import Dialog (list view) */}
+      <Dialog open={showImport && listTab === "audiences"} onOpenChange={(open) => { setShowImport(open); if (!open) { setImportListName(""); setImportListDesc(""); } }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Import Contacts</DialogTitle>
+            <DialogDescription>
+              Upload a CSV with contacts. Columns: email (required), first_name, last_name, company.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="import-list-name-lv">List Name</Label>
+              <Input
+                id="import-list-name-lv"
+                value={importListName}
+                onChange={(e) => setImportListName(e.target.value)}
+                placeholder="e.g. Partner Leads March 2026"
+                className="mt-1"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Creates a reusable audience list you can select when sending campaigns
+              </p>
+            </div>
+            {importListName.trim() && (
+              <div>
+                <Label htmlFor="import-list-desc-lv">List Description (optional)</Label>
+                <Input
+                  id="import-list-desc-lv"
+                  value={importListDesc}
+                  onChange={(e) => setImportListDesc(e.target.value)}
+                  placeholder="e.g. SaaS founders from LinkedIn outreach"
+                  className="mt-1"
+                />
+              </div>
+            )}
+            <div
+              className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:bg-slate-50 transition-colors"
+              onClick={() => document.getElementById("csv-file-input-lv")?.click()}
+              onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+              onDrop={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const file = e.dataTransfer.files[0];
+                if (file && file.name.endsWith(".csv")) handleCsvImport(file);
+                else toast.error("Please drop a .csv file");
+              }}
+            >
+              <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+              <p className="text-sm font-medium">
+                {importing ? "Importing..." : "Click to upload or drag & drop"}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">CSV files only</p>
+              <input
+                id="csv-file-input-lv"
+                type="file"
+                accept=".csv"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleCsvImport(file);
+                  e.target.value = "";
+                }}
+              />
+            </div>
+            {importing && (
+              <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Importing contacts...
+              </div>
+            )}
+            <div className="bg-slate-50 rounded-lg p-3">
+              <p className="text-xs font-medium mb-1">CSV Format Example:</p>
+              <code className="text-xs text-muted-foreground block">
+                email,first_name,last_name,company<br />
+                john@example.com,John,Doe,Acme Inc<br />
+                jane@example.com,Jane,Smith,TechCorp
+              </code>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

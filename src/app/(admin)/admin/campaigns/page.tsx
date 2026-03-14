@@ -91,7 +91,7 @@ interface AudienceList {
 }
 
 type View = "list" | "editor";
-type ListTab = "campaigns" | "audiences";
+type ListTab = "campaigns" | "audiences" | "analytics";
 
 // ─── Helpers ─────────────────────────────────────────────────────
 
@@ -1409,12 +1409,16 @@ export default function CampaignsPage() {
           </TabsTrigger>
           <TabsTrigger value="audiences" className="gap-1.5">
             <Users className="h-3.5 w-3.5" />
-            Audience Lists
-            {audienceLists.length > 0 && (
+            Audiences
+            {(audienceLists.length + segments.length) > 0 && (
               <span className="ml-1 rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-medium leading-none">
-                {audienceLists.length}
+                {audienceLists.length + segments.filter((s) => !s.type).length}
               </span>
             )}
+          </TabsTrigger>
+          <TabsTrigger value="analytics" className="gap-1.5">
+            <BarChart3 className="h-3.5 w-3.5" />
+            Analytics
           </TabsTrigger>
         </TabsList>
       </Tabs>
@@ -1511,71 +1515,222 @@ export default function CampaignsPage() {
             </div>
           )}
         </>
-      ) : (
-        /* ─── Audience Lists Tab ─── */
-        audienceLists.length === 0 ? (
-          <Card className="flex flex-col items-center justify-center py-20 text-center">
-            <Users className="h-10 w-10 text-muted-foreground mb-3" />
-            <h3 className="font-semibold mb-1">No audience lists yet</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              Import a CSV to create your first audience list
-            </p>
-            <Button size="sm" onClick={() => setShowImport(true)}>
-              <Upload className="h-3.5 w-3.5 mr-1.5" />
-              Import Contacts
-            </Button>
-          </Card>
-        ) : (
-          <div className="space-y-3">
-            <p className="text-xs text-muted-foreground">
-              {audienceLists.length} list{audienceLists.length !== 1 ? "s" : ""} &middot; {externalCount} total external contacts
-            </p>
-            {audienceLists.map((list) => (
-              <Card
-                key={list.id}
-                className="p-4 hover:bg-slate-50 transition-colors"
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <List className="h-4 w-4 text-muted-foreground shrink-0" />
-                      <h3 className="font-medium text-sm truncate">{list.name}</h3>
-                      <Badge variant="secondary" className="text-[10px] shrink-0">
-                        {list.contact_count} contact{list.contact_count !== 1 ? "s" : ""}
-                      </Badge>
-                    </div>
-                    {list.description && (
-                      <p className="text-xs text-muted-foreground mt-1 ml-6">{list.description}</p>
-                    )}
-                    <p className="text-[10px] text-muted-foreground mt-1 ml-6">
-                      Created {timeAgo(list.created_at)}
-                    </p>
+      ) : listTab === "audiences" ? (
+        /* ─── Audiences Tab ─── */
+        <div className="space-y-6">
+          {/* Built-in segments */}
+          <div>
+            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+              Built-in Segments
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {segments.filter((s) => !s.type).map((seg) => (
+                <Card key={seg.name} className="p-4">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Users className="h-4 w-4 text-muted-foreground" />
+                    <h3 className="font-medium text-sm">{seg.label}</h3>
                   </div>
-                  <div className="flex items-center gap-1 shrink-0">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => openEditList(list)}
-                      title="Edit list"
-                    >
-                      <Pencil className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-muted-foreground hover:text-red-600"
-                      onClick={() => setDeleteListConfirm(list.id)}
-                      title="Delete list"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
+                  <p className="text-2xl font-bold">{seg.count.toLocaleString()}</p>
+                  <p className="text-[10px] text-muted-foreground uppercase">contacts</p>
+                </Card>
+              ))}
+            </div>
+          </div>
+
+          {/* Audience lists */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                Custom Lists ({audienceLists.length})
+              </h2>
+            </div>
+            {audienceLists.length === 0 ? (
+              <Card className="flex flex-col items-center justify-center py-12 text-center">
+                <List className="h-8 w-8 text-muted-foreground mb-2" />
+                <h3 className="font-semibold text-sm mb-1">No custom lists yet</h3>
+                <p className="text-xs text-muted-foreground mb-3">
+                  Import a CSV to create your first audience list
+                </p>
+                <Button size="sm" variant="outline" onClick={() => setShowImport(true)}>
+                  <Upload className="h-3.5 w-3.5 mr-1.5" />
+                  Import Contacts
+                </Button>
+              </Card>
+            ) : (
+              <div className="space-y-2">
+                {audienceLists.map((list) => (
+                  <Card
+                    key={list.id}
+                    className="p-4 hover:bg-slate-50 transition-colors"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <List className="h-4 w-4 text-muted-foreground shrink-0" />
+                          <h3 className="font-medium text-sm truncate">{list.name}</h3>
+                          <Badge variant="secondary" className="text-[10px] shrink-0">
+                            {list.contact_count} contact{list.contact_count !== 1 ? "s" : ""}
+                          </Badge>
+                        </div>
+                        {list.description && (
+                          <p className="text-xs text-muted-foreground mt-1 ml-6">{list.description}</p>
+                        )}
+                        <p className="text-[10px] text-muted-foreground mt-1 ml-6">
+                          Created {timeAgo(list.created_at)}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => openEditList(list)}
+                          title="Edit list"
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground hover:text-red-600"
+                          onClick={() => setDeleteListConfirm(list.id)}
+                          title="Delete list"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      ) : (
+        /* ─── Analytics Tab ─── */
+        <div className="space-y-6">
+          {sent.length === 0 ? (
+            <Card className="flex flex-col items-center justify-center py-20 text-center">
+              <BarChart3 className="h-10 w-10 text-muted-foreground mb-3" />
+              <h3 className="font-semibold mb-1">No campaign data yet</h3>
+              <p className="text-sm text-muted-foreground">
+                Send your first campaign to see analytics here
+              </p>
+            </Card>
+          ) : (() => {
+            const totalSent = sent.reduce((s, c) => s + c.recipient_count, 0);
+            const totalOpens = sent.reduce((s, c) => s + (c.opens || 0), 0);
+            const totalClicks = sent.reduce((s, c) => s + (c.clicks || 0), 0);
+            const totalBounces = sent.reduce((s, c) => s + (c.bounces || 0), 0);
+            const totalUnsubs = sent.reduce((s, c) => s + (c.unsubscribes || 0), 0);
+            const totalComplaints = sent.reduce((s, c) => s + (c.complaints || 0), 0);
+            const openRate = totalSent > 0 ? ((totalOpens / totalSent) * 100).toFixed(1) : "0";
+            const clickRate = totalSent > 0 ? ((totalClicks / totalSent) * 100).toFixed(1) : "0";
+            const bounceRate = totalSent > 0 ? ((totalBounces / totalSent) * 100).toFixed(1) : "0";
+            return (
+              <>
+                {/* Summary cards */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                  <Card className="p-3 text-center">
+                    <Send className="h-4 w-4 text-blue-600 mx-auto mb-1" />
+                    <p className="text-lg font-bold">{totalSent.toLocaleString()}</p>
+                    <p className="text-[10px] text-muted-foreground uppercase font-medium">Total Sent</p>
+                  </Card>
+                  <Card className="p-3 text-center">
+                    <MailOpen className="h-4 w-4 text-green-600 mx-auto mb-1" />
+                    <p className="text-lg font-bold text-green-700">{openRate}%</p>
+                    <p className="text-[10px] text-muted-foreground uppercase font-medium">Open Rate</p>
+                  </Card>
+                  <Card className="p-3 text-center">
+                    <MousePointerClick className="h-4 w-4 text-purple-600 mx-auto mb-1" />
+                    <p className="text-lg font-bold text-purple-700">{clickRate}%</p>
+                    <p className="text-[10px] text-muted-foreground uppercase font-medium">Click Rate</p>
+                  </Card>
+                  <Card className="p-3 text-center">
+                    <AlertCircle className="h-4 w-4 text-amber-500 mx-auto mb-1" />
+                    <p className="text-lg font-bold text-amber-600">{bounceRate}%</p>
+                    <p className="text-[10px] text-muted-foreground uppercase font-medium">Bounce Rate</p>
+                  </Card>
+                  <Card className="p-3 text-center">
+                    <Ban className="h-4 w-4 text-red-500 mx-auto mb-1" />
+                    <p className="text-lg font-bold text-red-600">{totalUnsubs}</p>
+                    <p className="text-[10px] text-muted-foreground uppercase font-medium">Unsubscribes</p>
+                  </Card>
+                  <Card className="p-3 text-center">
+                    <AlertCircle className="h-4 w-4 text-red-400 mx-auto mb-1" />
+                    <p className="text-lg font-bold text-red-500">{totalComplaints}</p>
+                    <p className="text-[10px] text-muted-foreground uppercase font-medium">Complaints</p>
+                  </Card>
+                </div>
+
+                {/* Per-campaign breakdown */}
+                <div>
+                  <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+                    Campaign Performance
+                  </h2>
+                  <div className="border rounded-lg overflow-hidden">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="bg-slate-50 border-b">
+                          <th className="text-left p-3 font-medium text-muted-foreground">Campaign</th>
+                          <th className="text-right p-3 font-medium text-muted-foreground">Sent</th>
+                          <th className="text-right p-3 font-medium text-muted-foreground">Opens</th>
+                          <th className="text-right p-3 font-medium text-muted-foreground">Open %</th>
+                          <th className="text-right p-3 font-medium text-muted-foreground">Clicks</th>
+                          <th className="text-right p-3 font-medium text-muted-foreground">Click %</th>
+                          <th className="text-right p-3 font-medium text-muted-foreground">Bounces</th>
+                          <th className="text-right p-3 font-medium text-muted-foreground">Unsubs</th>
+                          <th className="text-right p-3 font-medium text-muted-foreground">Date</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {sent.map((c) => {
+                          const or = c.recipient_count > 0 ? ((c.opens / c.recipient_count) * 100).toFixed(1) : "0";
+                          const cr = c.recipient_count > 0 ? ((c.clicks / c.recipient_count) * 100).toFixed(1) : "0";
+                          return (
+                            <tr
+                              key={c.id}
+                              className="border-b last:border-b-0 hover:bg-slate-50 cursor-pointer transition-colors"
+                              onClick={() => openEditCampaign(c)}
+                            >
+                              <td className="p-3">
+                                <div className="font-medium truncate max-w-[200px]">{c.name}</div>
+                                <div className="text-[10px] text-muted-foreground truncate max-w-[200px]">{c.subject}</div>
+                              </td>
+                              <td className="p-3 text-right tabular-nums">{c.recipient_count.toLocaleString()}</td>
+                              <td className="p-3 text-right tabular-nums text-green-600">{(c.opens || 0).toLocaleString()}</td>
+                              <td className="p-3 text-right tabular-nums font-medium text-green-700">{or}%</td>
+                              <td className="p-3 text-right tabular-nums text-purple-600">{(c.clicks || 0).toLocaleString()}</td>
+                              <td className="p-3 text-right tabular-nums font-medium text-purple-700">{cr}%</td>
+                              <td className="p-3 text-right tabular-nums text-amber-600">{c.bounces || 0}</td>
+                              <td className="p-3 text-right tabular-nums text-red-600">{c.unsubscribes || 0}</td>
+                              <td className="p-3 text-right text-muted-foreground whitespace-nowrap">
+                                {c.sent_at ? new Date(c.sent_at).toLocaleDateString() : timeAgo(c.created_at)}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                      <tfoot>
+                        <tr className="bg-slate-50 font-medium">
+                          <td className="p-3">Total ({sent.length} campaigns)</td>
+                          <td className="p-3 text-right tabular-nums">{totalSent.toLocaleString()}</td>
+                          <td className="p-3 text-right tabular-nums text-green-600">{totalOpens.toLocaleString()}</td>
+                          <td className="p-3 text-right tabular-nums text-green-700">{openRate}%</td>
+                          <td className="p-3 text-right tabular-nums text-purple-600">{totalClicks.toLocaleString()}</td>
+                          <td className="p-3 text-right tabular-nums text-purple-700">{clickRate}%</td>
+                          <td className="p-3 text-right tabular-nums text-amber-600">{totalBounces}</td>
+                          <td className="p-3 text-right tabular-nums text-red-600">{totalUnsubs}</td>
+                          <td className="p-3"></td>
+                        </tr>
+                      </tfoot>
+                    </table>
                   </div>
                 </div>
-              </Card>
-            ))}
-          </div>
-        )
+              </>
+            );
+          })()}
+        </div>
       )}
 
       {/* Delete Campaign Confirmation */}

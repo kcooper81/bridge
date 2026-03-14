@@ -106,14 +106,16 @@ ${body}
 function headerBlock(): string {
   return `          <!-- Header -->
           <tr>
-            <td style="background-color: #ffffff; padding: 24px 32px; border-radius: 12px 12px 0 0; border-bottom: 1px solid #e4e4e7;">
-              <table role="presentation" cellpadding="0" cellspacing="0" style="width: 100%;">
+            <td style="background-color: #ffffff; padding: 20px 32px; border-radius: 12px 12px 0 0; border-bottom: 1px solid #e4e4e7;">
+              <table role="presentation" cellpadding="0" cellspacing="0">
                 <tr>
-                  <td style="vertical-align: middle; width: 28px;">
-                    <img src="https://teamprompt.app/brand/social-profile-512.png" alt="TeamPrompt" width="28" height="28" style="display: block; border-radius: 6px;" />
+                  <td style="vertical-align: middle;">
+                    <a href="https://teamprompt.app" style="text-decoration: none;">
+                      <img src="https://teamprompt.app/brand/social-profile-512.png" alt="TeamPrompt" width="36" height="36" style="display: block; border-radius: 8px;" />
+                    </a>
                   </td>
-                  <td style="vertical-align: middle; padding-left: 10px;">
-                    <span style="color: #18181b; font-size: 16px; font-weight: 700; line-height: 28px;">TeamPrompt</span>
+                  <td style="vertical-align: middle; padding-left: 12px;">
+                    <a href="https://teamprompt.app" style="color: #18181b; font-size: 17px; font-weight: 700; text-decoration: none; line-height: 1;">TeamPrompt</a>
                   </td>
                 </tr>
               </table>
@@ -124,11 +126,11 @@ function headerBlock(): string {
 function footerBlock(): string {
   return `          <!-- Footer -->
           <tr>
-            <td style="background-color: #fafafa; padding: 20px 32px; border-radius: 0 0 12px 12px; border-top: 1px solid #e4e4e7;">
-              <table role="presentation" cellpadding="0" cellspacing="0">
+            <td style="padding: 24px 32px; border-radius: 0 0 12px 12px; border-top: 1px solid #e4e4e7; text-align: center;">
+              <table role="presentation" cellpadding="0" cellspacing="0" style="margin: 0 auto;">
                 <tr>
-                  <td style="vertical-align: middle; width: 16px;">
-                    <img src="https://teamprompt.app/brand/social-profile-512.png" alt="" width="16" height="16" style="display: block; border-radius: 4px;" />
+                  <td style="vertical-align: middle;">
+                    <img src="https://teamprompt.app/brand/social-profile-512.png" alt="" width="20" height="20" style="display: block; border-radius: 4px;" />
                   </td>
                   <td style="vertical-align: middle; padding-left: 8px;">
                     <span style="font-size: 13px; color: ${MUTED_TEXT};">TeamPrompt</span>
@@ -137,15 +139,16 @@ function footerBlock(): string {
                   </td>
                 </tr>
               </table>
+              <p style="margin: 6px 0 0; font-size: 11px; color: #a1a1aa;">Your team&rsquo;s AI prompt library</p>
             </td>
           </tr>`;
 }
 
 function ctaButton(text: string, url: string): string {
-  return `              <table role="presentation" cellpadding="0" cellspacing="0" style="margin: 24px 0;">
+  return `              <table role="presentation" cellpadding="0" cellspacing="0" style="margin: 28px 0;">
                 <tr>
-                  <td style="background-color: ${BRAND_COLOR}; border-radius: 8px;">
-                    <a href="${url}" style="display: inline-block; padding: 12px 28px; color: #ffffff; font-size: 15px; font-weight: 600; text-decoration: none;">${text}</a>
+                  <td style="background-color: ${BRAND_COLOR}; border-radius: 8px; mso-padding-alt: 14px 32px;">
+                    <a href="${url}" style="display: inline-block; padding: 14px 32px; color: #ffffff; font-size: 15px; font-weight: 600; text-decoration: none; line-height: 1;">${text}</a>
                   </td>
                 </tr>
               </table>`;
@@ -178,12 +181,12 @@ function repeatCount(values: Record<string, string>, groupKey: string, suffixes:
 function featureBlock(icon: string, bgColor: string, title: string, desc: string): string {
   return `              <table role="presentation" cellpadding="0" cellspacing="0" style="margin-bottom: 20px; width: 100%;">
                 <tr>
-                  <td style="width: 40px; vertical-align: top; padding-top: 2px;">
-                    <div style="width: 32px; height: 32px; background-color: ${bgColor}; border-radius: 8px; text-align: center; line-height: 32px; font-size: 16px; color: ${BRAND_COLOR}; font-weight: bold;">${icon}</div>
+                  <td style="width: 44px; vertical-align: top; padding-top: 2px;">
+                    <div style="width: 36px; height: 36px; background-color: ${bgColor}; border-radius: 8px; text-align: center; line-height: 36px; font-size: 18px; color: ${BRAND_COLOR}; font-weight: bold;">${icon}</div>
                   </td>
-                  <td style="padding-left: 12px;">
-                    <p style="margin: 0 0 4px; font-size: 15px; font-weight: 600; color: #18181b;">${title}</p>
-                    <p style="margin: 0; font-size: 14px; color: #3f3f46; line-height: 1.5;">${desc}</p>
+                  <td style="padding-left: 14px; vertical-align: top;">
+                    <p style="margin: 0 0 4px; font-size: 15px; font-weight: 600; color: #18181b; line-height: 1.3;">${title}</p>
+                    <p style="margin: 0; font-size: 14px; color: #52525b; line-height: 1.55;">${desc}</p>
                   </td>
                 </tr>
               </table>`;
@@ -329,7 +332,7 @@ ${footerBlock()}
 ${headerBlock()}
           <tr>
             <td class="content-padding" style="background-color: #ffffff; padding: 32px; text-align: center;">
-              <div style="width: 64px; height: 64px; background-color: #EFF6FF; border-radius: 16px; margin: 0 auto 20px; text-align: center; line-height: 64px; font-size: 28px; color: ${BRAND_COLOR};">&#x2605;</div>
+              <div style="width: 56px; height: 56px; background-color: #EFF6FF; border-radius: 14px; margin: 0 auto 20px; text-align: center; line-height: 56px; font-size: 24px; color: ${BRAND_COLOR};">&#x2605;</div>
               <h1 style="margin: 0 0 12px; font-size: 26px; font-weight: 700; color: #18181b;">${v(vals, "headline", "[Announcement Headline]")}</h1>
               <p style="margin: 0 0 24px; font-size: 16px; color: #3f3f46; line-height: 1.6; max-width: 440px; margin-left: auto; margin-right: auto;">${v(vals, "body", "[2-3 sentences explaining the announcement.]")}</p>
 ${ctaButton(v(vals, "cta_text", "Learn More"), vals.cta_url?.trim() || "https://teamprompt.app")}

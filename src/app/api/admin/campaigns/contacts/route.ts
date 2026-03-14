@@ -126,11 +126,16 @@ export async function POST(request: NextRequest) {
             { onConflict: "list_id,contact_id" }
           );
 
-        // Update contact count
+        // Update contact count (count actual linked contacts, not just this batch)
+        const { count: totalLinked } = await db
+          .from("audience_list_contacts")
+          .select("*", { count: "exact", head: true })
+          .eq("list_id", listId);
+
         await db
           .from("audience_lists")
           .update({
-            contact_count: contactRows.length,
+            contact_count: totalLinked || 0,
             updated_at: new Date().toISOString(),
           })
           .eq("id", listId);

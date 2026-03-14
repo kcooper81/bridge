@@ -139,6 +139,7 @@ export default function CampaignsPage() {
   const [editListName, setEditListName] = useState("");
   const [editListDesc, setEditListDesc] = useState("");
   const [savingList, setSavingList] = useState(false);
+  const [deleteListConfirm, setDeleteListConfirm] = useState<string | null>(null);
   const [editorTab, setEditorTab] = useState<"fields" | "preview" | "html">("fields");
 
   // Editor form state
@@ -489,6 +490,9 @@ export default function CampaignsPage() {
       });
       if (!res.ok) throw new Error("Failed to delete list");
       toast.success("Audience list deleted");
+      setDeleteListConfirm(null);
+      // If the deleted list was selected as the audience, reset to "all"
+      if (formSegment === `list:${listId}`) setFormSegment("all");
       await Promise.all([loadSegments(), loadAudienceLists()]);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to delete list");
@@ -952,7 +956,7 @@ export default function CampaignsPage() {
                             variant="ghost"
                             size="sm"
                             className="h-6 w-6 p-0 text-muted-foreground hover:text-red-600"
-                            onClick={() => deleteAudienceList(list.id)}
+                            onClick={() => setDeleteListConfirm(list.id)}
                           >
                             <Trash2 className="h-3 w-3" />
                           </Button>
@@ -1231,7 +1235,7 @@ export default function CampaignsPage() {
                           variant="ghost"
                           size="sm"
                           className="h-6 w-6 p-0 text-muted-foreground hover:text-red-600"
-                          onClick={() => deleteAudienceList(list.id)}
+                          onClick={() => setDeleteListConfirm(list.id)}
                         >
                           <Trash2 className="h-3 w-3" />
                         </Button>
@@ -1287,6 +1291,29 @@ export default function CampaignsPage() {
               <Button onClick={saveListEdits} disabled={savingList || !editListName.trim()}>
                 {savingList && <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />}
                 Save
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Audience List Confirmation */}
+        <Dialog open={!!deleteListConfirm} onOpenChange={() => setDeleteListConfirm(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Delete Audience List?</DialogTitle>
+              <DialogDescription>
+                This will remove the list. The contacts themselves will not be deleted.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setDeleteListConfirm(null)}>
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => deleteListConfirm && deleteAudienceList(deleteListConfirm)}
+              >
+                Delete List
               </Button>
             </DialogFooter>
           </DialogContent>

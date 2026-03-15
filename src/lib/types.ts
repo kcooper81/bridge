@@ -350,6 +350,7 @@ export interface ConversationLog {
   response_text: string | null;
   guardrail_flags: unknown[];
   action: "sent" | "blocked" | "warned";
+  risk_score: number;
   metadata: Record<string, unknown>;
   created_at: string;
   // Joined

@@ -31,6 +31,7 @@ import { toast } from "sonner";
 import { UpgradeGate } from "@/components/upgrade";
 import { useSubscription } from "@/components/providers/subscription-provider";
 import { getConversationLogs } from "@/lib/vault-api";
+import { getRiskBgColor } from "@/lib/security/risk-score";
 import { formatDistanceToNow, format } from "date-fns";
 import type { ConversationLog } from "@/lib/types";
 import { NoOrgBanner } from "@/components/dashboard/no-org-banner";
@@ -210,13 +211,14 @@ export default function ActivityPage() {
       let ext: string;
 
       if (format === "csv") {
-        const headers = ["timestamp", "action", "ai_tool", "guardrail_flags", "user_id"];
+        const headers = ["timestamp", "action", "ai_tool", "risk_score", "guardrail_flags", "user_id"];
         if (logMode === "full") headers.push("prompt_text");
         const rows = exportLogs.map((log) => {
           const row = [
             log.created_at,
             log.action,
             log.ai_tool,
+            String(log.risk_score ?? 0),
             (log.guardrail_flags || []).join("; "),
             log.user_id || "",
           ];
@@ -231,6 +233,7 @@ export default function ActivityPage() {
           timestamp: log.created_at,
           action: log.action,
           ai_tool: log.ai_tool,
+          risk_score: log.risk_score ?? 0,
           guardrail_flags: log.guardrail_flags || [],
           user_id: log.user_id,
           ...(logMode === "full" ? { prompt_text: log.prompt_text } : {}),
@@ -474,6 +477,37 @@ export default function ActivityPage() {
         )}
       </div>
 
+      {/* Risk score summary */}
+      {!loading && logs.length > 0 && (() => {
+        const scored = logs.filter((l) => (l.risk_score ?? 0) > 0);
+        const avg = scored.length > 0 ? Math.round(scored.reduce((s, l) => s + (l.risk_score ?? 0), 0) / scored.length) : 0;
+        const high = logs.filter((l) => (l.risk_score ?? 0) >= 40).length;
+        const critical = logs.filter((l) => (l.risk_score ?? 0) >= 70).length;
+        if (avg === 0 && high === 0) return null;
+        return (
+          <div className="grid grid-cols-3 gap-3 mb-4">
+            <Card>
+              <CardContent className="p-3 text-center">
+                <p className={`text-2xl font-bold ${getRiskBgColor(avg).split(" ")[1]}`}>{avg}</p>
+                <p className="text-[10px] text-muted-foreground uppercase font-medium">Avg Risk Score</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-3 text-center">
+                <p className="text-2xl font-bold text-orange-600">{high}</p>
+                <p className="text-[10px] text-muted-foreground uppercase font-medium">High Risk (40+)</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-3 text-center">
+                <p className="text-2xl font-bold text-red-600">{critical}</p>
+                <p className="text-[10px] text-muted-foreground uppercase font-medium">Critical (70+)</p>
+              </CardContent>
+            </Card>
+          </div>
+        );
+      })()}
+
       {/* Log list */}
       {loading ? (
         <div className="space-y-3">
@@ -510,6 +544,11 @@ export default function ActivityPage() {
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <span className="text-sm font-medium capitalize">{log.ai_tool}</span>
                     <ActionBadge action={log.action} />
+                    {(log.risk_score ?? 0) > 0 && (
+                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold ${getRiskBgColor(log.risk_score)}`}>
+                        {log.risk_score}/100
+                      </span>
+                    )}
                     {log.prompt_id && (
                       <Badge variant="outline" className="text-[10px]">From Vault</Badge>
                     )}

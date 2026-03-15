@@ -6,6 +6,7 @@ import { trackExtensionActivity } from "../track-activity";
 import { detectHighEntropyStrings } from "@/lib/security/entropy";
 import { SMART_DETECTION_RULES } from "@/lib/security/default-rules";
 import type { DetectionType } from "@/lib/types";
+import { calculateRiskScore } from "@/lib/security/risk-score";
 
 const MAX_CONTENT_LENGTH = 50_000; // 50 KB max scan payload
 const REGEX_TIMEOUT_MS = 500; // Per-rule regex execution limit
@@ -343,10 +344,13 @@ export async function POST(request: NextRequest) {
       action = "allow";
     }
 
+    const risk_score = calculateRiskScore(violations as Array<{ severity: "block" | "warn"; category: string; detectionType: string }>);
+
     return withCors(NextResponse.json({
       passed: action !== "block",
       violations,
       action,
+      risk_score,
       allow_override: !overrideDisabled,
       ...(sanitized_content !== undefined && { sanitized_content, replacements }),
     }), request);

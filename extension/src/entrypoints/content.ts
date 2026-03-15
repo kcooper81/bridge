@@ -527,14 +527,16 @@ function performScan(text: string, onAllow: () => void) {
   scanOutbound(text).then((result) => {
     updateShieldScanning(false);
 
+    const riskScore = result?.risk_score ?? 0;
+
     if (result?.action === "block") {
       _lastBlockedText = text;
       showBlockOverlay(result.violations, result.sanitized_content, (sanitized) => {
         setChatInputText(sanitized);
         _lastBlockedText = null;
-        logInteraction(text, "auto_redacted", result.violations);
+        logInteraction(text, "auto_redacted", result.violations, { riskScore });
       });
-      logInteraction(text, "blocked", result.violations);
+      logInteraction(text, "blocked", result.violations, { riskScore });
       pulseShield("block");
       safeSendMessage({ type: "SET_BADGE", text: "!", color: "#ef4444" });
       setTimeout(() => safeSendMessage({ type: "SET_BADGE", text: "" }), 10000);
@@ -543,7 +545,7 @@ function performScan(text: string, onAllow: () => void) {
 
     if (result?.action === "warn") {
       showWarningBanner(result.violations);
-      logInteraction(text, "warned", result.violations);
+      logInteraction(text, "warned", result.violations, { riskScore });
       pulseShield("warn");
       safeSendMessage({ type: "SET_BADGE", text: "!", color: "#f59e0b" });
       setTimeout(() => safeSendMessage({ type: "SET_BADGE", text: "" }), 10000);
@@ -554,7 +556,7 @@ function performScan(text: string, onAllow: () => void) {
       logInteraction(text, "blocked", [{ ruleName: "Scan failure", category: "system", matchedText: "", action: "block" as const }]);
       return;
     } else {
-      logInteraction(text, "sent", []);
+      logInteraction(text, "sent", [], { riskScore });
     }
 
     onAllow();

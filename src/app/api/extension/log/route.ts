@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
     const orgSettings = (orgRow?.settings || {}) as Record<string, unknown>;
 
     const body = await request.json();
-    const { ai_tool, prompt_text, prompt_id, response_text, guardrail_flags, action, metadata } = body;
+    const { ai_tool, prompt_text, prompt_id, response_text, guardrail_flags, action, metadata, risk_score } = body;
 
     if (!ai_tool || typeof ai_tool !== "string" || !prompt_text || typeof prompt_text !== "string") {
       return withCors(NextResponse.json(
@@ -94,6 +94,7 @@ export async function POST(request: NextRequest) {
         response_text: storePromptText ? (response_text || null) : null,
         guardrail_flags: guardrail_flags || [],
         action: action || "sent",
+        risk_score: typeof risk_score === "number" ? Math.min(100, Math.max(0, Math.round(risk_score))) : 0,
         metadata: metadata || {},
       })
       .select("id, created_at")

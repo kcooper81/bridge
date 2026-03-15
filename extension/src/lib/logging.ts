@@ -9,7 +9,7 @@ export async function logInteraction(
   text: string,
   action: "sent" | "blocked" | "warned" | "auto_redacted",
   violations: unknown[],
-  opts?: { promptId?: string; method?: string }
+  opts?: { promptId?: string; method?: string; riskScore?: number }
 ): Promise<void> {
   const session = await getSession();
   if (!session) return;
@@ -26,6 +26,7 @@ export async function logInteraction(
         prompt_text: text.slice(0, 2000),
         prompt_id: opts?.promptId || null,
         action,
+        risk_score: opts?.riskScore ?? 0,
         guardrail_flags: violations,
         metadata: { url, source: "content_script", method: opts?.method },
       }),

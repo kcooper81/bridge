@@ -103,13 +103,13 @@ function ExtensionWelcomeContent() {
     // after OAuth redirect (e.g. when getSession() hasn't resolved yet).
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((_event: string, session: { access_token: string; refresh_token: string; user: unknown } | null) => {
       authDebug.log("state", `onAuthStateChange: ${_event}`, { hasSession: !!session }); // AUTH-DEBUG
       if (session) handleAuthSuccess(session);
     });
 
     // Also check immediately
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session } }: { data: { session: { access_token: string; refresh_token: string; user: unknown } | null } }) => {
       authDebug.log("session", "getSession() result", { hasSession: !!session }); // AUTH-DEBUG
       if (session) {
         handleAuthSuccess(session);

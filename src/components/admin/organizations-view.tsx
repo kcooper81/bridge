@@ -72,9 +72,9 @@ export function OrganizationsView() {
       supabase.from("prompts").select("org_id"),
     ]);
 
-    setOrgs((orgsRes.data || []).map((o) => ({ ...o, is_suspended: o.is_suspended || false })));
+    setOrgs((orgsRes.data || []).map((o: Record<string, unknown>) => ({ ...o, is_suspended: o.is_suspended || false })));
     setSubscriptions(subsRes.data || []);
-    setProfiles((profilesRes.data || []).map((p) => ({
+    setProfiles((profilesRes.data || []).map((p: Record<string, unknown>) => ({
       ...p,
       extension_status: p.extension_status || "unknown",
       last_extension_active: p.last_extension_active || null,

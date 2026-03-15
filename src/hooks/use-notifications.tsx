@@ -58,7 +58,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     const supabase = createClient();
     
     // Get current user to filter notifications
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    supabase.auth.getUser().then(({ data: { user } }: { data: { user: { id: string } | null } }) => {
       if (!user) return;
 
       const channel = supabase

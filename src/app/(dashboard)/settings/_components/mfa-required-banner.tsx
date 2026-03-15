@@ -20,7 +20,7 @@ export function MfaRequiredBanner() {
     async function check() {
       const supabase = createClient();
       const { data } = await supabase.auth.mfa.listFactors();
-      const verified = data?.totp?.some((f) => f.status === "verified");
+      const verified = data?.totp?.some((f: { status: string }) => f.status === "verified");
       setHasMfa(!!verified);
       setChecked(true);
     }

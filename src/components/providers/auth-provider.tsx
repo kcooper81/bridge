@@ -68,12 +68,12 @@ export function AuthProvider({
     }
 
     // Seed the first timer from the current session
-    supabase.auth.getSession().then(({ data }) => scheduleRefresh(data.session));
+    supabase.auth.getSession().then(({ data }: { data: { session: Session | null } }) => scheduleRefresh(data.session));
 
     // Single auth state listener — updates React state AND re-schedules refresh
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, newSession) => {
+    } = supabase.auth.onAuthStateChange((_event: string, newSession: Session | null) => {
       authDebug.log("state", `onAuthStateChange: ${_event}`, {
         hasSession: !!newSession,
         userId: newSession?.user?.id,
@@ -86,13 +86,13 @@ export function AuthProvider({
     // On tab focus: refresh immediately if token expires within 5 minutes
     function handleVisibilityChange() {
       if (document.visibilityState !== "visible") return;
-      supabase.auth.getSession().then(({ data }) => {
+      supabase.auth.getSession().then(({ data }: { data: { session: Session | null } }) => {
         const sess = data.session;
         if (!sess?.expires_at) return;
         const expiresIn = sess.expires_at * 1000 - Date.now();
         if (expiresIn < 5 * 60 * 1000) {
           authDebug.log("state", "tab visible — token expiring soon, refreshing");
-          supabase.auth.refreshSession().then(({ data: refreshed }) => {
+          supabase.auth.refreshSession().then(({ data: refreshed }: { data: { session: Session | null } }) => {
             scheduleRefresh(refreshed.session);
           });
         }

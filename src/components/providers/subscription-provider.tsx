@@ -85,27 +85,30 @@ export function SubscriptionProvider({
 
     orgIdRef.current = profile.org_id;
 
-    const { data: sub, error: subError } = await supabase
-      .from("subscriptions")
-      .select("*")
-      .eq("org_id", profile.org_id)
-      .maybeSingle();
-
-    if (subError) {
-      console.error("Failed to fetch subscription:", subError);
-      return;
-    }
-
-    if (sub) {
-      applySubscription(sub);
-    } else {
-      // Fallback: use organizations.plan when no subscription record exists
-      const { data: org } = await supabase
+    // Fetch subscription and org plan in parallel to avoid waterfall
+    const [subRes, orgRes] = await Promise.all([
+      supabase
+        .from("subscriptions")
+        .select("*")
+        .eq("org_id", profile.org_id)
+        .maybeSingle(),
+      supabase
         .from("organizations")
         .select("plan")
         .eq("id", profile.org_id)
-        .single();
-      const orgPlan = (org?.plan || "free") as PlanTier;
+        .single(),
+    ]);
+
+    if (subRes.error) {
+      console.error("Failed to fetch subscription:", subRes.error);
+      return;
+    }
+
+    if (subRes.data) {
+      applySubscription(subRes.data);
+    } else {
+      // Fallback: use organizations.plan when no subscription record exists
+      const orgPlan = (orgRes.data?.plan || "free") as PlanTier;
       setPlanLimits(PLAN_LIMITS[orgPlan] || PLAN_LIMITS.free);
     }
   }, []);

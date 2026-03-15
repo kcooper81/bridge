@@ -70,7 +70,7 @@ export default function AnalyticsPage() {
 
     // Top orgs by prompt count
     const orgPromptCounts = new Map<string, number>();
-    const orgNames = new Map(
+    const orgNames = new Map<string, string>(
       (orgsRes.data || []).map((o: { id: string; name: string }) => [o.id, o.name])
     );
     (promptsRes.data || []).forEach((p: { org_id: string }) => {

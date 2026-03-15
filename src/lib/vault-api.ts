@@ -124,7 +124,7 @@ export async function getPrompts(
   if (query) {
     const lower = query.toLowerCase();
     prompts = prompts.filter(
-      (p) =>
+      (p: { title: string; content: string; tags?: string[] }) =>
         p.title.toLowerCase().includes(lower) ||
         p.content.toLowerCase().includes(lower) ||
         (p.tags || []).some((t: string) => t.toLowerCase().includes(lower))
@@ -747,17 +747,17 @@ export async function getAnalytics(): Promise<Analytics | null> {
   const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
   const twoWeeksAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);
   const weekEvents = events.filter(
-    (e) => new Date(e.created_at) > oneWeekAgo
+    (e: { created_at: string }) => new Date(e.created_at) > oneWeekAgo
   );
   const lastWeekEvents = events.filter(
-    (e) => {
+    (e: { created_at: string }) => {
       const d = new Date(e.created_at);
       return d > twoWeeksAgo && d <= oneWeekAgo;
     }
   );
 
-  const totalRating = prompts.reduce((sum, p) => sum + (p.rating_total || 0), 0);
-  const ratingCount = prompts.reduce((sum, p) => sum + (p.rating_count || 0), 0);
+  const totalRating = prompts.reduce((sum: number, p: { rating_total?: number }) => sum + (p.rating_total || 0), 0);
+  const ratingCount = prompts.reduce((sum: number, p: { rating_count?: number }) => sum + (p.rating_count || 0), 0);
 
   const teamUsage: Record<string, number> = {};
   for (const p of prompts) {
@@ -773,7 +773,7 @@ export async function getAnalytics(): Promise<Analytics | null> {
 
   // Daily usage for last 30 days
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-  const recentEvents = events.filter((e) => new Date(e.created_at) > thirtyDaysAgo);
+  const recentEvents = events.filter((e: { created_at: string }) => new Date(e.created_at) > thirtyDaysAgo);
   const dailyMap: Record<string, number> = {};
   for (let i = 0; i < 30; i++) {
     const d = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
@@ -801,7 +801,7 @@ export async function getAnalytics(): Promise<Analytics | null> {
       .from("profiles")
       .select("id, name, email")
       .in("id", userIds);
-    const nameMap = new Map((profiles || []).map((p) => [p.id, p.name || p.email]));
+    const nameMap = new Map<string, string>((profiles || []).map((p: { id: string; name: string | null; email: string }) => [p.id, p.name || p.email]));
     userUsage = Object.entries(userMap)
       .map(([userId, count]) => ({
         userId,
@@ -811,7 +811,7 @@ export async function getAnalytics(): Promise<Analytics | null> {
       .sort((a, b) => b.count - a.count);
   }
 
-  const templateCount = prompts.filter((p) => p.is_template).length;
+  const templateCount = prompts.filter((p: { is_template?: boolean }) => p.is_template).length;
 
   // ── Guardrail analytics ──
   const allViolations = violationsRes.data || [];
@@ -836,7 +836,7 @@ export async function getAnalytics(): Promise<Analytics | null> {
       .from("security_rules")
       .select("id, name, severity")
       .in("id", ruleIds);
-    const ruleMap = new Map((ruleData || []).map((r) => [r.id, r]));
+    const ruleMap = new Map<string, { id: string; name: string; severity: string }>((ruleData || []).map((r: { id: string; name: string; severity: string }) => [r.id, r]));
     topTriggeredRules = Object.entries(ruleIdCounts)
       .map(([ruleId, count]) => ({
         name: ruleMap.get(ruleId)?.name || "Unknown Rule",
@@ -861,7 +861,7 @@ export async function getAnalytics(): Promise<Analytics | null> {
       .from("profiles")
       .select("id, name, email")
       .in("id", guardrailUserIds);
-    const gNameMap = new Map((gProfiles || []).map((p) => [p.id, p.name || p.email]));
+    const gNameMap = new Map<string, string>((gProfiles || []).map((p: { id: string; name: string | null; email: string }) => [p.id, p.name || p.email]));
     guardrailUserBreakdown = Object.entries(guardrailUserMap)
       .map(([userId, data]) => ({
         userId,
@@ -875,7 +875,7 @@ export async function getAnalytics(): Promise<Analytics | null> {
 
   return {
     totalPrompts: prompts.length,
-    totalUses: prompts.reduce((sum, p) => sum + (p.usage_count || 0), 0),
+    totalUses: prompts.reduce((sum: number, p: { usage_count?: number }) => sum + (p.usage_count || 0), 0),
     avgRating: ratingCount > 0 ? totalRating / ratingCount : 0,
     usesThisWeek: weekEvents.length,
     usesLastWeek: lastWeekEvents.length,
@@ -999,7 +999,7 @@ export async function ratePrompt(
     .eq("prompt_id", promptId);
 
   if (agg) {
-    const total = agg.reduce((sum, r) => sum + r.rating, 0);
+    const total = agg.reduce((sum: number, r: { rating: number }) => sum + r.rating, 0);
     const count = agg.length;
     await db
       .from("prompts")
@@ -1244,7 +1244,7 @@ export async function installLibraryPack(
         .select("name")
         .eq("org_id", orgId);
 
-      const existingNames = new Set((existingRules || []).map((r) => r.name));
+      const existingNames = new Set((existingRules || []).map((r: { name: string }) => r.name));
       const newRules = rulesToInstall.filter((r) => !existingNames.has(r.name));
 
       if (newRules.length > 0) {
@@ -1294,7 +1294,7 @@ export async function installComplianceTemplate(
     .select("name")
     .eq("org_id", orgId);
 
-  const existingNames = new Set((existingRules || []).map((r) => r.name));
+  const existingNames = new Set((existingRules || []).map((r: { name: string }) => r.name));
   const newRules = template.rules.filter((r) => !existingNames.has(r.name));
 
   if (newRules.length === 0) {
@@ -1415,17 +1415,18 @@ export async function getEffectivenessMetrics(): Promise<EffectivenessMetrics | 
   if (!prompts) return null;
 
   // Fetch owner names
-  const ownerIds = Array.from(new Set(prompts.map((p) => p.owner_id).filter(Boolean)));
+  const ownerIds = Array.from(new Set(prompts.map((p: { owner_id: string | null }) => p.owner_id).filter(Boolean)));
   const { data: profiles } = await db
     .from("profiles")
     .select("id, name, email")
     .in("id", ownerIds);
-  const nameMap = new Map((profiles || []).map((p) => [p.id, p.name || p.email]));
+  const nameMap = new Map<string, string>((profiles || []).map((p: { id: string; name: string | null; email: string }) => [p.id, p.name || p.email]));
 
   // Rated prompts
+  type PromptRow = { id: string; title: string; rating_total: number; rating_count: number; usage_count: number; owner_id: string };
   const rated = prompts
-    .filter((p) => p.rating_count > 0)
-    .map((p) => ({
+    .filter((p: PromptRow) => p.rating_count > 0)
+    .map((p: PromptRow) => ({
       id: p.id,
       title: p.title,
       avgRating: p.rating_total / p.rating_count,
@@ -1452,19 +1453,19 @@ export async function getEffectivenessMetrics(): Promise<EffectivenessMetrics | 
   ];
   const ratingDistribution = buckets.map(({ bucket, min, max }) => ({
     bucket,
-    count: rated.filter((p) => p.avgRating >= min && (max === 5 ? p.avgRating <= max : p.avgRating < max)).length,
+    count: rated.filter((p: { avgRating: number }) => p.avgRating >= min && (max === 5 ? p.avgRating <= max : p.avgRating < max)).length,
   }));
 
   // Unrated high-usage
   const unratedHighUsage = prompts
-    .filter((p) => (p.usage_count || 0) > 10 && p.rating_count === 0)
-    .map((p) => ({
+    .filter((p: PromptRow) => (p.usage_count || 0) > 10 && p.rating_count === 0)
+    .map((p: PromptRow) => ({
       id: p.id,
       title: p.title,
       usageCount: p.usage_count || 0,
       ownerName: nameMap.get(p.owner_id),
     }))
-    .sort((a, b) => b.usageCount - a.usageCount)
+    .sort((a: { usageCount: number }, b: { usageCount: number }) => b.usageCount - a.usageCount)
     .slice(0, 10);
 
   return { topRated, leastEffective, ratingDistribution, unratedHighUsage };

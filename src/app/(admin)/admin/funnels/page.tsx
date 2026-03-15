@@ -128,14 +128,14 @@ export default function FunnelsPage() {
         supabase.from("profiles").select("org_id"),
       ]);
 
-      const profiles = profilesRes.data || [];
-      const orgs = orgsRes.data || [];
-      const prompts = promptsRes.data || [];
-      const subs = subsRes.data || [];
-      const secRules = secRulesRes.data || [];
-      const guidelines = guidelinesRes.data || [];
-      const usageEvents = usageEventsRes.data || [];
-      const orgMembers = orgMembersRes.data || [];
+      const profiles: { id: string; org_id: string | null; created_at: string; last_extension_active: string | null }[] = profilesRes.data || [];
+      const orgs: { id: string; name: string; plan: string; created_at: string }[] = orgsRes.data || [];
+      const prompts: { id: string; org_id: string; owner_id: string | null; created_at: string }[] = promptsRes.data || [];
+      const subs: { id: string; org_id: string; plan: string; status: string; trial_ends_at: string | null; created_at: string }[] = subsRes.data || [];
+      const secRules: { id: string; org_id: string; created_at: string }[] = secRulesRes.data || [];
+      const guidelines: { id: string; org_id: string; created_at: string }[] = guidelinesRes.data || [];
+      const usageEvents: { id: string; user_id: string; created_at: string }[] = usageEventsRes.data || [];
+      const orgMembers: { org_id: string | null }[] = orgMembersRes.data || [];
 
       // ─── Core Funnel Counts ───
       const totalUsers = profiles.length;

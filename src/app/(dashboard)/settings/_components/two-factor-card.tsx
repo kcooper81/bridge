@@ -38,7 +38,7 @@ export function TwoFactorCard() {
     setState("loading");
     const supabase = createClient();
     const { data } = await supabase.auth.mfa.listFactors();
-    const verified = data?.totp?.find((f) => f.status === "verified");
+    const verified = data?.totp?.find((f: { status: string; id: string }) => f.status === "verified");
     if (verified) {
       setFactorId(verified.id);
       setState("enabled");

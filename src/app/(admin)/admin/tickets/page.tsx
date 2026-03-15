@@ -648,7 +648,7 @@ export default function TicketsPage() {
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "feedback" }, () => loadTickets())
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "feedback" }, () => loadTickets())
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "ticket_notes" }, () => loadTickets())
-      .subscribe((status) => {
+      .subscribe((status: string) => {
         if (status === "CHANNEL_ERROR") {
           console.warn("Realtime channel error — falling back to polling");
         }

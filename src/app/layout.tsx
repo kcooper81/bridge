@@ -89,15 +89,15 @@ export default function RootLayout({
             gtag('config', '${GA_ID}', { send_page_view: false });
           `}
         </Script>
-        {/* LinkedIn Insight Tag */}
-        <Script id="linkedin-partner" strategy="afterInteractive">
+        {/* LinkedIn Insight Tag — deferred to avoid blocking interactivity */}
+        <Script id="linkedin-partner" strategy="lazyOnload">
           {`
             _linkedin_partner_id = "8806306";
             window._linkedin_data_partner_ids = window._linkedin_data_partner_ids || [];
             window._linkedin_data_partner_ids.push(_linkedin_partner_id);
           `}
         </Script>
-        <Script id="linkedin-insight" strategy="afterInteractive">
+        <Script id="linkedin-insight" strategy="lazyOnload">
           {`
             (function(l) {
               if (!l){window.lintrk = function(a,b){window.lintrk.q.push([a,b])};

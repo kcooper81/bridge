@@ -16,8 +16,10 @@
  */
 
 const BRAND_COLOR = "#2563EB";
+const DARK_BG = "#0f1117";
 const LIGHT_BG = "#f4f4f5";
 const MUTED_TEXT = "#71717a";
+const LOGO_URL = "https://teamprompt.app/brand/logo-email-dark-512.png";
 
 export interface TemplateField {
   key: string;
@@ -106,16 +108,16 @@ ${body}
 function headerBlock(): string {
   return `          <!-- Header -->
           <tr>
-            <td style="background-color: #ffffff; padding: 20px 32px; border-radius: 12px 12px 0 0; border-bottom: 1px solid #e4e4e7;">
+            <td style="background-color: ${DARK_BG}; padding: 20px 32px; border-radius: 12px 12px 0 0;">
               <table role="presentation" cellpadding="0" cellspacing="0">
                 <tr>
                   <td style="vertical-align: middle;">
                     <a href="https://teamprompt.app" style="text-decoration: none;">
-                      <div style="width: 32px; height: 32px; background-color: #0f1d2d; border-radius: 8px; text-align: center; line-height: 32px; font-size: 16px; color: #ffffff; font-weight: 800; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">T</div>
+                      <img src="${LOGO_URL}" alt="TeamPrompt" width="32" height="32" style="display: block; border: 0; border-radius: 6px;" />
                     </a>
                   </td>
                   <td style="vertical-align: middle; padding-left: 12px;">
-                    <a href="https://teamprompt.app" style="color: #0f1d2d; font-size: 17px; font-weight: 700; text-decoration: none; line-height: 1; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">TeamPrompt</a>
+                    <a href="https://teamprompt.app" style="color: #e4e4e7; font-size: 17px; font-weight: 700; text-decoration: none; line-height: 1; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">TeamPrompt</a>
                   </td>
                 </tr>
               </table>
@@ -130,7 +132,7 @@ function footerBlock(): string {
               <table role="presentation" cellpadding="0" cellspacing="0" style="margin: 0 auto;">
                 <tr>
                   <td style="vertical-align: middle;">
-                    <div style="width: 18px; height: 18px; background-color: #0f1d2d; border-radius: 4px; text-align: center; line-height: 18px; font-size: 10px; color: #ffffff; font-weight: 800; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">T</div>
+                    <img src="${LOGO_URL}" alt="TeamPrompt" width="18" height="18" style="display: block; border: 0; border-radius: 4px;" />
                   </td>
                   <td style="vertical-align: middle; padding-left: 8px;">
                     <a href="https://teamprompt.app" style="font-size: 13px; color: #0f1d2d; text-decoration: none; font-weight: 600;">TeamPrompt</a>

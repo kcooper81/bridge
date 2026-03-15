@@ -154,7 +154,7 @@ export function AdminNav({ superAdminRole, supportAllowedPages }: { superAdminRo
         .from("ticket_reads")
         .select("ticket_id")
         .eq("admin_id", adminId);
-      const readIds = (readTickets || []).map((r) => r.ticket_id);
+      const readIds = (readTickets || []).map((r: { ticket_id: string }) => r.ticket_id);
 
       // Count inbox tickets not yet read by this admin
       let ticketQuery = supabase

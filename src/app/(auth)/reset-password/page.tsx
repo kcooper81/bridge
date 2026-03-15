@@ -23,7 +23,7 @@ export default function ResetPasswordPage() {
     // A logged-in user navigating here must not be able to reset their
     // password without the recovery token from their email link.
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event) => {
+      (event: string) => {
         if (event === "PASSWORD_RECOVERY") {
           setSessionValid(true);
         }

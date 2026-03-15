@@ -68,7 +68,8 @@ export default function SubscriptionsPage() {
       return;
     }
 
-    const subMap = new Map((subsRes.data || []).map((s) => [s.org_id, s]));
+    type SubRecord = { org_id: string; id: string; plan: string; status: string; seats: number; current_period_end: string | null; stripe_customer_id: string | null; stripe_subscription_id: string | null; created_at: string };
+    const subMap = new Map<string, SubRecord>((subsRes.data || []).map((s: SubRecord) => [s.org_id, s]));
 
     // Build map of org_id → first admin contact
     const adminMap = new Map<string, { email: string; name: string }>();

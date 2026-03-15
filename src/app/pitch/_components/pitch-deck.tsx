@@ -36,7 +36,6 @@ import {
   Banknote,
   X as XIcon,
   Award,
-  BadgeCheck,
   Link2,
 } from "lucide-react";
 
@@ -81,6 +80,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isScrollMode, setIsScrollMode] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
   const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -207,6 +207,26 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
             >
               {isScrollMode ? "Slides" : "Scroll"}
             </button>
+            <button
+              onClick={() => {
+                const url = shareToken
+                  ? `${window.location.origin}/pitch?share=${shareToken}`
+                  : `${window.location.origin}/pitch`;
+                navigator.clipboard.writeText(url);
+                setLinkCopied(true);
+                setTimeout(() => setLinkCopied(false), 2000);
+              }}
+              className="flex items-center gap-1 hover:text-zinc-700 transition-colors border border-zinc-200 rounded px-2 py-0.5"
+            >
+              <Link2 className="h-3 w-3" />
+              {linkCopied ? "Copied!" : "Share Link"}
+            </button>
+            <button
+              onClick={() => window.print()}
+              className="flex items-center gap-1 hover:text-zinc-700 transition-colors border border-zinc-200 rounded px-2 py-0.5"
+            >
+              Download PDF
+            </button>
             {shareToken && (
               <button
                 onClick={() => {
@@ -216,8 +236,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
                 }}
                 className="flex items-center gap-1 hover:text-zinc-700 transition-colors border border-zinc-200 rounded px-2 py-0.5"
               >
-                <Link2 className="h-3 w-3" />
-                {copied ? "Copied!" : "Copy Investor Link"}
+                {copied ? "Copied!" : "Investor Link"}
               </button>
             )}
           </div>
@@ -445,9 +464,9 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
                 { icon: Shield, label: "DLP Protection", desc: "Blocks API keys, credentials, PII, and secrets in real-time" },
-                { icon: Lock, label: "19 Compliance Packs", desc: "HIPAA, SOC 2, GDPR, PCI-DSS, and more" },
-                { icon: BarChart3, label: "Team Analytics", desc: "Track which prompts perform best" },
-                { icon: BadgeCheck, label: "Approval Workflows", desc: "Review & approve before team-wide use" },
+                { icon: Lock, label: "19 Compliance Packs", desc: "HIPAA, SOC 2, GDPR, PCI-DSS, CCPA, NIST, and more" },
+                { icon: AlertTriangle, label: "Risk Scoring 0–100", desc: "Every prompt scored by sensitivity level" },
+                { icon: BarChart3, label: "Analytics & Audit Trail", desc: "Full audit log with CSV/JSON export" },
               ].map((f) => (
                 <div key={f.label} className="bg-white rounded-xl border border-zinc-200 shadow-sm p-4">
                   <f.icon className="h-4 w-4 text-blue-600/60 mb-2" />
@@ -625,8 +644,29 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
             </RevealText>
           </div>
 
-          {/* Platform strip */}
+          {/* Full feature grid */}
           <RevealText delay={400}>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+              {[
+                { label: "Auto-Sanitization", desc: "Replaces PII with safe {{placeholders}}" },
+                { label: "Risk Scoring", desc: "Every prompt scored 0–100 by sensitivity" },
+                { label: "Audit Trail & Export", desc: "Full log with CSV/JSON export" },
+                { label: "19 Compliance Packs", desc: "HIPAA, SOC 2, GDPR, PCI-DSS, and more" },
+                { label: "Approval Queue", desc: "Review prompts before team-wide use" },
+                { label: "Version History & Diff", desc: "Compare any two versions side-by-side" },
+                { label: "Quality Guidelines", desc: "Enforce prompt structure and standards" },
+                { label: "Notifications", desc: "Real-time alerts for security events" },
+              ].map((f) => (
+                <div key={f.label} className="bg-white rounded-xl border border-zinc-200 shadow-sm p-3">
+                  <p className="font-semibold text-[11px] text-zinc-900">{f.label}</p>
+                  <p className="text-[10px] text-zinc-500 mt-0.5 leading-relaxed">{f.desc}</p>
+                </div>
+              ))}
+            </div>
+          </RevealText>
+
+          {/* Platform strip */}
+          <RevealText delay={500}>
             <div className="flex items-center justify-center gap-6 pt-2">
               {["ChatGPT", "Claude", "Gemini", "Copilot", "Perplexity"].map((name) => (
                 <span key={name} className="text-xs text-zinc-400 font-medium">{name}</span>

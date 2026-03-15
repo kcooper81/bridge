@@ -155,6 +155,9 @@ export default function CampaignsPage() {
   const [contactsLoading, setContactsLoading] = useState(false);
   const [contactsPage, setContactsPage] = useState(0);
   const [viewingListId, setViewingListId] = useState<string | null>(null);
+  const [addToListId, setAddToListId] = useState<string | null>(null);
+  const [addToListEmails, setAddToListEmails] = useState("");
+  const [addingToList, setAddingToList] = useState(false);
   const [editorTab, setEditorTab] = useState<"fields" | "preview" | "html">("fields");
 
   // Editor form state
@@ -586,6 +589,34 @@ export default function CampaignsPage() {
       toast.error(err instanceof Error ? err.message : "Failed to create list");
     } finally {
       setCreatingList(false);
+    }
+  }
+
+  async function addContactsToList() {
+    if (!addToListId) return;
+    setAddingToList(true);
+    try {
+      const payload: Record<string, unknown> = { list_id: addToListId };
+      if (addToListEmails.trim()) {
+        payload.emails = addToListEmails.split(/[\n,;]+/).map((e) => e.trim()).filter(Boolean);
+      } else {
+        payload.add_all = true;
+      }
+      const res = await fetch("/api/admin/campaigns/lists", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      toast.success(`Added ${data.added} contacts (${data.total} total in list)`);
+      setAddToListId(null);
+      setAddToListEmails("");
+      await Promise.all([loadSegments(), loadAudienceLists()]);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to add contacts");
+    } finally {
+      setAddingToList(false);
     }
   }
 
@@ -1672,6 +1703,9 @@ export default function CampaignsPage() {
                         </p>
                       </div>
                       <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setAddToListId(list.id)} title="Add contacts to list">
+                          <Plus className="h-3.5 w-3.5" />
+                        </Button>
                         <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEditList(list)} title="Edit list">
                           <Pencil className="h-3.5 w-3.5" />
                         </Button>
@@ -2005,6 +2039,42 @@ export default function CampaignsPage() {
             <Button onClick={saveListEdits} disabled={savingList || !editListName.trim()}>
               {savingList && <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />}
               Save
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Contacts to List Dialog */}
+      <Dialog open={!!addToListId} onOpenChange={(open) => { if (!open) { setAddToListId(null); setAddToListEmails(""); } }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Contacts to List</DialogTitle>
+            <DialogDescription>
+              Add specific emails or all existing contacts to &ldquo;{audienceLists.find((l) => l.id === addToListId)?.name}&rdquo;.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="add-emails">Email Addresses (optional)</Label>
+              <Textarea
+                id="add-emails"
+                value={addToListEmails}
+                onChange={(e) => setAddToListEmails(e.target.value)}
+                placeholder="Paste emails here, one per line. Leave empty to add ALL existing contacts."
+                className="mt-1 min-h-[100px] font-mono text-xs"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                {addToListEmails.trim()
+                  ? `${addToListEmails.split(/[\n,;]+/).filter((e) => e.trim()).length} emails entered`
+                  : `Leave empty to add all ${externalCount} contacts`}
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setAddToListId(null); setAddToListEmails(""); }}>Cancel</Button>
+            <Button onClick={addContactsToList} disabled={addingToList}>
+              {addingToList && <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />}
+              {addToListEmails.trim() ? "Add Emails" : "Add All Contacts"}
             </Button>
           </DialogFooter>
         </DialogContent>

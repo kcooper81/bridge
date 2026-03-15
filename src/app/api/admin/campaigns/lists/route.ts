@@ -25,6 +25,53 @@ export async function GET() {
 }
 
 /**
+ * PUT — add contacts to an existing list.
+ * Body: { list_id: string, emails: string[] }
+ *   OR  { list_id: string, add_all: true }
+ */
+export async function PUT(request: NextRequest) {
+  const auth = await verifyAdminAccess();
+  if (!auth) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
+  const { list_id, emails, add_all } = await request.json();
+  if (!list_id) return NextResponse.json({ error: "list_id required" }, { status: 400 });
+
+  const db = createServiceClient();
+
+  // Get contacts to add
+  let contactQuery = db.from("campaign_contacts").select("id").eq("unsubscribed", false);
+  if (!add_all && Array.isArray(emails) && emails.length > 0) {
+    contactQuery = contactQuery.in("email", emails.map((e: string) => e.trim().toLowerCase()));
+  }
+  const { data: contacts } = await contactQuery;
+
+  if (!contacts || contacts.length === 0) {
+    return NextResponse.json({ error: "No matching contacts found" }, { status: 400 });
+  }
+
+  // Upsert into junction
+  await db
+    .from("audience_list_contacts")
+    .upsert(
+      contacts.map((c) => ({ list_id, contact_id: c.id })),
+      { onConflict: "list_id,contact_id" }
+    );
+
+  // Update count
+  const { count } = await db
+    .from("audience_list_contacts")
+    .select("*", { count: "exact", head: true })
+    .eq("list_id", list_id);
+
+  await db
+    .from("audience_lists")
+    .update({ contact_count: count || 0, updated_at: new Date().toISOString() })
+    .eq("id", list_id);
+
+  return NextResponse.json({ added: contacts.length, total: count || 0 });
+}
+
+/**
  * POST — create a new audience list and optionally add all existing contacts to it.
  * Body: { name: string, description?: string, add_all_contacts?: boolean }
  */

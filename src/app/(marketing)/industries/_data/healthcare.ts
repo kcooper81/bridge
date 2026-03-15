@@ -5,7 +5,7 @@ export const industryData: IndustryPageData = {
   industry: "Healthcare",
   headline: "Secure AI adoption for healthcare teams",
   subtitle:
-    "Give clinicians a managed prompt library with data protection that detects patient info — so your team can use AI with confidence.",
+    "Detect and block protected health information before it reaches AI tools. Give clinicians a shared prompt library so they can use AI safely and efficiently.",
   compliance: ["PHI Detection", "Audit Logging", "Access Control"],
   painPoints: [
     {

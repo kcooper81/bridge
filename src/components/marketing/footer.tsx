@@ -50,8 +50,7 @@ export function MarketingFooter() {
               <span className="font-bold text-white">TeamPrompt</span>
             </div>
             <p className="text-sm leading-relaxed max-w-xs">
-              Prompt management for teams that use AI. Shared libraries,
-              quality guidelines, and data protection.
+              AI data loss prevention for teams. Detect and block sensitive data before it reaches ChatGPT, Claude, and other AI tools.
             </p>
           </div>
 

@@ -57,11 +57,11 @@ import { cn } from "@/lib/utils";
 import { PLAN_DISPLAY, PLAN_ORDER } from "@/lib/constants";
 
 export const metadata: Metadata = generatePageMetadata({
-  title: "AI Prompt Management for Teams — Shared Library & Data Protection",
+  title: "AI Data Loss Prevention for ChatGPT & AI Tools — Secure AI Adoption",
   description:
-    "TeamPrompt gives your team a shared prompt library, quality standards, and data protection — so the best AI prompts get reused, not reinvented.",
+    "Monitor, detect, and block sensitive data before employees send it to AI. DLP protection, shared prompt library, and audit logging for teams using ChatGPT, Claude, Gemini, and more.",
   path: "/",
-  keywords: ["AI prompt management", "team prompts", "prompt library", "shared prompts", "prompt management software", "AI governance", "ChatGPT for teams"],
+  keywords: ["AI DLP", "AI data loss prevention", "ChatGPT security", "AI governance", "AI compliance", "prompt management", "sensitive data protection", "enterprise AI security"],
 });
 
 const supportedTools = [
@@ -115,22 +115,21 @@ export default function LandingPage() {
             <div>
               <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-zinc-300 mb-8 backdrop-blur-sm">
                 <Shield className="h-3.5 w-3.5 text-blue-400" />
-                <span>Sensitive data protection — built in</span>
+                <span>19 compliance packs — HIPAA, SOC 2, PCI-DSS & more</span>
                 <ArrowRight className="h-3 w-3 text-zinc-500" />
               </div>
 
               <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.05]">
-                Your team writes the
+                Stop sensitive data
                 <br />
-                same prompts{" "}
+                from reaching{" "}
                 <span className="bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
-                  every week
+                  AI tools
                 </span>
               </h1>
 
               <p className="mt-6 text-lg sm:text-xl text-zinc-400 max-w-xl leading-relaxed">
-                TeamPrompt gives everyone one shared library for AI prompts
-                — with quality standards and data protection built in. The best prompts get reused, not reinvented.
+                Monitor what your team sends to ChatGPT, Claude, and Gemini. Block sensitive data before it leaves the browser — and give everyone a shared prompt library so they don&apos;t start from scratch.
               </p>
 
               <div className="mt-10 flex flex-col sm:flex-row gap-4">

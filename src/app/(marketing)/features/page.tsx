@@ -37,11 +37,11 @@ import { SectionLabel } from "@/components/marketing/section-label";
 import { CTASection } from "@/components/marketing/cta-section";
 
 export const metadata: Metadata = generatePageMetadata({
-  title: "Features — Prompt Library, DLP, Extensions & More",
+  title: "Features — AI DLP, Prompt Library, Compliance & Extensions",
   description:
-    "Explore TeamPrompt's features: shared prompt library, data protection, quality guidelines, team management, browser extension, and analytics.",
+    "AI data loss prevention, shared prompt library, 19 compliance packs, real-time scanning, audit logging, browser extension, and team analytics.",
   path: "/features",
-  keywords: ["prompt library", "AI data protection", "browser extension", "prompt templates", "compliance rules", "auto-sanitization", "approval queue", "version diff", "AI DLP", "prompt versioning"],
+  keywords: ["AI DLP", "AI data loss prevention", "sensitive data detection", "compliance packs", "HIPAA AI", "SOC 2 AI", "prompt library", "browser extension", "AI governance", "audit logging"],
 });
 
 /* ── CSS-only app preview mockups ────────────────────────── */

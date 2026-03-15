@@ -135,7 +135,7 @@ function footerBlock(): string {
                   <td style="vertical-align: middle; padding-left: 8px;">
                     <a href="https://teamprompt.app" style="font-size: 13px; color: #0f1d2d; text-decoration: none; font-weight: 600;">TeamPrompt</a>
                     <span style="font-size: 13px; color: #d4d4d8;"> &middot; </span>
-                    <span style="font-size: 13px; color: ${MUTED_TEXT};">AI prompts for teams</span>
+                    <span style="font-size: 13px; color: ${MUTED_TEXT};">Secure AI adoption for teams</span>
                   </td>
                 </tr>
               </table>

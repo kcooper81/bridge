@@ -15,11 +15,11 @@ const inter = Inter({ subsets: ["latin"], display: "swap" });
 
 export const metadata: Metadata = {
   title: {
-    default: "TeamPrompt - AI Prompt Management for Teams",
+    default: "TeamPrompt - AI Data Loss Prevention for ChatGPT & AI Tools",
     template: "%s | TeamPrompt",
   },
   description:
-    "TeamPrompt gives your team a shared prompt library, quality guidelines, and data protection — so the best prompts get reused, not reinvented.",
+    "Monitor, detect, and block sensitive data before employees send it to AI. TeamPrompt gives your team DLP protection, a shared prompt library, and full audit logging.",
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL || "https://teamprompt.app"
   ),
@@ -28,15 +28,15 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "/",
     siteName: "TeamPrompt",
-    title: "TeamPrompt - AI Prompt Management for Teams",
+    title: "TeamPrompt - AI Data Loss Prevention for ChatGPT & AI Tools",
     description:
-      "TeamPrompt gives your team a shared prompt library, quality guidelines, and data protection — so the best prompts get reused, not reinvented.",
+      "Monitor, detect, and block sensitive data before employees send it to AI. DLP protection, shared prompt library, and audit logging for teams.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "TeamPrompt - AI Prompt Management for Teams",
+    title: "TeamPrompt - AI Data Loss Prevention for ChatGPT & AI Tools",
     description:
-      "TeamPrompt gives your team a shared prompt library, quality guidelines, and data protection.",
+      "Monitor, detect, and block sensitive data before employees send it to AI. DLP + prompt management for teams.",
     site: "@teampromptapp",
     creator: "@teampromptapp",
   },

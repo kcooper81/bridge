@@ -58,8 +58,8 @@ export const HELP_OVERVIEW = {
   subtitle:
     "Everything you need to get the most out of TeamPrompt — from first setup to advanced security rules.",
   description: [
-    "TeamPrompt is a collaborative prompt management platform that helps teams standardize, secure, and scale their AI usage. Your workspace is the central hub where prompts are created, reviewed, and shared across your organization.",
-    "The browser extension connects TeamPrompt to the AI tools your team already uses — ChatGPT, Claude, Gemini, Copilot, and Perplexity — so prompts are always one click away. Security rules run in real-time, scanning outbound messages for sensitive data before they reach any AI model.",
+    "TeamPrompt is an AI data loss prevention and prompt management platform. It monitors what your team sends to AI tools, detects sensitive data in real time, and blocks it before it leaves the browser — while giving everyone a shared library of vetted prompts.",
+    "The browser extension works with ChatGPT, Claude, Gemini, Copilot, and Perplexity. DLP rules scan every outbound message for sensitive data — patient records, API keys, financial data, and more. 19 compliance packs cover HIPAA, SOC 2, PCI-DSS, GDPR, and other frameworks. Prompts are always one click away.",
     "Use the categories below to find answers, or search for a specific topic.",
   ],
 };

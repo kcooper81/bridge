@@ -4,11 +4,12 @@ const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || "https://teamprompt.app";
 
 const BASE_KEYWORDS = [
-  "prompt management",
-  "AI prompts",
-  "team prompts",
-  "TeamPrompt",
+  "AI DLP",
+  "AI data loss prevention",
   "AI governance",
+  "TeamPrompt",
+  "sensitive data protection",
+  "prompt management",
 ];
 
 export function generatePageMetadata({

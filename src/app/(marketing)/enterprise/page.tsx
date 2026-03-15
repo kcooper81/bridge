@@ -27,11 +27,11 @@ import {
 } from "lucide-react";
 
 export const metadata = generatePageMetadata({
-  title: "TeamPrompt Enterprise — AI Protection for Your Organization",
+  title: "TeamPrompt Enterprise — AI Data Loss Prevention at Scale",
   description:
-    "Auto-install TeamPrompt on every company browser. Employees get data protection and a shared prompt library from day one — no setup on their end.",
+    "Deploy AI DLP across your organization with managed browser extension. Detect sensitive data, enforce compliance policies, and give teams a shared prompt library — from day one.",
   path: "/enterprise",
-  keywords: ["enterprise AI", "managed chrome extension", "AI data protection", "AI compliance"],
+  keywords: ["enterprise AI DLP", "managed chrome extension", "AI data protection", "AI compliance", "enterprise AI governance"],
 });
 
 const deploymentMethods = [

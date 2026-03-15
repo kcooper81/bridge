@@ -326,9 +326,9 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
 
           <div className="grid sm:grid-cols-3 gap-5">
             {[
-              { stat: "68%", desc: "of employees paste confidential data into ChatGPT", source: "Cyberhaven 2024", icon: AlertTriangle, color: "text-red-400" },
-              { stat: "$4.2M", desc: "average cost of a data breach involving AI tools", source: "IBM Security", icon: DollarSign, color: "text-amber-400" },
-              { stat: "0%", desc: "of teams have prompt governance across all AI tools", source: "Market gap", icon: Shield, color: "text-purple-400" },
+              { stat: "34.8%", desc: "of data employees put into AI tools is sensitive — tripled in 2 years", source: "Cyberhaven 2025", icon: AlertTriangle, color: "text-red-400" },
+              { stat: "$4.6M", desc: "average cost of a shadow AI data breach — $670K more than standard", source: "IBM 2025", icon: DollarSign, color: "text-amber-400" },
+              { stat: "57%", desc: "of employees hide their AI usage from their employer entirely", source: "KPMG 2024", icon: Shield, color: "text-purple-400" },
             ].map((item, i) => (
               <RevealText key={item.stat} delay={200 + i * 150}>
                 <GlowCard glow={i === 2 ? "purple" : i === 1 ? "blue" : "purple"}>
@@ -343,7 +343,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
 
           <RevealText delay={700}>
             <p className="text-center text-sm text-zinc-400">
-              Blocking ChatGPT doesn&apos;t work. 92% of employees find workarounds. — <span className="text-zinc-400">Gartner</span>
+              27% of companies have banned AI tools — but 48% of employees upload company data anyway. — <span className="text-zinc-400">Cisco / KPMG</span>
             </p>
           </RevealText>
         </div>
@@ -709,9 +709,9 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
             </RevealText>
             <RevealText delay={350}>
               <GlowCard glow="blue">
-                <p className="text-6xl font-black bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">92%</p>
-                <p className="text-sm text-zinc-400 mt-2">of enterprises will adopt AI governance tools by 2026</p>
-                <p className="text-[10px] text-zinc-500 mt-1 uppercase tracking-widest">Gartner</p>
+                <p className="text-6xl font-black bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">40%</p>
+                <p className="text-sm text-zinc-400 mt-2">of AI data breaches will stem from cross-border GenAI misuse by 2027</p>
+                <p className="text-[10px] text-zinc-500 mt-1 uppercase tracking-widest">Gartner 2025</p>
               </GlowCard>
             </RevealText>
           </div>
@@ -1002,37 +1002,51 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
             </h2>
           </RevealText>
 
-          <div className="grid sm:grid-cols-3 gap-6">
-            <RevealText delay={200} className="sm:col-span-1">
-              <GlowCard className="py-8">
-                <div className="text-center mb-5">
-                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-500/20 to-blue-500/20 mx-auto mb-4 flex items-center justify-center text-3xl font-black text-purple-400">KC</div>
-                  <h3 className="font-bold text-lg">Kade Cooper</h3>
-                  <p className="text-sm text-purple-400 font-medium">Founder</p>
+          {/* Founder — full width, above team */}
+          <RevealText delay={200}>
+            <GlowCard className="py-8">
+              <div className="flex flex-col sm:flex-row gap-8 items-start">
+                {/* Photo + name */}
+                <div className="text-center sm:text-left shrink-0">
+                  <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-purple-500/20 to-blue-500/20 mx-auto sm:mx-0 mb-4 flex items-center justify-center text-4xl font-black text-purple-400">KC</div>
+                  <h3 className="font-bold text-xl">Kade Cooper</h3>
+                  <p className="text-sm text-purple-400 font-medium">Founder & Product Visionary</p>
+                  <p className="text-xs text-zinc-500 mt-1">Baton Rouge, Louisiana</p>
                 </div>
-                <p className="text-xs text-zinc-400 leading-relaxed mb-4">
-                  15+ years designing and shipping software at scale. Led UX and product at CYPHER Learning (ed-tech SaaS used by millions), where he drove platform usability, checkout optimization, and enterprise feature design. Certified ScrumMaster with deep experience in agile product development.
-                </p>
-                <p className="text-xs text-zinc-400 leading-relaxed mb-4">
-                  Saw firsthand how teams adopt AI tools without guardrails — employees pasting sensitive data into ChatGPT with zero oversight. Built TeamPrompt to solve the problem he lived every day: giving teams the freedom to use AI while protecting the data that matters.
-                </p>
-                <div className="space-y-1.5 border-t border-white/5 pt-3">
-                  {[
-                    "15+ years in UX/product at scale",
-                    "Shipped full SaaS platform with AI-assisted dev",
-                    "Certified ScrumMaster, agile-first builder",
-                    "Based in Baton Rouge, Louisiana",
-                  ].map((item) => (
-                    <div key={item} className="flex gap-2 items-start text-xs text-zinc-400">
-                      <CheckCircle2 className="h-3 w-3 text-purple-400 shrink-0 mt-0.5" />
-                      <span>{item}</span>
-                    </div>
-                  ))}
-                </div>
-              </GlowCard>
-            </RevealText>
 
-            <RevealText delay={350} className="sm:col-span-2 space-y-4">
+                {/* Bio */}
+                <div className="flex-1 space-y-4">
+                  <p className="text-sm text-zinc-300 leading-relaxed">
+                    <span className="text-white font-semibold">15+ years turning complex problems into intuitive products.</span> Kade is a UI/UX developer who thinks like a founder — he doesn&apos;t just design interfaces, he conceptualizes entire product experiences from the business need down to the pixel.
+                  </p>
+                  <p className="text-sm text-zinc-400 leading-relaxed">
+                    At <span className="text-purple-400 font-semibold">CYPHER Learning</span>, he shaped the user experience of an ed-tech SaaS platform used by millions — driving checkout optimization, enterprise feature design, and platform-wide usability improvements. He co-founded <span className="text-purple-400 font-semibold">OmniDek</span>, where he conceptualized core features from both a business strategy and user experience perspective, bridging the gap between what users need and what the market demands.
+                  </p>
+                  <p className="text-sm text-zinc-400 leading-relaxed">
+                    When AI tools exploded in the workplace, Kade saw what most people missed: <span className="text-white font-medium">the governance gap</span>. Employees were pasting sensitive data into ChatGPT with zero oversight — no DLP, no audit trail, no compliance. He didn&apos;t wait for someone else to build the solution. He used AI-assisted development to ship an entire SaaS platform, browser extension, and security engine — proving that a designer who understands both users and technology can move faster than a traditional dev team.
+                  </p>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 border-t border-white/5">
+                    {[
+                      { label: "Experience", value: "15+ years" },
+                      { label: "Specialty", value: "UI/UX + Product" },
+                      { label: "Certification", value: "ScrumMaster" },
+                      { label: "Co-founded", value: "OmniDek" },
+                    ].map((item) => (
+                      <div key={item.label}>
+                        <p className="text-[10px] text-zinc-500 uppercase tracking-widest">{item.label}</p>
+                        <p className="text-sm font-semibold text-zinc-200">{item.value}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </GlowCard>
+          </RevealText>
+
+          {/* Team */}
+          <div className="grid sm:grid-cols-2 gap-5">
+            <RevealText delay={350}>
               <GlowCard>
                 <h4 className="font-bold text-sm mb-3">Current Team</h4>
                 <div className="space-y-3">
@@ -1052,30 +1066,28 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
                   </div>
                 </div>
               </GlowCard>
-              <div className="grid grid-cols-2 gap-4">
-                <GlowCard glow="blue">
-                  <h4 className="font-bold text-sm mb-3">Why this works</h4>
-                  <div className="space-y-2">
-                    {[
-                      { icon: Zap, text: "Ships weekly — fast iteration" },
-                      { icon: Users, text: "Close to every customer" },
-                      { icon: DollarSign, text: "Capital efficient execution" },
-                      { icon: Rocket, text: "Lean team, global reach" },
-                    ].map((item) => (
-                      <div key={item.text} className="flex gap-2 items-start text-zinc-400">
-                        <item.icon className="h-3.5 w-3.5 text-purple-400 shrink-0 mt-0.5" />
-                        <span className="text-xs">{item.text}</span>
-                      </div>
-                    ))}
-                  </div>
-                </GlowCard>
-                <GlowCard glow="green">
-                  <h4 className="font-bold text-sm text-purple-400 mb-2">Next hire (with funding)</h4>
-                  <p className="text-xs text-zinc-400 leading-relaxed">
-                    Part-time security engineer for enterprise features — SSO/SAML, SCIM, SOC 2 certification.
-                  </p>
-                </GlowCard>
-              </div>
+            </RevealText>
+            <RevealText delay={450}>
+              <GlowCard glow="blue">
+                <h4 className="font-bold text-sm mb-3">Why this works</h4>
+                <div className="space-y-2">
+                  {[
+                    { icon: Zap, text: "Ships weekly — fast iteration" },
+                    { icon: Users, text: "Close to every customer" },
+                    { icon: DollarSign, text: "Capital efficient execution" },
+                    { icon: Rocket, text: "Lean team, global reach" },
+                  ].map((item) => (
+                    <div key={item.text} className="flex gap-2 items-start text-zinc-400">
+                      <item.icon className="h-3.5 w-3.5 text-purple-400 shrink-0 mt-0.5" />
+                      <span className="text-xs">{item.text}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-4 pt-3 border-t border-white/5">
+                  <h4 className="font-bold text-xs text-purple-400 mb-1">Next hire (with funding)</h4>
+                  <p className="text-xs text-zinc-400">Part-time security engineer — because enterprise buyers require SSO/SAML, SCIM provisioning, and SOC 2 certification before procurement will approve. This hire unlocks the $25K+ ACV deals.</p>
+                </div>
+              </GlowCard>
             </RevealText>
           </div>
         </div>

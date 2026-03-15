@@ -247,6 +247,7 @@ export const PLAN_DISPLAY: Record<PlanTier, PlanDisplayInfo> = {
       "Import/Export": true,
       "Bulk CSV Import": true,
       "Domain Auto-Join": true,
+      "Google Workspace Sync": true,
       "Compliance Rule Packs": true,
       "Auto-Replace Sensitive Data": true,
       "Approval Queue": true,

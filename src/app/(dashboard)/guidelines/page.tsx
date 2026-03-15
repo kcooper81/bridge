@@ -269,17 +269,20 @@ export default function GuidelinesPage() {
                           <Badge variant="outline" className="mt-1 text-xs">{g.category}</Badge>
                         )}
                       </div>
+                      {canEdit && (
                       <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-                        <Switch checked={g.enforced} onCheckedChange={() => handleToggleEnforced(g)} disabled={!canEdit} />
-                        {canEdit && (
-                          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openModal(g)}><Pencil className="h-3.5 w-3.5" /></Button>
-                            <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => handleDelete(g.id)} disabled={deletingId === g.id}>
-                              {deletingId === g.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
-                            </Button>
-                          </div>
-                        )}
+                        <Switch checked={g.enforced} onCheckedChange={() => handleToggleEnforced(g)} />
+                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openModal(g)}><Pencil className="h-3.5 w-3.5" /></Button>
+                          <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => handleDelete(g.id)} disabled={deletingId === g.id}>
+                            {deletingId === g.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+                          </Button>
+                        </div>
                       </div>
+                    )}
+                    {!canEdit && g.enforced && (
+                      <Badge variant="default" className="text-[10px]">Active</Badge>
+                    )}
                     </CardHeader>
                     <CardContent className="space-y-3">
                       {g.description && <p className="text-sm text-muted-foreground line-clamp-2">{g.description}</p>}
@@ -341,15 +344,17 @@ export default function GuidelinesPage() {
                         {g.description && <p className="text-xs text-muted-foreground truncate mt-0.5">{g.description}</p>}
                       </div>
                       <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-                        <Badge variant={g.enforced ? "default" : "secondary"} className="text-[10px]">{g.enforced ? "Enforced" : "Off"}</Badge>
-                        <Switch checked={g.enforced} onCheckedChange={() => handleToggleEnforced(g)} disabled={!canEdit} />
+                        <Badge variant={g.enforced ? "default" : "secondary"} className="text-[10px]">{g.enforced ? "Active" : "Off"}</Badge>
                         {canEdit && (
-                          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openModal(g)}><Pencil className="h-3.5 w-3.5" /></Button>
-                            <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => handleDelete(g.id)} disabled={deletingId === g.id}>
-                              {deletingId === g.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
-                            </Button>
-                          </div>
+                          <>
+                            <Switch checked={g.enforced} onCheckedChange={() => handleToggleEnforced(g)} />
+                            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openModal(g)}><Pencil className="h-3.5 w-3.5" /></Button>
+                              <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => handleDelete(g.id)} disabled={deletingId === g.id}>
+                                {deletingId === g.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+                              </Button>
+                            </div>
+                          </>
                         )}
                       </div>
                       <ChevronDown className={cn("h-4 w-4 text-muted-foreground shrink-0 transition-transform", isExpanded && "rotate-180")} />

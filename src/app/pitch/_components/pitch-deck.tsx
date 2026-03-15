@@ -89,7 +89,7 @@ function BigStat({ value, label, sub, className }: { value: string; label: strin
   return (
     <div className={cn("text-center", className)}>
       <p className="text-4xl sm:text-5xl font-black tracking-tight bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">{value}</p>
-      <p className="text-xs uppercase tracking-[0.2em] text-zinc-500 mt-2 font-semibold">{label}</p>
+      <p className="text-xs uppercase tracking-[0.2em] text-zinc-400 mt-2 font-semibold">{label}</p>
       {sub && <p className="text-xs text-purple-400 mt-1 font-medium">{sub}</p>}
     </div>
   );
@@ -207,7 +207,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
             ))}
           </div>
 
-          <div className="flex items-center gap-3 text-[11px] text-zinc-500">
+          <div className="flex items-center gap-3 text-[11px] text-zinc-400">
             {slideLabels[currentSlide] && (
               <span className="text-zinc-400 font-medium hidden sm:inline">{slideLabels[currentSlide]}</span>
             )}
@@ -256,7 +256,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
         <div className="relative z-10 max-w-5xl mx-auto text-center space-y-8">
           <RevealText>
             <div className="flex items-center justify-center gap-4 mb-8">
-              <Image src="/logo.svg" alt="TeamPrompt" width={48} height={48} className="rounded-xl" />
+              <Image src="/logo-dark.svg" alt="TeamPrompt" width={48} height={48} className="rounded-xl" />
               <span className="text-2xl font-bold tracking-tight">TeamPrompt</span>
             </div>
           </RevealText>
@@ -284,7 +284,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
           <RevealText delay={600}>
             <div className="flex items-center justify-center gap-8 pt-4">
               {["$13.5K MRR", "85 Paying Teams", "1,200+ Users", "Zero Ad Spend"].map((s) => (
-                <span key={s} className="text-sm text-zinc-500 font-medium">{s}</span>
+                <span key={s} className="text-sm text-zinc-400 font-medium">{s}</span>
               ))}
             </div>
           </RevealText>
@@ -303,7 +303,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
             <h2 className="text-4xl sm:text-5xl font-black tracking-tight leading-tight">
               Employees paste sensitive data
               <br />
-              <span className="text-zinc-500">into AI tools every day.</span>
+              <span className="text-zinc-400">into AI tools every day.</span>
             </h2>
           </RevealText>
 
@@ -318,14 +318,14 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
                   <item.icon className={cn("h-5 w-5 mb-4", item.color)} />
                   <p className="text-4xl font-black tracking-tight">{item.stat}</p>
                   <p className="text-sm text-zinc-400 mt-2 leading-relaxed">{item.desc}</p>
-                  <p className="text-[10px] text-zinc-600 mt-2 uppercase tracking-widest">{item.source}</p>
+                  <p className="text-[10px] text-zinc-500 mt-2 uppercase tracking-widest">{item.source}</p>
                 </GlowCard>
               </RevealText>
             ))}
           </div>
 
           <RevealText delay={700}>
-            <p className="text-center text-sm text-zinc-500">
+            <p className="text-center text-sm text-zinc-400">
               Blocking ChatGPT doesn&apos;t work. 92% of employees find workarounds. — <span className="text-zinc-400">Gartner</span>
             </p>
           </RevealText>
@@ -377,10 +377,10 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
                 { icon: BarChart3, label: "Activity & Audit", desc: "Full audit log with CSV/JSON export" },
                 { icon: Lock, label: "Auto-Sanitization", desc: "Replaces PII with safe placeholders" },
               ].map((f) => (
-                <div key={f.label} className="rounded-xl border border-white/5 bg-white/[0.02] p-4">
-                  <f.icon className="h-4 w-4 text-purple-400/60 mb-2" />
-                  <p className="font-semibold text-xs">{f.label}</p>
-                  <p className="text-[11px] text-zinc-500 mt-1">{f.desc}</p>
+                <div key={f.label} className="rounded-xl border border-white/5 bg-white/[0.02] p-5">
+                  <f.icon className="h-5 w-5 text-purple-400/70 mb-3" />
+                  <p className="font-bold text-sm">{f.label}</p>
+                  <p className="text-xs text-zinc-400 mt-1 leading-relaxed">{f.desc}</p>
                 </div>
               ))}
             </div>
@@ -512,8 +512,8 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
                 "Auto-Sanitization", "Risk Scoring 0–100", "Activity & Audit Export", "19 Compliance Packs",
                 "Approval Queue", "Version History & Diff", "Quality Guidelines", "Real-time Notifications",
               ].map((f) => (
-                <div key={f} className="rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3 text-center">
-                  <p className="text-[11px] font-semibold text-zinc-300">{f}</p>
+                <div key={f} className="rounded-xl border border-white/5 bg-white/[0.02] px-4 py-4 text-center">
+                  <p className="text-sm font-bold text-zinc-200">{f}</p>
                 </div>
               ))}
             </div>
@@ -522,7 +522,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
           <RevealText delay={600}>
             <div className="flex items-center justify-center gap-8">
               {["ChatGPT", "Claude", "Gemini", "Copilot", "Perplexity"].map((name) => (
-                <span key={name} className="text-xs text-zinc-600 font-medium">{name}</span>
+                <span key={name} className="text-xs text-zinc-500 font-medium">{name}</span>
               ))}
             </div>
           </RevealText>
@@ -541,7 +541,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
             <h2 className="text-4xl sm:text-5xl font-black tracking-tight leading-tight">
               The AI governance wave
               <br />
-              <span className="text-zinc-500">is just starting.</span>
+              <span className="text-zinc-400">is just starting.</span>
             </h2>
           </RevealText>
 
@@ -550,14 +550,14 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
               <GlowCard>
                 <p className="text-6xl font-black bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">$97B</p>
                 <p className="text-sm text-zinc-400 mt-2">AI security & governance market by 2030</p>
-                <p className="text-[10px] text-zinc-600 mt-1 uppercase tracking-widest">MarketsAndMarkets</p>
+                <p className="text-[10px] text-zinc-500 mt-1 uppercase tracking-widest">MarketsAndMarkets</p>
               </GlowCard>
             </RevealText>
             <RevealText delay={350}>
               <GlowCard glow="blue">
                 <p className="text-6xl font-black bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">92%</p>
                 <p className="text-sm text-zinc-400 mt-2">of enterprises will adopt AI governance tools by 2026</p>
-                <p className="text-[10px] text-zinc-600 mt-1 uppercase tracking-widest">Gartner</p>
+                <p className="text-[10px] text-zinc-500 mt-1 uppercase tracking-widest">Gartner</p>
               </GlowCard>
             </RevealText>
           </div>
@@ -572,7 +572,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
                 <div key={item.title} className="rounded-xl border border-white/5 bg-white/[0.02] p-5">
                   <item.icon className="h-4 w-4 text-purple-400 mb-3" />
                   <h4 className="text-sm font-bold mb-1">{item.title}</h4>
-                  <p className="text-xs text-zinc-500 leading-relaxed">{item.desc}</p>
+                  <p className="text-xs text-zinc-400 leading-relaxed">{item.desc}</p>
                 </div>
               ))}
             </div>
@@ -601,8 +601,8 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
                   <tr className="border-b border-white/10">
                     <th className="text-left py-4 px-5 font-bold text-zinc-400 text-xs uppercase tracking-widest">Feature</th>
                     <th className="text-center py-4 px-3 font-bold text-xs uppercase tracking-widest"><span className="bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">TeamPrompt</span></th>
-                    <th className="text-center py-4 px-3 font-bold text-zinc-600 text-xs uppercase tracking-widest">ChatGPT Team</th>
-                    <th className="text-center py-4 px-3 font-bold text-zinc-600 text-xs uppercase tracking-widest">Claude Team</th>
+                    <th className="text-center py-4 px-3 font-bold text-zinc-500 text-xs uppercase tracking-widest">ChatGPT Team</th>
+                    <th className="text-center py-4 px-3 font-bold text-zinc-500 text-xs uppercase tracking-widest">Claude Team</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -626,13 +626,13 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
                       </td>
                       <td className="text-center py-3 px-3">
                         {typeof row.chatgpt === "boolean" ? (
-                          row.chatgpt ? <CheckCircle2 className="h-4 w-4 text-zinc-500 mx-auto" /> : <span className="text-zinc-700">—</span>
-                        ) : <span className="text-zinc-500">{row.chatgpt}</span>}
+                          row.chatgpt ? <CheckCircle2 className="h-4 w-4 text-zinc-400 mx-auto" /> : <span className="text-zinc-700">—</span>
+                        ) : <span className="text-zinc-400">{row.chatgpt}</span>}
                       </td>
                       <td className="text-center py-3 px-3">
                         {typeof row.claude === "boolean" ? (
-                          row.claude ? <CheckCircle2 className="h-4 w-4 text-zinc-500 mx-auto" /> : <span className="text-zinc-700">—</span>
-                        ) : <span className="text-zinc-500">{row.claude}</span>}
+                          row.claude ? <CheckCircle2 className="h-4 w-4 text-zinc-400 mx-auto" /> : <span className="text-zinc-700">—</span>
+                        ) : <span className="text-zinc-400">{row.claude}</span>}
                       </td>
                     </tr>
                   ))}
@@ -642,7 +642,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
           </RevealText>
 
           <RevealText delay={400}>
-            <p className="text-center text-sm text-zinc-500">
+            <p className="text-center text-sm text-zinc-400">
               For <span className="text-purple-400 font-bold">$7/user</span>, TeamPrompt adds governance across <span className="text-purple-400 font-bold">all five platforms</span> at once.
             </p>
           </RevealText>
@@ -659,7 +659,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
             <h2 className="text-4xl sm:text-5xl font-black tracking-tight leading-tight">
               Freemium SaaS.
               <br />
-              <span className="text-zinc-500">Customers already paying.</span>
+              <span className="text-zinc-400">Customers already paying.</span>
             </h2>
           </RevealText>
 
@@ -673,9 +673,9 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
               ].map((t) => (
                 <div key={t.tier} className={cn("rounded-2xl p-6 text-center border", t.highlight ? "border-purple-500/30 bg-purple-500/5" : "border-white/10 bg-white/[0.02]")}>
                   {t.highlight && <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-purple-500 to-blue-500" />}
-                  <p className="text-xs text-zinc-500 uppercase tracking-widest font-bold">{t.tier}</p>
+                  <p className="text-xs text-zinc-400 uppercase tracking-widest font-bold">{t.tier}</p>
                   <p className="text-3xl font-black mt-2">{t.price}</p>
-                  <p className="text-xs text-zinc-500 mt-1">{t.desc}</p>
+                  <p className="text-xs text-zinc-400 mt-1">{t.desc}</p>
                   {t.highlight && <span className="inline-block mt-3 text-[10px] bg-gradient-to-r from-purple-500 to-blue-500 text-white px-3 py-0.5 rounded-full font-bold uppercase tracking-wider">Most Popular</span>}
                 </div>
               ))}
@@ -692,7 +692,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
               ].map((m) => (
                 <GlowCard key={m.label} className="text-center py-5">
                   <p className="text-2xl font-black">{m.value}</p>
-                  <p className="text-[10px] text-zinc-500 uppercase tracking-widest mt-1">{m.label}</p>
+                  <p className="text-[10px] text-zinc-400 uppercase tracking-widest mt-1">{m.label}</p>
                 </GlowCard>
               ))}
             </div>
@@ -712,7 +712,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
             <h2 className="text-4xl sm:text-5xl font-black tracking-tight leading-tight">
               Organic growth.
               <br />
-              <span className="text-zinc-500">Zero ad spend.</span>
+              <span className="text-zinc-400">Zero ad spend.</span>
             </h2>
           </RevealText>
 
@@ -729,8 +729,8 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
           <RevealText delay={400}>
             <GlowCard>
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-bold text-xs uppercase tracking-widest text-zinc-500">MRR Growth — Organic, No Ad Spend</h3>
-                <span className="text-xs text-zinc-600">$1.2K → $13.5K in 8 months</span>
+                <h3 className="font-bold text-xs uppercase tracking-widest text-zinc-400">MRR Growth — Organic, No Ad Spend</h3>
+                <span className="text-xs text-zinc-500">$1.2K → $13.5K in 8 months</span>
               </div>
               {(() => {
                 const data = [
@@ -753,11 +753,11 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
                     {yTicks.map((t) => (
                       <g key={t}>
                         <line x1={PAD.left} x2={W - PAD.right} y1={y(t)} y2={y(t)} stroke="rgba(255,255,255,0.06)" strokeWidth={1} />
-                        <text x={PAD.left - 6} y={y(t) + 4} textAnchor="end" className="fill-zinc-600 text-[10px] font-mono">${t}K</text>
+                        <text x={PAD.left - 6} y={y(t) + 4} textAnchor="end" className="fill-zinc-500 text-[10px] font-mono">${t}K</text>
                       </g>
                     ))}
                     {data.map((d, i) => (
-                      <text key={d.month} x={x(i)} y={H - 6} textAnchor="middle" className={cn("text-[10px] font-mono", i === data.length - 1 ? "fill-purple-400 font-bold" : "fill-zinc-600")}>{d.month}</text>
+                      <text key={d.month} x={x(i)} y={H - 6} textAnchor="middle" className={cn("text-[10px] font-mono", i === data.length - 1 ? "fill-purple-400 font-bold" : "fill-zinc-500")}>{d.month}</text>
                     ))}
                     <defs>
                       <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="0">
@@ -789,7 +789,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
             <h2 className="text-4xl sm:text-5xl font-black tracking-tight leading-tight">
               Enterprise-grade.
               <br />
-              <span className="text-zinc-500">Solo-built.</span>
+              <span className="text-zinc-400">Solo-built.</span>
             </h2>
           </RevealText>
 
@@ -806,10 +806,10 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
                     { layer: "Infra", tech: "Vercel (auto-scaling), Supabase Cloud, Stripe", icon: Globe },
                   ].map((row) => (
                     <div key={row.layer} className="flex gap-3">
-                      <row.icon className="h-4 w-4 text-zinc-600 mt-0.5 shrink-0" />
+                      <row.icon className="h-4 w-4 text-zinc-500 mt-0.5 shrink-0" />
                       <div>
                         <p className="text-xs text-purple-400 font-bold uppercase tracking-wider">{row.layer}</p>
-                        <p className="text-xs text-zinc-500">{row.tech}</p>
+                        <p className="text-xs text-zinc-400">{row.tech}</p>
                       </div>
                     </div>
                   ))}
@@ -850,7 +850,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
                 ].map((m) => (
                   <div key={m.title}>
                     <h4 className="text-xs font-bold text-zinc-300">{m.title}</h4>
-                    <p className="text-xs text-zinc-600 mt-1 leading-relaxed">{m.desc}</p>
+                    <p className="text-xs text-zinc-500 mt-1 leading-relaxed">{m.desc}</p>
                   </div>
                 ))}
               </div>
@@ -871,7 +871,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
             <h2 className="text-4xl sm:text-5xl font-black tracking-tight leading-tight">
               Solo founder.
               <br />
-              <span className="text-zinc-500">Full-stack execution.</span>
+              <span className="text-zinc-400">Full-stack execution.</span>
             </h2>
           </RevealText>
 
@@ -883,8 +883,8 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
                 <p className="text-sm text-purple-400 font-medium">Founder & Solo Builder</p>
                 <div className="mt-4 space-y-2 text-left">
                   {[
-                    "Full-stack engineer",
-                    "Built entire platform solo",
+                    "UI/UX developer turned founder",
+                    "Built entire platform with AI-assisted development",
                     "$0 to $13.5K MRR organically",
                     "Ships weekly, handles support",
                   ].map((item) => (
@@ -916,7 +916,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
               </GlowCard>
               <GlowCard glow="blue">
                 <h4 className="font-bold text-sm text-purple-400 mb-2">First hire (with funding)</h4>
-                <p className="text-xs text-zinc-500 leading-relaxed">
+                <p className="text-xs text-zinc-400 leading-relaxed">
                   Part-time security engineer for enterprise features — SSO/SAML, SCIM, SOC 2 certification.
                 </p>
               </GlowCard>
@@ -937,7 +937,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
             <h2 className="text-4xl sm:text-5xl font-black tracking-tight leading-tight">
               <span className="bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">$100K</span> pre-seed.
               <br />
-              <span className="text-zinc-500">Capital efficient. Revenue generating.</span>
+              <span className="text-zinc-400">Capital efficient. Revenue generating.</span>
             </h2>
           </RevealText>
 
@@ -955,7 +955,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
                     <div key={item.label}>
                       <div className="flex justify-between text-xs mb-1.5">
                         <span className="text-zinc-400">{item.label}</span>
-                        <span className="text-zinc-500 font-mono">{item.amount}</span>
+                        <span className="text-zinc-400 font-mono">{item.amount}</span>
                       </div>
                       <div className="h-1.5 rounded-full bg-white/5 overflow-hidden">
                         <div className="h-full rounded-full bg-gradient-to-r from-purple-500 to-blue-500" style={{ width: item.pct }} />
@@ -981,7 +981,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
                       <CheckCircle2 className="h-4 w-4 text-purple-400 shrink-0 mt-0.5" />
                       <div>
                         <p className="text-sm font-semibold">{item.label}</p>
-                        <p className="text-xs text-zinc-500">{item.value}</p>
+                        <p className="text-xs text-zinc-400">{item.value}</p>
                       </div>
                     </div>
                   ))}
@@ -1022,10 +1022,10 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
                 { metric: "ARR Run Rate", from: "$162K", to: "$600K", icon: DollarSign },
               ].map((t) => (
                 <GlowCard key={t.metric} className="text-center py-5">
-                  <t.icon className="h-4 w-4 text-zinc-600 mx-auto mb-2" />
-                  <p className="text-[10px] text-zinc-500 uppercase tracking-widest mb-2">{t.metric}</p>
+                  <t.icon className="h-4 w-4 text-zinc-500 mx-auto mb-2" />
+                  <p className="text-[10px] text-zinc-400 uppercase tracking-widest mb-2">{t.metric}</p>
                   <div className="flex items-center justify-center gap-2">
-                    <span className="text-xs text-zinc-600 font-mono">{t.from}</span>
+                    <span className="text-xs text-zinc-500 font-mono">{t.from}</span>
                     <ArrowRight className="h-3 w-3 text-purple-400" />
                     <span className="text-lg font-black bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">{t.to}</span>
                   </div>
@@ -1036,7 +1036,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
 
           <RevealText delay={400}>
             <GlowCard>
-              <h3 className="font-bold text-xs uppercase tracking-widest text-zinc-500 mb-6">Investor FAQ</h3>
+              <h3 className="font-bold text-xs uppercase tracking-widest text-zinc-400 mb-6">Investor FAQ</h3>
               <div className="grid sm:grid-cols-2 gap-4">
                 {[
                   { q: "How do you compete with free?", a: "Free lacks DLP, compliance, and analytics. Teams pay for governance.", icon: Briefcase },
@@ -1047,10 +1047,10 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
                   { q: "Enterprise sales?", a: "Product-led: one person installs, team adopts, org upgrades.", icon: Building2 },
                 ].map((faq) => (
                   <div key={faq.q} className="flex gap-3">
-                    <faq.icon className="h-4 w-4 text-zinc-600 shrink-0 mt-0.5" />
+                    <faq.icon className="h-4 w-4 text-zinc-500 shrink-0 mt-0.5" />
                     <div>
                       <p className="font-semibold text-xs text-zinc-300">{faq.q}</p>
-                      <p className="text-xs text-zinc-500 mt-1 leading-relaxed">{faq.a}</p>
+                      <p className="text-xs text-zinc-400 mt-1 leading-relaxed">{faq.a}</p>
                     </div>
                   </div>
                 ))}
@@ -1059,7 +1059,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
           </RevealText>
 
           <RevealText delay={500}>
-            <p className="text-center text-sm text-zinc-600 font-mono">
+            <p className="text-center text-sm text-zinc-500 font-mono">
               $50K MRR = $600K ARR → Strong seed round position
             </p>
           </RevealText>
@@ -1112,16 +1112,16 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
                 <br className="hidden sm:block" />
                 With <span className="text-purple-400 font-bold">$100K</span>, we accelerate what&apos;s already working.&rdquo;
               </blockquote>
-              <p className="text-sm text-zinc-600 mt-4">— Kade Cooper, Founder</p>
+              <p className="text-sm text-zinc-500 mt-4">— Kade Cooper, Founder</p>
             </div>
           </RevealText>
 
           <RevealText delay={600}>
             <div className="flex items-center justify-center gap-3 pt-4">
-              <Image src="/logo.svg" alt="TeamPrompt" width={32} height={32} className="rounded-lg" />
+              <Image src="/logo-dark.svg" alt="TeamPrompt" width={32} height={32} className="rounded-lg" />
               <div className="text-left">
                 <p className="font-bold text-lg">TeamPrompt</p>
-                <p className="text-xs text-zinc-500">teamprompt.app</p>
+                <p className="text-xs text-zinc-400">teamprompt.app</p>
               </div>
             </div>
             <Link

@@ -12,17 +12,18 @@ import { trackLogin } from "@/lib/analytics";
 import { authDebug } from "@/lib/auth-debug"; // AUTH-DEBUG
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
+  const searchParams = useSearchParams();
+  const [email, setEmail] = useState(searchParams.get("email") || "");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const searchParams = useSearchParams();
   const rawRedirect = searchParams.get("redirect") || "/vault";
   // Only allow relative paths — prevent open redirects
   const redirectTo = rawRedirect.startsWith("/") && !rawRedirect.startsWith("//")
     ? rawRedirect
     : "/vault";
   const plan = searchParams.get("plan");
+  const inviteEmail = searchParams.get("email");
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -84,11 +85,16 @@ export default function LoginPage() {
       const callbackUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}&auth_event=login&auth_method=${provider}`;
       authDebug.log("provider", `OAuth start: ${provider}`, { redirectTo, callbackUrl, origin: window.location.origin }); // AUTH-DEBUG
       const supabase = createClient();
+      const oauthOptions: { redirectTo: string; queryParams?: Record<string, string> } = {
+        redirectTo: callbackUrl,
+      };
+      // If coming from an invite, pass login_hint so Google pre-selects the right account
+      if (inviteEmail && provider === "google") {
+        oauthOptions.queryParams = { login_hint: inviteEmail };
+      }
       const { data, error: oauthError } = await supabase.auth.signInWithOAuth({
         provider,
-        options: {
-          redirectTo: callbackUrl,
-        },
+        options: oauthOptions,
       });
       authDebug.log("provider", `OAuth response`, { url: data?.url?.slice(0, 200), error: oauthError?.message }); // AUTH-DEBUG
       if (oauthError) {
@@ -111,6 +117,17 @@ export default function LoginPage() {
           Sign in to your TeamPrompt account
         </p>
       </div>
+
+      {inviteEmail && (
+        <div className="mb-4 rounded-lg border border-primary/20 bg-primary/5 p-3">
+          <p className="text-sm text-foreground">
+            Sign in with <strong>{inviteEmail}</strong> to accept your team invite.
+          </p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Make sure to use the same email that was invited.
+          </p>
+        </div>
+      )}
 
       {searchParams.get("error") && (
         <div className="mb-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">

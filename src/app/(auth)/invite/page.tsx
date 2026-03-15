@@ -36,21 +36,30 @@ export default function InvitePage() {
         data: { user },
       } = await supabase.auth.getUser();
 
+      // First, fetch invite details regardless of auth state (to show email hint)
+      const { data: invite } = await supabase
+        .from("invites")
+        .select("email, role, status, org_id, invited_by, organizations(name), profiles!invites_invited_by_fkey(name)")
+        .eq("token", token)
+        .single();
+
       if (!user) {
-        router.push(`/login?redirect=${encodeURIComponent(`/invite?token=${token}`)}`);
+        // Pass the invited email so the login page can show an account hint
+        const inviteEmail = invite?.email || "";
+        const redirect = encodeURIComponent(`/invite?token=${token}`);
+        const emailHint = inviteEmail ? `&email=${encodeURIComponent(inviteEmail)}` : "";
+        router.push(`/login?redirect=${redirect}${emailHint}`);
         return;
       }
 
-      // Fetch invite details to show before accepting
-      const { data: invite } = await supabase
-        .from("invites")
-        .select("role, org_id, invited_by, organizations(name), profiles!invites_invited_by_fkey(name)")
-        .eq("token", token)
-        .eq("status", "pending")
-        .single();
+      if (invite && invite.status === "accepted") {
+        // Invite was already used — but user is signed in, so just redirect them
+        toast.success("You've already accepted this invite. Welcome back!");
+        router.push("/home");
+        return;
+      }
 
-      if (invite) {
-        // Supabase joins return single objects for FK relations
+      if (invite && invite.status === "pending") {
         const orgData = invite.organizations as unknown as { name: string } | null;
         const inviterData = invite.profiles as unknown as { name: string } | null;
         setInviteDetails({
@@ -59,7 +68,7 @@ export default function InvitePage() {
           invitedBy: inviterData?.name || "A team member",
         });
       } else {
-        setError("This invite link is invalid or has already been used.");
+        setError("This invite link is invalid or has expired.");
       }
 
       setChecking(false);

@@ -25,54 +25,56 @@ import {
 // Opex = infra ($50-200) + people + marketing (funded only)
 
 // Organic-only: no paid marketing, no marketing contractor, no hires until M9
-// Growth: ~5% MoM slowing to ~3% (SEO + Chrome Store + WOM only)
+// Starting from actual current state: ~$0 MRR, 23 users, product shipped
+// Growth: Chrome Web Store organic + SEO + word of mouth only
 // People: PT support M9+ ($2,000) — no security eng or mktg contractor
 const PROFORMA_ORGANIC = [
-  { month: "M1",  mrr: 13500,  opex: 500,   adSpend: 0, stripe: 473 },
-  { month: "M2",  mrr: 14200,  opex: 500,   adSpend: 0, stripe: 497 },
-  { month: "M3",  mrr: 14900,  opex: 500,   adSpend: 0, stripe: 522 },
-  { month: "M4",  mrr: 15600,  opex: 500,   adSpend: 0, stripe: 546 },
-  { month: "M5",  mrr: 16300,  opex: 500,   adSpend: 0, stripe: 571 },
-  { month: "M6",  mrr: 17000,  opex: 500,   adSpend: 0, stripe: 595 },
-  { month: "M7",  mrr: 17700,  opex: 500,   adSpend: 0, stripe: 620 },
-  { month: "M8",  mrr: 18400,  opex: 500,   adSpend: 0, stripe: 644 },
-  { month: "M9",  mrr: 19100,  opex: 2500,  adSpend: 0, stripe: 669 },
-  { month: "M10", mrr: 19800,  opex: 2500,  adSpend: 0, stripe: 693 },
-  { month: "M11", mrr: 20500,  opex: 2500,  adSpend: 0, stripe: 718 },
-  { month: "M12", mrr: 21200,  opex: 2500,  adSpend: 0, stripe: 742 },
-  { month: "M13", mrr: 21900,  opex: 2500,  adSpend: 0, stripe: 767 },
-  { month: "M14", mrr: 22600,  opex: 2500,  adSpend: 0, stripe: 791 },
-  { month: "M15", mrr: 23300,  opex: 2500,  adSpend: 0, stripe: 816 },
-  { month: "M16", mrr: 24000,  opex: 2500,  adSpend: 0, stripe: 840 },
-  { month: "M17", mrr: 24700,  opex: 2500,  adSpend: 0, stripe: 865 },
-  { month: "M18", mrr: 25500,  opex: 2500,  adSpend: 0, stripe: 893 },
+  { month: "M1",  mrr: 200,    opex: 500,   adSpend: 0, stripe: 7 },
+  { month: "M2",  mrr: 500,    opex: 500,   adSpend: 0, stripe: 18 },
+  { month: "M3",  mrr: 1000,   opex: 500,   adSpend: 0, stripe: 35 },
+  { month: "M4",  mrr: 1600,   opex: 500,   adSpend: 0, stripe: 56 },
+  { month: "M5",  mrr: 2400,   opex: 500,   adSpend: 0, stripe: 84 },
+  { month: "M6",  mrr: 3200,   opex: 500,   adSpend: 0, stripe: 112 },
+  { month: "M7",  mrr: 4000,   opex: 500,   adSpend: 0, stripe: 140 },
+  { month: "M8",  mrr: 4800,   opex: 500,   adSpend: 0, stripe: 168 },
+  { month: "M9",  mrr: 5600,   opex: 2500,  adSpend: 0, stripe: 196 },
+  { month: "M10", mrr: 6400,   opex: 2500,  adSpend: 0, stripe: 224 },
+  { month: "M11", mrr: 7200,   opex: 2500,  adSpend: 0, stripe: 252 },
+  { month: "M12", mrr: 8000,   opex: 2500,  adSpend: 0, stripe: 280 },
+  { month: "M13", mrr: 8800,   opex: 2500,  adSpend: 0, stripe: 308 },
+  { month: "M14", mrr: 9600,   opex: 2500,  adSpend: 0, stripe: 336 },
+  { month: "M15", mrr: 10400,  opex: 2500,  adSpend: 0, stripe: 364 },
+  { month: "M16", mrr: 11200,  opex: 2500,  adSpend: 0, stripe: 392 },
+  { month: "M17", mrr: 12000,  opex: 2500,  adSpend: 0, stripe: 420 },
+  { month: "M18", mrr: 13000,  opex: 2500,  adSpend: 0, stripe: 455 },
 ];
 
-// With paid marketing: ad spend + marketing contractor accelerate acquisition
-// Growth: ~15-20% MoM (M3-6) as ads ramp, moderating to 5-8% by M12+
+// With $100K funding: ad spend + marketing contractor accelerate acquisition
+// Starting from actual current state: ~$0 MRR, 23 users, product shipped
+// Growth: ~40-60% MoM early (M2-5) as ads ramp + Chrome Store + SEO,
+//         moderating to 8-12% by M12+ as base grows
 // People: marketing contractor M2+ ($2,500), support M5+ ($2,000),
 //         security consultant M10+ ($3,000)
 // Ad spend: M2 $2K → M6 $4K → M9+ $5K (LinkedIn, Google, retargeting)
 // opex = infra + people (excludes ad spend); adSpend shown separately
-// Key assumption: each $1 ad spend generates ~$3-4 in MRR within 2 months (B2B SaaS benchmark)
 const PROFORMA_FUNDED = [
-  { month: "M1",  mrr: 13500,  opex: 500,    adSpend: 0,    stripe: 473 },
-  { month: "M2",  mrr: 15500,  opex: 3000,   adSpend: 2000, stripe: 543 },
-  { month: "M3",  mrr: 18500,  opex: 3000,   adSpend: 3000, stripe: 648 },
-  { month: "M4",  mrr: 22000,  opex: 3000,   adSpend: 3500, stripe: 770 },
-  { month: "M5",  mrr: 26000,  opex: 5000,   adSpend: 4000, stripe: 910 },
-  { month: "M6",  mrr: 30000,  opex: 5000,   adSpend: 4000, stripe: 1050 },
-  { month: "M7",  mrr: 33500,  opex: 5000,   adSpend: 4500, stripe: 1173 },
-  { month: "M8",  mrr: 36500,  opex: 5000,   adSpend: 4500, stripe: 1278 },
-  { month: "M9",  mrr: 39000,  opex: 5000,   adSpend: 5000, stripe: 1365 },
-  { month: "M10", mrr: 41500,  opex: 8000,   adSpend: 5000, stripe: 1453 },
-  { month: "M11", mrr: 43500,  opex: 8000,   adSpend: 5000, stripe: 1523 },
-  { month: "M12", mrr: 45500,  opex: 8000,   adSpend: 5000, stripe: 1593 },
-  { month: "M13", mrr: 46500,  opex: 8000,   adSpend: 4000, stripe: 1628 },
-  { month: "M14", mrr: 47500,  opex: 8000,   adSpend: 4000, stripe: 1663 },
-  { month: "M15", mrr: 48500,  opex: 8000,   adSpend: 4000, stripe: 1698 },
-  { month: "M16", mrr: 49000,  opex: 8000,   adSpend: 3500, stripe: 1715 },
-  { month: "M17", mrr: 49500,  opex: 8000,   adSpend: 3500, stripe: 1733 },
+  { month: "M1",  mrr: 200,    opex: 500,    adSpend: 0,    stripe: 7 },
+  { month: "M2",  mrr: 800,    opex: 3000,   adSpend: 2000, stripe: 28 },
+  { month: "M3",  mrr: 2000,   opex: 3000,   adSpend: 3000, stripe: 70 },
+  { month: "M4",  mrr: 4000,   opex: 3000,   adSpend: 3500, stripe: 140 },
+  { month: "M5",  mrr: 7000,   opex: 5000,   adSpend: 4000, stripe: 245 },
+  { month: "M6",  mrr: 11000,  opex: 5000,   adSpend: 4000, stripe: 385 },
+  { month: "M7",  mrr: 15000,  opex: 5000,   adSpend: 4500, stripe: 525 },
+  { month: "M8",  mrr: 19000,  opex: 5000,   adSpend: 4500, stripe: 665 },
+  { month: "M9",  mrr: 23000,  opex: 5000,   adSpend: 5000, stripe: 805 },
+  { month: "M10", mrr: 27000,  opex: 8000,   adSpend: 5000, stripe: 945 },
+  { month: "M11", mrr: 31000,  opex: 8000,   adSpend: 5000, stripe: 1085 },
+  { month: "M12", mrr: 35000,  opex: 8000,   adSpend: 5000, stripe: 1225 },
+  { month: "M13", mrr: 38000,  opex: 8000,   adSpend: 4000, stripe: 1330 },
+  { month: "M14", mrr: 41000,  opex: 8000,   adSpend: 4000, stripe: 1435 },
+  { month: "M15", mrr: 44000,  opex: 8000,   adSpend: 4000, stripe: 1540 },
+  { month: "M16", mrr: 46000,  opex: 8000,   adSpend: 3500, stripe: 1610 },
+  { month: "M17", mrr: 48000,  opex: 8000,   adSpend: 3500, stripe: 1680 },
   { month: "M18", mrr: 50000,  opex: 8000,   adSpend: 3500, stripe: 1750 },
 ];
 
@@ -80,7 +82,7 @@ const PROFORMA_FUNDED = [
 
 const COST_BREAKDOWN = {
   current: {
-    label: "Current (~$13.5K MRR)",
+    label: "Current (Pre-Revenue)",
     items: [
       { name: "Supabase Pro", cost: 25, note: "" },
       { name: "Vercel Pro", cost: 20, note: "" },
@@ -89,7 +91,7 @@ const COST_BREAKDOWN = {
       { name: "Google Analytics", cost: 0, note: "Free" },
       { name: "LinkedIn Insight Tag", cost: 0, note: "Free" },
       { name: "Domain + DNS", cost: 2, note: "" },
-      { name: "Stripe (3.5%)", cost: 473, note: "$13,500 x 3.5%" },
+      { name: "Stripe (3.5%)", cost: 0, note: "Scales with revenue" },
     ],
   },
   mid: {
@@ -259,7 +261,7 @@ export function BusinessPlan({ shareToken }: { shareToken: string }) {
           </h1>
           <p className="text-base text-zinc-600 max-w-2xl">
             Detailed financial projections, unit economics, cost structure, hiring plan,
-            and strategy for scaling TeamPrompt from $13.5K to $50K MRR.
+            and strategy for scaling TeamPrompt from launch to $50K MRR.
           </p>
         </div>
 
@@ -270,7 +272,7 @@ export function BusinessPlan({ shareToken }: { shareToken: string }) {
           {/* Summary cards */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
             {[
-              { label: "Starting MRR", value: "$13.5K", sub: "Current" },
+              { label: "Starting MRR", value: "~$0", sub: "Pre-revenue" },
               { label: "Organic M18", value: fmt(organicRows[organicRows.length - 1].mrr), sub: "$306K ARR" },
               { label: "Funded M18", value: fmt(fundedRows[fundedRows.length - 1].mrr), sub: "$600K ARR" },
               { label: "M18 Net (Funded)", value: fmt(fundedRows[fundedRows.length - 1].net), sub: "/month" },
@@ -623,7 +625,7 @@ export function BusinessPlan({ shareToken }: { shareToken: string }) {
                 </thead>
                 <tbody>
                   {[
-                    { phase: "M1 (Solo)", mrr: "$13.5K", cost: "$0", pct: "0%" },
+                    { phase: "M1 (Launch)", mrr: "~$200", cost: "$500", pct: "N/A" },
                     { phase: "M2-4 (+ Mktg contractor)", mrr: "$14.8-19.5K", cost: "$2,500", pct: "13-17%" },
                     { phase: "M5-9 (+ Support person)", mrr: "$22-32K", cost: "$4,500", pct: "14-20%" },
                     { phase: "M10-18 (+ Security consultant)", mrr: "$34.5-50K", cost: "$7,500", pct: "15-22%" },
@@ -653,7 +655,7 @@ export function BusinessPlan({ shareToken }: { shareToken: string }) {
               </div>
               <div className="space-y-3">
                 {[
-                  "Chrome Web Store discovery (4.8 star rating, 500+ reviews)",
+                  "Chrome Web Store discovery and organic search",
                   "Word-of-mouth from existing teams",
                   "SEO blog content (AI governance, prompt engineering)",
                   "Product-led growth: free tier to team adoption to org upgrade",
@@ -921,7 +923,7 @@ export function BusinessPlan({ shareToken }: { shareToken: string }) {
                 {
                   phase: "Phase 1: Foundation",
                   months: "Month 1-3",
-                  mrr: "$13.5K to $17K",
+                  mrr: "$0 to $2K",
                   focus: "Hire marketing contractor, launch LinkedIn/Google ad campaigns, optimize conversion funnel, ramp ad spend from $2K to $3K/mo",
                   milestone: "$17K MRR, marketing engine running",
                 },

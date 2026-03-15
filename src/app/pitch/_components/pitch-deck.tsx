@@ -1187,7 +1187,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
                       "First 10 case studies from early adopters",
                       "SSO/SAML integration for enterprise readiness",
                     ],
-                    target: "Target: 500 users, 50 paying teams",
+                    target: "Target: 200 users, 30 paying teams, $2K MRR",
                   },
                   {
                     phase: "Phase 2", period: "Months 4–6", label: "Acceleration",
@@ -1199,7 +1199,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
                       "SCIM directory provisioning for enterprise accounts",
                       "Partner integrations (SIEM, MDM, compliance platforms)",
                     ],
-                    target: "Target: 2,000 users, 150 paying teams, $20K MRR",
+                    target: "Target: 1,000 users, 100 paying teams, $11K MRR",
                   },
                   {
                     phase: "Phase 3", period: "Months 7–12", label: "Scale & Revenue",
@@ -1211,7 +1211,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
                       "Hire security engineer for enterprise features",
                       "Expand to 3+ additional AI tools as market evolves",
                     ],
-                    target: "Target: 5,000 users, 250 paying teams, $35K MRR",
+                    target: "Target: 3,500 users, 250 paying teams, $35K MRR",
                   },
                   {
                     phase: "Phase 4", period: "Months 13–18", label: "Seed Round Position",
@@ -1223,7 +1223,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
                       "Prepare and execute seed round ($1–2M)",
                       "First full-time hires — engineering + GTM",
                     ],
-                    target: "Target: 8,000+ users, 300+ paying teams, $50K MRR ($600K ARR)",
+                    target: "Target: 5,000+ users, 350+ paying teams, $50K MRR ($600K ARR)",
                   },
                 ].map((phase, i) => (
                   <RevealText key={phase.phase} delay={200 + i * 100}>

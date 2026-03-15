@@ -63,6 +63,7 @@ import {
   TrendingDown,
   ArrowUpDown,
   AlertTriangle,
+  ChevronDown,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { DEFAULT_SECURITY_RULES } from "@/lib/security/default-rules";
@@ -564,22 +565,53 @@ export default function GuardrailsPage() {
           <StatCard label="Block Rate" value={`${blockRate}%`} icon={<Shield className="h-5 w-5" />} />
         </div>
 
-        {/* Read-only rules list for members */}
+        {/* Read-only rules list for members — clickable for details */}
         {rules.filter((r) => r.is_active).length > 0 && (
           <div className="mb-6">
             <h3 className="text-sm font-semibold mb-3">Active Rules</h3>
             <div className="rounded-lg border border-border divide-y divide-border">
               {rules.filter((r) => r.is_active).map((rule) => (
-                <div key={rule.id} className="flex items-center gap-3 px-4 py-3">
-                  <Shield className="h-4 w-4 text-primary shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium">{rule.name}</p>
-                    {rule.description && <p className="text-xs text-muted-foreground truncate">{rule.description}</p>}
+                <details key={rule.id} className="group">
+                  <summary className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted/50 transition-colors list-none [&::-webkit-details-marker]:hidden">
+                    <Shield className="h-4 w-4 text-primary shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium">{rule.name}</p>
+                      {rule.description && <p className="text-xs text-muted-foreground truncate">{rule.description}</p>}
+                    </div>
+                    <Badge variant={rule.severity === "block" ? "destructive" : "secondary"} className="text-[10px] shrink-0">
+                      {rule.severity === "block" ? "Blocks" : "Warns"}
+                    </Badge>
+                    <ChevronDown className="h-3.5 w-3.5 text-muted-foreground shrink-0 transition-transform group-open:rotate-180" />
+                  </summary>
+                  <div className="px-4 pb-4 pt-1 ml-7 space-y-2 text-sm">
+                    {rule.description && (
+                      <div>
+                        <p className="text-xs font-medium text-muted-foreground">Description</p>
+                        <p className="text-sm">{rule.description}</p>
+                      </div>
+                    )}
+                    <div className="flex gap-6">
+                      <div>
+                        <p className="text-xs font-medium text-muted-foreground">Category</p>
+                        <p className="text-sm capitalize">{rule.category.replace(/_/g, " ")}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs font-medium text-muted-foreground">Detection</p>
+                        <p className="text-sm capitalize">{rule.pattern_type}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs font-medium text-muted-foreground">Severity</p>
+                        <p className="text-sm capitalize">{rule.severity === "block" ? "Blocked — message will not send" : "Warning — message sends with alert"}</p>
+                      </div>
+                    </div>
+                    {rule.source_pack && (
+                      <div>
+                        <p className="text-xs font-medium text-muted-foreground">Source</p>
+                        <p className="text-sm">{rule.source_pack} compliance pack</p>
+                      </div>
+                    )}
                   </div>
-                  <Badge variant={rule.severity === "block" ? "destructive" : "secondary"} className="text-[10px] shrink-0">
-                    {rule.severity === "block" ? "Blocks" : "Warns"}
-                  </Badge>
-                </div>
+                </details>
               ))}
             </div>
           </div>

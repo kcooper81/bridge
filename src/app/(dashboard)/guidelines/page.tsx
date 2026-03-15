@@ -217,14 +217,16 @@ export default function GuidelinesPage() {
         }
       />
 
-      {!checkLimit("add_guideline", guidelines.length) && (
-        <UpgradePrompt feature="add_guideline" current={guidelines.length} max={planLimits.max_guidelines} className="mb-6" />
-      )}
-      <LimitNudge feature="add_guideline" current={guidelines.length} max={planLimits.max_guidelines} className="mb-4" />
-
-      {/* Usage cap indicator */}
-      {checkLimit("add_guideline", guidelines.length) && (
-        <UsageIndicator label="Guidelines" current={guidelines.length} max={planLimits.max_guidelines} className="mb-4" />
+      {canEdit && (
+        <>
+          {!checkLimit("add_guideline", guidelines.length) && (
+            <UpgradePrompt feature="add_guideline" current={guidelines.length} max={planLimits.max_guidelines} className="mb-6" />
+          )}
+          <LimitNudge feature="add_guideline" current={guidelines.length} max={planLimits.max_guidelines} className="mb-4" />
+          {checkLimit("add_guideline", guidelines.length) && (
+            <UsageIndicator label="Guidelines" current={guidelines.length} max={planLimits.max_guidelines} className="mb-4" />
+          )}
+        </>
       )}
 
       {guidelines.length === 0 ? (

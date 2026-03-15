@@ -111,11 +111,11 @@ function headerBlock(): string {
                 <tr>
                   <td style="vertical-align: middle;">
                     <a href="https://teamprompt.app" style="text-decoration: none;">
-                      <img src="https://teamprompt.app/brand/social-profile-512.png" alt="TeamPrompt" width="36" height="36" style="display: block; border-radius: 8px;" />
+                      <div style="width: 32px; height: 32px; background-color: #0f1d2d; border-radius: 8px; text-align: center; line-height: 32px; font-size: 16px; color: #ffffff; font-weight: 800; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">T</div>
                     </a>
                   </td>
                   <td style="vertical-align: middle; padding-left: 12px;">
-                    <a href="https://teamprompt.app" style="color: #18181b; font-size: 17px; font-weight: 700; text-decoration: none; line-height: 1;">TeamPrompt</a>
+                    <a href="https://teamprompt.app" style="color: #0f1d2d; font-size: 17px; font-weight: 700; text-decoration: none; line-height: 1; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">TeamPrompt</a>
                   </td>
                 </tr>
               </table>
@@ -130,16 +130,18 @@ function footerBlock(): string {
               <table role="presentation" cellpadding="0" cellspacing="0" style="margin: 0 auto;">
                 <tr>
                   <td style="vertical-align: middle;">
-                    <img src="https://teamprompt.app/brand/social-profile-512.png" alt="" width="20" height="20" style="display: block; border-radius: 4px;" />
+                    <div style="width: 18px; height: 18px; background-color: #0f1d2d; border-radius: 4px; text-align: center; line-height: 18px; font-size: 10px; color: #ffffff; font-weight: 800; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">T</div>
                   </td>
                   <td style="vertical-align: middle; padding-left: 8px;">
-                    <span style="font-size: 13px; color: ${MUTED_TEXT};">TeamPrompt</span>
+                    <a href="https://teamprompt.app" style="font-size: 13px; color: #0f1d2d; text-decoration: none; font-weight: 600;">TeamPrompt</a>
                     <span style="font-size: 13px; color: #d4d4d8;"> &middot; </span>
-                    <a href="https://teamprompt.app" style="font-size: 13px; color: ${BRAND_COLOR}; text-decoration: none;">teamprompt.app</a>
+                    <span style="font-size: 13px; color: ${MUTED_TEXT};">AI prompts for teams</span>
                   </td>
                 </tr>
               </table>
-              <p style="margin: 6px 0 0; font-size: 11px; color: #a1a1aa;">Your team&rsquo;s AI prompt library</p>
+              <p style="margin: 8px 0 0; font-size: 11px; color: #a1a1aa;">
+                <a href="https://teamprompt.app" style="color: #a1a1aa; text-decoration: underline;">teamprompt.app</a>
+              </p>
             </td>
           </tr>`;
 }
@@ -565,27 +567,22 @@ ${footerBlock()}
     id: "founder-note",
     name: "Founder Note",
     category: "Plain",
-    description: "Personal email from the founder — no heavy branding, feels like a real email",
+    description: "Personal email from the founder — just type your message",
     defaultSubject: "A quick note from me",
     previewText: "",
     fields: [
-      { key: "body", label: "Your Message", type: "textarea", placeholder: "Write naturally — this template looks like a personal email, not a marketing blast. Talk about what you're building, ask for feedback, share your vision." },
-      { key: "signoff", label: "Sign-off Name", type: "text", placeholder: "e.g. Kade", default: "Kade" },
-      { key: "title", label: "Title / Role", type: "text", placeholder: "e.g. Founder, TeamPrompt", default: "Founder, TeamPrompt" },
+      { key: "body", label: "Email", type: "textarea", placeholder: "", default: `Hi {{{FIRST_NAME|there}}},\n\nI wanted to reach out personally to share what we've been working on.\n\nWe just shipped [feature/update] and I think it's going to make a real difference for how your team uses AI. The idea came from feedback we got from teams like yours.\n\nI'd love to hear what you think — just reply to this email.\n\nBest,\nKade\nFounder, TeamPrompt` },
     ],
     build(vals) {
-      const bodyText = vals.body?.trim()
-        ? vals.body.trim().split(/\n\n+/).map(p =>
-          `              <p style="margin: 0 0 16px; font-size: 15px; color: #3f3f46; line-height: 1.6;">${esc(p)}</p>`
-        ).join("\n")
-        : `              <p style="margin: 0 0 16px; font-size: 15px; color: #3f3f46; line-height: 1.6;">[Your message here. Write naturally — this template looks like a personal email.]</p>`;
+      const text = (vals.body?.trim() || "Hi {{{FIRST_NAME|there}}},\n\nYour message here.\n\nBest,\nKade\nFounder, TeamPrompt");
+      const paragraphs = text.split(/\n\n+/).map(p => {
+        const lines = p.split(/\n/).map(l => esc(l)).join("<br />");
+        return `              <p style="margin: 0 0 16px; font-size: 15px; color: #3f3f46; line-height: 1.6;">${lines}</p>`;
+      }).join("\n");
       return wrap(`
           <tr>
             <td class="content-padding" style="background-color: #ffffff; padding: 32px; border-radius: 12px;">
-              <p style="margin: 0 0 16px; font-size: 15px; color: #3f3f46; line-height: 1.6;">Hi {{{FIRST_NAME|there}}},</p>
-${bodyText}
-              <p style="margin: 0 0 4px; font-size: 15px; color: #3f3f46; line-height: 1.6;">Best,<br />${v(vals, "signoff", "Kade")}</p>
-              <p style="margin: 0; font-size: 13px; color: ${MUTED_TEXT};">${v(vals, "title", "Founder, TeamPrompt")}</p>
+${paragraphs}
               <p style="margin: 16px 0 0; font-size: 13px; color: ${MUTED_TEXT};">
                 <a href="https://teamprompt.app" style="color: ${BRAND_COLOR};">teamprompt.app</a>
               </p>
@@ -601,31 +598,22 @@ ${bodyText}
     id: "quick-update",
     name: "Quick Update",
     category: "Plain",
-    description: "Short, casual update — like a text message in email form",
+    description: "Short casual update — like a real email, not a newsletter",
     defaultSubject: "Quick update",
     previewText: "",
     fields: [
-      { key: "message", label: "Message", type: "textarea", placeholder: "Keep it short — 2-4 sentences max. This template is designed to feel like a quick note, not a newsletter." },
-      { key: "cta_text", label: "Link Text (optional)", type: "text", placeholder: "e.g. Check it out" },
-      { key: "cta_url", label: "Link URL (optional)", type: "text", placeholder: "https://teamprompt.app" },
-      { key: "signoff", label: "Sign-off", type: "text", placeholder: "— Kade", default: "— The TeamPrompt Team" },
+      { key: "body", label: "Email", type: "textarea", placeholder: "", default: `Hi {{{FIRST_NAME|there}}},\n\nQuick heads up — we just rolled out [feature/change]. You'll notice [what's different].\n\nCheck it out here: https://teamprompt.app\n\n— The TeamPrompt Team` },
     ],
     build(vals) {
-      const msgText = vals.message?.trim()
-        ? vals.message.trim().split(/\n\n+/).map(p =>
-          `              <p style="margin: 0 0 12px; font-size: 15px; color: #3f3f46; line-height: 1.6;">${esc(p)}</p>`
-        ).join("\n")
-        : `              <p style="margin: 0 0 12px; font-size: 15px; color: #3f3f46; line-height: 1.6;">[Your short message here.]</p>`;
-      const link = vals.cta_text?.trim() && vals.cta_url?.trim()
-        ? `              <p style="margin: 0 0 16px; font-size: 15px;"><a href="${esc(vals.cta_url.trim())}" style="color: ${BRAND_COLOR}; text-decoration: underline;">${esc(vals.cta_text.trim())} &rarr;</a></p>`
-        : "";
+      const text = (vals.body?.trim() || "Hi {{{FIRST_NAME|there}}},\n\nYour update here.\n\n— The TeamPrompt Team");
+      const paragraphs = text.split(/\n\n+/).map(p => {
+        const lines = p.split(/\n/).map(l => esc(l)).join("<br />");
+        return `              <p style="margin: 0 0 14px; font-size: 15px; color: #3f3f46; line-height: 1.6;">${lines}</p>`;
+      }).join("\n");
       return wrap(`
           <tr>
             <td class="content-padding" style="background-color: #ffffff; padding: 32px; border-radius: 12px;">
-              <p style="margin: 0 0 12px; font-size: 15px; color: #3f3f46; line-height: 1.6;">Hi {{{FIRST_NAME|there}}},</p>
-${msgText}
-${link}
-              <p style="margin: 0; font-size: 15px; color: #3f3f46;">${v(vals, "signoff", "&mdash; The TeamPrompt Team")}</p>
+${paragraphs}
               <p style="margin: 16px 0 0; font-size: 13px; color: ${MUTED_TEXT};">
                 <a href="https://teamprompt.app" style="color: ${BRAND_COLOR};">teamprompt.app</a>
               </p>
@@ -641,48 +629,31 @@ ${link}
     id: "plain-text",
     name: "Plain Text",
     category: "Plain",
-    description: "Looks like a plain text email — maximum deliverability, zero design",
-    defaultSubject: "[Subject]",
+    description: "Looks like a plain text email — zero design, maximum deliverability",
+    defaultSubject: "",
     previewText: "",
     fields: [
-      { key: "body", label: "Email Body", type: "textarea", placeholder: "Write your full email here. Use blank lines between paragraphs. This will render as plain-looking text with no branding, headers, or design elements — just like typing in Gmail." },
-      { key: "signoff", label: "Sign-off", type: "text", placeholder: "e.g. Best, Kade", default: "Best,\nKade" },
-      { key: "title", label: "Title (optional)", type: "text", placeholder: "e.g. Founder, TeamPrompt" },
+      { key: "body", label: "Email", type: "textarea", placeholder: "", default: `Hi {{{FIRST_NAME|there}}},\n\nJust wanted to follow up on [topic]. We've been working on some things I think you'll find useful.\n\nLet me know if you have any questions — happy to chat.\n\nBest,\nKade\nFounder, TeamPrompt` },
     ],
     build(vals) {
-      const bodyText = vals.body?.trim()
-        ? vals.body.trim().split(/\n\n+/).map(p =>
-          `<p style="margin: 0 0 16px; font-size: 14px; color: #1a1a1a; line-height: 1.7; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">${esc(p)}</p>`
-        ).join("\n")
-        : `<p style="margin: 0 0 16px; font-size: 14px; color: #1a1a1a; line-height: 1.7;">[Your email body here. Write naturally — this looks like a plain text email.]</p>`;
-      const sig = vals.signoff?.trim()
-        ? `<p style="margin: 0 0 4px; font-size: 14px; color: #1a1a1a; line-height: 1.7;">${esc(vals.signoff.trim()).replace(/\n/g, "<br />")}</p>`
-        : "";
-      const titleLine = vals.title?.trim()
-        ? `<p style="margin: 0; font-size: 13px; color: #71717a; line-height: 1.5;">${esc(vals.title.trim())}</p>`
-        : "";
-      // Minimal wrapper — no header, no footer, no background color
+      const text = (vals.body?.trim() || "Your email here.");
+      const paragraphs = text.split(/\n\n+/).map(p => {
+        const lines = p.split(/\n/).map(l => esc(l)).join("<br />");
+        return `<p style="margin: 0 0 16px; font-size: 14px; color: #1a1a1a; line-height: 1.7; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">${lines}</p>`;
+      }).join("\n");
       return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <style>
-    body { margin: 0; padding: 0; }
-  </style>
+  <style>body { margin: 0; padding: 0; }</style>
 </head>
 <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding: 20px;">
     <tr>
       <td align="center">
         <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width: 560px; width: 100%;">
-          <tr>
-            <td style="padding: 20px 0;">
-${bodyText}
-${sig}
-${titleLine}
-            </td>
-          </tr>
+          <tr><td style="padding: 20px 0;">${paragraphs}</td></tr>
         </table>
       </td>
     </tr>
@@ -693,35 +664,27 @@ ${titleLine}
     get html() { return this.build({}); },
   },
 
-  // ─── Minimal / Personal (legacy) ───────────────────────────
+  // ─── Minimal Branded ───────────────────────────────────────
   {
     id: "minimal",
     name: "Minimal Branded",
     category: "Plain",
     description: "Clean personal email with subtle TeamPrompt branding",
-    defaultSubject: "[Subject]",
+    defaultSubject: "",
     previewText: "",
     fields: [
-      { key: "body", label: "Your Message", type: "textarea", placeholder: "Keep it conversational and genuine. This template has minimal branding — just your message with a small footer." },
-      { key: "closing", label: "Closing / CTA", type: "textarea", placeholder: "Optional — add a question or call to action to encourage replies." },
-      { key: "signoff", label: "Sign-off Name", type: "text", placeholder: "Your name", default: "Kade" },
+      { key: "body", label: "Email", type: "textarea", placeholder: "", default: `Hi {{{FIRST_NAME|there}}},\n\nI wanted to share something with you — [your message here].\n\nWould love to hear your thoughts. Just hit reply.\n\nBest,\nKade` },
     ],
     build(vals) {
-      const bodyText = vals.body?.trim()
-        ? vals.body.trim().split(/\n\n+/).map(p =>
-          `              <p style="margin: 0 0 16px; font-size: 15px; color: #3f3f46; line-height: 1.6;">${esc(p)}</p>`
-        ).join("\n")
-        : `              <p style="margin: 0 0 16px; font-size: 15px; color: #3f3f46; line-height: 1.6;">[Your message here.]</p>`;
-      const closing = vals.closing?.trim()
-        ? `              <p style="margin: 0 0 16px; font-size: 15px; color: #3f3f46; line-height: 1.6;">${esc(vals.closing.trim())}</p>`
-        : "";
+      const text = (vals.body?.trim() || "Hi {{{FIRST_NAME|there}}},\n\nYour message here.\n\nBest,\nKade");
+      const paragraphs = text.split(/\n\n+/).map(p => {
+        const lines = p.split(/\n/).map(l => esc(l)).join("<br />");
+        return `              <p style="margin: 0 0 16px; font-size: 15px; color: #3f3f46; line-height: 1.6;">${lines}</p>`;
+      }).join("\n");
       return wrap(`
           <tr>
             <td class="content-padding" style="background-color: #ffffff; padding: 32px; border-radius: 12px;">
-              <p style="margin: 0 0 16px; font-size: 15px; color: #3f3f46; line-height: 1.6;">Hi {{{FIRST_NAME|there}}},</p>
-${bodyText}
-${closing}
-              <p style="margin: 0 0 4px; font-size: 15px; color: #3f3f46; line-height: 1.6;">Best,<br />${v(vals, "signoff", "[Your Name]")}</p>
+${paragraphs}
               <p style="margin: 16px 0 0; font-size: 13px; color: ${MUTED_TEXT};">
                 TeamPrompt &middot; <a href="https://teamprompt.app" style="color: ${BRAND_COLOR};">teamprompt.app</a>
               </p>
@@ -739,41 +702,22 @@ CAMPAIGN_TEMPLATES.push({
   id: "partner-outreach",
   name: "Partner Outreach",
   category: "Outreach",
-  description: "Clean cold email for potential partners — conversational, not salesy",
+  description: "Cold email for potential partners — just edit the example",
   defaultSubject: "Quick question about {{{COMPANY|your team}}}",
-  previewText: "Saw what you're building and thought there might be a fit",
+  previewText: "",
   fields: [
-    { key: "opener", label: "Opening Line", type: "textarea", placeholder: "What caught your attention about them? Be specific. e.g. 'I saw your recent post about scaling prompt workflows...'" },
-    { key: "pitch", label: "What You Offer (1-2 sentences)", type: "textarea", placeholder: "Brief, honest description of what you do and why it's relevant. No buzzwords." },
-    { key: "ask", label: "The Ask", type: "textarea", placeholder: "What would you like from them? Keep it low-friction. e.g. 'Would you be open to a 15-minute call next week?'", default: "Would you be open to a quick chat sometime this week?" },
-    { key: "signoff", label: "Sign-off Name", type: "text", placeholder: "Your name", default: "Kade" },
-    { key: "title", label: "Your Title", type: "text", placeholder: "e.g. Founder, TeamPrompt", default: "Founder, TeamPrompt" },
+    { key: "body", label: "Email", type: "textarea", placeholder: "", default: `Hi {{{FIRST_NAME|there}}},\n\nI came across {{{COMPANY|your company}}} and really liked what you're building. We're working on something similar in the AI prompt space.\n\nTeamPrompt helps teams share and manage their AI prompts across tools like ChatGPT, Claude, and Gemini. I think there could be a natural fit between what we're each doing.\n\nWould you be open to a quick 15-minute chat this week?\n\nBest,\nKade\nFounder, TeamPrompt` },
   ],
   build(vals) {
-    const opener = vals.opener?.trim()
-      ? vals.opener.trim().split(/\n\n+/).map(p =>
-        `              <p style="margin: 0 0 14px; font-size: 15px; color: #3f3f46; line-height: 1.65;">${esc(p)}</p>`
-      ).join("\n")
-      : `              <p style="margin: 0 0 14px; font-size: 15px; color: #3f3f46; line-height: 1.65;">[Your opening line — what caught your eye about them.]</p>`;
-
-    const pitch = vals.pitch?.trim()
-      ? vals.pitch.trim().split(/\n\n+/).map(p =>
-        `              <p style="margin: 0 0 14px; font-size: 15px; color: #3f3f46; line-height: 1.65;">${esc(p)}</p>`
-      ).join("\n")
-      : `              <p style="margin: 0 0 14px; font-size: 15px; color: #3f3f46; line-height: 1.65;">[Brief pitch — what you do, why it matters to them.]</p>`;
-
+    const text = (vals.body?.trim() || "Hi {{{FIRST_NAME|there}}},\n\nYour message here.\n\nBest,\nKade");
+    const paragraphs = text.split(/\n\n+/).map(p => {
+      const lines = p.split(/\n/).map(l => esc(l)).join("<br />");
+      return `              <p style="margin: 0 0 14px; font-size: 15px; color: #3f3f46; line-height: 1.65;">${lines}</p>`;
+    }).join("\n");
     return wrap(`
           <tr>
             <td class="content-padding" style="background-color: #ffffff; padding: 32px; border-radius: 12px;">
-              <p style="margin: 0 0 14px; font-size: 15px; color: #3f3f46; line-height: 1.65;">Hi {{{FIRST_NAME|there}}},</p>
-${opener}
-${pitch}
-              <p style="margin: 0 0 14px; font-size: 15px; color: #3f3f46; line-height: 1.65;">${v(vals, "ask", "Would you be open to a quick chat sometime this week?")}</p>
-              <p style="margin: 0; font-size: 15px; color: #3f3f46; line-height: 1.65;">
-                Best,<br />
-                ${v(vals, "signoff", "[Your Name]")}
-                ${vals.title?.trim() ? `<br /><span style="font-size: 13px; color: ${MUTED_TEXT};">${esc(vals.title.trim())}</span>` : ""}
-              </p>
+${paragraphs}
             </td>
           </tr>
 `, "");

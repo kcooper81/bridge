@@ -724,6 +724,41 @@ export default function CampaignsPage() {
 
               {editorTab === "fields" && activeTemplate ? (
                 <div className="space-y-3 max-h-[500px] overflow-y-auto pr-1">
+                  {/* Variable insert buttons for single-field templates */}
+                  {activeTemplate.fields.length === 1 && activeTemplate.fields[0].type === "textarea" && (
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="text-[10px] text-muted-foreground uppercase font-medium">Insert:</span>
+                      {[
+                        { label: "First Name", value: "{{{FIRST_NAME|there}}}" },
+                        { label: "Last Name", value: "{{{LAST_NAME}}}" },
+                        { label: "Company", value: "{{{COMPANY|your team}}}" },
+                      ].map((variable) => (
+                        <Button
+                          key={variable.label}
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="h-6 text-[11px] px-2"
+                          onClick={() => {
+                            const field = activeTemplate.fields[0];
+                            const el = document.getElementById(`field-${field.key}`) as HTMLTextAreaElement | null;
+                            if (el) {
+                              const start = el.selectionStart;
+                              const end = el.selectionEnd;
+                              const current = fieldValues[field.key] || "";
+                              const updated = current.slice(0, start) + variable.value + current.slice(end);
+                              updateFieldValue(field.key, updated);
+                              setTimeout(() => { el.focus(); el.selectionStart = el.selectionEnd = start + variable.value.length; }, 0);
+                            } else {
+                              updateFieldValue(field.key, (fieldValues[field.key] || "") + variable.value);
+                            }
+                          }}
+                        >
+                          {variable.label}
+                        </Button>
+                      ))}
+                    </div>
+                  )}
                   {activeTemplate.fields.map((field) => (
                     <div key={field.key}>
                       <Label htmlFor={`field-${field.key}`} className="text-xs font-medium">
@@ -735,7 +770,7 @@ export default function CampaignsPage() {
                           value={fieldValues[field.key] || ""}
                           onChange={(e) => updateFieldValue(field.key, e.target.value)}
                           placeholder={field.placeholder}
-                          className="mt-1 text-sm min-h-[80px]"
+                          className={`mt-1 text-sm ${activeTemplate.fields.length === 1 ? "min-h-[350px] font-mono text-xs leading-relaxed" : "min-h-[80px]"}`}
                         />
                       ) : (
                         <Input

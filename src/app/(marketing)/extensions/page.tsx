@@ -66,7 +66,7 @@ const howItWorks = [
     step: 2,
     title: "Sign in",
     description:
-      "Log in with your TeamPrompt account. The extension syncs your team's prompt library automatically.",
+      "Log in with your TeamPrompt account. The extension syncs your DLP rules and prompt library automatically.",
   },
   {
     step: 3,
@@ -101,7 +101,7 @@ const faqs = [
   {
     question: "Do I need a TeamPrompt account?",
     answer:
-      "Yes, you need a free or paid TeamPrompt account. The extension uses your account to sync your team's prompt library, security rules, and preferences.",
+      "Yes, you need a free or paid TeamPrompt account. The extension uses your account to sync your DLP policies, prompt library, and preferences.",
   },
   {
     question: "Can I use the extension without the web dashboard?",
@@ -274,7 +274,7 @@ export default function ExtensionsPage() {
           <CTASection
             headline="Your team uses AI every day."
             gradientText="Give them the right prompts."
-            subtitle="Install the extension and start using your shared prompt library across every AI tool in minutes."
+            subtitle="Install the extension and get AI data loss prevention across every AI tool in minutes."
           />
         </div>
       </section>

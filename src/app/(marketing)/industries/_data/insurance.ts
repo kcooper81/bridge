@@ -5,7 +5,7 @@ export const industryData: IndustryPageData = {
   industry: "Insurance",
   headline: "Secure AI adoption for insurance teams",
   subtitle:
-    "Give underwriters and claims teams a managed prompt library with data protection that catches PII and PHI — so your organization can use AI with confidence.",
+    "Detect and block policyholder PII, PHI, and claims data before employees send it to AI. Shared prompt library for underwriting, claims, actuarial, and customer service teams.",
   compliance: ["PII/PHI Protection", "Claims Data Safety", "Audit Logging"],
   painPoints: [
     {

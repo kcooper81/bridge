@@ -5,7 +5,7 @@ export const industryData: IndustryPageData = {
   industry: "Education",
   headline: "Secure AI adoption for schools and universities",
   subtitle:
-    "Give educators a managed prompt library with data protection that catches student data — so your institution can embrace AI responsibly.",
+    "Detect and block student records, grades, and FERPA-protected data before staff send it to AI. Shared prompt library for lesson planning, assessment, and curriculum design.",
   compliance: ["FERPA Protection", "Student Data Safety", "Audit Logging"],
   painPoints: [
     {

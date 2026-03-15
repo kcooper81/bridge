@@ -930,7 +930,7 @@ export function TwitterBanner() {
         <div className="flex-1 space-y-2.5 sm:space-y-3 shrink-0">
           <BannerWordmark size="md" />
           <p className="text-white/90 text-[10px] sm:text-sm font-semibold leading-snug max-w-[220px] sm:max-w-[260px]">
-            Your team&apos;s AI prompt library — with built-in data protection
+            AI data loss prevention for ChatGPT, Claude &amp; AI tools
           </p>
           <FeatureIconRow />
           <CompatibilityLine />
@@ -951,7 +951,7 @@ export function TwitterBannerWhite() {
         <div className="flex-1 space-y-2.5 sm:space-y-3 shrink-0">
           <BannerWordmark size="md" dark />
           <p className="text-zinc-900 text-[10px] sm:text-sm font-semibold leading-snug max-w-[220px] sm:max-w-[260px]">
-            Your team&apos;s AI prompt library — with built-in data protection
+            AI data loss prevention for ChatGPT, Claude &amp; AI tools
           </p>
           <FeatureIconRowDark />
           <CompatibilityLine dark />
@@ -1055,7 +1055,7 @@ export function YouTubeBanner() {
       <div className="flex flex-col items-center justify-center h-full text-center gap-3 sm:gap-4">
         <BannerWordmark size="lg" />
         <p className="text-white/90 text-xs sm:text-base font-semibold max-w-md">
-          Your team&apos;s AI prompt library — with built-in data protection
+          AI data loss prevention for ChatGPT, Claude &amp; AI tools
         </p>
         <FeaturePills />
         <div className="grid grid-cols-2 gap-3 w-full max-w-md">
@@ -1271,7 +1271,7 @@ export function TwitterBannerGradient() {
         <div className="flex-1 space-y-2 sm:space-y-2.5 shrink-0 max-w-[45%]">
           <BannerWordmark size="md" />
           <p className="text-white text-[10px] sm:text-sm font-bold leading-snug">
-            Your team&apos;s AI prompt library — with built-in data protection
+            AI data loss prevention for ChatGPT, Claude &amp; AI tools
           </p>
           <FeaturePills />
           <CompatibilityLine />
@@ -1350,7 +1350,7 @@ export function YouTubeBannerGradient() {
       <div className="flex flex-col items-center justify-center h-full text-center gap-3 sm:gap-4">
         <BannerWordmark size="lg" />
         <p className="text-white text-xs sm:text-base font-bold max-w-md">
-          Your team&apos;s AI prompt library — with built-in data protection
+          AI data loss prevention for ChatGPT, Claude &amp; AI tools
         </p>
         <FeaturePills />
         <div className="w-full max-w-lg mt-1">
@@ -1543,7 +1543,7 @@ export function TwitterBannerLifestyle() {
         <div className="flex-1 space-y-2 sm:space-y-2.5 shrink-0 max-w-[40%]">
           <BannerWordmark size="md" />
           <p className="text-white text-[10px] sm:text-sm font-bold leading-snug">
-            Your team&apos;s AI prompt library — with built-in data protection
+            AI data loss prevention for ChatGPT, Claude &amp; AI tools
           </p>
           <FeaturePills />
           <CompatibilityLine />
@@ -1640,7 +1640,7 @@ export function YouTubeBannerLifestyle() {
       <div className="flex flex-col items-center justify-center h-full text-center gap-3 sm:gap-4">
         <BannerWordmark size="lg" />
         <p className="text-white text-xs sm:text-base font-bold max-w-md">
-          Your team&apos;s AI prompt library — with built-in data protection
+          AI data loss prevention for ChatGPT, Claude &amp; AI tools
         </p>
         <FeaturePills />
         <div className="w-full max-w-lg mt-1 relative">
@@ -1748,7 +1748,7 @@ export function LinkedInBannerLifestyle2() {
         <div className="flex-1 space-y-2 sm:space-y-2.5 max-w-[38%]">
           <BannerWordmark size="sm" />
           <p className="text-white text-[10px] sm:text-xs font-bold leading-snug">
-            One prompt library for your entire team &mdash; across every AI tool
+            Monitor and protect what your team sends to AI
           </p>
           <FeaturePills />
           <CompatibilityLine />
@@ -1808,7 +1808,7 @@ export function FacebookCoverLifestyle2() {
         <div className="flex-1 space-y-1.5 sm:space-y-2 max-w-[38%]">
           <BannerWordmark size="xs" />
           <p className="text-white text-[9px] sm:text-xs font-bold leading-snug">
-            Your team&apos;s AI prompt library &mdash; with built-in data protection
+            AI data loss prevention for ChatGPT, Claude &amp; AI tools
           </p>
           <FeaturePills />
         </div>
@@ -1878,7 +1878,7 @@ export function ExtensionMarqueeLifestyle1() {
         <div className="flex-1 space-y-2 sm:space-y-3 max-w-[38%]">
           <BannerWordmark size="md" />
           <p className="text-white text-xs sm:text-base font-bold leading-snug">
-            Your team&apos;s AI prompt library — with built-in data protection
+            AI data loss prevention for ChatGPT, Claude &amp; AI tools
           </p>
           <FeaturePills />
           <CompatibilityLine />
@@ -1971,7 +1971,7 @@ export function ExtensionScreenshotLifestyle1() {
         <div className="flex-1 space-y-2 sm:space-y-2.5 max-w-[38%]">
           <BannerWordmark size="md" />
           <p className="text-white text-xs sm:text-base font-bold leading-snug">
-            Your team&apos;s AI prompt library — with built-in data protection
+            AI data loss prevention for ChatGPT, Claude &amp; AI tools
           </p>
           <FeaturePills />
           <CompatibilityLine />
@@ -2064,7 +2064,7 @@ export function ExtensionScreenshotDark() {
         <div className="space-y-2 sm:space-y-2.5">
           <BannerWordmark size="md" />
           <p className="text-white/90 text-xs sm:text-base font-semibold leading-snug max-w-[50%]">
-            Your team&apos;s AI prompt library — with built-in data protection
+            AI data loss prevention for ChatGPT, Claude &amp; AI tools
           </p>
           <FeatureIconRow />
           <CompatibilityLine />
@@ -2088,7 +2088,7 @@ export function ExtensionScreenshotWhite() {
         <div className="space-y-2 sm:space-y-2.5">
           <BannerWordmark size="md" dark />
           <p className="text-zinc-900 text-xs sm:text-base font-semibold leading-snug max-w-[50%]">
-            Your team&apos;s AI prompt library — with built-in data protection
+            AI data loss prevention for ChatGPT, Claude &amp; AI tools
           </p>
           <FeatureIconRowDark />
           <CompatibilityLine dark />
@@ -2207,7 +2207,7 @@ export function ExtensionSmallPromoLifestyle() {
       <div className="flex flex-col justify-center h-full gap-2">
         <BannerWordmark size="xs" />
         <p className="text-white text-[8px] sm:text-[10px] font-bold leading-snug max-w-[70%]">
-          Team prompt library with DLP protection for AI tools
+          AI DLP — detect and block sensitive data in AI tools
         </p>
         <FeaturePills />
         <div className="absolute right-3 top-1/2 -translate-y-1/2 w-[40%]">
@@ -2631,7 +2631,7 @@ export function ProMarquee1({ accent = "blue" }: { accent?: ProAccent }) {
         <div className="flex-1 space-y-2 sm:space-y-3 max-w-[40%]">
           <BannerWordmark size="md" dark />
           <h2 className="text-zinc-900 text-xs sm:text-xl font-bold leading-snug">
-            Your team&apos;s AI prompt library — with built-in data protection
+            AI data loss prevention for ChatGPT, Claude &amp; AI tools
           </h2>
           <div className="flex flex-wrap gap-1">
             <FeaturePill label="Shared Prompt Library" dark />

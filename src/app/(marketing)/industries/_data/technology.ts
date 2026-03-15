@@ -5,7 +5,7 @@ export const industryData: IndustryPageData = {
   industry: "Technology",
   headline: "Stop developers from leaking secrets into AI",
   subtitle:
-    "Your engineers paste code, API keys, and config files into AI tools every day. TeamPrompt catches the sensitive parts.",
+    "Detect and block source code, API keys, and credentials before developers send them to AI. Shared prompt library for debugging, code review, and architecture teams.",
   compliance: ["Secret Detection", "Audit Logging", "Access Control"],
   painPoints: [
     {

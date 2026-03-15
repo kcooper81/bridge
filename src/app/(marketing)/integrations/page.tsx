@@ -21,7 +21,7 @@ import {
 export const metadata: Metadata = generatePageMetadata({
   title: "Integrations — Works With Every Major AI Tool",
   description:
-    "TeamPrompt works with ChatGPT, Claude, Gemini, Copilot, and Perplexity. Insert prompts, scan for sensitive data, and log usage across all AI tools.",
+    "DLP scanning, audit logging, and a shared prompt library for ChatGPT, Claude, Gemini, Copilot, and Perplexity — all from one browser extension.",
   path: "/integrations",
   keywords: ["ChatGPT extension", "Claude extension", "Gemini extension", "AI tool integration"],
 });
@@ -51,7 +51,7 @@ const aiTools = [
     name: "Gemini",
     by: "Google",
     description:
-      "Full support for Google Gemini. Search your prompt library and insert directly into Gemini's chat — no copy-pasting needed.",
+      "Full DLP scanning and prompt library support for Google Gemini. Insert prompts directly into Gemini's chat.",
     url: "https://gemini.google.com",
     color: "from-blue-500/20 to-blue-600/5",
     borderColor: "border-blue-500/20",
@@ -71,7 +71,7 @@ const aiTools = [
     name: "Perplexity",
     by: "Perplexity AI",
     description:
-      "Use your team's prompt library directly in Perplexity search. Great for standardizing research prompts across your organization.",
+      "DLP scanning and prompt library for Perplexity search. Standardize research prompts with built-in data protection.",
     url: "https://www.perplexity.ai",
     color: "from-purple-500/20 to-purple-600/5",
     borderColor: "border-purple-500/20",
@@ -84,7 +84,7 @@ const features = [
     icon: Search,
     title: "Search & Insert",
     description:
-      "Browse or search your team's prompt library from any supported AI tool. Click to insert — the prompt lands directly in the chat input.",
+      "DLP scanning, shared prompt library, and audit logging — accessible from a sidebar panel in any supported AI tool.",
   },
   {
     icon: Copy,
@@ -291,7 +291,7 @@ export default function IntegrationsPage() {
           <CTASection
             headline="Your team uses multiple AI tools."
             gradientText="Give them one prompt system."
-            subtitle="Install the extension and start using your shared prompt library across every AI tool in minutes."
+            subtitle="Install the extension and get AI data loss prevention and a shared prompt library across every AI tool in minutes."
           />
         </div>
       </section>

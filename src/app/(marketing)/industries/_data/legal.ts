@@ -5,7 +5,7 @@ export const industryData: IndustryPageData = {
   industry: "Legal",
   headline: "AI prompt management for law firms",
   subtitle:
-    "Protect attorney-client privilege while giving your lawyers the best AI prompts for legal research, drafting, and review.",
+    "Detect and block privileged information before it reaches AI tools. Give lawyers a shared prompt library for research, drafting, and review.",
   compliance: ["Privilege Detection", "Audit Logging", "Access Control"],
   painPoints: [
     {

@@ -339,7 +339,7 @@ const storeListing = {
   name: "TeamPrompt — AI Prompt Manager & DLP Shield",
   firefoxName: "TeamPrompt — AI Prompt Manager & DLP Shield",
   shortDescription:
-    "Access your team's approved AI prompt library, scan for sensitive data, and log conversations — right inside ChatGPT, Claude & more.",
+    "Detect and block sensitive data before it reaches AI tools. Shared prompt library and audit logging — right inside ChatGPT, Claude & more.",
   fullDescription: `TeamPrompt is the prompt management platform for teams that use AI every day.
 
 Instead of sharing prompts in Slack threads, Google Docs, or spreadsheets, your team gets a centralized library that works everywhere — right inside ChatGPT, Claude, Gemini, Copilot, and Perplexity.
@@ -357,7 +357,7 @@ Built for healthcare, legal, finance, government, and technology teams that need
 
 Free plan available. No credit card required.`,
   singlePurpose:
-    "Access a shared team prompt library and scan outbound AI messages for sensitive data.",
+    "Scan outbound AI messages for sensitive data. Access a shared team prompt library.",
   privacyPolicyUrl: "https://teamprompt.app/privacy",
   homepageUrl: "https://teamprompt.app",
   supportUrl: "https://teamprompt.app/help",
@@ -842,7 +842,7 @@ export default function MediaPage() {
               </p>
               <p className="text-sm text-muted-foreground leading-relaxed">
                 TeamPrompt is a prompt management platform that gives teams a
-                shared library, quality guidelines, and data protection for
+                AI data loss prevention, shared prompt library, and audit logging for
                 AI. It works with ChatGPT, Claude, Gemini, Copilot, and
                 Perplexity through a browser extension, and helps organizations
                 across healthcare, legal, finance, government, and technology
@@ -1654,7 +1654,7 @@ export default function MediaPage() {
                       </div>
                       <div className="bg-muted/50 rounded-lg p-3 text-sm">
                         <p className="font-medium mb-1">Introductory Text:</p>
-                        <p className="text-muted-foreground italic">&ldquo;Stop your team from writing bad prompts. Create a shared prompt library with version control, approval workflows, and usage analytics.&rdquo;</p>
+                        <p className="text-muted-foreground italic">&ldquo;Stop sensitive data from reaching AI tools. DLP protection, shared prompt library, and full audit logging for teams using AI.&rdquo;</p>
                       </div>
                       <div className="bg-muted/50 rounded-lg p-3 text-sm">
                         <p className="font-medium mb-1">Headline:</p>
@@ -1679,7 +1679,7 @@ export default function MediaPage() {
                   <div className="bg-muted/50 rounded-xl p-4 text-sm space-y-2">
                     <p><strong>Form Name:</strong> TeamPrompt Free Trial Signup</p>
                     <p><strong>Offer Headline:</strong> &ldquo;Try TeamPrompt Free &mdash; No Credit Card Required&rdquo;</p>
-                    <p><strong>Offer Detail:</strong> &ldquo;Get a shared prompt library, AI guardrails, and usage analytics for your team. Works with ChatGPT, Claude, Gemini, and 10+ AI platforms.&rdquo;</p>
+                    <p><strong>Offer Detail:</strong> &ldquo;AI data loss prevention, shared prompt library, and usage analytics for your team. Works with ChatGPT, Claude, Gemini, and 10+ AI platforms.&rdquo;</p>
                     <p><strong>Fields (keep minimal):</strong></p>
                     <ul className="ml-4 space-y-1">
                       <li>- First Name (pre-filled)</li>

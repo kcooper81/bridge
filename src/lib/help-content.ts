@@ -415,7 +415,7 @@ const _RAW_CATEGORIES: RawCategory[] = [
       },
       {
         q: "Can I export activity data?",
-        a: "Yes. Use the Import/Export page to export activity logs, prompts, and other data. Export formats include JSON and CSV for integration with your existing reporting tools.",
+        a: "Yes. On the Activity Log page, use the Export dropdown to download your logs as CSV or JSON. Exports respect your current filters (date range, AI tool, action type) so you can export exactly the data you need for compliance or reporting.",
         keywords: ["export", "download", "csv", "json", "report"],
       },
     ],
@@ -433,7 +433,7 @@ const _RAW_CATEGORIES: RawCategory[] = [
       },
       {
         q: "How do I export my data?",
-        a: "On the Import/Export page, choose what to export — prompts, activity logs, or all data. Select JSON or CSV format and download. Exports include all metadata like tags, descriptions, and timestamps.",
+        a: "Prompts: Use the Import/Export page to export your prompt library as JSON. Activity logs: Use the Export button on the Activity Log page to download as CSV or JSON. Both exports include all metadata like tags, timestamps, and action types.",
         keywords: ["export", "download", "backup", "data"],
       },
       {

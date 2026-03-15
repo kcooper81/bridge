@@ -41,7 +41,7 @@ export const industryData: IndustryPageData = {
       icon: "ClipboardList",
       title: "Full Audit Log",
       description:
-        "Every prompt, every user, every timestamp. Give your compliance team a complete record of AI usage to support internal audit and review processes.",
+        "Every prompt submission, every blocked attempt, every timestamp — logged and exportable as CSV or JSON. Give your compliance team a complete, filterable record of AI usage.",
     },
     {
       icon: "Users",
@@ -93,7 +93,7 @@ export const industryData: IndustryPageData = {
     {
       question: "What audit trail does TeamPrompt provide for compliance officers?",
       answer:
-        "TeamPrompt logs every prompt submission, blocked attempt, user action, and admin change with timestamps. Compliance officers get a dedicated dashboard with exportable reports, filterable by user, department, date range, and policy violation type — everything you need for HIPAA audits.",
+        "TeamPrompt logs every prompt submission and blocked attempt with timestamps. The Activity Log is filterable by user, AI tool, date range, and action type — and exportable as CSV or JSON for audit review. Combined with the guardrails analytics dashboard, this gives compliance teams the visibility they need.",
     },
   ],
   cta: {

@@ -25,7 +25,9 @@ import {
   X,
   Calendar,
   Filter,
+  Download,
 } from "lucide-react";
+import { toast } from "sonner";
 import { UpgradeGate } from "@/components/upgrade";
 import { useSubscription } from "@/components/providers/subscription-provider";
 import { getConversationLogs } from "@/lib/vault-api";
@@ -135,6 +137,8 @@ export default function ActivityPage() {
   const [searchInput, setSearchInput] = useState("");
   const [showFilters, setShowFilters] = useState(false);
 
+  const [exporting, setExporting] = useState(false);
+
   const logMode = (org?.settings as Record<string, unknown> | null)?.activity_log_mode || "metadata_only";
 
   const activeFilterCount = [
@@ -175,6 +179,81 @@ export default function ActivityPage() {
   }, [fetchLogs, orgLoading, currentUserRole]);
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
+
+  async function exportLogs(format: "csv" | "json") {
+    setExporting(true);
+    try {
+      const dateRange =
+        datePreset === "custom"
+          ? { from: customDateFrom || undefined, to: customDateTo || undefined }
+          : getDateRange(datePreset);
+
+      // Fetch all matching logs (up to 10,000)
+      const result = await getConversationLogs({
+        limit: 10000,
+        offset: 0,
+        aiTool: toolFilter === "__all__" ? undefined : toolFilter,
+        action: actionFilter === "__all__" ? undefined : actionFilter,
+        dateFrom: dateRange.from,
+        dateTo: dateRange.to,
+        search: searchQuery || undefined,
+      });
+
+      const exportLogs = result.logs;
+      if (exportLogs.length === 0) {
+        toast.error("No logs to export");
+        return;
+      }
+
+      let content: string;
+      let mimeType: string;
+      let ext: string;
+
+      if (format === "csv") {
+        const headers = ["timestamp", "action", "ai_tool", "guardrail_flags", "user_id"];
+        if (logMode === "full") headers.push("prompt_text");
+        const rows = exportLogs.map((log) => {
+          const row = [
+            log.created_at,
+            log.action,
+            log.ai_tool,
+            (log.guardrail_flags || []).join("; "),
+            log.user_id || "",
+          ];
+          if (logMode === "full") row.push((log.prompt_text || "").replace(/"/g, '""'));
+          return row.map((v) => `"${v}"`).join(",");
+        });
+        content = [headers.join(","), ...rows].join("\n");
+        mimeType = "text/csv";
+        ext = "csv";
+      } else {
+        content = JSON.stringify(exportLogs.map((log) => ({
+          timestamp: log.created_at,
+          action: log.action,
+          ai_tool: log.ai_tool,
+          guardrail_flags: log.guardrail_flags || [],
+          user_id: log.user_id,
+          ...(logMode === "full" ? { prompt_text: log.prompt_text } : {}),
+        })), null, 2);
+        mimeType = "application/json";
+        ext = "json";
+      }
+
+      const blob = new Blob([content], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `activity-log-${new Date().toISOString().slice(0, 10)}.${ext}`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success(`Exported ${exportLogs.length} log entries as ${ext.toUpperCase()}`);
+    } catch (err) {
+      toast.error("Export failed");
+      console.error(err);
+    } finally {
+      setExporting(false);
+    }
+  }
 
   function clearFilters() {
     setToolFilter("__all__");
@@ -351,9 +430,23 @@ export default function ActivityPage() {
             </Button>
           )}
 
-          <span className="text-sm text-muted-foreground ml-auto">
-            {total} {total === 1 ? "entry" : "entries"}
-          </span>
+          <div className="flex items-center gap-2 ml-auto">
+            <span className="text-sm text-muted-foreground">
+              {total} {total === 1 ? "entry" : "entries"}
+            </span>
+            {total > 0 && (
+              <Select value="" onValueChange={(v) => exportLogs(v as "csv" | "json")}>
+                <SelectTrigger className="w-auto h-8 gap-1.5 text-xs" disabled={exporting}>
+                  {exporting ? <span className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" /> : <Download className="h-3 w-3" />}
+                  Export
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="csv">Export as CSV</SelectItem>
+                  <SelectItem value="json">Export as JSON</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+          </div>
         </div>
 
         {/* Custom date range inputs */}

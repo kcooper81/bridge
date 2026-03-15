@@ -33,17 +33,14 @@ export default function InvitePage() {
         return;
       }
 
+      // Fetch invite details via API (bypasses RLS so any user can read invite info)
+      const detailsRes = await fetch(`/api/invite/details?token=${encodeURIComponent(token)}`);
+      const invite = detailsRes.ok ? await detailsRes.json() : null;
+
       const supabase = createClient();
       const {
         data: { user },
       } = await supabase.auth.getUser();
-
-      // First, fetch invite details regardless of auth state (to show email hint)
-      const { data: invite } = await supabase
-        .from("invites")
-        .select("email, role, status, org_id, invited_by, organizations(name), profiles!invites_invited_by_fkey(name)")
-        .eq("token", token)
-        .single();
 
       if (!user) {
         // Pass the invited email so the login page can show an account hint
@@ -54,26 +51,31 @@ export default function InvitePage() {
         return;
       }
 
-      if (invite && invite.status === "accepted") {
-        // Invite was already used — but user is signed in, so just redirect them
+      if (!invite) {
+        setError("This invite link is invalid.");
+        setChecking(false);
+        return;
+      }
+
+      if (invite.status === "accepted") {
         toast.success("You've already accepted this invite. Welcome back!");
         router.push("/home");
         return;
       }
 
-      if (invite && invite.status === "revoked") {
+      if (invite.status === "revoked") {
         setError("This invite has been revoked. A newer invite may have been sent — check your email for a more recent link, or ask your admin to resend.");
         setChecking(false);
         return;
       }
 
-      if (invite && invite.status === "expired") {
+      if (invite.expired || invite.status === "expired") {
         setError("This invite has expired. Ask your admin to send a new invite.");
         setChecking(false);
         return;
       }
 
-      if (invite && invite.status === "pending") {
+      if (invite.status === "pending") {
         // Check if signed-in email matches the invited email
         if (invite.email && user.email && invite.email.toLowerCase() !== user.email.toLowerCase()) {
           setEmailMismatch({
@@ -82,12 +84,10 @@ export default function InvitePage() {
           });
         }
 
-        const orgData = invite.organizations as unknown as { name: string } | null;
-        const inviterData = invite.profiles as unknown as { name: string } | null;
         setInviteDetails({
-          orgName: orgData?.name || "a team",
+          orgName: invite.orgName || "a team",
           role: invite.role || "member",
-          invitedBy: inviterData?.name || "A team member",
+          invitedBy: invite.invitedBy || "A team member",
           inviteEmail: invite.email || "",
         });
       } else {

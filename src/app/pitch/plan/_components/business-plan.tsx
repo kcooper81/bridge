@@ -49,30 +49,31 @@ const PROFORMA_ORGANIC = [
 ];
 
 // With paid marketing: ad spend + marketing contractor accelerate acquisition
-// Growth: ~10-15% MoM (M3-5) as ads ramp, moderating to 3-5% by M13+
+// Growth: ~15-20% MoM (M3-6) as ads ramp, moderating to 5-8% by M12+
 // People: marketing contractor M2+ ($2,500), support M5+ ($2,000),
 //         security consultant M10+ ($3,000)
-// Ad spend: M2 $2K → M6 $5K → M9+ $6K (LinkedIn, Google, retargeting)
+// Ad spend: M2 $2K → M6 $4K → M9+ $5K (LinkedIn, Google, retargeting)
 // opex = infra + people (excludes ad spend); adSpend shown separately
+// Key assumption: each $1 ad spend generates ~$3-4 in MRR within 2 months (B2B SaaS benchmark)
 const PROFORMA_FUNDED = [
   { month: "M1",  mrr: 13500,  opex: 500,    adSpend: 0,    stripe: 473 },
-  { month: "M2",  mrr: 14800,  opex: 3000,   adSpend: 2000, stripe: 518 },
-  { month: "M3",  mrr: 17000,  opex: 3000,   adSpend: 3000, stripe: 595 },
-  { month: "M4",  mrr: 19500,  opex: 3000,   adSpend: 4000, stripe: 683 },
-  { month: "M5",  mrr: 22000,  opex: 5000,   adSpend: 4000, stripe: 770 },
-  { month: "M6",  mrr: 24500,  opex: 5000,   adSpend: 5000, stripe: 858 },
-  { month: "M7",  mrr: 27000,  opex: 5000,   adSpend: 5000, stripe: 945 },
-  { month: "M8",  mrr: 29500,  opex: 5000,   adSpend: 5000, stripe: 1033 },
-  { month: "M9",  mrr: 32000,  opex: 5000,   adSpend: 6000, stripe: 1120 },
-  { month: "M10", mrr: 34500,  opex: 8000,   adSpend: 6000, stripe: 1208 },
-  { month: "M11", mrr: 37000,  opex: 8000,   adSpend: 6000, stripe: 1295 },
-  { month: "M12", mrr: 39000,  opex: 8000,   adSpend: 6000, stripe: 1365 },
-  { month: "M13", mrr: 41000,  opex: 8000,   adSpend: 6000, stripe: 1435 },
-  { month: "M14", mrr: 43000,  opex: 8000,   adSpend: 6000, stripe: 1505 },
-  { month: "M15", mrr: 45000,  opex: 8000,   adSpend: 6000, stripe: 1575 },
-  { month: "M16", mrr: 47000,  opex: 8000,   adSpend: 6000, stripe: 1645 },
-  { month: "M17", mrr: 48500,  opex: 8000,   adSpend: 6000, stripe: 1698 },
-  { month: "M18", mrr: 50000,  opex: 8000,   adSpend: 6000, stripe: 1750 },
+  { month: "M2",  mrr: 15500,  opex: 3000,   adSpend: 2000, stripe: 543 },
+  { month: "M3",  mrr: 18500,  opex: 3000,   adSpend: 3000, stripe: 648 },
+  { month: "M4",  mrr: 22000,  opex: 3000,   adSpend: 3500, stripe: 770 },
+  { month: "M5",  mrr: 26000,  opex: 5000,   adSpend: 4000, stripe: 910 },
+  { month: "M6",  mrr: 30000,  opex: 5000,   adSpend: 4000, stripe: 1050 },
+  { month: "M7",  mrr: 33500,  opex: 5000,   adSpend: 4500, stripe: 1173 },
+  { month: "M8",  mrr: 36500,  opex: 5000,   adSpend: 4500, stripe: 1278 },
+  { month: "M9",  mrr: 39000,  opex: 5000,   adSpend: 5000, stripe: 1365 },
+  { month: "M10", mrr: 41500,  opex: 8000,   adSpend: 5000, stripe: 1453 },
+  { month: "M11", mrr: 43500,  opex: 8000,   adSpend: 5000, stripe: 1523 },
+  { month: "M12", mrr: 45500,  opex: 8000,   adSpend: 5000, stripe: 1593 },
+  { month: "M13", mrr: 46500,  opex: 8000,   adSpend: 4000, stripe: 1628 },
+  { month: "M14", mrr: 47500,  opex: 8000,   adSpend: 4000, stripe: 1663 },
+  { month: "M15", mrr: 48500,  opex: 8000,   adSpend: 4000, stripe: 1698 },
+  { month: "M16", mrr: 49000,  opex: 8000,   adSpend: 3500, stripe: 1715 },
+  { month: "M17", mrr: 49500,  opex: 8000,   adSpend: 3500, stripe: 1733 },
+  { month: "M18", mrr: 50000,  opex: 8000,   adSpend: 3500, stripe: 1750 },
 ];
 
 // ─── Monthly operating costs at scale tiers ─────────────────────
@@ -813,7 +814,7 @@ export function BusinessPlan({ shareToken }: { shareToken: string }) {
         {/* ═══════════════════════════════════════════
             SECTION 7: USE OF FUNDS
         ═══════════════════════════════════════════ */}
-        <Section id="use-of-funds" title="Use of Funds — $100K" subtitle="Detailed allocation with Louisiana LEB 25% investor tax credit">
+        <Section id="use-of-funds" title="Use of Funds — $100K" subtitle="Detailed allocation to accelerate growth from organic traction">
           <div className="grid sm:grid-cols-2 gap-6">
             <Card>
               <h4 className="font-bold mb-6 text-zinc-900">Allocation Breakdown</h4>
@@ -865,27 +866,24 @@ export function BusinessPlan({ shareToken }: { shareToken: string }) {
               <Card>
                 <div className="flex items-center gap-3 mb-4">
                   <BarChart3 className="h-5 w-5 text-blue-600" />
-                  <h4 className="font-bold text-zinc-900">Louisiana LEB Tax Credit</h4>
+                  <h4 className="font-bold text-zinc-900">Why This Investment Works</h4>
                 </div>
-                <div className="space-y-4">
-                  <p className="text-sm text-zinc-600">
-                    TeamPrompt qualifies for the Louisiana Economic Development program.
-                    Investors receive a 25% state tax credit on their investment.
-                  </p>
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-baseline">
-                      <span className="text-sm text-zinc-500">Investment</span>
-                      <span className="text-lg font-black font-mono text-zinc-900">$100,000</span>
+                <div className="space-y-3">
+                  {[
+                    { label: "Already generating revenue", desc: "Not pre-revenue — real MRR from paying teams" },
+                    { label: "97% gross margin", desc: "Software-only, serverless — near-zero marginal cost" },
+                    { label: "Product-led growth", desc: "Free tier drives organic adoption, teams convert when they need security" },
+                    { label: "Clear path to seed round", desc: "$50K MRR = $600K ARR — strong position for $1-2M seed" },
+                    { label: "Capital efficient", desc: "$100K funds 12-18 months of accelerated growth" },
+                  ].map((item) => (
+                    <div key={item.label} className="flex gap-2 items-start">
+                      <Shield className="h-3.5 w-3.5 text-blue-600 shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-semibold text-zinc-900">{item.label}</p>
+                        <p className="text-xs text-zinc-500">{item.desc}</p>
+                      </div>
                     </div>
-                    <div className="flex justify-between items-baseline">
-                      <span className="text-sm text-zinc-500">Tax credit (25%)</span>
-                      <span className="text-lg font-black text-blue-600 font-mono">-$25,000</span>
-                    </div>
-                    <div className="border-t border-zinc-200 pt-2 flex justify-between items-baseline">
-                      <span className="text-sm text-blue-600 font-bold">Effective cost</span>
-                      <span className="text-2xl font-black text-blue-600 font-mono">$75,000</span>
-                    </div>
-                  </div>
+                  ))}
                 </div>
               </Card>
 

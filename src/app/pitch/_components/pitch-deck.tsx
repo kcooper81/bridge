@@ -35,7 +35,6 @@ import {
   Heart,
   Banknote,
   X as XIcon,
-  Award,
   Link2,
 } from "lucide-react";
 
@@ -939,16 +938,16 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
               Product-market fit.<br />
               <span className="text-zinc-500">Proven.</span>
             </h2>
-            <p className="mt-3 text-base text-zinc-500">6 months. Organic growth. Zero ad spend.</p>
+            <p className="mt-3 text-base text-zinc-500">Built and growing organically. Zero ad spend to date.</p>
           </RevealText>
 
           <RevealText delay={200}>
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
               {[
-                { value: "1,200+", label: "Active users", sub: "organic" },
-                { value: "85", label: "Paying teams", sub: "" },
-                { value: "$13.5K", label: "MRR", sub: "40% MoM" },
-                { value: "4.8★", label: "Chrome Store", sub: "500+ reviews" },
+                { value: "1,200+", label: "Registered users", sub: "organic" },
+                { value: "85", label: "Paying teams", sub: "avg 4 seats" },
+                { value: "$13.5K", label: "MRR", sub: "$162K ARR" },
+                { value: "4.8★", label: "Chrome Store", sub: "" },
                 { value: "<2%", label: "Monthly churn", sub: "" },
               ].map((m) => (
                 <div key={m.label} className="bg-white rounded-xl border border-zinc-200 shadow-sm p-4 text-center">
@@ -963,8 +962,8 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
           <RevealText delay={350}>
             <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-bold text-xs uppercase tracking-widest text-zinc-500">MRR Growth — 40% Month-over-Month</h3>
-                <span className="text-xs text-zinc-400">No marketing spend yet</span>
+                <h3 className="font-bold text-xs uppercase tracking-widest text-zinc-500">MRR Growth — Organic, No Ad Spend</h3>
+                <span className="text-xs text-zinc-400">$1.2K → $13.5K in 8 months</span>
               </div>
               {(() => {
                 const data = [
@@ -1195,7 +1194,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
       </div>
 
       {/* ═══════════════════════════════════════════════════════════
-          SLIDE 11: THE ASK + LOUISIANA LEB
+          SLIDE 11: THE ASK
       ═══════════════════════════════════════════════════════════ */}
       <div {...slideProps(10)}>
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500/0 via-blue-500/50 to-blue-500/0" />
@@ -1207,7 +1206,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
             </p>
             <h2 className="text-3xl sm:text-4xl font-black leading-tight tracking-tight text-zinc-900">
               $100K pre-seed.<br />
-              <span className="text-zinc-500">Capital efficient. Tax credit eligible.</span>
+              <span className="text-zinc-500">Capital efficient. Revenue generating.</span>
             </h2>
           </RevealText>
 
@@ -1243,35 +1242,31 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
             </RevealText>
 
             <RevealText delay={350}>
-              <div className="bg-amber-50 border border-amber-200 rounded-2xl p-7 h-full relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-[60px]" />
+              <div className="bg-blue-50 border border-blue-200 rounded-2xl p-7 h-full relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-[60px]" />
                 <div className="relative">
                   <div className="flex items-center gap-2 mb-4">
-                    <Award className="h-5 w-5 text-blue-600" />
-                    <h3 className="font-bold">Louisiana LEB Tax Credit</h3>
+                    <TrendingUp className="h-5 w-5 text-blue-600" />
+                    <h3 className="font-bold">Why This Is a Smart Bet</h3>
                   </div>
                   <div className="space-y-4">
-                    <p className="text-sm text-zinc-600 leading-relaxed">
-                      TeamPrompt qualifies for the <span className="text-blue-600 font-semibold">Louisiana Enterprise Zone / LEB program</span>.
-                      Investors receive a <span className="text-blue-600 font-semibold">25% state tax credit</span> on their investment.
-                    </p>
-                    <div className="bg-white rounded-xl border border-zinc-200 shadow-sm p-5 space-y-3">
-                      <div className="flex justify-between items-baseline">
-                        <span className="text-xs text-zinc-500">Investment</span>
-                        <span className="text-lg font-black text-zinc-900">$100,000</span>
-                      </div>
-                      <div className="flex justify-between items-baseline">
-                        <span className="text-xs text-zinc-500">Tax credit (25%)</span>
-                        <span className="text-lg font-black text-blue-600">−$25,000</span>
-                      </div>
-                      <div className="border-t border-zinc-200 pt-3 flex justify-between items-baseline">
-                        <span className="text-xs text-blue-600 font-bold uppercase tracking-wider">Effective cost</span>
-                        <span className="text-2xl font-black text-blue-600">$75,000</span>
-                      </div>
+                    <div className="space-y-3">
+                      {[
+                        { label: "Revenue today", value: "Already generating MRR — not pre-revenue" },
+                        { label: "Product shipped", value: "Full platform live with paying customers" },
+                        { label: "97% gross margin", value: "Software-only, serverless architecture" },
+                        { label: "Capital efficient", value: "$100K funds 12–18 months of runway" },
+                        { label: "Clear path to seed", value: "Hit $50K MRR → raise on strong metrics" },
+                      ].map((item) => (
+                        <div key={item.label} className="flex gap-3 items-start">
+                          <CheckCircle2 className="h-4 w-4 text-blue-600 shrink-0 mt-0.5" />
+                          <div>
+                            <p className="text-sm font-semibold text-zinc-900">{item.label}</p>
+                            <p className="text-xs text-zinc-500">{item.value}</p>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                    <p className="text-sm text-zinc-400 leading-relaxed">
-                      Louisiana Economic Development program designed to incentivize investment in Louisiana-based technology startups.
-                    </p>
                   </div>
                 </div>
               </div>
@@ -1307,9 +1302,9 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
           <RevealText delay={200}>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               {[
-                { metric: "Active Users", from: "1,200", to: "5,000", icon: Users },
+                { metric: "Registered Users", from: "1,200", to: "8,000+", icon: Users },
                 { metric: "MRR", from: "$13.5K", to: "$50K", icon: TrendingUp },
-                { metric: "Paying Teams", from: "85", to: "200", icon: Building2 },
+                { metric: "Paying Teams", from: "85", to: "350+", icon: Building2 },
                 { metric: "ARR Run Rate", from: "$162K", to: "$600K", icon: DollarSign },
               ].map((t) => (
                 <div key={t.metric} className="bg-white rounded-xl border border-zinc-200 shadow-sm p-5 text-center">

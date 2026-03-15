@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Admin only" }, { status: 403 });
     }
 
-    // Plan gate: google_workspace_sync requires Business
+    // Plan gate: google_workspace_sync requires Team or above
     if (!profile.is_super_admin) {
       const { data: org } = await db
         .from("organizations")
@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
       const plan = (org?.plan || "free") as PlanTier;
       if (!PLAN_LIMITS[plan]?.google_workspace_sync) {
         return NextResponse.json(
-          { error: "Google Workspace sync requires a Business plan" },
+          { error: "Google Workspace sync requires a Team plan or above" },
           { status: 403 }
         );
       }

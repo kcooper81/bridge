@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
       const plan = (org?.plan || "free") as PlanTier;
       if (!PLAN_LIMITS[plan]?.google_workspace_sync) {
         return NextResponse.json(
-          { error: "Google Workspace sync requires a Business plan" },
+          { error: "Google Workspace sync requires a Team plan or above" },
           { status: 403 }
         );
       }

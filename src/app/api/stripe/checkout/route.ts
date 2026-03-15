@@ -13,6 +13,13 @@ function getStripe() {
   });
 }
 
+function getPlanFromPriceId(priceId: string): string {
+  if (priceId === process.env.STRIPE_PRICE_PRO || priceId === process.env.STRIPE_PRICE_PRO_ANNUAL) return "pro";
+  if (priceId === process.env.STRIPE_PRICE_TEAM || priceId === process.env.STRIPE_PRICE_TEAM_ANNUAL) return "team";
+  if (priceId === process.env.STRIPE_PRICE_BUSINESS || priceId === process.env.STRIPE_PRICE_BUSINESS_ANNUAL) return "business";
+  return "free";
+}
+
 export async function POST(request: NextRequest) {
   // Early env var check before anything else
   const missingEnvs = [
@@ -110,6 +117,43 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Fallback: check Stripe directly for existing subscriptions (catches cases where
+    // the webhook failed and the DB is out of sync with Stripe)
+    const stripe = getStripe();
+    const existingCustomers = await stripe.customers.list({ email: user.email!, limit: 5 });
+    for (const cust of existingCustomers.data) {
+      const stripeSubs = await stripe.subscriptions.list({
+        customer: cust.id,
+        status: "all",
+        limit: 10,
+      });
+      const activeSub = stripeSubs.data.find(
+        (s) => s.status === "active" || s.status === "trialing"
+      );
+      if (activeSub) {
+        // Sync the subscription to DB so future checks work from DB alone
+        const subPriceId = activeSub.items.data[0]?.price?.id || "";
+        const subPlan = getPlanFromPriceId(subPriceId);
+        await db.from("subscriptions").upsert({
+          org_id: orgId,
+          stripe_customer_id: cust.id,
+          stripe_subscription_id: activeSub.id,
+          plan: subPlan,
+          status: activeSub.status,
+          seats: activeSub.items.data[0]?.quantity || 1,
+          current_period_end: new Date(activeSub.current_period_end * 1000).toISOString(),
+          trial_ends_at: activeSub.trial_end ? new Date(activeSub.trial_end * 1000).toISOString() : null,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: "org_id" });
+        await db.from("organizations").update({ plan: subPlan }).eq("id", orgId);
+
+        return NextResponse.json(
+          { error: "You already have an active subscription. Use 'Manage Billing' to change plans." },
+          { status: 409 }
+        );
+      }
+    }
+
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://teamprompt.app";
     const seatCount = Math.max(
       planConfig.minSeats,
@@ -140,7 +184,13 @@ export async function POST(request: NextRequest) {
     if (existingSub?.stripe_customer_id) {
       sessionParams.customer = existingSub.stripe_customer_id;
     } else {
-      sessionParams.customer_email = user.email;
+      // Also check if we found a Stripe customer above to reuse
+      const existingCust = existingCustomers.data[0];
+      if (existingCust) {
+        sessionParams.customer = existingCust.id;
+      } else {
+        sessionParams.customer_email = user.email;
+      }
     }
 
     if (planConfig.trial) {
@@ -154,7 +204,7 @@ export async function POST(request: NextRequest) {
       };
     }
 
-    const session = await getStripe().checkout.sessions.create(sessionParams);
+    const session = await stripe.checkout.sessions.create(sessionParams);
     return NextResponse.json({ url: session.url });
   } catch (error) {
     console.error("Checkout error:", error);

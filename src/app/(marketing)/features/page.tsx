@@ -804,7 +804,7 @@ const features = [
     details: [
       "Admin, Manager, and Member roles",
       "Bulk CSV import and bulk role assignment",
-      "Google Workspace directory sync (Business)",
+      "Google Workspace directory sync (Team+)",
       "Domain-based auto-join and custom welcome emails",
     ],
   },

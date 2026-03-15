@@ -105,7 +105,7 @@ export const PLAN_LIMITS: Record<PlanTier, PlanLimits> = {
     bulk_role_assignment: true,
     custom_welcome_email: true,
     domain_auto_join: true,
-    google_workspace_sync: false,
+    google_workspace_sync: true,
     priority_support: false,
     sla: false,
   },

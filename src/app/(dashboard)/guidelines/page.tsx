@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { cn } from "@/lib/utils";
 import { useOrg } from "@/components/providers/org-provider";
 import { useSubscription } from "@/components/providers/subscription-provider";
 import { PageHeader } from "@/components/dashboard/page-header";
@@ -21,7 +22,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { TagInput } from "@/components/ui/tag-input";
 import { CategoryCombobox } from "@/components/ui/category-combobox";
-import { BookOpen, Download, Loader2, Pencil, Plus, Trash2 } from "lucide-react";
+import { BookOpen, ChevronDown, Download, LayoutGrid, List, Loader2, Pencil, Plus, Trash2 } from "lucide-react";
 import { NoOrgBanner } from "@/components/dashboard/no-org-banner";
 import { UpgradePrompt, LimitNudge } from "@/components/upgrade";
 import { UsageIndicator } from "@/components/dashboard/usage-indicator";
@@ -41,6 +42,8 @@ export default function GuidelinesPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editGuideline, setEditGuideline] = useState<Guideline | null>(null);
   const [installing, setInstalling] = useState(false);
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -234,46 +237,163 @@ export default function GuidelinesPage() {
           <BookOpen className="h-12 w-12 text-muted-foreground mb-4" />
           <h3 className="text-lg font-medium">No guidelines yet</h3>
           <p className="text-sm text-muted-foreground mt-1">
-            Install the 14 built-in defaults or create your own.
+            {canEdit ? "Install the 14 built-in defaults or create your own." : "Your admin hasn't created any guidelines yet."}
           </p>
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {guidelines.map((g) => (
-            <Card key={g.id} className="group">
-              <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
-                <div className="flex-1 min-w-0">
-                  <CardTitle className="text-base">{g.name}</CardTitle>
-                  {g.category && (
-                    <Badge variant="outline" className="mt-1 text-xs">
-                      {g.category}
-                    </Badge>
-                  )}
-                </div>
-                <div className="flex items-center gap-2">
-                  <Switch checked={g.enforced} onCheckedChange={() => handleToggleEnforced(g)} disabled={!canEdit} />
-                  {canEdit && (
-                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openModal(g)}>
-                        <Pencil className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => handleDelete(g.id)} disabled={deletingId === g.id}>
-                        {deletingId === g.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
-                      </Button>
+        <>
+          {/* View toggle */}
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-sm text-muted-foreground">{guidelines.length} guideline{guidelines.length !== 1 ? "s" : ""}</p>
+            <div className="flex items-center border border-border rounded-lg overflow-hidden">
+              <button onClick={() => setViewMode("grid")} className={cn("p-1.5 transition-colors", viewMode === "grid" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted")}>
+                <LayoutGrid className="h-4 w-4" />
+              </button>
+              <button onClick={() => setViewMode("list")} className={cn("p-1.5 transition-colors", viewMode === "list" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted")}>
+                <List className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+
+          {viewMode === "grid" ? (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {guidelines.map((g) => {
+                const isExpanded = expandedId === g.id;
+                const rules = g.rules || {};
+                return (
+                  <Card key={g.id} className="group cursor-pointer transition-shadow hover:shadow-md" onClick={() => setExpandedId(isExpanded ? null : g.id)}>
+                    <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
+                      <div className="flex-1 min-w-0">
+                        <CardTitle className="text-base">{g.name}</CardTitle>
+                        {g.category && (
+                          <Badge variant="outline" className="mt-1 text-xs">{g.category}</Badge>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                        <Switch checked={g.enforced} onCheckedChange={() => handleToggleEnforced(g)} disabled={!canEdit} />
+                        {canEdit && (
+                          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openModal(g)}><Pencil className="h-3.5 w-3.5" /></Button>
+                            <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => handleDelete(g.id)} disabled={deletingId === g.id}>
+                              {deletingId === g.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      {g.description && <p className="text-sm text-muted-foreground line-clamp-2">{g.description}</p>}
+                      <ChevronDown className={cn("h-4 w-4 text-muted-foreground mx-auto transition-transform", isExpanded && "rotate-180")} />
+                      {isExpanded && (
+                        <div className="space-y-3 pt-2 border-t border-border">
+                          {rules.bestPractices && rules.bestPractices.length > 0 && (
+                            <div>
+                              <p className="text-xs font-semibold text-muted-foreground mb-1">Best Practices</p>
+                              <ul className="space-y-1">{rules.bestPractices.map((r: string) => <li key={r} className="text-xs text-foreground flex gap-2"><span className="text-primary">+</span>{r}</li>)}</ul>
+                            </div>
+                          )}
+                          {rules.toneRules && rules.toneRules.length > 0 && (
+                            <div>
+                              <p className="text-xs font-semibold text-muted-foreground mb-1">Tone</p>
+                              <ul className="space-y-1">{rules.toneRules.map((r: string) => <li key={r} className="text-xs text-foreground">{r}</li>)}</ul>
+                            </div>
+                          )}
+                          {rules.restrictions && rules.restrictions.length > 0 && (
+                            <div>
+                              <p className="text-xs font-semibold text-muted-foreground mb-1">Restrictions</p>
+                              <ul className="space-y-1">{rules.restrictions.map((r: string) => <li key={r} className="text-xs text-destructive flex gap-2"><span>-</span>{r}</li>)}</ul>
+                            </div>
+                          )}
+                          {(rules.minLength || rules.maxLength) && (
+                            <div>
+                              <p className="text-xs font-semibold text-muted-foreground mb-1">Length</p>
+                              <p className="text-xs">{rules.minLength ? `Min: ${rules.minLength} chars` : ""}{rules.minLength && rules.maxLength ? " · " : ""}{rules.maxLength ? `Max: ${rules.maxLength} chars` : ""}</p>
+                            </div>
+                          )}
+                          {rules.bannedWords && rules.bannedWords.length > 0 && (
+                            <div>
+                              <p className="text-xs font-semibold text-muted-foreground mb-1">Banned Words</p>
+                              <div className="flex flex-wrap gap-1">{rules.bannedWords.map((w: string) => <span key={w} className="text-[10px] bg-destructive/10 text-destructive px-1.5 py-0.5 rounded">{w}</span>)}</div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          ) : (
+            /* List view */
+            <div className="rounded-lg border border-border divide-y divide-border">
+              {guidelines.map((g) => {
+                const isExpanded = expandedId === g.id;
+                const rules = g.rules || {};
+                return (
+                  <div key={g.id} className="group">
+                    <div className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => setExpandedId(isExpanded ? null : g.id)}>
+                      <BookOpen className="h-4 w-4 text-primary shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-medium">{g.name}</p>
+                          {g.category && <Badge variant="outline" className="text-[10px]">{g.category}</Badge>}
+                        </div>
+                        {g.description && <p className="text-xs text-muted-foreground truncate mt-0.5">{g.description}</p>}
+                      </div>
+                      <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                        <Badge variant={g.enforced ? "default" : "secondary"} className="text-[10px]">{g.enforced ? "Enforced" : "Off"}</Badge>
+                        <Switch checked={g.enforced} onCheckedChange={() => handleToggleEnforced(g)} disabled={!canEdit} />
+                        {canEdit && (
+                          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openModal(g)}><Pencil className="h-3.5 w-3.5" /></Button>
+                            <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => handleDelete(g.id)} disabled={deletingId === g.id}>
+                              {deletingId === g.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                      <ChevronDown className={cn("h-4 w-4 text-muted-foreground shrink-0 transition-transform", isExpanded && "rotate-180")} />
                     </div>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent>
-                {g.description && (
-                  <p className="text-sm text-muted-foreground line-clamp-2">
-                    {g.description}
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                    {isExpanded && (
+                      <div className="px-4 pb-4 pt-1 ml-7 space-y-3 border-t border-border">
+                        {rules.bestPractices && rules.bestPractices.length > 0 && (
+                          <div>
+                            <p className="text-xs font-semibold text-muted-foreground mb-1">Best Practices</p>
+                            <ul className="space-y-1">{rules.bestPractices.map((r: string) => <li key={r} className="text-sm flex gap-2"><span className="text-primary">+</span>{r}</li>)}</ul>
+                          </div>
+                        )}
+                        {rules.toneRules && rules.toneRules.length > 0 && (
+                          <div>
+                            <p className="text-xs font-semibold text-muted-foreground mb-1">Tone</p>
+                            <ul className="space-y-1">{rules.toneRules.map((r: string) => <li key={r} className="text-sm">{r}</li>)}</ul>
+                          </div>
+                        )}
+                        {rules.restrictions && rules.restrictions.length > 0 && (
+                          <div>
+                            <p className="text-xs font-semibold text-muted-foreground mb-1">Restrictions</p>
+                            <ul className="space-y-1">{rules.restrictions.map((r: string) => <li key={r} className="text-sm text-destructive flex gap-2"><span>-</span>{r}</li>)}</ul>
+                          </div>
+                        )}
+                        {(rules.minLength || rules.maxLength) && (
+                          <div>
+                            <p className="text-xs font-semibold text-muted-foreground mb-1">Length Requirements</p>
+                            <p className="text-sm">{rules.minLength ? `Min: ${rules.minLength} chars` : ""}{rules.minLength && rules.maxLength ? " · " : ""}{rules.maxLength ? `Max: ${rules.maxLength} chars` : ""}</p>
+                          </div>
+                        )}
+                        {rules.bannedWords && rules.bannedWords.length > 0 && (
+                          <div>
+                            <p className="text-xs font-semibold text-muted-foreground mb-1">Banned Words</p>
+                            <div className="flex flex-wrap gap-1">{rules.bannedWords.map((w: string) => <span key={w} className="text-xs bg-destructive/10 text-destructive px-2 py-0.5 rounded">{w}</span>)}</div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </>
       )}
 
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>

@@ -871,6 +871,64 @@ export default function TeamPage() {
     );
   }
 
+  // Member read-only view — can see team but not manage
+  if (currentUserRole === "member") {
+    return (
+      <>
+        <PageHeader title="Team" description="Your team members" />
+
+        {/* Team list */}
+        <div className="rounded-lg border border-border">
+          <div className="p-3 border-b border-border flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            <span className="flex-1">Member</span>
+            <span className="w-20 text-center">Role</span>
+          </div>
+          {members.map((m) => (
+            <div key={m.id} className="flex items-center gap-3 p-3 border-b border-border last:border-0">
+              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary shrink-0">
+                {(m.name || m.email).slice(0, 2).toUpperCase()}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate">{m.name || m.email}</p>
+                <p className="text-xs text-muted-foreground truncate">{m.email}</p>
+              </div>
+              <span className={cn(
+                "text-xs font-medium px-2 py-0.5 rounded capitalize",
+                m.role === "admin" ? "bg-primary/10 text-primary" :
+                m.role === "manager" ? "bg-amber-500/10 text-amber-600" :
+                "bg-muted text-muted-foreground"
+              )}>
+                {m.role}
+              </span>
+              {m.isCurrentUser && (
+                <span className="text-[10px] text-muted-foreground">(you)</span>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Teams the member belongs to */}
+        {teams.length > 0 && (
+          <div className="mt-6">
+            <h3 className="text-sm font-semibold mb-3">Teams</h3>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {teams.map((team) => {
+                const teamMembers = members.filter((m) => m.teamIds?.includes(team.id));
+                return (
+                  <div key={team.id} className="rounded-lg border border-border p-4">
+                    <p className="text-sm font-semibold">{team.name}</p>
+                    {team.description && <p className="text-xs text-muted-foreground mt-1">{team.description}</p>}
+                    <p className="text-xs text-muted-foreground mt-2">{teamMembers.length} member{teamMembers.length !== 1 ? "s" : ""}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </>
+    );
+  }
+
   return (
     <>
       <PageHeader

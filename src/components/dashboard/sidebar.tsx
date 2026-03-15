@@ -40,8 +40,8 @@ const navSections: { title: string; items: NavItem[] }[] = [
       { label: "Prompts", href: "/vault", icon: Archive },
       { label: "Templates", href: "/templates", icon: Library },
       { label: "Approvals", href: "/approvals", icon: CheckSquare, roles: ["admin", "manager"] },
-      { label: "Guidelines", href: "/guidelines", icon: BookOpen, roles: ["admin", "manager"] },
-      { label: "Team", href: "/team", icon: Users, roles: ["admin", "manager"] },
+      { label: "Guidelines", href: "/guidelines", icon: BookOpen },
+      { label: "Team", href: "/team", icon: Users },
     ],
   },
   {
@@ -49,7 +49,7 @@ const navSections: { title: string; items: NavItem[] }[] = [
     items: [
       { label: "Analytics", href: "/analytics", icon: BarChart3, roles: ["admin", "manager"] },
       { label: "Activity & Audit", href: "/activity", icon: Activity, roles: ["admin", "manager"] },
-      { label: "Guardrails", href: "/guardrails", icon: Shield, roles: ["admin", "manager"] },
+      { label: "Guardrails", href: "/guardrails", icon: Shield },
     ],
   },
 ];

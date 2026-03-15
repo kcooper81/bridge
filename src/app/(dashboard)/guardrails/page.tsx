@@ -556,13 +556,35 @@ export default function GuardrailsPage() {
       <>
         <PageHeader
           title="AI Guardrails"
-          description="Your organization uses guardrails to protect sensitive data in AI prompts"
+          description="Your organization's data protection rules — avoid including this data in AI prompts"
         />
         <div className="mb-6 grid grid-cols-3 gap-4">
           <StatCard label="Active Policies" value={activeRules} icon={<ShieldCheck className="h-5 w-5" />} />
           <StatCard label="Violations (7d)" value={weekViolations} icon={<ShieldAlert className="h-5 w-5" />} />
           <StatCard label="Block Rate" value={`${blockRate}%`} icon={<Shield className="h-5 w-5" />} />
         </div>
+
+        {/* Read-only rules list for members */}
+        {rules.filter((r) => r.is_active).length > 0 && (
+          <div className="mb-6">
+            <h3 className="text-sm font-semibold mb-3">Active Rules</h3>
+            <div className="rounded-lg border border-border divide-y divide-border">
+              {rules.filter((r) => r.is_active).map((rule) => (
+                <div key={rule.id} className="flex items-center gap-3 px-4 py-3">
+                  <Shield className="h-4 w-4 text-primary shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium">{rule.name}</p>
+                    {rule.description && <p className="text-xs text-muted-foreground truncate">{rule.description}</p>}
+                  </div>
+                  <Badge variant={rule.severity === "block" ? "destructive" : "secondary"} className="text-[10px] shrink-0">
+                    {rule.severity === "block" ? "Blocks" : "Warns"}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         <MemberSuggestRule />
       </>
     );

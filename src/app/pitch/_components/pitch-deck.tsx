@@ -21,7 +21,6 @@ import {
   Rocket,
   FileText,
   Layers,
-  ArrowRight,
   Monitor,
   Server,
   Database,
@@ -34,7 +33,7 @@ import {
 
 // ─── Constants ──────────────────────────────────────────────────
 
-const TOTAL_SLIDES = 13;
+const TOTAL_SLIDES = 14;
 // Colors used inline in SVG gradients when needed
 // const ACCENT = "#7C3AED"; const ACCENT_BLUE = "#3B82F6";
 
@@ -161,7 +160,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
   });
 
   const slideLabels = [
-    "", "Problem", "Solution", "Product", "Why Now", "Competitive Edge",
+    "", "Problem", "Solution", "Product", "How It Works", "Why Now", "Competitive Edge",
     "Business Model", "Traction", "Architecture", "Team", "The Ask", "Growth Plan", "Vision",
   ];
 
@@ -548,9 +547,146 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
       </div>
 
       {/* ═══════════════════════════════════════════════════════════
-          SLIDE 5: WHY NOW
+          SLIDE 5: HOW IT WORKS — USER FLOW
       ═══════════════════════════════════════════════════════════ */}
       <div {...slideProps(4)}>
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500/0 via-blue-500/50 to-purple-500/0" />
+
+        <div className="relative z-10 max-w-5xl mx-auto space-y-10">
+          <RevealText>
+            <div className="text-center">
+              <SlideLabel>How It Works</SlideLabel>
+              <h2 className="text-4xl sm:text-5xl font-black tracking-tight">
+                From install to protected
+                <br />
+                <span className="bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">in under 2 minutes.</span>
+              </h2>
+            </div>
+          </RevealText>
+
+          {/* Flow steps */}
+          <div className="space-y-0">
+            {[
+              {
+                step: "1",
+                title: "Admin creates workspace",
+                desc: "Sign up, name your org, invite your team via email or CSV. Members get an invite email and join with one click.",
+                mock: (
+                  <div className="rounded-xl bg-[#12121A] border border-white/10 p-4 w-full max-w-xs">
+                    <p className="text-[10px] text-white/40 mb-2">New Workspace</p>
+                    <div className="h-7 rounded-lg bg-white/5 border border-white/10 px-3 flex items-center text-white text-xs mb-2">Acme Corp</div>
+                    <div className="flex gap-2">
+                      <div className="h-7 flex-1 rounded-lg bg-white/5 border border-white/10 px-3 flex items-center text-white/40 text-[10px]">sarah@acme.com</div>
+                      <div className="h-7 px-3 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 flex items-center text-white text-[10px] font-semibold">Invite</div>
+                    </div>
+                  </div>
+                ),
+              },
+              {
+                step: "2",
+                title: "Set up guardrails & guidelines",
+                desc: "Install compliance packs (HIPAA, SOC 2, GDPR) with one click. Add custom rules. Enable quality guidelines for prompt standards.",
+                mock: (
+                  <div className="rounded-xl bg-[#12121A] border border-white/10 p-4 w-full max-w-xs">
+                    <p className="text-[10px] text-white/40 mb-2">Install Compliance Pack</p>
+                    <div className="space-y-1.5">
+                      {["HIPAA", "SOC 2", "GDPR"].map((p, i) => (
+                        <div key={p} className="flex items-center justify-between px-3 py-2 rounded-lg bg-white/5 border border-white/10">
+                          <span className="text-white text-[11px] font-medium">{p}</span>
+                          <span className={i < 2 ? "text-[9px] text-emerald-400 font-semibold" : "text-[9px] text-purple-400 font-semibold"}>{i < 2 ? "Installed" : "Install"}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ),
+              },
+              {
+                step: "3",
+                title: "Members install the extension",
+                desc: "One-click install from Chrome/Firefox/Edge. Extension auto-connects to the workspace. Shield indicator confirms protection is active.",
+                mock: (
+                  <div className="rounded-xl bg-[#12121A] border border-white/10 p-4 w-full max-w-xs">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-6 h-6 rounded bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center">
+                        <Shield className="h-3 w-3 text-white" />
+                      </div>
+                      <span className="text-white text-xs font-semibold">Extension Active</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                      <div className="w-2 h-2 rounded-full bg-emerald-400" />
+                      <span className="text-emerald-400 text-[10px] font-medium">Guardrails Active — 17 rules</span>
+                    </div>
+                  </div>
+                ),
+              },
+              {
+                step: "4",
+                title: "Team uses AI normally — TeamPrompt scans in real-time",
+                desc: "When anyone types in ChatGPT, Claude, or Gemini, TeamPrompt scans the message before it sends. Sensitive data gets blocked or auto-sanitized.",
+                mock: (
+                  <div className="rounded-xl bg-[#12121A] border border-white/10 p-4 w-full max-w-xs">
+                    <div className="bg-purple-500 rounded-xl rounded-br-sm px-3 py-2 text-white text-[10px] mb-2 ml-6">
+                      Summarize the financials for client <span className="bg-red-400/30 px-0.5 rounded">John Smith, SSN 123-45-6789</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/20">
+                      <Shield className="h-3 w-3 text-red-400" />
+                      <span className="text-red-400 text-[10px] font-semibold">Blocked — SSN and PII detected</span>
+                    </div>
+                  </div>
+                ),
+              },
+              {
+                step: "5",
+                title: "Admins see everything in the audit trail",
+                desc: "Every interaction logged with risk scores. Filter by tool, action, or date. Export as CSV/JSON for compliance reporting.",
+                mock: (
+                  <div className="rounded-xl bg-[#12121A] border border-white/10 p-4 w-full max-w-xs">
+                    <p className="text-[10px] text-white/40 mb-2">Activity & Audit</p>
+                    <div className="space-y-1">
+                      {[
+                        { tool: "ChatGPT", action: "Blocked", risk: "87", color: "text-red-400 bg-red-500/10" },
+                        { tool: "Claude", action: "Sent", risk: "5", color: "text-emerald-400 bg-emerald-500/10" },
+                        { tool: "Gemini", action: "Warned", risk: "42", color: "text-amber-400 bg-amber-500/10" },
+                      ].map((l) => (
+                        <div key={l.tool} className="flex items-center gap-2 px-2 py-1.5 rounded bg-white/5 text-[10px]">
+                          <span className="text-white/70 w-14">{l.tool}</span>
+                          <span className={`px-1.5 py-0.5 rounded font-semibold ${l.color}`}>{l.action}</span>
+                          <span className="ml-auto text-white/40">Risk: {l.risk}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ),
+              },
+            ].map((item, i) => (
+              <RevealText key={item.step} delay={i * 150}>
+                <div className={cn("flex items-center gap-8 py-6", i % 2 === 1 && "flex-row-reverse")}>
+                  {/* Text side */}
+                  <div className="flex-1 space-y-2">
+                    <div className="flex items-center gap-3">
+                      <span className="text-3xl font-black text-purple-400/30">{item.step}</span>
+                      <h3 className="text-lg font-bold">{item.title}</h3>
+                    </div>
+                    <p className="text-sm text-zinc-400 leading-relaxed pl-12">{item.desc}</p>
+                  </div>
+                  {/* Mock side */}
+                  <div className="flex-shrink-0">{item.mock}</div>
+                </div>
+                {i < 4 && (
+                  <div className="flex justify-center">
+                    <div className="w-px h-8 bg-gradient-to-b from-purple-500/30 to-transparent" />
+                  </div>
+                )}
+              </RevealText>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ═══════════════════════════════════════════════════════════
+          SLIDE 6: WHY NOW
+      ═══════════════════════════════════════════════════════════ */}
+      <div {...slideProps(5)}>
         <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-600/5 rounded-full blur-[200px]" />
 
         <div className="relative z-10 max-w-5xl mx-auto space-y-10">
@@ -599,9 +735,9 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
       </div>
 
       {/* ═══════════════════════════════════════════════════════════
-          SLIDE 6: COMPETITIVE EDGE
+          SLIDE 7: COMPETITIVE EDGE
       ═══════════════════════════════════════════════════════════ */}
-      <div {...slideProps(5)}>
+      <div {...slideProps(6)}>
         <div className="relative z-10 max-w-5xl mx-auto space-y-10">
           <RevealText>
             <SlideLabel>Competitive Edge</SlideLabel>
@@ -668,9 +804,9 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
       </div>
 
       {/* ═══════════════════════════════════════════════════════════
-          SLIDE 7: BUSINESS MODEL
+          SLIDE 8: BUSINESS MODEL
       ═══════════════════════════════════════════════════════════ */}
-      <div {...slideProps(6)}>
+      <div {...slideProps(7)}>
         <div className="relative z-10 max-w-5xl mx-auto space-y-10">
           <RevealText>
             <SlideLabel>Business Model</SlideLabel>
@@ -719,9 +855,9 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
       </div>
 
       {/* ═══════════════════════════════════════════════════════════
-          SLIDE 8: TRACTION
+          SLIDE 9: TRACTION
       ═══════════════════════════════════════════════════════════ */}
-      <div {...slideProps(7)}>
+      <div {...slideProps(8)}>
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500/0 via-purple-500/50 to-purple-500/0" />
 
         <div className="relative z-10 max-w-5xl mx-auto space-y-10">
@@ -771,9 +907,9 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
       </div>
 
       {/* ═══════════════════════════════════════════════════════════
-          SLIDE 9: ARCHITECTURE
+          SLIDE 10: ARCHITECTURE
       ═══════════════════════════════════════════════════════════ */}
-      <div {...slideProps(8)}>
+      <div {...slideProps(9)}>
         <div className="relative z-10 max-w-5xl mx-auto space-y-10">
           <RevealText>
             <SlideLabel>Architecture</SlideLabel>
@@ -851,9 +987,9 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
       </div>
 
       {/* ═══════════════════════════════════════════════════════════
-          SLIDE 10: TEAM
+          SLIDE 11: TEAM
       ═══════════════════════════════════════════════════════════ */}
-      <div {...slideProps(9)}>
+      <div {...slideProps(10)}>
         <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-purple-600/5 rounded-full blur-[150px]" />
 
         <div className="relative z-10 max-w-4xl mx-auto space-y-10">
@@ -868,16 +1004,24 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
 
           <div className="grid sm:grid-cols-3 gap-6">
             <RevealText delay={200} className="sm:col-span-1">
-              <GlowCard className="text-center py-8">
-                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-500/20 to-blue-500/20 mx-auto mb-4 flex items-center justify-center text-3xl font-black text-purple-400">KC</div>
-                <h3 className="font-bold text-lg">Kade Cooper</h3>
-                <p className="text-sm text-purple-400 font-medium">Founder & Solo Builder</p>
-                <div className="mt-4 space-y-2 text-left">
+              <GlowCard className="py-8">
+                <div className="text-center mb-5">
+                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-500/20 to-blue-500/20 mx-auto mb-4 flex items-center justify-center text-3xl font-black text-purple-400">KC</div>
+                  <h3 className="font-bold text-lg">Kade Cooper</h3>
+                  <p className="text-sm text-purple-400 font-medium">Founder</p>
+                </div>
+                <p className="text-xs text-zinc-400 leading-relaxed mb-4">
+                  15+ years designing and shipping software at scale. Led UX and product at CYPHER Learning (ed-tech SaaS used by millions), where he drove platform usability, checkout optimization, and enterprise feature design. Certified ScrumMaster with deep experience in agile product development.
+                </p>
+                <p className="text-xs text-zinc-400 leading-relaxed mb-4">
+                  Saw firsthand how teams adopt AI tools without guardrails — employees pasting sensitive data into ChatGPT with zero oversight. Built TeamPrompt to solve the problem he lived every day: giving teams the freedom to use AI while protecting the data that matters.
+                </p>
+                <div className="space-y-1.5 border-t border-white/5 pt-3">
                   {[
-                    "UI/UX developer turned founder",
-                    "Built entire platform with AI-assisted development",
-                    "23 early users, zero ad spend",
-                    "Ships weekly, handles support",
+                    "15+ years in UX/product at scale",
+                    "Shipped full SaaS platform with AI-assisted dev",
+                    "Certified ScrumMaster, agile-first builder",
+                    "Based in Baton Rouge, Louisiana",
                   ].map((item) => (
                     <div key={item} className="flex gap-2 items-start text-xs text-zinc-400">
                       <CheckCircle2 className="h-3 w-3 text-purple-400 shrink-0 mt-0.5" />
@@ -938,9 +1082,9 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
       </div>
 
       {/* ═══════════════════════════════════════════════════════════
-          SLIDE 11: THE ASK
+          SLIDE 12: THE ASK
       ═══════════════════════════════════════════════════════════ */}
-      <div {...slideProps(10)}>
+      <div {...slideProps(11)}>
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500/0 via-purple-500/50 to-purple-500/0" />
 
         <div className="relative z-10 max-w-5xl mx-auto space-y-10">
@@ -1014,39 +1158,106 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
       </div>
 
       {/* ═══════════════════════════════════════════════════════════
-          SLIDE 12: GROWTH PLAN
+          SLIDE 13: GROWTH PLAN
       ═══════════════════════════════════════════════════════════ */}
-      <div {...slideProps(11)}>
+      <div {...slideProps(12)}>
         <div className="relative z-10 max-w-5xl mx-auto space-y-10">
           <RevealText>
             <SlideLabel>Growth Plan</SlideLabel>
             <h2 className="text-4xl sm:text-5xl font-black tracking-tight leading-tight">
-              18-Month Targets
+              18-Month Roadmap
             </h2>
           </RevealText>
 
+          {/* Timeline */}
           <RevealText delay={200}>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              {[
-                { metric: "Registered Users", from: "23", to: "5,000+", icon: Users },
-                { metric: "MRR Target", from: "$0", to: "$50K", icon: TrendingUp },
-                { metric: "Paying Teams", from: "1", to: "300+", icon: Building2 },
-                { metric: "ARR Target", from: "—", to: "$600K", icon: DollarSign },
-              ].map((t) => (
-                <GlowCard key={t.metric} className="text-center py-5">
-                  <t.icon className="h-5 w-5 text-zinc-400 mx-auto mb-3" />
-                  <p className="text-xs text-zinc-400 uppercase tracking-widest mb-3">{t.metric}</p>
-                  <div className="flex items-center justify-center gap-3">
-                    <span className="text-sm text-zinc-400 font-mono">{t.from}</span>
-                    <ArrowRight className="h-4 w-4 text-purple-400" />
-                    <span className="text-2xl font-black bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">{t.to}</span>
-                  </div>
-                </GlowCard>
-              ))}
+            <div className="relative">
+              {/* Timeline line */}
+              <div className="absolute left-6 top-0 bottom-0 w-px bg-gradient-to-b from-purple-500 via-blue-500 to-purple-500/20" />
+
+              <div className="space-y-8">
+                {[
+                  {
+                    phase: "Phase 1", period: "Months 1–3", label: "Foundation & Launch",
+                    color: "from-purple-500 to-purple-400",
+                    items: [
+                      "Chrome Web Store optimization — reviews, screenshots, ASO",
+                      "LinkedIn paid ads targeting CISOs and IT leaders",
+                      "Google Ads on high-intent keywords (AI DLP, ChatGPT security)",
+                      "First 10 case studies from early adopters",
+                      "SSO/SAML integration for enterprise readiness",
+                    ],
+                    target: "Target: 500 users, 50 paying teams",
+                  },
+                  {
+                    phase: "Phase 2", period: "Months 4–6", label: "Acceleration",
+                    color: "from-blue-500 to-blue-400",
+                    items: [
+                      "AI SEO content engine — comparison pages, guides, templates",
+                      "Scale LinkedIn + Google campaigns based on Phase 1 data",
+                      "SOC 2 Type II certification process",
+                      "SCIM directory provisioning for enterprise accounts",
+                      "Partner integrations (SIEM, MDM, compliance platforms)",
+                    ],
+                    target: "Target: 2,000 users, 150 paying teams, $20K MRR",
+                  },
+                  {
+                    phase: "Phase 3", period: "Months 7–12", label: "Scale & Revenue",
+                    color: "from-purple-400 to-blue-400",
+                    items: [
+                      "Content marketing at scale — webinars, whitepapers, podcasts",
+                      "Industry-specific landing pages (healthcare, finance, legal)",
+                      "Enterprise pilot program with 10+ seat deals",
+                      "Hire security engineer for enterprise features",
+                      "Expand to 3+ additional AI tools as market evolves",
+                    ],
+                    target: "Target: 5,000 users, 250 paying teams, $35K MRR",
+                  },
+                  {
+                    phase: "Phase 4", period: "Months 13–18", label: "Seed Round Position",
+                    color: "from-blue-400 to-emerald-400",
+                    items: [
+                      "Proven unit economics and repeatable acquisition",
+                      "Enterprise customer base with case studies",
+                      "Full compliance certification suite",
+                      "Prepare and execute seed round ($1–2M)",
+                      "First full-time hires — engineering + GTM",
+                    ],
+                    target: "Target: 8,000+ users, 300+ paying teams, $50K MRR ($600K ARR)",
+                  },
+                ].map((phase, i) => (
+                  <RevealText key={phase.phase} delay={200 + i * 100}>
+                    <div className="flex gap-6 pl-1">
+                      {/* Timeline dot */}
+                      <div className={cn("w-11 h-11 rounded-full bg-gradient-to-br flex items-center justify-center text-white text-sm font-black shrink-0 z-10", phase.color)}>
+                        {i + 1}
+                      </div>
+                      {/* Content */}
+                      <GlowCard className="flex-1" glow={i % 2 === 0 ? "purple" : "blue"}>
+                        <div className="flex items-baseline gap-3 mb-3">
+                          <span className="text-sm font-bold">{phase.phase}</span>
+                          <span className="text-xs text-zinc-400">{phase.period}</span>
+                          <span className="text-xs font-semibold text-purple-400 ml-auto">{phase.label}</span>
+                        </div>
+                        <div className="grid sm:grid-cols-2 gap-x-4 gap-y-1.5 mb-3">
+                          {phase.items.map((item) => (
+                            <div key={item} className="flex gap-2 items-start">
+                              <CheckCircle2 className="h-3 w-3 text-purple-400/60 shrink-0 mt-1" />
+                              <p className="text-xs text-zinc-400 leading-relaxed">{item}</p>
+                            </div>
+                          ))}
+                        </div>
+                        <p className="text-xs font-semibold text-zinc-300 border-t border-white/5 pt-2">{phase.target}</p>
+                      </GlowCard>
+                    </div>
+                  </RevealText>
+                ))}
+              </div>
             </div>
           </RevealText>
 
-          <RevealText delay={400}>
+          {/* Investor FAQ */}
+          <RevealText delay={600}>
             <GlowCard>
               <h3 className="font-bold text-sm uppercase tracking-widest text-zinc-400 mb-6">Investor FAQ</h3>
               <div className="grid sm:grid-cols-2 gap-5">
@@ -1069,19 +1280,13 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
               </div>
             </GlowCard>
           </RevealText>
-
-          <RevealText delay={500}>
-            <p className="text-center text-sm text-zinc-500 font-mono">
-              Target: $50K MRR = $600K ARR → Strong seed round position
-            </p>
-          </RevealText>
         </div>
       </div>
 
       {/* ═══════════════════════════════════════════════════════════
-          SLIDE 13: VISION / CLOSING
+          SLIDE 14: VISION / CLOSING
       ═══════════════════════════════════════════════════════════ */}
-      <div {...slideProps(12)}>
+      <div {...slideProps(13)}>
         <div className="absolute top-1/3 left-1/3 w-[600px] h-[600px] bg-purple-600/8 rounded-full blur-[200px]" />
         <div className="absolute bottom-1/3 right-1/3 w-[400px] h-[400px] bg-blue-600/5 rounded-full blur-[150px]" />
 

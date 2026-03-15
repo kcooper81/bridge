@@ -12,12 +12,14 @@ interface InviteDetails {
   orgName: string;
   role: string;
   invitedBy: string;
+  inviteEmail: string;
 }
 
 export default function InvitePage() {
   const [loading, setLoading] = useState(false);
   const [checking, setChecking] = useState(true);
   const [error, setError] = useState("");
+  const [emailMismatch, setEmailMismatch] = useState<{ signedInAs: string; invitedAs: string } | null>(null);
   const [inviteDetails, setInviteDetails] = useState<InviteDetails | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -60,12 +62,21 @@ export default function InvitePage() {
       }
 
       if (invite && invite.status === "pending") {
+        // Check if signed-in email matches the invited email
+        if (invite.email && user.email && invite.email.toLowerCase() !== user.email.toLowerCase()) {
+          setEmailMismatch({
+            signedInAs: user.email,
+            invitedAs: invite.email,
+          });
+        }
+
         const orgData = invite.organizations as unknown as { name: string } | null;
         const inviterData = invite.profiles as unknown as { name: string } | null;
         setInviteDetails({
           orgName: orgData?.name || "a team",
           role: invite.role || "member",
           invitedBy: inviterData?.name || "A team member",
+          inviteEmail: invite.email || "",
         });
       } else {
         setError("This invite link is invalid or has expired.");
@@ -75,6 +86,15 @@ export default function InvitePage() {
     }
     checkAuth();
   }, [token, router]);
+
+  async function handleSwitchAccount() {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    const inviteEmail = inviteDetails?.inviteEmail || "";
+    const redirect = encodeURIComponent(`/invite?token=${token}`);
+    const emailHint = inviteEmail ? `&email=${encodeURIComponent(inviteEmail)}` : "";
+    window.location.href = `/login?redirect=${redirect}${emailHint}`;
+  }
 
   async function handleAccept() {
     setError("");
@@ -158,21 +178,37 @@ export default function InvitePage() {
         </p>
       )}
 
+      {emailMismatch && (
+        <div className="mt-4 rounded-lg border border-amber-500/30 bg-amber-500/5 p-4 text-left space-y-3">
+          <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">
+            Wrong account
+          </p>
+          <p className="text-sm text-muted-foreground">
+            This invite was sent to <strong>{emailMismatch.invitedAs}</strong>, but you&apos;re signed in as <strong>{emailMismatch.signedInAs}</strong>.
+          </p>
+          <Button onClick={handleSwitchAccount} className="w-full">
+            Sign in as {emailMismatch.invitedAs}
+          </Button>
+        </div>
+      )}
+
       {error && (
         <div className="mt-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
           {error}
         </div>
       )}
 
-      <div className="mt-6 flex gap-3 justify-center">
-        <Button variant="outline" onClick={() => router.push("/")}>
-          Decline
-        </Button>
-        <Button onClick={handleAccept} disabled={loading || !inviteDetails}>
-          {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Accept Invite
-        </Button>
-      </div>
+      {!emailMismatch && (
+        <div className="mt-6 flex gap-3 justify-center">
+          <Button variant="outline" onClick={() => router.push("/")}>
+            Decline
+          </Button>
+          <Button onClick={handleAccept} disabled={loading || !inviteDetails}>
+            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Accept Invite
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

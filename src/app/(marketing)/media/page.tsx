@@ -932,6 +932,30 @@ export default function MediaPage() {
           </div>
         </section>
 
+        {/* ── Virtual Backgrounds ──────────────────── */}
+        <section id="virtual-backgrounds" className="mb-24 scroll-mt-24">
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3">
+            Virtual Backgrounds
+          </h2>
+          <p className="text-muted-foreground mb-8 max-w-2xl">
+            Branded virtual backgrounds for Google Meet, Zoom, and Teams. Upload as a custom background in your video call settings.
+          </p>
+          <div className="grid gap-6 sm:grid-cols-2">
+            <div className="rounded-xl border border-border overflow-hidden bg-card">
+              <img src="/brand/google-meet-bg.png" alt="TeamPrompt virtual background" className="w-full aspect-video object-cover" />
+              <div className="p-4 flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium">Dark Background</p>
+                  <p className="text-xs text-muted-foreground">1920 x 1080 — Google Meet, Zoom, Teams</p>
+                </div>
+                <a href="/brand/google-meet-bg.png" download="teamprompt-virtual-bg-dark.png" className="text-xs font-semibold text-primary hover:underline">
+                  Download PNG
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* ── 6. OG / Social Share Card ──────────────────── */}
         <section id="og-cards" className="mb-24 scroll-mt-24">
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3">

@@ -27,13 +27,14 @@ import {
   Code2,
   Puzzle,
   Briefcase,
+  Target,
   Banknote,
   Link2,
 } from "lucide-react";
 
 // ─── Constants ──────────────────────────────────────────────────
 
-const TOTAL_SLIDES = 14;
+const TOTAL_SLIDES = 15;
 // Colors used inline in SVG gradients when needed
 // const ACCENT = "#7C3AED"; const ACCENT_BLUE = "#3B82F6";
 
@@ -161,7 +162,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
 
   const slideLabels = [
     "", "Problem", "Solution", "Product", "How It Works", "Why Now", "Competitive Edge",
-    "Business Model", "Traction", "Architecture", "Team", "The Ask", "Growth Plan", "Vision",
+    "Business Model", "Traction", "Architecture", "Team", "The Ask", "Growth Plan", "Deep Dive FAQ", "Vision",
   ];
 
   return (
@@ -1268,37 +1269,86 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
             </div>
           </RevealText>
 
-          {/* Investor FAQ */}
-          <RevealText delay={600}>
-            <GlowCard>
-              <h3 className="font-bold text-sm uppercase tracking-widest text-zinc-400 mb-6">Investor FAQ</h3>
-              <div className="grid sm:grid-cols-2 gap-5">
-                {[
-                  { q: "How do you compete with free?", a: "Free lacks DLP, compliance, and analytics. Teams pay for governance.", icon: Briefcase },
-                  { q: "Why not raise more?", a: "$100K → 18 months to prove the model, then raise seed on real metrics.", icon: DollarSign },
-                  { q: "Biggest risk?", a: "Execution — mitigated by a fully shipped product and early organic traction.", icon: AlertTriangle },
-                  { q: "Can it scale with a lean team?", a: "Serverless. Extension is client-side. 100K users with minimal cost.", icon: Server },
-                  { q: "How defensible?", a: "5 AI tools, unique DOM integration, constant platform updates.", icon: Code2 },
-                  { q: "Enterprise sales?", a: "Product-led: one person installs, team adopts, org upgrades.", icon: Building2 },
-                ].map((faq) => (
-                  <div key={faq.q} className="flex gap-3">
-                    <faq.icon className="h-5 w-5 text-zinc-400 shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-semibold text-sm text-zinc-200">{faq.q}</p>
-                      <p className="text-sm text-zinc-400 mt-1 leading-relaxed">{faq.a}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </GlowCard>
-          </RevealText>
         </div>
       </div>
 
       {/* ═══════════════════════════════════════════════════════════
-          SLIDE 14: VISION / CLOSING
+          SLIDE 14: INVESTOR FAQ — DEEP DIVE
       ═══════════════════════════════════════════════════════════ */}
       <div {...slideProps(13)}>
+        <div className="relative z-10 max-w-5xl mx-auto space-y-10">
+          <RevealText>
+            <SlideLabel>Investor FAQ</SlideLabel>
+            <h2 className="text-4xl sm:text-5xl font-black tracking-tight leading-tight">
+              Questions you&apos;re
+              <br />
+              <span className="text-zinc-400">already thinking.</span>
+            </h2>
+          </RevealText>
+
+          <div className="space-y-5">
+            {[
+              {
+                q: "What are the biggest risks?",
+                a: "1) Go-to-market execution — we have the product but need to prove repeatable acquisition. Mitigated by a fully shipped product, Chrome Web Store distribution, and a clear paid ads strategy with measurable CAC. 2) Platform dependency — if ChatGPT or Claude change their DOM, the extension breaks. Mitigated by same-day shipping cadence and deep technical knowledge of all 5 platforms. 3) Enterprise sales cycle — long procurement processes. Mitigated by product-led growth: individual installs, team adopts, org pays. No enterprise sales team needed for initial traction.",
+                icon: AlertTriangle,
+              },
+              {
+                q: "How do you compete with free AI tools that have built-in team plans?",
+                a: "ChatGPT Team ($25/user) and Claude Team ($25/user) only govern their own platform. They can't scan what employees paste into competing tools. TeamPrompt governs all 5 AI tools from a single extension for $7/user — cross-platform DLP, compliance packs, risk scoring, and audit trails. It's the same reason 1Password exists alongside browser-native password managers: cross-platform governance is fundamentally different from single-vendor features.",
+                icon: Briefcase,
+              },
+              {
+                q: "Why only $100K? Why not raise more?",
+                a: "Capital efficiency. The product is built. $100K funds 12-18 months of marketing, one security contractor, and infrastructure scaling. The goal: prove the model to $50K MRR, then raise a proper $1-2M seed round on real unit economics — not projections. Raising more now would dilute unnecessarily when the main need is marketing, not engineering.",
+                icon: DollarSign,
+              },
+              {
+                q: "Can this scale with a lean team? What breaks at 1,000 users?",
+                a: "The architecture is built for this. The extension runs entirely client-side — DLP scanning happens in the browser, not on our servers. The backend is serverless on Vercel with auto-scaling. Database is Supabase (Postgres) with row-level security. At 1,000 users, our infrastructure cost increases by roughly $50-100/month. At 10,000 users, maybe $300/month. The $100K is for marketing and people, not servers.",
+                icon: Server,
+              },
+              {
+                q: "How defensible is a browser extension?",
+                a: "Deeply. Each of the 5 AI tools (ChatGPT, Claude, Gemini, Copilot, Perplexity) has a unique DOM structure, event handling, and input system. We maintain separate selector engines for each. These platforms update their UIs weekly — we ship fixes same-day. A competitor would need to reverse-engineer and maintain integrations across all 5 simultaneously. Google DeepMind researchers proved that even simple prompt attacks can extract training data — our client-side interception prevents that data from ever reaching the AI tool in the first place.",
+                icon: Code2,
+              },
+              {
+                q: "What does the data show about where leaked data actually goes?",
+                a: "OpenAI uses free/Plus conversations for training by default. Google retains Gemini data 18 months minimum — and if human reviewers examine it, up to 3 years with no way to delete. Google DeepMind researchers extracted a gigabyte of real PII from ChatGPT's training data for just $200. Even 'enterprise' plans retain data in abuse monitoring logs for 7-55 days. TeamPrompt blocks the data before it ever leaves the browser — the AI company never receives it.",
+                icon: Shield,
+              },
+              {
+                q: "What about regulatory risk — GDPR, HIPAA, SEC?",
+                a: "Italy already fined OpenAI €15M for GDPR violations. Generic ChatGPT is explicitly not HIPAA compliant — any PHI input is an unauthorized disclosure. The SEC launched a dedicated AI task force in 2025. HIPAA penalties reached $2M+ annually. These regulations are why organizations need TeamPrompt: we prevent the data from reaching AI tools, creating a compliance-safe layer. 63% of breached organizations don't have an AI governance policy — that's our market.",
+                icon: Lock,
+              },
+              {
+                q: "How do you acquire customers without a big marketing budget?",
+                a: "Three channels: 1) Chrome Web Store — organic discovery for searches like 'ChatGPT security' and 'AI prompt manager'. 2) Content-led SEO — comparison pages, industry guides, compliance content that ranks for high-intent searches. 3) Product-led virality — one person installs, invites their team, team requires the org to pay. With $100K, we add LinkedIn/Google paid ads to accelerate what's already working organically.",
+                icon: Target,
+              },
+            ].map((faq, i) => (
+              <RevealText key={faq.q} delay={i * 80}>
+                <GlowCard glow={i % 2 === 0 ? "purple" : "blue"}>
+                  <div className="flex gap-4">
+                    <faq.icon className="h-5 w-5 text-purple-400 shrink-0 mt-1" />
+                    <div>
+                      <p className="font-bold text-base text-zinc-100 mb-2">{faq.q}</p>
+                      <p className="text-sm text-zinc-400 leading-relaxed">{faq.a}</p>
+                    </div>
+                  </div>
+                </GlowCard>
+              </RevealText>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ═══════════════════════════════════════════════════════════
+          SLIDE 15: VISION / CLOSING
+      ═══════════════════════════════════════════════════════════ */}
+      <div {...slideProps(14)}>
         <div className="absolute top-1/3 left-1/3 w-[600px] h-[600px] bg-purple-600/8 rounded-full blur-[200px]" />
         <div className="absolute bottom-1/3 right-1/3 w-[400px] h-[400px] bg-blue-600/5 rounded-full blur-[150px]" />
 

@@ -54,6 +54,7 @@ export const limiters = {
   packInstall: createLimiter(10, "1 m", "pack-install"),
   deprovision: createLimiter(5, "1 m", "deprovision"),
   guardrailsSuggest: createLimiter(10, "1 m", "guardrails-suggest"),
+  guidelineSuggest: createLimiter(10, "1 m", "guideline-suggest"),
   packRequest: createLimiter(10, "1 m", "pack-request"),
   approvals: createLimiter(20, "1 m", "approvals"),
   transferAdmin: createLimiter(3, "10 m", "transfer-admin"),

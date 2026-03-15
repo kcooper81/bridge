@@ -8,7 +8,7 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { CardGridSkeleton } from "@/components/dashboard/skeleton-loader";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import {
   Dialog,
@@ -22,7 +22,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { TagInput } from "@/components/ui/tag-input";
 import { CategoryCombobox } from "@/components/ui/category-combobox";
-import { BookOpen, ChevronDown, Download, LayoutGrid, List, Loader2, Pencil, Plus, Trash2 } from "lucide-react";
+import { BookOpen, CheckCircle2, ChevronDown, Download, LayoutGrid, Lightbulb, List, Loader2, Pencil, Plus, Trash2 } from "lucide-react";
 import { NoOrgBanner } from "@/components/dashboard/no-org-banner";
 import { UpgradePrompt, LimitNudge } from "@/components/upgrade";
 import { UsageIndicator } from "@/components/dashboard/usage-indicator";
@@ -31,6 +31,7 @@ import {
   deleteGuidelineApi,
   installDefaultGuidelines,
 } from "@/lib/vault-api";
+import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import { trackGuidelineCreated, trackGuidelineUpdated, trackGuidelineDeleted } from "@/lib/analytics";
 import type { Guideline, GuidelineRules } from "@/lib/types";
@@ -401,6 +402,8 @@ export default function GuidelinesPage() {
         </>
       )}
 
+      {!canEdit && <MemberSuggestGuideline />}
+
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
@@ -475,5 +478,99 @@ export default function GuidelinesPage() {
         </DialogContent>
       </Dialog>
     </>
+  );
+}
+
+function MemberSuggestGuideline() {
+  const [name, setName] = useState("");
+  const [category, setCategory] = useState("");
+  const [description, setDescription] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+
+  async function handleSubmit() {
+    if (!name.trim() || !description.trim()) return;
+    setSubmitting(true);
+    try {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error("Session expired. Please sign in again.");
+        return;
+      }
+      const res = await fetch("/api/guidelines/suggest", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ name: name.trim(), category: category.trim() || undefined, description: description.trim() }),
+      });
+      if (!res.ok) {
+        toast.error("Failed to submit suggestion");
+        return;
+      }
+      toast.success("Guideline suggestion sent to your admin");
+      setName("");
+      setCategory("");
+      setDescription("");
+      setSubmitted(true);
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <Card className="mt-8">
+      <CardHeader>
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 rounded-xl bg-amber-500/10 flex items-center justify-center">
+            <Lightbulb className="h-5 w-5 text-amber-500" />
+          </div>
+          <div>
+            <CardTitle>Suggest a Guideline</CardTitle>
+            <CardDescription>
+              Have an idea for a quality guideline? Suggest one for your admin to review and add.
+            </CardDescription>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {submitted ? (
+          <div className="flex flex-col items-center py-8 text-center">
+            <CheckCircle2 className="h-10 w-10 text-tp-green mb-3" />
+            <h3 className="text-sm font-medium">Suggestion submitted</h3>
+            <p className="text-xs text-muted-foreground mt-1">Your admin will review it and create the guideline if appropriate.</p>
+            <Button variant="outline" size="sm" className="mt-4" onClick={() => setSubmitted(false)}>
+              Suggest another
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-4 max-w-lg">
+            <div className="space-y-2">
+              <Label>Name *</Label>
+              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Accessibility Language" />
+            </div>
+            <div className="space-y-2">
+              <Label>Category</Label>
+              <Input value={category} onChange={(e) => setCategory(e.target.value)} placeholder="e.g. Tone, Formatting, Compliance" />
+            </div>
+            <div className="space-y-2">
+              <Label>What should this guideline cover? *</Label>
+              <Textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="e.g. Prompts should use inclusive, accessible language and avoid ableist terms"
+                rows={3}
+              />
+            </div>
+            <Button onClick={handleSubmit} disabled={submitting || !name.trim() || !description.trim()}>
+              {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {submitting ? "Submitting..." : "Submit Suggestion"}
+            </Button>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }

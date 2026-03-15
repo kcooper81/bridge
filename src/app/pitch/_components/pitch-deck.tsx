@@ -175,21 +175,39 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
       {/* Background grain texture */}
       <div className="fixed inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJhIiB4PSIwIiB5PSIwIj48ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iLjc1IiBzdGl0Y2hUaWxlcz0ic3RpdGNoIi8+PGZlQ29sb3JNYXRyaXggdHlwZT0ic2F0dXJhdGUiIHZhbHVlcz0iMCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIiBmaWx0ZXI9InVybCgjYSkiIG9wYWNpdHk9Ii4wMyIvPjwvc3ZnPg==')] opacity-50 pointer-events-none z-0" />
 
-      {/* ─── Navigation overlay ─── */}
+      {/* ─── Navigation arrows ─── */}
       {!isScrollMode && (
         <>
-          <button onClick={prev} className="fixed left-0 top-0 bottom-0 w-20 z-40 flex items-center justify-start pl-4 opacity-0 hover:opacity-100 transition-opacity cursor-pointer" aria-label="Previous slide">
-            <ChevronLeft className="h-8 w-8 text-white/30" />
+          <button
+            onClick={prev}
+            className={cn(
+              "fixed left-4 top-1/2 -translate-y-1/2 z-40 w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer",
+              currentSlide === 0
+                ? "opacity-0 pointer-events-none"
+                : "bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/10 opacity-70 hover:opacity-100"
+            )}
+            aria-label="Previous slide"
+          >
+            <ChevronLeft className="h-6 w-6 text-white" />
           </button>
-          <button onClick={next} className="fixed right-0 top-0 bottom-0 w-20 z-40 flex items-center justify-end pr-4 opacity-0 hover:opacity-100 transition-opacity cursor-pointer" aria-label="Next slide">
-            <ChevronRight className="h-8 w-8 text-white/30" />
+          <button
+            onClick={next}
+            className={cn(
+              "fixed right-4 top-1/2 -translate-y-1/2 z-40 w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer",
+              currentSlide === TOTAL_SLIDES - 1
+                ? "opacity-0 pointer-events-none"
+                : "bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/10 opacity-70 hover:opacity-100"
+            )}
+            aria-label="Next slide"
+          >
+            <ChevronRight className="h-6 w-6 text-white" />
           </button>
         </>
       )}
 
       {/* ─── Bottom bar ─── */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#0A0A0F]/90 backdrop-blur-xl border-t border-white/5">
-        <div className="flex items-center justify-between px-6 py-2.5">
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#15151F]/95 backdrop-blur-xl border-t border-white/10 shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
+        <div className="flex items-center justify-between px-6 py-3">
           <div className="flex items-center gap-1.5">
             {Array.from({ length: TOTAL_SLIDES }).map((_, i) => (
               <button
@@ -207,12 +225,12 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
             ))}
           </div>
 
-          <div className="flex items-center gap-3 text-[11px] text-zinc-400">
+          <div className="flex items-center gap-3 text-xs text-zinc-300">
             {slideLabels[currentSlide] && (
               <span className="text-zinc-400 font-medium hidden sm:inline">{slideLabels[currentSlide]}</span>
             )}
             <span className="font-mono">{String(currentSlide + 1).padStart(2, "0")}/{TOTAL_SLIDES}</span>
-            <button onClick={() => setIsScrollMode((v) => !v)} className="hover:text-white/70 transition-colors border border-white/10 rounded-full px-3 py-0.5">
+            <button onClick={() => setIsScrollMode((v) => !v)} className="hover:text-white/70 transition-colors border border-white/20 rounded-full px-3 py-1 hover:bg-white/10">
               {isScrollMode ? "Slides" : "Scroll"}
             </button>
             <button
@@ -222,12 +240,12 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
                 setLinkCopied(true);
                 setTimeout(() => setLinkCopied(false), 2000);
               }}
-              className="flex items-center gap-1 hover:text-white/70 transition-colors border border-white/10 rounded-full px-3 py-0.5"
+              className="flex items-center gap-1 hover:text-white/70 transition-colors border border-white/20 rounded-full px-3 py-1 hover:bg-white/10"
             >
               <Link2 className="h-3 w-3" />
               {linkCopied ? "Copied!" : "Share"}
             </button>
-            <button onClick={() => window.print()} className="hover:text-white/70 transition-colors border border-white/10 rounded-full px-3 py-0.5 hidden sm:inline">
+            <button onClick={() => window.print()} className="hover:text-white/70 transition-colors border border-white/20 rounded-full px-3 py-1 hover:bg-white/10 hidden sm:inline">
               PDF
             </button>
             {shareToken && (
@@ -237,7 +255,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
                   setCopied(true);
                   setTimeout(() => setCopied(false), 2000);
                 }}
-                className="flex items-center gap-1 hover:text-white/70 transition-colors border border-white/10 rounded-full px-3 py-0.5 hidden sm:inline"
+                className="flex items-center gap-1 hover:text-white/70 transition-colors border border-white/20 rounded-full px-3 py-1 hover:bg-white/10 hidden sm:inline"
               >
                 {copied ? "Copied!" : "Investor Link"}
               </button>

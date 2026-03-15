@@ -871,48 +871,61 @@ export default function TeamPage() {
     );
   }
 
-  // Member read-only view — can see team but not manage
+  // Member read-only view — show their teams first, then all org members
   if (currentUserRole === "member") {
+    const currentMember = members.find((m) => m.isCurrentUser);
+    const myTeamIds = currentMember?.teamIds || [];
+    const myTeams = teams.filter((t) => myTeamIds.includes(t.id));
+    const otherTeams = teams.filter((t) => !myTeamIds.includes(t.id));
+
     return (
       <>
-        <PageHeader title="Team" description="Your team members" />
+        <PageHeader title="Team" description="Your teams and organization members" />
 
-        {/* Team list */}
-        <div className="rounded-lg border border-border">
-          <div className="p-3 border-b border-border flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            <span className="flex-1">Member</span>
-            <span className="w-20 text-center">Role</span>
-          </div>
-          {members.map((m) => (
-            <div key={m.id} className="flex items-center gap-3 p-3 border-b border-border last:border-0">
-              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary shrink-0">
-                {(m.name || m.email).slice(0, 2).toUpperCase()}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{m.name || m.email}</p>
-                <p className="text-xs text-muted-foreground truncate">{m.email}</p>
-              </div>
-              <span className={cn(
-                "text-xs font-medium px-2 py-0.5 rounded capitalize",
-                m.role === "admin" ? "bg-primary/10 text-primary" :
-                m.role === "manager" ? "bg-amber-500/10 text-amber-600" :
-                "bg-muted text-muted-foreground"
-              )}>
-                {m.role}
-              </span>
-              {m.isCurrentUser && (
-                <span className="text-[10px] text-muted-foreground">(you)</span>
-              )}
+        {/* Your Teams — highlighted */}
+        {myTeams.length > 0 && (
+          <div className="mb-6">
+            <h3 className="text-sm font-semibold mb-3">Your Teams</h3>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {myTeams.map((team) => {
+                const teamMembers = members.filter((m) => m.teamIds?.includes(team.id));
+                return (
+                  <div key={team.id} className="rounded-lg border-2 border-primary/20 bg-primary/5 p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Users className="h-4 w-4 text-primary" />
+                      <p className="text-sm font-semibold">{team.name}</p>
+                    </div>
+                    {team.description && <p className="text-xs text-muted-foreground mb-3">{team.description}</p>}
+                    <div className="space-y-1.5">
+                      {teamMembers.map((m) => (
+                        <div key={m.id} className="flex items-center gap-2">
+                          <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary shrink-0">
+                            {(m.name || m.email).slice(0, 2).toUpperCase()}
+                          </div>
+                          <span className="text-xs truncate flex-1">{m.name || m.email}</span>
+                          <span className={cn(
+                            "text-[10px] font-medium px-1.5 py-0.5 rounded capitalize",
+                            m.role === "admin" ? "bg-primary/10 text-primary" :
+                            m.role === "manager" ? "bg-amber-500/10 text-amber-600" :
+                            "bg-muted text-muted-foreground"
+                          )}>{m.role}</span>
+                          {m.isCurrentUser && <span className="text-[9px] text-muted-foreground">(you)</span>}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-          ))}
-        </div>
+          </div>
+        )}
 
-        {/* Teams the member belongs to */}
-        {teams.length > 0 && (
-          <div className="mt-6">
-            <h3 className="text-sm font-semibold mb-3">Teams</h3>
+        {/* Other Teams */}
+        {otherTeams.length > 0 && (
+          <div className="mb-6">
+            <h3 className="text-sm font-semibold mb-3 text-muted-foreground">Other Teams</h3>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {teams.map((team) => {
+              {otherTeams.map((team) => {
                 const teamMembers = members.filter((m) => m.teamIds?.includes(team.id));
                 return (
                   <div key={team.id} className="rounded-lg border border-border p-4">
@@ -925,6 +938,35 @@ export default function TeamPage() {
             </div>
           </div>
         )}
+
+        {/* All org members */}
+        <div>
+          <h3 className="text-sm font-semibold mb-3">All Members</h3>
+          <div className="rounded-lg border border-border">
+            {members.map((m) => (
+              <div key={m.id} className={cn(
+                "flex items-center gap-3 p-3 border-b border-border last:border-0",
+                m.isCurrentUser && "bg-primary/5"
+              )}>
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary shrink-0">
+                  {(m.name || m.email).slice(0, 2).toUpperCase()}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{m.name || m.email} {m.isCurrentUser && <span className="text-muted-foreground font-normal">(you)</span>}</p>
+                  <p className="text-xs text-muted-foreground truncate">{m.email}</p>
+                </div>
+                <span className={cn(
+                  "text-xs font-medium px-2 py-0.5 rounded capitalize",
+                  m.role === "admin" ? "bg-primary/10 text-primary" :
+                  m.role === "manager" ? "bg-amber-500/10 text-amber-600" :
+                  "bg-muted text-muted-foreground"
+                )}>
+                  {m.role}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
       </>
     );
   }

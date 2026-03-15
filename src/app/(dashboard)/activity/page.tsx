@@ -31,7 +31,7 @@ import { toast } from "sonner";
 import { UpgradeGate } from "@/components/upgrade";
 import { useSubscription } from "@/components/providers/subscription-provider";
 import { getConversationLogs } from "@/lib/vault-api";
-import { getRiskBgColor } from "@/lib/security/risk-score";
+import { getRiskBgColor, getRiskColor } from "@/lib/security/risk-score";
 import { formatDistanceToNow, format } from "date-fns";
 import type { ConversationLog } from "@/lib/types";
 import { NoOrgBanner } from "@/components/dashboard/no-org-banner";
@@ -488,7 +488,7 @@ export default function ActivityPage() {
           <div className="grid grid-cols-3 gap-3 mb-4">
             <Card>
               <CardContent className="p-3 text-center">
-                <p className={`text-2xl font-bold ${getRiskBgColor(avg).split(" ")[1]}`}>{avg}</p>
+                <p className={`text-2xl font-bold ${getRiskColor(avg)}`}>{avg}</p>
                 <p className="text-[10px] text-muted-foreground uppercase font-medium">Avg Risk Score</p>
               </CardContent>
             </Card>
@@ -545,7 +545,7 @@ export default function ActivityPage() {
                     <span className="text-sm font-medium capitalize">{log.ai_tool}</span>
                     <ActionBadge action={log.action} />
                     {(log.risk_score ?? 0) > 0 && (
-                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold ${getRiskBgColor(log.risk_score)}`}>
+                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold ${getRiskBgColor(log.risk_score ?? 0)}`}>
                         {log.risk_score}/100
                       </span>
                     )}

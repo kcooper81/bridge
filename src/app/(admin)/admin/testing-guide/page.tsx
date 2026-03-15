@@ -1229,6 +1229,152 @@ const sections: Section[] = [
       },
     ],
   },
+  {
+    id: "recent",
+    title: "Risk Scoring, Audit & Export (v1.11.0+)",
+    icon: ShieldAlert,
+    description:
+      "Test prompt risk scoring, activity & audit log export, notification management, and usage cap indicators.",
+    preconditions: [
+      "Logged in as Admin or Manager role",
+      "Extension is installed and has logged at least a few AI interactions",
+      "At least one guardrail rule is active (to trigger violations for risk scoring)",
+      "Organization is on Team plan or above (for audit log access)",
+    ],
+    steps: [
+      // ── Risk Scoring ──
+      {
+        action:
+          "Open the Analytics & Audit page from the sidebar",
+        expected:
+          "Page title shows 'Analytics & Audit'. Summary cards at top include Average Risk Score, High Risk (40+) count, and Critical (70+) count.",
+        priority: "P0",
+      },
+      {
+        action:
+          "Send a message through the extension that triggers a guardrail violation (e.g. paste a test API key)",
+        expected:
+          "Log entry appears with a color-coded risk score badge. Score is 0–100 based on severity: green (0–15), yellow (16–39), orange (40–69), red (70–89), dark red (90–100).",
+        priority: "P0",
+      },
+      {
+        action:
+          "Send a clean message through the extension with no sensitive data",
+        expected:
+          "Log entry appears with a low risk score (0–15) and a green badge.",
+        priority: "P0",
+      },
+      {
+        action:
+          "Send a message with multiple violations (e.g. an API key AND an email address)",
+        expected:
+          "Risk score is higher than a single-violation entry. Multiple guardrail flags shown on the log entry.",
+        priority: "P1",
+      },
+      // ── Audit Log Export ──
+      {
+        action:
+          "On the Analytics & Audit page, click the Export dropdown button",
+        expected:
+          "Dropdown shows two options: 'Export as CSV' and 'Export as JSON'.",
+        priority: "P0",
+      },
+      {
+        action:
+          "Click 'Export as CSV' with no filters applied",
+        expected:
+          "CSV file downloads containing all log entries. File includes columns for timestamp, AI tool, action, risk score, guardrail flags, and prompt text (if full logging mode is on).",
+        priority: "P0",
+      },
+      {
+        action:
+          "Apply a date filter (e.g. 'Last 7 Days') and an action filter (e.g. 'Blocked'), then export as JSON",
+        expected:
+          "JSON file downloads containing only filtered entries. Verify the exported data matches the visible filtered results.",
+        priority: "P1",
+      },
+      {
+        action:
+          "Switch to metadata-only logging mode in Settings → Security, then export",
+        expected:
+          "Exported data includes action, tool, timestamps, and risk scores but does NOT include prompt text content.",
+        priority: "P1",
+      },
+      // ── Notifications Management ──
+      {
+        action:
+          "Click the notification bell in the header → navigate to the full Notifications page",
+        expected:
+          "Notifications page shows all notifications with type icons, timestamps, and read/unread status.",
+        priority: "P0",
+      },
+      {
+        action:
+          "Use the type filter dropdown to filter by 'Security' notifications only",
+        expected:
+          "Only security_violation notifications are shown. Other types are hidden. Filter badge shows active count.",
+        priority: "P1",
+      },
+      {
+        action:
+          "Select multiple notifications using the checkboxes, then click 'Mark Read'",
+        expected:
+          "All selected notifications are marked as read. Unread badge count in header decreases accordingly.",
+        priority: "P0",
+      },
+      {
+        action:
+          "Select multiple notifications using the checkboxes, then click 'Delete'",
+        expected:
+          "Confirmation appears. Selected notifications are permanently removed from the list.",
+        priority: "P1",
+      },
+      {
+        action:
+          "Click 'Mark All Read' button",
+        expected:
+          "All notifications are marked as read. Bell icon badge disappears.",
+        priority: "P1",
+      },
+      // ── Usage Cap Indicators ──
+      {
+        action:
+          "Navigate to the Prompts (Vault) page on a Free plan account",
+        expected:
+          "Usage indicator appears near the top showing current prompt count vs max (e.g. '12 / 25 prompts'). Badge warns when approaching limit.",
+        priority: "P0",
+      },
+      {
+        action:
+          "Navigate to the Team page on a Free plan account",
+        expected:
+          "Usage indicator shows current member count vs max (e.g. '2 / 3 members'). Upgrade prompt appears when at limit.",
+        priority: "P1",
+      },
+      {
+        action:
+          "Navigate to the Guidelines page on a Free or Pro plan account",
+        expected:
+          "Usage indicator shows current guideline count vs max. Upgrade nudge appears when limit is reached.",
+        priority: "P1",
+      },
+      // ── Audit Trail Compliance ──
+      {
+        action:
+          "Set log retention to 30 days in Settings → Security → Activity & Privacy",
+        expected:
+          "Retention setting saves. Confirmation shows logs older than 30 days will be auto-deleted.",
+        priority: "P1",
+      },
+      {
+        action:
+          "Verify the sidebar label shows 'Analytics & Audit' under Intelligence section",
+        expected:
+          "Sidebar navigation item reads 'Analytics & Audit', not just 'Activity Log'.",
+        priority: "P0",
+      },
+    ],
+  },
 ];
 
 /* ── Storage key ────────────────────────────────── */

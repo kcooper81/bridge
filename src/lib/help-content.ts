@@ -380,8 +380,8 @@ const _RAW_CATEGORIES: RawCategory[] = [
   {
     id: "analytics",
     icon: BarChart3,
-    title: "Analytics & Activity",
-    description: "Track AI usage, security events, and team activity.",
+    title: "Analytics, Activity & Audit",
+    description: "Track AI usage, security events, audit trails, and team activity.",
     articles: [
       {
         q: "What does the Analytics page show?",
@@ -394,13 +394,13 @@ const _RAW_CATEGORIES: RawCategory[] = [
         keywords: ["dashboard", "guardrail widget", "guardrail summary", "blocks", "warnings", "admin dashboard"],
       },
       {
-        q: "What is the Activity Log?",
-        a: "The Activity Log records AI interactions captured by the browser extension. Each entry shows the AI tool used, the action taken (sent, blocked, or warned), guardrail flags, and a timestamp.\n\nBy default, TeamPrompt uses **metadata-only mode** — it logs the action, tool, and timestamp but does **not** store the actual prompt text. This protects employee privacy while still giving admins visibility into usage patterns and security events.\n\nAdmins can switch to **full logging mode** in Settings → Security → Activity & Privacy to also capture prompt text, which is useful for compliance-heavy industries that require a complete audit trail.\n\nThe Activity Log is available to admins and managers on the Team plan and above.",
-        keywords: ["activity log", "audit", "history", "interactions", "compliance", "metadata", "logging mode"],
+        q: "What is the Activity & Audit Log?",
+        a: "The Activity & Audit Log is your organization's complete audit trail of AI interactions, captured by the browser extension. Each entry shows the AI tool used, the action taken (sent, blocked, or warned), a risk score (0–100), guardrail flags, and a timestamp.\n\nBy default, TeamPrompt uses **metadata-only mode** — it logs the action, tool, and timestamp but does **not** store the actual prompt text. This protects employee privacy while still giving admins visibility into usage patterns and security events.\n\nAdmins can switch to **full logging mode** in Settings → Security → Activity & Privacy to also capture prompt text, which is useful for compliance-heavy industries that require a complete audit trail.\n\nThe audit log supports CSV and JSON export, date/tool/action filters, and configurable retention policies. Available to admins and managers on the Team plan and above.",
+        keywords: ["activity log", "audit log", "audit trail", "history", "interactions", "compliance", "metadata", "logging mode"],
       },
       {
-        q: "How do I filter the Activity Log?",
-        a: "The Activity Log supports multiple filters that can be combined:\n\n• **AI Tool** — Filter by ChatGPT, Claude, Gemini, Copilot, Perplexity, or Other.\n• **Action Type** — Filter by Sent, Blocked, or Warned to focus on specific event types.\n• **Date Range** — Choose from presets (Today, Last 7/30/90 Days) or set a custom date range.\n• **Search** — When full logging mode is enabled, search across prompt text to find specific conversations.\n\nActive filters are shown with a count badge. Click \"Clear all\" to reset all filters at once.",
+        q: "How do I filter the Activity & Audit Log?",
+        a: "The Activity & Audit Log supports multiple filters that can be combined:\n\n• **AI Tool** — Filter by ChatGPT, Claude, Gemini, Copilot, Perplexity, or Other.\n• **Action Type** — Filter by Sent, Blocked, or Warned to focus on specific event types.\n• **Date Range** — Choose from presets (Today, Last 7/30/90 Days) or set a custom date range.\n• **Search** — When full logging mode is enabled, search across prompt text to find specific conversations.\n\nActive filters are shown with a count badge. Click \"Clear all\" to reset all filters at once.",
         keywords: ["filter", "search", "date range", "action filter", "tool filter", "activity log filters"],
       },
       {
@@ -420,8 +420,18 @@ const _RAW_CATEGORIES: RawCategory[] = [
       },
       {
         q: "Can I export activity data?",
-        a: "Yes. On the Activity Log page, use the Export dropdown to download your logs as CSV or JSON. Exports respect your current filters (date range, AI tool, action type) and include risk scores — so you can export exactly the data you need for compliance or reporting.",
-        keywords: ["export", "download", "csv", "json", "report"],
+        a: "Yes. On the Activity & Audit Log page, use the Export dropdown to download your logs as CSV or JSON. Exports respect your current filters (date range, AI tool, action type) and include risk scores — so you can export exactly the data you need for compliance or reporting.",
+        keywords: ["export", "download", "csv", "json", "report", "audit export"],
+      },
+      {
+        q: "How do notifications work?",
+        a: "TeamPrompt sends in-app notifications for key events: security violations, prompt submissions and approvals, member joins/departures, extension inactivity alerts, and system updates.\n\nAccess notifications via the bell icon in the header or the full Notifications page. You can:\n\n• **Filter by type** — View only security, approval, or extension notifications.\n• **Bulk select** — Check multiple notifications and mark as read or delete in bulk.\n• **Mark all read** — Clear all unread badges at once.\n• **Click to navigate** — Each notification links to the relevant page (e.g., a security violation links to Guardrails).\n\nThe bell icon shows an unread count badge that updates in real time.",
+        keywords: ["notifications", "bell icon", "alerts", "bulk select", "mark read", "delete notifications", "notification types"],
+      },
+      {
+        q: "What are usage cap indicators?",
+        a: "Usage cap indicators appear on the Prompts, Team, and Guidelines pages to show your current usage relative to your plan's limits (e.g., \"12 / 25 prompts\").\n\nWhen you're approaching your plan limit, the indicator changes color to warn you. When you reach the limit, an upgrade prompt appears. Upgrading your plan increases or removes the limits.\n\nUsage caps vary by plan — Free has the lowest limits, while Business and Enterprise plans offer the highest or unlimited capacity.",
+        keywords: ["usage cap", "plan limits", "limit indicator", "max prompts", "max members", "max guidelines", "upgrade"],
       },
     ],
   },
@@ -461,7 +471,7 @@ const _RAW_CATEGORIES: RawCategory[] = [
     articles: [
       {
         q: "What plans are available?",
-        a: "Free: up to 3 members and 25 prompts with core features. Pro ($9/mo): unlimited prompts, up to 12 members, analytics, and all 14 guidelines. Team ($7/user/mo): up to 50 members, custom security rules, audit log, and import/export. Business ($12/user/mo): up to 500 members, unlimited guidelines, priority support, and SLA guarantee. See the pricing page for full details.",
+        a: "Free: up to 3 members and 25 prompts with core features. Pro ($9/mo): unlimited prompts, up to 12 members, analytics, and all 14 guidelines. Team ($7/user/mo): up to 50 members, custom security rules, full audit trail with export, risk scoring, and import/export. Business ($12/user/mo): up to 500 members, unlimited guidelines, priority support, and SLA guarantee. See the pricing page for full details.",
         keywords: ["plans", "pricing", "free", "team", "business", "cost"],
       },
       {

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useOrg } from "@/components/providers/org-provider";
 import { PageHeader } from "@/components/dashboard/page-header";
+import { PageSkeleton } from "@/components/dashboard/skeleton-loader";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
@@ -244,11 +245,7 @@ export default function ApprovalsPage() {
     return (
       <>
         <PageHeader title="Approvals" description="Review pending prompts and rule suggestions" />
-        <div className="space-y-4">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="h-16 rounded-lg bg-muted animate-pulse" />
-          ))}
-        </div>
+        <PageSkeleton />
       </>
     );
   }

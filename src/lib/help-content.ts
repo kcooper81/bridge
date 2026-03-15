@@ -394,13 +394,13 @@ const _RAW_CATEGORIES: RawCategory[] = [
         keywords: ["dashboard", "guardrail widget", "guardrail summary", "blocks", "warnings", "admin dashboard"],
       },
       {
-        q: "What is the Activity & Audit Log?",
-        a: "The Activity & Audit Log is your organization's complete audit trail of AI interactions, captured by the browser extension. Each entry shows the AI tool used, the action taken (sent, blocked, or warned), a risk score (0–100), guardrail flags, and a timestamp.\n\nBy default, TeamPrompt uses **metadata-only mode** — it logs the action, tool, and timestamp but does **not** store the actual prompt text. This protects employee privacy while still giving admins visibility into usage patterns and security events.\n\nAdmins can switch to **full logging mode** in Settings → Security → Activity & Privacy to also capture prompt text, which is useful for compliance-heavy industries that require a complete audit trail.\n\nThe audit log supports CSV and JSON export, date/tool/action filters, and configurable retention policies. Available to admins and managers on the Team plan and above.",
+        q: "What is the Activity & Audit?",
+        a: "The Activity & Audit is your organization's complete audit trail of AI interactions, captured by the browser extension. Each entry shows the AI tool used, the action taken (sent, blocked, or warned), a risk score (0–100), guardrail flags, and a timestamp.\n\nBy default, TeamPrompt uses **metadata-only mode** — it logs the action, tool, and timestamp but does **not** store the actual prompt text. This protects employee privacy while still giving admins visibility into usage patterns and security events.\n\nAdmins can switch to **full logging mode** in Settings → Security → Activity & Privacy to also capture prompt text, which is useful for compliance-heavy industries that require a complete audit trail.\n\nThe audit log supports CSV and JSON export, date/tool/action filters, and configurable retention policies. Available to admins and managers on the Team plan and above.",
         keywords: ["activity log", "audit log", "audit trail", "history", "interactions", "compliance", "metadata", "logging mode"],
       },
       {
-        q: "How do I filter the Activity & Audit Log?",
-        a: "The Activity & Audit Log supports multiple filters that can be combined:\n\n• **AI Tool** — Filter by ChatGPT, Claude, Gemini, Copilot, Perplexity, or Other.\n• **Action Type** — Filter by Sent, Blocked, or Warned to focus on specific event types.\n• **Date Range** — Choose from presets (Today, Last 7/30/90 Days) or set a custom date range.\n• **Search** — When full logging mode is enabled, search across prompt text to find specific conversations.\n\nActive filters are shown with a count badge. Click \"Clear all\" to reset all filters at once.",
+        q: "How do I filter the Activity & Audit?",
+        a: "The Activity & Audit supports multiple filters that can be combined:\n\n• **AI Tool** — Filter by ChatGPT, Claude, Gemini, Copilot, Perplexity, or Other.\n• **Action Type** — Filter by Sent, Blocked, or Warned to focus on specific event types.\n• **Date Range** — Choose from presets (Today, Last 7/30/90 Days) or set a custom date range.\n• **Search** — When full logging mode is enabled, search across prompt text to find specific conversations.\n\nActive filters are shown with a count badge. Click \"Clear all\" to reset all filters at once.",
         keywords: ["filter", "search", "date range", "action filter", "tool filter", "activity log filters"],
       },
       {
@@ -420,7 +420,7 @@ const _RAW_CATEGORIES: RawCategory[] = [
       },
       {
         q: "Can I export activity data?",
-        a: "Yes. On the Activity & Audit Log page, use the Export dropdown to download your logs as CSV or JSON. Exports respect your current filters (date range, AI tool, action type) and include risk scores — so you can export exactly the data you need for compliance or reporting.",
+        a: "Yes. On the Activity & Audit page, use the Export dropdown to download your logs as CSV or JSON. Exports respect your current filters (date range, AI tool, action type) and include risk scores — so you can export exactly the data you need for compliance or reporting.",
         keywords: ["export", "download", "csv", "json", "report", "audit export"],
       },
       {

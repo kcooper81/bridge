@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { useOrg } from "@/components/providers/org-provider";
 import { useSubscription } from "@/components/providers/subscription-provider";
 import { PageHeader } from "@/components/dashboard/page-header";
+import { PageSkeleton } from "@/components/dashboard/skeleton-loader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,11 +30,7 @@ export default function ImportExportPage() {
     return (
       <>
         <PageHeader title="Import / Export" />
-        <div className="grid gap-6 lg:grid-cols-2">
-          {[1, 2].map((i) => (
-            <div key={i} className="h-64 rounded-lg bg-muted animate-pulse" />
-          ))}
-        </div>
+        <PageSkeleton />
       </>
     );
   }

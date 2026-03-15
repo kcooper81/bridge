@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useOrg } from "@/components/providers/org-provider";
 import { useSubscription } from "@/components/providers/subscription-provider";
 import { PageHeader } from "@/components/dashboard/page-header";
+import { CardGridSkeleton } from "@/components/dashboard/skeleton-loader";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -179,11 +180,7 @@ export default function GuidelinesPage() {
     return (
       <>
         <PageHeader title="Guidelines" description="Define quality guidelines for your team's prompts" />
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="h-32 rounded-lg bg-muted animate-pulse" />
-          ))}
-        </div>
+        <CardGridSkeleton />
       </>
     );
   }

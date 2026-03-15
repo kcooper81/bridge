@@ -272,7 +272,7 @@ export default function ActivityPage() {
   if (noOrg) {
     return (
       <>
-        <PageHeader title="Analytics & Audit" />
+        <PageHeader title="Activity & Audit" />
         <NoOrgBanner />
       </>
     );
@@ -281,7 +281,7 @@ export default function ActivityPage() {
   if (orgLoading) {
     return (
       <>
-        <PageHeader title="Analytics & Audit" />
+        <PageHeader title="Activity & Audit" />
         <div className="space-y-3">
           {[1, 2, 3, 4, 5].map((i) => (
             <div key={i} className="h-20 rounded-lg bg-muted animate-pulse" />
@@ -294,7 +294,7 @@ export default function ActivityPage() {
   if (!["admin", "manager"].includes(currentUserRole)) {
     return (
       <>
-        <PageHeader title="Analytics & Audit" />
+        <PageHeader title="Activity & Audit" />
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <Activity className="h-12 w-12 text-muted-foreground mb-4" />
           <h3 className="text-lg font-medium">Activity log requires admin or manager role</h3>
@@ -309,8 +309,8 @@ export default function ActivityPage() {
   if (!canAccess("audit_log")) {
     return (
       <>
-        <PageHeader title="Analytics & Audit" />
-        <UpgradeGate feature="audit_log" title="Analytics & Audit" />
+        <PageHeader title="Activity & Audit" />
+        <UpgradeGate feature="audit_log" title="Activity & Audit" />
       </>
     );
   }
@@ -318,7 +318,7 @@ export default function ActivityPage() {
   return (
     <>
       <PageHeader
-        title="Analytics & Audit"
+        title="Activity & Audit"
         description="Full audit trail of AI interactions — logged by the browser extension for compliance and security review"
       />
 

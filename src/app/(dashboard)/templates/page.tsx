@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useOrg } from "@/components/providers/org-provider";
 import { createClient } from "@/lib/supabase/client";
 import { PageHeader } from "@/components/dashboard/page-header";
+import { PageSkeleton } from "@/components/dashboard/skeleton-loader";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -406,11 +407,7 @@ export default function TemplatesPage() {
           title="Templates"
           description="Browse and install curated content packs for your team"
         />
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-            <div key={i} className="h-56 rounded-lg bg-muted animate-pulse" />
-          ))}
-        </div>
+        <PageSkeleton />
       </>
     );
   }

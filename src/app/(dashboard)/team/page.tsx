@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { useOrg } from "@/components/providers/org-provider";
 import { useSubscription } from "@/components/providers/subscription-provider";
 import { PageHeader } from "@/components/dashboard/page-header";
+import { PageSkeleton } from "@/components/dashboard/skeleton-loader";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -312,13 +313,7 @@ export default function TeamPage() {
     return (
       <>
         <PageHeader title="Team" description="Manage members, teams, and invitations" />
-        <div className="space-y-3">
-          <div className="h-10 rounded-lg bg-muted animate-pulse" />
-          <div className="h-8 w-64 rounded-lg bg-muted animate-pulse" />
-          {[1, 2, 3, 4].map((j) => (
-            <div key={j} className="h-14 rounded-lg bg-muted animate-pulse" />
-          ))}
-        </div>
+        <PageSkeleton />
       </>
     );
   }

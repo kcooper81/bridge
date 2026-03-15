@@ -383,7 +383,7 @@ const sections: Section[] = [
         priority: "P2",
       },
       {
-        action: "View Activity Log",
+        action: "View Activity & Audit page",
         expected:
           "Events are logged (prompt created, edited, deleted, user invited, etc.).",
         priority: "P1",
@@ -515,6 +515,30 @@ const sections: Section[] = [
           "Page loads with browser-detected CTA button. All 3 browser store cards display. FAQ and features sections render.",
         priority: "P1",
       },
+      {
+        action: "Navigate between dashboard pages and observe loading",
+        expected:
+          "Sidebar and header render instantly. Page content shows consistent skeleton loaders (PageSkeleton) while data loads. No blank white screens.",
+        priority: "P0",
+      },
+      {
+        action: "Invite a member who has multiple Google accounts → have them click the invite link",
+        expected:
+          "Login page shows 'Sign in with [invited email]' banner. Google OAuth pre-selects the correct account via login_hint. If wrong account is signed in, invite page shows 'Wrong account' with a 'Sign in as [email]' button.",
+        priority: "P0",
+      },
+      {
+        action: "Have an invited member click an old/revoked invite link after being re-invited",
+        expected:
+          "Shows clear message: 'This invite has been revoked. A newer invite may have been sent.' Not a generic 'invalid' error.",
+        priority: "P1",
+      },
+      {
+        action: "Check Settings → Danger Zone for Leave Organization",
+        expected:
+          "Shows 'Leave Organization' option with org name. For solo admins: warns data will be deleted. For orgs with members: warns they need to transfer admin first.",
+        priority: "P1",
+      },
     ],
   },
   {
@@ -532,7 +556,7 @@ const sections: Section[] = [
       {
         action: "Check the sidebar navigation",
         expected:
-          "Sidebar hides: Approvals, Team, Activity Log, Guardrails, and Settings cog. Only member-accessible items are visible.",
+          "Sidebar hides: Approvals, Team, Guidelines, Analytics, Activity & Audit, and Guardrails. Only Prompts and Templates are visible under Workspace. Intelligence section is hidden entirely.",
         priority: "P0",
       },
       {
@@ -597,9 +621,21 @@ const sections: Section[] = [
         priority: "P1",
       },
       {
-        action: "View the Analytics page",
+        action: "Navigate directly to /analytics, /activity, or /guardrails via URL",
         expected:
-          "Basic analytics are accessible. Data loads correctly.",
+          "Pages show a role restriction message or redirect. Members cannot access Analytics, Activity & Audit, or Guardrails even by direct URL.",
+        priority: "P0",
+      },
+      {
+        action: "Check the Templates page — try to install a pack directly",
+        expected:
+          'Members see "Request Install" button instead of "Install". Clicking it sends a request to admin. No direct install allowed.',
+        priority: "P0",
+      },
+      {
+        action: "Check Settings page for Leave Organization option",
+        expected:
+          "Danger Zone shows 'Leave Organization' with org name and clear messaging about what happens.",
         priority: "P1",
       },
       {
@@ -1245,9 +1281,9 @@ const sections: Section[] = [
       // ── Risk Scoring ──
       {
         action:
-          "Open the Analytics & Audit page from the sidebar",
+          "Open the Activity & Audit page from the sidebar",
         expected:
-          "Page title shows 'Analytics & Audit'. Summary cards at top include Average Risk Score, High Risk (40+) count, and Critical (70+) count.",
+          "Page title shows 'Activity & Audit'. Summary cards at top include Average Risk Score, High Risk (40+) count, and Critical (70+) count.",
         priority: "P0",
       },
       {
@@ -1274,7 +1310,7 @@ const sections: Section[] = [
       // ── Audit Log Export ──
       {
         action:
-          "On the Analytics & Audit page, click the Export dropdown button",
+          "On the Activity & Audit page, click the Export dropdown button",
         expected:
           "Dropdown shows two options: 'Export as CSV' and 'Export as JSON'.",
         priority: "P0",
@@ -1368,9 +1404,9 @@ const sections: Section[] = [
       },
       {
         action:
-          "Verify the sidebar label shows 'Analytics & Audit' under Intelligence section",
+          "Verify the sidebar label shows 'Activity & Audit' under Intelligence section",
         expected:
-          "Sidebar navigation item reads 'Analytics & Audit', not just 'Activity Log'.",
+          "Sidebar navigation item reads 'Activity & Audit', not just 'Activity Log'.",
         priority: "P0",
       },
     ],

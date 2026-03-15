@@ -47,23 +47,23 @@ const navSections: { title: string; items: NavItem[] }[] = [
   {
     title: "Intelligence",
     items: [
-      { label: "Analytics", href: "/analytics", icon: BarChart3 },
-      { label: "Analytics & Audit", href: "/activity", icon: Activity, roles: ["admin", "manager"] },
-      { label: "Guardrails", href: "/guardrails", icon: Shield },
+      { label: "Analytics", href: "/analytics", icon: BarChart3, roles: ["admin", "manager"] },
+      { label: "Activity & Audit", href: "/activity", icon: Activity, roles: ["admin", "manager"] },
+      { label: "Guardrails", href: "/guardrails", icon: Shield, roles: ["admin", "manager"] },
     ],
   },
 ];
 
 function NavContent({ onItemClick }: { onItemClick?: () => void }) {
   const pathname = usePathname();
-  const { currentUserRole, prompts, members } = useOrg();
+  const { currentUserRole, prompts, members, loading: orgLoading } = useOrg();
   const { theme } = useTheme();
   const [supportOpen, setSupportOpen] = useState(false);
   const [supportTab, setSupportTab] = useState<"help" | "whats-new" | "contact">("help");
   const { unseen } = useHasUnseenRelease();
 
-  const pendingCount = prompts.filter((p) => p.status === "pending").length;
-  const inactiveExtensionCount = (currentUserRole === "admin" || currentUserRole === "manager")
+  const pendingCount = orgLoading ? 0 : prompts.filter((p) => p.status === "pending").length;
+  const inactiveExtensionCount = orgLoading ? 0 : (currentUserRole === "admin" || currentUserRole === "manager")
     ? members.filter((m) => getExtensionStatus(m.last_extension_active) === "inactive").length
     : 0;
 
@@ -101,7 +101,7 @@ function NavContent({ onItemClick }: { onItemClick?: () => void }) {
         {navSections.map((section) => {
           const visibleItems = section.items.filter(
             (item) =>
-              !item.roles || item.roles.includes(currentUserRole)
+              !item.roles || orgLoading || item.roles.includes(currentUserRole)
           );
           if (visibleItems.length === 0) return null;
 

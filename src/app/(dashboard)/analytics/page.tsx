@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useOrg } from "@/components/providers/org-provider";
 import { useSubscription } from "@/components/providers/subscription-provider";
 import { PageHeader } from "@/components/dashboard/page-header";
+import { PageSkeleton } from "@/components/dashboard/skeleton-loader";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -62,11 +63,7 @@ export default function AnalyticsPage() {
     return (
       <>
         <PageHeader title="Analytics" description="Usage insights and trends for your team" />
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-24 rounded-lg bg-muted animate-pulse" />
-          ))}
-        </div>
+        <PageSkeleton />
       </>
     );
   }
@@ -93,11 +90,7 @@ export default function AnalyticsPage() {
     return (
       <>
         <PageHeader title="Analytics" description="Usage insights and trends for your team" />
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-24 rounded-lg bg-muted animate-pulse" />
-          ))}
-        </div>
+        <PageSkeleton />
       </>
     );
   }

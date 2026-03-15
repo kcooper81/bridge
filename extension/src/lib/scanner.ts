@@ -16,8 +16,9 @@ export interface ScanResult {
     matchedText: string;
     detectionType: DetectionType;
   }[];
-  action: "allow" | "warn" | "block";
+  action: "allow" | "warn" | "block" | "auto_redact";
   risk_score: number;
+  allow_override?: boolean;
   sanitized_content?: string;
   replacements?: {
     placeholder: string;

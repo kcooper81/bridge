@@ -150,7 +150,7 @@ function ctaButton(text: string, url: string): string {
   return `              <table role="presentation" cellpadding="0" cellspacing="0" style="margin: 28px 0;">
                 <tr>
                   <td style="background-color: ${BRAND_COLOR}; border-radius: 8px; mso-padding-alt: 14px 32px;">
-                    <a href="${url}" style="display: inline-block; padding: 14px 32px; color: #ffffff; font-size: 15px; font-weight: 600; text-decoration: none; line-height: 1;">${text}</a>
+                    <a href="${esc(url)}" style="display: inline-block; padding: 14px 32px; color: #ffffff; font-size: 15px; font-weight: 600; text-decoration: none; line-height: 1;">${text}</a>
                   </td>
                 </tr>
               </table>`;

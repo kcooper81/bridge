@@ -54,9 +54,11 @@ export async function POST(
   }
   const campaign = transitioned;
   if (!campaign.subject?.trim()) {
+    await db.from("email_campaigns").update({ status: "draft", updated_at: new Date().toISOString() }).eq("id", id);
     return NextResponse.json({ error: "Subject is required" }, { status: 400 });
   }
   if (!campaign.body_html?.trim()) {
+    await db.from("email_campaigns").update({ status: "draft", updated_at: new Date().toISOString() }).eq("id", id);
     return NextResponse.json({ error: "Email body is required" }, { status: 400 });
   }
 

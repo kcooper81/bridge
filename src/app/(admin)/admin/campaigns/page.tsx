@@ -2192,6 +2192,7 @@ export default function CampaignsPage() {
                 className="hidden"
                 onChange={(e) => {
                   const file = e.target.files?.[0];
+                  if (!importListName.trim()) { toast.error("Enter a list name first"); e.target.value = ""; return; }
                   if (file) handleCsvImport(file);
                   e.target.value = "";
                 }}

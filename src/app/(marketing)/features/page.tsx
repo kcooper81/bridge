@@ -852,7 +852,7 @@ const features = [
     description:
       "Pre-built security rules for regulated industries. Install rules for healthcare (HIPAA), EU privacy (GDPR), payment cards (PCI-DSS), and more with one click.",
     details: [
-      "6 compliance frameworks ready to deploy",
+      "19 compliance frameworks ready to deploy",
       "One-click install activates all relevant rules",
       "Covers patient records, personal data, financial info, and passwords",
       "Customize or extend any pack after installation",

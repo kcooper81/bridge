@@ -99,7 +99,7 @@ export const industryData: IndustryPageData = {
     },
   ],
   cta: {
-    headline: "5 PCI-DSS rules. 6 compliance packs.",
+    headline: "5 PCI-DSS rules. 19 compliance packs.",
     gradientText: "Audit trail from day one.",
     subtitle:
       "Install, activate a compliance pack, and start protecting financial data — all in under 2 minutes.",

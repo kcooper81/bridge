@@ -69,7 +69,7 @@ const benefits = [
   "Pattern tester built into the rule editor",
   "Full activity log of all violations",
   "15 pre-built rules covering common data types",
-  "6 one-click compliance rule packs for healthcare, finance, and privacy",
+  "19 one-click compliance packs — HIPAA, SOC 2, PCI-DSS, GDPR, and more",
   "Custom rules for your industry's requirements",
   "Role-based access for managing security rules",
   "Browser extension scans text before it reaches AI tools",

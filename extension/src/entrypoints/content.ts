@@ -125,6 +125,7 @@ function killContentScript() {
   if (_pingIntervalId) clearInterval(_pingIntervalId);
   _refreshIntervalId = null;
   _pingIntervalId = null;
+  if (_saveObserver) { _saveObserver.disconnect(); _saveObserver = null; }
   // Remove ALL injected UI — no overlays, banners, or shield when extension is dead
   removeAllInjectedUI();
 }
@@ -534,12 +535,24 @@ function performScan(text: string, onAllow: () => void) {
       showBlockOverlay(result.violations, result.sanitized_content, (sanitized) => {
         setChatInputText(sanitized);
         _lastBlockedText = null;
-        logInteraction(text, "auto_redacted", result.violations, { riskScore });
+        logInteraction(text, "warned", result.violations, { riskScore });
       });
       logInteraction(text, "blocked", result.violations, { riskScore });
       pulseShield("block");
       safeSendMessage({ type: "SET_BADGE", text: "!", color: "#ef4444" });
       setTimeout(() => safeSendMessage({ type: "SET_BADGE", text: "" }), 10000);
+      return;
+    }
+
+    if (result?.action === "auto_redact" && result.sanitized_content) {
+      // Auto-redact: replace input with sanitized version and allow send
+      setChatInputText(result.sanitized_content);
+      showWarningBanner(result.violations);
+      logInteraction(text, "warned", result.violations, { riskScore });
+      pulseShield("warn");
+      safeSendMessage({ type: "SET_BADGE", text: "!", color: "#f59e0b" });
+      setTimeout(() => safeSendMessage({ type: "SET_BADGE", text: "" }), 10000);
+      onAllow();
       return;
     }
 

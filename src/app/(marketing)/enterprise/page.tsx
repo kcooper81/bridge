@@ -165,7 +165,7 @@ const faqs = [
   {
     question: "Which compliance frameworks are supported?",
     answer:
-      "TeamPrompt includes 6 one-click compliance rule packs: HIPAA (healthcare), GDPR (EU data protection), PCI-DSS (payment cards), CCPA (California privacy), SOC 2 (service organizations), and General PII detection. Each pack installs pre-configured security rules that detect and block the specific data patterns relevant to that framework.",
+      "TeamPrompt includes 19 one-click compliance packs covering HIPAA, HITECH, GDPR, PCI-DSS, CCPA, SOC 2, SOX, FERPA, GLBA, NIST 800-171, FedRAMP, ITAR, CJIS, COPPA, NAIC, FTC, RESPA/TILA, Legal Privilege, and General PII. Each pack installs pre-configured DLP rules that detect and block the specific data patterns relevant to that framework.",
   },
 ];
 

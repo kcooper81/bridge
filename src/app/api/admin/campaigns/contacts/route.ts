@@ -222,9 +222,13 @@ export async function GET(request: NextRequest) {
   }
 
   if (search) {
-    const filter = `email.ilike.%${search}%,first_name.ilike.%${search}%,last_name.ilike.%${search}%,company.ilike.%${search}%`;
-    countQuery = countQuery.or(filter);
-    dataQuery = dataQuery.or(filter);
+    // Escape special PostgREST filter characters
+    const safe = search.replace(/[,().\\]/g, "");
+    if (safe) {
+      const filter = `email.ilike.%${safe}%,first_name.ilike.%${safe}%,last_name.ilike.%${safe}%,company.ilike.%${safe}%`;
+      countQuery = countQuery.or(filter);
+      dataQuery = dataQuery.or(filter);
+    }
   }
 
   const [{ count }, { data: contacts }] = await Promise.all([countQuery, dataQuery]);

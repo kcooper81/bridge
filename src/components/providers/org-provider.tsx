@@ -224,6 +224,38 @@ export function OrgProvider({ children }: { children: React.ReactNode }) {
     refresh().finally(() => setLoading(false));
   }, [refresh]);
 
+  // Realtime: auto-refresh when members join/leave or invites change
+  useEffect(() => {
+    if (noOrg || loading) return;
+
+    const supabase = createClient();
+    const orgId = org?.id;
+    if (!orgId) return;
+
+    const channel = supabase
+      .channel("org-realtime")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "profiles", filter: `org_id=eq.${orgId}` },
+        () => { refresh(); }
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "invites", filter: `org_id=eq.${orgId}` },
+        () => { refresh(); }
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "prompts", filter: `org_id=eq.${orgId}` },
+        () => { refresh(); }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [noOrg, loading, org?.id, refresh]);
+
   return (
     <OrgContext.Provider
       value={{

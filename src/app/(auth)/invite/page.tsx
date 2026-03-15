@@ -61,6 +61,18 @@ export default function InvitePage() {
         return;
       }
 
+      if (invite && invite.status === "revoked") {
+        setError("This invite has been revoked. A newer invite may have been sent — check your email for a more recent link, or ask your admin to resend.");
+        setChecking(false);
+        return;
+      }
+
+      if (invite && invite.status === "expired") {
+        setError("This invite has expired. Ask your admin to send a new invite.");
+        setChecking(false);
+        return;
+      }
+
       if (invite && invite.status === "pending") {
         // Check if signed-in email matches the invited email
         if (invite.email && user.email && invite.email.toLowerCase() !== user.email.toLowerCase()) {

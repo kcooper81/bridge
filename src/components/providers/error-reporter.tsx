@@ -11,6 +11,8 @@ import { reportError } from "@/lib/report-error";
 export function ErrorReporter({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     function handleError(event: ErrorEvent) {
+      // Ignore benign ResizeObserver warnings (common with Radix UI components)
+      if (event.message?.includes("ResizeObserver")) return;
       reportError(event.error ?? event.message, {
         source: "window.onerror",
         filename: event.filename,

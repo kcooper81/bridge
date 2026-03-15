@@ -150,20 +150,53 @@ export default function BillingPage() {
               Current Plan
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-4">
+            {/* Plan badge and status */}
             <div className="flex items-center gap-3">
               <Badge className="text-base px-3 py-1 capitalize">{currentPlan}</Badge>
               {subscription?.status && (
-                <Badge variant={subscription.status === "active" ? "default" : "destructive"}>
-                  {subscription.status}
+                <Badge variant={subscription.status === "active" ? "default" : subscription.status === "trialing" ? "secondary" : "destructive"}>
+                  {subscription.status === "trialing" ? "Free Trial" : subscription.status}
                 </Badge>
               )}
             </div>
+
+            {/* Trial info — friendly messaging */}
+            {subscription?.trial_ends_at && subscription.status === "trialing" && (
+              <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 space-y-2">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
+                  <p className="text-sm font-semibold">You get 14 days free, then your subscription begins</p>
+                </div>
+                <p className="text-sm text-muted-foreground pl-6">
+                  Your free trial ends on{" "}
+                  <span className="font-medium text-foreground">
+                    {format(new Date(subscription.trial_ends_at), "MMMM d, yyyy")}
+                  </span>
+                  . After that, your <span className="font-medium capitalize">{currentPlan}</span> plan will automatically activate and billing starts. You can cancel anytime before then.
+                </p>
+              </div>
+            )}
+
+            {/* Active subscription info */}
+            {subscription?.status === "active" && subscription.current_period_end && (
+              <div className="rounded-lg border border-border bg-muted/30 p-4">
+                <p className="text-sm text-muted-foreground">
+                  {subscription.cancel_at_period_end ? (
+                    <>Your plan will be canceled on <span className="font-medium text-foreground">{format(new Date(subscription.current_period_end), "MMMM d, yyyy")}</span>. You&apos;ll keep access until then.</>
+                  ) : (
+                    <>Next billing date: <span className="font-medium text-foreground">{format(new Date(subscription.current_period_end), "MMMM d, yyyy")}</span></>
+                  )}
+                </p>
+              </div>
+            )}
+
+            {/* Free plan upsell */}
             {currentPlan === "free" && !subscription?.stripe_customer_id && (
               <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 space-y-3">
                 <p className="text-sm font-medium">You&apos;re on the Free plan</p>
                 <p className="text-sm text-muted-foreground">
-                  Upgrade to unlock unlimited prompts, custom security rules, analytics, and more.
+                  Upgrade to unlock unlimited prompts, custom security rules, analytics, and more. All paid plans include a 14-day free trial.
                 </p>
                 <div className="space-y-1.5">
                   {[
@@ -173,7 +206,9 @@ export default function BillingPage() {
                     { label: "Analytics", free: "No", paid: "Pro+" },
                     { label: "Import / Export", free: "No", paid: "Pro+" },
                     { label: "Custom Security", free: "No", paid: "Team+" },
-                    { label: "Activity Log", free: "No", paid: "Team+" },
+                    { label: "Audit Log & Export", free: "No", paid: "Team+" },
+                    { label: "Risk Scoring", free: "No", paid: "Team+" },
+                    { label: "Google Workspace Sync", free: "No", paid: "Team+" },
                     { label: "Priority Support", free: "No", paid: "Business" },
                     { label: "SLA Guarantee", free: "No", paid: "Business" },
                   ].map((row) => (
@@ -188,22 +223,16 @@ export default function BillingPage() {
                 </div>
               </div>
             )}
-            {subscription?.current_period_end && (
-              <p className="text-sm text-muted-foreground">
-                {subscription.cancel_at_period_end ? "Cancels" : "Renews"} on{" "}
-                {format(new Date(subscription.current_period_end), "MMMM d, yyyy")}
-              </p>
-            )}
-            {subscription?.trial_ends_at && subscription.status === "trialing" && (
-              <p className="text-sm text-tp-yellow">
-                Trial ends {format(new Date(subscription.trial_ends_at), "MMMM d, yyyy")}
-              </p>
-            )}
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">Seats: {subscription?.seats || 1}</span>
-              <span className="text-sm text-muted-foreground">Members: {members.length}</span>
+
+            {/* Seats & members */}
+            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+              <span>Seats: <span className="font-medium text-foreground">{subscription?.seats || 1}</span></span>
+              <span className="text-border">|</span>
+              <span>Members: <span className="font-medium text-foreground">{members.length}</span></span>
             </div>
-            {subscription?.stripe_customer_id && (
+
+            {/* Manage billing button */}
+            {subscription?.stripe_customer_id && subscription.stripe_customer_id !== "manual_upgrade" && (
               <Button variant="outline" onClick={openPortal} disabled={loadingPortal}>
                 {loadingPortal && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Manage Billing

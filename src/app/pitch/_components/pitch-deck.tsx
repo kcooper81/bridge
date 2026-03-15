@@ -35,8 +35,8 @@ import {
 // ─── Constants ──────────────────────────────────────────────────
 
 const TOTAL_SLIDES = 13;
-const ACCENT = "#7C3AED"; // purple-600
-const ACCENT_BLUE = "#3B82F6"; // blue-500
+// Colors used inline in SVG gradients when needed
+// const ACCENT = "#7C3AED"; const ACCENT_BLUE = "#3B82F6";
 
 // ─── Animated text reveal ───────────────────────────────────────
 function RevealText({ children, delay = 0, className }: { children: React.ReactNode; delay?: number; className?: string }) {
@@ -283,7 +283,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
 
           <RevealText delay={600}>
             <div className="flex items-center justify-center gap-8 pt-4">
-              {["$13.5K MRR", "85 Paying Teams", "1,200+ Users", "Zero Ad Spend"].map((s) => (
+              {["Full Product Live", "23 Early Users", "5 AI Tools Supported", "Zero Ad Spend"].map((s) => (
                 <span key={s} className="text-sm text-zinc-400 font-medium">{s}</span>
               ))}
             </div>
@@ -659,7 +659,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
             <h2 className="text-4xl sm:text-5xl font-black tracking-tight leading-tight">
               Freemium SaaS.
               <br />
-              <span className="text-zinc-400">Customers already paying.</span>
+              <span className="text-zinc-400">Ready to scale.</span>
             </h2>
           </RevealText>
 
@@ -710,70 +710,43 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
           <RevealText>
             <SlideLabel>Traction</SlideLabel>
             <h2 className="text-4xl sm:text-5xl font-black tracking-tight leading-tight">
-              Organic growth.
+              Product built.
               <br />
-              <span className="text-zinc-400">Zero ad spend.</span>
+              <span className="text-zinc-400">Ready to grow.</span>
             </h2>
           </RevealText>
 
           <RevealText delay={200}>
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
-              <BigStat value="1,200+" label="Registered Users" sub="organic" />
-              <BigStat value="85" label="Paying Teams" sub="avg 4 seats" />
-              <BigStat value="$13.5K" label="MRR" sub="$162K ARR" />
-              <BigStat value="4.8★" label="Chrome Store" />
-              <BigStat value="<2%" label="Monthly Churn" />
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <BigStat value="23" label="Early Users" sub="organic signups" />
+              <BigStat value="40+" label="Prompts Created" />
+              <BigStat value="5" label="AI Tools Supported" sub="ChatGPT, Claude, Gemini, Copilot, Perplexity" />
+              <BigStat value="$0" label="Ad Spend to Date" sub="100% organic" />
             </div>
           </RevealText>
 
           <RevealText delay={400}>
             <GlowCard>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-bold text-xs uppercase tracking-widest text-zinc-400">MRR Growth — Organic, No Ad Spend</h3>
-                <span className="text-xs text-zinc-500">$1.2K → $13.5K in 8 months</span>
+              <h3 className="font-bold text-xs uppercase tracking-widest text-zinc-400 mb-4">What&apos;s Built & Shipped</h3>
+              <div className="grid sm:grid-cols-3 gap-4">
+                {[
+                  { title: "Full SaaS Platform", items: ["Prompt vault with versioning", "Team management + roles", "Analytics dashboard", "Billing with Stripe"] },
+                  { title: "Browser Extension", items: ["Chrome, Firefox, Edge", "Real-time DLP scanning", "Side panel + prompt insertion", "Shield indicator"] },
+                  { title: "Security & Compliance", items: ["19 compliance packs", "Risk scoring 0–100", "Auto-sanitization", "Full audit trail + export"] },
+                ].map((col) => (
+                  <div key={col.title}>
+                    <p className="text-sm font-bold text-zinc-200 mb-2">{col.title}</p>
+                    <div className="space-y-1.5">
+                      {col.items.map((item) => (
+                        <div key={item} className="flex gap-2 items-start">
+                          <CheckCircle2 className="h-3.5 w-3.5 text-purple-400 shrink-0 mt-0.5" />
+                          <p className="text-xs text-zinc-400">{item}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
               </div>
-              {(() => {
-                const data = [
-                  { month: "M1", mrr: 1.2 }, { month: "M2", mrr: 1.7 }, { month: "M3", mrr: 2.4 },
-                  { month: "M4", mrr: 3.4 }, { month: "M5", mrr: 4.7 }, { month: "M6", mrr: 6.6 },
-                  { month: "M7", mrr: 8.5 }, { month: "Now", mrr: 13.5 },
-                ];
-                const W = 700, H = 200;
-                const PAD = { top: 25, right: 15, bottom: 30, left: 45 };
-                const cW = W - PAD.left - PAD.right;
-                const cH = H - PAD.top - PAD.bottom;
-                const yMax = 15;
-                const yTicks = [0, 5, 10, 15];
-                function x(i: number) { return PAD.left + (i / (data.length - 1)) * cW; }
-                function y(v: number) { return PAD.top + cH - (v / yMax) * cH; }
-                const line = data.map((d, i) => `${i === 0 ? "M" : "L"}${x(i).toFixed(1)},${y(d.mrr).toFixed(1)}`).join(" ");
-                const area = line + ` L${x(data.length - 1).toFixed(1)},${y(0).toFixed(1)} L${x(0).toFixed(1)},${y(0).toFixed(1)} Z`;
-                return (
-                  <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto">
-                    {yTicks.map((t) => (
-                      <g key={t}>
-                        <line x1={PAD.left} x2={W - PAD.right} y1={y(t)} y2={y(t)} stroke="rgba(255,255,255,0.06)" strokeWidth={1} />
-                        <text x={PAD.left - 6} y={y(t) + 4} textAnchor="end" className="fill-zinc-500 text-[10px] font-mono">${t}K</text>
-                      </g>
-                    ))}
-                    {data.map((d, i) => (
-                      <text key={d.month} x={x(i)} y={H - 6} textAnchor="middle" className={cn("text-[10px] font-mono", i === data.length - 1 ? "fill-purple-400 font-bold" : "fill-zinc-500")}>{d.month}</text>
-                    ))}
-                    <defs>
-                      <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="0">
-                        <stop offset="0%" stopColor={ACCENT} />
-                        <stop offset="100%" stopColor={ACCENT_BLUE} />
-                      </linearGradient>
-                    </defs>
-                    <path d={area} fill="url(#lineGrad)" fillOpacity={0.08} />
-                    <path d={line} fill="none" stroke="url(#lineGrad)" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
-                    {data.map((d, i) => (
-                      <circle key={i} cx={x(i)} cy={y(d.mrr)} r={i === data.length - 1 ? 5 : 3} fill={i === data.length - 1 ? ACCENT : "rgba(124,58,237,0.5)"} />
-                    ))}
-                    <text x={x(data.length - 1) + 2} y={y(data[data.length - 1].mrr) - 10} textAnchor="middle" className="fill-purple-400 text-[11px] font-mono font-bold">${data[data.length - 1].mrr}K</text>
-                  </svg>
-                );
-              })()}
             </GlowCard>
           </RevealText>
         </div>
@@ -869,7 +842,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
           <RevealText>
             <SlideLabel>Team</SlideLabel>
             <h2 className="text-4xl sm:text-5xl font-black tracking-tight leading-tight">
-              Solo founder.
+              Lean team.
               <br />
               <span className="text-zinc-400">Full-stack execution.</span>
             </h2>
@@ -885,7 +858,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
                   {[
                     "UI/UX developer turned founder",
                     "Built entire platform with AI-assisted development",
-                    "$0 to $13.5K MRR organically",
+                    "23 early users, zero ad spend",
                     "Ships weekly, handles support",
                   ].map((item) => (
                     <div key={item} className="flex gap-2 items-start text-xs text-zinc-400">
@@ -899,27 +872,48 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
 
             <RevealText delay={350} className="sm:col-span-2 space-y-4">
               <GlowCard>
-                <h4 className="font-bold text-sm mb-3">Why solo works here</h4>
-                <div className="grid grid-cols-2 gap-3">
-                  {[
-                    { icon: Zap, text: "Ships weekly — fast iteration" },
-                    { icon: Users, text: "Close to every customer" },
-                    { icon: DollarSign, text: "Capital efficient execution" },
-                    { icon: Rocket, text: "Proven complex system delivery" },
-                  ].map((item) => (
-                    <div key={item.text} className="flex gap-2 items-start text-sm text-zinc-400">
-                      <item.icon className="h-3.5 w-3.5 text-purple-400 shrink-0 mt-0.5" />
-                      <span className="text-xs">{item.text}</span>
+                <h4 className="font-bold text-sm mb-3">Current Team</h4>
+                <div className="space-y-3">
+                  <div className="flex gap-3 items-start">
+                    <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-xs font-bold text-blue-400 shrink-0">FS</div>
+                    <div>
+                      <p className="text-sm font-semibold">Full-Stack Engineer <span className="text-zinc-400 font-normal">(Contract)</span></p>
+                      <p className="text-xs text-zinc-400">Full-stack development — backend, API, and platform features</p>
                     </div>
-                  ))}
+                  </div>
+                  <div className="flex gap-3 items-start">
+                    <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center text-xs font-bold text-emerald-400 shrink-0">SM</div>
+                    <div>
+                      <p className="text-sm font-semibold">Social Media Team <span className="text-zinc-400 font-normal">(India, Contract)</span></p>
+                      <p className="text-xs text-zinc-400">Social channel management, content distribution, and community engagement</p>
+                    </div>
+                  </div>
                 </div>
               </GlowCard>
-              <GlowCard glow="blue">
-                <h4 className="font-bold text-sm text-purple-400 mb-2">First hire (with funding)</h4>
-                <p className="text-xs text-zinc-400 leading-relaxed">
-                  Part-time security engineer for enterprise features — SSO/SAML, SCIM, SOC 2 certification.
-                </p>
-              </GlowCard>
+              <div className="grid grid-cols-2 gap-4">
+                <GlowCard glow="blue">
+                  <h4 className="font-bold text-sm mb-3">Why this works</h4>
+                  <div className="space-y-2">
+                    {[
+                      { icon: Zap, text: "Ships weekly — fast iteration" },
+                      { icon: Users, text: "Close to every customer" },
+                      { icon: DollarSign, text: "Capital efficient execution" },
+                      { icon: Rocket, text: "Lean team, global reach" },
+                    ].map((item) => (
+                      <div key={item.text} className="flex gap-2 items-start text-zinc-400">
+                        <item.icon className="h-3.5 w-3.5 text-purple-400 shrink-0 mt-0.5" />
+                        <span className="text-xs">{item.text}</span>
+                      </div>
+                    ))}
+                  </div>
+                </GlowCard>
+                <GlowCard glow="green">
+                  <h4 className="font-bold text-sm text-purple-400 mb-2">Next hire (with funding)</h4>
+                  <p className="text-xs text-zinc-400 leading-relaxed">
+                    Part-time security engineer for enterprise features — SSO/SAML, SCIM, SOC 2 certification.
+                  </p>
+                </GlowCard>
+              </div>
             </RevealText>
           </div>
         </div>
@@ -971,11 +965,11 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
                 <h3 className="font-bold mb-5 flex items-center gap-2"><TrendingUp className="h-4 w-4 text-purple-400" /> Why This Is a Smart Bet</h3>
                 <div className="space-y-3">
                   {[
-                    { label: "Revenue today", value: "Already generating MRR" },
-                    { label: "97% gross margin", value: "Software-only, serverless" },
-                    { label: "Product shipped", value: "Full platform live with paying customers" },
-                    { label: "Capital efficient", value: "$100K funds 12–18 months" },
-                    { label: "Clear path to seed", value: "$50K MRR → raise on strong metrics" },
+                    { label: "Product shipped", value: "Full platform live — not a prototype" },
+                    { label: "97% gross margin", value: "Software-only, serverless architecture" },
+                    { label: "Early traction", value: "23 organic users, growing without ads" },
+                    { label: "Capital efficient", value: "$100K funds 12–18 months of growth" },
+                    { label: "Clear path to revenue", value: "Freemium model proven by Notion, Slack, Figma" },
                   ].map((item) => (
                     <div key={item.label} className="flex gap-3 items-start">
                       <CheckCircle2 className="h-4 w-4 text-purple-400 shrink-0 mt-0.5" />
@@ -1016,18 +1010,18 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
           <RevealText delay={200}>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               {[
-                { metric: "Registered Users", from: "1,200", to: "8,000+", icon: Users },
-                { metric: "MRR", from: "$13.5K", to: "$50K", icon: TrendingUp },
-                { metric: "Paying Teams", from: "85", to: "350+", icon: Building2 },
-                { metric: "ARR Run Rate", from: "$162K", to: "$600K", icon: DollarSign },
+                { metric: "Registered Users", from: "23", to: "5,000+", icon: Users },
+                { metric: "MRR Target", from: "$0", to: "$50K", icon: TrendingUp },
+                { metric: "Paying Teams", from: "1", to: "300+", icon: Building2 },
+                { metric: "ARR Target", from: "—", to: "$600K", icon: DollarSign },
               ].map((t) => (
                 <GlowCard key={t.metric} className="text-center py-5">
-                  <t.icon className="h-4 w-4 text-zinc-500 mx-auto mb-2" />
-                  <p className="text-[10px] text-zinc-400 uppercase tracking-widest mb-2">{t.metric}</p>
-                  <div className="flex items-center justify-center gap-2">
-                    <span className="text-xs text-zinc-500 font-mono">{t.from}</span>
-                    <ArrowRight className="h-3 w-3 text-purple-400" />
-                    <span className="text-lg font-black bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">{t.to}</span>
+                  <t.icon className="h-5 w-5 text-zinc-400 mx-auto mb-3" />
+                  <p className="text-xs text-zinc-400 uppercase tracking-widest mb-3">{t.metric}</p>
+                  <div className="flex items-center justify-center gap-3">
+                    <span className="text-sm text-zinc-400 font-mono">{t.from}</span>
+                    <ArrowRight className="h-4 w-4 text-purple-400" />
+                    <span className="text-2xl font-black bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">{t.to}</span>
                   </div>
                 </GlowCard>
               ))}
@@ -1036,21 +1030,21 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
 
           <RevealText delay={400}>
             <GlowCard>
-              <h3 className="font-bold text-xs uppercase tracking-widest text-zinc-400 mb-6">Investor FAQ</h3>
-              <div className="grid sm:grid-cols-2 gap-4">
+              <h3 className="font-bold text-sm uppercase tracking-widest text-zinc-400 mb-6">Investor FAQ</h3>
+              <div className="grid sm:grid-cols-2 gap-5">
                 {[
                   { q: "How do you compete with free?", a: "Free lacks DLP, compliance, and analytics. Teams pay for governance.", icon: Briefcase },
-                  { q: "Why not raise more?", a: "$100K → 18 months to $50K MRR. Strong seed position.", icon: DollarSign },
-                  { q: "Biggest risk?", a: "Execution — mitigated by 8 months of shipping and 40% MoM growth.", icon: AlertTriangle },
-                  { q: "Can it scale solo?", a: "Serverless. Extension is client-side. 100K users with minimal cost.", icon: Server },
+                  { q: "Why not raise more?", a: "$100K → 18 months to prove the model, then raise seed on real metrics.", icon: DollarSign },
+                  { q: "Biggest risk?", a: "Execution — mitigated by a fully shipped product and early organic traction.", icon: AlertTriangle },
+                  { q: "Can it scale with a lean team?", a: "Serverless. Extension is client-side. 100K users with minimal cost.", icon: Server },
                   { q: "How defensible?", a: "5 AI tools, unique DOM integration, constant platform updates.", icon: Code2 },
                   { q: "Enterprise sales?", a: "Product-led: one person installs, team adopts, org upgrades.", icon: Building2 },
                 ].map((faq) => (
                   <div key={faq.q} className="flex gap-3">
-                    <faq.icon className="h-4 w-4 text-zinc-500 shrink-0 mt-0.5" />
+                    <faq.icon className="h-5 w-5 text-zinc-400 shrink-0 mt-0.5" />
                     <div>
-                      <p className="font-semibold text-xs text-zinc-300">{faq.q}</p>
-                      <p className="text-xs text-zinc-400 mt-1 leading-relaxed">{faq.a}</p>
+                      <p className="font-semibold text-sm text-zinc-200">{faq.q}</p>
+                      <p className="text-sm text-zinc-400 mt-1 leading-relaxed">{faq.a}</p>
                     </div>
                   </div>
                 ))}
@@ -1060,7 +1054,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
 
           <RevealText delay={500}>
             <p className="text-center text-sm text-zinc-500 font-mono">
-              $50K MRR = $600K ARR → Strong seed round position
+              Target: $50K MRR = $600K ARR → Strong seed round position
             </p>
           </RevealText>
         </div>
@@ -1108,9 +1102,9 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
               <blockquote className="text-xl sm:text-2xl text-zinc-300 leading-relaxed font-light">
                 &ldquo;I built this because I lived this problem.
                 <br className="hidden sm:block" />
-                Customers are already paying.
+                The product is shipped and users are signing up.
                 <br className="hidden sm:block" />
-                With <span className="text-purple-400 font-bold">$100K</span>, we accelerate what&apos;s already working.&rdquo;
+                With <span className="text-purple-400 font-bold">$100K</span>, we turn early traction into real scale.&rdquo;
               </blockquote>
               <p className="text-sm text-zinc-500 mt-4">— Kade Cooper, Founder</p>
             </div>

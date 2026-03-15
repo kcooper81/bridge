@@ -414,8 +414,13 @@ const _RAW_CATEGORIES: RawCategory[] = [
         keywords: ["retention", "expiration", "auto-delete", "cleanup", "data retention", "log expiry"],
       },
       {
+        q: "What is Prompt Risk Scoring?",
+        a: "Every prompt scanned by TeamPrompt receives a risk score from 0 to 100, based on what sensitive data was detected.\n\n**Score ranges:**\n• **0–15 (Low)** — No sensitive data detected. Safe, routine prompts.\n• **16–39 (Moderate)** — Minor flags like email addresses or internal URLs. Worth monitoring.\n• **40–69 (High)** — Contains internal data, customer info, or financial references.\n• **70–89 (Critical)** — PII, credentials, or regulated data detected (SSNs, API keys, patient data).\n• **90–100 (Severe)** — Multiple critical matches. Private keys, database credentials, or classified data.\n\n**How scoring works:**\nThe score is calculated based on the number and type of violations detected during the DLP scan. Factors include the category of data (secrets weigh more than internal data), the severity level (blocked items weigh more than warnings), and the detection method. Multiple violations increase the score with diminishing returns.\n\nRisk scores appear as color-coded badges on each entry in the Activity Log, and summary cards show your average risk score and counts of high/critical prompts. Scores are included in CSV and JSON exports for compliance reporting.",
+        keywords: ["risk score", "risk scoring", "prompt risk", "risk level", "score", "0 to 100", "low", "moderate", "high", "critical", "severe"],
+      },
+      {
         q: "Can I export activity data?",
-        a: "Yes. On the Activity Log page, use the Export dropdown to download your logs as CSV or JSON. Exports respect your current filters (date range, AI tool, action type) so you can export exactly the data you need for compliance or reporting.",
+        a: "Yes. On the Activity Log page, use the Export dropdown to download your logs as CSV or JSON. Exports respect your current filters (date range, AI tool, action type) and include risk scores — so you can export exactly the data you need for compliance or reporting.",
         keywords: ["export", "download", "csv", "json", "report"],
       },
     ],

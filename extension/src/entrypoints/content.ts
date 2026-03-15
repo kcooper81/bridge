@@ -553,7 +553,7 @@ function performScan(text: string, onAllow: () => void) {
       // Fail-closed: scan returned null — determine reason and block
       const reason = _isAuthenticated ? "api-error" : "no-auth";
       showScanBlockOverlay(reason);
-      logInteraction(text, "blocked", [{ ruleName: "Scan failure", category: "system", matchedText: "", action: "block" as const }]);
+      logInteraction(text, "blocked", [{ ruleName: "Scan failure", category: "system", matchedText: "", action: "block" as const }], { riskScore: 0 });
       return;
     } else {
       logInteraction(text, "sent", [], { riskScore });
@@ -564,7 +564,7 @@ function performScan(text: string, onAllow: () => void) {
     // Fail-closed: scan failed (network error) — block, don't auto-send
     updateShieldScanning(false);
     showScanBlockOverlay("api-error");
-    logInteraction(text, "blocked", [{ ruleName: "Scan failure", category: "system", matchedText: "", action: "block" as const }]);
+    logInteraction(text, "blocked", [{ ruleName: "Scan failure", category: "system", matchedText: "", action: "block" as const }], { riskScore: 0 });
   });
 }
 

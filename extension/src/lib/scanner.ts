@@ -17,6 +17,7 @@ export interface ScanResult {
     detectionType: DetectionType;
   }[];
   action: "allow" | "warn" | "block";
+  risk_score: number;
   sanitized_content?: string;
   replacements?: {
     placeholder: string;

@@ -50,11 +50,16 @@ export function calculateRiskScore(violations: Violation[]): number {
   let score = 0;
 
   for (const v of violations) {
-    // Base score from category
-    const catKey = Object.keys(CATEGORY_WEIGHTS).find((k) =>
-      v.category.toLowerCase().includes(k)
-    );
-    const categoryScore = catKey ? CATEGORY_WEIGHTS[catKey] : CATEGORY_WEIGHTS.general;
+    // Base score from category — match the longest key for specificity
+    const cat = v.category.toLowerCase();
+    let categoryScore = CATEGORY_WEIGHTS.general;
+    let bestLen = 0;
+    for (const [k, w] of Object.entries(CATEGORY_WEIGHTS)) {
+      if (cat.includes(k) && k.length > bestLen) {
+        categoryScore = w;
+        bestLen = k.length;
+      }
+    }
 
     // Severity multiplier
     const severityMult = v.severity === "block" ? 1.5 : 1.0;

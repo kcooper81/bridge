@@ -13,6 +13,8 @@ export function ErrorReporter({ children }: { children: React.ReactNode }) {
     function handleError(event: ErrorEvent) {
       // Ignore benign ResizeObserver warnings (common with Radix UI components)
       if (event.message?.includes("ResizeObserver")) return;
+      // Ignore cross-origin extension detection errors (e.g. "Permission denied to access property 'version'")
+      if (event.message?.includes("Permission denied")) return;
       reportError(event.error ?? event.message, {
         source: "window.onerror",
         filename: event.filename,
@@ -22,6 +24,10 @@ export function ErrorReporter({ children }: { children: React.ReactNode }) {
     }
 
     function handleUnhandledRejection(event: PromiseRejectionEvent) {
+      // Ignore AbortError from fetch timeouts (expected when requests are cancelled)
+      const reason = event.reason;
+      if (reason instanceof DOMException && reason.name === "AbortError") return;
+      if (reason instanceof Error && reason.name === "AbortError") return;
       reportError(event.reason, {
         source: "unhandledrejection",
       });

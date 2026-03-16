@@ -223,7 +223,7 @@ export default defineBackground(() => {
         const FETCH_TIMEOUT = 15_000;
         const doFetch = (headers: Record<string, string>) => {
           const controller = new AbortController();
-          const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT);
+          const timer = setTimeout(() => controller.abort("fetch timeout"), FETCH_TIMEOUT);
           return fetch(msg.url, {
             method: msg.method || "GET",
             headers,

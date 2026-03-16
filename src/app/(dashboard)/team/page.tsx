@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { cn } from "@/lib/utils";
+import { createClient } from "@/lib/supabase/client";
 import { useOrg } from "@/components/providers/org-provider";
 import { useSubscription } from "@/components/providers/subscription-provider";
 import { PageHeader } from "@/components/dashboard/page-header";
@@ -56,7 +57,7 @@ import { UsageIndicator } from "@/components/dashboard/usage-indicator";
 import Link from "next/link";
 
 export default function TeamPage() {
-  const { teams, setTeams, members, currentUserRole, loading, refresh, noOrg } = useOrg();
+  const { org, teams, setTeams, members, currentUserRole, loading, refresh, noOrg } = useOrg();
   const { checkLimit, planLimits, canAccess } = useSubscription();
 
   const [teamModalOpen, setTeamModalOpen] = useState(false);
@@ -245,9 +246,34 @@ export default function TeamPage() {
     );
   };
 
+  const refreshInvites = useCallback(() => {
+    getInvites().then(setInvites).catch(() => {});
+  }, []);
+
+  // Load invites on mount + subscribe to realtime changes on invites and profiles
   useEffect(() => {
-    getInvites().then(setInvites).catch(() => { /* non-critical: invites load on next refresh */ });
-  }, [members]); // Re-fetch when members change (realtime updates trigger OrgProvider refresh)
+    refreshInvites();
+    if (!org?.id) return;
+
+    const supabase = createClient();
+    const channel = supabase
+      .channel("team-page-realtime")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "invites", filter: `org_id=eq.${org.id}` },
+        () => { refreshInvites(); refresh(); }
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "profiles", filter: `org_id=eq.${org.id}` },
+        () => { refreshInvites(); refresh(); }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [org?.id, refresh, refreshInvites]);
 
   const pendingInvites = useMemo(() => invites.filter((i) => i.status === "pending"), [invites]);
 

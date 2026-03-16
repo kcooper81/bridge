@@ -108,6 +108,26 @@ export default function ApprovalsPage() {
     if (canEdit) fetchData();
   }, [fetchData, canEdit]);
 
+  // Realtime: auto-refresh when prompts or rule suggestions change
+  useEffect(() => {
+    if (!org?.id || !canEdit) return;
+    const supabase = createClient();
+    const channel = supabase
+      .channel("approvals-realtime")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "prompts", filter: `org_id=eq.${org.id}` },
+        () => { fetchData(); }
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "rule_suggestions" },
+        () => { fetchData(); }
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [org?.id, canEdit, fetchData]);
+
   async function handleApprovePrompt(id: string) {
     setActionId(id);
     try {

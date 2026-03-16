@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { createClient } from "@/lib/supabase/client";
 import { useOrg } from "@/components/providers/org-provider";
 import { useSubscription } from "@/components/providers/subscription-provider";
 import { PageHeader } from "@/components/dashboard/page-header";
@@ -38,15 +39,14 @@ import type { Analytics } from "@/lib/types";
 import { NoOrgBanner } from "@/components/dashboard/no-org-banner";
 
 export default function AnalyticsPage() {
-  const { teams, members, noOrg, loading: orgLoading } = useOrg();
+  const { org, teams, members, noOrg, loading: orgLoading } = useOrg();
   const { canAccess } = useSubscription();
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [effectiveness, setEffectiveness] = useState<EffectivenessMetrics | null>(null);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(false);
 
-  useEffect(() => {
-    if (orgLoading || noOrg) return;
+  const refreshAnalytics = useCallback(() => {
     Promise.all([getAnalytics(), getEffectivenessMetrics()])
       .then(([a, e]) => {
         setAnalytics(a);
@@ -57,7 +57,32 @@ export default function AnalyticsPage() {
         setFetchError(true);
       })
       .finally(() => setLoading(false));
-  }, [orgLoading, noOrg]);
+  }, []);
+
+  useEffect(() => {
+    if (orgLoading || noOrg) return;
+    refreshAnalytics();
+  }, [orgLoading, noOrg, refreshAnalytics]);
+
+  // Realtime: refresh analytics when prompts or usage changes
+  useEffect(() => {
+    if (!org?.id || orgLoading || noOrg) return;
+    const supabase = createClient();
+    const channel = supabase
+      .channel("analytics-realtime")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "prompts", filter: `org_id=eq.${org.id}` },
+        () => { refreshAnalytics(); }
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "profiles", filter: `org_id=eq.${org.id}` },
+        () => { refreshAnalytics(); }
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [org?.id, orgLoading, noOrg, refreshAnalytics]);
 
   if (orgLoading) {
     return (

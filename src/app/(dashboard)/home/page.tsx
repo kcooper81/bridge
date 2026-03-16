@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import { useOrg } from "@/components/providers/org-provider";
 import { useAuth } from "@/components/providers/auth-provider";
 import { PageHeader } from "@/components/dashboard/page-header";
@@ -13,21 +14,45 @@ import { getAnalytics } from "@/lib/vault-api";
 import type { Analytics } from "@/lib/types";
 
 export default function DashboardHomePage() {
-  const { loading, noOrg } = useOrg();
+  const { org, loading, noOrg } = useOrg();
   const { user } = useAuth();
   const router = useRouter();
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [analyticsLoading, setAnalyticsLoading] = useState(true);
 
-  useEffect(() => {
-    if (loading || noOrg) return;
+  const refreshAnalytics = useCallback(() => {
     getAnalytics()
       .then(setAnalytics)
       .catch((err) => {
         console.error("Failed to load analytics:", err);
       })
       .finally(() => setAnalyticsLoading(false));
-  }, [loading, noOrg]);
+  }, []);
+
+  useEffect(() => {
+    if (loading || noOrg) return;
+    refreshAnalytics();
+  }, [loading, noOrg, refreshAnalytics]);
+
+  // Realtime: refresh dashboard stats when prompts or members change
+  useEffect(() => {
+    if (!org?.id || loading || noOrg) return;
+    const supabase = createClient();
+    const channel = supabase
+      .channel("home-realtime")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "prompts", filter: `org_id=eq.${org.id}` },
+        () => { refreshAnalytics(); }
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "profiles", filter: `org_id=eq.${org.id}` },
+        () => { refreshAnalytics(); }
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [org?.id, loading, noOrg, refreshAnalytics]);
 
   // Consume pending plan selection from signup/login flow
   useEffect(() => {

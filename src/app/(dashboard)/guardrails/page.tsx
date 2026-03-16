@@ -126,7 +126,10 @@ function CompliancePackCard({
   const allExist = existingCount === tpl.rules.length;
 
   return (
-    <div className="rounded-lg border border-border p-4 flex flex-col gap-2">
+    <div
+      className="rounded-lg border border-border p-4 flex flex-col gap-2 cursor-pointer hover:border-primary/40 hover:bg-accent/30 transition-colors"
+      onClick={() => onPreview(tpl)}
+    >
       <div className="flex items-start justify-between">
         <div>
           <p className="font-medium text-sm">{tpl.name}</p>
@@ -136,18 +139,18 @@ function CompliancePackCard({
       <div className="flex items-center justify-between mt-auto pt-2">
         <div className="flex items-center gap-2">
           <Badge variant="outline" className="text-[10px]">{tpl.rules.length} rules</Badge>
-          <Button variant="ghost" size="sm" className="h-6 text-[10px] px-2 gap-1 text-muted-foreground" onClick={() => onPreview(tpl)}>
+          <span className="text-[10px] text-muted-foreground flex items-center gap-1">
             <Eye className="h-3 w-3" />
-            Preview
-          </Button>
+            Click to preview
+          </span>
         </div>
         {isInstalled || allExist ? (
-          <Button variant="ghost" size="sm" className="h-7 text-xs text-tp-green gap-1" onClick={() => onInstall(tpl.id)} disabled={isInstalling}>
+          <Button variant="ghost" size="sm" className="h-7 text-xs text-tp-green gap-1" onClick={(e) => { e.stopPropagation(); onInstall(tpl.id); }} disabled={isInstalling}>
             {isInstalling ? <Loader2 className="h-3 w-3 animate-spin" /> : <CheckCircle2 className="h-3 w-3" />}
             {isInstalling ? "Installing..." : "Installed"}
           </Button>
         ) : (
-          <Button size="sm" className="h-7 text-xs" onClick={() => onInstall(tpl.id)} disabled={isInstalling}>
+          <Button size="sm" className="h-7 text-xs" onClick={(e) => { e.stopPropagation(); onInstall(tpl.id); }} disabled={isInstalling}>
             {isInstalling ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <Download className="mr-1 h-3 w-3" />}
             {isInstalling ? "Installing..." : existingCount > 0 ? `Install (${tpl.rules.length - existingCount} new)` : "Install"}
           </Button>

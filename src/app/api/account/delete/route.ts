@@ -72,6 +72,13 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Revoke any pending invites this user sent
+    await db
+      .from("invites")
+      .update({ status: "revoked" })
+      .eq("invited_by", user.id)
+      .eq("status", "pending");
+
     // Delete profile
     await db.from("profiles").delete().eq("id", user.id);
 

@@ -124,11 +124,17 @@ export default function IntegrationsPage() {
       const res = await fetch("/api/integrations/google/connect", {
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        toast.error(err.error || "Failed to start connection");
+        setConnecting(false);
+        return;
+      }
       const data = await res.json();
       if (data.url) {
         window.location.href = data.url;
       } else {
-        toast.error(data.error || "Failed to start connection");
+        toast.error("Failed to start connection");
         setConnecting(false);
       }
     } catch {

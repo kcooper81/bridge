@@ -131,6 +131,7 @@ export async function POST(request: NextRequest) {
                 })
                 .catch((err) => {
                   console.error("Failed to send extension email (trigger-accepted):", err);
+                  logServiceError("resend", err, { url: "/api/invite/accept" });
                 });
             }
           } catch (postAcceptErr) {
@@ -257,14 +258,19 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Update user's profile with org and role BEFORE cleaning up old org
+    // Update user's profile with org and role BEFORE cleaning up old org.
+    // Use upsert to handle the case where the handle_new_user trigger
+    // failed silently and no profile was created during signup.
     const { error: profileUpdateError } = await db
       .from("profiles")
-      .update({
+      .upsert({
+        id: user.id,
+        email: user.email || "",
+        name: user.user_metadata?.name || user.user_metadata?.full_name || user.email?.split("@")[0] || "",
+        avatar_url: user.user_metadata?.avatar_url || user.user_metadata?.picture || "",
         org_id: invite.org_id,
         role: invite.role,
-      })
-      .eq("id", user.id);
+      }, { onConflict: "id" });
 
     if (profileUpdateError) {
       console.error("Failed to update profile:", profileUpdateError);

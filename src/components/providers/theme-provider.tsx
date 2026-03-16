@@ -7,6 +7,7 @@ type Theme = "light" | "dark";
 interface ThemeContextValue {
   theme: Theme;
   setTheme: (theme: Theme) => void;
+  mounted: boolean;
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
@@ -15,6 +16,7 @@ const STORAGE_KEY = "teamprompt-theme";
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>("light");
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY) as Theme | null;
@@ -22,6 +24,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       setThemeState(stored);
       document.documentElement.setAttribute("data-theme", stored);
     }
+    setMounted(true);
   }, []);
 
   const setTheme = useCallback((newTheme: Theme) => {
@@ -31,7 +34,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme }}>
+    <ThemeContext.Provider value={{ theme, setTheme, mounted }}>
       {children}
     </ThemeContext.Provider>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/components/providers/auth-provider";
 import { useOrg } from "@/components/providers/org-provider";
@@ -206,6 +206,10 @@ export function ProfileTab() {
     .toUpperCase()
     .slice(0, 2);
 
+  // Avoid hydration mismatch: date formatting can differ between server and client
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   const identities = user?.identities || [];
 
   return (
@@ -310,7 +314,7 @@ export function ProfileTab() {
             </p>
           </div>
 
-          {user?.created_at && (
+          {user?.created_at && mounted && (
             <div className="text-sm text-muted-foreground">
               Member since {format(new Date(user.created_at), "MMMM d, yyyy")}
             </div>

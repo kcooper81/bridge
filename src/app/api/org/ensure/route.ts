@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { seedOrgDefaults } from "@/lib/seed-defaults";
 import { limiters, checkRateLimit } from "@/lib/rate-limit";
+import { PLAN_LIMITS } from "@/lib/constants";
+import type { PlanTier } from "@/lib/types";
 
 /**
  * POST /api/org/ensure
@@ -84,6 +86,30 @@ export async function POST(request: NextRequest) {
       // Join the invited org instead of creating a personal one
       orgId = pendingInvite.org_id;
       userRole = pendingInvite.role || "member";
+
+      // Check member limit before joining
+      const { data: inviteOrg } = await db
+        .from("organizations")
+        .select("plan")
+        .eq("id", orgId)
+        .single();
+
+      const orgPlan = (inviteOrg?.plan || "free") as PlanTier;
+      const limits = PLAN_LIMITS[orgPlan] || PLAN_LIMITS.free;
+
+      if (limits.max_members !== -1) {
+        const { count: memberCount } = await db
+          .from("profiles")
+          .select("id", { count: "exact", head: true })
+          .eq("org_id", orgId);
+
+        if ((memberCount || 0) >= limits.max_members) {
+          return NextResponse.json(
+            { error: "Organization has reached its member limit" },
+            { status: 403 }
+          );
+        }
+      }
 
       // Mark invite as accepted
       await db

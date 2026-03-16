@@ -663,21 +663,35 @@ export async function addTeamMember(teamId: string, userId: string, role: string
 }
 
 export async function removeTeamMember(teamId: string, userId: string): Promise<boolean> {
-  const { error } = await supabase()
-    .from("team_members")
-    .delete()
-    .eq("team_id", teamId)
-    .eq("user_id", userId);
-  return !error;
+  const db = supabase();
+  const { data: { session } } = await db.auth.getSession();
+  if (!session) return false;
+
+  const res = await fetch("/api/org/team-members", {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${session.access_token}`,
+    },
+    body: JSON.stringify({ teamId, userId }),
+  });
+  return res.ok;
 }
 
 export async function updateTeamMemberRole(teamId: string, userId: string, role: string): Promise<boolean> {
-  const { error } = await supabase()
-    .from("team_members")
-    .update({ role })
-    .eq("team_id", teamId)
-    .eq("user_id", userId);
-  return !error;
+  const db = supabase();
+  const { data: { session } } = await db.auth.getSession();
+  if (!session) return false;
+
+  const res = await fetch("/api/org/team-members", {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${session.access_token}`,
+    },
+    body: JSON.stringify({ teamId, userId, role }),
+  });
+  return res.ok;
 }
 
 export async function deprovisionUsers(
@@ -713,11 +727,19 @@ export async function deprovisionUsers(
 }
 
 export async function toggleMemberShield(memberId: string, disabled: boolean): Promise<boolean> {
-  const { error } = await supabase()
-    .from("profiles")
-    .update({ shield_disabled: disabled })
-    .eq("id", memberId);
-  return !error;
+  const db = supabase();
+  const { data: { session } } = await db.auth.getSession();
+  if (!session) return false;
+
+  const res = await fetch("/api/org/team-members", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${session.access_token}`,
+    },
+    body: JSON.stringify({ memberId, disabled }),
+  });
+  return res.ok;
 }
 
 // ─── Analytics ───

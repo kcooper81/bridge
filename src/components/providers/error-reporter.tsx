@@ -15,6 +15,8 @@ export function ErrorReporter({ children }: { children: React.ReactNode }) {
       if (event.message?.includes("ResizeObserver")) return;
       // Ignore cross-origin extension detection errors (e.g. "Permission denied to access property 'version'")
       if (event.message?.includes("Permission denied")) return;
+      // Ignore React hydration mismatches (benign in production, caused by client-only state like theme/dates)
+      if (event.message?.includes("Minified React error #425")) return;
       reportError(event.error ?? event.message, {
         source: "window.onerror",
         filename: event.filename,

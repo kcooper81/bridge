@@ -247,7 +247,7 @@ export default function TeamPage() {
 
   useEffect(() => {
     getInvites().then(setInvites).catch(() => { /* non-critical: invites load on next refresh */ });
-  }, []);
+  }, [members]); // Re-fetch when members change (realtime updates trigger OrgProvider refresh)
 
   const pendingInvites = useMemo(() => invites.filter((i) => i.status === "pending"), [invites]);
 

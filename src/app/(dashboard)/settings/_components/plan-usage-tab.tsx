@@ -71,7 +71,7 @@ export function PlanUsageTab() {
             </p>
           )}
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <span>Seats: {subscription?.seats || 1}</span>
+            <span>Seats: {subscription?.seats ?? 1}</span>
             <span>Members: {members.length}</span>
           </div>
         </CardContent>

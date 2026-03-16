@@ -175,9 +175,12 @@ export default function ApprovalsPage() {
     setRuleName(suggestion.name);
     setRuleDescription(suggestion.description || "");
     setRulePattern("");
-    setRulePatternType("exact");
-    setRuleCategory((suggestion.category as SecurityCategory) || "custom");
-    setRuleSeverity((suggestion.severity as SecuritySeverity) || "block");
+    const validPatternTypes: SecurityPatternType[] = ["exact", "regex", "glob", "keywords"];
+    const validCategories: SecurityCategory[] = ["api_keys", "credentials", "internal_terms", "internal", "pii", "secrets", "financial", "health", "custom"];
+    const validSeverities: SecuritySeverity[] = ["block", "warn"];
+    setRulePatternType(validPatternTypes.includes(suggestion.category as SecurityPatternType) ? suggestion.category as SecurityPatternType : "exact");
+    setRuleCategory(validCategories.includes(suggestion.category as SecurityCategory) ? suggestion.category as SecurityCategory : "custom");
+    setRuleSeverity(validSeverities.includes(suggestion.severity as SecuritySeverity) ? suggestion.severity as SecuritySeverity : "block");
     setRuleModalOpen(true);
   }
 

@@ -85,7 +85,7 @@ export default function SubscriptionsPage() {
         const admin = adminMap.get(org.id);
         const plan = sub?.plan || org.plan || "free";
         const status = sub ? sub.status : "no_subscription";
-        const seats = sub?.seats || 1;
+        const seats = sub?.seats ?? 1;
         return {
           id: sub?.id || org.id,
           org_id: org.id,

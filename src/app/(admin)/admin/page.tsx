@@ -134,7 +134,7 @@ export default function AdminDashboardPage() {
       }
       if (sub.status === "past_due") pastDueCount++;
       if (sub.status === "active") {
-        const seats = sub.seats || 1;
+        const seats = sub.seats ?? 1;
         totalMrr += (PLAN_PRICES[plan] || 0) * seats;
       }
     });

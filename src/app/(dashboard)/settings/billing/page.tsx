@@ -226,7 +226,7 @@ export default function BillingPage() {
 
             {/* Seats & members */}
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
-              <span>Seats: <span className="font-medium text-foreground">{subscription?.seats || 1}</span></span>
+              <span>Seats: <span className="font-medium text-foreground">{subscription?.seats ?? 1}</span></span>
               <span className="text-border">|</span>
               <span>Members: <span className="font-medium text-foreground">{members.length}</span></span>
             </div>

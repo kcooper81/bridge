@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useOrg } from "@/components/providers/org-provider";
 import { useSubscription } from "@/components/providers/subscription-provider";
 import { PageHeader } from "@/components/dashboard/page-header";
@@ -25,6 +25,24 @@ export default function ImportExportPage() {
   const [importing, setImporting] = useState(false);
   const [exporting, setExporting] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [dragOver, setDragOver] = useState(false);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+    const file = e.dataTransfer.files[0];
+    if (!file || !file.name.endsWith(".json")) {
+      toast.error("Please drop a .json file");
+      return;
+    }
+    // Simulate file input change
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    if (fileRef.current) {
+      fileRef.current.files = dt.files;
+      fileRef.current.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+  }, []);
 
   if (loading) {
     return (
@@ -173,9 +191,16 @@ export default function ImportExportPage() {
             <p className="text-sm text-muted-foreground">
               Upload a TeamPrompt export file (.json) to import prompts into your vault.
             </p>
-            <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-border p-8">
-              <Upload className="h-8 w-8 text-muted-foreground mb-2" />
-              <p className="text-sm text-muted-foreground mb-3">Drop a file here or click to browse</p>
+            <div
+              className={`flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-8 transition-colors ${
+                dragOver ? "border-primary bg-primary/5" : "border-border"
+              }`}
+              onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+              onDragLeave={() => setDragOver(false)}
+              onDrop={handleDrop}
+            >
+              <Upload className={`h-8 w-8 mb-2 ${dragOver ? "text-primary" : "text-muted-foreground"}`} />
+              <p className="text-sm text-muted-foreground mb-3">Drop a .json file here or click to browse</p>
               <Button variant="outline" onClick={() => fileRef.current?.click()} disabled={importing}>
                 {importing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Choose File

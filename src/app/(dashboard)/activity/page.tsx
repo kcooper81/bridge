@@ -470,6 +470,7 @@ export default function ActivityPage() {
                 type="date"
                 className="w-[160px] h-9"
                 value={customDateTo}
+                min={customDateFrom || undefined}
                 onChange={(e) => { setCustomDateTo(e.target.value); setPage(0); }}
               />
             </div>

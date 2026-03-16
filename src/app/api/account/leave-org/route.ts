@@ -88,6 +88,44 @@ export async function POST(request: NextRequest) {
         );
     }
 
+    // Notify remaining org admins that this member left (non-fatal, only if not sole member)
+    if (!isSoleMember) {
+      try {
+        const { data: admins } = await db
+          .from("profiles")
+          .select("id")
+          .eq("org_id", oldOrgId)
+          .eq("role", "admin")
+          .neq("id", user.id);
+
+        if (admins?.length) {
+          const memberName = user.user_metadata?.name || user.email || "A member";
+          await db.from("notifications").insert(
+            admins.map((a: { id: string }) => ({
+              user_id: a.id,
+              org_id: oldOrgId,
+              type: "member_left",
+              title: "Member left",
+              message: `${memberName} left the organization.`,
+              metadata: { member_id: user.id, member_email: user.email },
+            }))
+          );
+        }
+      } catch {
+        // non-fatal
+      }
+
+      // Revoke any pending invites for this user's email in the old org
+      if (user.email) {
+        await db
+          .from("invites")
+          .update({ status: "revoked" })
+          .eq("org_id", oldOrgId)
+          .ilike("email", user.email)
+          .eq("status", "pending");
+      }
+    }
+
     // Create a new personal org for the user
     const { data: newOrg, error: newOrgError } = await db
       .from("organizations")

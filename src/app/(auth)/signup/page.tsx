@@ -12,14 +12,20 @@ import { trackSignUp } from "@/lib/analytics";
 import { authDebug } from "@/lib/auth-debug"; // AUTH-DEBUG
 
 export default function SignupPage() {
+  const searchParams = useSearchParams();
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(searchParams.get("email") || "");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const searchParams = useSearchParams();
   const plan = searchParams.get("plan");
+  const rawRedirect = searchParams.get("redirect") || "/vault";
+  // Only allow relative paths — prevent open redirects
+  const redirectTo = rawRedirect.startsWith("/") && !rawRedirect.startsWith("//")
+    ? rawRedirect
+    : "/vault";
+  const inviteEmail = searchParams.get("email");
 
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault();
@@ -34,7 +40,7 @@ export default function SignupPage() {
         password,
         options: {
           data: { name },
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`,
         },
       });
 
@@ -77,11 +83,17 @@ export default function SignupPage() {
         sessionStorage.setItem("pending_plan", plan);
       }
       const supabase = createClient();
+      const callbackUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}&auth_event=signup&auth_method=${provider}`;
+      const oauthOptions: { redirectTo: string; queryParams?: Record<string, string> } = {
+        redirectTo: callbackUrl,
+      };
+      // If coming from an invite, pass login_hint so Google pre-selects the right account
+      if (inviteEmail && provider === "google") {
+        oauthOptions.queryParams = { login_hint: inviteEmail };
+      }
       const { error: oauthError } = await supabase.auth.signInWithOAuth({
         provider,
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback?auth_event=signup&auth_method=${provider}`,
-        },
+        options: oauthOptions,
       });
       if (oauthError) {
         authDebug.error("provider", `OAuth error from signup: ${provider}`, { message: oauthError.message }); // AUTH-DEBUG
@@ -132,6 +144,17 @@ export default function SignupPage() {
           Create your free workspace in seconds
         </p>
       </div>
+
+      {inviteEmail && (
+        <div className="mb-4 rounded-lg border border-primary/20 bg-primary/5 p-3">
+          <p className="text-sm text-foreground">
+            Create an account with <strong>{inviteEmail}</strong> to accept your team invite.
+          </p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Make sure to use the same email that was invited.
+          </p>
+        </div>
+      )}
 
       {error && (
         <div className="mb-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
@@ -214,7 +237,10 @@ export default function SignupPage() {
 
       <p className="mt-6 text-center text-sm text-muted-foreground">
         Already have an account?{" "}
-        <Link href="/login" className="text-primary hover:underline">
+        <Link
+          href={`/login${inviteEmail ? `?redirect=${encodeURIComponent(redirectTo)}&email=${encodeURIComponent(inviteEmail)}` : ""}`}
+          className="text-primary hover:underline"
+        >
           Sign in
         </Link>
       </p>

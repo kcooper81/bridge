@@ -47,7 +47,7 @@ export default function InvitePage() {
         const inviteEmail = invite?.email || "";
         const redirect = encodeURIComponent(`/invite?token=${token}`);
         const emailHint = inviteEmail ? `&email=${encodeURIComponent(inviteEmail)}` : "";
-        router.push(`/login?redirect=${redirect}${emailHint}`);
+        router.push(`/signup?redirect=${redirect}${emailHint}`);
         return;
       }
 
@@ -58,6 +58,20 @@ export default function InvitePage() {
       }
 
       if (invite.status === "accepted") {
+        // Trigger may have accepted during signup — call accept API to
+        // fire post-accept tasks (extension email, admin notifications)
+        const session = await supabase.auth.getSession();
+        const accessToken = session.data.session?.access_token;
+        if (accessToken) {
+          fetch("/api/invite/accept", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${accessToken}`,
+            },
+            body: JSON.stringify({ token }),
+          }).catch(() => { /* non-critical */ });
+        }
         toast.success("You've already accepted this invite. Welcome back!");
         router.push("/home");
         return;
@@ -105,7 +119,7 @@ export default function InvitePage() {
     const inviteEmail = inviteDetails?.inviteEmail || "";
     const redirect = encodeURIComponent(`/invite?token=${token}`);
     const emailHint = inviteEmail ? `&email=${encodeURIComponent(inviteEmail)}` : "";
-    window.location.href = `/login?redirect=${redirect}${emailHint}`;
+    window.location.href = `/signup?redirect=${redirect}${emailHint}`;
   }
 
   async function handleAccept() {

@@ -50,14 +50,105 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (claimError || !invite) {
+      // The trigger may have already accepted the invite during signup.
+      // Check if this user is already in the invited org — if so, it's a success.
+      const { data: alreadyAccepted } = await db
+        .from("invites")
+        .select("org_id, status")
+        .eq("token", inviteToken)
+        .single();
+
+      if (alreadyAccepted?.status === "accepted") {
+        const { data: currentProfile } = await db
+          .from("profiles")
+          .select("org_id")
+          .eq("id", user.id)
+          .single();
+
+        if (currentProfile?.org_id === alreadyAccepted.org_id) {
+          // Trigger already handled the org join — send extension email + notification
+          // (the trigger can't send emails, so we handle it here)
+          try {
+            // Notify admins (non-fatal, skip if already notified)
+            const { data: existingNotif } = await db
+              .from("notifications")
+              .select("id")
+              .eq("org_id", alreadyAccepted.org_id)
+              .eq("type", "member_joined")
+              .contains("metadata", { member_id: user.id })
+              .limit(1)
+              .maybeSingle();
+
+            if (!existingNotif) {
+              const { data: admins } = await db
+                .from("profiles")
+                .select("id")
+                .eq("org_id", alreadyAccepted.org_id)
+                .eq("role", "admin")
+                .neq("id", user.id);
+
+              if (admins?.length) {
+                const memberName = user.user_metadata?.name || user.email || "A new member";
+                await db.from("notifications").insert(
+                  admins.map((a: { id: string }) => ({
+                    user_id: a.id,
+                    org_id: alreadyAccepted.org_id,
+                    type: "member_joined",
+                    title: "New member joined",
+                    message: `${memberName} joined the organization.`,
+                    metadata: { member_id: user.id, member_email: user.email },
+                  }))
+                );
+              }
+            }
+
+            // Send extension install email
+            if (process.env.RESEND_API_KEY && user.email) {
+              const resend = new Resend(process.env.RESEND_API_KEY);
+              const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://teamprompt.app";
+              const fromEmail = process.env.RESEND_FROM_EMAIL || "TeamPrompt <noreply@teamprompt.app>";
+              const { data: org } = await db
+                .from("organizations")
+                .select("name")
+                .eq("id", alreadyAccepted.org_id)
+                .single();
+              const rawOrgName = org?.name || "your team";
+              const escapeHtml = (str: string) =>
+                str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+              const orgName = escapeHtml(rawOrgName);
+              resend.emails
+                .send({
+                  from: fromEmail,
+                  to: user.email,
+                  subject: `Install the TeamPrompt extension for ${rawOrgName.replace(/[\r\n]/g, "")}`,
+                  html: buildEmail({
+                    heading: "Install the TeamPrompt Extension",
+                    body: `<p>Welcome to <strong>${orgName}</strong>!</p><p>The extension lets you search and insert shared prompts directly into ChatGPT, Claude, Gemini, and more &mdash; with built-in guardrails to protect sensitive data.</p>`,
+                    ctaText: "Get the Extension",
+                    ctaUrl: `${siteUrl}/extensions`,
+                    footerNote: "Available for Chrome, Edge, and Firefox.",
+                  }),
+                })
+                .catch((err) => {
+                  console.error("Failed to send extension email (trigger-accepted):", err);
+                });
+            }
+          } catch (postAcceptErr) {
+            console.error("Post-accept tasks failed:", postAcceptErr);
+          }
+
+          return NextResponse.json({ success: true, orgId: alreadyAccepted.org_id });
+        }
+      }
+
       return NextResponse.json(
         { error: "Invalid or expired invite" },
         { status: 404 }
       );
     }
 
-    // Verify invite email matches authenticated user
-    if (invite.email !== user.email) {
+    // Verify invite email matches authenticated user (case-insensitive)
+    if (invite.email.toLowerCase() !== user.email?.toLowerCase()) {
       // Roll back the status change since this user cannot accept it
       const { error: rollbackError } = await db
         .from("invites")
@@ -201,6 +292,32 @@ export async function POST(request: NextRequest) {
 
       // Delete the orphaned org (non-fatal)
       await db.from("organizations").delete().eq("id", oldOrgId);
+    }
+
+    // Notify org admins that a new member joined (non-fatal)
+    try {
+      const { data: admins } = await db
+        .from("profiles")
+        .select("id")
+        .eq("org_id", invite.org_id)
+        .eq("role", "admin")
+        .neq("id", user.id);
+
+      if (admins?.length) {
+        const memberName = user.user_metadata?.name || user.email || "A new member";
+        await db.from("notifications").insert(
+          admins.map((a: { id: string }) => ({
+            user_id: a.id,
+            org_id: invite.org_id,
+            type: "member_joined",
+            title: "New member joined",
+            message: `${memberName} accepted an invite and joined the organization.`,
+            metadata: { member_id: user.id, member_email: user.email },
+          }))
+        );
+      }
+    } catch (notifErr) {
+      console.error("Failed to create member_joined notification:", notifErr);
     }
 
     // If invite has a team_id, add user to that team

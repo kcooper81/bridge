@@ -554,6 +554,14 @@ export async function updateMemberRole(
 
 export async function removeMember(memberId: string): Promise<boolean> {
   const db = supabase();
+  const orgId = await getOrgId();
+
+  // Get removed member's email so we can revoke their invites
+  const { data: memberProfile } = await db
+    .from("profiles")
+    .select("email, name")
+    .eq("id", memberId)
+    .single();
 
   // Remove from all teams first (I-05 fix)
   await db.from("team_members").delete().eq("user_id", memberId);
@@ -562,6 +570,37 @@ export async function removeMember(memberId: string): Promise<boolean> {
     .from("profiles")
     .update({ org_id: null })
     .eq("id", memberId);
+
+  if (!error && orgId && memberProfile?.email) {
+    // Revoke any pending invites so the user can't auto-rejoin via org/ensure
+    await db
+      .from("invites")
+      .update({ status: "revoked" })
+      .eq("org_id", orgId)
+      .ilike("email", memberProfile.email)
+      .eq("status", "pending");
+
+    // Notify admins that a member was removed
+    const { data: admins } = await db
+      .from("profiles")
+      .select("id")
+      .eq("org_id", orgId)
+      .eq("role", "admin");
+
+    if (admins?.length) {
+      await db.from("notifications").insert(
+        admins.map((a: { id: string }) => ({
+          user_id: a.id,
+          org_id: orgId,
+          type: "member_left",
+          title: "Member removed",
+          message: `${memberProfile.name || memberProfile.email} was removed from the organization.`,
+          metadata: { member_id: memberId, member_email: memberProfile.email },
+        }))
+      );
+    }
+  }
+
   return !error;
 }
 

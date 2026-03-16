@@ -146,8 +146,9 @@ export default function UsersPage() {
     const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
     return {
       total: users.length,
-      protected: users.filter((u) => u.extension_status === "active" || u.extension_status === "session_valid").length,
-      unprotected: users.filter((u) => u.extension_status === "session_lost" || !u.extension_version).length,
+      protected: users.filter((u) => u.extension_status === "active").length,
+      unprotected: users.filter((u) => u.extension_status === "session_lost").length,
+      noExtension: users.filter((u) => !u.extension_version).length,
       newThisWeek: users.filter((u) => u.created_at >= oneWeekAgo).length,
     };
   }, [users]);
@@ -281,6 +282,7 @@ export default function UsersPage() {
           value={stats.unprotected}
           icon={ShieldOff}
           color="red"
+          subtitle={`${stats.noExtension} no extension`}
           onClick={stats.unprotected > 0 ? () => { setFilterUnprotected(true); resetPage(); } : undefined}
         />
         <StatCard

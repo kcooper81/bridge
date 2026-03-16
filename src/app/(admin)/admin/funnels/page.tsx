@@ -75,6 +75,7 @@ interface FunnelData {
 
   // Conversion detail
   trialOrgs: number;
+  paidProOrgs: number;
   paidTeamOrgs: number;
   paidBusinessOrgs: number;
 
@@ -193,6 +194,7 @@ export default function FunnelsPage() {
 
       // ─── Subscription Breakdown ───
       const trialOrgs = subs.filter((s) => s.status === "trialing").length;
+      const paidProOrgs = paidSubs.filter((s) => s.plan === "pro").length;
       const paidTeamOrgs = paidSubs.filter((s) => s.plan === "team").length;
       const paidBusinessOrgs = paidSubs.filter((s) => s.plan === "business").length;
 
@@ -232,6 +234,7 @@ export default function FunnelsPage() {
         orgsWithGuardrails,
         orgsWithGuidelines,
         trialOrgs,
+        paidProOrgs,
         paidTeamOrgs,
         paidBusinessOrgs,
         topOrgs,
@@ -363,7 +366,7 @@ export default function FunnelsPage() {
           <CardDescription>Current subscription distribution</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             <div className="text-center p-4 rounded-lg bg-muted/50">
               <p className="text-3xl font-bold">{data.totalOrgs - data.orgsWithSubscription}</p>
               <p className="text-xs text-muted-foreground mt-1">Free</p>
@@ -373,7 +376,11 @@ export default function FunnelsPage() {
               <p className="text-xs text-muted-foreground mt-1">Trialing</p>
             </div>
             <div className="text-center p-4 rounded-lg bg-green-50 dark:bg-green-950/30">
-              <p className="text-3xl font-bold text-green-600">{data.paidTeamOrgs}</p>
+              <p className="text-3xl font-bold text-green-600">{data.paidProOrgs}</p>
+              <p className="text-xs text-muted-foreground mt-1">Pro Plan</p>
+            </div>
+            <div className="text-center p-4 rounded-lg bg-sky-50 dark:bg-sky-950/30">
+              <p className="text-3xl font-bold text-sky-600">{data.paidTeamOrgs}</p>
               <p className="text-xs text-muted-foreground mt-1">Team Plan</p>
             </div>
             <div className="text-center p-4 rounded-lg bg-purple-50 dark:bg-purple-950/30">

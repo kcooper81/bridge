@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import {
   Card,
@@ -10,13 +10,24 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import {
   BarChart3,
+  Filter,
   Loader2,
   Users,
   Building2,
   Archive,
   TrendingUp,
 } from "lucide-react";
+
+type Period = "3m" | "6m" | "12m" | "all";
 
 interface GrowthData {
   month: string;
@@ -30,65 +41,82 @@ export default function AnalyticsPage() {
   const [topOrgs, setTopOrgs] = useState<{ name: string; prompts: number }[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [period, setPeriod] = useState<Period>("6m");
 
-  useEffect(() => {
-    loadAnalytics();
-  }, []);
-
-  const loadAnalytics = async () => {
+  const loadAnalytics = useCallback(async () => {
+    setLoading(true);
+    setError(null);
     try {
-    const supabase = createClient();
+      const supabase = createClient();
 
-    // Get all orgs, users, prompts with created_at for monthly grouping
-    const [orgsRes, usersRes, promptsRes] = await Promise.all([
-      supabase.from("organizations").select("id, name, created_at"),
-      supabase.from("profiles").select("created_at"),
-      supabase.from("prompts").select("org_id, created_at"),
-    ]);
+      const monthCount = period === "3m" ? 3 : period === "6m" ? 6 : period === "12m" ? 12 : 24;
 
-    // Group by month (last 6 months)
-    const months: GrowthData[] = [];
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date();
-      d.setMonth(d.getMonth() - i);
-      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-      const label = d.toLocaleDateString("en-US", { month: "short", year: "2-digit" });
+      // Calculate cutoff date for query optimization
+      const cutoff = new Date();
+      cutoff.setMonth(cutoff.getMonth() - monthCount);
+      const cutoffISO = cutoff.toISOString();
 
-      const orgsCount = (orgsRes.data || []).filter(
-        (o: { created_at: string }) => o.created_at.startsWith(key)
-      ).length;
-      const usersCount = (usersRes.data || []).filter(
-        (u: { created_at: string }) => u.created_at.startsWith(key)
-      ).length;
-      const promptsCount = (promptsRes.data || []).filter(
-        (p: { created_at: string }) => p.created_at.startsWith(key)
-      ).length;
+      const [orgsRes, usersRes, promptsRes] = await Promise.all([
+        period === "all"
+          ? supabase.from("organizations").select("id, name, created_at")
+          : supabase.from("organizations").select("id, name, created_at").gte("created_at", cutoffISO),
+        period === "all"
+          ? supabase.from("profiles").select("created_at")
+          : supabase.from("profiles").select("created_at").gte("created_at", cutoffISO),
+        supabase.from("prompts").select("org_id, created_at"),
+      ]);
 
-      months.push({ month: label, orgs: orgsCount, users: usersCount, prompts: promptsCount });
-    }
-    setGrowthData(months);
+      // Also fetch all orgs for top orgs list (need names for all, not just recent)
+      const allOrgsRes = period !== "all"
+        ? await supabase.from("organizations").select("id, name")
+        : orgsRes;
 
-    // Top orgs by prompt count
-    const orgPromptCounts = new Map<string, number>();
-    const orgNames = new Map<string, string>(
-      (orgsRes.data || []).map((o: { id: string; name: string }) => [o.id, o.name])
-    );
-    (promptsRes.data || []).forEach((p: { org_id: string }) => {
-      orgPromptCounts.set(p.org_id, (orgPromptCounts.get(p.org_id) || 0) + 1);
-    });
-    const top = Array.from(orgPromptCounts.entries())
-      .map(([id, count]) => ({ name: orgNames.get(id) || "Unknown", prompts: count }))
-      .sort((a, b) => b.prompts - a.prompts)
-      .slice(0, 10);
-    setTopOrgs(top);
+      const months: GrowthData[] = [];
+      for (let i = monthCount - 1; i >= 0; i--) {
+        const d = new Date();
+        d.setMonth(d.getMonth() - i);
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+        const label = d.toLocaleDateString("en-US", { month: "short", year: "2-digit" });
 
-    setLoading(false);
+        const orgsCount = (orgsRes.data || []).filter(
+          (o: { created_at: string }) => o.created_at.startsWith(key)
+        ).length;
+        const usersCount = (usersRes.data || []).filter(
+          (u: { created_at: string }) => u.created_at.startsWith(key)
+        ).length;
+        const promptsCount = (promptsRes.data || []).filter(
+          (p: { created_at: string }) => p.created_at.startsWith(key)
+        ).length;
+
+        months.push({ month: label, orgs: orgsCount, users: usersCount, prompts: promptsCount });
+      }
+      setGrowthData(months);
+
+      // Top orgs by prompt count
+      const orgPromptCounts = new Map<string, number>();
+      const orgNames = new Map<string, string>(
+        (allOrgsRes.data || []).map((o: { id: string; name: string }) => [o.id, o.name])
+      );
+      (promptsRes.data || []).forEach((p: { org_id: string }) => {
+        orgPromptCounts.set(p.org_id, (orgPromptCounts.get(p.org_id) || 0) + 1);
+      });
+      const top = Array.from(orgPromptCounts.entries())
+        .map(([id, count]) => ({ name: orgNames.get(id) || "Unknown", prompts: count }))
+        .sort((a, b) => b.prompts - a.prompts)
+        .slice(0, 10);
+      setTopOrgs(top);
+
+      setLoading(false);
     } catch (err) {
       console.error("Analytics load error:", err);
       setError(err instanceof Error ? err.message : "Failed to load analytics data");
       setLoading(false);
     }
-  };
+  }, [period]);
+
+  useEffect(() => {
+    loadAnalytics();
+  }, [loadAnalytics]);
 
   if (loading) {
     return (
@@ -105,7 +133,7 @@ export default function AnalyticsPage() {
         <p className="text-lg font-medium">Failed to load analytics</p>
         <p className="text-sm text-muted-foreground mt-1">{error}</p>
         <button
-          onClick={() => { setError(null); setLoading(true); loadAnalytics(); }}
+          onClick={() => loadAnalytics()}
           className="mt-4 text-sm text-blue-600 hover:underline"
         >
           Try again
@@ -119,19 +147,81 @@ export default function AnalyticsPage() {
     1
   );
 
+  // Totals for the selected period
+  const totals = growthData.reduce(
+    (acc, d) => ({ orgs: acc.orgs + d.orgs, users: acc.users + d.users, prompts: acc.prompts + d.prompts }),
+    { orgs: 0, users: 0, prompts: 0 }
+  );
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Analytics</h1>
-        <p className="text-muted-foreground">Platform-wide growth and usage</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Analytics</h1>
+          <p className="text-muted-foreground">Platform-wide growth and usage</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Filter className="h-4 w-4 text-muted-foreground" />
+          <Select value={period} onValueChange={(v) => setPeriod(v as Period)}>
+            <SelectTrigger className="w-[140px] h-8 text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="3m">Last 3 months</SelectItem>
+              <SelectItem value="6m">Last 6 months</SelectItem>
+              <SelectItem value="12m">Last 12 months</SelectItem>
+              <SelectItem value="all">All time</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button variant="outline" size="sm" className="h-8 text-xs" onClick={loadAnalytics}>
+            Refresh
+          </Button>
+        </div>
       </div>
 
-      {/* Growth Chart (simple bar representation) */}
+      {/* Period Totals */}
+      <div className="grid grid-cols-3 gap-3">
+        <Card>
+          <CardContent className="p-4 flex items-center gap-3">
+            <div className="rounded-lg p-2 bg-blue-100 dark:bg-blue-900/30">
+              <Building2 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold">{totals.orgs}</p>
+              <p className="text-xs text-muted-foreground">New Orgs</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 flex items-center gap-3">
+            <div className="rounded-lg p-2 bg-green-100 dark:bg-green-900/30">
+              <Users className="h-5 w-5 text-green-600 dark:text-green-400" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold">{totals.users}</p>
+              <p className="text-xs text-muted-foreground">New Users</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 flex items-center gap-3">
+            <div className="rounded-lg p-2 bg-violet-100 dark:bg-violet-900/30">
+              <Archive className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold">{totals.prompts}</p>
+              <p className="text-xs text-muted-foreground">New Prompts</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Growth Chart */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <TrendingUp className="h-5 w-5" />
-            Monthly Growth (Last 6 Months)
+            Monthly Growth
           </CardTitle>
           <CardDescription>New signups per month</CardDescription>
         </CardHeader>

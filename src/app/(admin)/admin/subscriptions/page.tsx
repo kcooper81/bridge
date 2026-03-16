@@ -150,9 +150,9 @@ export default function SubscriptionsPage() {
   const { paginated, totalPages } = paginate(filtered);
 
   const stats = useMemo(() => {
-    const active = subs.filter((s) => s.status === "active" || s.status === "trialing");
+    const paying = subs.filter((s) => s.status === "active");
     return {
-      mrr: active.reduce((acc, s) => acc + s.mrr, 0),
+      mrr: paying.reduce((acc, s) => acc + s.mrr, 0),
       active: subs.filter((s) => s.status === "active").length,
       pastDue: subs.filter((s) => s.status === "past_due").length,
       trialing: subs.filter((s) => s.status === "trialing").length,

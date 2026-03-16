@@ -133,7 +133,7 @@ export default function AdminDashboardPage() {
         planDistribution[plan as keyof typeof planDistribution]++;
       }
       if (sub.status === "past_due") pastDueCount++;
-      if (sub.status === "active" || sub.status === "trialing") {
+      if (sub.status === "active") {
         const seats = sub.seats || 1;
         totalMrr += (PLAN_PRICES[plan] || 0) * seats;
       }

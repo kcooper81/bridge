@@ -297,7 +297,7 @@ export function Pagination({ page, totalPages, totalItems, onPageChange, pageSiz
   const end = totalItems ? Math.min(start + (pageSize || 20) - 1, totalItems) : 0;
 
   return (
-    <div className="flex items-center justify-between">
+    <div className="sticky top-0 z-10 flex items-center justify-between rounded-lg border bg-background/95 backdrop-blur px-3 py-2">
       <div className="flex items-center gap-3">
         {onPageSizeChange && pageSize && (
           <div className="flex items-center gap-1.5">

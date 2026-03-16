@@ -738,40 +738,41 @@ export default function GuardrailsPage() {
             <UpgradeGate feature="custom_security" title="Custom Security Policies" className="mb-6 py-10" />
           )}
 
-          {/* Compliance Packs */}
-          {canAccess("custom_security") && canEdit && (
-            <div className="mb-6">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <Package className="h-4 w-4 text-primary" />
-                  <h3 className="text-sm font-semibold">Compliance Packs</h3>
-                  <span className="text-xs text-muted-foreground">One-click install regulatory rule sets</span>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-7 text-xs gap-1"
-                  onClick={() => setShowAllPacks(true)}
-                >
-                  <Package className="h-3 w-3" />
-                  Browse All Packs ({COMPLIANCE_TEMPLATES.length})
-                </Button>
+          {/* Compliance Packs — visible to all, but install requires upgrade for free/pro */}
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Package className="h-4 w-4 text-primary" />
+                <h3 className="text-sm font-semibold">Compliance Packs</h3>
+                <span className="text-xs text-muted-foreground">One-click install regulatory rule sets</span>
+                {!canAccess("custom_security") && (
+                  <span className="text-[10px] bg-primary/10 text-primary rounded-full px-2 py-0.5 font-medium">Team+</span>
+                )}
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {COMPLIANCE_TEMPLATES.slice(0, 6).map((tpl) => (
-                  <CompliancePackCard
-                    key={tpl.id}
-                    tpl={tpl}
-                    rules={rules}
-                    installedPacks={installedPacks}
-                    installingPack={installingPack}
-                    onInstall={handleInstallCompliancePack}
-                    onPreview={setPreviewPack}
-                  />
-                ))}
-              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 text-xs gap-1"
+                onClick={() => setShowAllPacks(true)}
+              >
+                <Package className="h-3 w-3" />
+                Browse All Packs ({COMPLIANCE_TEMPLATES.length})
+              </Button>
             </div>
-          )}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {COMPLIANCE_TEMPLATES.slice(0, 6).map((tpl) => (
+                <CompliancePackCard
+                  key={tpl.id}
+                  tpl={tpl}
+                  rules={rules}
+                  installedPacks={installedPacks}
+                  installingPack={installingPack}
+                  onInstall={canAccess("custom_security") ? handleInstallCompliancePack : () => toast.error("Upgrade to Team or Business to install compliance packs")}
+                  onPreview={setPreviewPack}
+                />
+              ))}
+            </div>
+          </div>
 
           <div className="mb-4 flex items-center gap-4 flex-wrap">
             {teams.length > 0 && (
@@ -1147,7 +1148,7 @@ export default function GuardrailsPage() {
                         rules={rules}
                         installedPacks={installedPacks}
                         installingPack={installingPack}
-                        onInstall={handleInstallCompliancePack}
+                        onInstall={canAccess("custom_security") ? handleInstallCompliancePack : () => toast.error("Upgrade to Team or Business to install compliance packs")}
                         onPreview={(t) => { setShowAllPacks(false); setPreviewPack(t); }}
                       />
                     ))}

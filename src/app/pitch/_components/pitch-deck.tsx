@@ -169,7 +169,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
     <div
       className={cn(
         "relative bg-[#0A0A0F] text-white selection:bg-purple-500/30",
-        !isScrollMode && "h-screen overflow-hidden"
+        !isScrollMode && "h-screen overflow-y-auto"
       )}
     >
       {/* Background grain texture */}
@@ -1027,7 +1027,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
                     He co-founded <span className="text-purple-400 font-semibold">Omnidek</span>, where he conceptualized core features from both a business strategy and user experience perspective — bridging the gap between what users need and what the market demands. Across his career in enterprise SaaS, he&apos;s driven checkout optimization, platform usability at scale, and feature design for products used by millions.
                   </p>
                   <p className="text-sm text-zinc-400 leading-relaxed">
-                    When AI tools exploded in the workplace, Kade saw what most people missed: <span className="text-white font-medium">the governance gap</span>. Employees pasting sensitive data into ChatGPT with zero oversight — no DLP, no audit trail, no compliance. He didn&apos;t wait for someone else to build the solution. He used AI-assisted development to ship an entire SaaS platform, browser extension, and security engine — proving that a designer who understands both users <em>and</em> technology can move faster than a traditional dev team.
+                    When AI tools exploded in the workplace, Kade saw the wave coming before most: <span className="text-white font-medium">every team would need custom guardrails</span>. Employees pasting sensitive data into ChatGPT with zero oversight — no DLP, no audit trail, no compliance. Instead of waiting for someone else to build it, he used AI-assisted development to ship an entire SaaS platform, browser extension, and security engine — proving that a designer who understands both users <em>and</em> technology can move faster than a traditional dev team.
                   </p>
 
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 border-t border-white/5">
@@ -1388,9 +1388,9 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
           <RevealText delay={400}>
             <div className="max-w-2xl mx-auto border-t border-white/10 pt-10">
               <blockquote className="text-xl sm:text-2xl text-zinc-300 leading-relaxed font-light">
-                &ldquo;I built this because I lived this problem.
+                &ldquo;I saw this gap forming before most people noticed.
                 <br className="hidden sm:block" />
-                The product is shipped and users are signing up.
+                Every team needs AI guardrails — I built them.
                 <br className="hidden sm:block" />
                 With <span className="text-purple-400 font-bold">$100K</span>, we turn early traction into real scale.&rdquo;
               </blockquote>

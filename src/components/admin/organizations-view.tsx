@@ -90,6 +90,18 @@ export function OrganizationsView() {
 
   useEffect(() => { loadData(); }, [loadData]);
 
+  // Realtime: refresh when orgs, profiles, or subscriptions change
+  useEffect(() => {
+    const supabase = createClient();
+    const channel = supabase
+      .channel("admin-orgs-realtime")
+      .on("postgres_changes", { event: "*", schema: "public", table: "organizations" }, () => loadData())
+      .on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, () => loadData())
+      .on("postgres_changes", { event: "*", schema: "public", table: "subscriptions" }, () => loadData())
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [loadData]);
+
   // Auto-select first org on desktop when none is selected
   useEffect(() => {
     if (!loading && orgs.length > 0 && !selectedOrgId && activeTab === "teams" && window.innerWidth >= 1024) {

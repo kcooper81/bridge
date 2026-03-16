@@ -6,6 +6,7 @@ import { PLAN_LIMITS } from "@/lib/constants";
 import { buildEmail } from "@/lib/email-template";
 import type { PlanTier } from "@/lib/types";
 import { logServiceError } from "@/lib/log-error";
+import { cancelOrgSubscription } from "@/lib/cancel-org-subscription";
 
 export async function POST(request: NextRequest) {
   try {
@@ -288,6 +289,8 @@ export async function POST(request: NextRequest) {
     // Now that profile is safely moved, clean up the old solo org (non-fatal)
     if (existingProfile?.org_id && existingProfile.org_id !== invite.org_id) {
       const oldOrgId = existingProfile.org_id;
+      // Cancel any Stripe subscription before deleting
+      await cancelOrgSubscription(db, oldOrgId);
       await Promise.allSettled([
         db.from("prompts").delete().eq("org_id", oldOrgId),
         db.from("folders").delete().eq("org_id", oldOrgId),

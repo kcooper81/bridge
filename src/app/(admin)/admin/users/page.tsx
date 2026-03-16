@@ -101,6 +101,16 @@ export default function UsersPage() {
 
   useEffect(() => { loadUsers(); }, [loadUsers]);
 
+  // Realtime: refresh when profiles change
+  useEffect(() => {
+    const supabase = createClient();
+    const channel = supabase
+      .channel("admin-users-realtime")
+      .on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, () => loadUsers())
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [loadUsers]);
+
   const filtered = useMemo(() => {
     const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
     let result = [...users];
@@ -192,8 +202,10 @@ export default function UsersPage() {
     {
       key: "org_name", label: "Organization", sortable: true, hidden: "hidden md:table-cell",
       render: (row) =>
-        row.org_name ? (
-          <span className="text-sm">{row.org_name}</span>
+        row.org_name && row.org_id ? (
+          <a href={`/admin/organizations?org=${row.org_id}`} className="text-sm text-primary hover:underline" onClick={(e) => e.stopPropagation()}>
+            {row.org_name}
+          </a>
         ) : (
           <span className="text-muted-foreground">&mdash;</span>
         ),

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { PLAN_LIMITS } from "@/lib/constants";
 import { limiters, checkRateLimit } from "@/lib/rate-limit";
+import { cancelOrgSubscription } from "@/lib/cancel-org-subscription";
 import type { PlanTier } from "@/lib/types";
 
 const FREE_PROVIDERS = new Set([
@@ -138,6 +139,9 @@ export async function POST(request: NextRequest) {
       console.error("Domain join: failed to move user:", moveError);
       return NextResponse.json({ joined: false });
     }
+
+    // Cancel any Stripe subscription before deleting
+    await cancelOrgSubscription(db, oldOrgId);
 
     // Clean up old org data (non-fatal — orphaned data is acceptable)
     await Promise.allSettled([

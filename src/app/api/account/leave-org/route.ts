@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { limiters, checkRateLimit } from "@/lib/rate-limit";
+import { cancelOrgSubscription } from "@/lib/cancel-org-subscription";
 
 export async function POST(request: NextRequest) {
   try {
@@ -158,8 +159,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // If sole member, clean up the old org entirely
+    // If sole member, cancel billing and clean up the old org entirely
     if (isSoleMember) {
+      await cancelOrgSubscription(db, oldOrgId);
       await Promise.allSettled([
         db.from("prompts").delete().eq("org_id", oldOrgId),
         db.from("folders").delete().eq("org_id", oldOrgId),

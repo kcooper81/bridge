@@ -163,7 +163,9 @@ export default function SubscriptionsPage() {
     {
       key: "org_name", label: "Organization", sortable: true,
       render: (row) => (
-        <span className="font-medium">{row.org_name}</span>
+        <a href={`/admin/organizations?org=${row.org_id}`} className="font-medium text-primary hover:underline" onClick={(e) => e.stopPropagation()}>
+          {row.org_name}
+        </a>
       ),
     },
     {

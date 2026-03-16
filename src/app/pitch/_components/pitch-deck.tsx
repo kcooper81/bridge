@@ -154,8 +154,8 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
   const slideProps = (idx: number) => ({
     ref: (el: HTMLDivElement | null) => { slideRefs.current[idx] = el; },
     className: cn(
-      "w-full flex items-center justify-center px-6 sm:px-12 lg:px-20 relative overflow-hidden",
-      isScrollMode ? "min-h-screen py-28" : "h-screen py-16 overflow-y-auto",
+      "w-full flex items-start justify-center px-6 sm:px-12 lg:px-20 relative overflow-y-auto",
+      isScrollMode ? "min-h-screen py-28" : "min-h-screen pt-20 pb-24",
       !isScrollMode && idx !== currentSlide && "hidden"
     ),
   });
@@ -323,6 +323,9 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
               <br />
               <span className="text-zinc-400">into AI tools every day.</span>
             </h2>
+            <p className="mt-4 text-base text-zinc-400 leading-relaxed max-w-3xl">
+              When someone pastes data into ChatGPT, Claude, or Gemini — that data gets stored on their servers, used to train future models by default, reviewed by human moderators, and retained for months to years. Researchers have already extracted real names, emails, and phone numbers from AI training data for under $200. Once it&apos;s in, <span className="text-white font-medium">you can&apos;t get it back</span>.
+            </p>
           </RevealText>
 
           <div className="grid sm:grid-cols-3 gap-5">
@@ -1021,10 +1024,10 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
                     <span className="text-white font-semibold">15+ years turning complex problems into intuitive products.</span> Kade is a UI/UX developer who thinks like a founder — he doesn&apos;t just design interfaces, he conceptualizes entire product experiences from the business need down to the pixel.
                   </p>
                   <p className="text-sm text-zinc-400 leading-relaxed">
-                    At <span className="text-purple-400 font-semibold">CYPHER Learning</span>, he shaped the user experience of an ed-tech SaaS platform used by millions — driving checkout optimization, enterprise feature design, and platform-wide usability improvements. He co-founded <span className="text-purple-400 font-semibold">OmniDek</span>, where he conceptualized core features from both a business strategy and user experience perspective, bridging the gap between what users need and what the market demands.
+                    He co-founded <span className="text-purple-400 font-semibold">Omnidek</span>, where he conceptualized core features from both a business strategy and user experience perspective — bridging the gap between what users need and what the market demands. Across his career in enterprise SaaS, he&apos;s driven checkout optimization, platform usability at scale, and feature design for products used by millions.
                   </p>
                   <p className="text-sm text-zinc-400 leading-relaxed">
-                    When AI tools exploded in the workplace, Kade saw what most people missed: <span className="text-white font-medium">the governance gap</span>. Employees were pasting sensitive data into ChatGPT with zero oversight — no DLP, no audit trail, no compliance. He didn&apos;t wait for someone else to build the solution. He used AI-assisted development to ship an entire SaaS platform, browser extension, and security engine — proving that a designer who understands both users and technology can move faster than a traditional dev team.
+                    When AI tools exploded in the workplace, Kade saw what most people missed: <span className="text-white font-medium">the governance gap</span>. Employees pasting sensitive data into ChatGPT with zero oversight — no DLP, no audit trail, no compliance. He didn&apos;t wait for someone else to build the solution. He used AI-assisted development to ship an entire SaaS platform, browser extension, and security engine — proving that a designer who understands both users <em>and</em> technology can move faster than a traditional dev team.
                   </p>
 
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 border-t border-white/5">
@@ -1032,7 +1035,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
                       { label: "Experience", value: "15+ years" },
                       { label: "Specialty", value: "UI/UX + Product" },
                       { label: "Certification", value: "ScrumMaster" },
-                      { label: "Co-founded", value: "OmniDek" },
+                      { label: "Co-founded", value: "Omnidek" },
                     ].map((item) => (
                       <div key={item.label}>
                         <p className="text-[10px] text-zinc-500 uppercase tracking-widest">{item.label}</p>

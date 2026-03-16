@@ -78,6 +78,16 @@ export function AuthProvider({
         hasSession: !!newSession,
         userId: newSession?.user?.id,
       });
+
+      // If user was signed in and session is now gone, redirect to login
+      if (_event === "SIGNED_OUT" || (_event === "TOKEN_REFRESHED" && !newSession)) {
+        if (session) {
+          // Had a session before — this is an unexpected sign-out (token refresh failure)
+          window.location.href = "/login?error=session_expired";
+          return;
+        }
+      }
+
       setSession(newSession);
       setUser(newSession?.user ?? null);
       scheduleRefresh(newSession);

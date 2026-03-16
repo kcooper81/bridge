@@ -131,7 +131,11 @@ export default function LoginPage() {
 
       {searchParams.get("error") && (
         <div className="mb-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
-          Authentication failed. Please try again.
+          {searchParams.get("error") === "session_expired"
+            ? "Your session expired. Please sign in again."
+            : searchParams.get("error") === "email_not_verified"
+            ? "Please verify your email before signing in."
+            : "Authentication failed. Please try again."}
         </div>
       )}
 

@@ -111,7 +111,7 @@ function detectionTypeBadgeClass(dt: DetectionType | string): string {
 }
 
 function CompliancePackCard({
-  tpl, rules, installedPacks, installingPack, onInstall, onPreview,
+  tpl, rules, installedPacks, installingPack, onInstall, onPreview, requiresUpgrade,
 }: {
   tpl: ComplianceTemplate;
   rules: SecurityRule[];
@@ -119,6 +119,7 @@ function CompliancePackCard({
   installingPack: string | null;
   onInstall: (id: string) => void;
   onPreview: (tpl: ComplianceTemplate) => void;
+  requiresUpgrade?: boolean;
 }) {
   const isInstalled = installedPacks.has(tpl.id);
   const isInstalling = installingPack === tpl.id;
@@ -144,7 +145,12 @@ function CompliancePackCard({
             Click to preview
           </span>
         </div>
-        {isInstalled || allExist ? (
+        {requiresUpgrade ? (
+          <Button variant="outline" size="sm" className="h-7 text-xs gap-1" onClick={(e) => { e.stopPropagation(); onInstall(tpl.id); }}>
+            <TrendingUp className="h-3 w-3" />
+            Upgrade to Install
+          </Button>
+        ) : isInstalled || allExist ? (
           <Button variant="ghost" size="sm" className="h-7 text-xs text-tp-green gap-1" onClick={(e) => { e.stopPropagation(); onInstall(tpl.id); }} disabled={isInstalling}>
             {isInstalling ? <Loader2 className="h-3 w-3 animate-spin" /> : <CheckCircle2 className="h-3 w-3" />}
             {isInstalling ? "Installing..." : "Installed"}
@@ -772,6 +778,7 @@ export default function GuardrailsPage() {
                   installingPack={installingPack}
                   onInstall={canAccess("custom_security") ? handleInstallCompliancePack : () => toast.error("Upgrade to Team or Business to install compliance packs")}
                   onPreview={setPreviewPack}
+                  requiresUpgrade={!canAccess("custom_security")}
                 />
               ))}
             </div>
@@ -1153,6 +1160,7 @@ export default function GuardrailsPage() {
                         installingPack={installingPack}
                         onInstall={canAccess("custom_security") ? handleInstallCompliancePack : () => toast.error("Upgrade to Team or Business to install compliance packs")}
                         onPreview={(t) => { setShowAllPacks(false); setPreviewPack(t); }}
+                        requiresUpgrade={!canAccess("custom_security")}
                       />
                     ))}
                   </div>

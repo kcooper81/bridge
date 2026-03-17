@@ -65,6 +65,17 @@ export default function IntegrationsPage() {
   const [disconnecting, setDisconnecting] = useState(false);
   const [connecting, setConnecting] = useState(false);
 
+  // Slack state
+  const [slackStatus, setSlackStatus] = useState<{
+    connected: boolean; teamName?: string; channelId?: string; channelName?: string;
+    notifyDlp?: boolean; notifyPromptSubmissions?: boolean; notifyWeeklyDigest?: boolean;
+  }>({ connected: false });
+  const [slackConnecting, setSlackConnecting] = useState(false);
+  const [slackDisconnecting, setSlackDisconnecting] = useState(false);
+  const [slackChannels, setSlackChannels] = useState<Array<{ id: string; name: string; isPrivate: boolean }>>([]);
+  const [slackChannelsLoading, setSlackChannelsLoading] = useState(false);
+  const [slackSaving, setSlackSaving] = useState(false);
+
   // Bulk import modal state for sync results
   const [bulkImportOpen, setBulkImportOpen] = useState(false);
   const [syncedRows, setSyncedRows] = useState<BulkImportRow[]>([]);
@@ -79,12 +90,16 @@ export default function IntegrationsPage() {
         return;
       }
 
-      const res = await fetch("/api/integrations/google/status", {
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      });
-      if (res.ok) {
-        setGoogleStatus(await res.json());
-      }
+      const [googleRes, slackRes] = await Promise.all([
+        fetch("/api/integrations/google/status", {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        }),
+        fetch("/api/integrations/slack/status", {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        }),
+      ]);
+      if (googleRes.ok) setGoogleStatus(await googleRes.json());
+      if (slackRes.ok) setSlackStatus(await slackRes.json());
     } catch {
       // ignore
     } finally {
@@ -96,12 +111,16 @@ export default function IntegrationsPage() {
     fetchStatus();
   }, [fetchStatus]);
 
-  // Handle ?connected=google param
+  // Handle ?connected= param
   useEffect(() => {
-    if (searchParams.get("connected") === "google") {
+    const connected = searchParams.get("connected");
+    if (connected === "google") {
       toast.success("Google Workspace connected successfully!");
       fetchStatus();
-      // Clean up URL
+      window.history.replaceState({}, "", "/settings/integrations");
+    } else if (connected === "slack") {
+      toast.success("Slack connected successfully!");
+      fetchStatus();
       window.history.replaceState({}, "", "/settings/integrations");
     }
     if (searchParams.get("error")) {
@@ -207,6 +226,87 @@ export default function IntegrationsPage() {
       toast.error("Failed to disconnect");
     } finally {
       setDisconnecting(false);
+    }
+  }
+
+  // Slack handlers
+  async function handleSlackConnect() {
+    setSlackConnecting(true);
+    try {
+      const supabase = (await import("@/lib/supabase/client")).createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Not authenticated");
+      const res = await fetch("/api/integrations/slack/connect", {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      window.location.href = data.url;
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to connect Slack");
+      setSlackConnecting(false);
+    }
+  }
+
+  async function handleSlackDisconnect() {
+    if (!confirm("Disconnect Slack? Notifications will stop.")) return;
+    setSlackDisconnecting(true);
+    try {
+      const supabase = (await import("@/lib/supabase/client")).createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Not authenticated");
+      const res = await fetch("/api/integrations/slack/disconnect", {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      if (!res.ok) throw new Error("Failed");
+      toast.success("Slack disconnected");
+      setSlackStatus({ connected: false });
+      setSlackChannels([]);
+    } catch {
+      toast.error("Failed to disconnect Slack");
+    } finally {
+      setSlackDisconnecting(false);
+    }
+  }
+
+  async function loadSlackChannels() {
+    setSlackChannelsLoading(true);
+    try {
+      const supabase = (await import("@/lib/supabase/client")).createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      const res = await fetch("/api/integrations/slack/channels", {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      const data = await res.json();
+      if (res.ok) setSlackChannels(data.channels || []);
+    } catch {
+      toast.error("Failed to load channels");
+    } finally {
+      setSlackChannelsLoading(false);
+    }
+  }
+
+  async function saveSlackConfig(updates: Record<string, unknown>) {
+    setSlackSaving(true);
+    try {
+      const supabase = (await import("@/lib/supabase/client")).createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      const res = await fetch("/api/integrations/slack/config", {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${session.access_token}`, "Content-Type": "application/json" },
+        body: JSON.stringify(updates),
+      });
+      if (!res.ok) throw new Error("Failed");
+      toast.success("Slack settings saved");
+      // Update local state
+      setSlackStatus((prev) => ({ ...prev, ...updates }));
+    } catch {
+      toast.error("Failed to save settings");
+    } finally {
+      setSlackSaving(false);
     }
   }
 
@@ -337,6 +437,87 @@ export default function IntegrationsPage() {
             <Button variant="outline" size="sm" className="w-full" disabled>
               Coming Soon
             </Button>
+          </CardContent>
+        </Card>
+
+        {/* Slack */}
+        <Card className="relative overflow-hidden">
+          <CardContent className="p-6">
+            <div className="flex items-start justify-between mb-4">
+              <div className="p-2 rounded-lg bg-muted/50">
+                <svg className="h-8 w-8" viewBox="0 0 24 24" fill="none">
+                  <path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312zM15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z" fill="#E01E5A"/>
+                </svg>
+              </div>
+              {slackStatus.connected && (
+                <Badge variant="default" className="text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                  <CheckCircle2 className="mr-1 h-2.5 w-2.5" />
+                  Connected
+                </Badge>
+              )}
+            </div>
+            <h3 className="font-semibold mb-1">Slack</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              {slackStatus.connected
+                ? `Connected to ${slackStatus.teamName || "Slack"}${slackStatus.channelName ? ` · #${slackStatus.channelName}` : ""}`
+                : "Get DLP alerts, prompt approval requests, and weekly digests in Slack."}
+            </p>
+            {slackStatus.connected ? (
+              <div className="space-y-3">
+                {/* Channel picker */}
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground block mb-1">Notification Channel</label>
+                  <div className="flex gap-1.5">
+                    <select
+                      className="flex-1 h-8 rounded-md border bg-background px-2 text-xs"
+                      value={slackStatus.channelId || ""}
+                      onChange={(e) => {
+                        const ch = slackChannels.find((c) => c.id === e.target.value);
+                        if (ch) saveSlackConfig({ channelId: ch.id, channelName: ch.name });
+                      }}
+                      onFocus={() => { if (slackChannels.length === 0) loadSlackChannels(); }}
+                    >
+                      <option value="">{slackChannelsLoading ? "Loading..." : "Select a channel"}</option>
+                      {slackChannels.map((ch) => (
+                        <option key={ch.id} value={ch.id}>{ch.isPrivate ? "🔒 " : "#"}{ch.name}</option>
+                      ))}
+                    </select>
+                    <Button variant="outline" size="sm" className="h-8 px-2" onClick={loadSlackChannels} disabled={slackChannelsLoading}>
+                      <RefreshCw className={`h-3 w-3 ${slackChannelsLoading ? "animate-spin" : ""}`} />
+                    </Button>
+                  </div>
+                </div>
+                {/* Notification toggles */}
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-muted-foreground block">Notifications</label>
+                  {[
+                    { key: "notifyDlp", label: "DLP violations", checked: slackStatus.notifyDlp !== false },
+                    { key: "notifyPromptSubmissions", label: "Prompt submissions", checked: slackStatus.notifyPromptSubmissions !== false },
+                    { key: "notifyWeeklyDigest", label: "Weekly digest", checked: slackStatus.notifyWeeklyDigest !== false },
+                  ].map((toggle) => (
+                    <label key={toggle.key} className="flex items-center gap-2 text-xs cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="rounded"
+                        checked={toggle.checked}
+                        onChange={(e) => saveSlackConfig({ [toggle.key]: e.target.checked })}
+                        disabled={slackSaving}
+                      />
+                      {toggle.label}
+                    </label>
+                  ))}
+                </div>
+                <Button variant="outline" size="sm" className="w-full text-destructive hover:text-destructive" onClick={handleSlackDisconnect} disabled={slackDisconnecting}>
+                  {slackDisconnecting ? <Loader2 className="h-3 w-3 mr-1.5 animate-spin" /> : <Unplug className="h-3 w-3 mr-1.5" />}
+                  Disconnect
+                </Button>
+              </div>
+            ) : (
+              <Button variant="outline" size="sm" className="w-full" onClick={handleSlackConnect} disabled={slackConnecting}>
+                {slackConnecting ? <Loader2 className="h-3 w-3 mr-1.5 animate-spin" /> : null}
+                Connect Slack
+              </Button>
+            )}
           </CardContent>
         </Card>
 

@@ -1788,6 +1788,9 @@ export default function TicketsPage() {
             Fwd
           </button>
         </div>
+        <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-muted-foreground" onClick={() => setReplyExpanded(false)} title="Collapse">
+          <ChevronDown className="h-3.5 w-3.5" />
+        </Button>
 
         {/* Reply context */}
         {replyMode === "reply" && (

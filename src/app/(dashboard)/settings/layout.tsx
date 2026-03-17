@@ -5,15 +5,15 @@ import { usePathname } from "next/navigation";
 import { useOrg } from "@/components/providers/org-provider";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { cn } from "@/lib/utils";
-import { User, Building, CreditCard, Receipt, ShieldCheck } from "lucide-react";
+import { User, Building, CreditCard, ShieldCheck, Plug2 } from "lucide-react";
 import type { UserRole } from "@/lib/types";
 
 const tabs: { label: string; href: string; icon: typeof User; roles?: UserRole[] }[] = [
   { label: "Profile", href: "/settings", icon: User },
   { label: "Organization", href: "/settings/organization", icon: Building, roles: ["admin", "manager"] as UserRole[] },
   { label: "Security", href: "/settings/security", icon: ShieldCheck, roles: ["admin"] as UserRole[] },
-  { label: "Plan & Usage", href: "/settings/plan", icon: CreditCard, roles: ["admin", "manager"] },
-  { label: "Billing", href: "/settings/billing", icon: Receipt, roles: ["admin", "manager"] },
+  { label: "Integrations", href: "/settings/integrations", icon: Plug2, roles: ["admin"] as UserRole[] },
+  { label: "Plan & Billing", href: "/settings/plan", icon: CreditCard, roles: ["admin", "manager"] },
 ];
 
 export default function SettingsLayout({
@@ -26,6 +26,8 @@ export default function SettingsLayout({
 
   function isActive(href: string) {
     if (href === "/settings") return pathname === "/settings";
+    // Billing page routes to Plan & Billing tab
+    if (href === "/settings/plan" && pathname.startsWith("/settings/billing")) return true;
     return pathname.startsWith(href);
   }
 

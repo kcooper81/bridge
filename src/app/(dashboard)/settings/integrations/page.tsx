@@ -6,7 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, CheckCircle2, Lock, Loader2, RefreshCw, Unplug } from "lucide-react";
+import { CheckCircle2, Lock, Loader2, RefreshCw, Unplug } from "lucide-react";
 import { BulkImportModal } from "@/components/dashboard/bulk-import-modal";
 import { useSubscription } from "@/components/providers/subscription-provider";
 import { toast } from "sonner";
@@ -213,16 +213,9 @@ export default function IntegrationsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <Link
-          href="/settings/organization"
-          className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-4"
-        >
-          <ArrowLeft className="mr-1 h-4 w-4" />
-          Back to Organization
-        </Link>
         <h2 className="text-lg font-semibold">Integrations</h2>
         <p className="text-sm text-muted-foreground">
-          Connect third-party directory providers to sync your team
+          Connect third-party services, directory providers, and AI tools to your workspace
         </p>
       </div>
 

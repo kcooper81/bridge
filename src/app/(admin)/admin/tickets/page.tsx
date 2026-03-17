@@ -641,6 +641,7 @@ export default function TicketsPage() {
   // Note/reply form
   const [noteContent, setNoteContent] = useState("");
   const [replyMode, setReplyMode] = useState<"reply" | "note" | "forward">("reply");
+  const [replyExpanded, setReplyExpanded] = useState(false);
   const [sendingNote, setSendingNote] = useState(false);
   const editorRef = useRef<RichEditorRef>(null);
   const [ccInput, setCcInput] = useState("");
@@ -1026,6 +1027,7 @@ export default function TicketsPage() {
     setSelectedTicket(ticket);
     setNoteContent("");
     setReplyMode("reply");
+    setReplyExpanded(false);
     setCcEmails([]);
     setShowCc(false);
     setForwardTo("");
@@ -1264,9 +1266,9 @@ export default function TicketsPage() {
           return next;
         });
       } else if (e.key === "r") {
-        if (selectedTicket) { e.preventDefault(); setReplyMode("reply"); }
+        if (selectedTicket) { e.preventDefault(); setReplyMode("reply"); setReplyExpanded(true); }
       } else if (e.key === "n") {
-        if (selectedTicket) { e.preventDefault(); setReplyMode("note"); }
+        if (selectedTicket) { e.preventDefault(); setReplyMode("note"); setReplyExpanded(true); }
       } else if (e.key === "e") {
         if (selectedTicket) { e.preventDefault(); updateStatus(selectedTicket.id, "closed"); }
       } else if (e.key === "s") {
@@ -1713,6 +1715,36 @@ export default function TicketsPage() {
   // Reply form JSX
   const replyForm = selectedTicket && (
     <div className="border-t bg-card flex-shrink-0">
+      {/* Collapsed bar — click to expand */}
+      {!replyExpanded ? (
+        <div className="flex items-center gap-1.5 px-3 sm:px-4 py-2">
+          <button
+            type="button"
+            onClick={() => { setReplyMode("reply"); setReplyExpanded(true); }}
+            className="flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-blue-600 hover:border-blue-300 dark:hover:border-blue-700 transition-colors"
+          >
+            <Mail className="h-3 w-3" />
+            Reply
+          </button>
+          <button
+            type="button"
+            onClick={() => { setReplyMode("note"); setReplyExpanded(true); }}
+            className="flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-amber-600 hover:border-amber-300 dark:hover:border-amber-700 transition-colors"
+          >
+            <Lock className="h-3 w-3" />
+            Note
+          </button>
+          <button
+            type="button"
+            onClick={() => { setReplyMode("forward"); setReplyExpanded(true); }}
+            className="flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-purple-600 hover:border-purple-300 dark:hover:border-purple-700 transition-colors"
+          >
+            <Forward className="h-3 w-3" />
+            Forward
+          </button>
+        </div>
+      ) : (
+      <>
       {/* Mode tabs */}
       <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 pt-2.5 sm:pt-3 pb-2">
         <div className="flex gap-0.5 bg-muted rounded-md p-0.5">
@@ -1935,6 +1967,8 @@ export default function TicketsPage() {
           {replyMode === "note" ? "Add Note" : replyMode === "forward" ? "Forward" : "Send"}
         </Button>
       </div>
+      </>
+      )}
     </div>
   );
 

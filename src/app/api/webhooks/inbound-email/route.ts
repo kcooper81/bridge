@@ -157,22 +157,37 @@ function htmlToText(html: string): string {
 
 export async function POST(request: NextRequest) {
   try {
-    // Verify webhook authenticity via shared secret.
-    // Resend inbound webhooks don't use Svix signatures, so we use a shared secret
-    // passed as a query parameter or Authorization header.
+    // Verify webhook authenticity via Svix signature (Resend uses Svix under the hood)
     const webhookSecret = process.env.INBOUND_WEBHOOK_SECRET;
+    const rawBody = await request.text();
+
     if (webhookSecret) {
-      const authHeader = request.headers.get("authorization");
-      const querySecret = new URL(request.url).searchParams.get("secret");
-      const providedSecret = authHeader?.replace("Bearer ", "") || querySecret;
-      if (providedSecret !== webhookSecret) {
-        return NextResponse.json({ error: "Invalid webhook secret" }, { status: 401 });
+      const svixId = request.headers.get("svix-id");
+      const svixTimestamp = request.headers.get("svix-timestamp");
+      const svixSignature = request.headers.get("svix-signature");
+
+      if (!svixId || !svixTimestamp || !svixSignature) {
+        console.error("Inbound webhook missing Svix headers");
+        return NextResponse.json({ error: "Missing webhook signature headers" }, { status: 401 });
+      }
+
+      try {
+        const { Webhook } = await import("svix");
+        const wh = new Webhook(webhookSecret);
+        wh.verify(rawBody, {
+          "svix-id": svixId,
+          "svix-timestamp": svixTimestamp,
+          "svix-signature": svixSignature,
+        });
+      } catch (verifyErr) {
+        console.error("Inbound webhook signature verification failed:", verifyErr);
+        return NextResponse.json({ error: "Invalid webhook signature" }, { status: 401 });
       }
     } else if (process.env.NODE_ENV === "production") {
       return NextResponse.json({ error: "Webhook secret not configured" }, { status: 500 });
     }
 
-    const raw = await request.json();
+    const raw = JSON.parse(rawBody);
 
     console.log("Inbound email webhook received:", {
       type: raw.type,

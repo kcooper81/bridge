@@ -26,6 +26,8 @@ import {
   MailOpen,
   Ban,
   List,
+  Copy,
+  Save,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
@@ -161,6 +163,7 @@ export default function CampaignsPage() {
   const [addContactMode, setAddContactMode] = useState<"paste" | "manual">("paste");
   const [manualContacts, setManualContacts] = useState<Array<{ email: string; first_name: string; last_name: string; company: string }>>([{ email: "", first_name: "", last_name: "", company: "" }]);
   const [editorTab, setEditorTab] = useState<"fields" | "visual" | "preview" | "html">("fields");
+  const [customTemplates, setCustomTemplates] = useState<Array<{ id: string; name: string; subject: string; body_html: string; created_at: string }>>([]);
   const [testEmail, setTestEmail] = useState("");
   const [sendingTest, setSendingTest] = useState(false);
 
@@ -227,6 +230,8 @@ export default function CampaignsPage() {
     loadSegments();
     loadExternalCount();
     loadAudienceLists();
+    loadCustomTemplates();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadCampaigns, loadSegments, loadExternalCount, loadAudienceLists]);
 
   // ─── Editor actions ──────────────────────────────────────────
@@ -341,6 +346,74 @@ export default function CampaignsPage() {
       await loadCampaigns();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to delete");
+    }
+  }
+
+  async function duplicateCampaign(c: Campaign) {
+    try {
+      const res = await fetch("/api/admin/campaigns", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: `${c.name} (copy)`,
+          subject: c.subject,
+          from_email: c.from_email,
+          body_html: c.body_html,
+          segment_name: c.segment_name,
+        }),
+      });
+      if (!res.ok) throw new Error("Failed to duplicate");
+      const data = await res.json();
+      toast.success("Campaign duplicated");
+      await loadCampaigns();
+      openEditCampaign(data.campaign);
+    } catch {
+      toast.error("Failed to duplicate campaign");
+    }
+  }
+
+  async function saveAsCustomTemplate() {
+    const name = prompt("Template name:");
+    if (!name?.trim()) return;
+    try {
+      const res = await fetch("/api/admin/campaigns/custom-templates", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: name.trim(),
+          subject: formSubject,
+          body_html: formBody,
+        }),
+      });
+      if (!res.ok) throw new Error("Failed to save template");
+      toast.success(`Template "${name.trim()}" saved`);
+      await loadCustomTemplates();
+    } catch {
+      toast.error("Failed to save template");
+    }
+  }
+
+  async function loadCustomTemplates() {
+    try {
+      const res = await fetch("/api/admin/campaigns/custom-templates");
+      if (res.ok) {
+        const data = await res.json();
+        setCustomTemplates(data.templates || []);
+      }
+    } catch { /* Non-critical */ }
+  }
+
+  async function deleteCustomTemplate(id: string) {
+    try {
+      await fetch("/api/admin/campaigns/custom-templates", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      setCustomTemplates((prev) => prev.filter((t) => t.id !== id));
+      toast.success("Template deleted");
+    } catch {
+      toast.error("Failed to delete template");
     }
   }
 
@@ -762,6 +835,10 @@ export default function CampaignsPage() {
             )}
           </div>
           <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={saveAsCustomTemplate} disabled={!formBody.trim()} title="Save as reusable template">
+              <Save className="h-3.5 w-3.5 mr-1.5" />
+              Save Template
+            </Button>
             <Button variant="outline" size="sm" onClick={() => setShowPreview(true)} disabled={!formBody.trim()}>
               <Eye className="h-3.5 w-3.5 mr-1.5" />
               Preview
@@ -1421,6 +1498,49 @@ export default function CampaignsPage() {
                 Pick a template, then fill in the fields. You can always switch to HTML for full control.
               </DialogDescription>
             </DialogHeader>
+            {/* Saved custom templates */}
+            {customTemplates.length > 0 && (
+              <div className="space-y-2">
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Your Saved Templates</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {customTemplates.map((ct) => (
+                    <Card
+                      key={ct.id}
+                      className="p-3 cursor-pointer hover:ring-2 hover:ring-green-500 transition-all group relative"
+                      onClick={() => {
+                        setFormSubject(ct.subject || "");
+                        setFormBody(ct.body_html);
+                        setActiveTemplate(null);
+                        setFieldValues({});
+                        setEditorTab(ct.body_html ? "preview" : "html");
+                        setShowTemplates(false);
+                      }}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="h-9 w-9 rounded-lg bg-green-50 flex items-center justify-center shrink-0">
+                          <Save className="h-4 w-4 text-green-600" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <h4 className="font-medium text-sm">{ct.name}</h4>
+                          <p className="text-xs text-muted-foreground mt-0.5 truncate">{ct.subject || "(no subject)"}</p>
+                          <p className="text-[10px] text-muted-foreground mt-1">Saved {timeAgo(ct.created_at)}</p>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-red-600 absolute top-2 right-2"
+                          onClick={(e) => { e.stopPropagation(); deleteCustomTemplate(ct.id); }}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Built-in templates */}
             {TEMPLATE_CATEGORIES.map((cat) => {
               const templates = CAMPAIGN_TEMPLATES.filter((t) => t.category === cat.id);
               if (templates.length === 0) return null;
@@ -1787,6 +1907,7 @@ export default function CampaignsPage() {
                   campaigns={drafts}
                   onEdit={openEditCampaign}
                   onDelete={(id) => setShowDeleteConfirm(id)}
+                  onDuplicate={duplicateCampaign}
                 />
               )}
 
@@ -1796,6 +1917,7 @@ export default function CampaignsPage() {
                   title="Scheduled"
                   campaigns={scheduled}
                   onEdit={openEditCampaign}
+                  onDuplicate={duplicateCampaign}
                 />
               )}
 
@@ -1805,6 +1927,7 @@ export default function CampaignsPage() {
                   title="Sent"
                   campaigns={sent}
                   onEdit={openEditCampaign}
+                  onDuplicate={duplicateCampaign}
                 />
               )}
             </div>
@@ -2505,11 +2628,13 @@ function CampaignSection({
   campaigns,
   onEdit,
   onDelete,
+  onDuplicate,
 }: {
   title: string;
   campaigns: Campaign[];
   onEdit: (c: Campaign) => void;
   onDelete?: (id: string) => void;
+  onDuplicate?: (c: Campaign) => void;
 }) {
   return (
     <div>
@@ -2578,19 +2703,36 @@ function CampaignSection({
                 )}
               </div>
 
-              {onDelete && c.status === "draft" && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 shrink-0 text-muted-foreground hover:text-red-600"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDelete(c.id);
-                  }}
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
-              )}
+              <div className="flex items-center gap-0.5 shrink-0">
+                {onDuplicate && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                    title="Duplicate"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDuplicate(c);
+                    }}
+                  >
+                    <Copy className="h-3.5 w-3.5" />
+                  </Button>
+                )}
+                {onDelete && c.status === "draft" && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-muted-foreground hover:text-red-600"
+                    title="Delete"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDelete(c.id);
+                    }}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                )}
+              </div>
             </Card>
           );
         })}

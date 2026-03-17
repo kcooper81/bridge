@@ -7,9 +7,29 @@ export interface ReleaseNote {
   badge?: "new" | "fix" | "improvement";
 }
 
-export const APP_VERSION = "1.11.0";
+export const APP_VERSION = "1.12.0";
 
 export const RELEASE_NOTES: ReleaseNote[] = [
+  {
+    version: "1.12.0",
+    date: "2026-03-17",
+    title: "Realtime Updates, Security Hardening & Admin Improvements",
+    highlights: [
+      "Realtime updates across all dashboard pages — team members, invites, prompts, and analytics update live without refreshing",
+      "Fixed invite signup flow — new members now reliably join the invited org even when the database trigger fails",
+      "Stripe billing properly cancelled on all org deletion paths (leave-org, invite accept, domain-join)",
+      "Moved team member operations (remove, role change, shield toggle) to server-side API with proper auth checks",
+      "Admin views now show realtime data with cross-links — click org names in subscriptions or users to jump to org detail",
+      "Added time period selectors to admin analytics and funnel views",
+      "Compliance packs visible to all plans with upgrade prompts for free/pro users",
+      "Session expiry now redirects to login with clear message instead of silent failure",
+      "Campaign editor: new visual WYSIWYG tab and test email send from preview",
+      "Setup wizard connector lines fixed, modernized circle design",
+      "Import/export now supports drag-and-drop file upload",
+      "Fixed MRR calculation to exclude trialing subscriptions",
+    ],
+    badge: "improvement",
+  },
   {
     version: "1.11.0",
     date: "2026-03-13",

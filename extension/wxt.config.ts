@@ -36,10 +36,10 @@ export default defineConfig({
       : ["storage", "activeTab", "alarms", "sidePanel", "contextMenus"];
 
     return {
-      name: "TeamPrompt — AI Prompt Manager & DLP Shield",
-      version: "1.0.10",
+      name: "TeamPrompt — AI Prompt Manager & DLP for ChatGPT, Claude, Gemini",
+      version: "1.0.11",
       description:
-        "Access your team's prompt library, scan for sensitive data, and log AI conversations.",
+        "Stop your team from pasting passwords, API keys, and customer data into AI. Shared prompt library with real-time DLP scanning for ChatGPT, Claude, Gemini, Copilot, and Perplexity. Detects SSNs, credit cards, API keys, patient records. HIPAA, PCI-DSS, GDPR compliance packs. Built for healthcare, legal, finance, government, and tech teams.",
       icons: {
         16: "/icons/icon-16.png",
         32: "/icons/icon-32.png",

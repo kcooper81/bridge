@@ -117,6 +117,7 @@ let _refreshTimer: ReturnType<typeof setTimeout> | null = null;
 let _contextDead = false;
 let _refreshIntervalId: ReturnType<typeof setInterval> | null = null;
 let _pingIntervalId: ReturnType<typeof setInterval> | null = null;
+let _authChangeListener: ((changes: Record<string, browser.Storage.StorageChange>, area: string) => void) | null = null;
 
 function killContentScript() {
   if (_contextDead) return;
@@ -126,6 +127,10 @@ function killContentScript() {
   _refreshIntervalId = null;
   _pingIntervalId = null;
   if (_saveObserver) { _saveObserver.disconnect(); _saveObserver = null; }
+  if (_authChangeListener) {
+    try { browser.storage.onChanged.removeListener(_authChangeListener); } catch { /* context dead */ }
+    _authChangeListener = null;
+  }
   // Remove ALL injected UI — no overlays, banners, or shield when extension is dead
   removeAllInjectedUI();
 }
@@ -199,7 +204,7 @@ export default defineContentScript({
     initShieldIndicator();
 
     // ─── Auth Change Listener (Fix 2) ───
-    browser.storage.onChanged.addListener((changes, area) => {
+    _authChangeListener = (changes, area) => {
       if (isContextDead()) return;
       if (area !== "local" || !changes.accessToken) return;
       if (changes.accessToken.newValue) {
@@ -213,7 +218,8 @@ export default defineContentScript({
         showSessionLossBanner();
         updateShieldState();
       }
-    });
+    };
+    browser.storage.onChanged.addListener(_authChangeListener);
 
     // ─── Offline Detection (Fix 5) ───
     window.addEventListener("online", () => {
@@ -470,6 +476,7 @@ function reDispatchEnter(target: HTMLElement) {
     which: 13,
     bubbles: true,
     cancelable: true,
+    composed: true,
   });
   target.dispatchEvent(syntheticDown);
 
@@ -481,6 +488,7 @@ function reDispatchEnter(target: HTMLElement) {
     which: 13,
     bubbles: true,
     cancelable: true,
+    composed: true,
   });
   target.dispatchEvent(syntheticUp);
 

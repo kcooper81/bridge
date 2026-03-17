@@ -653,9 +653,9 @@ ${paragraphs}
 <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding: 20px;">
     <tr>
-      <td align="center">
+      <td align="left">
         <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width: 560px; width: 100%;">
-          <tr><td style="padding: 20px 0;">${paragraphs}</td></tr>
+          <tr><td style="padding: 20px 0; text-align: left;">${paragraphs}</td></tr>
         </table>
       </td>
     </tr>
@@ -693,9 +693,9 @@ ${paragraphs}
 <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding: 20px;">
     <tr>
-      <td align="center">
+      <td align="left">
         <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width: 560px; width: 100%;">
-          <tr><td style="padding: 20px 0;">
+          <tr><td style="padding: 20px 0; text-align: left;">
 ${paragraphs}
             <p style="margin: 16px 0 0; font-size: 12px; color: #a1a1aa;">
               <a href="https://teamprompt.app" style="color: #a1a1aa; text-decoration: none;">TeamPrompt</a>
@@ -740,9 +740,9 @@ CAMPAIGN_TEMPLATES.push({
 <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding: 20px;">
     <tr>
-      <td align="center">
+      <td align="left">
         <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width: 560px; width: 100%;">
-          <tr><td style="padding: 20px 0;">
+          <tr><td style="padding: 20px 0; text-align: left;">
 ${paragraphs}
           </td></tr>
         </table>

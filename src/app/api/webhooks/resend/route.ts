@@ -30,12 +30,6 @@ export async function POST(request: NextRequest) {
       "email.unsubscribed": "unsubscribes",
     };
 
-    const column = eventMap[type];
-    if (!column) {
-      // Not a tracked event (e.g. email.sent, email.delivered) — acknowledge
-      return NextResponse.json({ received: true });
-    }
-
     // Find the campaign by broadcast_id
     const broadcastId = data.broadcast_id;
     if (!broadcastId) {
@@ -48,9 +42,25 @@ export async function POST(request: NextRequest) {
     // Look up campaign
     const { data: campaign } = await db
       .from("email_campaigns")
-      .select("id")
+      .select("id, status")
       .eq("resend_broadcast_id", broadcastId)
       .maybeSingle();
+
+    // Update campaign status for delivery events
+    if (campaign && (type === "email.delivered" || type === "email.sent")) {
+      if (campaign.status === "queued" || campaign.status === "sending") {
+        await db
+          .from("email_campaigns")
+          .update({ status: "sent", sent_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+          .eq("id", campaign.id);
+      }
+      return NextResponse.json({ received: true });
+    }
+
+    const column = eventMap[type];
+    if (!column) {
+      return NextResponse.json({ received: true });
+    }
 
     if (!campaign) {
       // Unknown broadcast — ignore

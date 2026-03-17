@@ -234,6 +234,32 @@ export default function CampaignsPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadCampaigns, loadSegments, loadExternalCount, loadAudienceLists]);
 
+  // Poll for status updates when campaigns are in transitional states
+  useEffect(() => {
+    const hasTransitional = campaigns.some((c) =>
+      c.status === "queued" || c.status === "sending" || c.status === "scheduled"
+    );
+    if (!hasTransitional) return;
+
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch("/api/admin/campaigns");
+        const data = await res.json();
+        if (data.campaigns) {
+          setCampaigns(data.campaigns);
+          // Also update editingCampaign if it's one of the transitional ones
+          setEditingCampaign((prev) => {
+            if (!prev) return prev;
+            const updated = data.campaigns.find((c: Campaign) => c.id === prev.id);
+            return updated ? { ...prev, ...updated } : prev;
+          });
+        }
+      } catch { /* Polling failure is non-critical */ }
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [campaigns]);
+
   // ─── Editor actions ──────────────────────────────────────────
 
   function openNewCampaign() {

@@ -377,30 +377,52 @@ function TicketContent({
         )}
       </div>
 
-      {/* Scrollable content — email body takes primary focus */}
+      {/* Scrollable conversation thread */}
       <ScrollArea className="flex-1">
-        <div className="px-3 sm:px-4 py-3 space-y-4">
-          {/* Original message — full width, prominent */}
-          <div className="rounded-lg border shadow-sm overflow-hidden">
-            <div className="bg-muted/40 px-3 py-1.5 text-[11px] flex items-center justify-between border-b">
-              <div className="flex items-center gap-2">
-                <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <Mail className="h-2.5 w-2.5 text-primary" />
+        <div className="px-3 sm:px-4 py-3 space-y-3">
+          {/* Customer history banner */}
+          {customerHistory.length > 0 && (
+            <div className="rounded-lg border border-dashed bg-muted/20 px-3 py-2">
+              <button
+                type="button"
+                onClick={() => setHistoryOpen(!historyOpen)}
+                className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors w-full"
+              >
+                <History className="h-3.5 w-3.5" />
+                <span className="font-medium">{customerHistory.length} previous conversation{customerHistory.length !== 1 ? "s" : ""} with this contact</span>
+                <ChevronDown className={cn("h-3 w-3 ml-auto transition-transform", historyOpen && "rotate-180")} />
+              </button>
+              {historyOpen && (
+                <div className="mt-2 space-y-1">
+                  {customerHistory.map((t) => (
+                    <div
+                      key={t.id}
+                      className="flex items-center gap-2 text-[11px] rounded-md border px-2.5 py-2 cursor-pointer hover:bg-accent/50 transition-colors"
+                      onClick={() => { onSelectTicket(t); setHistoryOpen(false); }}
+                    >
+                      <span className={cn("inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-medium", STATUS_COLORS[t.status])}>
+                        {STATUS_LABELS[t.status] || t.status}
+                      </span>
+                      <span className="font-medium truncate flex-1">{t.subject || "No subject"}</span>
+                      <span className="text-muted-foreground flex-shrink-0">{timeAgo(t.created_at)}</span>
+                    </div>
+                  ))}
                 </div>
-                <span className="font-medium text-foreground">
-                  {ticket.sender_name || ticket.user_email?.split("@")[0] || "Customer"}
-                </span>
-                {ticket.inbox_email && (
-                  <span className="text-muted-foreground">
-                    to {ticket.inbox_email.split("@")[0]}
-                  </span>
-                )}
-              </div>
-              <span className="text-muted-foreground">
-                {new Date(ticket.created_at).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
-              </span>
+              )}
             </div>
-            <div className="p-4">
+          )}
+
+          {/* Unified conversation thread — original message + all notes chronologically */}
+          <div className="space-y-2">
+            {/* Original message */}
+            <ThreadMessage
+              sender={ticket.sender_name || ticket.user_email?.split("@")[0] || "Customer"}
+              email={ticket.user_email || ""}
+              date={ticket.created_at}
+              direction="inbound"
+              inboxEmail={ticket.inbox_email}
+              isFirst
+            >
               {ticket.html_body ? (
                 <EmailHtmlBody html={ticket.html_body} />
               ) : (
@@ -408,128 +430,141 @@ function TicketContent({
                   {ticket.message}
                 </p>
               )}
-            </div>
-            {ticket.attachments && ticket.attachments.length > 0 && (
-              <div className="px-4 pb-3 flex flex-wrap gap-1.5">
-                {ticket.attachments.map((att, i) => (
-                  <div key={i} className="inline-flex items-center gap-1.5 rounded border px-2 py-1 text-[11px] bg-muted/50">
-                    <Paperclip className="h-3 w-3 text-muted-foreground" />
-                    <span className="font-medium">{att.filename}</span>
-                    <span className="text-muted-foreground">{formatBytes(att.size)}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Customer history */}
-          {customerHistory.length > 0 && (
-            <button
-              type="button"
-              onClick={() => setHistoryOpen(!historyOpen)}
-              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <ChevronRight className={cn("h-3 w-3 transition-transform", historyOpen && "rotate-90")} />
-              <History className="h-3 w-3" />
-              {customerHistory.length} previous ticket{customerHistory.length !== 1 ? "s" : ""}
-            </button>
-          )}
-          {historyOpen && customerHistory.length > 0 && (
-            <div className="space-y-1 pl-4">
-              {customerHistory.map((t) => (
-                <div
-                  key={t.id}
-                  className="flex items-center gap-2 text-[11px] rounded border px-2.5 py-1.5 cursor-pointer hover:bg-muted/50 transition-colors"
-                  onClick={() => { onSelectTicket(t); setHistoryOpen(false); }}
-                >
-                  <span className={cn("inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-medium", STATUS_COLORS[t.status])}>
-                    {STATUS_LABELS[t.status] || t.status}
-                  </span>
-                  <span className="font-medium truncate flex-1">{t.subject || "No subject"}</span>
-                  <span className="text-muted-foreground flex-shrink-0">{timeAgo(t.created_at)}</span>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Notes thread — timeline style */}
-          {ticket.notes.length > 0 && (
-            <div className="relative">
-              <div className="flex items-center gap-2 mb-3">
-                <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Activity ({ticket.notes.length})
-                </h4>
-                <div className="flex-1 h-px bg-border" />
-              </div>
-
-              <div className="relative pl-6">
-                <div className="absolute left-[9px] top-2 bottom-2 w-px bg-border" />
-                <div className="space-y-3">
-                  {ticket.notes.map((note) => (
-                    <NoteCard key={note.id} note={note} />
+              {ticket.attachments && ticket.attachments.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {ticket.attachments.map((att, i) => (
+                    <div key={i} className="inline-flex items-center gap-1.5 rounded border px-2 py-1 text-[11px] bg-muted/50">
+                      <Paperclip className="h-3 w-3 text-muted-foreground" />
+                      <span className="font-medium">{att.filename}</span>
+                      <span className="text-muted-foreground">{formatBytes(att.size)}</span>
+                    </div>
                   ))}
                 </div>
-              </div>
-            </div>
-          )}
+              )}
+            </ThreadMessage>
+
+            {/* All notes/replies in chronological order */}
+            {ticket.notes.map((note) => (
+              <ThreadMessage
+                key={note.id}
+                sender={note.author_email || "Admin"}
+                email={note.author_email || ""}
+                date={note.created_at}
+                direction={note.is_internal ? "internal" : "outbound"}
+                emailSent={note.email_sent}
+                ccEmails={note.cc_emails}
+              >
+                {!note.is_internal && note.content.startsWith("<") ? (
+                  <EmailHtmlBody html={note.content} />
+                ) : (
+                  <p className="whitespace-pre-wrap text-sm">{note.content}</p>
+                )}
+              </ThreadMessage>
+            ))}
+          </div>
         </div>
       </ScrollArea>
     </>
   );
 }
 
-function NoteCard({ note }: { note: NoteRow }) {
-  return (
-    <div className="relative">
-      <div className={cn(
-        "absolute -left-6 top-2.5 h-[18px] w-[18px] rounded-full border-2 flex items-center justify-center",
-        note.is_internal
-          ? "bg-amber-50 border-amber-300 dark:bg-amber-950 dark:border-amber-700"
-          : "bg-blue-50 border-blue-300 dark:bg-blue-950 dark:border-blue-700"
-      )}>
-        {note.is_internal ? (
-          <Lock className="h-2 w-2 text-amber-600 dark:text-amber-400" />
-        ) : (
-          <Send className="h-2 w-2 text-blue-600 dark:text-blue-400" />
-        )}
-      </div>
+function ThreadMessage({
+  sender,
+  email,
+  date,
+  direction,
+  inboxEmail,
+  emailSent,
+  ccEmails,
+  isFirst,
+  children,
+}: {
+  sender: string;
+  email: string;
+  date: string;
+  direction: "inbound" | "outbound" | "internal";
+  inboxEmail?: string | null;
+  emailSent?: boolean;
+  ccEmails?: string[] | null;
+  isFirst?: boolean;
+  children: React.ReactNode;
+}) {
+  const [collapsed, setCollapsed] = useState(!isFirst && direction !== "internal");
 
-      <div className={cn(
-        "rounded-lg border text-sm",
-        note.is_internal
-          ? "border-amber-200 dark:border-amber-800/50"
-          : "border-blue-200 dark:border-blue-800/50"
-      )}>
-        <div className={cn(
-          "flex items-center gap-2 px-3 py-1.5 rounded-t-lg text-[11px]",
-          note.is_internal
-            ? "bg-amber-50/80 dark:bg-amber-950/30"
-            : "bg-blue-50/80 dark:bg-blue-950/30"
-        )}>
-          <span className="font-medium">{note.author_email || "Admin"}</span>
-          <span className="text-muted-foreground">{timeAgo(note.created_at)}</span>
-          {note.is_internal && (
-            <span className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">Internal</span>
-          )}
-          {note.email_sent && (
-            <span className="text-[10px] text-blue-600 dark:text-blue-400 font-medium flex items-center gap-0.5">
-              <CheckCircle className="h-2.5 w-2.5" /> Sent
-            </span>
-          )}
-          {note.cc_emails && note.cc_emails.length > 0 && (
-            <span className="text-[10px] text-muted-foreground">
-              CC: {note.cc_emails.join(", ")}
-            </span>
+  const colors = {
+    inbound: {
+      border: "border-border",
+      header: "bg-muted/40",
+      icon: "bg-primary/10 text-primary",
+      iconEl: <Mail className="h-2.5 w-2.5" />,
+    },
+    outbound: {
+      border: "border-blue-200 dark:border-blue-800/50",
+      header: "bg-blue-50/80 dark:bg-blue-950/30",
+      icon: "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400",
+      iconEl: <Send className="h-2.5 w-2.5" />,
+    },
+    internal: {
+      border: "border-amber-200 dark:border-amber-800/50",
+      header: "bg-amber-50/80 dark:bg-amber-950/30",
+      icon: "bg-amber-100 dark:bg-amber-900 text-amber-600 dark:text-amber-400",
+      iconEl: <Lock className="h-2.5 w-2.5" />,
+    },
+  }[direction];
+
+  return (
+    <div className={cn("rounded-lg border overflow-hidden", colors.border)}>
+      {/* Message header — clickable to expand/collapse */}
+      <button
+        type="button"
+        className={cn(
+          "w-full flex items-center gap-2 px-3 py-2 text-[11px] transition-colors hover:bg-accent/30",
+          colors.header
+        )}
+        onClick={() => setCollapsed(!collapsed)}
+      >
+        <div className={cn("h-6 w-6 rounded-full flex items-center justify-center flex-shrink-0", colors.icon)}>
+          {colors.iconEl}
+        </div>
+        <span className="font-semibold text-foreground">{sender}</span>
+        {email && email !== sender && (
+          <span className="text-muted-foreground hidden sm:inline">&lt;{email}&gt;</span>
+        )}
+        {inboxEmail && (
+          <span className="text-muted-foreground">
+            to {inboxEmail.split("@")[0]}
+          </span>
+        )}
+        {direction === "internal" && (
+          <span className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold px-1.5 py-0.5 rounded bg-amber-100/60 dark:bg-amber-900/40">
+            Internal Note
+          </span>
+        )}
+        {emailSent && (
+          <span className="text-[10px] text-blue-600 dark:text-blue-400 font-medium flex items-center gap-0.5">
+            <CheckCircle className="h-2.5 w-2.5" /> Sent
+          </span>
+        )}
+        <span className="ml-auto text-muted-foreground flex-shrink-0">
+          {new Date(date).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
+        </span>
+        <ChevronDown className={cn("h-3 w-3 text-muted-foreground transition-transform flex-shrink-0", !collapsed && "rotate-180")} />
+      </button>
+
+      {/* Message body — collapsible */}
+      {!collapsed && (
+        <div className="px-4 py-3">
+          {children}
+          {ccEmails && ccEmails.length > 0 && (
+            <div className="mt-2 flex items-center gap-1.5 text-[10px] text-muted-foreground flex-wrap">
+              <span className="font-medium">CC:</span>
+              {ccEmails.map((cc, i) => (
+                <span key={i} className="bg-muted rounded px-1.5 py-0.5">{cc}</span>
+              ))}
+            </div>
           )}
         </div>
-        <div className="px-3 py-2.5">
-          {!note.is_internal && note.content.startsWith("<") ? (
-            <EmailHtmlBody html={note.content} />
-          ) : (
-            <p className="whitespace-pre-wrap text-sm">{note.content}</p>
-          )}
-        </div>
-      </div>
+      )}
     </div>
   );
 }

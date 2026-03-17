@@ -700,11 +700,21 @@ export default function CampaignsPage() {
         if (!res.ok) throw new Error(data.error);
         toast.success(`Added ${data.added} contacts (${data.total} total in list)`);
       }
+      const addedListId = addToListId;
       setAddToListId(null);
       setAddToListEmails("");
       setManualContacts([{ email: "", first_name: "", last_name: "", company: "" }]);
       setAddContactMode("paste");
       await Promise.all([loadSegments(), loadAudienceLists()]);
+      // Refresh contacts list if we're viewing the list we just added to (or any list)
+      if (viewingListId === addedListId || viewingListId) {
+        setContactsPage(0);
+        loadContacts("", viewingListId, 0);
+      } else if (contactsList.length > 0) {
+        // Also refresh if contacts table is visible
+        setContactsPage(0);
+        loadContacts("", null, 0);
+      }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to add contacts");
     } finally {

@@ -47,6 +47,205 @@ const TEAM_AUTHOR: BlogAuthor = {
 // ─── Posts ───
 
 const _POSTS: BlogPost[] = [
+  // ── MCP Integration Blog Post ──
+  {
+    slug: "connect-ai-coding-tools-to-your-prompt-library-with-mcp",
+    title: "Connect AI Coding Tools to Your Prompt Library with MCP",
+    description:
+      "How to use TeamPrompt's MCP server to access your shared prompt library, run DLP checks, and log usage from Claude Desktop, Cursor, and Windsurf.",
+    publishedAt: "2026-03-17",
+    author: TEAM_AUTHOR,
+    category: "guide",
+    tags: ["MCP", "integrations", "Claude Desktop", "Cursor", "Windsurf", "prompt library", "DLP"],
+    readingTime: "5 min read",
+    coverImage: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=1200&q=80&auto=format&fit=crop",
+    coverImageAlt: "Code editor with AI integration",
+    relatedSlugs: [
+      "how-to-build-a-team-prompt-library",
+      "ai-dlp-101-what-it-is-and-why-your-team-needs-it",
+    ],
+    content: `
+## What is MCP?
+
+MCP (Model Context Protocol) is a standard that lets AI tools connect to external data sources through a single, unified interface. Think of it like USB for AI — one plug, every tool.
+
+TeamPrompt now ships with a built-in MCP server. Once connected, your AI coding tools can search your prompt library, run DLP scans, and log usage — all without leaving the editor.
+
+## Which tools support MCP?
+
+Any tool that supports the MCP protocol, including:
+
+- **Claude Desktop** — Anthropic's desktop app
+- **Cursor** — AI-powered code editor
+- **Windsurf** — Codeium's AI IDE
+- **Claude Code** — Anthropic's CLI tool
+- Any MCP-compatible client
+
+## What can you do with it?
+
+TeamPrompt exposes 5 tools through MCP:
+
+### 1. Search prompts
+Ask your AI tool to find prompts from your team's library.
+
+> "Search my team's prompts about onboarding"
+
+### 2. Get prompt content
+Fetch the full text of any prompt by name or ID.
+
+> "Get the bug report template"
+
+### 3. List templates
+Browse all your fill-in-the-blank prompt templates.
+
+> "Show me all templates with variables"
+
+### 4. Check DLP
+Scan text against your organization's security rules before sending to AI.
+
+> "Check if this text has any PII or sensitive data"
+
+### 5. Log usage
+Record that a prompt was used for analytics and audit compliance.
+
+> "Log that I used the code review prompt in Cursor"
+
+## How to set it up
+
+Setup takes about 2 minutes:
+
+1. Go to **Settings → Integrations → MCP Server**
+2. Click **Create API Key** — name it something like "Cursor - Work Laptop"
+3. Select which permissions the key should have (or leave all enabled)
+4. Copy the **connection config JSON** that appears
+5. Paste it into your AI tool's MCP settings
+6. Done — your AI tool can now access your TeamPrompt workspace
+
+### Claude Desktop config
+
+Paste the config JSON into your \`claude_desktop_config.json\` file:
+
+\`\`\`json
+{
+  "mcpServers": {
+    "teamprompt": {
+      "url": "https://teamprompt.app/api/mcp",
+      "headers": {
+        "Authorization": "Bearer tp_live_your_key_here"
+      }
+    }
+  }
+}
+\`\`\`
+
+### Cursor config
+
+Go to **Settings → MCP Servers → Add** and paste the same config.
+
+## Security
+
+API keys use SHA-256 hashing — the raw key is shown once and never stored. Each key has granular scope control, so you can create read-only keys (just search and get) or full-access keys that include DLP scanning and usage logging.
+
+Keys can be revoked instantly from the settings page, and you can set optional expiration dates for temporary access.
+
+## What this means for your team
+
+MCP turns TeamPrompt into the connective layer between your team and every AI tool they use — not just the ones the browser extension covers. Your prompts, security rules, and audit logging extend to coding tools, CLI agents, and any future MCP-compatible app.
+
+Zero additional cost. Near-zero data usage. Maximum reach.
+`,
+  },
+  // ── Slack Integration Blog Post ──
+  {
+    slug: "slack-integration-dlp-alerts-and-prompt-notifications",
+    title: "Get DLP Alerts and Prompt Notifications in Slack",
+    description:
+      "TeamPrompt now integrates with Slack — get instant alerts when sensitive data is blocked, notifications when prompts need approval, and weekly AI usage digests.",
+    publishedAt: "2026-03-17",
+    author: TEAM_AUTHOR,
+    category: "guide",
+    tags: ["Slack", "integrations", "DLP", "notifications", "security", "compliance"],
+    readingTime: "4 min read",
+    coverImage: "https://images.unsplash.com/photo-1563986768609-322da13575f2?w=1200&q=80&auto=format&fit=crop",
+    coverImageAlt: "Team communication and notifications",
+    relatedSlugs: [
+      "ai-dlp-101-what-it-is-and-why-your-team-needs-it",
+      "connect-ai-coding-tools-to-your-prompt-library-with-mcp",
+    ],
+    content: `
+## Why Slack?
+
+Your security team lives in Slack. When a DLP guardrail blocks an employee from pasting a customer's Social Security number into ChatGPT, the right people need to know — immediately, not the next time someone checks the admin dashboard.
+
+TeamPrompt's Slack integration brings three types of real-time notifications to your channels.
+
+## Three notification types
+
+### 1. DLP Violation Alerts
+
+When a team member's message is blocked or flagged by a guardrail rule, Slack gets an instant notification with:
+
+- The rule that triggered (e.g. "SSN Pattern Detected")
+- The category (PII, credentials, financial, etc.)
+- The severity level (block or warning)
+- Which user and which AI tool
+
+This gives your security team immediate visibility into data leak attempts — without anyone needing to log into the admin panel.
+
+### 2. Prompt Approval Notifications
+
+When a team member submits a new prompt for review (because they don't have auto-approve permissions), a Slack message appears with:
+
+- The prompt title
+- Who submitted it
+- A direct link to the approval queue
+
+Managers can see what needs review without checking the app. Approval workflows move faster.
+
+### 3. Weekly Activity Digest
+
+Every Monday, Slack posts a summary card showing:
+
+- Total AI conversations this week
+- Number of DLP events
+- New prompts created
+- Active users
+- Your most-used prompt
+
+It's a quick pulse check on how your team is using AI — delivered where you already look.
+
+## How to connect
+
+1. Go to **Settings → Integrations**
+2. Click **Connect Slack** on the Slack card
+3. Authorize TeamPrompt in your workspace
+4. Select a notification channel (e.g. #teamprompt-alerts)
+5. **Important:** Invite the bot to the channel — type \`/invite @TeamPrompt\` in Slack
+6. Toggle which notifications you want on/off
+
+Each notification type can be enabled or disabled independently. The channel picker lets you choose any public or private channel the bot has been invited to.
+
+## Designed to not be noisy
+
+Notifications are fire-and-forget — they don't slow down the extension or the scan. DLP alerts are batched per scan (one message per incident, not one per rule match). The weekly digest is a single card, not a thread.
+
+If your team has strict guardrails with many rules, you'll get one alert per blocked message, not one per matched pattern.
+
+## What's next
+
+Phase 2 will add **slash commands** — search your prompt library and run DLP checks directly from Slack:
+
+- \`/teamprompt search onboarding\` — find prompts
+- \`/teamprompt check [paste text]\` — DLP scan
+- \`/teamprompt help\` — see available commands
+
+Phase 3 adds **interactive buttons** — approve or reject prompts directly from the Slack notification, no browser needed.
+
+## Get started
+
+Connect Slack in under a minute from **Settings → Integrations**. Your security team will thank you.
+`,
+  },
   // ── 1. How to Build a Team Prompt Library ──
   {
     slug: "how-to-build-a-team-prompt-library",

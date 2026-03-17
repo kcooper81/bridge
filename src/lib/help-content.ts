@@ -12,6 +12,7 @@ import {
   Lock,
   BarChart3,
   Import,
+  Plug2,
 } from "lucide-react";
 
 // ─── Types ───
@@ -521,6 +522,54 @@ const _RAW_CATEGORIES: RawCategory[] = [
         q: "Does TeamPrompt store the text I send to AI tools?",
         a: "By default, **no** — TeamPrompt uses metadata-only logging, which records the AI tool used, action type (sent/blocked/warned), and timestamp, but does not store the actual prompt text.\n\nAdmins can opt-in to full logging mode from Settings → Security → Activity & Privacy, which also records prompt text for compliance and auditing purposes. Even in full mode, prompt text is capped at 2,000 characters.\n\nAdmins can also set a retention period to automatically delete logs after a specified number of days. Activity logging can be disabled entirely, in which case only usage counts are tracked.\n\nAll logged data is stored in your workspace's database and is visible only to admins and managers via the Activity Log.",
         keywords: ["logging", "store", "text", "privacy", "retention", "interactions", "metadata only", "prompt text"],
+      },
+    ],
+  },
+  {
+    id: "integrations",
+    icon: Plug2,
+    title: "Integrations",
+    description: "Connect TeamPrompt to Slack, MCP-compatible AI tools, Google Workspace, and more.",
+    articles: [
+      {
+        q: "What integrations does TeamPrompt support?",
+        a: "TeamPrompt integrates with:\n\n- **Slack** — Get DLP violation alerts, prompt approval notifications, and weekly activity digests in your Slack channels\n- **MCP (Model Context Protocol)** — Connect AI coding tools like Claude Desktop, Cursor, and Windsurf to your prompt library, DLP scanning, and audit logging\n- **Google Workspace** — Sync your user directory and groups for team management\n- **Browser Extension** — Works directly inside ChatGPT, Claude, Gemini, Copilot, and Perplexity\n\nAll integrations are managed from Settings → Integrations.",
+        keywords: ["integrations", "slack", "mcp", "google workspace", "connect", "api"],
+      },
+      {
+        q: "How do I connect Slack?",
+        a: "1. Go to **Settings → Integrations**\n2. Click **Connect Slack** on the Slack card\n3. Authorize TeamPrompt in your Slack workspace\n4. Select a **notification channel** (e.g. #teamprompt-alerts)\n5. **Important:** Invite the bot to the channel by typing `/invite @TeamPrompt` in Slack\n6. Toggle which notifications you want: DLP violations, prompt submissions, weekly digest\n\nSlack notifications are fire-and-forget — they don't slow down normal operations.",
+        keywords: ["slack", "connect", "notifications", "channel", "setup"],
+      },
+      {
+        q: "What Slack notifications are available?",
+        a: "Three types of Slack notifications:\n\n- **DLP Violations** — Instant alert when a team member's message is blocked or warned by a guardrail rule. Shows the rule name, category, severity, and user.\n- **Prompt Submissions** — Notifies when a team member submits a new prompt for approval, with a direct link to the approval queue.\n- **Weekly Digest** — Every Monday, a summary of AI conversations, DLP events, new prompts, active users, and your most-used prompt.\n\nEach type can be toggled on/off independently from the Slack card in Settings → Integrations.",
+        keywords: ["slack", "notifications", "dlp", "alerts", "digest", "approval"],
+      },
+      {
+        q: "What is the MCP integration?",
+        a: "MCP (Model Context Protocol) is a standard that lets AI coding tools connect to external data sources. TeamPrompt's MCP server lets tools like **Claude Desktop**, **Cursor**, **Windsurf**, and **Claude Code** access your workspace directly.\n\nWith MCP connected, you can:\n- Search your team's prompt library from inside your AI tool\n- Fetch full prompt content by name or ID\n- Browse prompt templates with fill-in variables\n- Run DLP scans on text before sending to AI\n- Log prompt usage for analytics and audit\n\nSetup: Settings → Integrations → MCP Server → Create API Key → paste the config JSON into your AI tool's MCP settings.",
+        keywords: ["mcp", "model context protocol", "claude desktop", "cursor", "windsurf", "api", "coding tools"],
+      },
+      {
+        q: "How do I set up MCP with Claude Desktop?",
+        a: "1. Go to **Settings → Integrations → MCP Server**\n2. Click **Create API Key** and name it (e.g. \"Claude Desktop\")\n3. Copy the **connection config JSON** that appears\n4. Open Claude Desktop → Settings → Developer → MCP Servers\n5. Paste the config JSON\n6. Restart Claude Desktop\n\nYou can now ask Claude to search your prompts, check text for sensitive data, or insert templates — all powered by your TeamPrompt workspace.\n\nExample: \"Search my team's prompts about onboarding\" or \"Check if this text has any PII\"",
+        keywords: ["mcp", "claude desktop", "setup", "api key", "config"],
+      },
+      {
+        q: "How do I set up MCP with Cursor?",
+        a: "1. Go to **Settings → Integrations → MCP Server**\n2. Click **Create API Key**\n3. Copy the connection config JSON\n4. In Cursor, go to **Settings → MCP Servers → Add**\n5. Paste the config JSON\n\nCursor can now access your prompt library, run DLP checks, and log usage through TeamPrompt's MCP tools.",
+        keywords: ["mcp", "cursor", "setup", "coding"],
+      },
+      {
+        q: "What MCP tools are available?",
+        a: "TeamPrompt exposes 5 tools via MCP:\n\n- **search_prompts** — Search your team's prompt library by keyword or tags\n- **get_prompt** — Fetch full prompt content by ID or title\n- **list_templates** — Browse all prompt templates with fill-in variables\n- **check_dlp** — Scan text for sensitive data against your org's security rules\n- **log_usage** — Record that a prompt was used for analytics and audit\n\nEach API key can have granular scope control — create read-only keys or full-access keys as needed.",
+        keywords: ["mcp", "tools", "search", "dlp", "scan", "templates", "api"],
+      },
+      {
+        q: "How do I manage MCP API keys?",
+        a: "Go to **Settings → Integrations → MCP Server**. From there you can:\n\n- **Create keys** with a name and custom scopes (permissions)\n- **Revoke keys** instantly — the AI tool loses access immediately\n- **Track usage** — see when each key was last used\n- **Set expiration** — optional expiry dates for temporary access\n\nAPI keys use SHA-256 hashing — the raw key is shown once at creation and never stored. If you lose it, create a new one.",
+        keywords: ["mcp", "api keys", "manage", "revoke", "security"],
       },
     ],
   },

@@ -235,6 +235,63 @@ export default function IntegrationsPage() {
               </div>
             ))}
 
+            {/* Slack */}
+            <div className="rounded-2xl border border-border bg-card p-6 hover:shadow-lg transition-shadow">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-50 dark:bg-purple-950/30">
+                  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none">
+                    <path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313z" fill="#E01E5A"/>
+                    <path d="M8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312z" fill="#36C5F0"/>
+                    <path d="M18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312z" fill="#2EB67D"/>
+                    <path d="M15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z" fill="#ECB22E"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="font-semibold">Slack</h3>
+                  <p className="text-xs text-muted-foreground">Notifications & Alerts</p>
+                </div>
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed mb-3">
+                Get real-time DLP violation alerts, prompt approval requests, and weekly activity digests directly in your Slack channels.
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {["DLP alerts", "Approval notifications", "Weekly digest"].map((feat) => (
+                  <span key={feat} className="inline-flex items-center gap-1 text-[11px] font-medium bg-muted px-2 py-0.5 rounded-full text-muted-foreground">
+                    <CheckCircle2 className="h-3 w-3 text-primary/60" />
+                    {feat}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* MCP */}
+            <div className="rounded-2xl border border-border bg-card p-6 hover:shadow-lg transition-shadow">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 dark:bg-indigo-950/30">
+                  <svg className="h-5 w-5 text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 2v4m0 12v4M2 12h4m12 0h4" />
+                    <circle cx="12" cy="12" r="3" />
+                    <path d="M12 5a7 7 0 110 14 7 7 0 010-14z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="font-semibold">MCP Server</h3>
+                  <p className="text-xs text-muted-foreground">AI Coding Tools</p>
+                </div>
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed mb-3">
+                Connect Claude Desktop, Cursor, Windsurf, and any MCP-compatible tool to your prompt library, DLP scanning, and audit logging.
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {["Search prompts", "DLP scanning", "Audit logging", "Templates"].map((feat) => (
+                  <span key={feat} className="inline-flex items-center gap-1 text-[11px] font-medium bg-muted px-2 py-0.5 rounded-full text-muted-foreground">
+                    <CheckCircle2 className="h-3 w-3 text-primary/60" />
+                    {feat}
+                  </span>
+                ))}
+              </div>
+            </div>
+
             {/* Coming soon card */}
             <div className="rounded-2xl border border-dashed border-border bg-card/50 p-6 flex flex-col items-center justify-center text-center">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted mb-3">
@@ -242,14 +299,14 @@ export default function IntegrationsPage() {
               </div>
               <h3 className="font-semibold mb-1">More coming soon</h3>
               <p className="text-sm text-muted-foreground">
-                We&apos;re adding support for more AI tools. Have a request?{" "}
+                We&apos;re adding support for more AI tools and integrations.{" "}
                 <Link
                   href="/help"
                   className="text-primary hover:underline"
                 >
                   Let us know
-                </Link>
-                .
+                </Link>{" "}
+                what you need.
               </p>
             </div>
           </div>

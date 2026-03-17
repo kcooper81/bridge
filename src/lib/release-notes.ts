@@ -7,9 +7,28 @@ export interface ReleaseNote {
   badge?: "new" | "fix" | "improvement";
 }
 
-export const APP_VERSION = "1.12.0";
+export const APP_VERSION = "1.13.0";
 
 export const RELEASE_NOTES: ReleaseNote[] = [
+  {
+    version: "1.13.0",
+    date: "2026-03-17",
+    title: "Slack Integration, MCP Server & Campaign Improvements",
+    highlights: [
+      "Slack integration — connect your workspace for real-time DLP violation alerts, prompt approval notifications, and weekly activity digests",
+      "MCP (Model Context Protocol) server — connect Claude Desktop, Cursor, Windsurf, and other AI coding tools to your prompt library, DLP scanning, and audit logging",
+      "MCP API key management with granular scope control, expiry dates, and usage tracking",
+      "Campaign duplicate — copy any campaign (draft, scheduled, or sent) with one click",
+      "Custom email templates — save any campaign email as a reusable template, browse saved templates in the template picker",
+      "Vanilla email templates now render like real personal emails — no gray background, no centering, minimal unsubscribe link",
+      "Campaign analytics webhook — receives open, click, bounce, and unsubscribe events from Resend in real-time",
+      "Campaign status polling — queued/sending campaigns auto-update to Sent without refreshing",
+      "Ticket thread UI — collapsible reply area gives more reading space, timeline connectors between messages, latest message always expanded",
+      "Settings reorganized — Integrations now has its own tab, visible in the settings cog dropdown",
+      "Add contacts to audience lists with manual entry fields (name, email, company) or bulk paste with format detection",
+    ],
+    badge: "new",
+  },
   {
     version: "1.12.0",
     date: "2026-03-17",

@@ -93,6 +93,13 @@ import {
   snoozeLabel,
 } from "./_components/types";
 
+// --- Helpers ---
+
+/** Collapse runs of 3+ blank lines into at most 2 */
+function collapseWhitespace(text: string): string {
+  return text.replace(/\n{3,}/g, "\n\n").trim();
+}
+
 // --- Icon maps ---
 
 const STATUS_ICONS: Record<string, React.ElementType> = {
@@ -130,6 +137,7 @@ function EmailHtmlBody({ html }: { html: string }) {
       pre { background: #f3f4f6; padding: 8px; border-radius: 4px; overflow-x: auto; font-size: 13px; }
       table { border-collapse: collapse; max-width: 100%; }
       td, th { padding: 4px 8px; }
+      br + br + br { display: none; }
     </style></head><body>${html}</body></html>`;
 
     const blob = new Blob([fullHtml], { type: "text/html" });
@@ -142,7 +150,7 @@ function EmailHtmlBody({ html }: { html: string }) {
         const doc = iframe.contentDocument;
         if (!doc) return;
         const height = doc.documentElement.scrollHeight || doc.body.scrollHeight;
-        if (height > 60) iframe.style.height = `${height}px`;
+        if (height > 40) iframe.style.height = `${Math.min(height + 8, 600)}px`;
       } catch {
         // Cross-origin after blob load
       }
@@ -150,8 +158,8 @@ function EmailHtmlBody({ html }: { html: string }) {
 
     iframe.onload = () => {
       resizeIframe();
-      setTimeout(resizeIframe, 200);
-      setTimeout(resizeIframe, 500);
+      setTimeout(resizeIframe, 150);
+      setTimeout(resizeIframe, 400);
     };
 
     return () => {
@@ -167,7 +175,7 @@ function EmailHtmlBody({ html }: { html: string }) {
       ref={iframeRef}
       className="w-full border-0"
       sandbox="allow-same-origin allow-popups allow-popups-to-escape-sandbox"
-      style={{ minHeight: "400px" }}
+      style={{ minHeight: "80px" }}
       title="Email content"
     />
   );
@@ -379,7 +387,7 @@ function TicketContent({
 
       {/* Scrollable conversation thread */}
       <ScrollArea className="flex-1">
-        <div className="px-3 sm:px-4 py-3 space-y-3">
+        <div className="px-3 sm:px-4 py-3 space-y-2">
           {/* Customer history banner */}
           {customerHistory.length > 0 && (
             <div className="rounded-lg border border-dashed bg-muted/20 px-3 py-2">
@@ -413,7 +421,7 @@ function TicketContent({
           )}
 
           {/* Unified conversation thread — original message + all notes chronologically */}
-          <div className="space-y-2">
+          <div className="space-y-0">
             {/* Original message */}
             <ThreadMessage
               sender={ticket.sender_name || ticket.user_email?.split("@")[0] || "Customer"}
@@ -422,12 +430,14 @@ function TicketContent({
               direction="inbound"
               inboxEmail={ticket.inbox_email}
               isFirst
+              isLast={ticket.notes.length === 0}
+              preview={ticket.message.replace(/\s+/g, " ").slice(0, 120)}
             >
               {ticket.html_body ? (
                 <EmailHtmlBody html={ticket.html_body} />
               ) : (
                 <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">
-                  {ticket.message}
+                  {collapseWhitespace(ticket.message)}
                 </p>
               )}
               {ticket.attachments && ticket.attachments.length > 0 && (
@@ -444,23 +454,30 @@ function TicketContent({
             </ThreadMessage>
 
             {/* All notes/replies in chronological order */}
-            {ticket.notes.map((note) => (
-              <ThreadMessage
-                key={note.id}
-                sender={note.author_email || "Admin"}
-                email={note.author_email || ""}
-                date={note.created_at}
-                direction={note.is_internal ? "internal" : "outbound"}
-                emailSent={note.email_sent}
-                ccEmails={note.cc_emails}
-              >
-                {!note.is_internal && note.content.startsWith("<") ? (
-                  <EmailHtmlBody html={note.content} />
-                ) : (
-                  <p className="whitespace-pre-wrap text-sm">{note.content}</p>
-                )}
-              </ThreadMessage>
-            ))}
+            {ticket.notes.map((note, idx) => {
+              const notePreview = note.content.startsWith("<")
+                ? note.content.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").slice(0, 120)
+                : note.content.replace(/\s+/g, " ").slice(0, 120);
+              return (
+                <ThreadMessage
+                  key={note.id}
+                  sender={note.author_email || "Admin"}
+                  email={note.author_email || ""}
+                  date={note.created_at}
+                  direction={note.is_internal ? "internal" : "outbound"}
+                  emailSent={note.email_sent}
+                  ccEmails={note.cc_emails}
+                  isLast={idx === ticket.notes.length - 1}
+                  preview={notePreview}
+                >
+                  {!note.is_internal && note.content.startsWith("<") ? (
+                    <EmailHtmlBody html={note.content} />
+                  ) : (
+                    <p className="whitespace-pre-wrap text-sm">{collapseWhitespace(note.content)}</p>
+                  )}
+                </ThreadMessage>
+              );
+            })}
           </div>
         </div>
       </ScrollArea>
@@ -477,6 +494,8 @@ function ThreadMessage({
   emailSent,
   ccEmails,
   isFirst,
+  isLast,
+  preview,
   children,
 }: {
   sender: string;
@@ -487,84 +506,107 @@ function ThreadMessage({
   emailSent?: boolean;
   ccEmails?: string[] | null;
   isFirst?: boolean;
+  isLast?: boolean;
+  preview?: string;
   children: React.ReactNode;
 }) {
-  const [collapsed, setCollapsed] = useState(!isFirst && direction !== "internal");
+  // Expand all messages by default so the thread is easy to follow
+  const [collapsed, setCollapsed] = useState(false);
 
   const colors = {
     inbound: {
       border: "border-border",
       header: "bg-muted/40",
       icon: "bg-primary/10 text-primary",
-      iconEl: <Mail className="h-2.5 w-2.5" />,
+      iconEl: <Mail className="h-3 w-3" />,
+      accent: "bg-primary",
     },
     outbound: {
       border: "border-blue-200 dark:border-blue-800/50",
       header: "bg-blue-50/80 dark:bg-blue-950/30",
       icon: "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400",
-      iconEl: <Send className="h-2.5 w-2.5" />,
+      iconEl: <Send className="h-3 w-3" />,
+      accent: "bg-blue-500",
     },
     internal: {
       border: "border-amber-200 dark:border-amber-800/50",
       header: "bg-amber-50/80 dark:bg-amber-950/30",
       icon: "bg-amber-100 dark:bg-amber-900 text-amber-600 dark:text-amber-400",
-      iconEl: <Lock className="h-2.5 w-2.5" />,
+      iconEl: <Lock className="h-3 w-3" />,
+      accent: "bg-amber-500",
     },
   }[direction];
 
   return (
-    <div className={cn("rounded-lg border overflow-hidden", colors.border)}>
-      {/* Message header — clickable to expand/collapse */}
-      <button
-        type="button"
-        className={cn(
-          "w-full flex items-center gap-2 px-3 py-2 text-[11px] transition-colors hover:bg-accent/30",
-          colors.header
-        )}
-        onClick={() => setCollapsed(!collapsed)}
-      >
-        <div className={cn("h-6 w-6 rounded-full flex items-center justify-center flex-shrink-0", colors.icon)}>
+    <div className="relative flex gap-3">
+      {/* Timeline connector */}
+      <div className="flex flex-col items-center flex-shrink-0 w-8">
+        <div className={cn("h-8 w-8 rounded-full flex items-center justify-center flex-shrink-0 z-10", colors.icon)}>
           {colors.iconEl}
         </div>
-        <span className="font-semibold text-foreground">{sender}</span>
-        {email && email !== sender && (
-          <span className="text-muted-foreground hidden sm:inline">&lt;{email}&gt;</span>
+        {!isLast && (
+          <div className="w-px flex-1 bg-border -mt-px" />
         )}
-        {inboxEmail && (
-          <span className="text-muted-foreground">
-            to {inboxEmail.split("@")[0]}
-          </span>
-        )}
-        {direction === "internal" && (
-          <span className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold px-1.5 py-0.5 rounded bg-amber-100/60 dark:bg-amber-900/40">
-            Internal Note
-          </span>
-        )}
-        {emailSent && (
-          <span className="text-[10px] text-blue-600 dark:text-blue-400 font-medium flex items-center gap-0.5">
-            <CheckCircle className="h-2.5 w-2.5" /> Sent
-          </span>
-        )}
-        <span className="ml-auto text-muted-foreground flex-shrink-0">
-          {new Date(date).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
-        </span>
-        <ChevronDown className={cn("h-3 w-3 text-muted-foreground transition-transform flex-shrink-0", !collapsed && "rotate-180")} />
-      </button>
+      </div>
 
-      {/* Message body — collapsible */}
-      {!collapsed && (
-        <div className="px-4 py-3">
-          {children}
-          {ccEmails && ccEmails.length > 0 && (
-            <div className="mt-2 flex items-center gap-1.5 text-[10px] text-muted-foreground flex-wrap">
-              <span className="font-medium">CC:</span>
-              {ccEmails.map((cc, i) => (
-                <span key={i} className="bg-muted rounded px-1.5 py-0.5">{cc}</span>
-              ))}
-            </div>
+      {/* Message card */}
+      <div className={cn("flex-1 min-w-0 rounded-lg border overflow-hidden", colors.border, !isLast && "mb-1")}>
+        {/* Message header — clickable to expand/collapse */}
+        <button
+          type="button"
+          className={cn(
+            "w-full flex items-center gap-2 px-3 py-2 text-[11px] transition-colors hover:bg-accent/30",
+            colors.header
           )}
-        </div>
-      )}
+          onClick={() => setCollapsed(!collapsed)}
+        >
+          <span className="font-semibold text-foreground truncate">{sender}</span>
+          {email && email !== sender && (
+            <span className="text-muted-foreground hidden sm:inline truncate">&lt;{email}&gt;</span>
+          )}
+          {inboxEmail && (
+            <span className="text-muted-foreground hidden sm:inline">
+              to {inboxEmail.split("@")[0]}
+            </span>
+          )}
+          {direction === "internal" && (
+            <span className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold px-1.5 py-0.5 rounded bg-amber-100/60 dark:bg-amber-900/40 flex-shrink-0">
+              Internal Note
+            </span>
+          )}
+          {emailSent && (
+            <span className="text-[10px] text-blue-600 dark:text-blue-400 font-medium flex items-center gap-0.5 flex-shrink-0">
+              <CheckCircle className="h-2.5 w-2.5" /> Sent
+            </span>
+          )}
+          <span className="ml-auto text-muted-foreground flex-shrink-0">
+            {new Date(date).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
+          </span>
+          <ChevronDown className={cn("h-3 w-3 text-muted-foreground transition-transform flex-shrink-0", !collapsed && "rotate-180")} />
+        </button>
+
+        {/* Preview when collapsed */}
+        {collapsed && preview && (
+          <div className="px-3 py-1.5 text-xs text-muted-foreground truncate border-t border-dashed">
+            {preview}
+          </div>
+        )}
+
+        {/* Message body — collapsible */}
+        {!collapsed && (
+          <div className="px-3 py-2.5">
+            {children}
+            {ccEmails && ccEmails.length > 0 && (
+              <div className="mt-2 flex items-center gap-1.5 text-[10px] text-muted-foreground flex-wrap">
+                <span className="font-medium">CC:</span>
+                {ccEmails.map((cc, i) => (
+                  <span key={i} className="bg-muted rounded px-1.5 py-0.5">{cc}</span>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

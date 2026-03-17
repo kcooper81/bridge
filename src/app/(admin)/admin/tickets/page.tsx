@@ -429,7 +429,6 @@ function TicketContent({
               date={ticket.created_at}
               direction="inbound"
               inboxEmail={ticket.inbox_email}
-              isFirst
               isLast={ticket.notes.length === 0}
               preview={ticket.message.replace(/\s+/g, " ").slice(0, 120)}
             >
@@ -493,7 +492,6 @@ function ThreadMessage({
   inboxEmail,
   emailSent,
   ccEmails,
-  isFirst,
   isLast,
   preview,
   children,
@@ -505,7 +503,6 @@ function ThreadMessage({
   inboxEmail?: string | null;
   emailSent?: boolean;
   ccEmails?: string[] | null;
-  isFirst?: boolean;
   isLast?: boolean;
   preview?: string;
   children: React.ReactNode;

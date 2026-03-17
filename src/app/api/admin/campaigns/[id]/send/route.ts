@@ -263,17 +263,27 @@ async function syncContacts(
   return synced;
 }
 
-/** Inject unsubscribe link placeholder if not already present */
+/** Inject unsubscribe link placeholder if not already present.
+ *  Uses a minimal style for plain/vanilla templates (no gray background wrapper)
+ *  and a more visible style for branded templates. */
 function wrapUnsubscribe(html: string): string {
   if (html.includes("{{{RESEND_UNSUBSCRIBE_URL}}}")) return html;
 
-  const unsubBlock = `
+  // Detect if this is a plain/vanilla email (no branded wrapper with gray bg)
+  const isBranded = html.includes("background-color: #f4f4f5") || html.includes("background-color: #0f1117");
+
+  const unsubBlock = isBranded
+    ? `
 <div style="text-align: center; padding: 20px 0; margin-top: 32px; border-top: 1px solid #e4e4e7;">
   <p style="margin: 0; font-size: 12px; color: #71717a;">
     You're receiving this because you signed up for TeamPrompt.<br />
     <a href="{{{RESEND_UNSUBSCRIBE_URL}}}" style="color: #2563EB; text-decoration: underline;">Unsubscribe</a>
   </p>
-</div>`;
+</div>`
+    : `
+<p style="margin: 32px 0 0; font-size: 11px; color: #a1a1aa; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+  <a href="{{{RESEND_UNSUBSCRIBE_URL}}}" style="color: #a1a1aa; text-decoration: underline;">Unsubscribe</a>
+</p>`;
 
   // Try to inject before </body>, otherwise append
   if (html.includes("</body>")) {

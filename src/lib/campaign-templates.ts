@@ -671,7 +671,7 @@ ${paragraphs}
     id: "minimal",
     name: "Minimal Branded",
     category: "Plain",
-    description: "Clean personal email with subtle TeamPrompt branding",
+    description: "Clean personal email with subtle TeamPrompt branding — no gray background",
     defaultSubject: "",
     previewText: "",
     fields: [
@@ -681,18 +681,32 @@ ${paragraphs}
       const text = (vals.body?.trim() || "Hi {{{FIRST_NAME|there}}},\n\nYour message here.\n\nBest,\nKade");
       const paragraphs = text.split(/\n\n+/).map(p => {
         const lines = p.split(/\n/).map(l => esc(l)).join("<br />");
-        return `              <p style="margin: 0 0 16px; font-size: 15px; color: #3f3f46; line-height: 1.6;">${lines}</p>`;
+        return `<p style="margin: 0 0 16px; font-size: 15px; color: #3f3f46; line-height: 1.6;">${lines}</p>`;
       }).join("\n");
-      return wrap(`
-          <tr>
-            <td class="content-padding" style="background-color: #ffffff; padding: 32px; border-radius: 12px;">
+      return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>body { margin: 0; padding: 0; }</style>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding: 20px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width: 560px; width: 100%;">
+          <tr><td style="padding: 20px 0;">
 ${paragraphs}
-              <p style="margin: 16px 0 0; font-size: 13px; color: ${MUTED_TEXT};">
-                TeamPrompt &middot; <a href="https://teamprompt.app" style="color: ${BRAND_COLOR};">teamprompt.app</a>
-              </p>
-            </td>
-          </tr>
-`, "");
+            <p style="margin: 16px 0 0; font-size: 12px; color: #a1a1aa;">
+              <a href="https://teamprompt.app" style="color: #a1a1aa; text-decoration: none;">TeamPrompt</a>
+            </p>
+          </td></tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
     },
     get html() { return this.build({}); },
   },
@@ -704,7 +718,7 @@ CAMPAIGN_TEMPLATES.push({
   id: "partner-outreach",
   name: "Partner Outreach",
   category: "Outreach",
-  description: "Cold email for potential partners — just edit the example",
+  description: "Cold email for potential partners — looks like a direct personal email",
   defaultSubject: "Quick question about {{{COMPANY|your team}}}",
   previewText: "",
   fields: [
@@ -714,15 +728,29 @@ CAMPAIGN_TEMPLATES.push({
     const text = (vals.body?.trim() || "Hi {{{FIRST_NAME|there}}},\n\nYour message here.\n\nBest,\nKade");
     const paragraphs = text.split(/\n\n+/).map(p => {
       const lines = p.split(/\n/).map(l => esc(l)).join("<br />");
-      return `              <p style="margin: 0 0 14px; font-size: 15px; color: #3f3f46; line-height: 1.65;">${lines}</p>`;
+      return `<p style="margin: 0 0 14px; font-size: 15px; color: #3f3f46; line-height: 1.65;">${lines}</p>`;
     }).join("\n");
-    return wrap(`
-          <tr>
-            <td class="content-padding" style="background-color: #ffffff; padding: 32px; border-radius: 12px;">
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>body { margin: 0; padding: 0; }</style>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding: 20px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width: 560px; width: 100%;">
+          <tr><td style="padding: 20px 0;">
 ${paragraphs}
-            </td>
-          </tr>
-`, "");
+          </td></tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
   },
   get html() { return this.build({}); },
 });

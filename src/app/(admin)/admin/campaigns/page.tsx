@@ -236,18 +236,24 @@ export default function CampaignsPage() {
 
   // Poll for status updates when campaigns are in transitional states
   useEffect(() => {
-    const hasTransitional = campaigns.some((c) =>
-      c.status === "queued" || c.status === "sending" || c.status === "scheduled"
+    const transitional = campaigns.filter((c) =>
+      (c.status === "queued" || c.status === "sending" || c.status === "scheduled") && c.resend_broadcast_id
     );
-    if (!hasTransitional) return;
+    if (transitional.length === 0) return;
 
     const interval = setInterval(async () => {
       try {
+        // Sync each transitional campaign's status from Resend via analytics endpoint
+        await Promise.all(
+          transitional.map((c) =>
+            fetch(`/api/admin/campaigns/${c.id}/analytics`).catch(() => null)
+          )
+        );
+        // Then reload the full list to pick up any status changes
         const res = await fetch("/api/admin/campaigns");
         const data = await res.json();
         if (data.campaigns) {
           setCampaigns(data.campaigns);
-          // Also update editingCampaign if it's one of the transitional ones
           setEditingCampaign((prev) => {
             if (!prev) return prev;
             const updated = data.campaigns.find((c: Campaign) => c.id === prev.id);

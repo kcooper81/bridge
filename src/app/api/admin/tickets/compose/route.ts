@@ -63,28 +63,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // 2. Create the initial note (the outbound message)
-  const { data: note, error: noteError } = await db
-    .from("ticket_notes")
-    .insert({
-      ticket_id: ticket.id,
-      author_id: auth.userId,
-      content: message.trim(),
-      is_internal: false,
-      email_sent: false,
-    })
-    .select("id, content, is_internal, email_sent, created_at")
-    .single();
-
-  if (noteError) {
-    console.error("Failed to create note:", noteError);
-    return NextResponse.json(
-      { error: "Ticket created but failed to create note" },
-      { status: 500 }
-    );
-  }
-
-  // 3. Send the email via Resend
+  // 2. Send the email via Resend
   let emailSent = false;
   if (process.env.RESEND_API_KEY) {
     try {
@@ -117,10 +96,6 @@ export async function POST(request: NextRequest) {
       });
 
       emailSent = true;
-      await db
-        .from("ticket_notes")
-        .update({ email_sent: true })
-        .eq("id", note.id);
     } catch (emailError) {
       console.error("Failed to send compose email:", emailError);
       logServiceError("resend", emailError, { url: "/api/admin/tickets/compose" });
@@ -129,7 +104,6 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json({
     ticket_id: ticket.id,
-    note: { ...note, email_sent: emailSent, author_email: auth.email },
     email_sent: emailSent,
   });
 }

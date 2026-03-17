@@ -20,6 +20,7 @@ import {
   LogOut,
   Menu,
   Moon,
+  Plug2,
   Receipt,
   Settings,
   Shield,
@@ -89,6 +90,14 @@ export function DashboardHeader() {
                   <Link href="/settings/security">
                     <ShieldCheck className="mr-2 h-4 w-4" />
                     Security
+                  </Link>
+                </DropdownMenuItem>
+              )}
+              {currentUserRole === "admin" && (
+                <DropdownMenuItem asChild>
+                  <Link href="/settings/integrations">
+                    <Plug2 className="mr-2 h-4 w-4" />
+                    Integrations
                   </Link>
                 </DropdownMenuItem>
               )}

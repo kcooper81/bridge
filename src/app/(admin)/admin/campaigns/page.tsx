@@ -158,7 +158,7 @@ export default function CampaignsPage() {
   const [addToListId, setAddToListId] = useState<string | null>(null);
   const [addToListEmails, setAddToListEmails] = useState("");
   const [addingToList, setAddingToList] = useState(false);
-  const [editorTab, setEditorTab] = useState<"fields" | "preview" | "html">("fields");
+  const [editorTab, setEditorTab] = useState<"fields" | "visual" | "preview" | "html">("fields");
   const [testEmail, setTestEmail] = useState("");
   const [sendingTest, setSendingTest] = useState(false);
 
@@ -772,11 +772,12 @@ export default function CampaignsPage() {
                     <LayoutTemplate className="h-3 w-3 mr-1.5" />
                     {activeTemplate ? "Change" : "Use Template"}
                   </Button>
-                  <Tabs value={editorTab} onValueChange={(val) => setEditorTab(val as "fields" | "preview" | "html")}>
+                  <Tabs value={editorTab} onValueChange={(val) => setEditorTab(val as "fields" | "visual" | "preview" | "html")}>
                     <TabsList className="h-7">
                       {activeTemplate && (
-                        <TabsTrigger value="fields" className="text-xs px-2 h-5">Edit</TabsTrigger>
+                        <TabsTrigger value="fields" className="text-xs px-2 h-5">Fields</TabsTrigger>
                       )}
+                      <TabsTrigger value="visual" className="text-xs px-2 h-5">Visual</TabsTrigger>
                       <TabsTrigger value="preview" className="text-xs px-2 h-5">Preview</TabsTrigger>
                       <TabsTrigger value="html" className="text-xs px-2 h-5">HTML</TabsTrigger>
                     </TabsList>
@@ -927,6 +928,65 @@ export default function CampaignsPage() {
                       — Switch to Preview to see the result, or HTML for full control.
                     </p>
                   </div>
+                </div>
+              ) : editorTab === "visual" ? (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-1 border rounded-md p-1 bg-muted/30">
+                    {[
+                      { cmd: "bold", icon: "B", title: "Bold", cls: "font-bold" },
+                      { cmd: "italic", icon: "I", title: "Italic", cls: "italic" },
+                      { cmd: "underline", icon: "U", title: "Underline", cls: "underline" },
+                      { cmd: "insertUnorderedList", icon: "\u2022", title: "Bullet list", cls: "" },
+                      { cmd: "insertOrderedList", icon: "1.", title: "Numbered list", cls: "" },
+                    ].map((btn) => (
+                      <button
+                        key={btn.cmd}
+                        type="button"
+                        title={btn.title}
+                        className={`h-7 w-7 rounded text-xs hover:bg-accent flex items-center justify-center ${btn.cls}`}
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          document.execCommand(btn.cmd, false);
+                        }}
+                      >
+                        {btn.icon}
+                      </button>
+                    ))}
+                    <div className="h-5 w-px bg-border mx-1" />
+                    <button
+                      type="button"
+                      title="Add link"
+                      className="h-7 px-2 rounded text-xs hover:bg-accent flex items-center justify-center"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        const url = prompt("Enter URL:");
+                        if (url) document.execCommand("createLink", false, url);
+                      }}
+                    >
+                      Link
+                    </button>
+                    <button
+                      type="button"
+                      title="Remove formatting"
+                      className="h-7 px-2 rounded text-xs hover:bg-accent flex items-center justify-center text-muted-foreground"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        document.execCommand("removeFormat", false);
+                      }}
+                    >
+                      Clear
+                    </button>
+                  </div>
+                  <div
+                    contentEditable
+                    suppressContentEditableWarning
+                    className="border rounded-lg bg-white min-h-[400px] p-4 prose prose-sm max-w-none focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    dangerouslySetInnerHTML={{ __html: formBody }}
+                    onBlur={(e) => setFormBody(e.currentTarget.innerHTML)}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Edit text directly. Changes save when you click away. Switch to HTML for full control.
+                  </p>
                 </div>
               ) : editorTab === "html" ? (
                 <Textarea

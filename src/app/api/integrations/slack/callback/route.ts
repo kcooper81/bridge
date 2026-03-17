@@ -105,18 +105,28 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(`${siteUrl}/settings/integrations?error=save_failed`);
     }
 
-    // Create default slack_config
-    await db.from("slack_config").upsert(
-      {
+    // Create default slack_config if not exists (preserve existing channel config on reconnect)
+    const { data: existingConfig } = await db
+      .from("slack_config")
+      .select("id")
+      .eq("org_id", profile.org_id)
+      .maybeSingle();
+
+    if (existingConfig) {
+      // Just update team info, keep channel + notification prefs
+      await db.from("slack_config")
+        .update({ slack_team_id: teamId, slack_team_name: teamName, updated_at: new Date().toISOString() })
+        .eq("org_id", profile.org_id);
+    } else {
+      await db.from("slack_config").insert({
         org_id: profile.org_id,
         slack_team_id: teamId,
         slack_team_name: teamName,
         notify_dlp_violations: true,
         notify_prompt_submissions: true,
         notify_weekly_digest: true,
-      },
-      { onConflict: "org_id" }
-    );
+      });
+    }
 
     const response = NextResponse.redirect(`${siteUrl}/settings/integrations?connected=slack`);
     response.cookies.delete("slack_oauth_nonce");

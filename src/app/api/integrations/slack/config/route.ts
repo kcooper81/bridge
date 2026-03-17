@@ -34,13 +34,13 @@ export async function PATCH(request: NextRequest) {
     const body = await request.json();
     const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };
 
-    if (body.channelId !== undefined) {
+    if (typeof body.channelId === "string" || body.channelId === null) {
       updates.notification_channel_id = body.channelId;
-      updates.notification_channel_name = body.channelName || null;
+      updates.notification_channel_name = typeof body.channelName === "string" ? body.channelName : null;
     }
-    if (body.notifyDlp !== undefined) updates.notify_dlp_violations = body.notifyDlp;
-    if (body.notifyPromptSubmissions !== undefined) updates.notify_prompt_submissions = body.notifyPromptSubmissions;
-    if (body.notifyWeeklyDigest !== undefined) updates.notify_weekly_digest = body.notifyWeeklyDigest;
+    if (typeof body.notifyDlp === "boolean") updates.notify_dlp_violations = body.notifyDlp;
+    if (typeof body.notifyPromptSubmissions === "boolean") updates.notify_prompt_submissions = body.notifyPromptSubmissions;
+    if (typeof body.notifyWeeklyDigest === "boolean") updates.notify_weekly_digest = body.notifyWeeklyDigest;
 
     const { error } = await db
       .from("slack_config")

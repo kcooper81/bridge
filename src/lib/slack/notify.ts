@@ -77,15 +77,15 @@ export async function notifyDlpViolation(
     aiTool?: string;
   }
 ): Promise<void> {
-  // Check if DLP notifications are enabled
+  // Check if DLP notifications are enabled (uses same DB call as sendSlackNotification)
   const db = createServiceClient();
   const { data: config } = await db
     .from("slack_config")
-    .select("notify_dlp_violations")
+    .select("notify_dlp_violations, notification_channel_id")
     .eq("org_id", orgId)
     .maybeSingle();
 
-  if (!config?.notify_dlp_violations) return;
+  if (!config?.notify_dlp_violations || !config.notification_channel_id) return;
 
   const severityEmoji = details.severity === "block" ? ":no_entry:" : ":warning:";
   const action = details.severity === "block" ? "Blocked" : "Warning";
@@ -132,11 +132,11 @@ export async function notifyPromptSubmission(
   const db = createServiceClient();
   const { data: config } = await db
     .from("slack_config")
-    .select("notify_prompt_submissions")
+    .select("notify_prompt_submissions, notification_channel_id")
     .eq("org_id", orgId)
     .maybeSingle();
 
-  if (!config?.notify_prompt_submissions) return;
+  if (!config?.notify_prompt_submissions || !config.notification_channel_id) return;
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://teamprompt.app";
   const text = `:memo: New prompt submitted for approval: "${details.promptTitle}"`;

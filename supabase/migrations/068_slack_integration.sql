@@ -18,9 +18,5 @@ CREATE TABLE IF NOT EXISTS slack_config (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- RLS enabled with no user-facing policies — all access via service role only
 ALTER TABLE slack_config ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Service role full access on slack_config"
-  ON slack_config FOR ALL
-  USING (true)
-  WITH CHECK (true);

@@ -109,6 +109,16 @@ export async function POST(request: NextRequest) {
       return withCors(NextResponse.json({ error: "Failed to create prompt" }, { status: 500 }), request);
     }
 
+    // Notify Slack if prompt is pending approval (fire-and-forget)
+    if (prompt && prompt.status === "pending") {
+      import("@/lib/slack/notify").then(({ notifyPromptSubmission }) => {
+        notifyPromptSubmission(profile.org_id, {
+          promptTitle: prompt.title,
+          submitterEmail: user.email || undefined,
+        }).catch(() => {});
+      }).catch(() => {});
+    }
+
     return withCors(NextResponse.json({ success: true, prompt }, { status: 201 }), request);
   } catch (error) {
     console.error("Extension create prompt error:", error);

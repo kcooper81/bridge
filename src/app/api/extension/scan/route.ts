@@ -7,6 +7,7 @@ import { detectHighEntropyStrings } from "@/lib/security/entropy";
 import { SMART_DETECTION_RULES } from "@/lib/security/default-rules";
 import type { DetectionType } from "@/lib/types";
 import { calculateRiskScore } from "@/lib/security/risk-score";
+import { notifyDlpViolation } from "@/lib/slack/notify";
 
 const MAX_CONTENT_LENGTH = 50_000; // 50 KB max scan payload
 const REGEX_TIMEOUT_MS = 500; // Per-rule regex execution limit
@@ -345,6 +346,20 @@ export async function POST(request: NextRequest) {
     }
 
     const risk_score = calculateRiskScore(violations as Array<{ severity: "block" | "warn"; category: string; detectionType: string }>);
+
+    // Fire-and-forget Slack notification for violations
+    if (violations.length > 0) {
+      const topViolation = violations.find((v) => v.severity === "block") || violations[0];
+      notifyDlpViolation(profile.org_id, {
+        ruleName: violations.length === 1
+          ? topViolation.ruleName
+          : `${topViolation.ruleName} (+${violations.length - 1} more)`,
+        category: topViolation.category,
+        severity: topViolation.severity,
+        userEmail: user.email || undefined,
+        aiTool: body?.ai_tool || undefined,
+      }).catch(() => {}); // fire-and-forget
+    }
 
     return withCors(NextResponse.json({
       passed: action !== "block",

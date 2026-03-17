@@ -702,11 +702,11 @@ CAMPAIGN_TEMPLATES.push({
   id: "partner-outreach",
   name: "Partner Outreach",
   category: "Outreach",
-  description: "Cold email for potential partners — looks like a direct personal email",
-  defaultSubject: "Quick question about {{{COMPANY|your team}}}",
+  description: "Cold email for potential partners — highlights TeamPrompt's full feature set",
+  defaultSubject: "Quick question about {{{COMPANY|your team}}} + AI",
   previewText: "",
   fields: [
-    { key: "body", label: "Email", type: "textarea", placeholder: "", default: `Hi {{{FIRST_NAME|there}}},\n\nI came across {{{COMPANY|your company}}} and really liked what you're building. We're working on something similar in the AI prompt space.\n\nTeamPrompt helps teams share and manage their AI prompts across tools like ChatGPT, Claude, and Gemini. I think there could be a natural fit between what we're each doing.\n\nWould you be open to a quick 15-minute chat this week?\n\nBest,\nKade\nFounder, TeamPrompt` },
+    { key: "body", label: "Email", type: "textarea", placeholder: "", default: `Hi {{{FIRST_NAME|there}}},\n\nI came across {{{COMPANY|your company}}} and really liked what you're building. I'm the founder of TeamPrompt — we help teams use AI tools safely and consistently.\n\nWe built a platform that sits between your team and AI tools like ChatGPT, Claude, Gemini, Copilot, and Perplexity. Here's what it does:\n\n• AI Data Loss Prevention (DLP) — scans and blocks sensitive data (SSN, credit cards, patient records, API keys) before it reaches any AI tool, in real-time\n• Shared Prompt Library — a searchable, rated collection of your team's best prompts so nobody starts from scratch\n• Prompt Templates — reusable fill-in-the-blank prompts with variables for consistent output every time\n• Browser Extension — works directly inside ChatGPT, Claude, Gemini, Copilot & Perplexity so your team never leaves their workflow\n• Quality Guidelines — set rules like "every prompt needs a clear role and output format" and enforce them automatically\n• Approval Queue — managers review and approve prompts before the team can use them\n• 19 Compliance Packs — one-click rules for HIPAA, SOC 2, PCI-DSS, GDPR, and other regulated industries\n• Usage Analytics — see which prompts get reused, which sit unused, and how your team interacts with AI\n• Audit Logging — full activity trail for compliance and security reviews\n• Teams & Roles — Admin, Manager, Member with granular access control\n• Import / Export — bring existing prompts in from CSV or share them across teams\n\nI think there could be a really natural fit between what we're each building. Would you be open to a quick 15-minute chat this week?\n\nBest,\nKade\nFounder, TeamPrompt\nhttps://teamprompt.app` },
   ],
   build(vals) {
     const text = (vals.body?.trim() || "Hi {{{FIRST_NAME|there}}},\n\nYour message here.\n\nBest,\nKade");

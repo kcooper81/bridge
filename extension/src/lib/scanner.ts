@@ -27,9 +27,16 @@ export interface ScanResult {
   }[];
 }
 
-export async function scanOutbound(text: string): Promise<ScanResult | null> {
+export type ScanErrorReason = "no-session" | "permission-denied" | "api-error" | "network-error";
+
+export interface ScanFailure {
+  error: true;
+  reason: ScanErrorReason;
+}
+
+export async function scanOutbound(text: string): Promise<ScanResult | ScanFailure> {
   const session = await getSession();
-  if (!session) return null;
+  if (!session) return { error: true, reason: "no-session" };
 
   try {
     const res = await apiFetch(`${CONFIG.SITE_URL}${API_ENDPOINTS.scan}`, {
@@ -38,9 +45,19 @@ export async function scanOutbound(text: string): Promise<ScanResult | null> {
       body: JSON.stringify({ content: text }),
     });
 
-    if (!res.ok) return null;
+    if (!res.ok) {
+      if (res.status === 401 || res.status === 403) {
+        return { error: true, reason: "permission-denied" };
+      }
+      return { error: true, reason: "api-error" };
+    }
     return res.data as ScanResult;
   } catch {
-    return null;
+    return { error: true, reason: "network-error" };
   }
+}
+
+/** Type guard to check if a scan result is an error */
+export function isScanError(result: ScanResult | ScanFailure): result is ScanFailure {
+  return "error" in result && result.error === true;
 }

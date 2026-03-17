@@ -391,15 +391,18 @@ export default defineContentScript({
         // Only clear web cookies on EXPLICIT logout (loggedOut flag).
         // Don't clear on SESSION_CLEAR from cookie polling — it may be a
         // false positive if cookies are temporarily unreadable.
-        browser.storage.local.get(["loggedOut"]).then(({ loggedOut }) => {
+        browser.storage.local.get(["loggedOut"]).then(async ({ loggedOut }) => {
           if (loggedOut !== true) return;
-          clearWebSession().then(() => {
-            sessionStorage.setItem("tp-ext-sync", "1");
-            // Redirect to the sign-out API endpoint which clears the server
-            // session, then redirects to /login. A plain reload would loop
-            // because the middleware still sees a valid server session.
-            window.location.href = "/auth/signout";
-          });
+          try {
+            await clearWebSession();
+          } catch {
+            // Best-effort cookie clearing — proceed with redirect regardless
+          }
+          sessionStorage.setItem("tp-ext-sync", "1");
+          // Redirect to the sign-out API endpoint which clears the server
+          // session, then redirects to /login. A plain reload would loop
+          // because the middleware still sees a valid server session.
+          window.location.href = "/auth/signout";
         }).catch(() => {
           // Context invalidated during async call
           _bridgeInvalidated = true;

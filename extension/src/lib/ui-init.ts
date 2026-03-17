@@ -1402,8 +1402,8 @@ export function initSharedUI(elements: UIElements) {
   });
 
   els.copyBtn.addEventListener("click", async () => {
-    if (hasUnfilledVariables()) flashUnfilledFields();
     const content = getFilledContent();
+    if (/\{\{.+?\}\}/.test(content)) flashUnfilledFields();
     try {
       await navigator.clipboard.writeText(content);
       els.copyBtn.textContent = "Copied!";
@@ -1416,8 +1416,8 @@ export function initSharedUI(elements: UIElements) {
   });
 
   els.insertBtn.addEventListener("click", async () => {
-    if (hasUnfilledVariables()) flashUnfilledFields();
     const content = getFilledContent();
+    if (/\{\{.+?\}\}/.test(content)) flashUnfilledFields();
     const [tab] = await browser.tabs.query({
       active: true,
       currentWindow: true,

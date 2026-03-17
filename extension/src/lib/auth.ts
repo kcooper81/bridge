@@ -139,10 +139,15 @@ export async function refreshSession(): Promise<void> {
     if (res.ok) {
       const tokens = await res.json();
       extAuthDebug.log("refresh", "refreshSession: success"); // AUTH-DEBUG
-      await browser.storage.local.set({
+      const update: Record<string, unknown> = {
         accessToken: tokens.access_token,
         refreshToken: tokens.refresh_token,
-      });
+      };
+      // Update user metadata if the server returned it (keeps email/name in sync)
+      if (tokens.user) {
+        update.user = { id: tokens.user.id, email: tokens.user.email };
+      }
+      await browser.storage.local.set(update);
     } else if (res.status === 400 || res.status === 403) {
       // Refresh token is permanently invalid (expired or revoked) — clear
       // tokens so the UI switches to "not signed in" instead of showing

@@ -2,7 +2,7 @@
 // Runs on AI tool pages. Handles: DLP scanning, prompt insertion, interaction logging, shield indicator.
 
 import { detectAiTool, insertIntoAiTool } from "../lib/ai-tools";
-import { scanOutbound, type ScanResult } from "../lib/scanner";
+import { scanOutbound, isScanError, type ScanResult, type ScanFailure } from "../lib/scanner";
 import { fetchSecurityStatus } from "../lib/security-status";
 import { logInteraction } from "../lib/logging";
 import { getSession } from "../lib/auth";
@@ -274,12 +274,12 @@ export default defineContentScript({
           killContentScript();
           return;
         }
-      } catch {
-        killContentScript();
-        return;
-      }
-      try {
-        browser.runtime.sendMessage({ type: "PING" }).catch(() => {
+        // Wrap in Promise.resolve to ensure both sync throws and async
+        // rejections are caught — browser.runtime.sendMessage can throw
+        // synchronously if context is already invalidated
+        Promise.resolve().then(() =>
+          browser.runtime.sendMessage({ type: "PING" })
+        ).catch(() => {
           killContentScript();
         });
       } catch {
@@ -379,6 +379,10 @@ function onUrlChange() {
   const newUrl = location.href;
   if (newUrl === _currentUrl) return;
   _currentUrl = newUrl;
+
+  // Clean up save buttons from the previous page/conversation to prevent
+  // memory leaks on SPAs (Claude, ChatGPT) that do client-side navigation
+  document.querySelectorAll(".tp-save-btn-wrap").forEach((el) => el.remove());
 
   if (_isAuthenticated && _isOnline) {
     debouncedRefreshShieldStatus();
@@ -508,10 +512,14 @@ function reDispatchEnter(target: HTMLElement) {
 
 // ─── Shared DLP Scan Logic (used by Enter key and click-to-send handlers) ───
 
+let _scanInProgress = false;
+
 function performScan(text: string, onAllow: () => void) {
   if (_contextDead) { onAllow(); return; }
   // Shield disabled by admin — let messages through without scanning
   if (_isDisabled) { onAllow(); return; }
+  // Prevent concurrent scans — if one is already in flight, block this one
+  if (_scanInProgress) return;
   // Block repeat submissions of previously blocked text
   if (_lastBlockedText !== null && text.trim() === _lastBlockedText.trim()) {
     showBlockOverlay([{ ruleId: "repeat-block", ruleName: "Previously blocked", category: "dlp", severity: "block", matchedText: "Same content was blocked moments ago", detectionType: "pattern" }]);
@@ -531,14 +539,30 @@ function performScan(text: string, onAllow: () => void) {
     return;
   }
 
+  _scanInProgress = true;
   updateShieldScanning(true);
 
   scanOutbound(text).then((result) => {
+    _scanInProgress = false;
     updateShieldScanning(false);
 
-    const riskScore = result?.risk_score ?? 0;
+    // Handle scan errors (no session, permission denied, API error, network)
+    if (isScanError(result)) {
+      const reason = result.reason === "no-session" ? "no-auth"
+        : result.reason === "permission-denied" ? "no-auth"
+        : result.reason === "network-error" ? "offline"
+        : "api-error";
+      showScanBlockOverlay(reason);
+      if (result.reason === "permission-denied") {
+        showSessionLossBanner();
+      }
+      logInteraction(text, "blocked", [{ ruleName: `Scan failed: ${result.reason}`, category: "system", matchedText: "", action: "block" as const }], { riskScore: 0 });
+      return;
+    }
 
-    if (result?.action === "block") {
+    const riskScore = result.risk_score ?? 0;
+
+    if (result.action === "block") {
       _lastBlockedText = text;
       showBlockOverlay(result.violations, result.sanitized_content, (sanitized) => {
         setChatInputText(sanitized);
@@ -552,8 +576,7 @@ function performScan(text: string, onAllow: () => void) {
       return;
     }
 
-    if (result?.action === "auto_redact" && result.sanitized_content) {
-      // Auto-redact: replace input with sanitized version and allow send
+    if (result.action === "auto_redact" && result.sanitized_content) {
       setChatInputText(result.sanitized_content);
       showWarningBanner(result.violations);
       logInteraction(text, "warned", result.violations, { riskScore });
@@ -564,28 +587,22 @@ function performScan(text: string, onAllow: () => void) {
       return;
     }
 
-    if (result?.action === "warn") {
+    if (result.action === "warn") {
       showWarningBanner(result.violations);
       logInteraction(text, "warned", result.violations, { riskScore });
       pulseShield("warn");
       safeSendMessage({ type: "SET_BADGE", text: "!", color: "#f59e0b" });
       setTimeout(() => safeSendMessage({ type: "SET_BADGE", text: "" }), 10000);
-    } else if (result === null) {
-      // Fail-closed: scan returned null — determine reason and block
-      const reason = _isAuthenticated ? "api-error" : "no-auth";
-      showScanBlockOverlay(reason);
-      logInteraction(text, "blocked", [{ ruleName: "Scan failure", category: "system", matchedText: "", action: "block" as const }], { riskScore: 0 });
-      return;
     } else {
       logInteraction(text, "sent", [], { riskScore });
     }
 
     onAllow();
   }).catch(() => {
-    // Fail-closed: scan failed (network error) — block, don't auto-send
+    _scanInProgress = false;
     updateShieldScanning(false);
     showScanBlockOverlay("api-error");
-    logInteraction(text, "blocked", [{ ruleName: "Scan failure", category: "system", matchedText: "", action: "block" as const }], { riskScore: 0 });
+    logInteraction(text, "blocked", [{ ruleName: "Scan failed: network-error", category: "system", matchedText: "", action: "block" as const }], { riskScore: 0 });
   });
 }
 

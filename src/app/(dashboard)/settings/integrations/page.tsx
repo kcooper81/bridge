@@ -347,6 +347,30 @@ export default function IntegrationsPage() {
           </CardContent>
         </Card>
 
+        {/* MCP Server */}
+        <Card className="relative overflow-hidden">
+          <CardContent className="p-6">
+            <div className="flex items-start justify-between mb-4">
+              <div className="p-2 rounded-lg bg-purple-50 dark:bg-purple-950/30">
+                <svg className="h-8 w-8 text-purple-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 2v4m0 12v4M2 12h4m12 0h4" />
+                  <circle cx="12" cy="12" r="3" />
+                  <path d="M12 5a7 7 0 110 14 7 7 0 010-14z" />
+                </svg>
+              </div>
+            </div>
+            <h3 className="font-semibold mb-1">MCP Server</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Connect Claude Desktop, Cursor, Windsurf, and other AI tools to your prompt library, DLP, and audit logging.
+            </p>
+            <Link href="/settings/integrations/mcp">
+              <Button variant="outline" size="sm" className="w-full">
+                Configure
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+
         {/* SCIM 2.0 */}
         <Card className="relative overflow-hidden">
           <CardContent className="p-6">

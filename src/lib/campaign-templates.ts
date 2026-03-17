@@ -648,18 +648,11 @@ ${paragraphs}
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <style>body { margin: 0; padding: 0; }</style>
 </head>
-<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding: 20px;">
-    <tr>
-      <td align="left">
-        <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width: 560px; width: 100%;">
-          <tr><td style="padding: 20px 0; text-align: left;">${paragraphs}</td></tr>
-        </table>
-      </td>
-    </tr>
-  </table>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 14px; color: #1a1a1a; line-height: 1.7;">
+<div style="padding: 8px 0;">
+${paragraphs}
+</div>
 </body>
 </html>`;
     },
@@ -688,23 +681,14 @@ ${paragraphs}
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <style>body { margin: 0; padding: 0; }</style>
 </head>
-<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding: 20px;">
-    <tr>
-      <td align="left">
-        <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width: 560px; width: 100%;">
-          <tr><td style="padding: 20px 0; text-align: left;">
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 15px; color: #3f3f46; line-height: 1.6;">
+<div style="padding: 8px 0;">
 ${paragraphs}
-            <p style="margin: 16px 0 0; font-size: 12px; color: #a1a1aa;">
-              <a href="https://teamprompt.app" style="color: #a1a1aa; text-decoration: none;">TeamPrompt</a>
-            </p>
-          </td></tr>
-        </table>
-      </td>
-    </tr>
-  </table>
+<p style="margin: 16px 0 0; font-size: 12px; color: #a1a1aa;">
+  <a href="https://teamprompt.app" style="color: #a1a1aa; text-decoration: none;">TeamPrompt</a>
+</p>
+</div>
 </body>
 </html>`;
     },
@@ -735,20 +719,11 @@ CAMPAIGN_TEMPLATES.push({
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <style>body { margin: 0; padding: 0; }</style>
 </head>
-<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding: 20px;">
-    <tr>
-      <td align="left">
-        <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width: 560px; width: 100%;">
-          <tr><td style="padding: 20px 0; text-align: left;">
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 15px; color: #3f3f46; line-height: 1.65;">
+<div style="padding: 8px 0;">
 ${paragraphs}
-          </td></tr>
-        </table>
-      </td>
-    </tr>
-  </table>
+</div>
 </body>
 </html>`;
   },

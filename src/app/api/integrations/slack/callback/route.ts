@@ -16,8 +16,15 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    if (!code || !state) {
+    if (!code) {
       return NextResponse.redirect(`${siteUrl}/settings/integrations?error=missing_params`);
+    }
+
+    // Public install flow (no state) — redirect to signup with pending connect
+    if (!state) {
+      return NextResponse.redirect(
+        `${siteUrl}/signup?redirect=/settings/integrations&message=Sign+up+to+connect+Slack`
+      );
     }
 
     // Decode and validate state

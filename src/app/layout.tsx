@@ -57,6 +57,9 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="apple-touch-icon" href="/brand/logo-icon-blue.svg" />
         <meta name="theme-color" content="#2563EB" />
+        {process.env.NEXT_PUBLIC_SLACK_APP_ID && (
+          <meta name="slack-app-id" content={process.env.NEXT_PUBLIC_SLACK_APP_ID} />
+        )}
         <link rel="preconnect" href="https://www.googletagmanager.com" />
         <link rel="preconnect" href="https://www.google-analytics.com" />
         <link rel="dns-prefetch" href="https://images.unsplash.com" />

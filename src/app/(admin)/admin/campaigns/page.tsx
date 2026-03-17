@@ -158,6 +158,8 @@ export default function CampaignsPage() {
   const [addToListId, setAddToListId] = useState<string | null>(null);
   const [addToListEmails, setAddToListEmails] = useState("");
   const [addingToList, setAddingToList] = useState(false);
+  const [addContactMode, setAddContactMode] = useState<"paste" | "manual">("paste");
+  const [manualContacts, setManualContacts] = useState<Array<{ email: string; first_name: string; last_name: string; company: string }>>([{ email: "", first_name: "", last_name: "", company: "" }]);
   const [editorTab, setEditorTab] = useState<"fields" | "visual" | "preview" | "html">("fields");
   const [testEmail, setTestEmail] = useState("");
   const [sendingTest, setSendingTest] = useState(false);
@@ -627,22 +629,81 @@ export default function CampaignsPage() {
     if (!addToListId) return;
     setAddingToList(true);
     try {
-      const payload: Record<string, unknown> = { list_id: addToListId };
-      if (addToListEmails.trim()) {
-        payload.emails = addToListEmails.split(/[\n,;]+/).map((e) => e.trim()).filter(Boolean);
+      if (addContactMode === "manual") {
+        // Manual mode: create contacts first via the contacts import endpoint, then add to list
+        const validContacts = manualContacts.filter((c) => c.email.trim());
+        if (validContacts.length === 0) {
+          toast.error("Enter at least one email address");
+          setAddingToList(false);
+          return;
+        }
+        // Import contacts (upserts by email)
+        const importRes = await fetch("/api/admin/campaigns/contacts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ contacts: validContacts }),
+        });
+        const importData = await importRes.json();
+        if (!importRes.ok) throw new Error(importData.error);
+        // Now add those emails to the list
+        const res = await fetch("/api/admin/campaigns/lists", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ list_id: addToListId, emails: validContacts.map((c) => c.email.trim()) }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        toast.success(`Added ${data.added} contacts (${data.total} total in list)`);
       } else {
-        payload.add_all = true;
+        // Paste mode (existing behavior)
+        const payload: Record<string, unknown> = { list_id: addToListId };
+        if (addToListEmails.trim()) {
+          // Check if pasted data has CSV-like structure (commas with names)
+          const lines = addToListEmails.split(/\n/).map((l) => l.trim()).filter(Boolean);
+          const hasStructure = lines.some((l) => l.includes(",") || l.includes("\t"));
+          if (hasStructure) {
+            // Parse as structured data: email, first_name, last_name, company
+            const contacts = lines.map((line) => {
+              const parts = line.split(/[,\t]+/).map((p) => p.trim());
+              return {
+                email: parts[0] || "",
+                first_name: parts[1] || "",
+                last_name: parts[2] || "",
+                company: parts[3] || "",
+              };
+            }).filter((c) => c.email);
+            if (contacts.some((c) => c.first_name || c.last_name || c.company)) {
+              // Has extra fields — import as full contacts first
+              const importRes = await fetch("/api/admin/campaigns/contacts", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ contacts }),
+              });
+              if (!importRes.ok) {
+                const err = await importRes.json();
+                throw new Error(err.error);
+              }
+            }
+            payload.emails = contacts.map((c) => c.email);
+          } else {
+            payload.emails = lines.filter((e) => e.includes("@"));
+          }
+        } else {
+          payload.add_all = true;
+        }
+        const res = await fetch("/api/admin/campaigns/lists", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        toast.success(`Added ${data.added} contacts (${data.total} total in list)`);
       }
-      const res = await fetch("/api/admin/campaigns/lists", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      toast.success(`Added ${data.added} contacts (${data.total} total in list)`);
       setAddToListId(null);
       setAddToListEmails("");
+      setManualContacts([{ email: "", first_name: "", last_name: "", company: "" }]);
+      setAddContactMode("paste");
       await Promise.all([loadSegments(), loadAudienceLists()]);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to add contacts");
@@ -2159,36 +2220,130 @@ export default function CampaignsPage() {
       </Dialog>
 
       {/* Add Contacts to List Dialog */}
-      <Dialog open={!!addToListId} onOpenChange={(open) => { if (!open) { setAddToListId(null); setAddToListEmails(""); } }}>
-        <DialogContent>
+      <Dialog open={!!addToListId} onOpenChange={(open) => { if (!open) { setAddToListId(null); setAddToListEmails(""); setManualContacts([{ email: "", first_name: "", last_name: "", company: "" }]); setAddContactMode("paste"); } }}>
+        <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>Add Contacts to List</DialogTitle>
             <DialogDescription>
-              Add specific emails or all existing contacts to &ldquo;{audienceLists.find((l) => l.id === addToListId)?.name}&rdquo;.
+              Add contacts to &ldquo;{audienceLists.find((l) => l.id === addToListId)?.name}&rdquo;.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="add-emails">Email Addresses (optional)</Label>
-              <Textarea
-                id="add-emails"
-                value={addToListEmails}
-                onChange={(e) => setAddToListEmails(e.target.value)}
-                placeholder="Paste emails here, one per line. Leave empty to add ALL existing contacts."
-                className="mt-1 min-h-[100px] font-mono text-xs"
-              />
-              <p className="text-xs text-muted-foreground mt-1">
-                {addToListEmails.trim()
-                  ? `${addToListEmails.split(/[\n,;]+/).filter((e) => e.trim()).length} emails entered`
-                  : `Leave empty to add all ${externalCount} contacts`}
-              </p>
-            </div>
+
+          {/* Mode toggle */}
+          <div className="flex gap-1 bg-muted rounded-lg p-1">
+            <button
+              type="button"
+              onClick={() => setAddContactMode("paste")}
+              className={`flex-1 text-xs font-medium rounded-md px-3 py-1.5 transition-colors ${addContactMode === "paste" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+            >
+              Paste / Bulk
+            </button>
+            <button
+              type="button"
+              onClick={() => setAddContactMode("manual")}
+              className={`flex-1 text-xs font-medium rounded-md px-3 py-1.5 transition-colors ${addContactMode === "manual" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+            >
+              Manual Entry
+            </button>
           </div>
+
+          {addContactMode === "paste" ? (
+            <div className="space-y-3">
+              <div>
+                <Label htmlFor="add-emails">Paste Contacts</Label>
+                <Textarea
+                  id="add-emails"
+                  value={addToListEmails}
+                  onChange={(e) => setAddToListEmails(e.target.value)}
+                  placeholder={"Paste one per line. Supported formats:\n\njohn@example.com\njohn@example.com, John, Doe, Acme Inc\njohn@example.com\tJohn\tDoe\tAcme Inc"}
+                  className="mt-1 min-h-[120px] font-mono text-xs"
+                />
+                <div className="mt-1.5 space-y-1">
+                  <p className="text-xs text-muted-foreground">
+                    {addToListEmails.trim()
+                      ? `${addToListEmails.split(/\n/).filter((e) => e.trim()).length} rows entered`
+                      : `Leave empty to add all ${externalCount} existing contacts`}
+                  </p>
+                  <div className="bg-muted/50 rounded-md p-2 border border-dashed">
+                    <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-1">Accepted formats</p>
+                    <div className="grid grid-cols-1 gap-0.5 text-[11px] font-mono text-muted-foreground">
+                      <span>email</span>
+                      <span>email, first_name, last_name, company</span>
+                      <span>email{"\t"}first_name{"\t"}last_name{"\t"}company</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div className="max-h-[300px] overflow-y-auto space-y-3 pr-1">
+                {manualContacts.map((contact, idx) => (
+                  <div key={idx} className="rounded-lg border p-3 space-y-2 bg-muted/20">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Contact {idx + 1}</span>
+                      {manualContacts.length > 1 && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-5 w-5 p-0 text-muted-foreground hover:text-destructive"
+                          onClick={() => setManualContacts((prev) => prev.filter((_, i) => i !== idx))}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      )}
+                    </div>
+                    <div>
+                      <Input
+                        placeholder="Email *"
+                        type="email"
+                        value={contact.email}
+                        onChange={(e) => setManualContacts((prev) => prev.map((c, i) => i === idx ? { ...c, email: e.target.value } : c))}
+                        className="h-8 text-xs"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Input
+                        placeholder="First name"
+                        value={contact.first_name}
+                        onChange={(e) => setManualContacts((prev) => prev.map((c, i) => i === idx ? { ...c, first_name: e.target.value } : c))}
+                        className="h-8 text-xs"
+                      />
+                      <Input
+                        placeholder="Last name"
+                        value={contact.last_name}
+                        onChange={(e) => setManualContacts((prev) => prev.map((c, i) => i === idx ? { ...c, last_name: e.target.value } : c))}
+                        className="h-8 text-xs"
+                      />
+                    </div>
+                    <Input
+                      placeholder="Company"
+                      value={contact.company}
+                      onChange={(e) => setManualContacts((prev) => prev.map((c, i) => i === idx ? { ...c, company: e.target.value } : c))}
+                      className="h-8 text-xs"
+                    />
+                  </div>
+                ))}
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full text-xs gap-1.5"
+                onClick={() => setManualContacts((prev) => [...prev, { email: "", first_name: "", last_name: "", company: "" }])}
+              >
+                <Plus className="h-3 w-3" />
+                Add Another Contact
+              </Button>
+            </div>
+          )}
+
           <DialogFooter>
-            <Button variant="outline" onClick={() => { setAddToListId(null); setAddToListEmails(""); }}>Cancel</Button>
+            <Button variant="outline" onClick={() => { setAddToListId(null); setAddToListEmails(""); setManualContacts([{ email: "", first_name: "", last_name: "", company: "" }]); setAddContactMode("paste"); }}>Cancel</Button>
             <Button onClick={addContactsToList} disabled={addingToList}>
               {addingToList && <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />}
-              {addToListEmails.trim() ? "Add Emails" : "Add All Contacts"}
+              {addContactMode === "manual"
+                ? `Add ${manualContacts.filter((c) => c.email.trim()).length} Contact${manualContacts.filter((c) => c.email.trim()).length !== 1 ? "s" : ""}`
+                : addToListEmails.trim() ? "Add Contacts" : "Add All Contacts"}
             </Button>
           </DialogFooter>
         </DialogContent>

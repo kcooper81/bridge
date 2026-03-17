@@ -507,8 +507,8 @@ function ThreadMessage({
   preview?: string;
   children: React.ReactNode;
 }) {
-  // Expand all messages by default so the thread is easy to follow
-  const [collapsed, setCollapsed] = useState(false);
+  // Expand latest message, collapse older ones for easier thread scanning
+  const [collapsed, setCollapsed] = useState(!isLast);
 
   const colors = {
     inbound: {

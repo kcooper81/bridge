@@ -159,6 +159,8 @@ export default function CampaignsPage() {
   const [addToListEmails, setAddToListEmails] = useState("");
   const [addingToList, setAddingToList] = useState(false);
   const [editorTab, setEditorTab] = useState<"fields" | "preview" | "html">("fields");
+  const [testEmail, setTestEmail] = useState("");
+  const [sendingTest, setSendingTest] = useState(false);
 
   // Editor form state
   const [formName, setFormName] = useState("");
@@ -337,6 +339,35 @@ export default function CampaignsPage() {
       await loadCampaigns();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to delete");
+    }
+  }
+
+  async function sendTestEmail() {
+    if (!testEmail.trim() || !formSubject.trim() || !formBody.trim()) {
+      toast.error("Enter a test email and make sure subject and body are filled in");
+      return;
+    }
+    setSendingTest(true);
+    try {
+      const res = await fetch("/api/admin/campaigns/test-send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: testEmail.trim(),
+          subject: formSubject,
+          html: formBody,
+          from: formFrom,
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Failed to send test");
+      }
+      toast.success(`Test email sent to ${testEmail}`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to send test email");
+    } finally {
+      setSendingTest(false);
     }
   }
 
@@ -1155,6 +1186,29 @@ export default function CampaignsPage() {
                 dangerouslySetInnerHTML={{ __html: formBody }}
                 className="prose prose-sm max-w-none"
               />
+            </div>
+            <div className="border-t pt-4 mt-2">
+              <p className="text-sm font-medium mb-2">Send a test email</p>
+              <div className="flex gap-2">
+                <Input
+                  type="email"
+                  placeholder="your@email.com"
+                  value={testEmail}
+                  onChange={(e) => setTestEmail(e.target.value)}
+                  className="flex-1"
+                />
+                <Button
+                  onClick={sendTestEmail}
+                  disabled={sendingTest || !testEmail.trim() || !formBody.trim()}
+                  size="sm"
+                >
+                  {sendingTest && <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />}
+                  Send Test
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1.5">
+                Subject will be prefixed with [TEST]
+              </p>
             </div>
           </DialogContent>
         </Dialog>

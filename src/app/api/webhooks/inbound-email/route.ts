@@ -142,17 +142,36 @@ async function findExistingTicket(
  */
 function htmlToText(html: string): string {
   return html
+    // Block-level elements get line breaks
     .replace(/<br\s*\/?>/gi, "\n")
     .replace(/<\/p>/gi, "\n\n")
     .replace(/<\/div>/gi, "\n")
     .replace(/<\/li>/gi, "\n")
+    .replace(/<\/tr>/gi, "\n")
+    .replace(/<\/h[1-6]>/gi, "\n\n")
+    .replace(/<\/blockquote>/gi, "\n")
+    // Gmail uses <wbr> and zero-width spaces
+    .replace(/<wbr\s*\/?>/gi, "")
+    // Strip remaining tags
     .replace(/<[^>]*>/g, "")
+    // HTML entities
     .replace(/&nbsp;/gi, " ")
     .replace(/&amp;/gi, "&")
     .replace(/&lt;/gi, "<")
     .replace(/&gt;/gi, ">")
     .replace(/&quot;/gi, '"')
     .replace(/&#39;/gi, "'")
+    .replace(/&rsquo;/gi, "'")
+    .replace(/&lsquo;/gi, "'")
+    .replace(/&rdquo;/gi, '"')
+    .replace(/&ldquo;/gi, '"')
+    .replace(/&mdash;/gi, "—")
+    .replace(/&ndash;/gi, "–")
+    .replace(/&#\d+;/gi, "")
+    .replace(/&\w+;/gi, "")
+    // Clean up whitespace but preserve line breaks
+    .replace(/[ \t]+/g, " ")
+    .replace(/ ?\n ?/g, "\n")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
 }

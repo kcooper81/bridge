@@ -1326,7 +1326,7 @@ export default function TicketsPage() {
     const hasReply = ticket.notes.some((n) => !n.is_internal);
     const starred = isStarred(ticket, userId);
     const snoozed = isSnoozed(ticket);
-    const preview = ticket.message.replace(/^From:.*?\n\n/, "").slice(0, 80);
+    const preview = ticket.message.replace(/^From:.*?\n\n/, "").replace(/\n+/g, " ").replace(/\s+/g, " ").trim().slice(0, 80);
 
     // Gmail-style mobile row
     if (isMobile) {

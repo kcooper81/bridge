@@ -47,6 +47,8 @@ export function trackPageView(url: string) {
 
 export function trackSignUp(method: "email" | "google" | "github") {
   trackEvent({ action: "sign_up", method });
+  // Google Ads conversion tracking
+  gtag("event", "conversion", { send_to: "AW-18011654538/signup" });
   trackLinkedInSignUp();
 }
 

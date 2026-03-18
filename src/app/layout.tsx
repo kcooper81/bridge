@@ -90,6 +90,7 @@ export default function RootLayout({
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
             gtag('config', '${GA_ID}', { send_page_view: false });
+            gtag('config', 'AW-18011654538');
           `}
         </Script>
         {/* LinkedIn Insight Tag — deferred to avoid blocking interactivity */}

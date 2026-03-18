@@ -38,9 +38,9 @@ const navSections: { title: string; items: NavItem[] }[] = [
   {
     title: "Workspace",
     items: [
-      { label: "AI Chat", href: "/chat", icon: MessageSquare, roles: ["__ai_chat__"] }, // special: shown based on org setting
       { label: "Prompts", href: "/vault", icon: Archive },
       { label: "Templates", href: "/templates", icon: Library },
+      { label: "AI Chat", href: "/chat", icon: MessageSquare, roles: ["__ai_chat__"] },
       { label: "Approvals", href: "/approvals", icon: CheckSquare, roles: ["admin", "manager"] },
       { label: "Guidelines", href: "/guidelines", icon: BookOpen },
       { label: "Team", href: "/team", icon: Users },

@@ -16,13 +16,27 @@ export async function GET() {
 
   if (!profile?.org_id) return NextResponse.json({ conversations: [] });
 
-  const { data } = await db
+  // eslint-disable-next-line prefer-const
+  let { data, error } = await db
     .from("chat_conversations")
     .select("id, title, model, provider, pinned, created_at, updated_at")
     .eq("org_id", profile.org_id)
     .eq("user_id", user.id)
     .order("updated_at", { ascending: false })
     .limit(50);
+
+  // Fallback if pinned column doesn't exist yet
+  if (error && error.message?.includes("pinned")) {
+    const fallback = await db
+      .from("chat_conversations")
+      .select("id, title, model, provider, created_at, updated_at")
+      .eq("org_id", profile.org_id)
+      .eq("user_id", user.id)
+      .order("updated_at", { ascending: false })
+      .limit(50);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    data = fallback.data as any;
+  }
 
   return NextResponse.json({ conversations: data || [] });
 }

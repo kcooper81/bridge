@@ -24,11 +24,19 @@ import {
   Check,
   X,
   ChevronLeft,
+  ChevronRight,
   Settings,
   Copy,
   RefreshCw,
   Square,
   Shield,
+  Library,
+  Search,
+  Star,
+  Braces,
+  FileText,
+  Download,
+  Slash,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -66,13 +74,26 @@ interface ChatMsg {
   content: string;
 }
 
+// Slash command definitions
+const SLASH_COMMANDS = [
+  { command: "/prompt", label: "Insert a prompt", description: "Search and insert from your prompt library", icon: FileText },
+  { command: "/template", label: "Use a template", description: "Insert a template with fill-in variables", icon: Braces },
+  { command: "/scan", label: "Check for sensitive data", description: "Run DLP scan on your current message", icon: Shield },
+  { command: "/model", label: "Switch model", description: "Change the AI model for this conversation", icon: Bot },
+  { command: "/export", label: "Export conversation", description: "Download this conversation as markdown", icon: Download },
+  { command: "/clear", label: "Clear conversation", description: "Start a new conversation", icon: Trash2 },
+];
+
 export default function ChatPage() {
-  const { currentUserRole, org, members } = useOrg();
+  const { currentUserRole, org, members, prompts: orgPrompts } = useOrg();
   const isAdmin = currentUserRole === "admin";
   const orgSettings = (org?.settings || {}) as Record<string, unknown>;
   const chatEnabledForMembers = orgSettings.ai_chat_enabled === true;
   const currentMember = members.find((m) => m.isCurrentUser);
   const userInitial = (currentMember?.name || currentMember?.email || "U")[0].toUpperCase();
+
+  // Approved prompts for the library panel
+  const approvedPrompts = orgPrompts.filter((p) => p.status === "approved");
 
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConvId, setActiveConvId] = useState<string | null>(null);
@@ -86,6 +107,12 @@ export default function ChatPage() {
   const [editTitleValue, setEditTitleValue] = useState("");
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [promptPanelOpen, setPromptPanelOpen] = useState(false);
+  const [promptSearch, setPromptSearch] = useState("");
+  const [promptFilter, setPromptFilter] = useState<"all" | "favorites" | "templates">("all");
+  const [slashMenuOpen, setSlashMenuOpen] = useState(false);
+  const [slashMenuIndex, setSlashMenuIndex] = useState(0);
+  const [slashFilter, setSlashFilter] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -221,6 +248,67 @@ export default function ChatPage() {
     setTimeout(() => setCopiedId(null), 2000);
   }
 
+  // Filtered prompts for the library panel
+  const filteredPrompts = approvedPrompts.filter((p) => {
+    if (promptFilter === "favorites" && !p.is_favorite) return false;
+    if (promptFilter === "templates" && !p.is_template) return false;
+    if (promptSearch) {
+      const q = promptSearch.toLowerCase();
+      return p.title.toLowerCase().includes(q) || (p.description || "").toLowerCase().includes(q) || p.tags.some((t) => t.toLowerCase().includes(q));
+    }
+    return true;
+  }).sort((a, b) => b.usage_count - a.usage_count);
+
+  // Insert a prompt into the chat input
+  function insertPrompt(content: string) {
+    setChatInput((prev) => prev ? `${prev}\n\n${content}` : content);
+    setPromptPanelOpen(false);
+    inputRef.current?.focus();
+  }
+
+  // Slash command filtering
+  const filteredSlashCommands = SLASH_COMMANDS.filter((cmd) =>
+    !slashFilter || cmd.command.includes(slashFilter) || cmd.label.toLowerCase().includes(slashFilter)
+  );
+
+  // Handle slash commands
+  function executeSlashCommand(command: string) {
+    setSlashMenuOpen(false);
+    setChatInput("");
+
+    switch (command) {
+      case "/prompt":
+      case "/template":
+        setPromptPanelOpen(true);
+        if (command === "/template") setPromptFilter("templates");
+        else setPromptFilter("all");
+        break;
+      case "/scan":
+        toast.info("DLP scan runs automatically on every message you send");
+        break;
+      case "/model":
+        // Focus the model selector (it's already in the header)
+        toast.info("Use the model dropdown in the header to switch models");
+        break;
+      case "/export": {
+        if (messages.length === 0) { toast.error("No messages to export"); break; }
+        const md = messages.map((m) => `## ${m.role === "user" ? "You" : "Assistant"}\n\n${m.content}`).join("\n\n---\n\n");
+        const blob = new Blob([md], { type: "text/markdown" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `chat-${new Date().toISOString().slice(0, 10)}.md`;
+        a.click();
+        URL.revokeObjectURL(url);
+        toast.success("Conversation exported");
+        break;
+      }
+      case "/clear":
+        startNewChat();
+        break;
+    }
+  }
+
   const loadConversations = useCallback(async () => {
     try {
       const res = await fetch("/api/chat/conversations");
@@ -319,7 +407,38 @@ export default function ChatPage() {
     }
   }
 
+  function handleInputChange(value: string) {
+    setChatInput(value);
+    // Detect slash command
+    if (value === "/" || (value.startsWith("/") && !value.includes(" "))) {
+      setSlashMenuOpen(true);
+      setSlashFilter(value);
+      setSlashMenuIndex(0);
+    } else {
+      setSlashMenuOpen(false);
+    }
+  }
+
   function handleKeyDown(e: React.KeyboardEvent) {
+    // Slash menu navigation
+    if (slashMenuOpen) {
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setSlashMenuIndex((prev) => Math.min(prev + 1, filteredSlashCommands.length - 1));
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setSlashMenuIndex((prev) => Math.max(prev - 1, 0));
+      } else if (e.key === "Enter" || e.key === "Tab") {
+        e.preventDefault();
+        if (filteredSlashCommands[slashMenuIndex]) {
+          executeSlashCommand(filteredSlashCommands[slashMenuIndex].command);
+        }
+      } else if (e.key === "Escape") {
+        setSlashMenuOpen(false);
+      }
+      return;
+    }
+
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
@@ -637,8 +756,64 @@ export default function ChatPage() {
               </div>
             )}
 
+            {/* Slash command menu */}
+            {slashMenuOpen && filteredSlashCommands.length > 0 && (
+              <div className="mx-4 mb-1 max-w-3xl lg:mx-auto">
+                <div className="rounded-lg border bg-popover shadow-lg overflow-hidden">
+                  {filteredSlashCommands.map((cmd, idx) => (
+                    <button
+                      key={cmd.command}
+                      type="button"
+                      className={cn(
+                        "w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors",
+                        idx === slashMenuIndex ? "bg-accent" : "hover:bg-muted/50"
+                      )}
+                      onClick={() => executeSlashCommand(cmd.command)}
+                      onMouseEnter={() => setSlashMenuIndex(idx)}
+                    >
+                      <div className="h-7 w-7 rounded-md bg-muted flex items-center justify-center flex-shrink-0">
+                        <cmd.icon className="h-3.5 w-3.5 text-muted-foreground" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <code className="text-xs font-mono text-primary">{cmd.command}</code>
+                          <span className="text-xs font-medium">{cmd.label}</span>
+                        </div>
+                        <p className="text-[10px] text-muted-foreground">{cmd.description}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Input area */}
             <div className="border-t bg-background px-4 py-3 flex-shrink-0">
+              {/* Quick actions bar */}
+              <div className="max-w-3xl mx-auto flex items-center gap-1.5 mb-2">
+                <button
+                  type="button"
+                  onClick={() => setPromptPanelOpen(!promptPanelOpen)}
+                  className={cn(
+                    "flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-medium transition-colors",
+                    promptPanelOpen
+                      ? "bg-primary/10 border-primary/30 text-primary"
+                      : "text-muted-foreground hover:text-foreground hover:border-primary/30"
+                  )}
+                >
+                  <Library className="h-3 w-3" />
+                  Prompts
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleInputChange("/")}
+                  className="flex items-center gap-1 rounded-full border px-2.5 py-1 text-[10px] font-medium text-muted-foreground hover:text-foreground hover:border-primary/30 transition-colors"
+                >
+                  <Slash className="h-3 w-3" />
+                  Commands
+                </button>
+              </div>
+
               <form
                 onSubmit={(e) => { e.preventDefault(); sendMessage(); }}
                 className="max-w-3xl mx-auto flex items-end gap-2"
@@ -646,9 +821,9 @@ export default function ChatPage() {
                 <Textarea
                   ref={inputRef}
                   value={chatInput}
-                  onChange={(e) => setChatInput(e.target.value)}
+                  onChange={(e) => handleInputChange(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Send a message... (Shift+Enter for new line)"
+                  placeholder="Type / for commands, or send a message..."
                   className="min-h-[44px] max-h-[200px] resize-none text-sm rounded-xl"
                   rows={1}
                   disabled={isLoading || noProviders}
@@ -672,6 +847,107 @@ export default function ChatPage() {
             </div>
           </>
         )}
+      </div>
+
+      {/* Prompt Library Panel (right sidebar) */}
+      <div className={cn(
+        "border-l bg-background flex flex-col transition-all duration-200 overflow-hidden",
+        promptPanelOpen ? "w-80" : "w-0"
+      )}>
+        <div className="p-3 border-b flex items-center justify-between flex-shrink-0">
+          <h3 className="text-sm font-semibold flex items-center gap-1.5">
+            <Library className="h-4 w-4" />
+            Prompt Library
+          </h3>
+          <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => setPromptPanelOpen(false)}>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+
+        {/* Search + filter */}
+        <div className="p-2 space-y-2 border-b flex-shrink-0">
+          <div className="relative">
+            <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Search prompts..."
+              value={promptSearch}
+              onChange={(e) => setPromptSearch(e.target.value)}
+              className="w-full h-8 rounded-md border bg-background pl-7 pr-2 text-xs outline-none focus:ring-1 focus:ring-primary"
+            />
+          </div>
+          <div className="flex gap-1">
+            {(["all", "favorites", "templates"] as const).map((f) => (
+              <button
+                key={f}
+                type="button"
+                onClick={() => setPromptFilter(f)}
+                className={cn(
+                  "flex-1 text-[10px] font-medium rounded-md px-2 py-1 transition-colors capitalize",
+                  promptFilter === f
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                )}
+              >
+                {f === "favorites" && <Star className="h-2.5 w-2.5 inline mr-0.5" />}
+                {f === "templates" && <Braces className="h-2.5 w-2.5 inline mr-0.5" />}
+                {f}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Prompt list */}
+        <ScrollArea className="flex-1">
+          <div className="p-2 space-y-1">
+            {filteredPrompts.length === 0 ? (
+              <p className="text-xs text-muted-foreground text-center py-8">
+                {promptSearch ? "No prompts match your search" : "No prompts available"}
+              </p>
+            ) : (
+              filteredPrompts.slice(0, 50).map((prompt) => (
+                <button
+                  key={prompt.id}
+                  type="button"
+                  className="w-full text-left rounded-lg border p-2.5 hover:bg-muted/50 hover:border-primary/30 transition-colors group"
+                  onClick={() => insertPrompt(prompt.content)}
+                >
+                  <div className="flex items-start justify-between gap-1">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-medium truncate flex items-center gap-1">
+                        {prompt.is_template && <Braces className="h-2.5 w-2.5 text-primary flex-shrink-0" />}
+                        {prompt.is_favorite && <Star className="h-2.5 w-2.5 text-amber-500 fill-amber-500 flex-shrink-0" />}
+                        {prompt.title}
+                      </p>
+                      {prompt.description && (
+                        <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-2">{prompt.description}</p>
+                      )}
+                    </div>
+                    <span className="text-[9px] text-muted-foreground flex-shrink-0 opacity-0 group-hover:opacity-100">
+                      Insert
+                    </span>
+                  </div>
+                  {prompt.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-1.5">
+                      {prompt.tags.slice(0, 3).map((tag) => (
+                        <span key={tag} className="text-[9px] bg-muted rounded px-1.5 py-0.5 text-muted-foreground">{tag}</span>
+                      ))}
+                    </div>
+                  )}
+                </button>
+              ))
+            )}
+          </div>
+        </ScrollArea>
+
+        <div className="p-2 border-t flex-shrink-0">
+          <Link href="/vault">
+            <Button variant="ghost" size="sm" className="w-full text-xs gap-1.5 text-muted-foreground">
+              <FileText className="h-3 w-3" />
+              Manage Prompts
+            </Button>
+          </Link>
+        </div>
       </div>
     </div>
   );

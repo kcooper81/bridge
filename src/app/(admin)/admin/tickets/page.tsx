@@ -1170,7 +1170,7 @@ export default function TicketsPage() {
 
     switch (quickFilter) {
       case "open":
-        result = result.filter((t) => (t.status === "new" || t.status === "in_progress") && !isSnoozed(t));
+        result = result.filter((t) => (t.status === "new" || t.status === "in_progress") && !isSnoozed(t) && t.direction !== "outbound");
         break;
       case "mine":
         result = result.filter((t) => t.assigned_to === userId && t.status !== "closed");
@@ -1218,8 +1218,8 @@ export default function TicketsPage() {
   const stats = useMemo(
     () => ({
       total: tickets.length,
-      new: tickets.filter((t) => t.status === "new").length,
-      open: tickets.filter((t) => t.status === "in_progress").length,
+      new: tickets.filter((t) => t.status === "new" && t.direction !== "outbound").length,
+      open: tickets.filter((t) => t.status === "in_progress" && t.direction !== "outbound").length,
       unread: tickets.filter((t) => !t.is_read).length,
       mine: tickets.filter((t) => t.assigned_to === userId && t.status !== "closed").length,
       starred: tickets.filter((t) => isStarred(t, userId)).length,

@@ -46,10 +46,10 @@ export async function POST(request: NextRequest) {
       message: message.trim(),
       html_body: is_html ? message.trim() : null,
       type: "email",
-      status: "in_progress",
+      status: "closed",
       priority: "normal",
       direction: "outbound",
-      assigned_to: auth.userId,
+      assigned_to: null,
       inbox_email,
       org_id: org_id || null,
     })

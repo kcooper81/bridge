@@ -1983,15 +1983,15 @@ export default function TicketsPage() {
     { key: "tickets", label: "Tickets", count: stats.tickets, icon: MessageSquare },
     { key: "emails", label: "Emails", count: stats.emails, icon: Mail },
     { key: "mine", label: "Mine", count: stats.mine },
-    { key: "starred", label: "Starred", count: stats.starred },
     { key: "unassigned", label: "Unassigned", count: stats.unassigned },
-    { key: "resolved", label: "Done", count: stats.resolved },
-    { key: "sent", label: "Sent", count: stats.sent },
+    { key: "starred", label: "Starred", count: 0 },
+    { key: "resolved", label: "Done", count: 0 },
+    { key: "sent", label: "Sent", count: 0 },
   ];
 
   const secondaryTabs: { key: QuickFilter | "folder:spam" | "folder:trash"; label: string; count: number; icon: React.ElementType }[] = [
     { key: "snoozed", label: "Snoozed", count: stats.snoozed, icon: AlarmClock },
-    { key: "all", label: "All", count: stats.total, icon: Inbox },
+    { key: "all", label: "All", count: 0, icon: Inbox },
     { key: "folder:spam", label: "Spam", count: 0, icon: ShieldBan },
     { key: "folder:trash", label: "Trash", count: 0, icon: Trash2 },
   ];

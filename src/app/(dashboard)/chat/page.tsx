@@ -257,28 +257,49 @@ export default function ChatPage() {
         }
       }
 
-      // Get conversation ID
-      const convId = res.headers.get("x-conversation-id");
-      if (convId && !activeConvId) {
-        setActiveConvId(convId);
-        loadConversations();
-      }
-
       // Stream the response
       const reader = res.body?.getReader();
       const decoder = new TextDecoder();
       const assistantId = (Date.now() + 1).toString();
       setMessages((prev) => [...prev, { id: assistantId, role: "assistant", content: "" }]);
 
+      let convIdParsed = false;
+
       if (reader) {
         try {
+          let buffer = "";
           while (true) {
             const { done, value } = await reader.read();
             if (done) break;
-            const chunk = decoder.decode(value, { stream: true });
-            setMessages((prev) =>
-              prev.map((m) => m.id === assistantId ? { ...m, content: m.content + chunk } : m)
-            );
+            let chunk = decoder.decode(value, { stream: true });
+
+            // Parse conversation ID from stream prefix
+            if (!convIdParsed) {
+              buffer += chunk;
+              const match = buffer.match(/^__CONV_ID__([a-f0-9-]+)__\n/);
+              if (match) {
+                if (!activeConvId) {
+                  setActiveConvId(match[1]);
+                  loadConversations();
+                }
+                convIdParsed = true;
+                chunk = buffer.slice(match[0].length);
+                buffer = "";
+              } else if (buffer.length > 200) {
+                // No prefix found, treat entire buffer as content
+                convIdParsed = true;
+                chunk = buffer;
+                buffer = "";
+              } else {
+                continue; // Wait for more data
+              }
+            }
+
+            if (chunk) {
+              setMessages((prev) =>
+                prev.map((m) => m.id === assistantId ? { ...m, content: m.content + chunk } : m)
+              );
+            }
           }
         } catch (err) {
           if ((err as Error).name === "AbortError") {

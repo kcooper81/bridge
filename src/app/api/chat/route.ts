@@ -251,14 +251,36 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    const response = result.toTextStreamResponse();
+    const textStream = result.toTextStreamResponse();
 
-    // Add conversation ID header so client knows which conversation this belongs to
+    // Wrap the stream to prepend conversation ID as first line
     if (convId) {
-      response.headers.set("x-conversation-id", convId);
+      const reader = textStream.body!.getReader();
+      const encoder = new TextEncoder();
+      const prefix = encoder.encode(`__CONV_ID__${convId}__\n`);
+      let prefixSent = false;
+
+      const wrappedStream = new ReadableStream({
+        async pull(controller) {
+          if (!prefixSent) {
+            controller.enqueue(prefix);
+            prefixSent = true;
+          }
+          const { done, value } = await reader.read();
+          if (done) {
+            controller.close();
+          } else {
+            controller.enqueue(value);
+          }
+        },
+      });
+
+      return new Response(wrappedStream, {
+        headers: { "Content-Type": "text/plain; charset=utf-8" },
+      });
     }
 
-    return response;
+    return textStream;
   } catch (error) {
     console.error("Chat error:", error);
     return new Response(JSON.stringify({ error: "Failed to process chat request" }), {

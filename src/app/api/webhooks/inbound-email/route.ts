@@ -268,6 +268,51 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // ── Auto-reply / bounce detection ──
+    // Check headers and subject for auto-reply indicators
+    const autoReplyHeaders = ["auto-submitted", "x-auto-response-suppress", "x-autorespond", "x-autoreply", "precedence"];
+    const isAutoReply = headers.some?.((h: { name: string; value: string }) => {
+      const name = h.name?.toLowerCase() || "";
+      const value = (h.value || "").toLowerCase();
+      if (autoReplyHeaders.includes(name)) return true;
+      if (name === "auto-submitted" && value !== "no") return true;
+      if (name === "precedence" && (value === "bulk" || value === "junk" || value === "auto_reply")) return true;
+      if (name === "x-auto-response-suppress" && value.includes("all")) return true;
+      return false;
+    });
+
+    const autoReplySubjectPatterns = [
+      /^(auto[- ]?reply|automatic reply|out of (the )?office|ooo)/i,
+      /^(undeliverable|delivery (status )?notification|failure notice)/i,
+      /^(returned mail|mail delivery (failed|subsystem))/i,
+      /^(vacation|away|on leave|on holiday)/i,
+      /^(auto[- ]?response|autoreply)/i,
+      /\b(mailer[- ]?daemon|postmaster)\b/i,
+    ];
+    const isAutoReplySubject = autoReplySubjectPatterns.some((re) => re.test(subject));
+    const isFromNoreply = /^(no-?reply|noreply|mailer-daemon|postmaster)@/i.test(senderEmail);
+
+    if (isAutoReply || isAutoReplySubject || isFromNoreply) {
+      console.log("Inbound email: auto-reply detected, auto-closing:", { from: senderEmail, subject });
+      // Still create the record for tracking, but auto-close it
+      const db = createServiceClient();
+      const { inboxEmail: autoInbox } = detectInbox(toAddresses, headers);
+      await db.from("feedback").insert({
+        type: "email",
+        subject: subject || "(Auto-reply)",
+        message: body || "(Auto-reply)",
+        html_body: html || null,
+        sender_email: senderEmail,
+        sender_name: senderName !== senderEmail ? senderName : null,
+        status: "closed",
+        priority: "low",
+        inbox_email: autoInbox,
+        direction: "inbound",
+        folder: "trash",
+      });
+      return NextResponse.json({ ok: true, action: "auto_reply_trashed" });
+    }
+
     const finalBody = body || "(No message body)";
     const db = createServiceClient();
 

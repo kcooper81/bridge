@@ -1,0 +1,50 @@
+import { NextRequest, NextResponse } from "next/server";
+import { createServiceClient } from "@/lib/supabase/server";
+
+/** GET — list user's conversations */
+export async function GET() {
+  const db = createServiceClient();
+  const { data: { user } } = await db.auth.getUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { data: profile } = await db
+    .from("profiles")
+    .select("org_id")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile?.org_id) return NextResponse.json({ conversations: [] });
+
+  const { data } = await db
+    .from("chat_conversations")
+    .select("id, title, model, provider, created_at, updated_at")
+    .eq("org_id", profile.org_id)
+    .eq("user_id", user.id)
+    .order("updated_at", { ascending: false })
+    .limit(50);
+
+  return NextResponse.json({ conversations: data || [] });
+}
+
+/** DELETE — delete a conversation */
+export async function DELETE(request: NextRequest) {
+  const db = createServiceClient();
+  const { data: { user } } = await db.auth.getUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { id } = await request.json();
+  if (!id) return NextResponse.json({ error: "id required" }, { status: 400 });
+
+  // Verify ownership
+  const { data: conv } = await db
+    .from("chat_conversations")
+    .select("id")
+    .eq("id", id)
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (!conv) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+  await db.from("chat_conversations").delete().eq("id", id);
+  return NextResponse.json({ success: true });
+}

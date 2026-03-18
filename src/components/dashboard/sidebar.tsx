@@ -18,6 +18,7 @@ import {
   HelpCircle,
   LayoutDashboard,
   Library,
+  MessageSquare,
   Shield,
   Users,
 } from "lucide-react";
@@ -37,6 +38,7 @@ const navSections: { title: string; items: NavItem[] }[] = [
   {
     title: "Workspace",
     items: [
+      { label: "AI Chat", href: "/chat", icon: MessageSquare },
       { label: "Prompts", href: "/vault", icon: Archive },
       { label: "Templates", href: "/templates", icon: Library },
       { label: "Approvals", href: "/approvals", icon: CheckSquare, roles: ["admin", "manager"] },

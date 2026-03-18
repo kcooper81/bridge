@@ -10,7 +10,7 @@ import { OrgProvider } from "@/components/providers/org-provider";
 import { SubscriptionProvider } from "@/components/providers/subscription-provider";
 import { ImpersonationProvider } from "@/hooks/use-impersonation";
 import { ImpersonationBanner } from "@/components/admin/impersonation-banner";
-import { Sidebar } from "@/components/dashboard/sidebar";
+import { Sidebar, SidebarProvider } from "@/components/dashboard/sidebar";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { ExtensionInstallBanner } from "@/components/dashboard/extension-install-banner";
 import { MfaRequiredBanner } from "@/app/(dashboard)/settings/_components/mfa-required-banner";
@@ -42,19 +42,21 @@ export default async function DashboardLayout({
         <SubscriptionProvider>
           <ImpersonationProvider>
             <NotificationsProvider>
-              <ImpersonationBanner />
-              <div className="flex min-h-dvh bg-background">
-                <Sidebar />
-                <div className="flex-1 flex flex-col overflow-hidden">
-                  <DashboardHeader />
-                  <main className="flex-1 overflow-y-auto scrollbar-thin p-4 md:p-6">
-                    <PaymentBanner />
-                    <ExtensionInstallBanner />
-                    <MfaRequiredBanner />
-                    {children}
-                  </main>
+              <SidebarProvider>
+                <ImpersonationBanner />
+                <div className="flex min-h-dvh bg-background">
+                  <Sidebar />
+                  <div className="flex-1 flex flex-col overflow-hidden">
+                    <DashboardHeader />
+                    <main className="flex-1 overflow-y-auto scrollbar-thin p-4 md:p-6">
+                      <PaymentBanner />
+                      <ExtensionInstallBanner />
+                      <MfaRequiredBanner />
+                      {children}
+                    </main>
+                  </div>
                 </div>
-              </div>
+              </SidebarProvider>
             </NotificationsProvider>
           </ImpersonationProvider>
         </SubscriptionProvider>

@@ -119,7 +119,9 @@ async function findExistingTicket(
     .replace(/\[Ticket#[a-f0-9-]+\]/gi, "")
     .trim();
 
-  if (cleanSubject.length > 3) {
+  // Only match by subject if it's specific enough (>10 chars) to avoid false positives
+  // Short subjects like "test", "hello", "hi" would match too many tickets
+  if (cleanSubject.length > 10) {
     // Escape PostgREST/SQL wildcards to prevent injection via subject line
     const safeSubject = cleanSubject.replace(/%/g, "\\%").replace(/_/g, "\\_");
     const { data } = await db

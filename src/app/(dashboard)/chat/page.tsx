@@ -437,19 +437,25 @@ export default function ChatPage() {
             </Select>
           )}
 
-          <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-            <Shield className="h-3 w-3 text-green-500" />
-            DLP active
-          </div>
-
           <div className="flex-1" />
 
-          <Link href="/settings/ai-providers">
-            <Button variant="ghost" size="sm" className="h-8 text-xs gap-1.5 text-muted-foreground">
-              <Settings className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">AI Providers</span>
-            </Button>
-          </Link>
+          {/* Status indicators */}
+          <div className="flex items-center gap-2">
+            <Link href="/guardrails" className="flex items-center gap-1.5 rounded-full border border-green-200 dark:border-green-800/50 bg-green-50/80 dark:bg-green-950/30 px-2.5 py-1 hover:bg-green-100/80 dark:hover:bg-green-950/50 transition-colors">
+              <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
+              <span className="text-[10px] font-medium text-green-700 dark:text-green-400">DLP Protected</span>
+            </Link>
+            <Link href="/vault" className="hidden sm:flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] text-muted-foreground hover:text-foreground hover:border-primary/30 transition-colors">
+              <MessageSquare className="h-3 w-3" />
+              Prompt Library
+            </Link>
+            <Link href="/settings/ai-providers">
+              <Button variant="ghost" size="sm" className="h-7 text-[10px] gap-1 text-muted-foreground px-2">
+                <Settings className="h-3 w-3" />
+                <span className="hidden sm:inline">Providers</span>
+              </Button>
+            </Link>
+          </div>
         </div>
 
         {/* Admin notice — chat not enabled for members */}

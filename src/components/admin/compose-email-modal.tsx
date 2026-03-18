@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
@@ -10,23 +10,31 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Loader2, Send } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Loader2, Send, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import RichEditor from "@/components/admin/rich-editor";
 import type { RichEditorRef } from "@/components/admin/rich-editor";
 
+interface Mailbox {
+  email: string;
+  display_name: string;
+  use_branded_template?: boolean;
+}
+
 interface ComposeEmailModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** Pre-filled recipient email */
   toEmail?: string;
-  /** Pre-filled recipient name */
   toName?: string;
-  /** Pre-filled subject line */
   subject?: string;
-  /** Organization ID to associate with the ticket */
   orgId?: string;
-  /** Callback after successful send */
   onSent?: (ticketId: string) => void;
 }
 
@@ -43,16 +51,37 @@ export function ComposeEmailModal({
   const [toName, setToName] = useState(initialName);
   const [subject, setSubject] = useState(initialSubject);
   const [sending, setSending] = useState(false);
+  const [mailboxes, setMailboxes] = useState<Mailbox[]>([]);
+  const [selectedInbox, setSelectedInbox] = useState("support@teamprompt.app");
+  const [plainEmail, setPlainEmail] = useState(false);
   const editorRef = useRef<RichEditorRef>(null);
 
-  // Sync state when props change (e.g. clicking a different row)
   useEffect(() => { setToEmail(initialEmail); }, [initialEmail]);
   useEffect(() => { setToName(initialName); }, [initialName]);
   useEffect(() => { setSubject(initialSubject); }, [initialSubject]);
 
-  const handleOpenChange = (open: boolean) => {
-    onOpenChange(open);
-  };
+  // Load mailboxes when modal opens
+  const loadMailboxes = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/mailboxes");
+      if (res.ok) {
+        const data = await res.json();
+        setMailboxes(data.mailboxes || []);
+      }
+    } catch { /* non-critical */ }
+  }, []);
+
+  useEffect(() => {
+    if (open) loadMailboxes();
+  }, [open, loadMailboxes]);
+
+  // When inbox changes, check if that mailbox has branded template off by default
+  useEffect(() => {
+    const mailbox = mailboxes.find((m) => m.email === selectedInbox);
+    if (mailbox && mailbox.use_branded_template === false) {
+      setPlainEmail(true);
+    }
+  }, [selectedInbox, mailboxes]);
 
   const handleSend = async () => {
     if (!toEmail.trim() || !subject.trim()) {
@@ -76,6 +105,8 @@ export function ComposeEmailModal({
           message: editorRef.current.getHTML(),
           is_html: true,
           org_id: orgId || undefined,
+          inbox_email: selectedInbox,
+          plain_email: plainEmail,
         }),
       });
 
@@ -87,7 +118,7 @@ export function ComposeEmailModal({
       const data = await res.json();
 
       if (data.email_sent) {
-        toast.success(`Email sent to ${toEmail}`);
+        toast.success(`Email sent from ${selectedInbox}`);
       } else {
         toast.success("Ticket created (email sending not configured)");
       }
@@ -103,16 +134,39 @@ export function ComposeEmailModal({
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-xl">
         <DialogHeader>
           <DialogTitle>Compose Email</DialogTitle>
           <DialogDescription>
-            This will send an email and create a ticket in your inbox for tracking.
+            Send an email and track the conversation in your inbox.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3 mt-2">
+          {/* From inbox selector */}
+          <div>
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">From</label>
+            <Select value={selectedInbox} onValueChange={setSelectedInbox}>
+              <SelectTrigger className="h-9 text-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {mailboxes.length > 0 ? (
+                  mailboxes.map((m) => (
+                    <SelectItem key={m.email} value={m.email}>
+                      {m.display_name} &lt;{m.email}&gt;
+                    </SelectItem>
+                  ))
+                ) : (
+                  <SelectItem value="support@teamprompt.app">
+                    TeamPrompt Support &lt;support@teamprompt.app&gt;
+                  </SelectItem>
+                )}
+              </SelectContent>
+            </Select>
+          </div>
+
           <div className="flex gap-2">
             <div className="flex-1">
               <label className="text-xs font-medium text-muted-foreground mb-1 block">To</label>
@@ -152,16 +206,30 @@ export function ComposeEmailModal({
         </div>
 
         <div className="flex items-center justify-between mt-4">
-          <p className="text-[11px] text-muted-foreground">
-            Logged as a ticket in your inbox
-          </p>
+          <div className="flex items-center gap-3">
+            <label className="flex items-center gap-1.5 cursor-pointer text-xs text-muted-foreground">
+              <input
+                type="checkbox"
+                className="rounded"
+                checked={!plainEmail}
+                onChange={(e) => setPlainEmail(!e.target.checked)}
+              />
+              <Sparkles className="h-3 w-3" />
+              Branded template
+            </label>
+            {plainEmail && (
+              <span className="text-[10px] text-muted-foreground">
+                Sends as a plain email — like Gmail
+              </span>
+            )}
+          </div>
           <Button onClick={handleSend} disabled={sending} className="gap-1.5">
             {sending ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
             ) : (
               <Send className="h-3.5 w-3.5" />
             )}
-            Send Email
+            Send
           </Button>
         </div>
       </DialogContent>

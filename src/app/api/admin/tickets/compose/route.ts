@@ -24,6 +24,7 @@ export async function POST(request: NextRequest) {
     is_html = false,
     org_id,
     inbox_email = "support@teamprompt.app",
+    plain_email = false,
   } = body;
 
   if (!to_email || !subject?.trim() || !message?.trim()) {
@@ -91,7 +92,7 @@ export async function POST(request: NextRequest) {
           senderLabel: label,
           senderEmail: inbox_email,
           signatureHtml: mailbox?.signature_html || undefined,
-          useBrandedTemplate: mailbox?.use_branded_template !== false,
+          useBrandedTemplate: plain_email ? false : mailbox?.use_branded_template !== false,
         }),
       });
 

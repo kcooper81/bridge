@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServiceClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 
 /** GET — fetch a conversation with all messages */
 export async function GET(
@@ -7,8 +7,9 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+  const auth = createClient();
+  const { data: { user } } = await auth.auth.getUser();
   const db = createServiceClient();
-  const { data: { user } } = await db.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { data: conv } = await db
@@ -38,8 +39,9 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+  const auth = createClient();
+  const { data: { user } } = await auth.auth.getUser();
   const db = createServiceClient();
-  const { data: { user } } = await db.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { title } = await request.json();

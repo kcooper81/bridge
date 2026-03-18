@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { createServiceClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { streamText } from "ai";
 import { createAIModel } from "@/lib/ai/providers";
 import { decrypt } from "@/lib/crypto";
@@ -11,10 +11,11 @@ import { notifyDlpViolation } from "@/lib/slack/notify";
  */
 export async function POST(request: NextRequest) {
   try {
+    const auth = createClient();
     const db = createServiceClient();
 
     // Auth via cookie session
-    const { data: { user }, error: authError } = await db.auth.getUser();
+    const { data: { user }, error: authError } = await auth.auth.getUser();
     if (authError || !user) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,

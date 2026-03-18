@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServiceClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 
 /** GET — list user's conversations */
 export async function GET() {
+  const auth = createClient();
+  const { data: { user } } = await auth.auth.getUser();
   const db = createServiceClient();
-  const { data: { user } } = await db.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { data: profile } = await db
@@ -28,8 +29,9 @@ export async function GET() {
 
 /** DELETE — delete a conversation */
 export async function DELETE(request: NextRequest) {
+  const auth = createClient();
+  const { data: { user } } = await auth.auth.getUser();
   const db = createServiceClient();
-  const { data: { user } } = await db.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id } = await request.json();

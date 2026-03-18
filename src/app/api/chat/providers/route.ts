@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServiceClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { encrypt } from "@/lib/crypto";
 import { PROVIDER_MODELS } from "@/lib/ai/providers";
 
 /** GET — list configured AI providers (never returns keys) */
 export async function GET() {
-  const db = createServiceClient();
-  const { data: { user } } = await db.auth.getUser();
+  const auth = createClient();
+  const { data: { user } } = await auth.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const db = createServiceClient();
 
   const { data: profile } = await db
     .from("profiles")
@@ -34,8 +35,9 @@ export async function GET() {
 
 /** POST — add or update a provider API key (admin only) */
 export async function POST(request: NextRequest) {
+  const auth = createClient();
+  const { data: { user } } = await auth.auth.getUser();
   const db = createServiceClient();
-  const { data: { user } } = await db.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { data: profile } = await db
@@ -92,8 +94,9 @@ export async function POST(request: NextRequest) {
 
 /** DELETE — remove a provider key (admin only) */
 export async function DELETE(request: NextRequest) {
+  const auth = createClient();
+  const { data: { user } } = await auth.auth.getUser();
   const db = createServiceClient();
-  const { data: { user } } = await db.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { data: profile } = await db

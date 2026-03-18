@@ -37,6 +37,7 @@ import {
   FileText,
   Download,
   Slash,
+  Pin,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -108,6 +109,7 @@ export default function ChatPage() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [promptPanelOpen, setPromptPanelOpen] = useState(false);
+  const [promptPanelPinned, setPromptPanelPinned] = useState(false);
   const [promptSearch, setPromptSearch] = useState("");
   const [promptFilter, setPromptFilter] = useState<"all" | "favorites" | "templates">("all");
   const [slashMenuOpen, setSlashMenuOpen] = useState(false);
@@ -116,6 +118,7 @@ export default function ChatPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const slashMenuRef = useRef<HTMLDivElement>(null);
 
   // Chat state
   const [messages, setMessages] = useState<ChatMsg[]>([]);
@@ -144,6 +147,8 @@ export default function ChatPage() {
 
     if (!messagesToSend) {
       setChatInput("");
+      // Reset textarea height
+      if (inputRef.current) inputRef.current.style.height = "auto";
       setMessages(allMessages);
     }
 
@@ -262,7 +267,7 @@ export default function ChatPage() {
   // Insert a prompt into the chat input
   function insertPrompt(content: string) {
     setChatInput((prev) => prev ? `${prev}\n\n${content}` : content);
-    setPromptPanelOpen(false);
+    if (!promptPanelPinned) setPromptPanelOpen(false);
     inputRef.current?.focus();
   }
 
@@ -342,6 +347,20 @@ export default function ChatPage() {
     loadConversations();
     loadProviders();
   }, [loadConversations, loadProviders]);
+
+  // Close slash menu on click outside
+  useEffect(() => {
+    if (!slashMenuOpen) return;
+    function handleClick(e: MouseEvent) {
+      if (slashMenuRef.current && !slashMenuRef.current.contains(e.target as Node) &&
+          inputRef.current && !inputRef.current.contains(e.target as Node)) {
+        setSlashMenuOpen(false);
+        setChatInput("");
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [slashMenuOpen]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -758,7 +777,7 @@ export default function ChatPage() {
 
             {/* Slash command menu */}
             {slashMenuOpen && filteredSlashCommands.length > 0 && (
-              <div className="mx-4 mb-1 max-w-3xl lg:mx-auto">
+              <div ref={slashMenuRef} className="mx-4 mb-1 max-w-3xl lg:mx-auto">
                 <div className="rounded-lg border bg-popover shadow-lg overflow-hidden">
                   {filteredSlashCommands.map((cmd, idx) => (
                     <button
@@ -821,10 +840,16 @@ export default function ChatPage() {
                 <Textarea
                   ref={inputRef}
                   value={chatInput}
-                  onChange={(e) => handleInputChange(e.target.value)}
+                  onChange={(e) => {
+                    handleInputChange(e.target.value);
+                    // Auto-resize textarea
+                    const el = e.target;
+                    el.style.height = "auto";
+                    el.style.height = `${Math.min(el.scrollHeight, 200)}px`;
+                  }}
                   onKeyDown={handleKeyDown}
                   placeholder="Type / for commands, or send a message..."
-                  className="min-h-[44px] max-h-[200px] resize-none text-sm rounded-xl"
+                  className="min-h-[44px] max-h-[200px] resize-none text-sm rounded-xl overflow-y-auto"
                   rows={1}
                   disabled={isLoading || noProviders}
                 />
@@ -859,9 +884,20 @@ export default function ChatPage() {
             <Library className="h-4 w-4" />
             Prompt Library
           </h3>
-          <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => setPromptPanelOpen(false)}>
-            <ChevronRight className="h-4 w-4" />
-          </Button>
+          <div className="flex items-center gap-0.5">
+            <Button
+              variant="ghost"
+              size="sm"
+              className={cn("h-6 w-6 p-0", promptPanelPinned && "text-primary")}
+              title={promptPanelPinned ? "Unpin panel" : "Pin panel open"}
+              onClick={() => setPromptPanelPinned(!promptPanelPinned)}
+            >
+              <Pin className={cn("h-3.5 w-3.5", promptPanelPinned && "fill-primary")} />
+            </Button>
+            <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => { setPromptPanelOpen(false); setPromptPanelPinned(false); }}>
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
 
         {/* Search + filter */}

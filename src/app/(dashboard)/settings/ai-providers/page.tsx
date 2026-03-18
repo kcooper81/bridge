@@ -14,9 +14,10 @@ import {
   DialogFooter,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Loader2, Key, Check, Trash2, Plus, Eye, EyeOff } from "lucide-react";
+import { Loader2, Key, Check, Trash2, Plus, Eye, EyeOff, Brain } from "lucide-react";
 import { toast } from "sonner";
 import { PROVIDER_MODELS } from "@/lib/ai/providers";
+import Link from "next/link";
 
 interface ConfiguredProvider {
   id: string;
@@ -273,6 +274,20 @@ export default function AIProvidersPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Link to AI-powered DLP detection */}
+      <Card className="p-4 flex items-center gap-3 bg-purple-50/50 dark:bg-purple-950/20 border-purple-200 dark:border-purple-800/50">
+        <div className="h-9 w-9 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center flex-shrink-0">
+          <Brain className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium">AI-Powered DLP Detection</p>
+          <p className="text-xs text-muted-foreground">Use AI models for advanced PII detection in your guardrail rules — detects names, addresses, medical info that patterns miss.</p>
+        </div>
+        <Link href="/guardrails">
+          <Button variant="outline" size="sm">Configure</Button>
+        </Link>
+      </Card>
     </div>
   );
 }

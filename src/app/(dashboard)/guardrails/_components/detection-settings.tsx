@@ -212,10 +212,11 @@ export function DetectionSettings({ orgId, canEdit, hasPremiumAccess }: Detectio
                     <SelectValue placeholder="Select a provider" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="openai">OpenAI (GPT-4o)</SelectItem>
+                    <SelectItem value="anthropic">Anthropic (Claude)</SelectItem>
+                    <SelectItem value="google">Google (Gemini)</SelectItem>
                     <SelectItem value="presidio">Microsoft Presidio (Self-hosted)</SelectItem>
                     <SelectItem value="aws_comprehend">AWS Comprehend</SelectItem>
-                    <SelectItem value="openai">OpenAI (GPT-4)</SelectItem>
-                    <SelectItem value="anthropic">Anthropic (Claude)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -239,17 +240,23 @@ export function DetectionSettings({ orgId, canEdit, hasPremiumAccess }: Detectio
                     </div>
                   )}
 
-                  {(settings.ai_detection_provider === "aws_comprehend" || settings.ai_detection_provider === "openai" || settings.ai_detection_provider === "anthropic") && (
+                  {(settings.ai_detection_provider === "aws_comprehend" || settings.ai_detection_provider === "openai" || settings.ai_detection_provider === "anthropic" || settings.ai_detection_provider === "google") && (
                     <div className="space-y-2">
                       <Label className="text-sm">
-                        {settings.ai_detection_provider === "aws_comprehend" ? "AWS Access Key" : settings.ai_detection_provider === "anthropic" ? "Anthropic API Key" : "OpenAI API Key"}
+                        {settings.ai_detection_provider === "aws_comprehend" ? "AWS Access Key"
+                          : settings.ai_detection_provider === "anthropic" ? "Anthropic API Key"
+                          : settings.ai_detection_provider === "google" ? "Google AI API Key"
+                          : "OpenAI API Key"}
                       </Label>
                       <div className="relative">
                         <Input
                           type={showApiKey ? "text" : "password"}
                           value={apiKeyDraft}
                           onChange={(e) => setApiKeyDraft(e.target.value)}
-                          placeholder={settings.ai_detection_provider === "aws_comprehend" ? "AKIA..." : settings.ai_detection_provider === "anthropic" ? "sk-ant-..." : "sk-..."}
+                          placeholder={settings.ai_detection_provider === "aws_comprehend" ? "AKIA..."
+                            : settings.ai_detection_provider === "anthropic" ? "sk-ant-..."
+                            : settings.ai_detection_provider === "google" ? "AIza..."
+                            : "sk-..."}
                           disabled={!canEdit}
                           className="pr-10"
                         />
@@ -266,6 +273,8 @@ export function DetectionSettings({ orgId, canEdit, hasPremiumAccess }: Detectio
                           ? "Your AWS access key for Comprehend. Secret key is stored encrypted."
                           : settings.ai_detection_provider === "anthropic"
                             ? "Your Anthropic API key. Stored encrypted and used for AI detection and rule generation."
+                          : settings.ai_detection_provider === "google"
+                            ? "Your Google AI API key from aistudio.google.com. Used for PII detection via Gemini."
                             : "Your OpenAI API key. Stored encrypted and only used for PII detection."}
                       </p>
                     </div>
@@ -322,6 +331,8 @@ export function DetectionSettings({ orgId, canEdit, hasPremiumAccess }: Detectio
                           ? "Create an IAM user with ComprehendFullAccess policy. Enter the access key above."
                           : settings.ai_detection_provider === "anthropic"
                             ? "Create an API key at console.anthropic.com. Claude models are used for detection and rule generation."
+                          : settings.ai_detection_provider === "google"
+                            ? "Create an API key at aistudio.google.com. Gemini models are used for PII detection."
                             : "Create an API key at platform.openai.com. Only gpt-4 class models are used for detection."}
                     </p>
                   </div>

@@ -35,6 +35,15 @@ interface SettingRow {
 
 const extensionAccessSettings: SettingRow[] = [
   {
+    key: "ai_chat_enabled",
+    label: "Enable AI Chat for Members",
+    description:
+      "Show the built-in AI Chat in the sidebar for all team members. When off, only admins can access AI Chat. Configure AI provider keys in Settings → AI Providers.",
+    defaultValue: false,
+    noticeWhenOn:
+      "AI Chat is visible to all members. Make sure you've configured at least one AI provider API key.",
+  },
+  {
     key: "require_signin_for_extension",
     label: "Require Sign-in for Extension",
     description:

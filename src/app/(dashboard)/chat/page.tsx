@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-// Chat uses direct fetch + streaming (not useChat hook — AI SDK v6 changed the API)
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -27,6 +26,10 @@ import {
   X,
   ChevronLeft,
   Settings,
+  Copy,
+  RefreshCw,
+  Square,
+  Shield,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -56,15 +59,10 @@ interface DlpViolation {
   severity: string;
 }
 
-function timeAgo(dateStr: string): string {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "now";
-  if (mins < 60) return `${mins}m`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h`;
-  const days = Math.floor(hrs / 24);
-  return `${days}d`;
+interface ChatMsg {
+  id: string;
+  role: string;
+  content: string;
 }
 
 export default function ChatPage() {
@@ -78,8 +76,16 @@ export default function ChatPage() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [editingTitle, setEditingTitle] = useState<string | null>(null);
   const [editTitleValue, setEditTitleValue] = useState("");
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  // Chat state
+  const [messages, setMessages] = useState<ChatMsg[]>([]);
+  const [chatInput, setChatInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   // Available models from configured providers
   const availableModels = providers
@@ -91,46 +97,51 @@ export default function ChatPage() {
       return models.map((m) => ({ provider: p.provider, providerLabel: p.label, model: m.id, modelLabel: m.label }));
     });
 
-  const [chatMessages, setChatMessages] = useState<Array<{ id: string; role: string; content: string }>>([]);
-  const [chatInput, setChatInput] = useState("");
-  const [chatLoading, setChatLoading] = useState(false);
+  // Stream a message to the AI
+  async function sendMessage(messagesToSend?: ChatMsg[]) {
+    const input = chatInput.trim();
+    if (!input && !messagesToSend) return;
+    if (isLoading) return;
 
-  // Simple streaming chat implementation
-  async function sendMessage() {
-    if (!chatInput.trim() || chatLoading) return;
-    const userMessage = chatInput.trim();
-    setChatInput("");
     setDlpBlock(null);
+    const userMsg: ChatMsg = { id: Date.now().toString(), role: "user", content: input };
+    const allMessages = messagesToSend || [...messages, userMsg];
 
-    const newMessages = [...chatMessages, { id: Date.now().toString(), role: "user", content: userMessage }];
-    setChatMessages(newMessages);
-    setChatLoading(true);
+    if (!messagesToSend) {
+      setChatInput("");
+      setMessages(allMessages);
+    }
+
+    setIsLoading(true);
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
 
     try {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          messages: newMessages.map((m) => ({ role: m.role, content: m.content })),
+          messages: allMessages.map((m) => ({ role: m.role, content: m.content })),
           model: selectedModel,
           provider: selectedProvider,
           conversationId: activeConvId,
         }),
+        signal: controller.signal,
       });
 
-      // Check for DLP block
+      // Check for DLP block or error
       const contentType = res.headers.get("content-type");
       if (contentType?.includes("application/json")) {
         const data = await res.json();
         if (data.blocked) {
           setDlpBlock(data.violations || []);
-          setChatMessages((prev) => prev.slice(0, -1));
-          setChatLoading(false);
+          if (!messagesToSend) setMessages((prev) => prev.slice(0, -1));
+          setIsLoading(false);
           return;
         }
         if (data.error) {
           toast.error(data.error);
-          setChatLoading(false);
+          setIsLoading(false);
           return;
         }
       }
@@ -146,27 +157,61 @@ export default function ChatPage() {
       const reader = res.body?.getReader();
       const decoder = new TextDecoder();
       const assistantId = (Date.now() + 1).toString();
-      setChatMessages((prev) => [...prev, { id: assistantId, role: "assistant", content: "" }]);
+      setMessages((prev) => [...prev, { id: assistantId, role: "assistant", content: "" }]);
 
       if (reader) {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          const chunk = decoder.decode(value, { stream: true });
-          setChatMessages((prev) =>
-            prev.map((m) => m.id === assistantId ? { ...m, content: m.content + chunk } : m)
-          );
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            const chunk = decoder.decode(value, { stream: true });
+            setMessages((prev) =>
+              prev.map((m) => m.id === assistantId ? { ...m, content: m.content + chunk } : m)
+            );
+          }
+        } catch (err) {
+          if ((err as Error).name === "AbortError") {
+            // User stopped generation — keep partial response
+          } else {
+            throw err;
+          }
         }
       }
+
+      // Refresh conversation list to show updated title
+      loadConversations();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to send message");
+      if ((err as Error).name !== "AbortError") {
+        toast.error(err instanceof Error ? err.message : "Failed to send message");
+      }
     } finally {
-      setChatLoading(false);
+      setIsLoading(false);
+      abortControllerRef.current = null;
     }
   }
 
-  const messages = chatMessages;
-  const isLoading = chatLoading;
+  // Stop generation
+  function stopGeneration() {
+    abortControllerRef.current?.abort();
+  }
+
+  // Regenerate last assistant response
+  function regenerateLastResponse() {
+    // Remove last assistant message and resend
+    const lastAssistantIdx = [...messages].reverse().findIndex((m) => m.role === "assistant");
+    if (lastAssistantIdx === -1) return;
+    const idx = messages.length - 1 - lastAssistantIdx;
+    const messagesWithoutLast = messages.slice(0, idx);
+    setMessages(messagesWithoutLast);
+    sendMessage(messagesWithoutLast);
+  }
+
+  // Copy message content
+  function copyMessage(content: string, id: string) {
+    navigator.clipboard.writeText(content);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  }
 
   const loadConversations = useCallback(async () => {
     try {
@@ -183,7 +228,6 @@ export default function ChatPage() {
       const res = await fetch("/api/chat/providers");
       const data = await res.json();
       setProviders(data.providers || []);
-      // Set default model
       if (data.providers?.length > 0 && !selectedModel) {
         const first = data.providers[0];
         const models = first.model_whitelist.length > 0
@@ -203,12 +247,10 @@ export default function ChatPage() {
     loadProviders();
   }, [loadConversations, loadProviders]);
 
-  // Auto-scroll to bottom on new messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Focus input on load and conversation switch
   useEffect(() => {
     inputRef.current?.focus();
   }, [activeConvId]);
@@ -220,10 +262,8 @@ export default function ChatPage() {
       const res = await fetch(`/api/chat/conversations/${convId}`);
       const data = await res.json();
       if (data.messages) {
-        setChatMessages(data.messages.map((m: { id: string; role: string; content: string }) => ({
-          id: m.id,
-          role: m.role as "user" | "assistant",
-          content: m.content,
+        setMessages(data.messages.map((m: { id: string; role: string; content: string }) => ({
+          id: m.id, role: m.role, content: m.content,
         })));
       }
       if (data.conversation) {
@@ -237,7 +277,7 @@ export default function ChatPage() {
 
   function startNewChat() {
     setActiveConvId(null);
-    setChatMessages([]);
+    setMessages([]);
     setDlpBlock(null);
     setChatInput("");
     inputRef.current?.focus();
@@ -280,6 +320,14 @@ export default function ChatPage() {
 
   const noProviders = providers.length === 0 && !loadingConvs;
 
+  // Filter conversations by search
+  const filteredConversations = searchQuery
+    ? conversations.filter((c) => c.title.toLowerCase().includes(searchQuery.toLowerCase()))
+    : conversations;
+
+  // Check if last message is from assistant (for regenerate button)
+  const lastIsAssistant = messages.length > 0 && messages[messages.length - 1].role === "assistant";
+
   return (
     <div className="flex h-[calc(100vh-64px)] overflow-hidden -m-4 md:-m-6">
       {/* Sidebar */}
@@ -287,22 +335,25 @@ export default function ChatPage() {
         "border-r bg-muted/30 flex flex-col transition-all duration-200",
         sidebarOpen ? "w-64" : "w-0 overflow-hidden"
       )}>
-        {/* New chat button */}
-        <div className="p-3 border-b">
-          <Button
-            variant="outline"
-            className="w-full justify-start gap-2 text-sm"
-            onClick={startNewChat}
-          >
+        <div className="p-3 space-y-2 border-b">
+          <Button variant="outline" className="w-full justify-start gap-2 text-sm" onClick={startNewChat}>
             <Plus className="h-4 w-4" />
             New Chat
           </Button>
+          {conversations.length > 5 && (
+            <input
+              type="text"
+              placeholder="Search conversations..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full h-7 rounded-md border bg-background px-2 text-xs outline-none focus:ring-1 focus:ring-primary"
+            />
+          )}
         </div>
 
-        {/* Conversation list */}
         <ScrollArea className="flex-1">
           <div className="p-2 space-y-0.5">
-            {conversations.map((conv) => (
+            {filteredConversations.map((conv) => (
               <div
                 key={conv.id}
                 className={cn(
@@ -330,18 +381,11 @@ export default function ChatPage() {
                 ) : (
                   <>
                     <span className="flex-1 truncate text-xs">{conv.title}</span>
-                    <span className="text-[10px] text-muted-foreground flex-shrink-0 opacity-0 group-hover:opacity-100">{timeAgo(conv.updated_at)}</span>
                     <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 flex items-center gap-0.5">
-                      <button
-                        className="p-0.5 hover:text-foreground"
-                        onClick={(e) => { e.stopPropagation(); setEditingTitle(conv.id); setEditTitleValue(conv.title); }}
-                      >
+                      <button className="p-0.5 hover:text-foreground" title="Rename" onClick={(e) => { e.stopPropagation(); setEditingTitle(conv.id); setEditTitleValue(conv.title); }}>
                         <Pencil className="h-3 w-3" />
                       </button>
-                      <button
-                        className="p-0.5 hover:text-destructive"
-                        onClick={(e) => { e.stopPropagation(); deleteConversation(conv.id); }}
-                      >
+                      <button className="p-0.5 hover:text-destructive" title="Delete" onClick={(e) => { e.stopPropagation(); deleteConversation(conv.id); }}>
                         <Trash2 className="h-3 w-3" />
                       </button>
                     </div>
@@ -360,12 +404,7 @@ export default function ChatPage() {
       <div className="flex-1 flex flex-col min-w-0">
         {/* Header */}
         <div className="flex items-center gap-2 px-4 py-2 border-b bg-background flex-shrink-0">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 w-8 p-0 lg:hidden"
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-          >
+          <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setSidebarOpen(!sidebarOpen)}>
             <ChevronLeft className={cn("h-4 w-4 transition-transform", !sidebarOpen && "rotate-180")} />
           </Button>
 
@@ -373,12 +412,12 @@ export default function ChatPage() {
             <Select
               value={`${selectedProvider}:${selectedModel}`}
               onValueChange={(val) => {
-                const [prov, mod] = val.split(":");
+                const [prov, ...rest] = val.split(":");
                 setSelectedProvider(prov);
-                setSelectedModel(mod);
+                setSelectedModel(rest.join(":"));
               }}
             >
-              <SelectTrigger className="w-[220px] h-8 text-xs">
+              <SelectTrigger className="w-[240px] h-8 text-xs">
                 <SelectValue placeholder="Select model" />
               </SelectTrigger>
               <SelectContent>
@@ -392,9 +431,14 @@ export default function ChatPage() {
             </Select>
           )}
 
+          <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+            <Shield className="h-3 w-3 text-green-500" />
+            DLP active
+          </div>
+
           <div className="flex-1" />
 
-          <Link href="/settings/integrations">
+          <Link href="/settings/ai-providers">
             <Button variant="ghost" size="sm" className="h-8 text-xs gap-1.5 text-muted-foreground">
               <Settings className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">AI Providers</span>
@@ -411,7 +455,7 @@ export default function ChatPage() {
               <p className="text-sm text-muted-foreground mb-6">
                 Add your OpenAI, Anthropic, or Google API key to start chatting. Your messages are protected by your workspace&apos;s DLP rules.
               </p>
-              <Link href="/settings/integrations">
+              <Link href="/settings/ai-providers">
                 <Button>
                   <Settings className="h-4 w-4 mr-2" />
                   Configure AI Providers
@@ -428,35 +472,72 @@ export default function ChatPage() {
                   <div className="text-center py-20">
                     <Bot className="h-10 w-10 text-muted-foreground/40 mx-auto mb-4" />
                     <h2 className="text-lg font-semibold text-muted-foreground">TeamPrompt Chat</h2>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Send a message to start. DLP scanning is active.
+                    <p className="text-sm text-muted-foreground mt-1 mb-6">
+                      Your messages are scanned by DLP rules before reaching the AI.
                     </p>
+                    <div className="flex flex-wrap items-center justify-center gap-2">
+                      {[
+                        "Write a project status update",
+                        "Review this code for bugs",
+                        "Draft a customer email",
+                        "Explain this error message",
+                      ].map((suggestion) => (
+                        <button
+                          key={suggestion}
+                          className="text-xs border rounded-full px-3 py-1.5 text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
+                          onClick={() => { setChatInput(suggestion); inputRef.current?.focus(); }}
+                        >
+                          {suggestion}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 )}
 
-                {messages.map((message: { id: string; role: string; content: string }) => (
+                {messages.map((message, idx) => (
                   <div
                     key={message.id}
-                    className={cn("flex gap-3 mb-6", message.role === "user" ? "justify-end" : "")}
+                    className={cn("group flex gap-3 mb-6", message.role === "user" ? "justify-end" : "")}
                   >
                     {message.role === "assistant" && (
                       <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-1">
                         <Bot className="h-4 w-4 text-primary" />
                       </div>
                     )}
-                    <div className={cn(
-                      "rounded-2xl px-4 py-3 max-w-[85%] text-sm leading-relaxed",
-                      message.role === "user"
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted"
-                    )}>
-                      {message.role === "assistant" ? (
-                        <div className="prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
-                          <ReactMarkdown>{message.content}</ReactMarkdown>
-                        </div>
-                      ) : (
-                        <p className="whitespace-pre-wrap">{message.content}</p>
-                      )}
+                    <div className="max-w-[85%] min-w-0">
+                      <div className={cn(
+                        "rounded-2xl px-4 py-3 text-sm leading-relaxed",
+                        message.role === "user"
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted"
+                      )}>
+                        {message.role === "assistant" ? (
+                          <div className="prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_pre]:bg-zinc-900 [&_pre]:text-zinc-100 [&_pre]:rounded-lg [&_pre]:p-3 [&_pre]:text-xs [&_pre]:overflow-x-auto [&_code]:text-xs [&_code]:bg-muted [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_pre_code]:bg-transparent [&_pre_code]:p-0">
+                            <ReactMarkdown>{message.content}</ReactMarkdown>
+                          </div>
+                        ) : (
+                          <p className="whitespace-pre-wrap">{message.content}</p>
+                        )}
+                      </div>
+                      {/* Message actions */}
+                      <div className="flex items-center gap-1 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                          title="Copy"
+                          onClick={() => copyMessage(message.content, message.id)}
+                        >
+                          {copiedId === message.id ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
+                        </button>
+                        {message.role === "assistant" && idx === messages.length - 1 && !isLoading && (
+                          <button
+                            className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                            title="Regenerate"
+                            onClick={regenerateLastResponse}
+                          >
+                            <RefreshCw className="h-3 w-3" />
+                          </button>
+                        )}
+                      </div>
                     </div>
                     {message.role === "user" && (
                       <div className="h-7 w-7 rounded-full bg-foreground/10 flex items-center justify-center flex-shrink-0 mt-1">
@@ -472,7 +553,11 @@ export default function ChatPage() {
                       <Bot className="h-4 w-4 text-primary" />
                     </div>
                     <div className="bg-muted rounded-2xl px-4 py-3">
-                      <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                      <div className="flex items-center gap-1.5">
+                        <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground/40 animate-bounce [animation-delay:0ms]" />
+                        <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground/40 animate-bounce [animation-delay:150ms]" />
+                        <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground/40 animate-bounce [animation-delay:300ms]" />
+                      </div>
                     </div>
                   </div>
                 )}
@@ -480,6 +565,23 @@ export default function ChatPage() {
                 <div ref={messagesEndRef} />
               </div>
             </ScrollArea>
+
+            {/* Stop / Regenerate bar */}
+            {(isLoading || lastIsAssistant) && (
+              <div className="flex items-center justify-center py-2">
+                {isLoading ? (
+                  <Button variant="outline" size="sm" className="text-xs gap-1.5 rounded-full" onClick={stopGeneration}>
+                    <Square className="h-3 w-3" />
+                    Stop generating
+                  </Button>
+                ) : lastIsAssistant ? (
+                  <Button variant="outline" size="sm" className="text-xs gap-1.5 rounded-full" onClick={regenerateLastResponse}>
+                    <RefreshCw className="h-3 w-3" />
+                    Regenerate response
+                  </Button>
+                ) : null}
+              </div>
+            )}
 
             {/* DLP Block Banner */}
             {dlpBlock && (
@@ -513,7 +615,7 @@ export default function ChatPage() {
                   value={chatInput}
                   onChange={(e) => setChatInput(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Send a message..."
+                  placeholder="Send a message... (Shift+Enter for new line)"
                   className="min-h-[44px] max-h-[200px] resize-none text-sm rounded-xl"
                   rows={1}
                   disabled={isLoading || noProviders}
@@ -532,7 +634,7 @@ export default function ChatPage() {
                 </Button>
               </form>
               <p className="text-center text-[10px] text-muted-foreground mt-2 max-w-3xl mx-auto">
-                Protected by your workspace&apos;s DLP rules. Messages are scanned before reaching the AI provider.
+                Messages are scanned by your workspace&apos;s DLP rules before reaching the AI provider. Your API key, your data.
               </p>
             </div>
           </>

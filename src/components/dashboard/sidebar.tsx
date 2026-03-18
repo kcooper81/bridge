@@ -38,7 +38,7 @@ const navSections: { title: string; items: NavItem[] }[] = [
   {
     title: "Workspace",
     items: [
-      { label: "AI Chat", href: "/chat", icon: MessageSquare },
+      { label: "AI Chat", href: "/chat", icon: MessageSquare, roles: ["__ai_chat__"] }, // special: shown based on org setting
       { label: "Prompts", href: "/vault", icon: Archive },
       { label: "Templates", href: "/templates", icon: Library },
       { label: "Approvals", href: "/approvals", icon: CheckSquare, roles: ["admin", "manager"] },
@@ -58,7 +58,7 @@ const navSections: { title: string; items: NavItem[] }[] = [
 
 function NavContent({ onItemClick }: { onItemClick?: () => void }) {
   const pathname = usePathname();
-  const { currentUserRole, prompts, members, loading: orgLoading } = useOrg();
+  const { currentUserRole, org, prompts, members, loading: orgLoading } = useOrg();
   const { theme } = useTheme();
   const [supportOpen, setSupportOpen] = useState(false);
   const [supportTab, setSupportTab] = useState<"help" | "whats-new" | "contact">("help");
@@ -101,10 +101,17 @@ function NavContent({ onItemClick }: { onItemClick?: () => void }) {
         </div>
 
         {navSections.map((section) => {
-          const visibleItems = section.items.filter(
-            (item) =>
-              !item.roles || orgLoading || item.roles.includes(currentUserRole)
-          );
+          const orgSettings = (org?.settings || {}) as Record<string, unknown>;
+          const isAdmin = currentUserRole === "admin";
+          const aiChatEnabled = orgSettings.ai_chat_enabled === true;
+
+          const visibleItems = section.items.filter((item) => {
+            // AI Chat: visible to admins always, members only if toggled on
+            if (item.roles?.includes("__ai_chat__")) {
+              return isAdmin || aiChatEnabled;
+            }
+            return !item.roles || orgLoading || item.roles.includes(currentUserRole);
+          });
           if (visibleItems.length === 0) return null;
 
           return (

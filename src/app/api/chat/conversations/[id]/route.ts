@@ -44,11 +44,14 @@ export async function PATCH(
   const db = createServiceClient();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { title } = await request.json();
+  const body = await request.json();
+  const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };
+  if (body.title !== undefined) updates.title = body.title?.trim() || "Untitled";
+  if (body.pinned !== undefined) updates.pinned = body.pinned;
 
   const { error } = await db
     .from("chat_conversations")
-    .update({ title: title?.trim() || "Untitled", updated_at: new Date().toISOString() })
+    .update(updates)
     .eq("id", id)
     .eq("user_id", user.id);
 

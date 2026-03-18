@@ -18,7 +18,7 @@ export async function GET() {
 
   const { data } = await db
     .from("chat_conversations")
-    .select("id, title, model, provider, created_at, updated_at")
+    .select("id, title, model, provider, pinned, created_at, updated_at")
     .eq("org_id", profile.org_id)
     .eq("user_id", user.id)
     .order("updated_at", { ascending: false })

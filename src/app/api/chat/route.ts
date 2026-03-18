@@ -197,12 +197,30 @@ export async function POST(request: NextRequest) {
     // Stream AI response
     const aiModel = createAIModel(provider || "openai", selectedModel, apiKey);
 
-    const result = streamText({
-      model: aiModel,
-      messages: messages.map((m: { role: string; content: string }) => ({
+    // Build messages with multimodal support
+    const aiMessages = messages.map((m: { role: string; content: string; images?: string[] }) => {
+      if (m.images?.length && m.role === "user") {
+        // Multimodal message with images
+        return {
+          role: m.role as "user",
+          content: [
+            ...m.images.map((img: string) => ({
+              type: "image" as const,
+              image: img,
+            })),
+            { type: "text" as const, text: m.content || "What's in this image?" },
+          ],
+        };
+      }
+      return {
         role: m.role as "user" | "assistant" | "system",
         content: m.content,
-      })),
+      };
+    });
+
+    const result = streamText({
+      model: aiModel,
+      messages: aiMessages,
       onFinish: async ({ text, usage }) => {
         // Save assistant message
         if (convId) {

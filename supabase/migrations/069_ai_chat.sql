@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS chat_conversations (
   title TEXT DEFAULT 'New conversation',
   model TEXT NOT NULL,
   provider TEXT NOT NULL,
+  pinned BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );

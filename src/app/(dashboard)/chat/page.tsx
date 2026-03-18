@@ -39,6 +39,7 @@ import {
   Slash,
   Pin,
   BarChart3,
+  Paperclip,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -47,12 +48,27 @@ import ReactMarkdown from "react-markdown";
 import { useOrg } from "@/components/providers/org-provider";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
+function ConvSection({ label, icon, children }: { label: string; icon?: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <div className="mb-2">
+      <div className="flex items-center gap-1.5 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-wider text-muted-foreground/60">
+        {icon}
+        {label}
+      </div>
+      <div className="space-y-0.5">{children}</div>
+    </div>
+  );
+}
+
 interface Conversation {
   id: string;
   title: string;
   model: string;
   provider: string;
   updated_at: string;
+  pinned?: boolean;
+  message_count?: number;
+  last_message_preview?: string;
 }
 
 interface ProviderConfig {
@@ -74,6 +90,7 @@ interface ChatMsg {
   id: string;
   role: string;
   content: string;
+  images?: string[]; // base64 data URLs
 }
 
 // Slash command definitions
@@ -128,10 +145,12 @@ export default function ChatPage() {
   const [slashMenuOpen, setSlashMenuOpen] = useState(false);
   const [slashMenuIndex, setSlashMenuIndex] = useState(0);
   const [slashFilter, setSlashFilter] = useState("");
+  const [pendingImages, setPendingImages] = useState<string[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const slashMenuRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Chat state
   const [messages, setMessages] = useState<ChatMsg[]>([]);
@@ -148,18 +167,53 @@ export default function ChatPage() {
       return models.map((m) => ({ provider: p.provider, providerLabel: p.label, model: m.id, modelLabel: m.label }));
     });
 
+  // Handle file selection
+  function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = e.target.files;
+    if (!files) return;
+
+    Array.from(files).forEach((file) => {
+      if (!file.type.startsWith("image/")) {
+        toast.error(`${file.name} is not an image`);
+        return;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error(`${file.name} is too large (max 10MB)`);
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        setPendingImages((prev) => [...prev, reader.result as string]);
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // Reset input so same file can be re-selected
+    e.target.value = "";
+  }
+
+  function removePendingImage(index: number) {
+    setPendingImages((prev) => prev.filter((_, i) => i !== index));
+  }
+
   // Stream a message to the AI
   async function sendMessage(messagesToSend?: ChatMsg[]) {
     const input = chatInput.trim();
-    if (!input && !messagesToSend) return;
+    if (!input && !messagesToSend && pendingImages.length === 0) return;
     if (isLoading) return;
 
     setDlpBlock(null);
-    const userMsg: ChatMsg = { id: Date.now().toString(), role: "user", content: input };
+    const userMsg: ChatMsg = {
+      id: Date.now().toString(),
+      role: "user",
+      content: input || (pendingImages.length > 0 ? "What's in this image?" : ""),
+      images: pendingImages.length > 0 ? [...pendingImages] : undefined,
+    };
     const allMessages = messagesToSend || [...messages, userMsg];
 
     if (!messagesToSend) {
       setChatInput("");
+      setPendingImages([]);
       // Reset textarea height
       if (inputRef.current) inputRef.current.style.height = "auto";
       setMessages(allMessages);
@@ -174,7 +228,11 @@ export default function ChatPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          messages: allMessages.map((m) => ({ role: m.role, content: m.content })),
+          messages: allMessages.map((m) => ({
+            role: m.role,
+            content: m.content,
+            ...(m.images?.length ? { images: m.images } : {}),
+          })),
           model: selectedModel,
           provider: selectedProvider,
           conversationId: activeConvId,
@@ -507,13 +565,86 @@ export default function ChatPage() {
 
   const noProviders = providers.length === 0 && !loadingConvs;
 
-  // Filter conversations by search
+  // Filter and group conversations
   const filteredConversations = searchQuery
     ? conversations.filter((c) => c.title.toLowerCase().includes(searchQuery.toLowerCase()))
     : conversations;
 
+  const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const weekStart = todayStart - 7 * 24 * 60 * 60 * 1000;
+
+  const pinnedConvs = filteredConversations.filter((c) => c.pinned);
+  const unpinnedConvs = filteredConversations.filter((c) => !c.pinned);
+  const todayConvs = unpinnedConvs.filter((c) => new Date(c.updated_at).getTime() >= todayStart);
+  const weekConvs = unpinnedConvs.filter((c) => {
+    const t = new Date(c.updated_at).getTime();
+    return t >= weekStart && t < todayStart;
+  });
+  const olderConvs = unpinnedConvs.filter((c) => new Date(c.updated_at).getTime() < weekStart);
+
+  function togglePin(convId: string) {
+    const conv = conversations.find((c) => c.id === convId);
+    if (!conv) return;
+    const newPinned = !conv.pinned;
+    setConversations((prev) => prev.map((c) => c.id === convId ? { ...c, pinned: newPinned } : c));
+    // Persist to server
+    fetch(`/api/chat/conversations/${convId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pinned: newPinned }),
+    }).catch(() => {});
+  }
+
   // Check if last message is from assistant (for regenerate button)
   const lastIsAssistant = messages.length > 0 && messages[messages.length - 1].role === "assistant";
+
+  function renderConvItem(conv: Conversation) {
+    return (
+      <div
+        key={conv.id}
+        className={cn(
+          "group flex items-start gap-2 rounded-lg px-2.5 py-2 cursor-pointer transition-colors",
+          activeConvId === conv.id
+            ? "bg-primary/10 text-foreground"
+            : "text-muted-foreground hover:bg-muted hover:text-foreground"
+        )}
+        onClick={() => loadConversation(conv.id)}
+      >
+        <MessageSquare className="h-3.5 w-3.5 flex-shrink-0 mt-0.5" />
+        {editingTitle === conv.id ? (
+          <div className="flex-1 flex items-center gap-1">
+            <input
+              className="flex-1 bg-transparent text-xs border-b border-primary outline-none"
+              value={editTitleValue}
+              onChange={(e) => setEditTitleValue(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") renameConversation(conv.id, editTitleValue); if (e.key === "Escape") setEditingTitle(null); }}
+              autoFocus
+              onClick={(e) => e.stopPropagation()}
+            />
+            <button onClick={(e) => { e.stopPropagation(); renameConversation(conv.id, editTitleValue); }}><Check className="h-3 w-3" /></button>
+            <button onClick={(e) => { e.stopPropagation(); setEditingTitle(null); }}><X className="h-3 w-3" /></button>
+          </div>
+        ) : (
+          <div className="flex-1 min-w-0">
+            <span className="truncate text-xs block font-medium">{conv.title}</span>
+            <span className="text-[10px] text-muted-foreground">{conv.model?.split("-").slice(0, 2).join("-")}</span>
+          </div>
+        )}
+        <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 flex items-center gap-0.5 mt-0.5">
+          <button className="p-0.5 hover:text-amber-500" title={conv.pinned ? "Unpin" : "Pin"} onClick={(e) => { e.stopPropagation(); togglePin(conv.id); }}>
+            <Pin className={cn("h-3 w-3", conv.pinned && "fill-amber-500 text-amber-500")} />
+          </button>
+          <button className="p-0.5 hover:text-foreground" title="Rename" onClick={(e) => { e.stopPropagation(); setEditingTitle(conv.id); setEditTitleValue(conv.title); }}>
+            <Pencil className="h-3 w-3" />
+          </button>
+          <button className="p-0.5 hover:text-destructive" title="Delete" onClick={(e) => { e.stopPropagation(); deleteConversation(conv.id); }}>
+            <Trash2 className="h-3 w-3" />
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-[calc(100vh-64px)] overflow-hidden -m-4 md:-m-6">
@@ -539,49 +670,33 @@ export default function ChatPage() {
         </div>
 
         <ScrollArea className="flex-1">
-          <div className="p-2 space-y-0.5">
-            {filteredConversations.map((conv) => (
-              <div
-                key={conv.id}
-                className={cn(
-                  "group flex items-center gap-2 rounded-lg px-3 py-2 text-sm cursor-pointer transition-colors",
-                  activeConvId === conv.id
-                    ? "bg-primary/10 text-foreground"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                )}
-                onClick={() => loadConversation(conv.id)}
-              >
-                <MessageSquare className="h-3.5 w-3.5 flex-shrink-0" />
-                {editingTitle === conv.id ? (
-                  <div className="flex-1 flex items-center gap-1">
-                    <input
-                      className="flex-1 bg-transparent text-xs border-b border-primary outline-none"
-                      value={editTitleValue}
-                      onChange={(e) => setEditTitleValue(e.target.value)}
-                      onKeyDown={(e) => { if (e.key === "Enter") renameConversation(conv.id, editTitleValue); if (e.key === "Escape") setEditingTitle(null); }}
-                      autoFocus
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                    <button onClick={(e) => { e.stopPropagation(); renameConversation(conv.id, editTitleValue); }}><Check className="h-3 w-3" /></button>
-                    <button onClick={(e) => { e.stopPropagation(); setEditingTitle(null); }}><X className="h-3 w-3" /></button>
-                  </div>
-                ) : (
-                  <>
-                    <span className="flex-1 truncate text-xs">{conv.title}</span>
-                    <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 flex items-center gap-0.5">
-                      <button className="p-0.5 hover:text-foreground" title="Rename" onClick={(e) => { e.stopPropagation(); setEditingTitle(conv.id); setEditTitleValue(conv.title); }}>
-                        <Pencil className="h-3 w-3" />
-                      </button>
-                      <button className="p-0.5 hover:text-destructive" title="Delete" onClick={(e) => { e.stopPropagation(); deleteConversation(conv.id); }}>
-                        <Trash2 className="h-3 w-3" />
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
-            ))}
+          <div className="p-2 space-y-1">
             {conversations.length === 0 && !loadingConvs && (
               <p className="text-xs text-muted-foreground text-center py-8">No conversations yet</p>
+            )}
+            {/* Pinned */}
+            {pinnedConvs.length > 0 && (
+              <ConvSection label="Pinned" icon={<Pin className="h-2.5 w-2.5" />}>
+                {pinnedConvs.map((conv) => renderConvItem(conv))}
+              </ConvSection>
+            )}
+            {/* Today */}
+            {todayConvs.length > 0 && (
+              <ConvSection label="Today">
+                {todayConvs.map((conv) => renderConvItem(conv))}
+              </ConvSection>
+            )}
+            {/* This Week */}
+            {weekConvs.length > 0 && (
+              <ConvSection label="This Week">
+                {weekConvs.map((conv) => renderConvItem(conv))}
+              </ConvSection>
+            )}
+            {/* Older */}
+            {olderConvs.length > 0 && (
+              <ConvSection label="Older">
+                {olderConvs.map((conv) => renderConvItem(conv))}
+              </ConvSection>
             )}
           </div>
         </ScrollArea>
@@ -718,6 +833,13 @@ export default function ChatPage() {
                           ? "bg-primary text-primary-foreground"
                           : "bg-muted"
                       )}>
+                        {message.images && message.images.length > 0 && (
+                          <div className="flex gap-2 flex-wrap mb-2">
+                            {message.images.map((img, imgIdx) => (
+                              <img key={imgIdx} src={img} alt={`Attachment ${imgIdx + 1}`} className="max-h-48 rounded-lg object-contain" />
+                            ))}
+                          </div>
+                        )}
                         {message.role === "assistant" ? (
                           <div className="prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_pre]:bg-zinc-900 [&_pre]:text-zinc-100 [&_pre]:rounded-lg [&_pre]:p-3 [&_pre]:text-xs [&_pre]:overflow-x-auto [&_code]:text-xs [&_code]:bg-muted [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_pre_code]:bg-transparent [&_pre_code]:p-0">
                             <ReactMarkdown>{message.content}</ReactMarkdown>
@@ -890,16 +1012,52 @@ export default function ChatPage() {
                 </button>
               </div>
 
+              {/* Pending image previews */}
+              {pendingImages.length > 0 && (
+                <div className="max-w-3xl mx-auto flex gap-2 mb-2 flex-wrap">
+                  {pendingImages.map((img, idx) => (
+                    <div key={idx} className="relative group">
+                      <img src={img} alt={`Upload ${idx + 1}`} className="h-16 w-16 rounded-lg object-cover border" />
+                      <button
+                        type="button"
+                        onClick={() => removePendingImage(idx)}
+                        className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
               <form
                 onSubmit={(e) => { e.preventDefault(); sendMessage(); }}
                 className="max-w-3xl mx-auto flex items-end gap-2"
               >
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                  onChange={handleFileSelect}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-[44px] w-[44px] rounded-xl flex-shrink-0 text-muted-foreground hover:text-foreground"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isLoading || noProviders}
+                  title="Attach image"
+                >
+                  <Paperclip className="h-4 w-4" />
+                </Button>
                 <Textarea
                   ref={inputRef}
                   value={chatInput}
                   onChange={(e) => {
                     handleInputChange(e.target.value);
-                    // Auto-resize textarea
                     const el = e.target;
                     el.style.height = "auto";
                     el.style.height = `${Math.min(el.scrollHeight, 200)}px`;

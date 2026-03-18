@@ -112,7 +112,7 @@ const navSections: { title: string; items: NavItem[] }[] = [
 
 // ── NavContent ──
 
-function NavContent({ onItemClick, collapsed: isCollapsed }: { onItemClick?: () => void; collapsed?: boolean }) {
+function NavContent({ onItemClick, collapsed: isCollapsed, onToggleCollapse }: { onItemClick?: () => void; collapsed?: boolean; onToggleCollapse?: () => void }) {
   const pathname = usePathname();
   const { currentUserRole, org, prompts, members, loading: orgLoading } = useOrg();
   const { theme } = useTheme();
@@ -275,6 +275,26 @@ function NavContent({ onItemClick, collapsed: isCollapsed }: { onItemClick?: () 
         )}
       </div>
 
+      {/* Collapse toggle */}
+      {onToggleCollapse && (
+        <div className={cn("border-t border-border/50", isCollapsed ? "px-1.5 py-2" : "px-3 py-2")}>
+          <button
+            type="button"
+            onClick={onToggleCollapse}
+            title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            className={cn(
+              "flex w-full items-center rounded-xl text-sm font-medium",
+              "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
+              "transition-all duration-200 ease-spring",
+              isCollapsed ? "justify-center px-2 py-2" : "gap-3 px-4 py-2"
+            )}
+          >
+            <ChevronLeft className={cn("h-[18px] w-[18px] flex-shrink-0 transition-transform", isCollapsed && "rotate-180")} />
+            {!isCollapsed && <span className="text-xs">Collapse</span>}
+          </button>
+        </div>
+      )}
+
       <SupportModal open={supportOpen} onOpenChange={setSupportOpen} initialTab={supportTab} />
     </div>
   );
@@ -287,19 +307,10 @@ export function Sidebar() {
 
   return (
     <aside className={cn(
-      "hidden md:flex sticky top-0 h-screen flex-col border-r border-border/50 bg-card/80 backdrop-blur-xl transition-all duration-200 relative",
+      "hidden md:flex sticky top-0 h-screen flex-col border-r border-border/50 bg-card/80 backdrop-blur-xl transition-all duration-200",
       collapsed ? "w-[60px]" : "w-[var(--sidebar-width)]"
     )}>
-      <NavContent collapsed={collapsed} />
-      {/* Collapse toggle button */}
-      <button
-        type="button"
-        onClick={toggleCollapsed}
-        className="absolute -right-3 top-20 h-6 w-6 rounded-full border bg-background shadow-sm flex items-center justify-center hover:bg-muted transition-colors z-10"
-        title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-      >
-        <ChevronLeft className={cn("h-3 w-3 transition-transform", collapsed && "rotate-180")} />
-      </button>
+      <NavContent collapsed={collapsed} onToggleCollapse={toggleCollapsed} />
     </aside>
   );
 }

@@ -650,8 +650,8 @@ export default function ChatPage() {
     <div className="flex h-[calc(100vh-64px)] overflow-hidden -m-4 md:-m-6">
       {/* Sidebar */}
       <div className={cn(
-        "border-r bg-muted/30 flex flex-col transition-all duration-200",
-        sidebarOpen ? "w-64" : "w-0 overflow-hidden"
+        "border-r bg-muted/30 flex flex-col transition-all duration-200 min-w-0",
+        sidebarOpen ? "w-72 flex-shrink-0" : "w-0 overflow-hidden"
       )}>
         <div className="p-3 space-y-2 border-b">
           <Button variant="outline" className="w-full justify-start gap-2 text-sm" onClick={startNewChat}>

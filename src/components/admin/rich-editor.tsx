@@ -106,8 +106,8 @@ const RichEditor = forwardRef<RichEditorRef, RichEditorProps>(
 
     return (
       <div className={cn("rounded-md border bg-background", className)}>
-        {/* Toolbar */}
-        <div className="flex items-center gap-0.5 border-b px-1.5 py-1">
+        {/* Toolbar — sticky so it stays visible when scrolling long emails */}
+        <div className="flex items-center gap-0.5 border-b px-1.5 py-1 sticky top-0 z-10 bg-background rounded-t-md">
           <ToolbarButton
             active={editor.isActive("bold")}
             onClick={() => editor.chain().focus().toggleBold().run()}

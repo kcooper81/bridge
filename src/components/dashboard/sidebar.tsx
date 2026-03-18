@@ -164,9 +164,7 @@ function NavContent({ onItemClick, collapsed: isCollapsed, onToggleCollapse }: {
                 : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
             )}
           >
-            {pathname === "/home" && (
-              <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 rounded-r-full bg-primary shadow-glow-sm" />
-            )}
+{/* no left accent bar */}
             <LayoutDashboard className={cn("h-[18px] w-[18px] flex-shrink-0", pathname === "/home" && "drop-shadow-sm")} />
             {!isCollapsed && "Dashboard"}
           </Link>
@@ -213,9 +211,7 @@ function NavContent({ onItemClick, collapsed: isCollapsed, onToggleCollapse }: {
                           : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
                       )}
                     >
-                      {isActive && (
-                        <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 rounded-r-full bg-primary shadow-glow-sm" />
-                      )}
+{/* no left accent bar */}
                       <item.icon className={cn("h-[18px] w-[18px] flex-shrink-0", isActive && "drop-shadow-sm")} />
                       {!isCollapsed && (
                         <>

@@ -12,6 +12,7 @@ import {
   ExternalLink,
   FileText,
   Globe,
+  MessageSquare,
   Rocket,
   UserPlus,
   Users,
@@ -37,6 +38,14 @@ export function SetupWizard() {
   const { org, members, teams, prompts, currentUserRole } = useOrg();
   const { detected: extensionDetected } = useExtensionDetection();
   const [dismissed, setDismissed] = useState(true);
+  const [hasAiProviders, setHasAiProviders] = useState(false);
+
+  // Check if AI providers are configured
+  useEffect(() => {
+    fetch("/api/chat/providers").then((res) => res.json()).then((data) => {
+      setHasAiProviders((data.providers || []).length > 0);
+    }).catch(() => {});
+  }, []);
 
   const browser = useMemo(() => detectBrowser(), []);
   const store = useMemo(() => getStoreForBrowser(browser), [browser]);
@@ -79,7 +88,7 @@ export function SetupWizard() {
     {
       id: "install-extension",
       title: "Install browser extension",
-      description: "The browser extension lets your team use prompts directly inside AI tools.",
+      description: "Use prompts and DLP scanning directly inside ChatGPT, Claude, Gemini, Copilot, and Perplexity.",
       done: extensionDetected,
       href: store.url,
       actionLabel: store.buttonLabel,
@@ -87,9 +96,18 @@ export function SetupWizard() {
       external: true,
     },
     {
+      id: "setup-ai-chat",
+      title: "Try AI Chat (optional)",
+      description: "Use any AI model through TeamPrompt with built-in DLP. Add your own API key — or skip this and use the extension with ChatGPT, Claude, etc.",
+      done: hasAiProviders,
+      href: "/settings/ai-providers",
+      actionLabel: "Set Up AI Chat",
+      icon: MessageSquare,
+    },
+    {
       id: "create-prompt",
       title: "Create your first prompt",
-      description: "Write a prompt and assign it to your team. They'll see it in the extension.",
+      description: "Write a prompt and assign it to your team. They'll see it in the extension and AI Chat.",
       done: prompts.length > 0,
       href: "/vault",
       actionLabel: "Create Prompt",

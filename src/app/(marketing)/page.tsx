@@ -50,11 +50,13 @@ import {
   HelpCircle,
   History,
   Plug,
+  Plug2,
   Lock,
   Building,
+  Bell,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { PLAN_DISPLAY, PLAN_ORDER } from "@/lib/constants";
+// Plan constants removed — pricing section now links to /pricing page
 
 export const metadata: Metadata = generatePageMetadata({
   title: "AI Data Loss Prevention for ChatGPT & AI Tools — Secure AI Adoption",
@@ -515,9 +517,9 @@ export default function LandingPage() {
             {[
               { icon: Users, title: "Teams & Roles", desc: "Admin, Manager, Member — the right access for the right people.", href: "/features#team-management", bg: "bg-sky-500/10" },
               { icon: BarChart3, title: "Usage Analytics", desc: "See which prompts actually get reused and which sit unused.", href: "/features#analytics-insights", bg: "bg-indigo-500/10" },
-              { icon: Zap, title: "Import / Export", desc: "Bring existing prompts in or share them with another team.", href: "/features#import-export", bg: "bg-yellow-500/10" },
               { icon: FileCheck, title: "Compliance Rules", desc: "One-click security rules for healthcare, finance, and regulated industries.", href: "/features#compliance-policy-packs", bg: "bg-teal-500/10" },
               { icon: CheckSquare, title: "Approval Queue", desc: "Managers review and approve prompts before the team can use them.", href: "/features#approval-queue", bg: "bg-violet-500/10" },
+              { icon: Zap, title: "Import / Export", desc: "Bring existing prompts in or share them with another team.", href: "/features#import-export", bg: "bg-yellow-500/10" },
             ].map((f) => (
               <Link key={f.title} href={f.href} className="group rounded-2xl border border-border bg-card p-6 hover:border-primary/30 transition-all duration-300 block">
                 <div className="flex items-center justify-between">
@@ -535,6 +537,81 @@ export default function LandingPage() {
               </Link>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ━━━ INTEGRATIONS SHOWCASE ━━━ */}
+      <section className="py-20 sm:py-28 border-t border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-14">
+            <SectionLabel>Integrations</SectionLabel>
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
+              Works where your team works
+            </h2>
+            <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
+              Browser extension for AI tools. Slack for alerts. MCP for coding tools. Google Workspace for team sync.
+            </p>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 max-w-5xl mx-auto">
+            {/* Slack */}
+            <Link href="/integrations" className="group rounded-2xl border border-border bg-card p-6 hover:border-primary/30 hover:shadow-md transition-all block">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-50 dark:bg-purple-950/30">
+                  <Bell className="h-5 w-5 text-purple-600" />
+                </div>
+                <h3 className="font-semibold">Slack</h3>
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                DLP violation alerts, prompt approval notifications, and weekly AI usage digests — right in your channels.
+              </p>
+            </Link>
+
+            {/* MCP */}
+            <Link href="/settings/integrations/mcp" className="group rounded-2xl border border-border bg-card p-6 hover:border-primary/30 hover:shadow-md transition-all block">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 dark:bg-indigo-950/30">
+                  <Plug2 className="h-5 w-5 text-indigo-600" />
+                </div>
+                <h3 className="font-semibold">MCP Server</h3>
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Connect Claude Desktop, Cursor, and Windsurf to your prompt library, DLP, and audit logging.
+              </p>
+            </Link>
+
+            {/* Browser Extension */}
+            <Link href="/integrations" className="group rounded-2xl border border-border bg-card p-6 hover:border-primary/30 hover:shadow-md transition-all block">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-950/30">
+                  <Globe className="h-5 w-5 text-blue-600" />
+                </div>
+                <h3 className="font-semibold">5 AI Tools</h3>
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Browser extension for ChatGPT, Claude, Gemini, Copilot, and Perplexity — insert prompts and scan in real-time.
+              </p>
+            </Link>
+
+            {/* Google Workspace */}
+            <Link href="/integrations" className="group rounded-2xl border border-border bg-card p-6 hover:border-primary/30 hover:shadow-md transition-all block">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-50 dark:bg-green-950/30">
+                  <Users className="h-5 w-5 text-green-600" />
+                </div>
+                <h3 className="font-semibold">Google Workspace</h3>
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Sync your user directory and groups for automatic team management and onboarding.
+              </p>
+            </Link>
+          </div>
+
+          <p className="text-center mt-8 text-sm text-muted-foreground">
+            <Link href="/integrations" className="text-primary hover:underline font-medium">
+              See all integrations &rarr;
+            </Link>
+          </p>
         </div>
       </section>
 
@@ -688,75 +765,31 @@ export default function LandingPage() {
 
       {/* ━━━ PRICING PREVIEW ━━━ */}
       <section className="py-20 sm:py-28">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-14">
-            <SectionLabel>Pricing</SectionLabel>
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-              One price per user. No surprises.
+        <div className="max-w-4xl mx-auto px-4 sm:px-6">
+          <div className="rounded-2xl border border-border bg-card p-10 sm:p-14 text-center">
+            <SectionLabel className="text-center">Pricing</SectionLabel>
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mt-3">
+              Start free. Scale as you grow.
             </h2>
-            <p className="mt-4 text-lg text-muted-foreground">
-              Start free, upgrade when your team grows.
+            <p className="mt-4 text-lg text-muted-foreground max-w-xl mx-auto">
+              Free for up to 3 members. Pro starts at $8/user/month. Team plans for larger organizations with advanced DLP, compliance packs, and integrations.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-8">
+              <Link href="/signup">
+                <Button size="lg" className="rounded-full font-semibold px-8">
+                  Get Started Free
+                </Button>
+              </Link>
+              <Link href="/pricing">
+                <Button variant="outline" size="lg" className="rounded-full font-semibold px-8">
+                  Compare Plans &rarr;
+                </Button>
+              </Link>
+            </div>
+            <p className="mt-6 text-sm text-muted-foreground">
+              All plans include the browser extension for ChatGPT, Claude, Gemini, Copilot, and Perplexity. 14-day free trial on paid plans.
             </p>
           </div>
-
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 max-w-6xl mx-auto">
-            {PLAN_ORDER.map((tier) => {
-              const plan = PLAN_DISPLAY[tier];
-              // Show first 6 included features for the homepage preview
-              const highlights = Object.entries(plan.features)
-                .filter(([, v]) => v !== false)
-                .slice(0, 6)
-                .map(([k, v]) => (typeof v === "string" ? `${k}: ${v}` : k));
-              return (
-                <div
-                  key={plan.name}
-                  className={cn(
-                    "relative rounded-2xl border p-8 flex flex-col transition-all duration-300",
-                    plan.popular
-                      ? "border-primary bg-card shadow-lg shadow-primary/5"
-                      : "border-border bg-card hover:border-primary/20 hover:shadow-md"
-                  )}
-                >
-                  {plan.popular && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full">
-                      Most Popular
-                    </div>
-                  )}
-                  <div className="mb-6">
-                    <h3 className="text-lg font-bold">{plan.name}</h3>
-                    <div className="mt-3 flex items-baseline gap-1">
-                      <span className="text-4xl font-bold tracking-tight">{plan.monthlyPrice}</span>
-                      <span className="text-sm text-muted-foreground">{plan.period}</span>
-                    </div>
-                    <p className="mt-2 text-sm text-muted-foreground">{plan.description}</p>
-                  </div>
-                  <ul className="space-y-3 flex-1">
-                    {highlights.map((f) => (
-                      <li key={f} className="flex items-center gap-2.5 text-sm">
-                        <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
-                  <Link href={plan.href} className="mt-8 block">
-                    <Button
-                      variant={plan.popular ? "default" : "outline"}
-                      className="w-full rounded-full font-semibold"
-                    >
-                      {plan.cta}
-                    </Button>
-                  </Link>
-                </div>
-              );
-            })}
-          </div>
-
-          <p className="text-center mt-8 text-sm text-muted-foreground">
-            All plans include the browser extension for ChatGPT, Claude, Gemini, Copilot, and Perplexity.{" "}
-            <Link href="/pricing" className="text-primary hover:underline font-medium">
-              Compare all features &rarr;
-            </Link>
-          </p>
         </div>
       </section>
 

@@ -17,6 +17,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { type, data } = body;
 
+    console.log("[Resend Webhook]", type, JSON.stringify(data || {}).slice(0, 200));
+
     if (!type || !data) {
       return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
     }
@@ -33,64 +35,74 @@ export async function POST(request: NextRequest) {
     // Find the campaign by broadcast_id
     const broadcastId = data.broadcast_id;
     if (!broadcastId) {
-      // Not a broadcast event — could be a transactional email
+      console.log("[Resend Webhook] No broadcast_id — transactional email, skipping");
       return NextResponse.json({ received: true });
     }
 
     const db = createServiceClient();
 
     // Look up campaign
-    const { data: campaign } = await db
+    const { data: campaign, error: lookupError } = await db
       .from("email_campaigns")
       .select("id, status")
       .eq("resend_broadcast_id", broadcastId)
       .maybeSingle();
 
+    if (lookupError) {
+      console.error("[Resend Webhook] Campaign lookup error:", lookupError.message);
+    }
+
+    if (!campaign) {
+      console.log("[Resend Webhook] No campaign found for broadcast_id:", broadcastId);
+      return NextResponse.json({ received: true });
+    }
+
+    console.log("[Resend Webhook] Matched campaign:", campaign.id, "event:", type);
+
     // Update campaign status for delivery events
-    if (campaign && (type === "email.delivered" || type === "email.sent")) {
+    if (type === "email.delivered" || type === "email.sent") {
       if (campaign.status === "queued" || campaign.status === "sending") {
         await db
           .from("email_campaigns")
           .update({ status: "sent", sent_at: new Date().toISOString(), updated_at: new Date().toISOString() })
           .eq("id", campaign.id);
+        console.log("[Resend Webhook] Campaign status → sent");
       }
       return NextResponse.json({ received: true });
     }
 
     const column = eventMap[type];
     if (!column) {
+      console.log("[Resend Webhook] Unknown event type:", type);
       return NextResponse.json({ received: true });
     }
 
-    if (!campaign) {
-      // Unknown broadcast — ignore
-      return NextResponse.json({ received: true });
+    // Increment counter directly (read + increment + write)
+    const { data: row, error: readError } = await db
+      .from("email_campaigns")
+      .select(column)
+      .eq("id", campaign.id)
+      .single();
+
+    if (readError) {
+      console.error("[Resend Webhook] Read error:", readError.message);
     }
 
-    // Increment counter — try RPC first, fallback to manual
-    const { error: rpcError } = await db.rpc("increment_campaign_counter", {
-      campaign_id: campaign.id,
-      counter_column: column,
-    });
-
-    if (rpcError) {
-      // Fallback: read + increment + write
-      const { data: row } = await db
+    if (row) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const currentVal = ((row as any)[column] as number) || 0;
+      const { error: updateError } = await db
         .from("email_campaigns")
-        .select(column)
-        .eq("id", campaign.id)
-        .single();
+        .update({
+          [column]: currentVal + 1,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", campaign.id);
 
-      if (row) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const currentVal = ((row as any)[column] as number) || 0;
-        await db
-          .from("email_campaigns")
-          .update({
-            [column]: currentVal + 1,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", campaign.id);
+      if (updateError) {
+        console.error("[Resend Webhook] Update error:", updateError.message);
+      } else {
+        console.log("[Resend Webhook] Incremented", column, "to", currentVal + 1);
       }
     }
 

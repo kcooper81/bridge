@@ -38,6 +38,7 @@ import {
   Download,
   Slash,
   Pin,
+  BarChart3,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -76,13 +77,25 @@ interface ChatMsg {
 }
 
 // Slash command definitions
-const SLASH_COMMANDS = [
+const SLASH_COMMANDS: Array<{
+  command: string;
+  label: string;
+  description: string;
+  icon: React.ComponentType<{ className?: string }>;
+  roles?: string[];
+  section?: string;
+}> = [
   { command: "/prompt", label: "Insert a prompt", description: "Search and insert from your prompt library", icon: FileText },
   { command: "/template", label: "Use a template", description: "Insert a template with fill-in variables", icon: Braces },
   { command: "/scan", label: "Check for sensitive data", description: "Run DLP scan on your current message", icon: Shield },
   { command: "/model", label: "Switch model", description: "Change the AI model for this conversation", icon: Bot },
   { command: "/export", label: "Export conversation", description: "Download this conversation as markdown", icon: Download },
   { command: "/clear", label: "Clear conversation", description: "Start a new conversation", icon: Trash2 },
+  // Admin/manager only commands
+  { command: "/activity", label: "Team activity summary", description: "Ask AI about recent team activity and AI usage", icon: BarChart3, roles: ["admin", "manager"], section: "Admin" },
+  { command: "/violations", label: "DLP violations report", description: "Ask AI about recent DLP violations and blocked data", icon: ShieldAlert, roles: ["admin", "manager"], section: "Admin" },
+  { command: "/usage", label: "Usage analytics", description: "Ask AI about prompt usage, top users, and trends", icon: BarChart3, roles: ["admin", "manager"], section: "Admin" },
+  { command: "/audit", label: "Audit log query", description: "Ask AI to search the audit trail for specific events", icon: Search, roles: ["admin", "manager"], section: "Admin" },
 ];
 
 export default function ChatPage() {
@@ -271,10 +284,14 @@ export default function ChatPage() {
     inputRef.current?.focus();
   }
 
-  // Slash command filtering
-  const filteredSlashCommands = SLASH_COMMANDS.filter((cmd) =>
-    !slashFilter || cmd.command.includes(slashFilter) || cmd.label.toLowerCase().includes(slashFilter)
-  );
+  // Slash command filtering (role-aware)
+  const filteredSlashCommands = SLASH_COMMANDS.filter((cmd) => {
+    // Role check
+    if (cmd.roles && !cmd.roles.includes(currentUserRole)) return false;
+    // Text filter
+    if (slashFilter && !cmd.command.includes(slashFilter) && !cmd.label.toLowerCase().includes(slashFilter)) return false;
+    return true;
+  });
 
   // Handle slash commands
   function executeSlashCommand(command: string) {
@@ -311,6 +328,30 @@ export default function ChatPage() {
       case "/clear":
         startNewChat();
         break;
+      case "/activity": {
+        const prompt = "Give me a summary of my team's AI activity for the past week. Include: total conversations, most active users, which AI tools are being used most, and any notable trends. Be concise and use bullet points.";
+        setChatInput(prompt);
+        inputRef.current?.focus();
+        break;
+      }
+      case "/violations": {
+        const prompt = "Summarize recent DLP violations and blocked data incidents. Include: how many violations this week, what types of sensitive data were detected (PII, credentials, patient records, etc.), which rules triggered most, and any repeat offenders. Be concise.";
+        setChatInput(prompt);
+        inputRef.current?.focus();
+        break;
+      }
+      case "/usage": {
+        const prompt = "Show me prompt usage analytics. Which prompts are most popular? Which ones are unused? How is AI adoption trending across the team? Any recommendations for improving prompt library utilization?";
+        setChatInput(prompt);
+        inputRef.current?.focus();
+        break;
+      }
+      case "/audit": {
+        const prompt = "I need to search the audit trail. Help me find specific events — I'll tell you what I'm looking for. What time period and what type of events should I search for?";
+        setChatInput(prompt);
+        inputRef.current?.focus();
+        break;
+      }
     }
   }
 
@@ -778,30 +819,46 @@ export default function ChatPage() {
             {/* Slash command menu */}
             {slashMenuOpen && filteredSlashCommands.length > 0 && (
               <div ref={slashMenuRef} className="mx-4 mb-1 max-w-3xl lg:mx-auto">
-                <div className="rounded-lg border bg-popover shadow-lg overflow-hidden">
-                  {filteredSlashCommands.map((cmd, idx) => (
-                    <button
-                      key={cmd.command}
-                      type="button"
-                      className={cn(
-                        "w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors",
-                        idx === slashMenuIndex ? "bg-accent" : "hover:bg-muted/50"
-                      )}
-                      onClick={() => executeSlashCommand(cmd.command)}
-                      onMouseEnter={() => setSlashMenuIndex(idx)}
-                    >
-                      <div className="h-7 w-7 rounded-md bg-muted flex items-center justify-center flex-shrink-0">
-                        <cmd.icon className="h-3.5 w-3.5 text-muted-foreground" />
+                <div className="rounded-lg border bg-popover shadow-lg overflow-hidden max-h-[320px] overflow-y-auto">
+                  {filteredSlashCommands.map((cmd, idx) => {
+                    const prevCmd = filteredSlashCommands[idx - 1];
+                    const showSection = cmd.section && cmd.section !== prevCmd?.section;
+                    return (
+                      <div key={cmd.command}>
+                        {showSection && (
+                          <div className="px-3 pt-2 pb-1 text-[9px] font-semibold uppercase tracking-wider text-muted-foreground border-t">
+                            {cmd.section}
+                          </div>
+                        )}
+                        <button
+                          type="button"
+                          className={cn(
+                            "w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors",
+                            idx === slashMenuIndex ? "bg-accent" : "hover:bg-muted/50"
+                          )}
+                          onClick={() => executeSlashCommand(cmd.command)}
+                          onMouseEnter={() => setSlashMenuIndex(idx)}
+                        >
+                          <div className={cn(
+                            "h-7 w-7 rounded-md flex items-center justify-center flex-shrink-0",
+                            cmd.section === "Admin" ? "bg-amber-100 dark:bg-amber-900/30" : "bg-muted"
+                          )}>
+                            <cmd.icon className={cn(
+                              "h-3.5 w-3.5",
+                              cmd.section === "Admin" ? "text-amber-600 dark:text-amber-400" : "text-muted-foreground"
+                            )} />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                              <code className="text-xs font-mono text-primary">{cmd.command}</code>
+                              <span className="text-xs font-medium">{cmd.label}</span>
+                            </div>
+                            <p className="text-[10px] text-muted-foreground">{cmd.description}</p>
+                          </div>
+                        </button>
                       </div>
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                          <code className="text-xs font-mono text-primary">{cmd.command}</code>
-                          <span className="text-xs font-medium">{cmd.label}</span>
-                        </div>
-                        <p className="text-[10px] text-muted-foreground">{cmd.description}</p>
-                      </div>
-                    </button>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}

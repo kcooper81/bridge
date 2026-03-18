@@ -277,20 +277,14 @@ function NavContent({ onItemClick, collapsed: isCollapsed, onToggleCollapse }: {
 
       {/* Collapse toggle */}
       {onToggleCollapse && (
-        <div className={cn("border-t border-border/50", isCollapsed ? "px-1.5 py-2" : "px-3 py-2")}>
+        <div className={cn("border-t border-border/50 flex", isCollapsed ? "justify-center py-3" : "justify-end px-3 py-3")}>
           <button
             type="button"
             onClick={onToggleCollapse}
             title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-            className={cn(
-              "flex w-full items-center rounded-xl text-sm font-medium",
-              "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
-              "transition-all duration-200 ease-spring",
-              isCollapsed ? "justify-center px-2 py-2" : "gap-3 px-4 py-2"
-            )}
+            className="h-7 w-7 rounded-full bg-muted/60 hover:bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
           >
-            <ChevronLeft className={cn("h-[18px] w-[18px] flex-shrink-0 transition-transform", isCollapsed && "rotate-180")} />
-            {!isCollapsed && <span className="text-xs">Collapse</span>}
+            <ChevronLeft className={cn("h-3.5 w-3.5 transition-transform", isCollapsed && "rotate-180")} />
           </button>
         </div>
       )}

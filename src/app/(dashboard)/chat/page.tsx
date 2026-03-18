@@ -20,7 +20,6 @@ import {
   AlertTriangle,
   ShieldAlert,
   Bot,
-  User,
   Pencil,
   Check,
   X,
@@ -36,6 +35,7 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import { useOrg } from "@/components/providers/org-provider";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 interface Conversation {
   id: string;
@@ -67,10 +67,12 @@ interface ChatMsg {
 }
 
 export default function ChatPage() {
-  const { currentUserRole, org } = useOrg();
+  const { currentUserRole, org, members } = useOrg();
   const isAdmin = currentUserRole === "admin";
   const orgSettings = (org?.settings || {}) as Record<string, unknown>;
   const chatEnabledForMembers = orgSettings.ai_chat_enabled === true;
+  const currentMember = members.find((m) => m.isCurrentUser);
+  const userInitial = (currentMember?.name || currentMember?.email || "U")[0].toUpperCase();
 
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConvId, setActiveConvId] = useState<string | null>(null);
@@ -566,9 +568,14 @@ export default function ChatPage() {
                       </div>
                     </div>
                     {message.role === "user" && (
-                      <div className="h-7 w-7 rounded-full bg-foreground/10 flex items-center justify-center flex-shrink-0 mt-1">
-                        <User className="h-4 w-4 text-foreground/70" />
-                      </div>
+                      <Avatar className="h-7 w-7 flex-shrink-0 mt-1">
+                        {currentMember?.avatar_url && (
+                          <AvatarImage src={currentMember.avatar_url} alt={currentMember?.name || "You"} />
+                        )}
+                        <AvatarFallback className="bg-foreground/10 text-foreground/70 text-xs font-semibold">
+                          {userInitial}
+                        </AvatarFallback>
+                      </Avatar>
                     )}
                   </div>
                 ))}

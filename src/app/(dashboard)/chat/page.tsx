@@ -1029,8 +1029,8 @@ export default function ChatPage() {
     <div className="flex h-[calc(100vh-64px)] overflow-hidden -m-4 md:-m-6">
       {/* ─── Sidebar ─── */}
       <div className={cn(
-        "border-r bg-muted/30 flex flex-col transition-all duration-200 min-w-0",
-        sidebarOpen ? "w-80 flex-shrink-0" : "w-0 overflow-hidden"
+        "border-r bg-muted/30 flex flex-col transition-all duration-200 overflow-hidden",
+        sidebarOpen ? "w-80 min-w-[320px] max-w-[320px]" : "w-0 min-w-0"
       )}>
         {/* Top actions */}
         <div className="p-3 border-b flex-shrink-0">

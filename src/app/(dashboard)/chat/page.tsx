@@ -787,12 +787,15 @@ export default function ChatPage() {
     } catch { /* non-critical */ } finally { setLoadingConvs(false); }
   }, []);
 
+  const selectedModelRef = useRef(selectedModel);
+  selectedModelRef.current = selectedModel;
+
   const loadProviders = useCallback(async () => {
     try {
       const res = await fetch("/api/chat/providers");
       const data = await res.json();
       setProviders(data.providers || []);
-      if (data.providers?.length > 0 && !selectedModel) {
+      if (data.providers?.length > 0 && !selectedModelRef.current) {
         const first = data.providers[0];
         const models = first.model_whitelist.length > 0
           ? first.availableModels.filter((m: { id: string }) => first.model_whitelist.includes(m.id))
@@ -800,7 +803,6 @@ export default function ChatPage() {
         if (models.length > 0) { setSelectedModel(models[0].id); setSelectedProvider(first.provider); }
       }
     } catch { /* non-critical */ }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadCollections = useCallback(async () => {
@@ -879,9 +881,6 @@ export default function ChatPage() {
     };
   }, [isResizing]);
 
-  function handleSearchChange(value: string) {
-    setSearchQuery(value);
-  }
 
   // ── Conversation operations ──
   async function loadConversation(convId: string) {
@@ -1229,7 +1228,7 @@ export default function ChatPage() {
                 type="text"
                 placeholder="Search conversations..."
                 value={searchQuery}
-                onChange={(e) => handleSearchChange(e.target.value)}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full h-9 rounded-lg border bg-background pl-9 pr-3 text-sm outline-none focus:ring-1 focus:ring-primary"
               />
             </div>

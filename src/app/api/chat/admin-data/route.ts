@@ -30,10 +30,21 @@ export async function POST(request: NextRequest) {
   const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
   const monthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
 
+  // Resolve team filter to user IDs
+  let teamUserIds: string[] | null = null;
+  if (filterTeamId) {
+    const { data: teamMembers } = await db
+      .from("team_members")
+      .select("user_id")
+      .eq("team_id", filterTeamId);
+    teamUserIds = (teamMembers || []).map((m: any) => m.user_id);
+  }
+
   // Helper: apply optional user/team filter to a query
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function applyFilter(query: any, userCol = "user_id") {
     if (filterUserId) return query.eq(userCol, filterUserId);
+    if (teamUserIds && teamUserIds.length > 0) return query.in(userCol, teamUserIds);
     return query;
   }
 
@@ -208,6 +219,11 @@ ${(() => {
       }
       const totalViolationCount = violations.length + blockedLogs.length;
 
+      // Pre-compute action type counts from both sources
+      const actionCounts: Record<string, number> = {};
+      for (const v of violations) { actionCounts[v.action_taken] = (actionCounts[v.action_taken] || 0) + 1; }
+      for (const l of blockedLogs) { actionCounts["blocked"] = (actionCounts["blocked"] || 0) + 1; void l; }
+
       const topRules = Object.entries(ruleCounts)
         .sort((a, b) => b[1] - a[1])
         .slice(0, 10)
@@ -231,7 +247,7 @@ ${(() => {
 ### Summary
 - Total violations: ${totalViolationCount} (${violations.length} from extension scans, ${blockedLogs.length} from chat DLP)
 - Severity breakdown: ${Object.entries(severityCounts).map(([s, c]) => `${s}: ${c}`).join(", ") || "none"}
-- Action types: ${violations.reduce((acc: Record<string, number>, v: any) => { acc[v.action_taken] = (acc[v.action_taken] || 0) + 1; return acc; }, {} as Record<string, number>).blocked || 0} blocked, ${violations.reduce((acc: Record<string, number>, v: any) => { acc[v.action_taken] = (acc[v.action_taken] || 0) + 1; return acc; }, {} as Record<string, number>).overridden || 0} overridden
+- Action types: ${Object.entries(actionCounts).map(([a, c]) => `${a}: ${c}`).join(", ") || "none"}
 
 ### Categories Detected
 ${topCategories || "  No violations"}

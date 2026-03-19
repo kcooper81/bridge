@@ -36,7 +36,6 @@ import {
   Braces,
   FileText,
   Download,
-  Slash,
   Pin,
   BarChart3,
   Paperclip,
@@ -56,7 +55,6 @@ import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import { trackChatMessageSent, trackChatConversationCreated, trackChatFileUploaded, trackChatCompareUsed, trackChatPresetUsed, trackChatAdminCommand, trackChatCollectionCreated } from "@/lib/analytics";
 import { useOrg } from "@/components/providers/org-provider";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 // ── Shared sub-components ──
 
@@ -186,14 +184,10 @@ const TAG_COLORS = [
 // ── Main component ──
 
 export default function ChatPage() {
-  const { currentUserRole, org, members, prompts: orgPrompts } = useOrg();
+  const { currentUserRole, org, prompts: orgPrompts } = useOrg();
   const isAdmin = currentUserRole === "admin";
   const orgSettings = (org?.settings || {}) as Record<string, unknown>;
   const chatEnabledForMembers = orgSettings.ai_chat_enabled === true;
-  const systemPrompt = orgSettings.ai_system_prompt as string | undefined;
-  const currentMember = members.find((m) => m.isCurrentUser);
-  const userInitial = (currentMember?.name || currentMember?.email || "U")[0].toUpperCase();
-
   const approvedPrompts = orgPrompts.filter((p) => p.status === "approved");
 
   // ── State ──
@@ -1687,8 +1681,8 @@ export default function ChatPage() {
         ) : (
           // ── Normal mode ──
           <>
-            {/* Header */}
-            <div className="flex items-center gap-2 px-4 py-2 border-b bg-background flex-shrink-0">
+            {/* Header — clean and minimal */}
+            <div className="flex items-center gap-3 px-4 py-2.5 border-b bg-background flex-shrink-0">
               <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setSidebarOpen(!sidebarOpen)}>
                 <ChevronLeft className={cn("h-4 w-4 transition-transform", !sidebarOpen && "rotate-180")} />
               </Button>
@@ -1702,7 +1696,7 @@ export default function ChatPage() {
                     setSelectedModel(rest.join(":"));
                   }}
                 >
-                  <SelectTrigger className="w-[240px] h-8 text-xs">
+                  <SelectTrigger className="w-[200px] h-8 text-xs border-0 bg-transparent hover:bg-muted transition-colors">
                     <SelectValue placeholder="Select model" />
                   </SelectTrigger>
                   <SelectContent>
@@ -1718,28 +1712,11 @@ export default function ChatPage() {
 
               <div className="flex-1" />
 
-              <div className="flex items-center gap-2">
-                {systemPrompt && (
-                  <span className="flex items-center gap-1 rounded-full border border-violet-200 dark:border-violet-800/50 bg-violet-50/80 dark:bg-violet-950/30 px-2.5 py-1 text-[10px] font-medium text-violet-700 dark:text-violet-400" title={`System prompt: ${systemPrompt.slice(0, 100)}...`}>
-                    <Sparkles className="h-2.5 w-2.5" />
-                    System Prompt
-                  </span>
-                )}
-                <Link href="/guardrails" className="flex items-center gap-1.5 rounded-full border border-green-200 dark:border-green-800/50 bg-green-50/80 dark:bg-green-950/30 px-2.5 py-1 hover:bg-green-100/80 dark:hover:bg-green-950/50 transition-colors">
-                  <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
-                  <span className="text-[10px] font-medium text-green-700 dark:text-green-400">DLP Protected</span>
-                </Link>
-                <Link href="/vault" className="hidden sm:flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] text-muted-foreground hover:text-foreground hover:border-primary/30 transition-colors">
-                  <MessageSquare className="h-3 w-3" />
-                  Prompt Library
-                </Link>
-                <Link href="/settings/ai-providers">
-                  <Button variant="ghost" size="sm" className="h-7 text-[10px] gap-1 text-muted-foreground px-2">
-                    <Settings className="h-3 w-3" />
-                    <span className="hidden sm:inline">Providers</span>
-                  </Button>
-                </Link>
-              </div>
+              {/* DLP badge — always visible */}
+              <Link href="/guardrails" className="flex items-center gap-1.5 rounded-full border border-green-200 dark:border-green-800/50 bg-green-50/80 dark:bg-green-950/30 px-2.5 py-1 hover:bg-green-100/80 dark:hover:bg-green-950/50 transition-colors">
+                <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
+                <span className="text-[10px] font-medium text-green-700 dark:text-green-400">DLP Active</span>
+              </Link>
             </div>
 
             {/* Admin notice */}
@@ -1776,55 +1753,61 @@ export default function ChatPage() {
                 <ScrollArea className="flex-1" ref={scrollAreaRef}>
                   <div className="max-w-3xl mx-auto px-4 py-6">
                     {messages.length === 0 && !isLoading && (
-                      <div className="text-center py-12">
-                        <Bot className="h-10 w-10 text-muted-foreground/40 mx-auto mb-4" />
-                        <h2 className="text-lg font-semibold text-muted-foreground">TeamPrompt Chat</h2>
-                        <p className="text-sm text-muted-foreground mt-1 mb-6">
-                          Your messages are scanned by DLP rules before reaching the AI.
-                        </p>
+                      <div className="flex flex-col items-center justify-center py-16 sm:py-24">
+                        <h1 className="text-2xl sm:text-3xl font-semibold text-foreground mb-2">What can I help you with?</h1>
+                        <p className="text-muted-foreground text-sm mb-10">Ask anything. Your messages are DLP-protected.</p>
 
                         {/* Presets */}
                         {presets.length > 0 && (
-                          <div className="mb-6">
-                            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Quick Start</p>
-                            <div className="flex flex-wrap items-center justify-center gap-2">
-                              {presets.slice(0, 6).map((preset) => (
-                                <button
-                                  key={preset.id}
-                                  className="flex items-center gap-2 border rounded-lg px-3 py-2 text-left hover:border-primary/50 hover:bg-muted/50 transition-colors max-w-[200px]"
-                                  onClick={() => startPreset(preset)}
-                                >
-                                  <div className="h-7 w-7 rounded-md flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${preset.color || "#6366f1"}20` }}>
-                                    <Sparkles className="h-3.5 w-3.5" style={{ color: preset.color || "#6366f1" }} />
-                                  </div>
-                                  <div className="min-w-0">
-                                    <p className="text-xs font-medium truncate">{preset.name}</p>
-                                    {preset.description && <p className="text-[10px] text-muted-foreground truncate">{preset.description}</p>}
-                                  </div>
-                                </button>
-                              ))}
-                            </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-lg mb-8">
+                            {presets.slice(0, 4).map((preset) => (
+                              <button
+                                key={preset.id}
+                                className="flex items-center gap-3 border rounded-xl px-4 py-3 text-left hover:border-primary/40 hover:bg-muted/50 transition-all group"
+                                onClick={() => startPreset(preset)}
+                              >
+                                <div className="h-9 w-9 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${preset.color || "#6366f1"}15` }}>
+                                  <Sparkles className="h-4 w-4" style={{ color: preset.color || "#6366f1" }} />
+                                </div>
+                                <div className="min-w-0">
+                                  <p className="text-sm font-medium truncate group-hover:text-primary transition-colors">{preset.name}</p>
+                                  {preset.description && <p className="text-xs text-muted-foreground truncate">{preset.description}</p>}
+                                </div>
+                              </button>
+                            ))}
                           </div>
                         )}
 
-                        {/* Suggestions — rotate based on time */}
+                        {/* Suggestion cards — 2x2 grid */}
                         {(() => {
                           const allSuggestions = [
-                            ["Write a project status update", "Review this code for bugs", "Draft a customer email", "Explain this error message"],
-                            ["Summarize this document", "Help me brainstorm ideas", "Write a meeting agenda", "Create a bug report"],
-                            ["Draft a product announcement", "Analyze this data", "Write unit tests for this function", "Create an onboarding checklist"],
-                            ["Rewrite this for clarity", "Compare two approaches", "Write a proposal outline", "Help debug this error"],
+                            [
+                              { icon: FileText, title: "Write a status update", desc: "Project progress report" },
+                              { icon: Search, title: "Review code for bugs", desc: "Find issues in your code" },
+                              { icon: MessageSquare, title: "Draft a customer email", desc: "Professional communication" },
+                              { icon: Bot, title: "Explain an error", desc: "Debug with context" },
+                            ],
+                            [
+                              { icon: FileText, title: "Summarize a document", desc: "Key points and takeaways" },
+                              { icon: Sparkles, title: "Brainstorm ideas", desc: "Creative problem solving" },
+                              { icon: MessageSquare, title: "Write a meeting agenda", desc: "Structured discussion plan" },
+                              { icon: Search, title: "Analyze this data", desc: "Insights and patterns" },
+                            ],
                           ];
                           const suggestions = allSuggestions[Math.floor(Date.now() / (1000 * 60 * 30)) % allSuggestions.length];
                           return (
-                            <div className="flex flex-wrap items-center justify-center gap-2">
-                              {suggestions.map((suggestion) => (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-lg">
+                              {suggestions.map((s) => (
                                 <button
-                                  key={suggestion}
-                                  className="text-xs border rounded-full px-3 py-1.5 text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
-                                  onClick={() => { setChatInput(suggestion); inputRef.current?.focus(); }}
+                                  key={s.title}
+                                  className="flex items-start gap-3 border rounded-xl px-4 py-3 text-left hover:border-primary/40 hover:bg-muted/50 transition-all group"
+                                  onClick={() => { setChatInput(s.title); inputRef.current?.focus(); }}
                                 >
-                                  {suggestion}
+                                  <s.icon className="h-4 w-4 text-muted-foreground/50 mt-0.5 flex-shrink-0 group-hover:text-primary/60 transition-colors" />
+                                  <div>
+                                    <p className="text-sm font-medium group-hover:text-primary transition-colors">{s.title}</p>
+                                    <p className="text-xs text-muted-foreground">{s.desc}</p>
+                                  </div>
                                 </button>
                               ))}
                             </div>
@@ -1918,127 +1901,90 @@ export default function ChatPage() {
                   </div>
                 )}
 
-                {/* Input area */}
-                <div className="border-t bg-background px-4 py-3 flex-shrink-0">
-                  <div className="max-w-3xl mx-auto flex items-center gap-1.5 mb-2">
-                    <button
-                      type="button"
-                      onClick={() => setPromptPanelOpen(!promptPanelOpen)}
-                      className={cn(
-                        "flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-medium transition-colors",
-                        promptPanelOpen ? "bg-primary/10 border-primary/30 text-primary" : "text-muted-foreground hover:text-foreground hover:border-primary/30"
-                      )}
-                    >
-                      <Library className="h-3 w-3" />Prompts
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleInputChange("/")}
-                      className="flex items-center gap-1 rounded-full border px-2.5 py-1 text-[10px] font-medium text-muted-foreground hover:text-foreground hover:border-primary/30 transition-colors"
-                    >
-                      <Slash className="h-3 w-3" />Commands
-                    </button>
-                    {availableModels.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => executeSlashCommand("/compare")}
-                        className={cn(
-                          "flex items-center gap-1 rounded-full border px-2.5 py-1 text-[10px] font-medium transition-colors",
-                          compareMode ? "bg-primary/10 border-primary/30 text-primary" : "text-muted-foreground hover:text-foreground hover:border-primary/30"
-                        )}
-                      >
-                        <Columns2 className="h-3 w-3" />Compare
-                      </button>
-                    )}
-                  </div>
-
-                  {/* Pending attachments */}
-                  {(pendingImages.length > 0 || pendingFiles.length > 0) && (
-                    <div className="max-w-3xl mx-auto flex gap-2 mb-2 flex-wrap">
-                      {pendingImages.map((img, idx) => (
-                        <div key={`img-${idx}`} className="relative group">
-                          <img src={img} alt={`Upload ${idx + 1}`} className="h-16 w-16 rounded-lg object-cover border" />
-                          <button
-                            type="button"
-                            onClick={() => removePendingImage(idx)}
-                            className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            <X className="h-3 w-3" />
-                          </button>
-                        </div>
-                      ))}
-                      {pendingFiles.map((pf, idx) => (
-                        <div key={`file-${idx}`} className={cn(
-                          "relative group flex items-center gap-2 border rounded-lg px-3 py-2 max-w-[240px]",
-                          pf.dlpPassed ? "border-green-200 dark:border-green-800/40 bg-green-50/50 dark:bg-green-950/20" :
-                          pf.error ? "border-red-200 dark:border-red-800/40 bg-red-50/50 dark:bg-red-950/20" :
-                          "bg-muted/50"
-                        )}>
-                          <FileText className={cn("h-5 w-5 flex-shrink-0", pf.dlpPassed ? "text-green-600 dark:text-green-400" : "text-muted-foreground")} />
-                          <div className="min-w-0 flex-1">
-                            <p className="text-xs font-medium truncate">{pf.name}</p>
-                            <p className="text-[10px] text-muted-foreground">
-                              {pf.uploading ? (
-                                <span className="flex items-center gap-1">
-                                  <Loader2 className="h-2.5 w-2.5 animate-spin" />
-                                  <span>Scanning &amp; extracting...</span>
-                                </span>
-                              ) : pf.error ? (
-                                <span className="text-destructive">{pf.error}</span>
-                              ) : pf.dlpPassed ? (
-                                <span className="flex items-center gap-1 text-green-600 dark:text-green-400">
-                                  <Shield className="h-2.5 w-2.5" />
-                                  DLP passed · {formatFileSize(pf.size)}
-                                </span>
-                              ) : (
-                                <span>{formatFileSize(pf.size)}</span>
-                              )}
-                            </p>
+                {/* Input area — integrated composer */}
+                <div className="bg-background px-4 py-4 flex-shrink-0">
+                  <div className="max-w-3xl mx-auto">
+                    {/* Pending attachments */}
+                    {(pendingImages.length > 0 || pendingFiles.length > 0) && (
+                      <div className="flex gap-2 mb-3 flex-wrap">
+                        {pendingImages.map((img, idx) => (
+                          <div key={`img-${idx}`} className="relative group">
+                            <img src={img} alt={`Upload ${idx + 1}`} className="h-16 w-16 rounded-lg object-cover border" />
+                            <button type="button" onClick={() => removePendingImage(idx)} className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity">
+                              <X className="h-3 w-3" />
+                            </button>
                           </div>
-                          <button
-                            type="button"
-                            onClick={() => removePendingFile(idx)}
-                            className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            <X className="h-3 w-3" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                        ))}
+                        {pendingFiles.map((pf, idx) => (
+                          <div key={`file-${idx}`} className={cn(
+                            "relative group flex items-center gap-2 border rounded-lg px-3 py-2 max-w-[240px]",
+                            pf.dlpPassed ? "border-green-200 dark:border-green-800/40 bg-green-50/50 dark:bg-green-950/20" :
+                            pf.error ? "border-red-200 dark:border-red-800/40 bg-red-50/50 dark:bg-red-950/20" : "bg-muted/50"
+                          )}>
+                            <FileText className={cn("h-5 w-5 flex-shrink-0", pf.dlpPassed ? "text-green-600 dark:text-green-400" : "text-muted-foreground")} />
+                            <div className="min-w-0 flex-1">
+                              <p className="text-xs font-medium truncate">{pf.name}</p>
+                              <p className="text-[10px] text-muted-foreground">
+                                {pf.uploading ? <span className="flex items-center gap-1"><Loader2 className="h-2.5 w-2.5 animate-spin" />Scanning...</span>
+                                  : pf.error ? <span className="text-destructive">{pf.error}</span>
+                                  : pf.dlpPassed ? <span className="flex items-center gap-1 text-green-600 dark:text-green-400"><Shield className="h-2.5 w-2.5" />DLP passed · {formatFileSize(pf.size)}</span>
+                                  : <span>{formatFileSize(pf.size)}</span>}
+                              </p>
+                            </div>
+                            <button type="button" onClick={() => removePendingFile(idx)} className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity">
+                              <X className="h-3 w-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
 
-                  <form onSubmit={(e) => { e.preventDefault(); sendMessage(); }} className="max-w-3xl mx-auto flex items-end gap-2">
-                    <input ref={fileInputRef} type="file" accept="image/*,.pdf,.doc,.docx,.txt,.csv,.tsv,.json,.xml,.yaml,.yml,.md,.py,.js,.ts,.jsx,.tsx,.html,.css,.sql,.sh,.go,.rs,.java,.c,.cpp,.rb,.php,.swift,.kt,.r,.xlsx,.xls" multiple className="hidden" onChange={handleFileSelect} />
-                    <Button
-                      type="button" variant="ghost" size="icon"
-                      className="h-[44px] w-[44px] rounded-xl flex-shrink-0 text-muted-foreground hover:text-foreground"
-                      onClick={() => fileInputRef.current?.click()}
-                      disabled={isLoading || noProviders} title="Attach files"
-                    >
-                      <Paperclip className="h-4 w-4" />
-                    </Button>
-                    <Textarea
-                      ref={inputRef}
-                      value={chatInput}
-                      onChange={(e) => {
-                        handleInputChange(e.target.value);
-                        const el = e.target;
-                        el.style.height = "auto";
-                        el.style.height = `${Math.min(el.scrollHeight, 200)}px`;
-                      }}
-                      onKeyDown={handleKeyDown}
-                      placeholder="Type / for commands, or send a message..."
-                      className="min-h-[44px] max-h-[200px] resize-none text-sm rounded-xl overflow-y-auto"
-                      rows={1}
-                      disabled={isLoading || noProviders}
-                    />
-                    <Button type="submit" size="icon" className="h-[44px] w-[44px] rounded-xl flex-shrink-0" disabled={(!chatInput.trim() && pendingImages.length === 0 && pendingFiles.length === 0) || isLoading || noProviders}>
-                      {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                    </Button>
-                  </form>
-                  <p className="text-center text-[10px] text-muted-foreground mt-2 max-w-3xl mx-auto">
-                    Messages are scanned by your workspace&apos;s DLP rules before reaching the AI provider. Your API key, your data.
-                  </p>
+                    {/* Composer — input with inline buttons */}
+                    <form onSubmit={(e) => { e.preventDefault(); sendMessage(); }} className="relative">
+                      <input ref={fileInputRef} type="file" accept="image/*,.pdf,.doc,.docx,.txt,.csv,.tsv,.json,.xml,.yaml,.yml,.md,.py,.js,.ts,.jsx,.tsx,.html,.css,.sql,.sh,.go,.rs,.java,.c,.cpp,.rb,.php,.swift,.kt,.r,.xlsx,.xls" multiple className="hidden" onChange={handleFileSelect} />
+                      <div className="flex items-end rounded-2xl border bg-background shadow-sm focus-within:ring-1 focus-within:ring-primary/30 focus-within:border-primary/30 transition-all">
+                        <button
+                          type="button"
+                          className="p-3 text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={isLoading || noProviders}
+                          title="Attach files"
+                        >
+                          <Paperclip className="h-5 w-5" />
+                        </button>
+                        <Textarea
+                          ref={inputRef}
+                          value={chatInput}
+                          onChange={(e) => {
+                            handleInputChange(e.target.value);
+                            const el = e.target;
+                            el.style.height = "auto";
+                            el.style.height = `${Math.min(el.scrollHeight, 200)}px`;
+                          }}
+                          onKeyDown={handleKeyDown}
+                          placeholder="Message TeamPrompt..."
+                          className="min-h-[52px] max-h-[200px] resize-none text-[15px] border-0 shadow-none focus-visible:ring-0 rounded-none py-3.5 px-0 overflow-y-auto"
+                          rows={1}
+                          disabled={isLoading || noProviders}
+                        />
+                        <button
+                          type="submit"
+                          className={cn(
+                            "p-3 flex-shrink-0 transition-colors",
+                            (!chatInput.trim() && pendingImages.length === 0 && pendingFiles.length === 0) || isLoading || noProviders
+                              ? "text-muted-foreground/30"
+                              : "text-primary hover:text-primary/80"
+                          )}
+                          disabled={(!chatInput.trim() && pendingImages.length === 0 && pendingFiles.length === 0) || isLoading || noProviders}
+                        >
+                          {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
+                        </button>
+                      </div>
+                    </form>
+                    <p className="text-center text-[10px] text-muted-foreground/50 mt-2">
+                      Protected by DLP · Type / for commands
+                    </p>
+                  </div>
                 </div>
               </>
             )}
@@ -2169,119 +2115,115 @@ export default function ChatPage() {
       : message.id && !isNaN(Number(message.id))
         ? new Date(Number(message.id)).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
         : "";
-    return (
-      <div
-        key={message.id}
-        className={cn("group flex gap-3 mb-6 animate-in fade-in-0 slide-in-from-bottom-2 duration-300", message.role === "user" ? "justify-end" : "")}
-      >
-        {message.role === "assistant" && (
-          <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-1">
-            <Bot className="h-4 w-4 text-primary" />
-          </div>
-        )}
-        <div className="max-w-[85%] min-w-0">
-          <div className={cn(
-            "rounded-2xl px-4 py-3 text-sm leading-relaxed",
-            message.role === "user"
-              ? "bg-primary text-primary-foreground"
-              : "bg-muted/80 dark:bg-zinc-800/80 border border-transparent dark:border-zinc-700/50"
-          )}>
-            {message.images && message.images.length > 0 && (
-              <div className="flex gap-2 flex-wrap mb-2">
-                {message.images.map((img, imgIdx) => (
-                  <img key={imgIdx} src={img} alt={`Attachment ${imgIdx + 1}`} className="max-h-48 rounded-lg object-contain" />
-                ))}
-              </div>
-            )}
-            {message.files && message.files.length > 0 && (
-              <div className="flex gap-2 flex-wrap mb-2">
-                {message.files.map((f, fIdx) => (
-                  <div key={fIdx} className="flex items-center gap-1.5 bg-white/10 dark:bg-white/5 rounded-md px-2 py-1">
-                    <FileText className="h-3.5 w-3.5 flex-shrink-0 opacity-70" />
-                    <span className="text-xs font-medium">{f.name}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-            {message.role === "assistant" ? (
-              <div className="prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_pre]:relative [&_pre]:bg-zinc-900 [&_pre]:text-zinc-100 [&_pre]:rounded-lg [&_pre]:p-3 [&_pre]:text-xs [&_pre]:overflow-x-auto [&_code]:text-xs [&_code]:bg-muted [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_pre_code]:bg-transparent [&_pre_code]:p-0">
-                <ReactMarkdown
-                  components={{
-                    pre: ({ children, ...props }) => (
-                      <div className="relative group/code">
-                        <pre {...props}>{children}</pre>
-                        <button
-                          className="absolute top-2 right-2 p-1.5 rounded-md bg-zinc-700/80 text-zinc-300 hover:bg-zinc-600 hover:text-white opacity-0 group-hover/code:opacity-100 transition-opacity"
-                          onClick={() => {
-                            const code = (children as React.ReactElement)?.props?.children;
-                            if (typeof code === "string") { navigator.clipboard.writeText(code); toast.success("Copied!"); }
-                          }}
-                        >
-                          <Copy className="h-3 w-3" />
-                        </button>
-                      </div>
-                    ),
-                  }}
-                >{message.content}</ReactMarkdown>
-              </div>
-            ) : (
+    // ── User message ──
+    if (message.role === "user") {
+      return (
+        <div key={message.id} className="group flex justify-end mb-8 animate-in fade-in-0 slide-in-from-bottom-2 duration-300">
+          <div className="max-w-[75%] min-w-0">
+            <div className="rounded-2xl bg-primary text-primary-foreground px-5 py-3 text-[15px] leading-7">
+              {message.images && message.images.length > 0 && (
+                <div className="flex gap-2 flex-wrap mb-2">
+                  {message.images.map((img, imgIdx) => (
+                    <img key={imgIdx} src={img} alt={`Attachment ${imgIdx + 1}`} className="max-h-48 rounded-lg object-contain" />
+                  ))}
+                </div>
+              )}
+              {message.files && message.files.length > 0 && (
+                <div className="flex gap-2 flex-wrap mb-2">
+                  {message.files.map((f, fIdx) => (
+                    <div key={fIdx} className="flex items-center gap-1.5 bg-white/10 rounded-md px-2 py-1">
+                      <FileText className="h-3.5 w-3.5 flex-shrink-0 opacity-70" />
+                      <span className="text-xs font-medium">{f.name}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
               <p className="whitespace-pre-wrap">{message.content}</p>
-            )}
-          </div>
-          {/* Message actions + timestamp */}
-          <div className="flex items-center gap-1 mt-1">
-            {/* Timestamp — always visible but subtle */}
-            {timestamp && <span className="text-[10px] text-muted-foreground/40 mr-1">{timestamp}</span>}
-            {/* Actions — visible on hover */}
-            <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-              <button className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors" title="Copy" onClick={() => copyMessage(message.content, message.id)}>
-                {copiedId === message.id ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
-              </button>
-              {message.role === "assistant" && idx !== undefined && idx === messages.length - 1 && !isLoading && (
-                <button className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors" title="Regenerate" onClick={regenerateLastResponse}>
-                  <RefreshCw className="h-3 w-3" />
+            </div>
+            <div className="flex items-center gap-1 mt-1.5 justify-end">
+              {timestamp && <span className="text-[10px] text-muted-foreground/40">{timestamp}</span>}
+              <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                <button className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors" title="Copy" onClick={() => copyMessage(message.content, message.id)}>
+                  {copiedId === message.id ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
                 </button>
-              )}
-              {message.role === "assistant" && (
-                <>
-                  <button
-                    className={cn("p-1 rounded transition-colors", rating === 1 ? "text-green-500 bg-green-500/10" : "text-muted-foreground hover:text-green-500 hover:bg-muted")}
-                    title="Good response" onClick={() => rateMessage(message.id, 1)}
-                  >
-                    <ThumbsUp className="h-3 w-3" />
-                  </button>
-                  <button
-                    className={cn("p-1 rounded transition-colors", rating === -1 ? "text-red-500 bg-red-500/10" : "text-muted-foreground hover:text-red-500 hover:bg-muted")}
-                    title="Bad response" onClick={() => rateMessage(message.id, -1)}
-                  >
-                    <ThumbsDown className="h-3 w-3" />
-                  </button>
-                </>
-              )}
+              </div>
             </div>
           </div>
         </div>
-        {message.role === "user" && (
-          <Avatar className="h-7 w-7 flex-shrink-0 mt-1">
-            {currentMember?.avatar_url && <AvatarImage src={currentMember.avatar_url} alt={currentMember?.name || "You"} />}
-            <AvatarFallback className="bg-foreground/10 text-foreground/70 text-xs font-semibold">{userInitial}</AvatarFallback>
-          </Avatar>
-        )}
+      );
+    }
+
+    // ── Assistant message — no bubble, clean document-like rendering ──
+    return (
+      <div key={message.id} className="group mb-8 animate-in fade-in-0 slide-in-from-bottom-2 duration-300">
+        <div className="flex gap-3">
+          <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <Bot className="h-4 w-4 text-primary" />
+          </div>
+          <div className="flex-1 min-w-0 pt-0.5">
+            <div className="prose dark:prose-invert max-w-none text-[15px] leading-7 [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_pre]:relative [&_pre]:bg-zinc-900 [&_pre]:text-zinc-100 [&_pre]:rounded-xl [&_pre]:p-4 [&_pre]:text-[13px] [&_pre]:overflow-x-auto [&_pre]:my-4 [&_code]:text-[13px] [&_code]:bg-muted [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded-md [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:mt-6 [&_h2]:mb-3 [&_h3]:text-base [&_h3]:font-semibold [&_h3]:mt-5 [&_h3]:mb-2 [&_p]:mb-3 [&_ul]:mb-3 [&_ol]:mb-3 [&_li]:mb-1 [&_blockquote]:border-l-2 [&_blockquote]:border-primary/30 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-muted-foreground [&_table]:text-sm [&_th]:text-left [&_th]:font-semibold [&_td]:py-1.5 [&_td]:pr-4">
+              <ReactMarkdown
+                components={{
+                  pre: ({ children, ...props }) => (
+                    <div className="relative group/code">
+                      <pre {...props}>{children}</pre>
+                      <button
+                        className="absolute top-3 right-3 p-1.5 rounded-md bg-zinc-700/80 text-zinc-300 hover:bg-zinc-600 hover:text-white opacity-0 group-hover/code:opacity-100 transition-opacity"
+                        onClick={() => {
+                          const code = (children as React.ReactElement)?.props?.children;
+                          if (typeof code === "string") { navigator.clipboard.writeText(code); toast.success("Copied!"); }
+                        }}
+                      >
+                        <Copy className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ),
+                }}
+              >{message.content}</ReactMarkdown>
+            </div>
+            {/* Actions */}
+            <div className="flex items-center gap-1 mt-2">
+              {timestamp && <span className="text-[10px] text-muted-foreground/40 mr-1">{timestamp}</span>}
+              <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors" title="Copy" onClick={() => copyMessage(message.content, message.id)}>
+                  {copiedId === message.id ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
+                </button>
+                {idx !== undefined && idx === messages.length - 1 && !isLoading && (
+                  <button className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors" title="Regenerate" onClick={regenerateLastResponse}>
+                    <RefreshCw className="h-3 w-3" />
+                  </button>
+                )}
+                <button
+                  className={cn("p-1 rounded transition-colors", rating === 1 ? "text-green-500 bg-green-500/10" : "text-muted-foreground hover:text-green-500 hover:bg-muted")}
+                  title="Good response" onClick={() => rateMessage(message.id, 1)}
+                >
+                  <ThumbsUp className="h-3 w-3" />
+                </button>
+                <button
+                  className={cn("p-1 rounded transition-colors", rating === -1 ? "text-red-500 bg-red-500/10" : "text-muted-foreground hover:text-red-500 hover:bg-muted")}
+                  title="Bad response" onClick={() => rateMessage(message.id, -1)}
+                >
+                  <ThumbsDown className="h-3 w-3" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 
   function renderLoadingDots() {
     return (
-      <div className="flex gap-3 mb-6">
-        <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-1">
+      <div className="flex gap-3 mb-8">
+        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
           <Bot className="h-4 w-4 text-primary" />
         </div>
-        <div className="bg-muted rounded-2xl px-4 py-3">
+        <div className="pt-2">
           <div className="flex items-center gap-1.5">
-            <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground/40 animate-bounce [animation-delay:0ms]" />
-            <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground/40 animate-bounce [animation-delay:150ms]" />
-            <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground/40 animate-bounce [animation-delay:300ms]" />
+            <div className="h-2 w-2 rounded-full bg-muted-foreground/30 animate-bounce [animation-delay:0ms]" />
+            <div className="h-2 w-2 rounded-full bg-muted-foreground/30 animate-bounce [animation-delay:150ms]" />
+            <div className="h-2 w-2 rounded-full bg-muted-foreground/30 animate-bounce [animation-delay:300ms]" />
           </div>
         </div>
       </div>

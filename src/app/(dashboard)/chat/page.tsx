@@ -1206,57 +1206,54 @@ export default function ChatPage() {
   // ── Render conversation item ──
   function renderConvItem(conv: Conversation) {
     const convCollections = collections.filter((c) => conv.tag_ids?.includes(c.id));
+    const hoverInfo = [conv.model, new Date(conv.updated_at).toLocaleDateString()].filter(Boolean).join(" · ");
     return (
       <div
         key={conv.id}
         className={cn(
-          "group flex items-center gap-2.5 rounded-lg px-3 py-2.5 cursor-pointer transition-colors",
+          "group flex items-center gap-2 rounded-lg px-3 py-2 cursor-pointer transition-colors",
           activeConvId === conv.id ? "bg-primary/10 text-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"
         )}
         onClick={() => loadConversation(conv.id)}
         onDoubleClick={(e) => { e.stopPropagation(); setEditingTitle(conv.id); setEditTitleValue(conv.title); }}
         onContextMenu={(e) => openContextMenu(e, conv.id)}
+        title={hoverInfo}
       >
         {editingTitle === conv.id ? (
           <div className="flex-1 flex items-center gap-2 min-w-0">
             <input
-              className="flex-1 bg-transparent text-sm border-b border-primary outline-none min-w-0 py-0.5"
+              className="flex-1 bg-transparent text-[13px] border-b border-primary outline-none min-w-0 py-0.5"
               value={editTitleValue}
               onChange={(e) => setEditTitleValue(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter") renameConversation(conv.id, editTitleValue); if (e.key === "Escape") setEditingTitle(null); }}
               autoFocus
               onClick={(e) => e.stopPropagation()}
             />
-            <button className="p-1 hover:text-primary" onClick={(e) => { e.stopPropagation(); renameConversation(conv.id, editTitleValue); }}><Check className="h-4 w-4" /></button>
-            <button className="p-1 hover:text-foreground" onClick={(e) => { e.stopPropagation(); setEditingTitle(null); }}><X className="h-4 w-4" /></button>
+            <button className="p-1 hover:text-primary" onClick={(e) => { e.stopPropagation(); renameConversation(conv.id, editTitleValue); }}><Check className="h-3.5 w-3.5" /></button>
+            <button className="p-1 hover:text-foreground" onClick={(e) => { e.stopPropagation(); setEditingTitle(null); }}><X className="h-3.5 w-3.5" /></button>
           </div>
         ) : (
           <>
-            <div className="flex-1 min-w-0 overflow-hidden">
-              <div className="flex items-center gap-1.5 min-w-0">
-                <span className="truncate text-sm font-medium flex-1 min-w-0" title={conv.title}>{conv.title}</span>
-                {isLoading && activeConvId === conv.id && (
-                  <span className="h-2 w-2 rounded-full bg-primary animate-pulse flex-shrink-0" title="Generating..." />
-                )}
-                {conv.pinned && <Star className="h-3 w-3 fill-amber-400 text-amber-400 flex-shrink-0" />}
-              </div>
-              <div className="flex items-center gap-1.5 mt-0.5">
-                <span className="text-xs text-muted-foreground truncate">{conv.model?.split("-").slice(0, 2).join("-")}</span>
-                {convCollections.length > 0 && (
-                  <div className="flex gap-1 flex-shrink-0">
-                    {convCollections.slice(0, 3).map((col) => (
-                      <span key={col.id} className="h-2 w-2 rounded-full" style={{ backgroundColor: col.color }} title={col.name} />
-                    ))}
-                  </div>
-                )}
-              </div>
+            <div className="flex-1 min-w-0 overflow-hidden flex items-center gap-1.5">
+              {conv.pinned && <Star className="h-3 w-3 fill-amber-400 text-amber-400 flex-shrink-0" />}
+              <span className="truncate text-[13px] flex-1 min-w-0">{conv.title}</span>
+              {isLoading && activeConvId === conv.id && (
+                <span className="h-2 w-2 rounded-full bg-primary animate-pulse flex-shrink-0" />
+              )}
+              {convCollections.length > 0 && (
+                <div className="flex gap-0.5 flex-shrink-0">
+                  {convCollections.slice(0, 2).map((col) => (
+                    <span key={col.id} className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: col.color }} title={col.name} />
+                  ))}
+                </div>
+              )}
             </div>
             <button
-              className="flex-shrink-0 opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-destructive/10 hover:text-destructive transition-all"
+              className="flex-shrink-0 opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-destructive/10 hover:text-destructive transition-all"
               title="Delete"
               onClick={(e) => { e.stopPropagation(); deleteConversation(conv.id); }}
             >
-              <Trash2 className="h-3.5 w-3.5" />
+              <Trash2 className="h-3 w-3" />
             </button>
           </>
         )}
@@ -1443,6 +1440,10 @@ export default function ChatPage() {
           <>
             <div className="fixed inset-0 z-40" onClick={() => { setContextMenu(null); setContextSubmenu(null); }} onContextMenu={(e) => { e.preventDefault(); setContextMenu(null); setContextSubmenu(null); }} />
             <div className="fixed z-50 bg-popover border rounded-xl shadow-2xl py-1.5 w-[200px]" style={{ left: menuX, top: menuY }} onClick={(e) => e.stopPropagation()}>
+              {/* Model & date info */}
+              <div className="px-3 py-1.5 text-[10px] text-muted-foreground/60 truncate border-b mb-1">
+                {conv.model} · {new Date(conv.updated_at).toLocaleDateString()}
+              </div>
               <button className="flex items-center gap-3 w-full px-3 py-2 text-sm hover:bg-muted transition-colors" onClick={() => { togglePin(conv.id); setContextMenu(null); }}>
                 <Star className={cn("h-4 w-4", conv.pinned && "fill-amber-400 text-amber-400")} />
                 {conv.pinned ? "Remove from Favorites" : "Add to Favorites"}

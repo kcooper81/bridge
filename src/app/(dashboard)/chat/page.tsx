@@ -213,6 +213,7 @@ export default function ChatPage() {
   const [editingCollection, setEditingCollection] = useState<string | null>(null);
   const [editCollectionName, setEditCollectionName] = useState("");
   const [adminContext, setAdminContext] = useState<string | null>(null);
+  const [sidebarTab, setSidebarTab] = useState<"chats" | "favorites" | "collections">("chats");
   const [contextMenu, setContextMenu] = useState<{ convId: string; x: number; y: number } | null>(null);
   const [collectionContextMenu, setCollectionContextMenu] = useState<{ collectionId: string; x: number; y: number } | null>(null);
   const [contextSubmenu, setContextSubmenu] = useState<"collections" | null>(null);
@@ -1029,8 +1030,8 @@ export default function ChatPage() {
     <div className="flex h-[calc(100vh-64px)] overflow-hidden -m-4 md:-m-6">
       {/* ─── Sidebar ─── */}
       <div className={cn(
-        "border-r bg-muted/30 flex flex-col transition-all duration-200 overflow-hidden",
-        sidebarOpen ? "w-80 min-w-[320px] max-w-[320px]" : "w-0 min-w-0"
+        "border-r bg-muted/30 flex flex-col transition-all duration-200",
+        sidebarOpen ? "w-[320px] min-w-[320px] max-w-[320px]" : "w-0 min-w-0 overflow-hidden"
       )}>
         {/* Top actions */}
         <div className="p-3 border-b flex-shrink-0">
@@ -1052,91 +1053,129 @@ export default function ChatPage() {
           )}
         </div>
 
-        {/* Main list */}
+        {/* Tabs */}
+        <div className="flex border-b flex-shrink-0">
+          {([
+            { id: "chats" as const, label: "Chats", icon: MessageSquare, count: conversations.length },
+            { id: "favorites" as const, label: "Favorites", icon: Star, count: pinnedConvs.length },
+            { id: "collections" as const, label: "Collections", icon: Circle, count: sortedCollections.length },
+          ]).map((tab) => (
+            <button
+              key={tab.id}
+              className={cn(
+                "flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium transition-colors relative",
+                sidebarTab === tab.id ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+              )}
+              onClick={() => { setSidebarTab(tab.id); setActiveCollection(null); }}
+            >
+              <tab.icon className={cn("h-3.5 w-3.5", sidebarTab === tab.id && tab.id === "favorites" && "fill-amber-400 text-amber-400")} />
+              {tab.label}
+              {tab.count > 0 && (
+                <span className={cn(
+                  "text-[10px] tabular-nums min-w-[18px] h-[18px] flex items-center justify-center rounded-full",
+                  sidebarTab === tab.id ? "bg-primary/10 text-primary" : "text-muted-foreground/50"
+                )}>{tab.count}</span>
+              )}
+              {sidebarTab === tab.id && <div className="absolute bottom-0 left-2 right-2 h-0.5 bg-primary rounded-full" />}
+            </button>
+          ))}
+        </div>
+
+        {/* Tab content */}
         <ScrollArea className="flex-1">
-          <div className="p-2">
-            {/* ── Collection view: back button + filtered list ── */}
-            {activeCollection ? (() => {
-              const col = collections.find((c) => c.id === activeCollection);
-              return (
-                <div className="space-y-2">
-                  <button
-                    className="flex items-center gap-2.5 px-3 py-2.5 text-sm font-medium text-foreground hover:text-primary transition-colors w-full rounded-xl border bg-background/50"
-                    onClick={() => setActiveCollection(null)}
-                  >
-                    <ArrowLeft className="h-4 w-4" />
-                    <span className="h-3 w-3 rounded-full flex-shrink-0" style={{ backgroundColor: col?.color }} />
-                    <span className="flex-1 text-left">{col?.name || "Collection"}</span>
-                    <span className="text-xs text-muted-foreground">{filteredConversations.length} chats</span>
-                  </button>
-                  <div className="space-y-0.5">
-                    {filteredConversations.length === 0 && (
-                      <p className="text-sm text-muted-foreground text-center py-8">No chats in this collection yet.<br />Right-click any chat to add it.</p>
-                    )}
-                    {filteredConversations.map(renderConvItem)}
-                  </div>
-                </div>
-              );
-            })() : (
-              /* ── Default view: favorites card + collections card + conversations ── */
-              <div className="space-y-3">
+          <div className="p-2 overflow-hidden">
+
+            {/* ── Chats tab ── */}
+            {sidebarTab === "chats" && (
+              <div className="space-y-0.5">
                 {conversations.length === 0 && !loadingConvs && (
                   <p className="text-sm text-muted-foreground text-center py-12">No conversations yet</p>
                 )}
-
-                {/* ★ Favorites card */}
-                {pinnedConvs.length > 0 && (
-                  <div className="rounded-xl border border-amber-200/50 dark:border-amber-800/30 bg-amber-50/50 dark:bg-amber-950/20 p-1.5">
-                    <div className="flex items-center gap-1.5 px-2.5 py-1.5">
-                      <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500" />
-                      <span className="text-xs font-semibold text-amber-700 dark:text-amber-400 uppercase tracking-wider">Favorites</span>
-                      <span className="text-[10px] text-amber-500/60 ml-auto">{pinnedConvs.length}</span>
-                    </div>
-                    <div className="space-y-0.5">
-                      {pinnedConvs.map(renderConvItem)}
-                    </div>
-                  </div>
-                )}
-
-                {/* ● Collections card */}
-                {sortedCollections.length > 0 && (
-                  <div className="rounded-xl border border-primary/10 bg-primary/[0.02] dark:bg-primary/[0.04] p-1.5">
-                    <div className="flex items-center gap-1.5 px-2.5 py-1.5">
-                      <Circle className="h-3.5 w-3.5 text-primary/60" />
-                      <span className="text-xs font-semibold text-primary/70 uppercase tracking-wider">Collections</span>
-                      <button
-                        className="ml-auto p-0.5 text-primary/40 hover:text-primary transition-colors"
-                        title="New collection"
-                        onClick={() => setShowNewCollection(true)}
-                      >
-                        <Plus className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
-                    <div className="space-y-0.5">
-                      {sortedCollections.map((col) => (
-                        <button
-                          key={col.id}
-                          className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-sm text-muted-foreground hover:bg-background/80 hover:text-foreground transition-colors"
-                          onClick={() => setActiveCollection(col.id)}
-                          onContextMenu={(e) => { e.preventDefault(); setCollectionContextMenu({ collectionId: col.id, x: e.clientX, y: e.clientY }); }}
-                        >
-                          <span className="h-3 w-3 rounded-full flex-shrink-0 shadow-sm" style={{ backgroundColor: col.color }} />
-                          <span className="flex-1 text-left truncate font-medium">{col.name}</span>
-                          <span className="text-xs text-muted-foreground/50 tabular-nums">{collectionCounts.get(col.id) || 0}</span>
-                          <ChevronRight className="h-3 w-3 text-muted-foreground/30" />
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Conversations by time */}
                 {todayConvs.length > 0 && <ConvSection label="Today">{todayConvs.map(renderConvItem)}</ConvSection>}
                 {yesterdayConvs.length > 0 && <ConvSection label="Yesterday">{yesterdayConvs.map(renderConvItem)}</ConvSection>}
                 {weekConvs.length > 0 && <ConvSection label="Previous 7 Days" collapsible defaultOpen={false}>{weekConvs.map(renderConvItem)}</ConvSection>}
                 {olderConvs.length > 0 && <ConvSection label="Older" collapsible defaultOpen={false}>{olderConvs.map(renderConvItem)}</ConvSection>}
               </div>
             )}
+
+            {/* ── Favorites tab ── */}
+            {sidebarTab === "favorites" && (
+              <div className="space-y-0.5">
+                {pinnedConvs.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Star className="h-8 w-8 text-amber-300/40 mx-auto mb-3" />
+                    <p className="text-sm text-muted-foreground">No favorites yet</p>
+                    <p className="text-xs text-muted-foreground/60 mt-1">Right-click a chat to add it</p>
+                  </div>
+                ) : (
+                  pinnedConvs.map(renderConvItem)
+                )}
+              </div>
+            )}
+
+            {/* ── Collections tab ── */}
+            {sidebarTab === "collections" && !activeCollection && (
+              <div className="space-y-1">
+                {sortedCollections.length === 0 && (
+                  <div className="text-center py-12">
+                    <Circle className="h-8 w-8 text-muted-foreground/30 mx-auto mb-3" />
+                    <p className="text-sm text-muted-foreground">No collections yet</p>
+                    <p className="text-xs text-muted-foreground/60 mt-1 mb-4">Group related chats together</p>
+                    <Button variant="outline" size="sm" className="text-xs gap-1.5" onClick={() => setShowNewCollection(true)}>
+                      <Plus className="h-3.5 w-3.5" />
+                      New Collection
+                    </Button>
+                  </div>
+                )}
+                {sortedCollections.map((col) => (
+                  <button
+                    key={col.id}
+                    className="flex items-center gap-3 w-full px-3 py-3 rounded-xl text-sm hover:bg-muted transition-colors"
+                    onClick={() => setActiveCollection(col.id)}
+                    onContextMenu={(e) => { e.preventDefault(); setCollectionContextMenu({ collectionId: col.id, x: e.clientX, y: e.clientY }); }}
+                  >
+                    <span className="h-3.5 w-3.5 rounded-full flex-shrink-0 shadow-sm" style={{ backgroundColor: col.color }} />
+                    <span className="flex-1 text-left truncate font-medium">{col.name}</span>
+                    <span className="text-xs text-muted-foreground/50 tabular-nums">{collectionCounts.get(col.id) || 0}</span>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground/30" />
+                  </button>
+                ))}
+                {sortedCollections.length > 0 && (
+                  <button
+                    className="flex items-center gap-3 w-full px-3 py-3 rounded-xl text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                    onClick={() => setShowNewCollection(true)}
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                    <span>New Collection</span>
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* ── Collection detail view ── */}
+            {sidebarTab === "collections" && activeCollection && (() => {
+              const col = collections.find((c) => c.id === activeCollection);
+              return (
+                <div className="space-y-1">
+                  <button
+                    className="flex items-center gap-2.5 px-3 py-2.5 text-sm font-medium text-foreground hover:text-primary transition-colors w-full rounded-xl border bg-background/50"
+                    onClick={() => setActiveCollection(null)}
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                    <span className="h-3 w-3 rounded-full flex-shrink-0" style={{ backgroundColor: col?.color }} />
+                    <span className="flex-1 text-left truncate">{col?.name || "Collection"}</span>
+                    <span className="text-xs text-muted-foreground">{filteredConversations.length}</span>
+                  </button>
+                  <div className="space-y-0.5">
+                    {filteredConversations.length === 0 && (
+                      <p className="text-sm text-muted-foreground text-center py-8">No chats in this collection yet.<br /><span className="text-xs">Right-click any chat to add it.</span></p>
+                    )}
+                    {filteredConversations.map(renderConvItem)}
+                  </div>
+                </div>
+              );
+            })()}
+
           </div>
         </ScrollArea>
       </div>

@@ -40,9 +40,8 @@ import {
   Pin,
   BarChart3,
   Paperclip,
-  FolderPlus,
-  Folder,
-  Tag,
+  ArrowLeft,
+  Circle,
   ThumbsUp,
   ThumbsDown,
   Sparkles,
@@ -90,17 +89,10 @@ interface Conversation {
   updated_at: string;
   pinned?: boolean;
   folder_id?: string | null;
-  tag_ids?: string[];
+  tag_ids?: string[]; // collection IDs (reusing tag_ids from DB)
 }
 
-interface ChatFolder {
-  id: string;
-  name: string;
-  color: string;
-  sort_order: number;
-}
-
-interface ChatTag {
+interface Collection {
   id: string;
   name: string;
   color: string;
@@ -143,14 +135,6 @@ interface ChatMsg {
   rating?: number; // -1, 0, 1
 }
 
-interface SearchResult {
-  messageId: string;
-  conversationId: string;
-  conversationTitle: string;
-  role: string;
-  snippet: string;
-  created_at: string;
-}
 
 // ── Slash command definitions ──
 
@@ -219,22 +203,19 @@ export default function ChatPage() {
   const [chatInput, setChatInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  // New feature state
-  const [folders, setFolders] = useState<ChatFolder[]>([]);
-  const [tags, setTags] = useState<ChatTag[]>([]);
+  // Collections & organization
+  const [collections, setCollections] = useState<Collection[]>([]);
   const [presets, setPresets] = useState<ChatPreset[]>([]);
-  const [newFolderName, setNewFolderName] = useState("");
-  const [showNewFolder, setShowNewFolder] = useState(false);
-  const [newTagName, setNewTagName] = useState("");
-  const [newTagColor, setNewTagColor] = useState(TAG_COLORS[6]);
-  const [showNewTag, setShowNewTag] = useState(false);
-  const [searchMode] = useState<"title" | "fulltext">("title");
-  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
-  const [searchingFullText, setSearchingFullText] = useState(false);
+  const [activeCollection, setActiveCollection] = useState<string | null>(null); // viewing a collection
+  const [showNewCollection, setShowNewCollection] = useState(false);
+  const [newCollectionName, setNewCollectionName] = useState("");
+  const [newCollectionColor, setNewCollectionColor] = useState(TAG_COLORS[6]);
+  const [editingCollection, setEditingCollection] = useState<string | null>(null);
+  const [editCollectionName, setEditCollectionName] = useState("");
   const [adminContext, setAdminContext] = useState<string | null>(null);
   const [contextMenu, setContextMenu] = useState<{ convId: string; x: number; y: number } | null>(null);
-  const [contextSubmenu, setContextSubmenu] = useState<"tags" | "folders" | null>(null);
-  const activeFilterTag: string | null = null;
+  const [collectionContextMenu, setCollectionContextMenu] = useState<{ collectionId: string; x: number; y: number } | null>(null);
+  const [contextSubmenu, setContextSubmenu] = useState<"collections" | null>(null);
   const [messageRatings, setMessageRatings] = useState<Record<string, number>>({});
   const [compareMode, setCompareMode] = useState(false);
   const [compareModel, setCompareModel] = useState("");
@@ -720,19 +701,11 @@ export default function ChatPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const loadFolders = useCallback(async () => {
-    try {
-      const res = await fetch("/api/chat/folders");
-      const data = await res.json();
-      setFolders(data.folders || []);
-    } catch { /* non-critical */ }
-  }, []);
-
-  const loadTags = useCallback(async () => {
+  const loadCollections = useCallback(async () => {
     try {
       const res = await fetch("/api/chat/tags");
       const data = await res.json();
-      setTags(data.tags || []);
+      setCollections(data.tags || []);
     } catch { /* non-critical */ }
   }, []);
 
@@ -747,10 +720,9 @@ export default function ChatPage() {
   useEffect(() => {
     loadConversations();
     loadProviders();
-    loadFolders();
-    loadTags();
+    loadCollections();
     loadPresets();
-  }, [loadConversations, loadProviders, loadFolders, loadTags, loadPresets]);
+  }, [loadConversations, loadProviders, loadCollections, loadPresets]);
 
   // Close slash menu on click outside
   useEffect(() => {
@@ -769,25 +741,8 @@ export default function ChatPage() {
   useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
   useEffect(() => { inputRef.current?.focus(); }, [activeConvId]);
 
-  // ── Full-text search ──
-  async function fullTextSearch(query: string) {
-    if (query.length < 2) { setSearchResults([]); return; }
-    setSearchingFullText(true);
-    try {
-      const res = await fetch(`/api/chat/search?q=${encodeURIComponent(query)}`);
-      const data = await res.json();
-      setSearchResults(data.results || []);
-    } catch { /* non-critical */ } finally { setSearchingFullText(false); }
-  }
-
-  // Debounced full-text search
-  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   function handleSearchChange(value: string) {
     setSearchQuery(value);
-    if (searchMode === "fulltext") {
-      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
-      searchTimeoutRef.current = setTimeout(() => fullTextSearch(value), 400);
-    }
   }
 
   // ── Conversation operations ──
@@ -862,75 +817,61 @@ export default function ChatPage() {
     }).catch(() => {});
   }
 
-  async function moveToFolder(convId: string, folderId: string | null) {
-    setConversations((prev) => prev.map((c) => c.id === convId ? { ...c, folder_id: folderId } : c));
-    try {
-      await fetch(`/api/chat/conversations/${convId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ folder_id: folderId }),
-      });
-    } catch { toast.error("Failed to move"); }
-  }
-
-  // ── Folder operations ──
-  async function createFolder() {
-    if (!newFolderName.trim()) return;
-    try {
-      const res = await fetch("/api/chat/folders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: newFolderName.trim() }),
-      });
-      const data = await res.json();
-      if (data.folder) setFolders((prev) => [...prev, data.folder]);
-      setNewFolderName("");
-      setShowNewFolder(false);
-    } catch { toast.error("Failed to create folder"); }
-  }
-
-  async function deleteFolder(folderId: string) {
-    try {
-      await fetch("/api/chat/folders", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: folderId }),
-      });
-      setFolders((prev) => prev.filter((f) => f.id !== folderId));
-      setConversations((prev) => prev.map((c) => c.folder_id === folderId ? { ...c, folder_id: null } : c));
-    } catch { toast.error("Failed to delete folder"); }
-  }
-
-  // ── Tag operations ──
-  async function createTag() {
-    if (!newTagName.trim()) return;
+  // ── Collection operations ──
+  async function createCollection() {
+    if (!newCollectionName.trim()) return;
     try {
       const res = await fetch("/api/chat/tags", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: newTagName.trim(), color: newTagColor }),
+        body: JSON.stringify({ name: newCollectionName.trim(), color: newCollectionColor }),
       });
       const data = await res.json();
-      if (data.tag) setTags((prev) => [...prev, data.tag]);
-      setNewTagName("");
-      setShowNewTag(false);
-    } catch { toast.error("Failed to create tag"); }
+      if (data.tag) setCollections((prev) => [...prev, data.tag]);
+      setNewCollectionName("");
+      setNewCollectionColor(TAG_COLORS[6]);
+      setShowNewCollection(false);
+    } catch { toast.error("Failed to create collection"); }
   }
 
-  async function toggleConvTag(convId: string, tagId: string) {
+  async function deleteCollection(collectionId: string) {
+    try {
+      await fetch("/api/chat/tags", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: collectionId }),
+      });
+      setCollections((prev) => prev.filter((c) => c.id !== collectionId));
+      setConversations((prev) => prev.map((c) => ({
+        ...c,
+        tag_ids: (c.tag_ids || []).filter((t) => t !== collectionId),
+      })));
+      if (activeCollection === collectionId) setActiveCollection(null);
+      setCollectionContextMenu(null);
+    } catch { toast.error("Failed to delete collection"); }
+  }
+
+  async function renameCollection(collectionId: string, name: string) {
+    setCollections((prev) => prev.map((c) => c.id === collectionId ? { ...c, name } : c));
+    setEditingCollection(null);
+    // Tags API doesn't have a PATCH — use delete + recreate approach or accept local-only rename
+    // For now, optimistic update only. A PATCH endpoint could be added later.
+  }
+
+  async function toggleConvCollection(convId: string, collectionId: string) {
     const conv = conversations.find((c) => c.id === convId);
     if (!conv) return;
-    const hasTag = conv.tag_ids?.includes(tagId);
+    const hasIt = conv.tag_ids?.includes(collectionId);
     setConversations((prev) => prev.map((c) => {
       if (c.id !== convId) return c;
-      const tagIds = c.tag_ids || [];
-      return { ...c, tag_ids: hasTag ? tagIds.filter((t) => t !== tagId) : [...tagIds, tagId] };
+      const ids = c.tag_ids || [];
+      return { ...c, tag_ids: hasIt ? ids.filter((t) => t !== collectionId) : [...ids, collectionId] };
     }));
     try {
       await fetch("/api/chat/tags", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ conversationId: convId, tagId, action: hasTag ? "remove" : "add" }),
+        body: JSON.stringify({ conversationId: convId, tagId: collectionId, action: hasIt ? "remove" : "add" }),
       });
     } catch { /* non-critical */ }
   }
@@ -979,8 +920,9 @@ export default function ChatPage() {
 
   // ── Filter conversations ──
   const filteredConversations = conversations.filter((c) => {
-    if (activeFilterTag && !c.tag_ids?.includes(activeFilterTag)) return false;
-    if (searchQuery && searchMode === "title") {
+    // If viewing a collection, only show conversations in that collection
+    if (activeCollection && !c.tag_ids?.includes(activeCollection)) return false;
+    if (searchQuery) {
       return c.title.toLowerCase().includes(searchQuery.toLowerCase());
     }
     return true;
@@ -989,15 +931,32 @@ export default function ChatPage() {
   const now = new Date();
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
   const weekStart = todayStart - 7 * 24 * 60 * 60 * 1000;
+  const yesterdayStart = todayStart - 24 * 60 * 60 * 1000;
 
-  const pinnedConvs = filteredConversations.filter((c) => c.pinned && !c.folder_id);
-  const unfolderedConvs = filteredConversations.filter((c) => !c.pinned && !c.folder_id);
-  const todayConvs = unfolderedConvs.filter((c) => new Date(c.updated_at).getTime() >= todayStart);
-  const weekConvs = unfolderedConvs.filter((c) => {
+  const pinnedConvs = filteredConversations.filter((c) => c.pinned);
+  const unpinnedConvs = filteredConversations.filter((c) => !c.pinned);
+  const todayConvs = unpinnedConvs.filter((c) => new Date(c.updated_at).getTime() >= todayStart);
+  const yesterdayConvs = unpinnedConvs.filter((c) => {
     const t = new Date(c.updated_at).getTime();
-    return t >= weekStart && t < todayStart;
+    return t >= yesterdayStart && t < todayStart;
   });
-  const olderConvs = unfolderedConvs.filter((c) => new Date(c.updated_at).getTime() < weekStart);
+  const weekConvs = unpinnedConvs.filter((c) => {
+    const t = new Date(c.updated_at).getTime();
+    return t >= weekStart && t < yesterdayStart;
+  });
+  const olderConvs = unpinnedConvs.filter((c) => new Date(c.updated_at).getTime() < weekStart);
+
+  // Collection counts and most-recent sort
+  const collectionCounts = new Map<string, number>();
+  const collectionLatest = new Map<string, number>();
+  for (const c of conversations) {
+    for (const tagId of c.tag_ids || []) {
+      collectionCounts.set(tagId, (collectionCounts.get(tagId) || 0) + 1);
+      const t = new Date(c.updated_at).getTime();
+      if (t > (collectionLatest.get(tagId) || 0)) collectionLatest.set(tagId, t);
+    }
+  }
+  const sortedCollections = [...collections].sort((a, b) => (collectionLatest.get(b.id) || 0) - (collectionLatest.get(a.id) || 0));
   const lastIsAssistant = messages.length > 0 && messages[messages.length - 1].role === "assistant";
 
   // ── Open right-click context menu ──
@@ -1010,7 +969,7 @@ export default function ChatPage() {
 
   // ── Render conversation item ──
   function renderConvItem(conv: Conversation) {
-    const convTags = tags.filter((t) => conv.tag_ids?.includes(t.id));
+    const convCollections = collections.filter((c) => conv.tag_ids?.includes(c.id));
     return (
       <div
         key={conv.id}
@@ -1043,16 +1002,15 @@ export default function ChatPage() {
               </div>
               <div className="flex items-center gap-1.5 mt-0.5">
                 <span className="text-xs text-muted-foreground">{conv.model?.split("-").slice(0, 2).join("-")}</span>
-                {convTags.length > 0 && (
+                {convCollections.length > 0 && (
                   <div className="flex gap-1 flex-shrink-0">
-                    {convTags.slice(0, 3).map((tag) => (
-                      <span key={tag.id} className="h-2 w-2 rounded-full" style={{ backgroundColor: tag.color }} title={tag.name} />
+                    {convCollections.slice(0, 3).map((col) => (
+                      <span key={col.id} className="h-2 w-2 rounded-full" style={{ backgroundColor: col.color }} title={col.name} />
                     ))}
                   </div>
                 )}
               </div>
             </div>
-            {/* Single hover action — trash. Everything else via right-click. */}
             <button
               className="flex-shrink-0 opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-destructive/10 hover:text-destructive transition-all"
               title="Delete"
@@ -1094,26 +1052,33 @@ export default function ChatPage() {
           )}
         </div>
 
-        {/* Conversation list */}
+        {/* Main list */}
         <ScrollArea className="flex-1">
           <div className="p-2">
-            {/* Full-text search results */}
-            {searchMode === "fulltext" && searchQuery.length >= 2 ? (
-              <div className="space-y-0.5">
-                {searchingFullText && <p className="text-sm text-muted-foreground text-center py-8"><Loader2 className="h-4 w-4 animate-spin inline mr-2" />Searching...</p>}
-                {!searchingFullText && searchResults.length === 0 && <p className="text-sm text-muted-foreground text-center py-8">No results</p>}
-                {searchResults.map((r) => (
+            {/* ── Collection view: back button + filtered list ── */}
+            {activeCollection ? (() => {
+              const col = collections.find((c) => c.id === activeCollection);
+              return (
+                <>
                   <button
-                    key={r.messageId}
-                    className="w-full text-left rounded-lg px-3 py-2.5 hover:bg-muted transition-colors"
-                    onClick={() => loadConversation(r.conversationId)}
+                    className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-foreground hover:text-primary transition-colors w-full mb-1"
+                    onClick={() => setActiveCollection(null)}
                   >
-                    <p className="text-sm font-medium truncate">{r.conversationTitle}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{r.snippet}</p>
+                    <ArrowLeft className="h-4 w-4" />
+                    <span className="h-2.5 w-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: col?.color }} />
+                    {col?.name || "Collection"}
+                    <span className="text-xs text-muted-foreground ml-auto">{filteredConversations.length}</span>
                   </button>
-                ))}
-              </div>
-            ) : (
+                  <div className="space-y-0.5">
+                    {filteredConversations.length === 0 && (
+                      <p className="text-sm text-muted-foreground text-center py-8">No chats in this collection</p>
+                    )}
+                    {filteredConversations.map(renderConvItem)}
+                  </div>
+                </>
+              );
+            })() : (
+              /* ── Default view: collections + time-grouped chats ── */
               <div className="space-y-0.5">
                 {conversations.length === 0 && !loadingConvs && (
                   <p className="text-sm text-muted-foreground text-center py-12">No conversations yet</p>
@@ -1126,161 +1091,92 @@ export default function ChatPage() {
                   </ConvSection>
                 )}
 
-                {/* Folders with conversations */}
-                {folders.map((folder) => {
-                  const folderConvs = filteredConversations.filter((c) => c.folder_id === folder.id && !c.pinned);
-                  if (folderConvs.length === 0) return null;
-                  return (
-                    <ConvSection
-                      key={folder.id}
-                      label={folder.name}
-                      icon={<Folder className="h-3 w-3" style={{ color: folder.color }} />}
-                      collapsible
-                    >
-                      {folderConvs.map(renderConvItem)}
-                    </ConvSection>
-                  );
-                })}
+                {/* Collections */}
+                {sortedCollections.length > 0 && (
+                  <div className="mb-1 mt-2">
+                    <div className="flex items-center gap-1.5 px-3 py-1.5">
+                      <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/70">Collections</span>
+                      <button
+                        className="ml-auto p-0.5 text-muted-foreground/50 hover:text-foreground transition-colors"
+                        title="New collection"
+                        onClick={() => setShowNewCollection(true)}
+                      >
+                        <Plus className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                    <div className="space-y-0.5">
+                      {sortedCollections.map((col) => (
+                        <button
+                          key={col.id}
+                          className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                          onClick={() => setActiveCollection(col.id)}
+                          onContextMenu={(e) => { e.preventDefault(); setCollectionContextMenu({ collectionId: col.id, x: e.clientX, y: e.clientY }); }}
+                        >
+                          <span className="h-2.5 w-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: col.color }} />
+                          <span className="flex-1 text-left truncate font-medium">{col.name}</span>
+                          <span className="text-xs text-muted-foreground/60">{collectionCounts.get(col.id) || 0}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
-                {/* Time groups (unfiled only) */}
+                {/* Time-grouped chats */}
                 {todayConvs.length > 0 && <ConvSection label="Today">{todayConvs.map(renderConvItem)}</ConvSection>}
-                {weekConvs.length > 0 && <ConvSection label="This Week">{weekConvs.map(renderConvItem)}</ConvSection>}
-                {olderConvs.length > 0 && <ConvSection label="Older" collapsible>{olderConvs.map(renderConvItem)}</ConvSection>}
+                {yesterdayConvs.length > 0 && <ConvSection label="Yesterday">{yesterdayConvs.map(renderConvItem)}</ConvSection>}
+                {weekConvs.length > 0 && <ConvSection label="Previous 7 Days" collapsible defaultOpen={false}>{weekConvs.map(renderConvItem)}</ConvSection>}
+                {olderConvs.length > 0 && <ConvSection label="Older" collapsible defaultOpen={false}>{olderConvs.map(renderConvItem)}</ConvSection>}
               </div>
             )}
           </div>
         </ScrollArea>
       </div>
 
-      {/* Right-click context menu */}
+      {/* ── Right-click context menu (conversation) ── */}
       {contextMenu && (() => {
         const conv = conversations.find((c) => c.id === contextMenu.convId);
         if (!conv) return null;
-        const menuW = 200;
-        const menuH = 320;
-        const menuX = Math.min(contextMenu.x, (typeof window !== "undefined" ? window.innerWidth : 1200) - menuW);
-        const menuY = Math.min(contextMenu.y, (typeof window !== "undefined" ? window.innerHeight : 800) - menuH);
+        const menuX = Math.min(contextMenu.x, (typeof window !== "undefined" ? window.innerWidth : 1200) - 200);
+        const menuY = Math.min(contextMenu.y, (typeof window !== "undefined" ? window.innerHeight : 800) - 320);
         return (
           <>
             <div className="fixed inset-0 z-40" onClick={() => { setContextMenu(null); setContextSubmenu(null); }} onContextMenu={(e) => { e.preventDefault(); setContextMenu(null); setContextSubmenu(null); }} />
-            <div
-              className="fixed z-50 bg-popover border rounded-xl shadow-2xl py-1.5 w-[200px]"
-              style={{ left: menuX, top: menuY }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Pin/Unpin */}
-              <button
-                className="flex items-center gap-3 w-full px-3 py-2 text-sm hover:bg-muted transition-colors"
-                onClick={() => { togglePin(conv.id); setContextMenu(null); }}
-              >
+            <div className="fixed z-50 bg-popover border rounded-xl shadow-2xl py-1.5 w-[200px]" style={{ left: menuX, top: menuY }} onClick={(e) => e.stopPropagation()}>
+              <button className="flex items-center gap-3 w-full px-3 py-2 text-sm hover:bg-muted transition-colors" onClick={() => { togglePin(conv.id); setContextMenu(null); }}>
                 <Pin className={cn("h-4 w-4", conv.pinned && "fill-amber-500 text-amber-500")} />
                 {conv.pinned ? "Unpin" : "Pin to top"}
               </button>
-
-              {/* Rename */}
-              <button
-                className="flex items-center gap-3 w-full px-3 py-2 text-sm hover:bg-muted transition-colors"
-                onClick={() => { setEditingTitle(conv.id); setEditTitleValue(conv.title); setContextMenu(null); }}
-              >
+              <button className="flex items-center gap-3 w-full px-3 py-2 text-sm hover:bg-muted transition-colors" onClick={() => { setEditingTitle(conv.id); setEditTitleValue(conv.title); setContextMenu(null); }}>
                 <Pencil className="h-4 w-4" />
                 Rename
               </button>
-
               <div className="border-t my-1 mx-2" />
-
-              {/* Tags submenu */}
-              <div className="relative" onMouseEnter={() => setContextSubmenu("tags")} onMouseLeave={() => { if (contextSubmenu === "tags") setContextSubmenu(null); }}>
-                <button
-                  className={cn("flex items-center gap-3 w-full px-3 py-2 text-sm hover:bg-muted transition-colors", contextSubmenu === "tags" && "bg-muted")}
-                  onClick={() => setContextSubmenu(contextSubmenu === "tags" ? null : "tags")}
-                >
-                  <Tag className="h-4 w-4" />
-                  <span className="flex-1 text-left">Tags</span>
+              {/* Collections submenu */}
+              <div className="relative" onMouseEnter={() => setContextSubmenu("collections")} onMouseLeave={() => { if (contextSubmenu === "collections") setContextSubmenu(null); }}>
+                <button className={cn("flex items-center gap-3 w-full px-3 py-2 text-sm hover:bg-muted transition-colors", contextSubmenu === "collections" && "bg-muted")} onClick={() => setContextSubmenu(contextSubmenu === "collections" ? null : "collections")}>
+                  <Circle className="h-4 w-4" />
+                  <span className="flex-1 text-left">Collections</span>
                   <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
                 </button>
-                {contextSubmenu === "tags" && (
+                {contextSubmenu === "collections" && (
                   <div className="absolute left-full top-0 ml-0.5 bg-popover border rounded-xl shadow-2xl py-1.5 min-w-[180px] z-50">
-                    {tags.map((tag) => (
-                      <button
-                        key={tag.id}
-                        className="flex items-center gap-2.5 w-full px-3 py-2 text-sm hover:bg-muted transition-colors"
-                        onClick={() => toggleConvTag(conv.id, tag.id)}
-                      >
-                        <span className="h-3 w-3 rounded-full flex-shrink-0 border" style={{ backgroundColor: tag.color }} />
-                        <span className="flex-1 text-left truncate">{tag.name}</span>
-                        {conv.tag_ids?.includes(tag.id) && <Check className="h-4 w-4 text-primary flex-shrink-0" />}
+                    {collections.map((col) => (
+                      <button key={col.id} className="flex items-center gap-2.5 w-full px-3 py-2 text-sm hover:bg-muted transition-colors" onClick={() => toggleConvCollection(conv.id, col.id)}>
+                        <span className="h-3 w-3 rounded-full flex-shrink-0" style={{ backgroundColor: col.color }} />
+                        <span className="flex-1 text-left truncate">{col.name}</span>
+                        {conv.tag_ids?.includes(col.id) && <Check className="h-4 w-4 text-primary flex-shrink-0" />}
                       </button>
                     ))}
-                    {tags.length > 0 && <div className="border-t my-1 mx-2" />}
-                    <button
-                      className="flex items-center gap-2.5 w-full px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-                      onClick={() => { setShowNewTag(true); setContextMenu(null); }}
-                    >
+                    {collections.length > 0 && <div className="border-t my-1 mx-2" />}
+                    <button className="flex items-center gap-2.5 w-full px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors" onClick={() => { setShowNewCollection(true); setContextMenu(null); }}>
                       <Plus className="h-4 w-4" />
-                      Create tag
+                      New collection
                     </button>
                   </div>
                 )}
               </div>
-
-              {/* Move to folder submenu */}
-              <div className="relative" onMouseEnter={() => setContextSubmenu("folders")} onMouseLeave={() => { if (contextSubmenu === "folders") setContextSubmenu(null); }}>
-                <button
-                  className={cn("flex items-center gap-3 w-full px-3 py-2 text-sm hover:bg-muted transition-colors", contextSubmenu === "folders" && "bg-muted")}
-                  onClick={() => setContextSubmenu(contextSubmenu === "folders" ? null : "folders")}
-                >
-                  <Folder className="h-4 w-4" />
-                  <span className="flex-1 text-left">Move to folder</span>
-                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
-                </button>
-                {contextSubmenu === "folders" && (
-                  <div className="absolute left-full top-0 ml-0.5 bg-popover border rounded-xl shadow-2xl py-1.5 min-w-[180px] z-50">
-                    <button
-                      className="flex items-center gap-2.5 w-full px-3 py-2 text-sm hover:bg-muted transition-colors"
-                      onClick={() => { moveToFolder(conv.id, null); setContextMenu(null); }}
-                    >
-                      <X className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
-                      <span>No folder</span>
-                      {!conv.folder_id && <Check className="h-4 w-4 text-primary flex-shrink-0" />}
-                    </button>
-                    {folders.map((f) => (
-                      <div key={f.id} className="group/folder flex items-center hover:bg-muted transition-colors">
-                        <button
-                          className="flex items-center gap-2.5 flex-1 px-3 py-2 text-sm min-w-0"
-                          onClick={() => { moveToFolder(conv.id, f.id); setContextMenu(null); }}
-                        >
-                          <Folder className="h-4 w-4 flex-shrink-0" style={{ color: f.color }} />
-                          <span className="flex-1 text-left truncate">{f.name}</span>
-                          {conv.folder_id === f.id && <Check className="h-4 w-4 text-primary flex-shrink-0" />}
-                        </button>
-                        <button
-                          className="p-1 mr-1 opacity-0 group-hover/folder:opacity-100 hover:text-destructive transition-all"
-                          title={`Delete "${f.name}" folder`}
-                          onClick={(e) => { e.stopPropagation(); deleteFolder(f.id); }}
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </button>
-                      </div>
-                    ))}
-                    <div className="border-t my-1 mx-2" />
-                    <button
-                      className="flex items-center gap-2.5 w-full px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-                      onClick={() => { setShowNewFolder(true); setContextMenu(null); }}
-                    >
-                      <FolderPlus className="h-4 w-4" />
-                      Create folder
-                    </button>
-                  </div>
-                )}
-              </div>
-
               <div className="border-t my-1 mx-2" />
-
-              {/* Delete */}
-              <button
-                className="flex items-center gap-3 w-full px-3 py-2 text-sm text-destructive hover:bg-destructive/10 transition-colors"
-                onClick={() => { deleteConversation(conv.id); setContextMenu(null); }}
-              >
+              <button className="flex items-center gap-3 w-full px-3 py-2 text-sm text-destructive hover:bg-destructive/10 transition-colors" onClick={() => { deleteConversation(conv.id); setContextMenu(null); }}>
                 <Trash2 className="h-4 w-4" />
                 Delete
               </button>
@@ -1289,55 +1185,78 @@ export default function ChatPage() {
         );
       })()}
 
-      {/* New folder dialog — shown when triggered from context menu */}
-      {showNewFolder && (
+      {/* ── Right-click context menu (collection) ── */}
+      {collectionContextMenu && (() => {
+        const col = collections.find((c) => c.id === collectionContextMenu.collectionId);
+        if (!col) return null;
+        const menuX = Math.min(collectionContextMenu.x, (typeof window !== "undefined" ? window.innerWidth : 1200) - 180);
+        const menuY = Math.min(collectionContextMenu.y, (typeof window !== "undefined" ? window.innerHeight : 800) - 150);
+        return (
+          <>
+            <div className="fixed inset-0 z-40" onClick={() => setCollectionContextMenu(null)} onContextMenu={(e) => { e.preventDefault(); setCollectionContextMenu(null); }} />
+            <div className="fixed z-50 bg-popover border rounded-xl shadow-2xl py-1.5 w-[180px]" style={{ left: menuX, top: menuY }} onClick={(e) => e.stopPropagation()}>
+              <button className="flex items-center gap-3 w-full px-3 py-2 text-sm hover:bg-muted transition-colors" onClick={() => { setEditingCollection(col.id); setEditCollectionName(col.name); setCollectionContextMenu(null); }}>
+                <Pencil className="h-4 w-4" />
+                Rename
+              </button>
+              <button className="flex items-center gap-3 w-full px-3 py-2 text-sm text-destructive hover:bg-destructive/10 transition-colors" onClick={() => { deleteCollection(col.id); }}>
+                <Trash2 className="h-4 w-4" />
+                Delete
+              </button>
+            </div>
+          </>
+        );
+      })()}
+
+      {/* ── New collection dialog ── */}
+      {showNewCollection && (
         <>
-          <div className="fixed inset-0 z-40 bg-black/20" onClick={() => setShowNewFolder(false)} />
-          <div className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-popover border rounded-xl shadow-2xl p-5 w-[320px]">
-            <h3 className="text-sm font-semibold mb-3">Create Folder</h3>
+          <div className="fixed inset-0 z-40 bg-black/20" onClick={() => setShowNewCollection(false)} />
+          <div className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-popover border rounded-xl shadow-2xl p-5 w-[340px]">
+            <h3 className="text-base font-semibold mb-4">New Collection</h3>
             <input
-              className="w-full h-10 rounded-lg border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-primary"
-              placeholder="Folder name"
-              value={newFolderName}
-              onChange={(e) => setNewFolderName(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter") createFolder(); if (e.key === "Escape") setShowNewFolder(false); }}
+              className="w-full h-10 rounded-lg border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-primary mb-3"
+              placeholder="Collection name"
+              value={newCollectionName}
+              onChange={(e) => setNewCollectionName(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter" && newCollectionName.trim()) createCollection(); if (e.key === "Escape") setShowNewCollection(false); }}
               autoFocus
             />
-            <div className="flex justify-end gap-2 mt-4">
-              <Button variant="outline" size="sm" onClick={() => setShowNewFolder(false)}>Cancel</Button>
-              <Button size="sm" onClick={createFolder} disabled={!newFolderName.trim()}>Create</Button>
+            <p className="text-xs text-muted-foreground mb-2">Color</p>
+            <div className="flex gap-2 mb-5">
+              {TAG_COLORS.map((c) => (
+                <button
+                  key={c}
+                  className={cn("h-7 w-7 rounded-full border-2 transition-all", newCollectionColor === c ? "border-foreground scale-110 shadow-sm" : "border-transparent hover:scale-105")}
+                  style={{ backgroundColor: c }}
+                  onClick={() => setNewCollectionColor(c)}
+                />
+              ))}
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" size="sm" onClick={() => setShowNewCollection(false)}>Cancel</Button>
+              <Button size="sm" onClick={createCollection} disabled={!newCollectionName.trim()}>Create</Button>
             </div>
           </div>
         </>
       )}
 
-      {/* New tag dialog — shown when triggered from context menu */}
-      {showNewTag && (
+      {/* ── Rename collection dialog ── */}
+      {editingCollection && (
         <>
-          <div className="fixed inset-0 z-40 bg-black/20" onClick={() => setShowNewTag(false)} />
-          <div className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-popover border rounded-xl shadow-2xl p-5 w-[320px]">
-            <h3 className="text-sm font-semibold mb-3">Create Tag</h3>
+          <div className="fixed inset-0 z-40 bg-black/20" onClick={() => setEditingCollection(null)} />
+          <div className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-popover border rounded-xl shadow-2xl p-5 w-[340px]">
+            <h3 className="text-base font-semibold mb-4">Rename Collection</h3>
             <input
-              className="w-full h-10 rounded-lg border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-primary mb-3"
-              placeholder="Tag name"
-              value={newTagName}
-              onChange={(e) => setNewTagName(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter") createTag(); if (e.key === "Escape") setShowNewTag(false); }}
+              className="w-full h-10 rounded-lg border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-primary"
+              value={editCollectionName}
+              onChange={(e) => setEditCollectionName(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter" && editCollectionName.trim()) renameCollection(editingCollection, editCollectionName.trim()); if (e.key === "Escape") setEditingCollection(null); }}
               autoFocus
             />
-            <div className="flex gap-1.5 mb-4">
-              {TAG_COLORS.map((c) => (
-                <button
-                  key={c}
-                  className={cn("h-6 w-6 rounded-full border-2 transition-all", newTagColor === c ? "border-foreground scale-110" : "border-transparent hover:scale-105")}
-                  style={{ backgroundColor: c }}
-                  onClick={() => setNewTagColor(c)}
-                />
-              ))}
-            </div>
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" size="sm" onClick={() => setShowNewTag(false)}>Cancel</Button>
-              <Button size="sm" onClick={createTag} disabled={!newTagName.trim()}>Create</Button>
+            <div className="flex justify-end gap-2 mt-4">
+              <Button variant="outline" size="sm" onClick={() => setEditingCollection(null)}>Cancel</Button>
+              <Button size="sm" onClick={() => renameCollection(editingCollection, editCollectionName.trim())} disabled={!editCollectionName.trim()}>Save</Button>
             </div>
           </div>
         </>

@@ -46,6 +46,9 @@ import {
   ThumbsDown,
   Sparkles,
   Columns2,
+  Share2,
+  FileDown,
+  Printer,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -223,6 +226,8 @@ export default function ChatPage() {
   const [compareProvider, setCompareProvider] = useState("");
   const [compareMessages, setCompareMessages] = useState<ChatMsg[]>([]);
   const [compareLoading, setCompareLoading] = useState(false);
+  const [sidebarWidth, setSidebarWidth] = useState(320);
+  const [isResizing, setIsResizing] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -756,6 +761,28 @@ export default function ChatPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // ── Sidebar resize ──
+  useEffect(() => {
+    if (!isResizing) return;
+    function handleMouseMove(e: MouseEvent) {
+      const newWidth = Math.min(480, Math.max(260, e.clientX));
+      setSidebarWidth(newWidth);
+    }
+    function handleMouseUp() {
+      setIsResizing(false);
+    }
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+  }, [isResizing]);
+
   function handleSearchChange(value: string) {
     setSearchQuery(value);
   }
@@ -1039,6 +1066,9 @@ export default function ChatPage() {
             <div className="flex-1 min-w-0 overflow-hidden">
               <div className="flex items-center gap-1.5 min-w-0">
                 <span className="truncate text-sm font-medium flex-1 min-w-0" title={conv.title}>{conv.title}</span>
+                {isLoading && activeConvId === conv.id && (
+                  <span className="h-2 w-2 rounded-full bg-primary animate-pulse flex-shrink-0" title="Generating..." />
+                )}
                 {conv.pinned && <Star className="h-3 w-3 fill-amber-400 text-amber-400 flex-shrink-0" />}
               </div>
               <div className="flex items-center gap-1.5 mt-0.5">
@@ -1069,10 +1099,14 @@ export default function ChatPage() {
   return (
     <div className="flex h-[calc(100vh-64px)] overflow-hidden -m-4 md:-m-6">
       {/* ─── Sidebar ─── */}
-      <div className={cn(
-        "border-r bg-muted/30 flex flex-col transition-all duration-200",
-        sidebarOpen ? "w-[320px] min-w-[320px] max-w-[320px]" : "w-0 min-w-0 overflow-hidden"
-      )}>
+      <div
+        className={cn(
+          "border-r bg-muted/30 flex flex-col relative",
+          sidebarOpen ? "" : "w-0 min-w-0 overflow-hidden",
+          !isResizing && "transition-all duration-200"
+        )}
+        style={sidebarOpen ? { width: sidebarWidth, minWidth: sidebarWidth, maxWidth: sidebarWidth } : undefined}
+      >
         {/* Top actions */}
         <div className="p-3 border-b flex-shrink-0">
           <Button variant="outline" className="w-full justify-start gap-2 h-10 text-sm" onClick={startNewChat}>
@@ -1118,7 +1152,7 @@ export default function ChatPage() {
 
         {/* Tab content */}
         <ScrollArea className="flex-1">
-          <div className="p-2 overflow-hidden">
+          <div className="p-2 overflow-hidden transition-all duration-200">
 
             {/* ── Chats tab ── */}
             {sidebarTab === "chats" && (
@@ -1213,6 +1247,16 @@ export default function ChatPage() {
 
           </div>
         </ScrollArea>
+
+        {/* Resize handle */}
+        {sidebarOpen && (
+          <div
+            className="absolute top-0 right-0 w-1.5 h-full cursor-col-resize z-10 group hover:bg-primary/20 transition-colors"
+            onMouseDown={(e) => { e.preventDefault(); setIsResizing(true); }}
+          >
+            <div className="absolute top-1/2 right-0 -translate-y-1/2 h-8 w-1 rounded-full bg-muted-foreground/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+          </div>
+        )}
       </div>
 
       {/* ── Right-click context menu (conversation) ── */}
@@ -1232,6 +1276,63 @@ export default function ChatPage() {
               <button className="flex items-center gap-3 w-full px-3 py-2 text-sm hover:bg-muted transition-colors" onClick={() => { setEditingTitle(conv.id); setEditTitleValue(conv.title); setContextMenu(null); }}>
                 <Pencil className="h-4 w-4" />
                 Rename
+              </button>
+              <button className="flex items-center gap-3 w-full px-3 py-2 text-sm hover:bg-muted transition-colors" onClick={() => {
+                const url = `${window.location.origin}/chat?id=${conv.id}`;
+                navigator.clipboard.writeText(url);
+                toast.success("Share link copied to clipboard");
+                setContextMenu(null);
+              }}>
+                <Share2 className="h-4 w-4" />
+                Share
+              </button>
+              <div className="border-t my-1 mx-2" />
+              <button className="flex items-center gap-3 w-full px-3 py-2 text-sm hover:bg-muted transition-colors" onClick={async () => {
+                setContextMenu(null);
+                // Load conversation messages if not already active
+                if (activeConvId !== conv.id) {
+                  try {
+                    const res = await fetch(`/api/chat/conversations/${conv.id}`);
+                    const data = await res.json();
+                    if (data.messages) {
+                      const md = data.messages.map((m: { role: string; content: string }) => `## ${m.role === "user" ? "You" : "Assistant"}\n\n${m.content}`).join("\n\n---\n\n");
+                      const blob = new Blob([md], { type: "text/markdown" });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement("a");
+                      a.href = url;
+                      a.download = `${conv.title.slice(0, 40)}-${new Date().toISOString().slice(0, 10)}.md`;
+                      a.click();
+                      URL.revokeObjectURL(url);
+                      toast.success("Exported as Markdown");
+                    }
+                  } catch { toast.error("Failed to export"); }
+                } else {
+                  const md = messages.map((m) => `## ${m.role === "user" ? "You" : "Assistant"}\n\n${m.content}`).join("\n\n---\n\n");
+                  const blob = new Blob([md], { type: "text/markdown" });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement("a");
+                  a.href = url;
+                  a.download = `${conv.title.slice(0, 40)}-${new Date().toISOString().slice(0, 10)}.md`;
+                  a.click();
+                  URL.revokeObjectURL(url);
+                  toast.success("Exported as Markdown");
+                }
+              }}>
+                <FileDown className="h-4 w-4" />
+                Export Markdown
+              </button>
+              <button className="flex items-center gap-3 w-full px-3 py-2 text-sm hover:bg-muted transition-colors" onClick={() => {
+                setContextMenu(null);
+                if (activeConvId !== conv.id) {
+                  loadConversation(conv.id).then(() => {
+                    setTimeout(() => window.print(), 300);
+                  });
+                } else {
+                  window.print();
+                }
+              }}>
+                <Printer className="h-4 w-4" />
+                Export as PDF
               </button>
               <div className="border-t my-1 mx-2" />
               {/* Collections submenu */}

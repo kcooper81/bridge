@@ -995,13 +995,13 @@ export default function ChatPage() {
           </div>
         ) : (
           <>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-1.5">
-                <span className="truncate text-sm font-medium" title={conv.title}>{conv.title}</span>
-                {conv.pinned && <Pin className="h-3 w-3 fill-amber-500 text-amber-500 flex-shrink-0" />}
+            <div className="flex-1 min-w-0 overflow-hidden">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <span className="truncate text-sm font-medium flex-1 min-w-0" title={conv.title}>{conv.title}</span>
+                {conv.pinned && <Star className="h-3 w-3 fill-amber-400 text-amber-400 flex-shrink-0" />}
               </div>
               <div className="flex items-center gap-1.5 mt-0.5">
-                <span className="text-xs text-muted-foreground">{conv.model?.split("-").slice(0, 2).join("-")}</span>
+                <span className="text-xs text-muted-foreground truncate">{conv.model?.split("-").slice(0, 2).join("-")}</span>
                 {convCollections.length > 0 && (
                   <div className="flex gap-1 flex-shrink-0">
                     {convCollections.slice(0, 3).map((col) => (
@@ -1086,7 +1086,7 @@ export default function ChatPage() {
 
                 {/* Pinned */}
                 {pinnedConvs.length > 0 && (
-                  <ConvSection label="Pinned" icon={<Pin className="h-3 w-3" />}>
+                  <ConvSection label="Favorites" icon={<Star className="h-3 w-3 text-amber-400" />}>
                     {pinnedConvs.map(renderConvItem)}
                   </ConvSection>
                 )}
@@ -1143,8 +1143,8 @@ export default function ChatPage() {
             <div className="fixed inset-0 z-40" onClick={() => { setContextMenu(null); setContextSubmenu(null); }} onContextMenu={(e) => { e.preventDefault(); setContextMenu(null); setContextSubmenu(null); }} />
             <div className="fixed z-50 bg-popover border rounded-xl shadow-2xl py-1.5 w-[200px]" style={{ left: menuX, top: menuY }} onClick={(e) => e.stopPropagation()}>
               <button className="flex items-center gap-3 w-full px-3 py-2 text-sm hover:bg-muted transition-colors" onClick={() => { togglePin(conv.id); setContextMenu(null); }}>
-                <Pin className={cn("h-4 w-4", conv.pinned && "fill-amber-500 text-amber-500")} />
-                {conv.pinned ? "Unpin" : "Pin to top"}
+                <Star className={cn("h-4 w-4", conv.pinned && "fill-amber-400 text-amber-400")} />
+                {conv.pinned ? "Remove from Favorites" : "Add to Favorites"}
               </button>
               <button className="flex items-center gap-3 w-full px-3 py-2 text-sm hover:bg-muted transition-colors" onClick={() => { setEditingTitle(conv.id); setEditTitleValue(conv.title); setContextMenu(null); }}>
                 <Pencil className="h-4 w-4" />

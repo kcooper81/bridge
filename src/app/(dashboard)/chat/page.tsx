@@ -136,6 +136,17 @@ interface ChatMsg {
   content: string;
   images?: string[];
   rating?: number; // -1, 0, 1
+  files?: Array<{ name: string; type: string; size: number }>; // attached file metadata
+}
+
+interface PendingFile {
+  file: File;
+  name: string;
+  type: string;
+  size: number;
+  extractedText?: string;
+  uploading?: boolean;
+  error?: string;
 }
 
 
@@ -202,6 +213,7 @@ export default function ChatPage() {
   const [slashMenuIndex, setSlashMenuIndex] = useState(0);
   const [slashFilter, setSlashFilter] = useState("");
   const [pendingImages, setPendingImages] = useState<string[]>([]);
+  const [pendingFiles, setPendingFiles] = useState<PendingFile[]>([]);
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [chatInput, setChatInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -273,12 +285,43 @@ export default function ChatPage() {
     const files = e.target.files;
     if (!files) return;
     for (const file of Array.from(files)) {
-      if (!file.type.startsWith("image/")) { toast.error(`${file.name} is not an image`); continue; }
-      if (file.size > 20 * 1024 * 1024) { toast.error(`${file.name} is too large (max 20MB)`); continue; }
-      try {
-        const compressed = await compressImage(file);
-        setPendingImages((prev) => [...prev, compressed]);
-      } catch { toast.error(`Failed to process ${file.name}`); }
+      if (file.size > 25 * 1024 * 1024) { toast.error(`${file.name} is too large (max 25MB)`); continue; }
+
+      if (file.type.startsWith("image/")) {
+        // Images — compress and add to pendingImages (sent as base64 for multimodal)
+        try {
+          const compressed = await compressImage(file);
+          setPendingImages((prev) => [...prev, compressed]);
+        } catch { toast.error(`Failed to process ${file.name}`); }
+      } else {
+        // Documents — add to pendingFiles, upload for text extraction
+        const pf: PendingFile = { file, name: file.name, type: file.type, size: file.size, uploading: true };
+        setPendingFiles((prev) => [...prev, pf]);
+
+        // Upload for server-side text extraction + DLP scan
+        try {
+          const fd = new FormData();
+          fd.append("files", file);
+          const res = await fetch("/api/chat/upload", { method: "POST", body: fd });
+          const data = await res.json();
+
+          if (data.blocked) {
+            setDlpBlock(data.violations || []);
+            setPendingFiles((prev) => prev.filter((f) => f.file !== file));
+            continue;
+          }
+
+          if (data.error) {
+            setPendingFiles((prev) => prev.map((f) => f.file === file ? { ...f, uploading: false, error: data.error } : f));
+            continue;
+          }
+
+          const extracted = data.files?.[0];
+          setPendingFiles((prev) => prev.map((f) => f.file === file ? { ...f, uploading: false, extractedText: extracted?.text || "" } : f));
+        } catch {
+          setPendingFiles((prev) => prev.map((f) => f.file === file ? { ...f, uploading: false, error: "Upload failed" } : f));
+        }
+      }
     }
     e.target.value = "";
   }
@@ -287,24 +330,62 @@ export default function ChatPage() {
     setPendingImages((prev) => prev.filter((_, i) => i !== index));
   }
 
+  function removePendingFile(index: number) {
+    setPendingFiles((prev) => prev.filter((_, i) => i !== index));
+  }
+
+  function formatFileSize(bytes: number): string {
+    if (bytes < 1024) return `${bytes}B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)}KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)}MB`;
+  }
+
   // ── Stream message to AI ──
   async function sendMessage(messagesToSend?: ChatMsg[], overrideContext?: string) {
     const input = chatInput.trim();
-    if (!input && !messagesToSend && pendingImages.length === 0) return;
+    if (!input && !messagesToSend && pendingImages.length === 0 && pendingFiles.length === 0) return;
     if (isLoading) return;
+    // Don't send if files are still uploading
+    if (pendingFiles.some((f) => f.uploading)) { toast.info("Files are still processing..."); return; }
 
     setDlpBlock(null);
+
+    // Build message content with file text
+    let messageContent = input;
+    const filesMeta: Array<{ name: string; type: string; size: number }> = [];
+    if (pendingFiles.length > 0) {
+      const fileTexts = pendingFiles
+        .filter((f) => f.extractedText && !f.error)
+        .map((f) => {
+          filesMeta.push({ name: f.name, type: f.type, size: f.size });
+          return `--- File: ${f.name} ---\n${f.extractedText}`;
+        });
+      if (fileTexts.length > 0) {
+        const fileContext = fileTexts.join("\n\n");
+        messageContent = messageContent
+          ? `${messageContent}\n\n${fileContext}`
+          : `Analyze the following file(s):\n\n${fileContext}`;
+      }
+    }
+
+    if (!messageContent && pendingImages.length > 0) {
+      messageContent = "What's in this image?";
+    }
+    if (!messageContent && !messagesToSend) return;
+
     const userMsg: ChatMsg = {
       id: Date.now().toString(),
       role: "user",
-      content: input || (pendingImages.length > 0 ? "What's in this image?" : ""),
+      content: messageContent || "",
       images: pendingImages.length > 0 ? [...pendingImages] : undefined,
+      files: filesMeta.length > 0 ? filesMeta : undefined,
     };
     const allMessages = messagesToSend || [...messages, userMsg];
 
     if (!messagesToSend) {
       setChatInput("");
       setPendingImages([]);
+      setPendingFiles([]);
       if (inputRef.current) inputRef.current.style.height = "auto";
       setMessages(allMessages);
     }
@@ -1777,10 +1858,11 @@ export default function ChatPage() {
                     )}
                   </div>
 
-                  {pendingImages.length > 0 && (
+                  {/* Pending attachments */}
+                  {(pendingImages.length > 0 || pendingFiles.length > 0) && (
                     <div className="max-w-3xl mx-auto flex gap-2 mb-2 flex-wrap">
                       {pendingImages.map((img, idx) => (
-                        <div key={idx} className="relative group">
+                        <div key={`img-${idx}`} className="relative group">
                           <img src={img} alt={`Upload ${idx + 1}`} className="h-16 w-16 rounded-lg object-cover border" />
                           <button
                             type="button"
@@ -1791,16 +1873,40 @@ export default function ChatPage() {
                           </button>
                         </div>
                       ))}
+                      {pendingFiles.map((pf, idx) => (
+                        <div key={`file-${idx}`} className="relative group flex items-center gap-2 border rounded-lg px-3 py-2 bg-muted/50 max-w-[200px]">
+                          <FileText className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
+                          <div className="min-w-0 flex-1">
+                            <p className="text-xs font-medium truncate">{pf.name}</p>
+                            <p className="text-[10px] text-muted-foreground">
+                              {pf.uploading ? (
+                                <span className="flex items-center gap-1"><Loader2 className="h-2.5 w-2.5 animate-spin" />Processing...</span>
+                              ) : pf.error ? (
+                                <span className="text-destructive">{pf.error}</span>
+                              ) : (
+                                <span className="text-green-600 dark:text-green-400">{formatFileSize(pf.size)} — ready</span>
+                              )}
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => removePendingFile(idx)}
+                            className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ))}
                     </div>
                   )}
 
                   <form onSubmit={(e) => { e.preventDefault(); sendMessage(); }} className="max-w-3xl mx-auto flex items-end gap-2">
-                    <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleFileSelect} />
+                    <input ref={fileInputRef} type="file" accept="image/*,.pdf,.doc,.docx,.txt,.csv,.tsv,.json,.xml,.yaml,.yml,.md,.py,.js,.ts,.jsx,.tsx,.html,.css,.sql,.sh,.go,.rs,.java,.c,.cpp,.rb,.php,.swift,.kt,.r,.xlsx,.xls" multiple className="hidden" onChange={handleFileSelect} />
                     <Button
                       type="button" variant="ghost" size="icon"
                       className="h-[44px] w-[44px] rounded-xl flex-shrink-0 text-muted-foreground hover:text-foreground"
                       onClick={() => fileInputRef.current?.click()}
-                      disabled={isLoading || noProviders} title="Attach image"
+                      disabled={isLoading || noProviders} title="Attach files"
                     >
                       <Paperclip className="h-4 w-4" />
                     </Button>
@@ -1975,6 +2081,16 @@ export default function ChatPage() {
               <div className="flex gap-2 flex-wrap mb-2">
                 {message.images.map((img, imgIdx) => (
                   <img key={imgIdx} src={img} alt={`Attachment ${imgIdx + 1}`} className="max-h-48 rounded-lg object-contain" />
+                ))}
+              </div>
+            )}
+            {message.files && message.files.length > 0 && (
+              <div className="flex gap-2 flex-wrap mb-2">
+                {message.files.map((f, fIdx) => (
+                  <div key={fIdx} className="flex items-center gap-1.5 bg-white/10 dark:bg-white/5 rounded-md px-2 py-1">
+                    <FileText className="h-3.5 w-3.5 flex-shrink-0 opacity-70" />
+                    <span className="text-xs font-medium">{f.name}</span>
+                  </div>
                 ))}
               </div>
             )}

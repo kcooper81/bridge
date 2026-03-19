@@ -63,6 +63,24 @@ export async function DELETE(request: NextRequest) {
   return NextResponse.json({ success: true });
 }
 
+/** PATCH — rename/recolor a tag */
+export async function PATCH(request: NextRequest) {
+  const auth = createClient();
+  const db = createServiceClient();
+  const { data: { user } } = await auth.auth.getUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { id, name, color } = await request.json();
+  if (!id) return NextResponse.json({ error: "id required" }, { status: 400 });
+
+  const updates: Record<string, unknown> = {};
+  if (name !== undefined) updates.name = name.trim();
+  if (color !== undefined) updates.color = color;
+
+  await db.from("chat_tags").update(updates).eq("id", id).eq("user_id", user.id);
+  return NextResponse.json({ success: true });
+}
+
 /** PUT — toggle tag on a conversation */
 export async function PUT(request: NextRequest) {
   const auth = createClient();

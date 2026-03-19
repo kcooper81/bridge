@@ -83,7 +83,14 @@ export async function PATCH(request: NextRequest) {
   if (body.provider !== undefined) updates.provider = body.provider;
   if (body.icon !== undefined) updates.icon = body.icon;
   if (body.color !== undefined) updates.color = body.color;
-  if (body.is_shared !== undefined) updates.is_shared = body.is_shared;
+  if (body.is_shared !== undefined) {
+    // Only admins/managers can make presets shared
+    const { data: profile } = await db.from("profiles").select("role").eq("id", user.id).single();
+    if (body.is_shared && !["admin", "manager"].includes(profile?.role || "")) {
+      return NextResponse.json({ error: "Only admins can share presets" }, { status: 403 });
+    }
+    updates.is_shared = body.is_shared;
+  }
 
   await db.from("chat_presets").update(updates).eq("id", body.id).eq("created_by", user.id);
   return NextResponse.json({ success: true });

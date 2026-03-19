@@ -154,7 +154,7 @@ export async function POST(request: NextRequest) {
       // Check security rules
       for (const rule of rulesResult.data || []) {
         try {
-          const regex = new RegExp(rule.pattern, "gi");
+          const regex = new RegExp(rule.pattern, "i");
           if (regex.test(allText)) {
             violations.push({ ruleName: rule.name, category: rule.category, severity: rule.severity });
           }
@@ -170,7 +170,7 @@ export async function POST(request: NextRequest) {
           }
         } else if (term.term_type === "regex") {
           try {
-            if (new RegExp(term.term, "gi").test(allText)) {
+            if (new RegExp(term.term, "i").test(allText)) {
               violations.push({ ruleName: `Pattern: "${term.term}"`, category: term.category, severity: term.severity });
             }
           } catch { /* skip */ }

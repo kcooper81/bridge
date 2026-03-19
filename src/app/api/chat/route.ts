@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { messages, model, provider, conversationId } = body;
+    const { messages, model, provider, conversationId, compareOnly } = body;
 
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
       return new Response(JSON.stringify({ error: "Messages required" }), {
@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
         // Check security rules
         for (const rule of rulesResult.data || []) {
           try {
-            const regex = new RegExp(rule.pattern, "gi");
+            const regex = new RegExp(rule.pattern, "i");
             if (regex.test(lastUserMessage.content)) {
               violations.push({ ruleName: rule.name, category: rule.category, severity: rule.severity });
             }
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
             }
           } else if (term.term_type === "regex") {
             try {
-              if (new RegExp(term.term, "gi").test(lastUserMessage.content)) {
+              if (new RegExp(term.term, "i").test(lastUserMessage.content)) {
                 violations.push({ ruleName: `Pattern: "${term.term}"`, category: term.category, severity: term.severity });
               }
             } catch { /* skip */ }
@@ -180,31 +180,33 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Create/update conversation
+    // Create/update conversation (skip for compare-only requests)
     let convId = conversationId;
-    if (!convId) {
-      const { data: conv } = await db
-        .from("chat_conversations")
-        .insert({
-          org_id: profile.org_id,
-          user_id: user.id,
-          title: (lastUserMessage?.content || "New conversation").slice(0, 100),
-          model: selectedModel,
-          provider: provider || "openai",
-        })
-        .select("id")
-        .single();
-      convId = conv?.id;
-    }
+    if (!compareOnly) {
+      if (!convId) {
+        const { data: conv } = await db
+          .from("chat_conversations")
+          .insert({
+            org_id: profile.org_id,
+            user_id: user.id,
+            title: (lastUserMessage?.content || "New conversation").slice(0, 100),
+            model: selectedModel,
+            provider: provider || "openai",
+          })
+          .select("id")
+          .single();
+        convId = conv?.id;
+      }
 
-    // Save user message
-    if (convId && lastUserMessage) {
-      await db.from("chat_messages").insert({
-        conversation_id: convId,
-        role: "user",
-        content: lastUserMessage.content,
-        model: selectedModel,
-      });
+      // Save user message
+      if (convId && lastUserMessage) {
+        await db.from("chat_messages").insert({
+          conversation_id: convId,
+          role: "user",
+          content: lastUserMessage.content,
+          model: selectedModel,
+        });
+      }
     }
 
     // Load org system prompt if set
@@ -253,32 +255,34 @@ export async function POST(request: NextRequest) {
       model: aiModel,
       messages: [...systemMessages, ...aiMessages],
       onFinish: async ({ text, usage }) => {
-        // Save assistant message
-        if (convId) {
-          await db.from("chat_messages").insert({
-            conversation_id: convId,
-            role: "assistant",
-            content: text,
-            model: selectedModel,
-            tokens_used: (usage?.totalTokens) || 0,
-          });
-
-          // Update conversation timestamp
-          await db.from("chat_conversations")
-            .update({ updated_at: new Date().toISOString() })
-            .eq("id", convId);
+        // Save assistant message (skip for compare-only)
+        if (convId && !compareOnly) {
+          try {
+            await db.from("chat_messages").insert({
+              conversation_id: convId,
+              role: "assistant",
+              content: text,
+              model: selectedModel,
+              tokens_used: (usage?.totalTokens) || 0,
+            });
+            await db.from("chat_conversations")
+              .update({ updated_at: new Date().toISOString() })
+              .eq("id", convId);
+          } catch (e) { console.error("Failed to save assistant message:", e); }
         }
 
-        // Log to conversation_logs for audit
-        try {
-          await db.from("conversation_logs").insert({
-            org_id: profile.org_id,
-            user_id: user.id,
-            ai_tool: "teamprompt_chat",
-            action: "sent",
-            metadata: { model: selectedModel, provider: provider || "openai", tokens: usage?.totalTokens || 0 },
-          });
-        } catch { /* non-critical */ }
+        // Log to conversation_logs for audit (skip for compare-only)
+        if (!compareOnly) {
+          try {
+            await db.from("conversation_logs").insert({
+              org_id: profile.org_id,
+              user_id: user.id,
+              ai_tool: "teamprompt_chat",
+              action: "sent",
+              metadata: { model: selectedModel, provider: provider || "openai", tokens: usage?.totalTokens || 0 },
+            });
+          } catch { /* non-critical */ }
+        }
       },
     });
 

@@ -97,6 +97,6 @@ export async function DELETE(request: NextRequest) {
 
   if (!conv) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  await db.from("chat_conversations").delete().eq("id", id);
+  await db.from("chat_conversations").delete().eq("id", id).eq("user_id", user.id);
   return NextResponse.json({ success: true });
 }

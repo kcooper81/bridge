@@ -505,6 +505,7 @@ export default function ChatPage() {
           messages: allMessages.map((m) => ({ role: m.role, content: m.content })),
           model: compareModel,
           provider: compareProvider,
+          compareOnly: true, // don't create a conversation on server
         }),
         signal: controller.signal,
       });
@@ -675,18 +676,16 @@ export default function ChatPage() {
           });
           const data = await res.json();
           if (data.error) { toast.error(data.error); break; }
-          // Set the context and auto-send
+          // Build messages directly (avoid stale closure from setTimeout)
           const prompt = promptMap[command];
-          setChatInput(prompt);
-          setAdminContext(data.context);
-          // Use setTimeout to let state update, then send
-          setTimeout(() => {
-            const userMsg: ChatMsg = { id: Date.now().toString(), role: "user", content: prompt };
-            const allMsgs = [...messages, userMsg];
-            setMessages(allMsgs);
-            setChatInput("");
+          const userMsg: ChatMsg = { id: Date.now().toString(), role: "user", content: prompt };
+          setMessages((prev) => {
+            const allMsgs = [...prev, userMsg];
+            // Kick off the send after state update
             sendMessageDirect(allMsgs, data.context);
-          }, 100);
+            return allMsgs;
+          });
+          setChatInput("");
         } catch {
           toast.error("Failed to fetch admin data");
         }
@@ -729,28 +728,32 @@ export default function ChatPage() {
       let convIdParsed = false;
 
       if (reader) {
-        let buffer = "";
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          let chunk = decoder.decode(value, { stream: true });
-          if (!convIdParsed) {
-            buffer += chunk;
-            const match = buffer.match(/^__CONV_ID__([a-f0-9-]+)__\n/);
-            if (match) {
-              if (!activeConvId) { setActiveConvId(match[1]); loadConversations(); }
-              convIdParsed = true;
-              chunk = buffer.slice(match[0].length);
-              buffer = "";
-            } else if (buffer.length > 200) {
-              convIdParsed = true; chunk = buffer; buffer = "";
-            } else { continue; }
+        try {
+          let buffer = "";
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            let chunk = decoder.decode(value, { stream: true });
+            if (!convIdParsed) {
+              buffer += chunk;
+              const match = buffer.match(/^__CONV_ID__([a-f0-9-]+)__\n/);
+              if (match) {
+                if (!activeConvId) { setActiveConvId(match[1]); loadConversations(); }
+                convIdParsed = true;
+                chunk = buffer.slice(match[0].length);
+                buffer = "";
+              } else if (buffer.length > 200) {
+                convIdParsed = true; chunk = buffer; buffer = "";
+              } else { continue; }
+            }
+            if (chunk) {
+              setMessages((prev) =>
+                prev.map((m) => m.id === assistantId ? { ...m, content: m.content + chunk } : m)
+              );
+            }
           }
-          if (chunk) {
-            setMessages((prev) =>
-              prev.map((m) => m.id === assistantId ? { ...m, content: m.content + chunk } : m)
-            );
-          }
+        } catch (err) {
+          if ((err as Error).name !== "AbortError") throw err;
         }
       }
       loadConversations();
@@ -1002,8 +1005,13 @@ export default function ChatPage() {
   async function renameCollection(collectionId: string, name: string) {
     setCollections((prev) => prev.map((c) => c.id === collectionId ? { ...c, name } : c));
     setEditingCollection(null);
-    // Tags API doesn't have a PATCH — use delete + recreate approach or accept local-only rename
-    // For now, optimistic update only. A PATCH endpoint could be added later.
+    try {
+      await fetch("/api/chat/tags", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: collectionId, name }),
+      });
+    } catch { /* non-critical, optimistic update already applied */ }
   }
 
   async function toggleConvCollection(convId: string, collectionId: string) {
@@ -1925,7 +1933,7 @@ export default function ChatPage() {
                       rows={1}
                       disabled={isLoading || noProviders}
                     />
-                    <Button type="submit" size="icon" className="h-[44px] w-[44px] rounded-xl flex-shrink-0" disabled={!chatInput.trim() || isLoading || noProviders}>
+                    <Button type="submit" size="icon" className="h-[44px] w-[44px] rounded-xl flex-shrink-0" disabled={(!chatInput.trim() && pendingImages.length === 0 && pendingFiles.length === 0) || isLoading || noProviders}>
                       {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                     </Button>
                   </form>
@@ -1952,7 +1960,7 @@ export default function ChatPage() {
                 rows={1}
                 disabled={isLoading || noProviders}
               />
-              <Button type="submit" size="icon" className="h-[44px] w-[44px] rounded-xl flex-shrink-0" disabled={!chatInput.trim() || isLoading || noProviders}>
+              <Button type="submit" size="icon" className="h-[44px] w-[44px] rounded-xl flex-shrink-0" disabled={(!chatInput.trim() && pendingImages.length === 0 && pendingFiles.length === 0) || isLoading || noProviders}>
                 {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
               </Button>
             </form>

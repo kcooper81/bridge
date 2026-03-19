@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
         )
       `)
       .eq("chat_conversations.user_id", user.id)
-      .ilike("content", `%${q}%`)
+      .ilike("content", `%${q.replace(/[%_\\]/g, "\\$&")}%`)
       .order("created_at", { ascending: false })
       .limit(30);
 

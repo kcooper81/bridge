@@ -98,9 +98,9 @@ export default function SignupPage() {
       if (oauthError) {
         authDebug.error("provider", `OAuth error from signup: ${provider}`, { message: oauthError.message }); // AUTH-DEBUG
         setError(oauthError.message);
-      } else {
-        trackSignUp(provider);
       }
+      // Note: trackSignUp fires via AuthEventTracker after OAuth callback returns.
+      // Firing here would be lost since the browser navigates away immediately.
     } catch {
       authDebug.error("provider", `OAuth unexpected error from signup: ${provider}`); // AUTH-DEBUG
       setError("An unexpected error occurred");

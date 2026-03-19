@@ -47,8 +47,11 @@ export function trackPageView(url: string) {
 
 export function trackSignUp(method: "email" | "google" | "github") {
   trackEvent({ action: "sign_up", method });
-  // Google Ads conversion tracking
-  gtag("event", "conversion", { send_to: "AW-18011654538/signup" });
+  // Google Ads conversion — use the GA4 sign_up event imported as a conversion
+  // in Google Ads (via GA4 link). No separate gtag conversion call needed since
+  // Google Ads imports the sign_up event directly from the linked GA4 property.
+  // If you later set up a native Google Ads conversion tag, replace with:
+  //   gtag("event", "conversion", { send_to: "AW-18011654538/YOUR_LABEL_HERE" });
   trackLinkedInSignUp();
 }
 
@@ -86,16 +89,27 @@ export function trackBeginCheckout(item: CheckoutItem) {
 }
 
 /** Fire on the ?checkout=success redirect after Stripe */
-export function trackPurchase(plan: string) {
+export function trackPurchase(plan: string, transactionId?: string) {
+  // Deduplicate — only fire once per transaction
+  const txnKey = `tp_purchase_${transactionId || plan}`;
+  if (typeof sessionStorage !== "undefined" && sessionStorage.getItem(txnKey)) return;
+  if (typeof sessionStorage !== "undefined") sessionStorage.setItem(txnKey, "1");
+
+  // Estimate value from plan name (used for GA4 revenue attribution)
+  const planPrices: Record<string, number> = { pro: 12, business: 29, enterprise: 79 };
+  const estimatedValue = planPrices[plan.toLowerCase()] || 0;
+
   trackEvent({
     action: "purchase",
     currency: "USD",
-    transaction_id: `tp_${Date.now()}`,
+    value: estimatedValue,
+    transaction_id: transactionId || `tp_${Date.now()}`,
     items: [
       {
         item_id: `plan_${plan}`,
         item_name: `TeamPrompt ${capitalize(plan)}`,
         item_category: "subscription",
+        price: estimatedValue,
         quantity: 1,
       },
     ],

@@ -174,7 +174,7 @@ export async function POST(request: NextRequest) {
       mode: "subscription",
       payment_method_types: ["card"],
       line_items: [lineItem],
-      success_url: `${siteUrl}/settings/billing?checkout=success&plan=${plan}`,
+      success_url: `${siteUrl}/settings/billing?checkout=success&plan=${plan}&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${siteUrl}/settings/billing?checkout=cancel`,
       client_reference_id: orgId,
       metadata: { orgId, userId: user.id, plan },

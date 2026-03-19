@@ -122,7 +122,8 @@ export default function VaultPage() {
   useEffect(() => {
     if (searchParams.get("checkout") === "success") {
       const plan = searchParams.get("plan") || "your new plan";
-      trackPurchase(plan);
+      const sessionId = searchParams.get("session_id") || undefined;
+      trackPurchase(plan, sessionId);
       toast.success(`Welcome to ${plan}! Your upgrade is active.`);
       router.replace("/vault");
     }

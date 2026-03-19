@@ -1056,9 +1056,9 @@ export default function ChatPage() {
         {/* Tabs */}
         <div className="flex border-b flex-shrink-0">
           {([
-            { id: "chats" as const, label: "Chats", icon: MessageSquare, count: conversations.length },
-            { id: "favorites" as const, label: "Favorites", icon: Star, count: pinnedConvs.length },
-            { id: "collections" as const, label: "Collections", icon: Circle, count: sortedCollections.length },
+            { id: "chats" as const, label: "Chats", icon: MessageSquare },
+            { id: "favorites" as const, label: "Favorites", icon: Star },
+            { id: "collections" as const, label: "Collections", icon: Circle },
           ]).map((tab) => (
             <button
               key={tab.id}
@@ -1070,12 +1070,6 @@ export default function ChatPage() {
             >
               <tab.icon className={cn("h-3.5 w-3.5", sidebarTab === tab.id && tab.id === "favorites" && "fill-amber-400 text-amber-400")} />
               {tab.label}
-              {tab.count > 0 && (
-                <span className={cn(
-                  "text-[10px] tabular-nums min-w-[18px] h-[18px] flex items-center justify-center rounded-full",
-                  sidebarTab === tab.id ? "bg-primary/10 text-primary" : "text-muted-foreground/50"
-                )}>{tab.count}</span>
-              )}
               {sidebarTab === tab.id && <div className="absolute bottom-0 left-2 right-2 h-0.5 bg-primary rounded-full" />}
             </button>
           ))}

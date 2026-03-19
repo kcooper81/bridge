@@ -1008,16 +1008,16 @@ export default function ChatPage() {
       <div
         key={conv.id}
         className={cn(
-          "group flex items-start gap-2 rounded-lg px-2.5 py-2 cursor-pointer transition-colors relative",
+          "group flex items-start gap-2 rounded-lg px-2.5 py-2 cursor-pointer transition-colors",
           activeConvId === conv.id ? "bg-primary/10 text-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"
         )}
         onClick={() => loadConversation(conv.id)}
       >
         <MessageSquare className="h-3.5 w-3.5 flex-shrink-0 mt-0.5" />
         {editingTitle === conv.id ? (
-          <div className="flex-1 flex items-center gap-1">
+          <div className="flex-1 flex items-center gap-1 min-w-0">
             <input
-              className="flex-1 bg-transparent text-xs border-b border-primary outline-none"
+              className="flex-1 bg-transparent text-xs border-b border-primary outline-none min-w-0"
               value={editTitleValue}
               onChange={(e) => setEditTitleValue(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter") renameConversation(conv.id, editTitleValue); if (e.key === "Escape") setEditingTitle(null); }}
@@ -1028,77 +1028,47 @@ export default function ChatPage() {
             <button onClick={(e) => { e.stopPropagation(); setEditingTitle(null); }}><X className="h-3 w-3" /></button>
           </div>
         ) : (
-          <div className="flex-1 min-w-0">
-            <span className="truncate text-xs block font-medium">{conv.title}</span>
-            <div className="flex items-center gap-1 mt-0.5">
-              <span className="text-[10px] text-muted-foreground">{conv.model?.split("-").slice(0, 2).join("-")}</span>
-              {convTags.length > 0 && (
-                <div className="flex gap-0.5">
-                  {convTags.slice(0, 3).map((tag) => (
-                    <span key={tag.id} className="h-1.5 w-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: tag.color }} title={tag.name} />
-                  ))}
-                </div>
-              )}
+          <>
+            <div className="flex-1 min-w-0">
+              <span className="truncate text-xs block font-medium">{conv.title}</span>
+              <div className="flex items-center gap-1 mt-0.5">
+                <span className="text-[10px] text-muted-foreground truncate">{conv.model?.split("-").slice(0, 2).join("-")}</span>
+                {conv.folder_id && (() => {
+                  const f = folders.find((f) => f.id === conv.folder_id);
+                  return f ? (
+                    <span className="text-[9px] text-muted-foreground flex items-center gap-0.5 truncate">
+                      <Folder className="h-2 w-2 flex-shrink-0" style={{ color: f.color }} />
+                      {f.name}
+                    </span>
+                  ) : null;
+                })()}
+                {convTags.length > 0 && (
+                  <div className="flex gap-0.5 flex-shrink-0">
+                    {convTags.slice(0, 3).map((tag) => (
+                      <span key={tag.id} className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: tag.color }} title={tag.name} />
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        )}
-        <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 flex items-center gap-0.5 mt-0.5">
-          <button className="p-0.5 hover:text-amber-500" title={conv.pinned ? "Unpin" : "Pin"} onClick={(e) => { e.stopPropagation(); togglePin(conv.id); }}>
-            <Pin className={cn("h-3 w-3", conv.pinned && "fill-amber-500 text-amber-500")} />
-          </button>
-          <button className="p-0.5 hover:text-primary" title="Tags" onClick={(e) => { e.stopPropagation(); setTagMenuConvId(tagMenuConvId === conv.id ? null : conv.id); }}>
-            <Tag className="h-3 w-3" />
-          </button>
-          <button className="p-0.5 hover:text-foreground" title="Rename" onClick={(e) => { e.stopPropagation(); setEditingTitle(conv.id); setEditTitleValue(conv.title); }}>
-            <Pencil className="h-3 w-3" />
-          </button>
-          <button className="p-0.5 hover:text-destructive" title="Delete" onClick={(e) => { e.stopPropagation(); deleteConversation(conv.id); }}>
-            <Trash2 className="h-3 w-3" />
-          </button>
-        </div>
-
-        {/* Tag menu popup */}
-        {tagMenuConvId === conv.id && (
-          <div className="absolute left-full top-0 ml-1 z-50 bg-popover border rounded-lg shadow-lg p-2 min-w-[160px]" onClick={(e) => e.stopPropagation()}>
-            <p className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">Tags</p>
-            {tags.length === 0 && <p className="text-[10px] text-muted-foreground">No tags yet</p>}
-            {tags.map((tag) => (
-              <button
-                key={tag.id}
-                className="flex items-center gap-2 w-full px-2 py-1 text-xs rounded hover:bg-muted transition-colors"
-                onClick={() => toggleConvTag(conv.id, tag.id)}
-              >
-                <span className="h-2.5 w-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: tag.color }} />
-                <span className="flex-1 text-left">{tag.name}</span>
-                {conv.tag_ids?.includes(tag.id) && <Check className="h-3 w-3 text-primary" />}
+            {/* Hover actions */}
+            <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 flex items-center gap-0.5 mt-0.5">
+              <button className="p-0.5 hover:text-amber-500" title={conv.pinned ? "Unpin" : "Pin"} onClick={(e) => { e.stopPropagation(); togglePin(conv.id); }}>
+                <Pin className={cn("h-3 w-3", conv.pinned && "fill-amber-500 text-amber-500")} />
               </button>
-            ))}
-            {/* Move to folder */}
-            {folders.length > 0 && (
-              <>
-                <div className="border-t my-1" />
-                <p className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">Move to folder</p>
-                <button
-                  className="flex items-center gap-2 w-full px-2 py-1 text-xs rounded hover:bg-muted"
-                  onClick={() => { moveToFolder(conv.id, null); setTagMenuConvId(null); }}
-                >
-                  <X className="h-2.5 w-2.5" />
-                  <span>No folder</span>
+              {(tags.length > 0 || folders.length > 0) && (
+                <button className="p-0.5 hover:text-primary" title="Tags & Folders" onClick={(e) => { e.stopPropagation(); setTagMenuConvId(tagMenuConvId === conv.id ? null : conv.id); }}>
+                  <Tag className="h-3 w-3" />
                 </button>
-                {folders.map((f) => (
-                  <button
-                    key={f.id}
-                    className="flex items-center gap-2 w-full px-2 py-1 text-xs rounded hover:bg-muted"
-                    onClick={() => { moveToFolder(conv.id, f.id); setTagMenuConvId(null); }}
-                  >
-                    <Folder className="h-2.5 w-2.5" style={{ color: f.color }} />
-                    <span>{f.name}</span>
-                    {conv.folder_id === f.id && <Check className="h-3 w-3 text-primary" />}
-                  </button>
-                ))}
-              </>
-            )}
-          </div>
+              )}
+              <button className="p-0.5 hover:text-foreground" title="Rename" onClick={(e) => { e.stopPropagation(); setEditingTitle(conv.id); setEditTitleValue(conv.title); }}>
+                <Pencil className="h-3 w-3" />
+              </button>
+              <button className="p-0.5 hover:text-destructive" title="Delete" onClick={(e) => { e.stopPropagation(); deleteConversation(conv.id); }}>
+                <Trash2 className="h-3 w-3" />
+              </button>
+            </div>
+          </>
         )}
       </div>
     );
@@ -1110,42 +1080,51 @@ export default function ChatPage() {
       {/* ─── Sidebar ─── */}
       <div className={cn(
         "border-r bg-muted/30 flex flex-col transition-all duration-200 min-w-0",
-        sidebarOpen ? "w-72 flex-shrink-0" : "w-0 overflow-hidden"
+        sidebarOpen ? "w-80 flex-shrink-0" : "w-0 overflow-hidden"
       )}>
-        <div className="p-3 space-y-2 border-b">
-          <Button variant="outline" className="w-full justify-start gap-2 text-sm" onClick={startNewChat}>
-            <Plus className="h-4 w-4" />
-            New Chat
-          </Button>
-          {/* Search bar with mode toggle */}
-          <div className="flex gap-1">
-            <div className="relative flex-1">
-              <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder={searchMode === "fulltext" ? "Search messages..." : "Search conversations..."}
-                value={searchQuery}
-                onChange={(e) => handleSearchChange(e.target.value)}
-                className="w-full h-7 rounded-md border bg-background pl-7 pr-2 text-xs outline-none focus:ring-1 focus:ring-primary"
-              />
-            </div>
+        <div className="p-3 space-y-2 border-b flex-shrink-0">
+          <div className="flex gap-1.5">
+            <Button variant="outline" className="flex-1 justify-start gap-2 text-sm" onClick={startNewChat}>
+              <Plus className="h-4 w-4" />
+              New Chat
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-9 w-9 flex-shrink-0"
+              title="New folder"
+              onClick={() => { setShowNewFolder(true); setSidebarTab("folders"); }}
+            >
+              <FolderPlus className="h-4 w-4" />
+            </Button>
+          </div>
+          {/* Search bar */}
+          <div className="relative">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder={searchMode === "fulltext" ? "Search all messages..." : "Search chats..."}
+              value={searchQuery}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              className="w-full h-8 rounded-md border bg-background pl-8 pr-16 text-xs outline-none focus:ring-1 focus:ring-primary"
+            />
             <button
               type="button"
               onClick={() => { setSearchMode(searchMode === "title" ? "fulltext" : "title"); setSearchResults([]); setSearchQuery(""); }}
               className={cn(
-                "h-7 px-1.5 rounded-md border text-[9px] font-medium transition-colors flex-shrink-0",
-                searchMode === "fulltext" ? "bg-primary/10 border-primary/30 text-primary" : "text-muted-foreground hover:text-foreground"
+                "absolute right-1.5 top-1/2 -translate-y-1/2 h-5 px-2 rounded text-[9px] font-medium transition-colors",
+                searchMode === "fulltext" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-muted"
               )}
-              title={searchMode === "fulltext" ? "Search messages (full-text)" : "Search titles only"}
+              title={searchMode === "fulltext" ? "Searching message content" : "Searching titles only"}
             >
-              {searchMode === "fulltext" ? "FT" : "T"}
+              {searchMode === "fulltext" ? "Messages" : "Titles"}
             </button>
           </div>
         </div>
 
-        {/* Tag filter bar */}
+        {/* Tag filter chips */}
         {tags.length > 0 && (
-          <div className="px-3 py-1.5 border-b flex gap-1 flex-wrap">
+          <div className="px-3 py-1.5 border-b flex gap-1 flex-wrap flex-shrink-0">
             {activeFilterTag && (
               <button
                 className="h-5 px-1.5 rounded text-[9px] font-medium bg-muted text-muted-foreground hover:text-foreground"
@@ -1159,7 +1138,7 @@ export default function ChatPage() {
                 key={tag.id}
                 className={cn(
                   "h-5 px-1.5 rounded text-[9px] font-medium transition-colors flex items-center gap-1",
-                  activeFilterTag === tag.id ? "ring-1 ring-primary" : "hover:bg-muted"
+                  activeFilterTag === tag.id ? "ring-1 ring-primary bg-primary/5" : "hover:bg-muted"
                 )}
                 onClick={() => setActiveFilterTag(activeFilterTag === tag.id ? null : tag.id)}
               >
@@ -1170,8 +1149,8 @@ export default function ChatPage() {
           </div>
         )}
 
-        {/* Sidebar tabs */}
-        <div className="flex border-b">
+        {/* View toggle: Chats / Folders */}
+        <div className="flex border-b flex-shrink-0">
           <button
             className={cn("flex-1 py-1.5 text-[10px] font-medium transition-colors", sidebarTab === "chats" ? "text-primary border-b-2 border-primary" : "text-muted-foreground")}
             onClick={() => setSidebarTab("chats")}
@@ -1206,9 +1185,10 @@ export default function ChatPage() {
             </div>
           )}
 
-          {/* Normal conversation list or folders view */}
+          {/* Conversation list / folder view */}
           {(searchMode !== "fulltext" || searchQuery.length < 2) && (
             <div className="p-2 space-y-1">
+              {/* ── Chats tab: time-grouped, unfiled conversations ── */}
               {sidebarTab === "chats" && (
                 <>
                   {conversations.length === 0 && !loadingConvs && (
@@ -1216,18 +1196,44 @@ export default function ChatPage() {
                   )}
                   {pinnedConvs.length > 0 && (
                     <ConvSection label="Pinned" icon={<Pin className="h-2.5 w-2.5" />}>
-                      {pinnedConvs.map((conv) => renderConvItem(conv))}
+                      {pinnedConvs.map(renderConvItem)}
                     </ConvSection>
                   )}
+                  {/* Show folder groups inline if any conversations are in folders */}
+                  {folders.map((folder) => {
+                    const folderConvs = filteredConversations.filter((c) => c.folder_id === folder.id && !c.pinned);
+                    if (folderConvs.length === 0) return null;
+                    return (
+                      <ConvSection
+                        key={folder.id}
+                        label={folder.name}
+                        icon={<Folder className="h-2.5 w-2.5" style={{ color: folder.color }} />}
+                        collapsible
+                      >
+                        {folderConvs.map(renderConvItem)}
+                      </ConvSection>
+                    );
+                  })}
                   {todayConvs.length > 0 && <ConvSection label="Today">{todayConvs.map(renderConvItem)}</ConvSection>}
                   {weekConvs.length > 0 && <ConvSection label="This Week">{weekConvs.map(renderConvItem)}</ConvSection>}
                   {olderConvs.length > 0 && <ConvSection label="Older" collapsible>{olderConvs.map(renderConvItem)}</ConvSection>}
                 </>
               )}
 
+              {/* ── Folders tab: manage folders + see all by folder ── */}
               {sidebarTab === "folders" && (
                 <>
-                  {/* Folder list */}
+                  {folders.length === 0 && !showNewFolder && (
+                    <div className="text-center py-6">
+                      <Folder className="h-8 w-8 text-muted-foreground/30 mx-auto mb-2" />
+                      <p className="text-xs text-muted-foreground mb-2">Organize chats into folders</p>
+                      <Button variant="outline" size="sm" className="text-xs gap-1.5" onClick={() => setShowNewFolder(true)}>
+                        <FolderPlus className="h-3 w-3" />
+                        Create folder
+                      </Button>
+                    </div>
+                  )}
+
                   {folders.map((folder) => {
                     const folderConvs = filteredConversations.filter((c) => c.folder_id === folder.id);
                     return (
@@ -1237,7 +1243,7 @@ export default function ChatPage() {
                         icon={<FolderOpen className="h-2.5 w-2.5" style={{ color: folder.color }} />}
                         collapsible
                       >
-                        {folderConvs.length === 0 && <p className="text-[10px] text-muted-foreground px-2.5 py-1">Empty</p>}
+                        {folderConvs.length === 0 && <p className="text-[10px] text-muted-foreground px-2.5 py-1">Empty — drag a chat here or use its menu</p>}
                         {folderConvs.map(renderConvItem)}
                         <button
                           className="w-full text-left text-[10px] text-destructive/60 hover:text-destructive px-2.5 py-1 transition-colors"
@@ -1249,28 +1255,28 @@ export default function ChatPage() {
                     );
                   })}
 
-                  {/* Unfiled conversations */}
+                  {/* Unfiled */}
                   {filteredConversations.filter((c) => !c.folder_id).length > 0 && (
                     <ConvSection label="Unfiled" icon={<MessageSquare className="h-2.5 w-2.5" />} collapsible>
                       {filteredConversations.filter((c) => !c.folder_id).map(renderConvItem)}
                     </ConvSection>
                   )}
 
-                  {/* New folder form */}
+                  {/* New folder inline form */}
                   {showNewFolder ? (
-                    <div className="px-2.5 py-2 flex gap-1">
+                    <div className="px-2.5 py-2 flex gap-1.5">
                       <input
-                        className="flex-1 h-6 rounded border bg-background px-2 text-xs outline-none focus:ring-1 focus:ring-primary"
+                        className="flex-1 h-7 rounded-md border bg-background px-2.5 text-xs outline-none focus:ring-1 focus:ring-primary min-w-0"
                         placeholder="Folder name"
                         value={newFolderName}
                         onChange={(e) => setNewFolderName(e.target.value)}
                         onKeyDown={(e) => { if (e.key === "Enter") createFolder(); if (e.key === "Escape") setShowNewFolder(false); }}
                         autoFocus
                       />
-                      <button className="text-primary" onClick={createFolder}><Check className="h-3.5 w-3.5" /></button>
-                      <button className="text-muted-foreground" onClick={() => setShowNewFolder(false)}><X className="h-3.5 w-3.5" /></button>
+                      <button className="text-primary hover:text-primary/80" onClick={createFolder}><Check className="h-4 w-4" /></button>
+                      <button className="text-muted-foreground hover:text-foreground" onClick={() => setShowNewFolder(false)}><X className="h-4 w-4" /></button>
                     </div>
-                  ) : (
+                  ) : folders.length > 0 && (
                     <button
                       className="flex items-center gap-1.5 px-2.5 py-2 text-xs text-muted-foreground hover:text-foreground transition-colors w-full"
                       onClick={() => setShowNewFolder(true)}
@@ -1285,19 +1291,19 @@ export default function ChatPage() {
           )}
         </ScrollArea>
 
-        {/* Tags management at bottom of sidebar */}
-        <div className="border-t p-2">
+        {/* Bottom bar: new tag + folder actions */}
+        <div className="border-t p-2 flex-shrink-0">
           {showNewTag ? (
-            <div className="flex gap-1 items-center">
+            <div className="flex gap-1.5 items-center">
               <input
-                className="flex-1 h-6 rounded border bg-background px-2 text-xs outline-none focus:ring-1 focus:ring-primary"
+                className="flex-1 h-7 rounded-md border bg-background px-2.5 text-xs outline-none focus:ring-1 focus:ring-primary min-w-0"
                 placeholder="Tag name"
                 value={newTagName}
                 onChange={(e) => setNewTagName(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter") createTag(); if (e.key === "Escape") setShowNewTag(false); }}
                 autoFocus
               />
-              <div className="flex gap-0.5">
+              <div className="flex gap-0.5 flex-shrink-0">
                 {TAG_COLORS.slice(0, 5).map((c) => (
                   <button
                     key={c}
@@ -1307,8 +1313,8 @@ export default function ChatPage() {
                   />
                 ))}
               </div>
-              <button className="text-primary" onClick={createTag}><Check className="h-3 w-3" /></button>
-              <button className="text-muted-foreground" onClick={() => setShowNewTag(false)}><X className="h-3 w-3" /></button>
+              <button className="text-primary hover:text-primary/80 flex-shrink-0" onClick={createTag}><Check className="h-4 w-4" /></button>
+              <button className="text-muted-foreground hover:text-foreground flex-shrink-0" onClick={() => setShowNewTag(false)}><X className="h-4 w-4" /></button>
             </div>
           ) : (
             <button
@@ -1321,6 +1327,59 @@ export default function ChatPage() {
           )}
         </div>
       </div>
+
+      {/* Tag/folder context menu — rendered outside sidebar to avoid clipping */}
+      {tagMenuConvId && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setTagMenuConvId(null)} />
+          <div className="fixed z-50 bg-popover border rounded-lg shadow-xl p-2 min-w-[180px] max-w-[220px]" style={{ left: sidebarOpen ? "332px" : "12px", top: "160px" }} onClick={(e) => e.stopPropagation()}>
+            <p className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5 px-1">Tags</p>
+            {tags.length === 0 && <p className="text-[10px] text-muted-foreground px-1 mb-1">No tags yet — create one below</p>}
+            {tags.map((tag) => {
+              const conv = conversations.find((c) => c.id === tagMenuConvId);
+              return (
+                <button
+                  key={tag.id}
+                  className="flex items-center gap-2 w-full px-2 py-1.5 text-xs rounded hover:bg-muted transition-colors"
+                  onClick={() => toggleConvTag(tagMenuConvId, tag.id)}
+                >
+                  <span className="h-2.5 w-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: tag.color }} />
+                  <span className="flex-1 text-left truncate">{tag.name}</span>
+                  {conv?.tag_ids?.includes(tag.id) && <Check className="h-3 w-3 text-primary flex-shrink-0" />}
+                </button>
+              );
+            })}
+
+            {folders.length > 0 && (
+              <>
+                <div className="border-t my-1.5" />
+                <p className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5 px-1">Move to folder</p>
+                <button
+                  className="flex items-center gap-2 w-full px-2 py-1.5 text-xs rounded hover:bg-muted"
+                  onClick={() => { moveToFolder(tagMenuConvId, null); setTagMenuConvId(null); }}
+                >
+                  <X className="h-2.5 w-2.5 flex-shrink-0" />
+                  <span>No folder</span>
+                </button>
+                {folders.map((f) => {
+                  const conv = conversations.find((c) => c.id === tagMenuConvId);
+                  return (
+                    <button
+                      key={f.id}
+                      className="flex items-center gap-2 w-full px-2 py-1.5 text-xs rounded hover:bg-muted"
+                      onClick={() => { moveToFolder(tagMenuConvId, f.id); setTagMenuConvId(null); }}
+                    >
+                      <Folder className="h-2.5 w-2.5 flex-shrink-0" style={{ color: f.color }} />
+                      <span className="truncate">{f.name}</span>
+                      {conv?.folder_id === f.id && <Check className="h-3 w-3 text-primary flex-shrink-0" />}
+                    </button>
+                  );
+                })}
+              </>
+            )}
+          </div>
+        </>
+      )}
 
       {/* ─── Main chat area ─── */}
       <div className={cn("flex-1 flex min-w-0", compareMode ? "flex-row" : "flex-col")}>

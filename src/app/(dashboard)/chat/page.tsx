@@ -150,6 +150,7 @@ interface PendingFile {
   extractedText?: string;
   uploading?: boolean;
   error?: string;
+  dlpPassed?: boolean;
 }
 
 
@@ -323,7 +324,7 @@ export default function ChatPage() {
           }
 
           const extracted = data.files?.[0];
-          setPendingFiles((prev) => prev.map((f) => f.file === file ? { ...f, uploading: false, extractedText: extracted?.text || "" } : f));
+          setPendingFiles((prev) => prev.map((f) => f.file === file ? { ...f, uploading: false, extractedText: extracted?.text || "", dlpPassed: true } : f));
           trackChatFileUploaded(file.type || file.name.split(".").pop() || "unknown");
         } catch {
           setPendingFiles((prev) => prev.map((f) => f.file === file ? { ...f, uploading: false, error: "Upload failed" } : f));
@@ -854,20 +855,43 @@ export default function ChatPage() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, [slashMenuOpen]);
 
-  // Smart auto-scroll: only scroll to bottom if user is near the bottom (within 150px)
-  // This lets users scroll up to read without being yanked back down during streaming
+  // ChatGPT-style scroll behavior:
+  // 1. Always scroll to bottom when user sends a message
+  // 2. During streaming, auto-scroll only if user hasn't scrolled up
+  // 3. If user scrolls up mid-stream, stop auto-scrolling
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const userScrolledUpRef = useRef(false);
+  const prevMessageCountRef = useRef(0);
+
+  // Detect when user manually scrolls up during streaming
   useEffect(() => {
     const viewport = scrollAreaRef.current?.querySelector("[data-radix-scroll-area-viewport]") as HTMLElement | null;
-    if (!viewport) {
-      // Fallback if no scroll area ref
+    if (!viewport) return;
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = viewport;
+      const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
+      // If user scrolled more than 200px from bottom, they're reading — don't auto-scroll
+      userScrolledUpRef.current = distanceFromBottom > 200;
+    };
+    viewport.addEventListener("scroll", handleScroll, { passive: true });
+    return () => viewport.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const prevCount = prevMessageCountRef.current;
+    const newCount = messages.length;
+    prevMessageCountRef.current = newCount;
+
+    // New message added (user sent or assistant message created) — always scroll
+    if (newCount > prevCount) {
+      userScrolledUpRef.current = false;
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
       return;
     }
-    const { scrollTop, scrollHeight, clientHeight } = viewport;
-    const isNearBottom = scrollHeight - scrollTop - clientHeight < 150;
-    if (isNearBottom) {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+
+    // Streaming update (same message count, content changed) — scroll only if near bottom
+    if (!userScrolledUpRef.current) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "auto" }); // "auto" for instant during stream
     }
   }, [messages]);
   useEffect(() => { inputRef.current?.focus(); }, [activeConvId]);
@@ -1943,17 +1967,30 @@ export default function ChatPage() {
                         </div>
                       ))}
                       {pendingFiles.map((pf, idx) => (
-                        <div key={`file-${idx}`} className="relative group flex items-center gap-2 border rounded-lg px-3 py-2 bg-muted/50 max-w-[200px]">
-                          <FileText className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
+                        <div key={`file-${idx}`} className={cn(
+                          "relative group flex items-center gap-2 border rounded-lg px-3 py-2 max-w-[240px]",
+                          pf.dlpPassed ? "border-green-200 dark:border-green-800/40 bg-green-50/50 dark:bg-green-950/20" :
+                          pf.error ? "border-red-200 dark:border-red-800/40 bg-red-50/50 dark:bg-red-950/20" :
+                          "bg-muted/50"
+                        )}>
+                          <FileText className={cn("h-5 w-5 flex-shrink-0", pf.dlpPassed ? "text-green-600 dark:text-green-400" : "text-muted-foreground")} />
                           <div className="min-w-0 flex-1">
                             <p className="text-xs font-medium truncate">{pf.name}</p>
                             <p className="text-[10px] text-muted-foreground">
                               {pf.uploading ? (
-                                <span className="flex items-center gap-1"><Loader2 className="h-2.5 w-2.5 animate-spin" />Processing...</span>
+                                <span className="flex items-center gap-1">
+                                  <Loader2 className="h-2.5 w-2.5 animate-spin" />
+                                  <span>Scanning &amp; extracting...</span>
+                                </span>
                               ) : pf.error ? (
                                 <span className="text-destructive">{pf.error}</span>
+                              ) : pf.dlpPassed ? (
+                                <span className="flex items-center gap-1 text-green-600 dark:text-green-400">
+                                  <Shield className="h-2.5 w-2.5" />
+                                  DLP passed · {formatFileSize(pf.size)}
+                                </span>
                               ) : (
-                                <span className="text-green-600 dark:text-green-400">{formatFileSize(pf.size)} — ready</span>
+                                <span>{formatFileSize(pf.size)}</span>
                               )}
                             </p>
                           </div>

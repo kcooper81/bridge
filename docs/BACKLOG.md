@@ -1,327 +1,143 @@
 # TeamPrompt Backlog
 
-## Completed
-- [x] Member role dashboard restrictions
-  - Settings layout: hide Billing & Plan tabs for members
-  - Billing page: role gate (admin only message)
-  - Plan & Usage tab: role gate (contact admin message)
-  - UpgradeGate: member-aware messaging (no upgrade button, "contact admin")
-  - Dashboard quick actions: "My Settings" instead of "Manage Team" for members
-  - Payment banner: member-safe messaging (no billing links for members)
-  - Templates: request+approval system for member installs
-    - DB migration: `029_pack_install_requests.sql`
-    - API: `/api/template-packs/request` (POST create, GET list)
-    - API: `/api/template-packs/request/[requestId]` (PATCH approve/reject)
-    - UI: "Request Install" button for members, "Requested" badge, admin approval banner
+## AI Chat (Built 2026-03-18/19)
+- [x] Admin slash commands with real DB data (/activity, /violations, /usage, /audit)
+- [x] Collections (replaced folders + tags — unified concept with color dots)
+- [x] Favorites (pin conversations to top with star icon)
+- [x] Right-click context menu (pin, rename, collections, share, export, delete)
+- [x] File upload with DLP scanning (PDF, DOCX, TXT, code files, images)
+- [x] DLP scan indicator on uploaded files (green shield = passed)
+- [x] Multi-model compare mode (side-by-side split view)
+- [x] Response rating (thumbs up/down on AI messages)
+- [x] Conversation presets / starters (admin-configured templates)
+- [x] System prompt / custom instructions (org-wide, injected server-side)
+- [x] Full-text search API (PostgreSQL FTS + ILIKE fallback)
+- [x] Sidebar tabs (Chats / Favorites / Collections)
+- [x] Sidebar resize handle (drag to resize, 260-480px)
+- [x] ChatGPT-style smart scroll (auto-scroll near bottom, stop if user scrolls up)
+- [x] Loading dots fix (show until content streams, not just until message object created)
+- [x] Ctrl+N new chat shortcut with keyboard hint on button
+- [x] Double-click to rename conversations
+- [x] Undo delete with 3-second toast
+- [x] Message timestamps (from created_at for server messages, from ID for new)
+- [x] Code block copy button (hover to reveal)
+- [x] Rotating starter suggestions (4 sets, rotate every 30 min)
+- [x] Dark mode message bubbles (zinc-800 with subtle border)
+- [x] Message entrance animations (fade + slide up)
+- [x] Typing indicator in sidebar (pulsing dot on active conversation)
+- [x] Share conversation link (copies to clipboard)
+- [x] Export Markdown + Export PDF in context menu
+- [x] Chat analytics events (7 GA4 events: message sent, conversation created, file uploaded, compare used, preset used, admin command, collection created)
+- [x] Separate preset system prompt from admin context (no conflicts)
+- [x] 2 full QA passes (55 bugs found + fixed)
+
+## Google Ads & Marketing (Built 2026-03-18/19)
+- [x] GA4 event audit and fixes (broken conversion tag, duplicate OAuth, purchase dedup)
+- [x] 4 Google Ads landing pages (/lp/ai-dlp, /lp/shadow-ai, /lp/ai-compliance, /lp/prompt-library)
+- [x] 10 SEO blog articles (shadow AI, AI DLP, governance, HIPAA, SOC 2, CISO risks, prompt injection, etc.)
+- [x] Sitemap updated with all new pages (18 blog slugs + 4 LP slugs)
+- [x] Google Ads campaign optimization (keyword cleanup, bidding strategy, negatives)
+
+## Database Migrations (2026-03-18/19)
+- [x] 070_chat_pinned_column.sql — pinned boolean on chat_conversations
+- [x] 071_chat_features.sql — folders, tags, presets, ratings, FTS index (made idempotent)
+- [x] All API endpoints have column fallbacks for unmigrated DBs
+
+## Infrastructure
+- [x] Radix ScrollArea horizontal overflow fix (global CSS !important rule)
+- [x] ReDoS protection (safeRegexTest helper with content length limit)
+- [x] Docs consolidation (all .md files moved to docs/ folder)
+
+---
+
+## Previously Completed (Pre 2026-03-18)
+- [x] Member role dashboard restrictions + template request/approval system
 - [x] Extension install email system
-  - API: `POST /api/invite/extension-email` (bulk or targeted, admin/manager only)
-  - Auto-sends extension install email on invite accept (non-blocking)
-  - Email links to `/extensions` page with browser store links
-  - Rate limited (5/min per org)
-- [x] Extension tab restructure: Faves, Recent, Prompts
-  - Tabs: Faves (default) | Recent | Prompts — Shield removed, now overlay via status bar
-  - Guardrails button in status bar with checkmark icon when active
-  - "+ Add Rule" text button in status bar → opens dashboard guardrails page
+- [x] Extension tab restructure (Faves, Recent, Prompts)
 - [x] Categories & tags filtering on all tabs
-  - Filter bar (folder dropdown + tag multi-select) now shows on Faves, Recent, and Prompts tabs
 - [x] Dashboard: hide settings cog from members
-  - Settings gear dropdown hidden for member role
-  - Organization tab in settings gated to admin/manager
 - [x] Guardrails: member rule/policy suggestion flow
-  - DB: `rule_suggestions` table (org_id, team_id nullable, suggested_by, name, description, category, severity, status, reviewed_by)
-  - DB migration: `030_rule_suggestions.sql` with RLS policies
-  - API: `POST /api/guardrails/suggest` (any org member can suggest)
-  - API: `GET /api/guardrails/suggest` (admin/manager gets pending suggestions)
-  - API: `PATCH /api/guardrails/suggest/[id]` (approve/reject with notes)
-
-- [x] Marketing, Help Docs & Release Notes Update
-  - **Phase 1: Fix inconsistencies**
-    - Homepage: "3 members" → "1 member" on Free plan
-    - Enterprise: "6 AI tools" → "5 AI tools" in stats
-    - Help content: corrected plan info (Free: 1 member/25 prompts, Pro $9, Team $7/user, Business $12/user)
-    - Help FAQs: corrected free plan description
-  - **Phase 2: Update marketing pages**
-    - Homepage: added Compliance Packs + Approval Queue to secondary features, updated analytics desc
-    - Features: added 4 new sections (Compliance Packs, Auto-Sanitization, Approval Queue, Version Diff) with mockups
-    - Security: added compliance packs grid (6 frameworks), auto-sanitization to benefits, updated How It Works step 02
-    - Pricing: added Compliance Packs, Auto-Sanitization, Approval Queue, Version History & Diff rows
-    - Enterprise: added Compliance Policy Packs to platform features + benefits, added compliance FAQ
-  - **Phase 3: Help articles (7 new)**
-    - Guardrails: "What are compliance policy packs?", "How does auto-sanitization work?", "How do I suggest a security rule?"
-    - Prompt Vault: "How do I compare prompt versions?"
-    - Getting Started: "How do I use the approval queue?"
-    - Import/Export: "What are template packs?"
-    - Analytics: updated existing article with effectiveness metrics mention
-  - **Phase 4: New SEO pages**
-    - Use cases: ai-dlp, prompt-management, ai-audit-trail (3 pages)
-    - Comparisons: vs-custom-gpts, vs-prompt-managers (2 pages)
-    - Industries: education + insurance (data files + page files)
-    - Navigation: mega-menu + footer updated with Education, Insurance, Changelog
-  - **Phase 5: Release notes system**
-    - `src/lib/release-notes.ts` — data file with ReleaseNote interface, APP_VERSION, 4 releases
-    - `src/components/dashboard/whats-new-modal.tsx` — modal + reusable ReleaseNotesList + useHasUnseenRelease hook
-    - Support modal: added "What's New" tab with red dot indicator for unseen updates
-    - Sidebar: version number display (v1.3.0) with unseen dot, clickable to open What's New
-    - `src/app/(marketing)/changelog/page.tsx` — public changelog page with SEO metadata
-
-- [x] Two-Factor Authentication (TOTP) for Admins & Managers
-  - `qrcode` dependency installed
-  - `types.ts`: `require_mfa_for_admins` in Organization settings
-  - `supabase/middleware.ts`: returns AAL data
-  - `middleware.ts`: `/verify-mfa` route + AAL1→AAL2 redirect
-  - `verify-mfa/page.tsx`: MFA verification page (6-digit TOTP code)
-  - `login/page.tsx`: post-login MFA check
-  - `two-factor-card.tsx`: enrollment card (QR, secret, verify, disable)
-  - `settings/page.tsx`: renders 2FA card for admin/manager
-  - `organization-tab.tsx`: "Require 2FA" toggle in org preferences
-  - `mfa-required-banner.tsx`: non-dismissible amber banner for enforcement
-  - `layout.tsx`: renders MFA banner in dashboard
-  - Privacy policy & terms of use updated with 2FA data handling + liability
-
-- [x] Compliance Policy Template Packs
-  - SOC 2 template added to `compliance-templates.ts` (6 frameworks total: HIPAA, PCI-DSS, GDPR, CCPA, General PII, SOC 2)
-  - Compliance pack browser UI in Guardrails → Policies tab (grid with preview modal, install states, rule count badges)
-  - One-click install function in `vault-api.ts` with name-based de-duplication
-  - Feature gating: requires `custom_security` subscription + admin/manager role
-- [x] Auto-Sanitization with Placeholders
-  - Scan endpoint returns `sanitized_content` with `{{CATEGORY_N}}` placeholders
-  - Extension UI: "Send Sanitized Version" button on violation block
-  - Sanitized preview with highlighted placeholders, `action_taken: "auto_redacted"` logging
+- [x] Marketing, Help Docs & Release Notes update (5 phases)
+- [x] Two-Factor Authentication (TOTP) for admins & managers
+- [x] Compliance Policy Template Packs (19 packs, 88 rules)
+- [x] Auto-Sanitization with placeholders
 - [x] Prompt Effectiveness Analytics
-  - `getEffectivenessMetrics()` in vault-api: top/least effective, rating distribution, unrated high-usage
-  - UI section in Analytics page: rating distribution bars, top/least effective tables, needs-attention list
 - [x] Approval Queue Dashboard
-  - `/approvals` page with Prompts + Rule Suggestions tabs (`approvals/page.tsx`, 626 lines)
-  - Approve/reject actions with optional reason modal
-  - Sidebar nav item with pending count badge (admin/manager only)
-  - API: `getPendingPrompts()`, `approvePrompt()`, `rejectPrompt()` in vault-api.ts
-  - Extras: prompt preview modal, create-rule-from-suggestion flow, dismiss action
 - [x] Version History Diff View
-  - Migration: `changed_by` column on `prompt_versions` (`031_version_metadata.sql`)
-  - `computeLineDiff()` utility (LCS-based line diff) in `src/lib/diff.ts`
-  - Compare button in prompt modal showing inline diff with green/red highlighting
-  - `updatePrompt()` stores `changed_by: user.id`
-  - Extras: restore button, attribution (who + when), up to 10 versions, active state highlighting
 - [x] Avatar Upload
-  - API: `POST /api/profile/avatar` — validates file type/size, uploads to Supabase Storage `avatars` bucket
-  - API: `DELETE /api/profile/avatar` — removes avatar from storage + clears profile URL
-  - Profile tab: clickable avatar with hover overlay (Camera icon), drag-and-drop support
-  - X button to remove avatar, syncs `avatar_url` in both profiles table and auth metadata
-  - 2 MB max, JPEG/PNG/WebP/GIF supported
 - [x] Email Address Change
-  - API: `POST /api/profile/email` — users can change own email, admins can change non-admin member emails
-  - Profile tab: email field is now editable with inline "Update" button
-  - Team page: admins see pencil icon on non-admin members to change their email via modal
-  - Security: admins cannot change other admins' emails, must be same org, duplicate email check
-- [x] Manage Categories — Button + Modal Redesign
-  - Replaced inline collapsible FolderManager with a button that opens the modal
-  - Added color picker (12 preset colors) to create and edit flows
-  - Colors saved to `folders.color` via existing `saveFolderApi`
-  - Both list and grid views show color-coded folder icons
-  - Color picker inline in both create form and edit form
-
-- [x] Bulk Employee Import & Integrations Page
-  - Bulk CSV import modal: file upload, paste, column mapping preview, validation (green/yellow/red), progress bar, results summary
-  - API: `POST /api/invite/bulk` — validates rows, checks plan limits, auto-creates teams, batch invites via Resend
-  - `bulkInvite()` client function in vault-api.ts
-  - `BulkImportRow` and `BulkImportResult` types
-  - "Import Members" button on team page
-  - Integrations settings page (`/settings/integrations`) with cards for Google Workspace, Microsoft Entra ID (coming soon), SCIM 2.0 (coming soon)
-  - Integrations link card in Organization settings tab
-
+- [x] Manage Categories redesign
+- [x] Bulk Employee Import & CSV upload
 - [x] Google Workspace Directory Sync
-  - Migration: `035_workspace_integrations.sql` — `workspace_integrations` table (org_id, provider, tokens, admin_email, timestamps)
-  - API: `GET /api/integrations/google/connect` — builds OAuth URL with directory scopes, CSRF state cookie
-  - API: `GET /api/integrations/google/callback` — exchanges code, gets admin email, upserts integration
-  - API: `GET /api/integrations/google/status` — returns connected state, admin email, last sync time
-  - API: `POST /api/integrations/google/sync` — fetches users (paginated, cap 2000) + groups, returns BulkImportRow[]
-  - API: `DELETE /api/integrations/google/disconnect` — revokes token, deletes integration
-  - Integrations page: connected/disconnected state, Sync Now → opens bulk import modal with pre-populated rows
-  - Bulk import modal: `initialRows` prop skips input step, goes straight to preview
-
 - [x] Domain-Based Auto-Join
-  - Organization settings: `auto_join_domain` toggle in Preferences card (disabled when no domain set)
-  - API: `POST /api/auth/domain-join` — checks email domain, finds matching org with auto_join enabled, migrates solo personal org
-  - Skips free providers (gmail, yahoo, outlook, etc.)
-  - org-provider: fire-and-forget call after auth, refreshes if user auto-joined
-
 - [x] Welcome Email Customization
-  - Organization settings: `invite_welcome_message` in types.ts (JSONB, no migration)
-  - New "Invite Email" card in org settings with Textarea (max 500 chars, char counter)
-  - Invite send route: prepends escaped welcome message as styled blockquote
-  - Invite bulk route: same welcome message blockquote in batch emails
-
 - [x] Bulk Role Assignment
-  - Team page: `selectedMemberIds` state with Checkbox in table header (select all non-self) and per-row
-  - Bulk action bar: "{N} selected" + role Select + Apply + Clear buttons
-  - `handleBulkRoleChange()`: guards last-admin, Promise.all updateMemberRole, clears selection
-  - Selection clears after individual role changes and member removal
-
-- [x] SEO Internal Linking for 100 Solution Pages
-  - Solutions index (`/solutions`): shows all 8 categories (was 3) — added alternative, guide, workflow, role, template
-  - Related Solutions cross-links: 6-card "Related Solutions" section on every individual solution page (`getRelatedPages` helper)
-  - Mega-menu: "By Use Case" links now point to actual solution pages (Prompt Library, AI Governance, DLP & Compliance, Prompt Templates) + "Browse all solutions" CTA
-  - Footer: new "Solutions" column with links to /solutions and category anchors
-  - Sitemap: added `/solutions` to core pages (weekly, 0.8 priority)
-
-- [x] Fix admin panel crash (AuthProvider missing)
-  - Admin layout now wraps children with `AuthProvider` (fetches session server-side)
-  - Fixes "useAuth must be used within an AuthProvider" error on `/admin/admin-users`
-
-- [x] Media page: switch extension mockups to light mode
-  - DLPBlockScene and InsertScene converted from dark theme to light theme (white bg, zinc borders)
-  - Banners stay dark, mockups on top are now light — matches VaultScene and AnalyticsScene
-
-- [x] Fix Extension Install Flow — Browser Detection + /extensions Page
-  - `src/lib/browser-detect.ts`: detectBrowser(), EXTENSION_STORES, getStoreForBrowser()
-  - `/extensions` marketing page with browser-detected hero CTA, browser cards, features, FAQ
-  - Extension install banner: browser-detected store URL + icon + button text
-  - Setup wizard: "Install browser extension" with detected store URL
-  - Getting-started: browser-specific label + store URL
-
-- [x] Media page: redesign social banner gradient variants
-  - Replaced full-bleed stock photo backgrounds with decorative rounded squares
-  - Replaced admin/super-admin screenshots with prompt vault, guardrails, and extension views
-  - New MockupBannerShell with DecoShapes (rounded rectangles) background elements
-  - StaggeredMockup component: overlapping, offset app screenshots
-  - All gradient variants updated: Twitter, LinkedIn, Facebook, YouTube, OG
-
-- [x] Admin Inbox Redesign & Features
-  - Fixed reply editor (next/dynamic ref forwarding bug → direct import + SSR guard)
-  - Ticket assignment system: assign dropdown, My Tickets/Unassigned filters, auto-assign on reply
-  - Auto-select first ticket on load (desktop)
-  - Full UI redesign: consolidated filters, timeline notes, prominent message card, labeled controls
-  - Compact reply form: pill toggle, inline context, canned response templates
-  - `/api/admin/staff` endpoint for assignment dropdowns
-  - Realtime nav badges: past due subscriptions (red), new signups (green), browser notifications
-
-- [x] Admin Pages Enhancement (Subscriptions, Users, Organizations)
-  - Subscriptions: summary stat cards (MRR, active, past due, trialing), plan filter, Created column, full CSV export
-  - Users: summary stat cards (total, protected, unprotected, new this week), new filters (new this week, no extension), Last Active column
-  - Organizations: summary stat cards (total orgs, paid, new this week, total members)
-
-- [x] QA Audit Fixes
-  - Fixed SQL injection risk in extension routes (security-status, scan) — UUID validation on team_id filter
-  - Fixed unhandled promise rejections in invite/accept and domain-join — `Promise.all` → `Promise.allSettled` for cleanup ops
-  - Fixed missing DialogDescription warnings — added sr-only fallback in dialog.tsx
-  - Configurable support staff page access — ADMIN_PAGES constant, SupportAccessGuard, PATCH endpoint
-
-- [x] Chrome Web Store listing optimization (CHROME-STORE-OPTIMIZATION.md)
-- [x] "Rate Us" banner after 7 days of use (v1.0.9)
-- [x] Google Ads campaign structure (PAID-ADS.md)
-- [x] Comprehensive QA pass — 25 issues found/fixed across auth, dashboard, team, marketing, API, extension, DLP
-- [x] DLP default rules enabled (SSN, Credit Card active by default)
-- [x] Email verification enforcement (login + middleware)
-
-## Pending
-- [ ] **AI Response Clipper + Team Knowledge Base** — One-click save any AI response. Tagged, searchable, shareable. Builds a team "second brain" from AI conversations.
-- [ ] **Universal Prompt Palette (Cmd+Shift+P anywhere)** — Search and insert prompts into any text field (Docs, Slack, email), not just AI sites.
-- [ ] **AI Usage Dashboard ("Wrapped for AI")** — Team analytics: usage frequency, hours saved, top prompts, reuse rates. ROI justification for managers.
-- [ ] **Prompt Chains / Workflows** — Chain prompts together (summarize → extract → draft). One-click multi-step workflows, shareable like Zapier zaps.
-- [ ] Customizable dashboard — drag-and-drop widget layout (deferred)
-  - Allow admins/managers to choose which dashboard widgets to show and reorder them
-  - Consider react-grid-layout or dnd-kit for drag-and-drop
-  - Persist layout preference per user (user_preferences table or localStorage)
-- [ ] Role-differentiated dashboards — members vs admin/manager views
-  - Members: personal prompt stats, team prompts, usage, favorites
-  - Admins/Managers: full org overview with guardrails, team activity, compliance
-- [ ] Guardrail security hardening for sensitive pattern data (passwords, secrets)
-  - Evaluate encryption-at-rest for custom DLP patterns
-  - Assess if admin custom patterns could contain example sensitive data
-  - Consider pattern obfuscation in API responses
-- [x] Extension zip title — updated wxt.config.ts name to "TeamPrompt — AI Prompt Manager & DLP Shield"
-- [x] Testing guide improvements for QA specialists
-  - Pass/Fail/Skip status cycle per step (click to cycle)
-  - Priority tags (P0/P1/P2) on every step with color coding
-  - Preconditions listed per section
-  - Notes/comments field per step (expandable)
-  - Search across all steps
-  - Filter by status (all/untested/pass/fail/skip)
-  - Export results as .txt report with summary
-  - Copy results to clipboard
-  - Copy bug report template from failed steps
-  - Multi-color progress bar (green/red/amber)
-  - Completion summary shows pass-all vs failures-found
-  - Browser-specific extension testing steps added
-  - /extensions page test step added
-- [ ] Chrome Web Store API integration for extension updates
-  - Set up Chrome Web Store Developer API credentials
-  - API endpoint to upload new extension zip (`chromewebstore.v1.1` API)
-  - Automate publish flow (upload → publish to testers → publish to public)
-  - Version bump script (sync wxt.config.ts version with package.json)
-  - Consider CI/CD pipeline trigger on extension changes
-- [ ] **Enterprise Integrations**
-  - [ ] Slack integration — DLP violation alerts, approval notifications to a channel
-  - [ ] Microsoft Teams integration — same as Slack (alerts + notifications)
-  - [ ] Microsoft Entra ID (Azure AD) directory sync
-  - [ ] SCIM 2.0 provisioning endpoint (for Okta, OneLogin, JumpCloud)
-  - [ ] SAML 2.0 SSO (Okta, Azure AD, OneLogin)
-- [x] Auto-deprovisioning (remove access when employee leaves directory)
-  - Migration 044: `directory_sync_source` column on profiles, `directory_sync_log` table
-  - Google sync route detects removed users (compares directory vs tagged members)
-  - Retroactive tagging: existing members matched by email get `directory_sync_source` set
-  - `/api/integrations/deprovision` POST endpoint: safely removes directory-synced users
-  - `deprovisionUsers()` client helper in vault-api.ts
-  - `auto_deprovision_on_sync` org setting in types.ts
-- [ ] Consider upgrading Vercel to Pro plan for more frequent cron jobs (currently daily on Hobby, ideally every 6 hours for extension checks)
-- [ ] How to handle desktop AI clients (Claude Desktop, ChatGPT Desktop, etc.)
-  - **Not building a full desktop client yet** — ROI doesn't work at solo-founder stage (3 platforms = hiring dependency)
-  - Browser is still dominant; buyers (IT leaders, compliance officers) manage browser envs, not desktops
-  - Evaluate lighter-weight options instead:
-    - System-tray clipboard monitor (Tauri) — scans clipboard before paste into any desktop AI app
-    - OS-level proxy — intercept API calls from desktop clients at network level
-    - MCP Server integration — see below
-  - Consider DLP coverage gap — extension only covers browser-based AI tools
-  - Research OS-level APIs for input interception on Windows/macOS
-- [ ] **MCP Server for Claude Desktop**
-  - Build a TeamPrompt MCP server that provides prompt library access + DLP scanning inside Claude Desktop
-  - Claude Desktop supports MCP natively — no UI needed, just a server
-  - Low effort, high signal to investors — shows platform extensibility
-  - Could expand to other MCP-compatible clients as ecosystem grows
-- [ ] **Clipboard monitor companion app**
-  - Lightweight Tauri/Electron system-tray app for desktop AI coverage
-  - Monitors clipboard for sensitive data before paste into any desktop AI client
-  - Simpler than a full desktop client — covers the DLP gap without building a whole product
-  - Pairs with the browser extension for complete coverage
+- [x] SEO Internal Linking (100 solution pages)
+- [x] Fix admin panel crash
+- [x] Media page mockup redesign
+- [x] Fix Extension Install Flow + /extensions page
+- [x] Admin Inbox Redesign & ticket assignment
+- [x] Admin Pages Enhancement (subscriptions, users, orgs)
+- [x] QA Audit Fixes (SQL injection, promise handling, dialog warnings)
+- [x] Chrome Web Store listing optimization
+- [x] "Rate Us" banner after 7 days
+- [x] DLP default rules enabled
+- [x] Email verification enforcement
+- [x] Auto-deprovisioning (directory sync)
 - [x] AI-Powered Guardrail Rule Generation
-  - API: `POST /api/guardrails/generate` — OpenAI + Anthropic (Claude) support
-  - Anthropic provider added to Detection Settings (type, UI, API key field, info text)
-  - AI Generate modal: pre-checks API key, shows setup prompt if missing with link to Detection tab
-  - Settings gear icon on Guardrails page header → opens Detection tab
-  - Help article: "How do I generate rules with AI?"
 - [x] Quick Save Prompt from Extension
-  - Context menu: right-click selected text → "Save to TeamPrompt" (opens side panel with pre-filled form)
-  - Save button injected near chat input on AI pages (ChatGPT, Claude, Gemini, Copilot, Perplexity)
-  - Side panel auto-opens create form with pre-filled content and auto-generated title
-  - `contextMenus` permission added, `QUICK_SAVE` message handler in background.ts
-  - Storage-based handoff between content script → side panel (quickSaveContent + timestamp)
 - [x] Admin Ticket Compose Email
-  - "Compose" button in admin ticket inbox header
-  - `ComposeEmailModal` component + `/api/admin/tickets/compose` endpoint
-- [x] Mobile responsiveness overhaul — /vault and all app views
-  - Dashboard layout: `h-screen` → `min-h-dvh` for mobile browser chrome
-  - Dialog base: `w-[95vw]` + `p-4 sm:p-6` for mobile
-  - Prompt modal: `w-[95vw] sm:max-w-2xl`, responsive grids (`grid-cols-1 sm:grid-cols-N`)
-  - Vault page: full-width filter dropdowns on mobile (`w-full sm:w-[Npx]`)
-  - Notification bell: responsive popover width (`w-[95vw] sm:w-[380px]`)
-  - Page header: `text-2xl sm:text-3xl`
-  - Approvals: larger touch targets (`h-8 sm:h-7`), responsive action column widths
-  - Settings: scrollable tab bar (`overflow-x-auto scrollbar-hide`), container padding
-  - Sidebar: `max-w-[280px]` on mobile sheet
-  - Admin views: responsive stat cards, stacking headers, tighter ticket UI on mobile
+- [x] Mobile responsiveness overhaul
+- [x] Expanded Compliance Packs (13 new, 19 total)
+- [x] Testing guide improvements
 
-- [x] Expanded Compliance Packs & Guardrail Enhancements (v1.10.0)
-  - 13 new compliance packs: FERPA, GLBA, NIST 800-171, FedRAMP, NAIC, ITAR, CJIS, COPPA, FTC/Retail, HITECH, SOX, RESPA/TILA, Legal Privilege (19 total, 88 rules)
-  - `source_pack` column on security_rules (migration 052) for tracking which pack each rule came from
-  - Pack filter dropdown on Policies tab (filter by installed pack or "no pack")
-  - Source column on Policies table showing pack badge / Default / Custom
-  - Browse All Packs modal with 8 industry groups (Healthcare, Education, Finance, etc.)
-  - Sortable Policies table (name, source, scope, category, severity, active)
-  - Sortable Violations table (date, user, policy, detection, action)
-  - Enhanced guardrail stats: active/inactive count, week-over-week violation trend, block rate, top triggered rule
-  - Analytics page: Guardrail Activity section (blocks, warnings, block rate, flagged users, triggered rules bar chart, per-member table)
-  - Dashboard: Guardrail Activity widget for admin/manager (blocks/warnings this week, top 3 rules)
-  - Manage Teams modal — centralized team CRUD, removed edit/delete from filter chips
-  - Fixed org chart team detail — edit/delete modals now render in the early return branch
-  - Help docs updated with 4 new articles + updated 4 existing articles
-  - Testing guide updated with 10+ new test steps
+---
+
+## Pending — High Priority (Product Roadmap)
+- [ ] **Prompt Risk Scoring** — Score every prompt Low/Medium/High/Critical instead of binary block/warn. Visual risk badge on messages.
+- [ ] **Smart Redaction** — Auto-replace sensitive data with [REDACTED] and let message through. Users don't get blocked.
+- [ ] **Shadow AI Detection** — Detect 50+ AI tool domains employees visit. Admin alerts for unapproved tools.
+- [ ] **Per-Team Policy Engine** — Rules scoped to teams/departments. "Engineering can use Claude but not ChatGPT."
+
+## Pending — Medium Priority (Differentiators)
+- [ ] **Prompt Injection Detection** — Detect "ignore previous instructions" patterns
+- [ ] **Team/Department Analytics Dashboard** — Visual comparison of AI usage and risk by department
+- [ ] **User Coaching** — Contextual education when user does something risky (not just "blocked")
+- [ ] **Data Fingerprinting** — Detect internal documents pasted into AI (fuzzy hash matching)
+
+## Pending — AI Chat UI
+- [ ] Wide mode toggle (expand message area beyond 768px)
+- [ ] Cmd+K command palette (quick switch conversations, search, change models)
+- [ ] Keyboard navigation (arrow keys in sidebar)
+- [ ] Edit sent messages / branching
+- [ ] Inline annotations (highlight → "Explain this" / "Simplify")
+- [ ] Quick action buttons ("Make shorter", "More formal", "Add examples")
+- [ ] Syntax-highlighted code blocks with language label
+- [ ] Mermaid diagram rendering
+- [ ] LaTeX math rendering
+- [ ] Markdown preview in input
+- [ ] @ mentions (reference conversations or team members)
+- [ ] Drag-and-drop files anywhere on page
+- [ ] Streaming token counter
+
+## Pending — Platform & Enterprise
+- [ ] Chrome Web Store API integration for automated extension updates
+- [ ] Slack integration (DLP alerts, approval notifications)
+- [ ] Microsoft Teams integration
+- [ ] Microsoft Entra ID (Azure AD) directory sync
+- [ ] SCIM 2.0 provisioning (Okta, OneLogin, JumpCloud)
+- [ ] SAML 2.0 SSO
+- [ ] MCP Server for Claude Desktop
+- [ ] Clipboard monitor companion app (Tauri/Electron system tray)
+- [ ] API/Backend coverage (monitor direct API calls, not just browser)
+- [ ] Compliance report generator (one-click PDF for auditors)
+- [ ] Desktop AI client coverage (Claude Desktop, ChatGPT Desktop)
+
+## Pending — Product Features
+- [ ] AI Response Clipper + Team Knowledge Base
+- [ ] Universal Prompt Palette (Cmd+Shift+P anywhere)
+- [ ] AI Usage Dashboard ("Wrapped for AI")
+- [ ] Prompt Chains / Workflows
+- [ ] Customizable dashboard (drag-and-drop widgets)
+- [ ] Role-differentiated dashboards (member vs admin views)
+- [ ] Guardrail pattern encryption (secrets in custom rules)

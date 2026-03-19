@@ -742,6 +742,20 @@ export default function ChatPage() {
   useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
   useEffect(() => { inputRef.current?.focus(); }, [activeConvId]);
 
+  // Global keyboard shortcuts
+  useEffect(() => {
+    function handleGlobalKeyDown(e: KeyboardEvent) {
+      // Ctrl+N / Cmd+N — new chat
+      if ((e.ctrlKey || e.metaKey) && e.key === "n") {
+        e.preventDefault();
+        startNewChat();
+      }
+    }
+    document.addEventListener("keydown", handleGlobalKeyDown);
+    return () => document.removeEventListener("keydown", handleGlobalKeyDown);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   function handleSearchChange(value: string) {
     setSearchQuery(value);
   }
@@ -783,15 +797,40 @@ export default function ChatPage() {
   }
 
   async function deleteConversation(convId: string) {
-    try {
-      await fetch("/api/chat/conversations", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: convId }),
-      });
-      setConversations((prev) => prev.filter((c) => c.id !== convId));
-      if (activeConvId === convId) startNewChat();
-    } catch { toast.error("Failed to delete"); }
+    const conv = conversations.find((c) => c.id === convId);
+    // Optimistically remove from UI
+    setConversations((prev) => prev.filter((c) => c.id !== convId));
+    if (activeConvId === convId) startNewChat();
+
+    // Show undo toast (3 seconds to undo)
+    let undone = false;
+    toast("Conversation deleted", {
+      action: {
+        label: "Undo",
+        onClick: () => {
+          undone = true;
+          if (conv) setConversations((prev) => [conv, ...prev]);
+        },
+      },
+      duration: 3000,
+      onDismiss: () => {
+        if (undone) return;
+        // Actually delete on server after toast dismisses
+        fetch("/api/chat/conversations", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: convId }),
+        }).catch(() => {});
+      },
+      onAutoClose: () => {
+        if (undone) return;
+        fetch("/api/chat/conversations", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: convId }),
+        }).catch(() => {});
+      },
+    });
   }
 
   async function renameConversation(convId: string, title: string) {
@@ -979,6 +1018,7 @@ export default function ChatPage() {
           activeConvId === conv.id ? "bg-primary/10 text-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"
         )}
         onClick={() => loadConversation(conv.id)}
+        onDoubleClick={(e) => { e.stopPropagation(); setEditingTitle(conv.id); setEditTitleValue(conv.title); }}
         onContextMenu={(e) => openContextMenu(e, conv.id)}
       >
         {editingTitle === conv.id ? (
@@ -1038,6 +1078,7 @@ export default function ChatPage() {
           <Button variant="outline" className="w-full justify-start gap-2 h-10 text-sm" onClick={startNewChat}>
             <Plus className="h-4 w-4" />
             New Chat
+            <kbd className="ml-auto text-[10px] text-muted-foreground/50 font-mono bg-muted rounded px-1.5 py-0.5">Ctrl+N</kbd>
           </Button>
           {conversations.length > 3 && (
             <div className="relative mt-2">
@@ -1490,23 +1531,29 @@ export default function ChatPage() {
                           </div>
                         )}
 
-                        {/* Suggestions */}
-                        <div className="flex flex-wrap items-center justify-center gap-2">
-                          {[
-                            "Write a project status update",
-                            "Review this code for bugs",
-                            "Draft a customer email",
-                            "Explain this error message",
-                          ].map((suggestion) => (
-                            <button
-                              key={suggestion}
-                              className="text-xs border rounded-full px-3 py-1.5 text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
-                              onClick={() => { setChatInput(suggestion); inputRef.current?.focus(); }}
-                            >
-                              {suggestion}
-                            </button>
-                          ))}
-                        </div>
+                        {/* Suggestions — rotate based on time */}
+                        {(() => {
+                          const allSuggestions = [
+                            ["Write a project status update", "Review this code for bugs", "Draft a customer email", "Explain this error message"],
+                            ["Summarize this document", "Help me brainstorm ideas", "Write a meeting agenda", "Create a bug report"],
+                            ["Draft a product announcement", "Analyze this data", "Write unit tests for this function", "Create an onboarding checklist"],
+                            ["Rewrite this for clarity", "Compare two approaches", "Write a proposal outline", "Help debug this error"],
+                          ];
+                          const suggestions = allSuggestions[Math.floor(Date.now() / (1000 * 60 * 30)) % allSuggestions.length];
+                          return (
+                            <div className="flex flex-wrap items-center justify-center gap-2">
+                              {suggestions.map((suggestion) => (
+                                <button
+                                  key={suggestion}
+                                  className="text-xs border rounded-full px-3 py-1.5 text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
+                                  onClick={() => { setChatInput(suggestion); inputRef.current?.focus(); }}
+                                >
+                                  {suggestion}
+                                </button>
+                              ))}
+                            </div>
+                          );
+                        })()}
                       </div>
                     )}
 
@@ -1803,10 +1850,13 @@ export default function ChatPage() {
 
   function renderMessage(message: ChatMsg, idx?: number) {
     const rating = messageRatings[message.id] || 0;
+    const timestamp = message.id && !isNaN(Number(message.id))
+      ? new Date(Number(message.id)).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
+      : "";
     return (
       <div
         key={message.id}
-        className={cn("group flex gap-3 mb-6", message.role === "user" ? "justify-end" : "")}
+        className={cn("group flex gap-3 mb-6 animate-in fade-in-0 slide-in-from-bottom-2 duration-300", message.role === "user" ? "justify-end" : "")}
       >
         {message.role === "assistant" && (
           <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-1">
@@ -1816,7 +1866,9 @@ export default function ChatPage() {
         <div className="max-w-[85%] min-w-0">
           <div className={cn(
             "rounded-2xl px-4 py-3 text-sm leading-relaxed",
-            message.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted"
+            message.role === "user"
+              ? "bg-primary text-primary-foreground"
+              : "bg-muted/80 dark:bg-zinc-800/80 border border-transparent dark:border-zinc-700/50"
           )}>
             {message.images && message.images.length > 0 && (
               <div className="flex gap-2 flex-wrap mb-2">
@@ -1826,42 +1878,61 @@ export default function ChatPage() {
               </div>
             )}
             {message.role === "assistant" ? (
-              <div className="prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_pre]:bg-zinc-900 [&_pre]:text-zinc-100 [&_pre]:rounded-lg [&_pre]:p-3 [&_pre]:text-xs [&_pre]:overflow-x-auto [&_code]:text-xs [&_code]:bg-muted [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_pre_code]:bg-transparent [&_pre_code]:p-0">
-                <ReactMarkdown>{message.content}</ReactMarkdown>
+              <div className="prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_pre]:relative [&_pre]:bg-zinc-900 [&_pre]:text-zinc-100 [&_pre]:rounded-lg [&_pre]:p-3 [&_pre]:text-xs [&_pre]:overflow-x-auto [&_code]:text-xs [&_code]:bg-muted [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_pre_code]:bg-transparent [&_pre_code]:p-0">
+                <ReactMarkdown
+                  components={{
+                    pre: ({ children, ...props }) => (
+                      <div className="relative group/code">
+                        <pre {...props}>{children}</pre>
+                        <button
+                          className="absolute top-2 right-2 p-1.5 rounded-md bg-zinc-700/80 text-zinc-300 hover:bg-zinc-600 hover:text-white opacity-0 group-hover/code:opacity-100 transition-opacity"
+                          onClick={() => {
+                            const code = (children as React.ReactElement)?.props?.children;
+                            if (typeof code === "string") { navigator.clipboard.writeText(code); toast.success("Copied!"); }
+                          }}
+                        >
+                          <Copy className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ),
+                  }}
+                >{message.content}</ReactMarkdown>
               </div>
             ) : (
               <p className="whitespace-pre-wrap">{message.content}</p>
             )}
           </div>
-          {/* Message actions */}
-          <div className="flex items-center gap-1 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors" title="Copy" onClick={() => copyMessage(message.content, message.id)}>
-              {copiedId === message.id ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
-            </button>
-            {message.role === "assistant" && idx !== undefined && idx === messages.length - 1 && !isLoading && (
-              <button className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors" title="Regenerate" onClick={regenerateLastResponse}>
-                <RefreshCw className="h-3 w-3" />
+          {/* Message actions + timestamp */}
+          <div className="flex items-center gap-1 mt-1">
+            {/* Timestamp — always visible but subtle */}
+            {timestamp && <span className="text-[10px] text-muted-foreground/40 mr-1">{timestamp}</span>}
+            {/* Actions — visible on hover */}
+            <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors" title="Copy" onClick={() => copyMessage(message.content, message.id)}>
+                {copiedId === message.id ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
               </button>
-            )}
-            {/* Rating buttons for assistant messages */}
-            {message.role === "assistant" && (
-              <>
-                <button
-                  className={cn("p-1 rounded transition-colors", rating === 1 ? "text-green-500 bg-green-500/10" : "text-muted-foreground hover:text-green-500 hover:bg-muted")}
-                  title="Good response"
-                  onClick={() => rateMessage(message.id, 1)}
-                >
-                  <ThumbsUp className="h-3 w-3" />
+              {message.role === "assistant" && idx !== undefined && idx === messages.length - 1 && !isLoading && (
+                <button className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors" title="Regenerate" onClick={regenerateLastResponse}>
+                  <RefreshCw className="h-3 w-3" />
                 </button>
-                <button
-                  className={cn("p-1 rounded transition-colors", rating === -1 ? "text-red-500 bg-red-500/10" : "text-muted-foreground hover:text-red-500 hover:bg-muted")}
-                  title="Bad response"
-                  onClick={() => rateMessage(message.id, -1)}
-                >
-                  <ThumbsDown className="h-3 w-3" />
-                </button>
-              </>
-            )}
+              )}
+              {message.role === "assistant" && (
+                <>
+                  <button
+                    className={cn("p-1 rounded transition-colors", rating === 1 ? "text-green-500 bg-green-500/10" : "text-muted-foreground hover:text-green-500 hover:bg-muted")}
+                    title="Good response" onClick={() => rateMessage(message.id, 1)}
+                  >
+                    <ThumbsUp className="h-3 w-3" />
+                  </button>
+                  <button
+                    className={cn("p-1 rounded transition-colors", rating === -1 ? "text-red-500 bg-red-500/10" : "text-muted-foreground hover:text-red-500 hover:bg-muted")}
+                    title="Bad response" onClick={() => rateMessage(message.id, -1)}
+                  >
+                    <ThumbsDown className="h-3 w-3" />
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         </div>
         {message.role === "user" && (

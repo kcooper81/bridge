@@ -8,6 +8,18 @@ const BLOG_SLUGS = [
   "teamprompt-vs-shared-google-docs-for-prompts",
   "getting-started-with-teamprompt-in-under-2-minutes",
   "ai-governance-for-regulated-industries",
+  "connect-ai-coding-tools-to-your-prompt-library-with-mcp",
+  "slack-integration-dlp-alerts-and-prompt-notifications",
+  "what-is-shadow-ai-and-how-to-control-it",
+  "ai-dlp-preventing-data-leaks-to-chatgpt-and-claude",
+  "ai-governance-framework-practical-guide-for-teams",
+  "how-to-create-an-ai-acceptable-use-policy",
+  "hipaa-compliance-and-ai-what-healthcare-teams-must-know",
+  "complete-guide-to-ai-security-for-enterprise",
+  "5-ai-data-risks-every-ciso-should-know",
+  "prompt-injection-attacks-how-they-work-and-how-to-defend",
+  "soc-2-and-ai-meeting-compliance-requirements",
+  "why-your-dlp-strategy-needs-to-cover-ai-tools",
 ];
 
 const HELP_CATEGORIES = [

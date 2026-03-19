@@ -12,12 +12,25 @@ export async function GET(
   const db = createServiceClient();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { data: conv } = await db
+  // eslint-disable-next-line prefer-const
+  let { data: conv, error: convErr } = await db
     .from("chat_conversations")
     .select("id, title, model, provider, pinned, created_at, updated_at")
     .eq("id", id)
     .eq("user_id", user.id)
     .maybeSingle();
+
+  // Fallback if pinned column doesn't exist
+  if (convErr && convErr.message?.includes("pinned")) {
+    const fb = await db
+      .from("chat_conversations")
+      .select("id, title, model, provider, created_at, updated_at")
+      .eq("id", id)
+      .eq("user_id", user.id)
+      .maybeSingle();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    conv = fb.data as any;
+  }
 
   if (!conv) return NextResponse.json({ error: "Not found" }, { status: 404 });
 

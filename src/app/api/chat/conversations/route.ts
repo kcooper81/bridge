@@ -16,7 +16,8 @@ export async function GET() {
 
   if (!profile?.org_id) return NextResponse.json({ conversations: [] });
 
-  // eslint-disable-next-line prefer-const
+  // Try with all columns, then progressively fall back if columns don't exist
+  // eslint-disable-next-line prefer-const, @typescript-eslint/no-explicit-any
   let { data, error } = await db
     .from("chat_conversations")
     .select("id, title, model, provider, pinned, folder_id, created_at, updated_at")
@@ -25,9 +26,23 @@ export async function GET() {
     .order("updated_at", { ascending: false })
     .limit(100);
 
-  // Fallback if new columns don't exist yet
-  if (error && (error.message?.includes("pinned") || error.message?.includes("folder_id"))) {
-    const fallback = await db
+  // Fallback: folder_id doesn't exist yet (migration 071)
+  if (error && error.message?.includes("folder_id")) {
+    const fb = await db
+      .from("chat_conversations")
+      .select("id, title, model, provider, pinned, created_at, updated_at")
+      .eq("org_id", profile.org_id)
+      .eq("user_id", user.id)
+      .order("updated_at", { ascending: false })
+      .limit(100);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    data = fb.data as any;
+    error = fb.error;
+  }
+
+  // Fallback: pinned doesn't exist yet (migration 070)
+  if (error && error.message?.includes("pinned")) {
+    const fb = await db
       .from("chat_conversations")
       .select("id, title, model, provider, created_at, updated_at")
       .eq("org_id", profile.org_id)
@@ -35,7 +50,7 @@ export async function GET() {
       .order("updated_at", { ascending: false })
       .limit(100);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    data = fallback.data as any;
+    data = fb.data as any;
   }
 
   // Load conversation tags

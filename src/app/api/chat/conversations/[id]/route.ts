@@ -14,7 +14,7 @@ export async function GET(
 
   const { data: conv } = await db
     .from("chat_conversations")
-    .select("id, title, model, provider, created_at, updated_at")
+    .select("id, title, model, provider, pinned, created_at, updated_at")
     .eq("id", id)
     .eq("user_id", user.id)
     .maybeSingle();

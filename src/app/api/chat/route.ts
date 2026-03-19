@@ -5,6 +5,17 @@ import { createAIModel } from "@/lib/ai/providers";
 import { decrypt } from "@/lib/crypto";
 import { notifyDlpViolation } from "@/lib/slack/notify";
 
+/** Safe regex test with a length limit to prevent ReDoS on long content */
+function safeRegexTest(pattern: string, flags: string, content: string): boolean {
+  try {
+    // Limit content length to prevent catastrophic backtracking
+    const limited = content.length > 10000 ? content.slice(0, 10000) : content;
+    return new RegExp(pattern, flags).test(limited);
+  } catch {
+    return false;
+  }
+}
+
 /**
  * POST /api/chat — stream a chat message through DLP scan + AI provider.
  * Uses cookie-based auth (dashboard route, not extension).
@@ -78,12 +89,9 @@ export async function POST(request: NextRequest) {
 
         // Check security rules
         for (const rule of rulesResult.data || []) {
-          try {
-            const regex = new RegExp(rule.pattern, "i");
-            if (regex.test(lastUserMessage.content)) {
-              violations.push({ ruleName: rule.name, category: rule.category, severity: rule.severity });
-            }
-          } catch { /* invalid regex */ }
+          if (safeRegexTest(rule.pattern, "i", lastUserMessage.content)) {
+            violations.push({ ruleName: rule.name, category: rule.category, severity: rule.severity });
+          }
         }
 
         // Check sensitive terms
@@ -94,11 +102,9 @@ export async function POST(request: NextRequest) {
               violations.push({ ruleName: `Sensitive term: "${term.term}"`, category: term.category, severity: term.severity });
             }
           } else if (term.term_type === "regex") {
-            try {
-              if (new RegExp(term.term, "i").test(lastUserMessage.content)) {
-                violations.push({ ruleName: `Pattern: "${term.term}"`, category: term.category, severity: term.severity });
-              }
-            } catch { /* skip */ }
+            if (safeRegexTest(term.term, "i", lastUserMessage.content)) {
+              violations.push({ ruleName: `Pattern: "${term.term}"`, category: term.category, severity: term.severity });
+            }
           }
         }
 

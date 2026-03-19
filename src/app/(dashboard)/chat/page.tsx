@@ -245,6 +245,8 @@ export default function ChatPage() {
   const [sidebarWidth, setSidebarWidth] = useState(320);
   const [isResizing, setIsResizing] = useState(false);
 
+  const msgIdCounter = useRef(0);
+  const nextMsgId = () => `${Date.now()}-${++msgIdCounter.current}`;
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -379,7 +381,7 @@ export default function ChatPage() {
     if (!messageContent && !messagesToSend) return;
 
     const userMsg: ChatMsg = {
-      id: Date.now().toString(),
+      id: nextMsgId(),
       role: "user",
       content: messageContent || "",
       images: pendingImages.length > 0 ? [...pendingImages] : undefined,
@@ -423,7 +425,7 @@ export default function ChatPage() {
 
       // Track + clear contexts after sending
       trackChatMessageSent(selectedModel, selectedProvider);
-      if (!activeConvId) trackChatConversationCreated();
+      if (!activeConvIdRef.current) trackChatConversationCreated();
       if (contextToSend) setAdminContext(null);
       if (presetPrompt) setPresetSystemPrompt(null);
 
@@ -441,7 +443,7 @@ export default function ChatPage() {
 
       const reader = res.body?.getReader();
       const decoder = new TextDecoder();
-      const assistantId = (Date.now() + 1).toString();
+      const assistantId = nextMsgId();
       setMessages((prev) => [...prev, { id: assistantId, role: "assistant", content: "", rating: 0 }]);
 
       let convIdParsed = false;
@@ -503,6 +505,7 @@ export default function ChatPage() {
 
   // ── Compare mode: send to second model ──
   async function sendCompareMessage(allMessages: ChatMsg[]) {
+    setCompareMessages([]); // Reset to prevent unbounded growth
     setCompareLoading(true);
     const controller = new AbortController();
     compareAbortRef.current = controller;
@@ -512,7 +515,11 @@ export default function ChatPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          messages: allMessages.map((m) => ({ role: m.role, content: m.content })),
+          messages: allMessages.map((m) => ({
+            role: m.role,
+            content: m.content,
+            ...(m.images?.length ? { images: m.images } : {}),
+          })),
           model: compareModel,
           provider: compareProvider,
           compareOnly: true, // don't create a conversation on server
@@ -528,7 +535,7 @@ export default function ChatPage() {
 
       const reader = res.body?.getReader();
       const decoder = new TextDecoder();
-      const assistantId = `compare-${Date.now()}`;
+      const assistantId = `compare-${nextMsgId()}`;
       setCompareMessages((prev) => [...prev, ...allMessages.filter(m => m.role === "user").slice(-1), { id: assistantId, role: "assistant", content: "" }]);
 
       if (reader) {
@@ -580,6 +587,7 @@ export default function ChatPage() {
     const idx = messages.length - 1 - lastAssistantIdx;
     const messagesWithoutLast = messages.slice(0, idx);
     setMessages(messagesWithoutLast);
+    setCompareMessages([]); // Clear stale compare response
     sendMessage(messagesWithoutLast);
   }
 
@@ -690,7 +698,7 @@ export default function ChatPage() {
           if (data.error) { toast.error(data.error); break; }
           // Build messages directly (avoid stale closure from setTimeout)
           const prompt = promptMap[command];
-          const userMsg: ChatMsg = { id: Date.now().toString(), role: "user", content: prompt };
+          const userMsg: ChatMsg = { id: nextMsgId(), role: "user", content: prompt };
           // Build the full messages array from current state via ref
           const currentMessages = [...messages, userMsg];
           setMessages(currentMessages);
@@ -734,7 +742,7 @@ export default function ChatPage() {
 
       const reader = res.body?.getReader();
       const decoder = new TextDecoder();
-      const assistantId = (Date.now() + 1).toString();
+      const assistantId = nextMsgId();
       setMessages((prev) => [...prev, { id: assistantId, role: "assistant", content: "", rating: 0 }]);
       let convIdParsed = false;
 
@@ -767,6 +775,10 @@ export default function ChatPage() {
           if ((err as Error).name !== "AbortError") throw err;
         }
       }
+      // Trigger compare if active
+      if (compareMode && compareModel) {
+        sendCompareMessage(allMessages);
+      }
       loadConversations();
     } catch (err) {
       if ((err as Error).name !== "AbortError") toast.error("Failed to send");
@@ -788,6 +800,8 @@ export default function ChatPage() {
 
   const selectedModelRef = useRef(selectedModel);
   selectedModelRef.current = selectedModel;
+  const activeConvIdRef = useRef(activeConvId);
+  activeConvIdRef.current = activeConvId;
 
   const loadProviders = useCallback(async () => {
     try {
@@ -944,7 +958,10 @@ export default function ChatPage() {
         label: "Undo",
         onClick: () => {
           undone = true;
-          if (conv) setConversations((prev) => [conv, ...prev]);
+          // Re-add and re-fetch to get correct sort order
+          if (conv) {
+            setConversations((prev) => [...prev, conv].sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()));
+          }
         },
       },
       duration: 3000,

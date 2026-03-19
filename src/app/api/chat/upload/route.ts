@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 
+function safeRegexTest(pattern: string, flags: string, content: string): boolean {
+  try {
+    const limited = content.length > 50000 ? content.slice(0, 50000) : content;
+    return new RegExp(pattern, flags).test(limited);
+  } catch { return false; }
+}
+
 /**
  * POST /api/chat/upload — extract text from uploaded files + DLP scan.
  * Accepts multipart form data with files.
@@ -125,8 +132,16 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // DLP scan all extracted text
-    const allText = results.map((r) => r.text).join("\n\n");
+    // DLP scan extracted text — skip placeholder text (starts with "[")
+    const allText = results
+      .map((r) => r.text)
+      .filter((t) => !t.startsWith("["))
+      .join("\n\n");
+    if (!allText.trim()) {
+      return NextResponse.json({
+        files: results.map((r) => ({ name: r.name, type: r.type, size: r.size, text: r.text, truncated: r.truncated })),
+      });
+    }
 
     const { data: orgData } = await db
       .from("organizations")
@@ -153,12 +168,9 @@ export async function POST(request: NextRequest) {
 
       // Check security rules
       for (const rule of rulesResult.data || []) {
-        try {
-          const regex = new RegExp(rule.pattern, "i");
-          if (regex.test(allText)) {
-            violations.push({ ruleName: rule.name, category: rule.category, severity: rule.severity });
-          }
-        } catch { /* invalid regex */ }
+        if (safeRegexTest(rule.pattern, "i", allText)) {
+          violations.push({ ruleName: rule.name, category: rule.category, severity: rule.severity });
+        }
       }
 
       // Check sensitive terms
@@ -169,11 +181,9 @@ export async function POST(request: NextRequest) {
             violations.push({ ruleName: `Sensitive term: "${term.term}"`, category: term.category, severity: term.severity });
           }
         } else if (term.term_type === "regex") {
-          try {
-            if (new RegExp(term.term, "i").test(allText)) {
-              violations.push({ ruleName: `Pattern: "${term.term}"`, category: term.category, severity: term.severity });
-            }
-          } catch { /* skip */ }
+          if (safeRegexTest(term.term, "i", allText)) {
+            violations.push({ ruleName: `Pattern: "${term.term}"`, category: term.category, severity: term.severity });
+          }
         }
       }
 

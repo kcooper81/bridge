@@ -21,11 +21,23 @@ export async function GET(
 
   if (!conv) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  const { data: messages } = await db
+  // eslint-disable-next-line prefer-const
+  let { data: messages, error: msgError } = await db
     .from("chat_messages")
     .select("id, role, content, model, tokens_used, dlp_action, dlp_violations, rating, created_at")
     .eq("conversation_id", id)
     .order("created_at", { ascending: true });
+
+  // Fallback if rating column doesn't exist yet (migration 071)
+  if (msgError && msgError.message?.includes("rating")) {
+    const fallback = await db
+      .from("chat_messages")
+      .select("id, role, content, model, tokens_used, dlp_action, dlp_violations, created_at")
+      .eq("conversation_id", id)
+      .order("created_at", { ascending: true });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    messages = fallback.data as any;
+  }
 
   return NextResponse.json({
     conversation: conv,

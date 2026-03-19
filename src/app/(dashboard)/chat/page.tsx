@@ -237,6 +237,7 @@ export default function ChatPage() {
   const [compareProvider, setCompareProvider] = useState("");
   const [compareMessages, setCompareMessages] = useState<ChatMsg[]>([]);
   const [compareLoading, setCompareLoading] = useState(false);
+  const [adminNoticeDismissed, setAdminNoticeDismissed] = useState(false);
   const [sidebarWidth, setSidebarWidth] = useState(320);
   const [isResizing, setIsResizing] = useState(false);
 
@@ -1724,17 +1725,20 @@ export default function ChatPage() {
               </Link>
             </div>
 
-            {/* Admin notice */}
-            {isAdmin && !chatEnabledForMembers && (
+            {/* Admin notice — dismissible */}
+            {isAdmin && !chatEnabledForMembers && !adminNoticeDismissed && (
               <div className="mx-4 mt-2 rounded-lg border border-blue-200 dark:border-blue-800/50 bg-blue-50/80 dark:bg-blue-950/30 px-3 py-2 flex items-center gap-2 text-xs">
                 <Shield className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400 flex-shrink-0" />
-                <span className="text-blue-800 dark:text-blue-300">
+                <span className="flex-1 text-blue-800 dark:text-blue-300">
                   Only admins can see AI Chat right now.{" "}
                   <Link href="/settings/security" className="font-medium underline underline-offset-2 hover:text-blue-900 dark:hover:text-blue-200">
                     Enable for all members
                   </Link>{" "}
                   in Settings &rarr; Security when you&apos;re ready.
                 </span>
+                <button onClick={() => setAdminNoticeDismissed(true)} className="text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 flex-shrink-0">
+                  <X className="h-3.5 w-3.5" />
+                </button>
               </div>
             )}
 

@@ -62,12 +62,29 @@ export async function PATCH(
   if (body.pinned !== undefined) updates.pinned = body.pinned;
   if (body.folder_id !== undefined) updates.folder_id = body.folder_id;
 
-  const { error } = await db
+  let { error } = await db
     .from("chat_conversations")
     .update(updates)
     .eq("id", id)
     .eq("user_id", user.id);
 
-  if (error) return NextResponse.json({ error: "Failed to rename" }, { status: 500 });
+  // Retry without folder_id if column doesn't exist
+  if (error && error.message?.includes("folder_id")) {
+    delete updates.folder_id;
+    const retry = await db.from("chat_conversations").update(updates).eq("id", id).eq("user_id", user.id);
+    error = retry.error;
+  }
+
+  // Retry without pinned if column doesn't exist
+  if (error && error.message?.includes("pinned")) {
+    delete updates.pinned;
+    const retry = await db.from("chat_conversations").update(updates).eq("id", id).eq("user_id", user.id);
+    error = retry.error;
+  }
+
+  if (error) {
+    console.error("Failed to update conversation:", error);
+    return NextResponse.json({ error: "Failed to update" }, { status: 500 });
+  }
   return NextResponse.json({ success: true });
 }

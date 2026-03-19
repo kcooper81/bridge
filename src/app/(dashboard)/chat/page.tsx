@@ -854,7 +854,22 @@ export default function ChatPage() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, [slashMenuOpen]);
 
-  useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
+  // Smart auto-scroll: only scroll to bottom if user is near the bottom (within 150px)
+  // This lets users scroll up to read without being yanked back down during streaming
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const viewport = scrollAreaRef.current?.querySelector("[data-radix-scroll-area-viewport]") as HTMLElement | null;
+    if (!viewport) {
+      // Fallback if no scroll area ref
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      return;
+    }
+    const { scrollTop, scrollHeight, clientHeight } = viewport;
+    const isNearBottom = scrollHeight - scrollTop - clientHeight < 150;
+    if (isNearBottom) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages]);
   useEffect(() => { inputRef.current?.focus(); }, [activeConvId]);
 
   // Global keyboard shortcuts
@@ -982,16 +997,28 @@ export default function ChatPage() {
     } catch { toast.error("Failed to rename"); }
   }
 
-  function togglePin(convId: string) {
+  async function togglePin(convId: string) {
     const conv = conversations.find((c) => c.id === convId);
     if (!conv) return;
     const newPinned = !conv.pinned;
     setConversations((prev) => prev.map((c) => c.id === convId ? { ...c, pinned: newPinned } : c));
-    fetch(`/api/chat/conversations/${convId}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ pinned: newPinned }),
-    }).catch(() => {});
+    try {
+      const res = await fetch(`/api/chat/conversations/${convId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pinned: newPinned }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        console.error("Failed to save favorite:", data);
+        toast.error("Failed to save favorite");
+        // Revert optimistic update
+        setConversations((prev) => prev.map((c) => c.id === convId ? { ...c, pinned: !newPinned } : c));
+      }
+    } catch {
+      toast.error("Failed to save favorite");
+      setConversations((prev) => prev.map((c) => c.id === convId ? { ...c, pinned: !newPinned } : c));
+    }
   }
 
   // ── Collection operations ──
@@ -1600,7 +1627,7 @@ export default function ChatPage() {
               <ScrollArea className="flex-1">
                 <div className="max-w-2xl mx-auto px-4 py-6">
                   {messages.map((message) => renderMessage(message))}
-                  {isLoading && messages[messages.length - 1]?.role === "user" && renderLoadingDots()}
+                  {isLoading && (messages[messages.length - 1]?.role === "user" || (messages[messages.length - 1]?.role === "assistant" && !messages[messages.length - 1]?.content)) && renderLoadingDots()}
                   <div ref={messagesEndRef} />
                 </div>
               </ScrollArea>
@@ -1721,7 +1748,7 @@ export default function ChatPage() {
             ) : (
               <>
                 {/* Messages */}
-                <ScrollArea className="flex-1">
+                <ScrollArea className="flex-1" ref={scrollAreaRef}>
                   <div className="max-w-3xl mx-auto px-4 py-6">
                     {messages.length === 0 && !isLoading && (
                       <div className="text-center py-12">
@@ -1783,7 +1810,7 @@ export default function ChatPage() {
 
                     {messages.map((message, idx) => renderMessage(message, idx))}
 
-                    {isLoading && messages[messages.length - 1]?.role === "user" && renderLoadingDots()}
+                    {isLoading && (messages[messages.length - 1]?.role === "user" || (messages[messages.length - 1]?.role === "assistant" && !messages[messages.length - 1]?.content)) && renderLoadingDots()}
 
                     <div ref={messagesEndRef} />
                   </div>

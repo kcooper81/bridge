@@ -234,7 +234,8 @@ export default function ChatPage() {
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [searchingFullText, setSearchingFullText] = useState(false);
   const [adminContext, setAdminContext] = useState<string | null>(null);
-  const [tagMenuConvId, setTagMenuConvId] = useState<string | null>(null);
+  const [contextMenu, setContextMenu] = useState<{ convId: string; x: number; y: number } | null>(null);
+  const [contextSubmenu, setContextSubmenu] = useState<"tags" | "folders" | null>(null);
   const [activeFilterTag, setActiveFilterTag] = useState<string | null>(null);
   const [messageRatings, setMessageRatings] = useState<Record<string, number>>({});
   const [compareMode, setCompareMode] = useState(false);
@@ -1001,6 +1002,14 @@ export default function ChatPage() {
   const olderConvs = unfolderedConvs.filter((c) => new Date(c.updated_at).getTime() < weekStart);
   const lastIsAssistant = messages.length > 0 && messages[messages.length - 1].role === "assistant";
 
+  // ── Open right-click context menu ──
+  function openContextMenu(e: React.MouseEvent, convId: string) {
+    e.preventDefault();
+    e.stopPropagation();
+    setContextMenu({ convId, x: e.clientX, y: e.clientY });
+    setContextSubmenu(null);
+  }
+
   // ── Render conversation item ──
   function renderConvItem(conv: Conversation) {
     const convTags = tags.filter((t) => conv.tag_ids?.includes(t.id));
@@ -1012,6 +1021,7 @@ export default function ChatPage() {
           activeConvId === conv.id ? "bg-primary/10 text-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"
         )}
         onClick={() => loadConversation(conv.id)}
+        onContextMenu={(e) => openContextMenu(e, conv.id)}
       >
         <MessageSquare className="h-3.5 w-3.5 flex-shrink-0 mt-0.5" />
         {editingTitle === conv.id ? (
@@ -1051,18 +1061,10 @@ export default function ChatPage() {
                 )}
               </div>
             </div>
-            {/* Hover actions */}
+            {/* Minimal hover actions — pin + delete. Full menu via right-click. */}
             <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 flex items-center gap-0.5 mt-0.5">
               <button className="p-0.5 hover:text-amber-500" title={conv.pinned ? "Unpin" : "Pin"} onClick={(e) => { e.stopPropagation(); togglePin(conv.id); }}>
                 <Pin className={cn("h-3 w-3", conv.pinned && "fill-amber-500 text-amber-500")} />
-              </button>
-              {(tags.length > 0 || folders.length > 0) && (
-                <button className="p-0.5 hover:text-primary" title="Tags & Folders" onClick={(e) => { e.stopPropagation(); setTagMenuConvId(tagMenuConvId === conv.id ? null : conv.id); }}>
-                  <Tag className="h-3 w-3" />
-                </button>
-              )}
-              <button className="p-0.5 hover:text-foreground" title="Rename" onClick={(e) => { e.stopPropagation(); setEditingTitle(conv.id); setEditTitleValue(conv.title); }}>
-                <Pencil className="h-3 w-3" />
               </button>
               <button className="p-0.5 hover:text-destructive" title="Delete" onClick={(e) => { e.stopPropagation(); deleteConversation(conv.id); }}>
                 <Trash2 className="h-3 w-3" />
@@ -1328,58 +1330,119 @@ export default function ChatPage() {
         </div>
       </div>
 
-      {/* Tag/folder context menu — rendered outside sidebar to avoid clipping */}
-      {tagMenuConvId && (
-        <>
-          <div className="fixed inset-0 z-40" onClick={() => setTagMenuConvId(null)} />
-          <div className="fixed z-50 bg-popover border rounded-lg shadow-xl p-2 min-w-[180px] max-w-[220px]" style={{ left: sidebarOpen ? "332px" : "12px", top: "160px" }} onClick={(e) => e.stopPropagation()}>
-            <p className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5 px-1">Tags</p>
-            {tags.length === 0 && <p className="text-[10px] text-muted-foreground px-1 mb-1">No tags yet — create one below</p>}
-            {tags.map((tag) => {
-              const conv = conversations.find((c) => c.id === tagMenuConvId);
-              return (
-                <button
-                  key={tag.id}
-                  className="flex items-center gap-2 w-full px-2 py-1.5 text-xs rounded hover:bg-muted transition-colors"
-                  onClick={() => toggleConvTag(tagMenuConvId, tag.id)}
-                >
-                  <span className="h-2.5 w-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: tag.color }} />
-                  <span className="flex-1 text-left truncate">{tag.name}</span>
-                  {conv?.tag_ids?.includes(tag.id) && <Check className="h-3 w-3 text-primary flex-shrink-0" />}
-                </button>
-              );
-            })}
+      {/* Right-click context menu */}
+      {contextMenu && (() => {
+        const conv = conversations.find((c) => c.id === contextMenu.convId);
+        if (!conv) return null;
+        // Clamp menu position to viewport
+        const menuX = Math.min(contextMenu.x, window.innerWidth - 220);
+        const menuY = Math.min(contextMenu.y, window.innerHeight - 300);
+        return (
+          <>
+            <div className="fixed inset-0 z-40" onClick={() => { setContextMenu(null); setContextSubmenu(null); }} onContextMenu={(e) => { e.preventDefault(); setContextMenu(null); setContextSubmenu(null); }} />
+            <div
+              className="fixed z-50 bg-popover border rounded-lg shadow-xl py-1 min-w-[180px]"
+              style={{ left: menuX, top: menuY }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Pin/Unpin */}
+              <button
+                className="flex items-center gap-2.5 w-full px-3 py-1.5 text-xs hover:bg-muted transition-colors"
+                onClick={() => { togglePin(conv.id); setContextMenu(null); }}
+              >
+                <Pin className={cn("h-3.5 w-3.5", conv.pinned && "fill-amber-500 text-amber-500")} />
+                {conv.pinned ? "Unpin" : "Pin to top"}
+              </button>
 
-            {folders.length > 0 && (
-              <>
-                <div className="border-t my-1.5" />
-                <p className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5 px-1">Move to folder</p>
+              {/* Rename */}
+              <button
+                className="flex items-center gap-2.5 w-full px-3 py-1.5 text-xs hover:bg-muted transition-colors"
+                onClick={() => { setEditingTitle(conv.id); setEditTitleValue(conv.title); setContextMenu(null); }}
+              >
+                <Pencil className="h-3.5 w-3.5" />
+                Rename
+              </button>
+
+              <div className="border-t my-1" />
+
+              {/* Tags submenu */}
+              <div className="relative">
                 <button
-                  className="flex items-center gap-2 w-full px-2 py-1.5 text-xs rounded hover:bg-muted"
-                  onClick={() => { moveToFolder(tagMenuConvId, null); setTagMenuConvId(null); }}
+                  className={cn("flex items-center gap-2.5 w-full px-3 py-1.5 text-xs hover:bg-muted transition-colors", contextSubmenu === "tags" && "bg-muted")}
+                  onClick={() => setContextSubmenu(contextSubmenu === "tags" ? null : "tags")}
                 >
-                  <X className="h-2.5 w-2.5 flex-shrink-0" />
-                  <span>No folder</span>
+                  <Tag className="h-3.5 w-3.5" />
+                  <span className="flex-1 text-left">Tags</span>
+                  <ChevronRight className="h-3 w-3 text-muted-foreground" />
                 </button>
-                {folders.map((f) => {
-                  const conv = conversations.find((c) => c.id === tagMenuConvId);
-                  return (
+                {contextSubmenu === "tags" && (
+                  <div className="absolute left-full top-0 ml-1 bg-popover border rounded-lg shadow-xl py-1 min-w-[160px] z-50">
+                    {tags.length === 0 && <p className="text-[10px] text-muted-foreground px-3 py-1">No tags yet</p>}
+                    {tags.map((tag) => (
+                      <button
+                        key={tag.id}
+                        className="flex items-center gap-2 w-full px-3 py-1.5 text-xs hover:bg-muted transition-colors"
+                        onClick={() => toggleConvTag(conv.id, tag.id)}
+                      >
+                        <span className="h-2.5 w-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: tag.color }} />
+                        <span className="flex-1 text-left truncate">{tag.name}</span>
+                        {conv.tag_ids?.includes(tag.id) && <Check className="h-3 w-3 text-primary flex-shrink-0" />}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Move to folder submenu */}
+              <div className="relative">
+                <button
+                  className={cn("flex items-center gap-2.5 w-full px-3 py-1.5 text-xs hover:bg-muted transition-colors", contextSubmenu === "folders" && "bg-muted")}
+                  onClick={() => setContextSubmenu(contextSubmenu === "folders" ? null : "folders")}
+                >
+                  <Folder className="h-3.5 w-3.5" />
+                  <span className="flex-1 text-left">Move to folder</span>
+                  <ChevronRight className="h-3 w-3 text-muted-foreground" />
+                </button>
+                {contextSubmenu === "folders" && (
+                  <div className="absolute left-full top-0 ml-1 bg-popover border rounded-lg shadow-xl py-1 min-w-[160px] z-50">
                     <button
-                      key={f.id}
-                      className="flex items-center gap-2 w-full px-2 py-1.5 text-xs rounded hover:bg-muted"
-                      onClick={() => { moveToFolder(tagMenuConvId, f.id); setTagMenuConvId(null); }}
+                      className="flex items-center gap-2 w-full px-3 py-1.5 text-xs hover:bg-muted transition-colors"
+                      onClick={() => { moveToFolder(conv.id, null); setContextMenu(null); }}
                     >
-                      <Folder className="h-2.5 w-2.5 flex-shrink-0" style={{ color: f.color }} />
-                      <span className="truncate">{f.name}</span>
-                      {conv?.folder_id === f.id && <Check className="h-3 w-3 text-primary flex-shrink-0" />}
+                      <MessageSquare className="h-3 w-3 flex-shrink-0 text-muted-foreground" />
+                      <span>No folder</span>
+                      {!conv.folder_id && <Check className="h-3 w-3 text-primary flex-shrink-0" />}
                     </button>
-                  );
-                })}
-              </>
-            )}
-          </div>
-        </>
-      )}
+                    {folders.map((f) => (
+                      <button
+                        key={f.id}
+                        className="flex items-center gap-2 w-full px-3 py-1.5 text-xs hover:bg-muted transition-colors"
+                        onClick={() => { moveToFolder(conv.id, f.id); setContextMenu(null); }}
+                      >
+                        <Folder className="h-3 w-3 flex-shrink-0" style={{ color: f.color }} />
+                        <span className="flex-1 text-left truncate">{f.name}</span>
+                        {conv.folder_id === f.id && <Check className="h-3 w-3 text-primary flex-shrink-0" />}
+                      </button>
+                    ))}
+                    {folders.length === 0 && <p className="text-[10px] text-muted-foreground px-3 py-1">No folders yet</p>}
+                  </div>
+                )}
+              </div>
+
+              <div className="border-t my-1" />
+
+              {/* Delete */}
+              <button
+                className="flex items-center gap-2.5 w-full px-3 py-1.5 text-xs hover:bg-destructive/10 text-destructive transition-colors"
+                onClick={() => { deleteConversation(conv.id); setContextMenu(null); }}
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                Delete
+              </button>
+            </div>
+          </>
+        );
+      })()}
 
       {/* ─── Main chat area ─── */}
       <div className={cn("flex-1 flex min-w-0", compareMode ? "flex-row" : "flex-col")}>

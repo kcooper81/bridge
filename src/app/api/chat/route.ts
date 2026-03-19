@@ -184,7 +184,7 @@ export async function POST(request: NextRequest) {
     let convId = conversationId;
     if (!compareOnly) {
       if (!convId) {
-        const { data: conv } = await db
+        const { data: conv, error: convError } = await db
           .from("chat_conversations")
           .insert({
             org_id: profile.org_id,
@@ -195,6 +195,9 @@ export async function POST(request: NextRequest) {
           })
           .select("id")
           .single();
+        if (convError) {
+          console.error("Failed to create conversation:", convError);
+        }
         convId = conv?.id;
       }
 
@@ -212,16 +215,20 @@ export async function POST(request: NextRequest) {
     // Load org system prompt if set
     const orgSystemPrompt = orgSettings.ai_system_prompt as string | undefined;
 
-    // Check for admin context injection (from slash commands)
+    // Check for injected context
     const adminContext = body.adminContext as string | undefined;
+    const presetSystemPrompt = body.presetSystemPrompt as string | undefined;
 
     // Stream AI response
     const aiModel = createAIModel(provider || "openai", selectedModel, apiKey);
 
-    // Build system messages
+    // Build system messages (order: org prompt → preset prompt → admin data)
     const systemMessages: Array<{ role: "system"; content: string }> = [];
     if (orgSystemPrompt) {
       systemMessages.push({ role: "system", content: orgSystemPrompt });
+    }
+    if (presetSystemPrompt) {
+      systemMessages.push({ role: "system", content: presetSystemPrompt });
     }
     if (adminContext) {
       systemMessages.push({
@@ -289,8 +296,8 @@ export async function POST(request: NextRequest) {
     const textStream = result.toTextStreamResponse();
 
     // Wrap the stream to prepend conversation ID as first line
-    if (convId) {
-      const reader = textStream.body!.getReader();
+    if (convId && textStream.body) {
+      const reader = textStream.body.getReader();
       const encoder = new TextEncoder();
       const prefix = encoder.encode(`__CONV_ID__${convId}__\n`);
       let prefixSent = false;

@@ -54,6 +54,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
+import { trackChatMessageSent, trackChatConversationCreated, trackChatFileUploaded, trackChatCompareUsed, trackChatPresetUsed, trackChatAdminCommand, trackChatCollectionCreated } from "@/lib/analytics";
 import { useOrg } from "@/components/providers/org-provider";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
@@ -137,6 +138,8 @@ interface ChatMsg {
   images?: string[];
   rating?: number; // -1, 0, 1
   files?: Array<{ name: string; type: string; size: number }>; // attached file metadata
+  created_at?: string; // ISO timestamp from server
+  model?: string; // model that generated this message
 }
 
 interface PendingFile {
@@ -228,6 +231,7 @@ export default function ChatPage() {
   const [editingCollection, setEditingCollection] = useState<string | null>(null);
   const [editCollectionName, setEditCollectionName] = useState("");
   const [adminContext, setAdminContext] = useState<string | null>(null);
+  const [presetSystemPrompt, setPresetSystemPrompt] = useState<string | null>(null);
   const [sidebarTab, setSidebarTab] = useState<"chats" | "favorites" | "collections">("chats");
   const [contextMenu, setContextMenu] = useState<{ convId: string; x: number; y: number } | null>(null);
   const [collectionContextMenu, setCollectionContextMenu] = useState<{ collectionId: string; x: number; y: number } | null>(null);
@@ -318,6 +322,7 @@ export default function ChatPage() {
 
           const extracted = data.files?.[0];
           setPendingFiles((prev) => prev.map((f) => f.file === file ? { ...f, uploading: false, extractedText: extracted?.text || "" } : f));
+          trackChatFileUploaded(file.type || file.name.split(".").pop() || "unknown");
         } catch {
           setPendingFiles((prev) => prev.map((f) => f.file === file ? { ...f, uploading: false, error: "Upload failed" } : f));
         }
@@ -395,6 +400,7 @@ export default function ChatPage() {
     abortControllerRef.current = controller;
 
     const contextToSend = overrideContext || adminContext;
+    const presetPrompt = presetSystemPrompt;
 
     try {
       const res = await fetch("/api/chat", {
@@ -410,12 +416,16 @@ export default function ChatPage() {
           provider: selectedProvider,
           conversationId: activeConvId,
           ...(contextToSend ? { adminContext: contextToSend } : {}),
+          ...(presetPrompt ? { presetSystemPrompt: presetPrompt } : {}),
         }),
         signal: controller.signal,
       });
 
-      // Clear admin context after sending
+      // Track + clear contexts after sending
+      trackChatMessageSent(selectedModel, selectedProvider);
+      if (!activeConvId) trackChatConversationCreated();
       if (contextToSend) setAdminContext(null);
+      if (presetPrompt) setPresetSystemPrompt(null);
 
       const contentType = res.headers.get("content-type");
       if (contentType?.includes("application/json")) {
@@ -651,6 +661,7 @@ export default function ChatPage() {
         break;
       case "/compare":
         setCompareMode(!compareMode);
+        if (!compareMode) trackChatCompareUsed();
         if (!compareModel && availableModels.length > 1) {
           const other = availableModels.find((m) => m.model !== selectedModel);
           if (other) { setCompareModel(other.model); setCompareProvider(other.provider); }
@@ -668,6 +679,7 @@ export default function ChatPage() {
           "/audit": "Here is the audit trail data. Summarize the key events. I'll ask follow-up questions to drill into specific areas.",
         };
         toast.info("Fetching data from your database...");
+        trackChatAdminCommand(command);
         try {
           const res = await fetch("/api/chat/admin-data", {
             method: "POST",
@@ -880,8 +892,9 @@ export default function ChatPage() {
       const res = await fetch(`/api/chat/conversations/${convId}`);
       const data = await res.json();
       if (data.messages) {
-        setMessages(data.messages.map((m: { id: string; role: string; content: string; rating?: number }) => ({
+        setMessages(data.messages.map((m: { id: string; role: string; content: string; rating?: number; created_at?: string; model?: string }) => ({
           id: m.id, role: m.role, content: m.content, rating: m.rating || 0,
+          created_at: m.created_at, model: m.model,
         })));
         // Load existing ratings
         const ratings: Record<string, number> = {};
@@ -903,7 +916,10 @@ export default function ChatPage() {
     setDlpBlock(null);
     setChatInput("");
     setAdminContext(null);
+    setPresetSystemPrompt(null);
     setCompareMessages([]);
+    setPendingFiles([]);
+    setPendingImages([]);
     inputRef.current?.focus();
   }
 
@@ -978,7 +994,10 @@ export default function ChatPage() {
         body: JSON.stringify({ name: newCollectionName.trim(), color: newCollectionColor }),
       });
       const data = await res.json();
-      if (data.tag) setCollections((prev) => [...prev, data.tag]);
+      if (data.tag) {
+        setCollections((prev) => [...prev, data.tag]);
+        trackChatCollectionCreated();
+      }
       setNewCollectionName("");
       setNewCollectionColor(TAG_COLORS[6]);
       setShowNewCollection(false);
@@ -1034,6 +1053,7 @@ export default function ChatPage() {
 
   // ── Preset: start a new chat from preset ──
   function startPreset(preset: ChatPreset) {
+    trackChatPresetUsed(preset.name);
     startNewChat();
     if (preset.model && preset.provider) {
       setSelectedModel(preset.model);
@@ -1042,9 +1062,8 @@ export default function ChatPage() {
     if (preset.first_message) {
       setChatInput(preset.first_message);
     }
-    // System prompt will be injected server-side via adminContext
     if (preset.system_prompt) {
-      setAdminContext(preset.system_prompt);
+      setPresetSystemPrompt(preset.system_prompt);
     }
     inputRef.current?.focus();
   }
@@ -2065,9 +2084,11 @@ export default function ChatPage() {
 
   function renderMessage(message: ChatMsg, idx?: number) {
     const rating = messageRatings[message.id] || 0;
-    const timestamp = message.id && !isNaN(Number(message.id))
-      ? new Date(Number(message.id)).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
-      : "";
+    const timestamp = message.created_at
+      ? new Date(message.created_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
+      : message.id && !isNaN(Number(message.id))
+        ? new Date(Number(message.id)).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
+        : "";
     return (
       <div
         key={message.id}

@@ -231,6 +231,38 @@ export function trackPromptRejected() {
 }
 
 // ---------------------------------------------------------------------------
+// AI Chat events
+// ---------------------------------------------------------------------------
+
+export function trackChatMessageSent(model: string, provider: string) {
+  trackEvent({ action: "chat_message_sent", category: "chat", model, provider });
+}
+
+export function trackChatConversationCreated() {
+  trackEvent({ action: "chat_conversation_created", category: "chat" });
+}
+
+export function trackChatFileUploaded(fileType: string) {
+  trackEvent({ action: "chat_file_uploaded", category: "chat", label: fileType });
+}
+
+export function trackChatCompareUsed() {
+  trackEvent({ action: "chat_compare_used", category: "chat" });
+}
+
+export function trackChatPresetUsed(presetName: string) {
+  trackEvent({ action: "chat_preset_used", category: "chat", label: presetName });
+}
+
+export function trackChatAdminCommand(command: string) {
+  trackEvent({ action: "chat_admin_command", category: "chat", label: command });
+}
+
+export function trackChatCollectionCreated() {
+  trackEvent({ action: "chat_collection_created", category: "chat" });
+}
+
+// ---------------------------------------------------------------------------
 // LinkedIn Insight Tag conversion tracking
 // ---------------------------------------------------------------------------
 

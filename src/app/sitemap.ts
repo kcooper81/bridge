@@ -129,6 +129,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     process.env.NEXT_PUBLIC_SITE_URL || "https://teamprompt.app";
   const today = new Date().toISOString().split("T")[0];
 
+  const landingPages: MetadataRoute.Sitemap = [
+    { url: `${baseUrl}/lp/ai-dlp`, lastModified: today, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${baseUrl}/lp/shadow-ai`, lastModified: today, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${baseUrl}/lp/ai-compliance`, lastModified: today, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${baseUrl}/lp/prompt-library`, lastModified: today, changeFrequency: "monthly", priority: 0.8 },
+  ];
+
   const corePages: MetadataRoute.Sitemap = [
     { url: baseUrl, lastModified: today, changeFrequency: "weekly", priority: 1 },
     { url: `${baseUrl}/pricing`, lastModified: today, changeFrequency: "weekly", priority: 0.9 },
@@ -189,6 +196,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Deduplicate by URL (strip trailing slashes)
   const all = [
     ...corePages,
+    ...landingPages,
     ...industryPages,
     ...seoPages,
     ...blogPages,

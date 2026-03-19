@@ -1059,45 +1059,53 @@ export default function ChatPage() {
             {activeCollection ? (() => {
               const col = collections.find((c) => c.id === activeCollection);
               return (
-                <>
+                <div className="space-y-2">
                   <button
-                    className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-foreground hover:text-primary transition-colors w-full mb-1"
+                    className="flex items-center gap-2.5 px-3 py-2.5 text-sm font-medium text-foreground hover:text-primary transition-colors w-full rounded-xl border bg-background/50"
                     onClick={() => setActiveCollection(null)}
                   >
                     <ArrowLeft className="h-4 w-4" />
-                    <span className="h-2.5 w-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: col?.color }} />
-                    {col?.name || "Collection"}
-                    <span className="text-xs text-muted-foreground ml-auto">{filteredConversations.length}</span>
+                    <span className="h-3 w-3 rounded-full flex-shrink-0" style={{ backgroundColor: col?.color }} />
+                    <span className="flex-1 text-left">{col?.name || "Collection"}</span>
+                    <span className="text-xs text-muted-foreground">{filteredConversations.length} chats</span>
                   </button>
                   <div className="space-y-0.5">
                     {filteredConversations.length === 0 && (
-                      <p className="text-sm text-muted-foreground text-center py-8">No chats in this collection</p>
+                      <p className="text-sm text-muted-foreground text-center py-8">No chats in this collection yet.<br />Right-click any chat to add it.</p>
                     )}
                     {filteredConversations.map(renderConvItem)}
                   </div>
-                </>
+                </div>
               );
             })() : (
-              /* ── Default view: collections + time-grouped chats ── */
-              <div className="space-y-0.5">
+              /* ── Default view: favorites card + collections card + conversations ── */
+              <div className="space-y-3">
                 {conversations.length === 0 && !loadingConvs && (
                   <p className="text-sm text-muted-foreground text-center py-12">No conversations yet</p>
                 )}
 
-                {/* Pinned */}
+                {/* ★ Favorites card */}
                 {pinnedConvs.length > 0 && (
-                  <ConvSection label="Favorites" icon={<Star className="h-3 w-3 text-amber-400" />}>
-                    {pinnedConvs.map(renderConvItem)}
-                  </ConvSection>
+                  <div className="rounded-xl border border-amber-200/50 dark:border-amber-800/30 bg-amber-50/50 dark:bg-amber-950/20 p-1.5">
+                    <div className="flex items-center gap-1.5 px-2.5 py-1.5">
+                      <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500" />
+                      <span className="text-xs font-semibold text-amber-700 dark:text-amber-400 uppercase tracking-wider">Favorites</span>
+                      <span className="text-[10px] text-amber-500/60 ml-auto">{pinnedConvs.length}</span>
+                    </div>
+                    <div className="space-y-0.5">
+                      {pinnedConvs.map(renderConvItem)}
+                    </div>
+                  </div>
                 )}
 
-                {/* Collections */}
+                {/* ● Collections card */}
                 {sortedCollections.length > 0 && (
-                  <div className="mb-1 mt-2">
-                    <div className="flex items-center gap-1.5 px-3 py-1.5">
-                      <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/70">Collections</span>
+                  <div className="rounded-xl border border-primary/10 bg-primary/[0.02] dark:bg-primary/[0.04] p-1.5">
+                    <div className="flex items-center gap-1.5 px-2.5 py-1.5">
+                      <Circle className="h-3.5 w-3.5 text-primary/60" />
+                      <span className="text-xs font-semibold text-primary/70 uppercase tracking-wider">Collections</span>
                       <button
-                        className="ml-auto p-0.5 text-muted-foreground/50 hover:text-foreground transition-colors"
+                        className="ml-auto p-0.5 text-primary/40 hover:text-primary transition-colors"
                         title="New collection"
                         onClick={() => setShowNewCollection(true)}
                       >
@@ -1108,20 +1116,21 @@ export default function ChatPage() {
                       {sortedCollections.map((col) => (
                         <button
                           key={col.id}
-                          className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                          className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-sm text-muted-foreground hover:bg-background/80 hover:text-foreground transition-colors"
                           onClick={() => setActiveCollection(col.id)}
                           onContextMenu={(e) => { e.preventDefault(); setCollectionContextMenu({ collectionId: col.id, x: e.clientX, y: e.clientY }); }}
                         >
-                          <span className="h-2.5 w-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: col.color }} />
+                          <span className="h-3 w-3 rounded-full flex-shrink-0 shadow-sm" style={{ backgroundColor: col.color }} />
                           <span className="flex-1 text-left truncate font-medium">{col.name}</span>
-                          <span className="text-xs text-muted-foreground/60">{collectionCounts.get(col.id) || 0}</span>
+                          <span className="text-xs text-muted-foreground/50 tabular-nums">{collectionCounts.get(col.id) || 0}</span>
+                          <ChevronRight className="h-3 w-3 text-muted-foreground/30" />
                         </button>
                       ))}
                     </div>
                   </div>
                 )}
 
-                {/* Time-grouped chats */}
+                {/* Conversations by time */}
                 {todayConvs.length > 0 && <ConvSection label="Today">{todayConvs.map(renderConvItem)}</ConvSection>}
                 {yesterdayConvs.length > 0 && <ConvSection label="Yesterday">{yesterdayConvs.map(renderConvItem)}</ConvSection>}
                 {weekConvs.length > 0 && <ConvSection label="Previous 7 Days" collapsible defaultOpen={false}>{weekConvs.map(renderConvItem)}</ConvSection>}

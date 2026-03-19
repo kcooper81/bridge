@@ -23,7 +23,7 @@ export async function GET(
 
   const { data: messages } = await db
     .from("chat_messages")
-    .select("id, role, content, model, tokens_used, dlp_action, dlp_violations, created_at")
+    .select("id, role, content, model, tokens_used, dlp_action, dlp_violations, rating, created_at")
     .eq("conversation_id", id)
     .order("created_at", { ascending: true });
 
@@ -48,6 +48,7 @@ export async function PATCH(
   const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };
   if (body.title !== undefined) updates.title = body.title?.trim() || "Untitled";
   if (body.pinned !== undefined) updates.pinned = body.pinned;
+  if (body.folder_id !== undefined) updates.folder_id = body.folder_id;
 
   const { error } = await db
     .from("chat_conversations")

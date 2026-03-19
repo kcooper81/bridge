@@ -49,9 +49,17 @@ export async function POST(request: NextRequest) {
     // Get the latest user message for DLP scanning
     const lastUserMessage = [...messages].reverse().find((m: { role: string }) => m.role === "user");
 
+    // Load org settings (needed for DLP + system prompt)
+    const { data: orgData } = await db
+      .from("organizations")
+      .select("settings")
+      .eq("id", profile.org_id)
+      .single();
+    const orgSettings = (orgData?.settings || {}) as Record<string, unknown>;
+
     if (lastUserMessage) {
       // Run DLP scan on the user's message
-      const [rulesResult, termsResult, orgResult] = await Promise.all([
+      const [rulesResult, termsResult] = await Promise.all([
         db.from("security_rules")
           .select("name, pattern, pattern_type, category, severity")
           .eq("org_id", profile.org_id)
@@ -62,13 +70,7 @@ export async function POST(request: NextRequest) {
           .eq("org_id", profile.org_id)
           .eq("is_active", true)
           .is("team_id", null),
-        db.from("organizations")
-          .select("settings")
-          .eq("id", profile.org_id)
-          .single(),
       ]);
-
-      const orgSettings = (orgResult.data?.settings || {}) as Record<string, unknown>;
 
       // Skip scan if guardrails disabled
       if (orgSettings.guardrails_enabled !== false) {
@@ -194,8 +196,26 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // Load org system prompt if set
+    const orgSystemPrompt = orgSettings.ai_system_prompt as string | undefined;
+
+    // Check for admin context injection (from slash commands)
+    const adminContext = body.adminContext as string | undefined;
+
     // Stream AI response
     const aiModel = createAIModel(provider || "openai", selectedModel, apiKey);
+
+    // Build system messages
+    const systemMessages: Array<{ role: "system"; content: string }> = [];
+    if (orgSystemPrompt) {
+      systemMessages.push({ role: "system", content: orgSystemPrompt });
+    }
+    if (adminContext) {
+      systemMessages.push({
+        role: "system",
+        content: `The following is real data from the organization's database. Use it to answer the user's question accurately.\n\n${adminContext}`,
+      });
+    }
 
     // Build messages with multimodal support
     const aiMessages = messages.map((m: { role: string; content: string; images?: string[] }) => {
@@ -220,7 +240,7 @@ export async function POST(request: NextRequest) {
 
     const result = streamText({
       model: aiModel,
-      messages: aiMessages,
+      messages: [...systemMessages, ...aiMessages],
       onFinish: async ({ text, usage }) => {
         // Save assistant message
         if (convId) {

@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Force Radix ScrollArea viewport to never scroll horizontally.
+   Radix sets overflow:scroll inline, so !important is needed. */
+[data-radix-scroll-area-viewport] {
+  overflow-x: hidden !important;
+}
+
 @layer base {
   /* TeamPrompt Light Theme (default) - Apple TV Style */
   :root {

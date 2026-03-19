@@ -1152,7 +1152,7 @@ export default function ChatPage() {
 
         {/* Tab content */}
         <ScrollArea className="flex-1">
-          <div className="p-2 overflow-hidden transition-all duration-200">
+          <div className="p-2 overflow-hidden transition-all duration-200 w-0 min-w-full">
 
             {/* ── Chats tab ── */}
             {sidebarTab === "chats" && (

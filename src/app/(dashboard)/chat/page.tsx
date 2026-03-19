@@ -42,7 +42,6 @@ import {
   Paperclip,
   FolderPlus,
   Folder,
-  FolderOpen,
   Tag,
   ThumbsUp,
   ThumbsDown,
@@ -64,16 +63,16 @@ function ConvSection({ label, icon, children, collapsible, defaultOpen = true }:
 }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <div className="mb-2">
+    <div className="mb-1 mt-2 first:mt-0">
       <button
         type="button"
-        className="flex items-center gap-1.5 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-wider text-muted-foreground/60 w-full text-left"
+        className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/70 w-full text-left hover:text-muted-foreground transition-colors"
         onClick={() => collapsible && setOpen(!open)}
       >
         {icon}
         {label}
         {collapsible && (
-          <ChevronRight className={cn("h-2 w-2 ml-auto transition-transform", open && "rotate-90")} />
+          <ChevronRight className={cn("h-3 w-3 ml-auto transition-transform", open && "rotate-90")} />
         )}
       </button>
       {open && <div className="space-y-0.5">{children}</div>}
@@ -229,14 +228,13 @@ export default function ChatPage() {
   const [newTagName, setNewTagName] = useState("");
   const [newTagColor, setNewTagColor] = useState(TAG_COLORS[6]);
   const [showNewTag, setShowNewTag] = useState(false);
-  const [sidebarTab, setSidebarTab] = useState<"chats" | "folders">("chats");
-  const [searchMode, setSearchMode] = useState<"title" | "fulltext">("title");
+  const [searchMode] = useState<"title" | "fulltext">("title");
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [searchingFullText, setSearchingFullText] = useState(false);
   const [adminContext, setAdminContext] = useState<string | null>(null);
   const [contextMenu, setContextMenu] = useState<{ convId: string; x: number; y: number } | null>(null);
   const [contextSubmenu, setContextSubmenu] = useState<"tags" | "folders" | null>(null);
-  const [activeFilterTag, setActiveFilterTag] = useState<string | null>(null);
+  const activeFilterTag: string | null = null;
   const [messageRatings, setMessageRatings] = useState<Record<string, number>>({});
   const [compareMode, setCompareMode] = useState(false);
   const [compareModel, setCompareModel] = useState("");
@@ -1017,59 +1015,51 @@ export default function ChatPage() {
       <div
         key={conv.id}
         className={cn(
-          "group flex items-start gap-2 rounded-lg px-2.5 py-2 cursor-pointer transition-colors",
+          "group flex items-center gap-2.5 rounded-lg px-3 py-2.5 cursor-pointer transition-colors",
           activeConvId === conv.id ? "bg-primary/10 text-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"
         )}
         onClick={() => loadConversation(conv.id)}
         onContextMenu={(e) => openContextMenu(e, conv.id)}
       >
-        <MessageSquare className="h-3.5 w-3.5 flex-shrink-0 mt-0.5" />
         {editingTitle === conv.id ? (
-          <div className="flex-1 flex items-center gap-1 min-w-0">
+          <div className="flex-1 flex items-center gap-2 min-w-0">
             <input
-              className="flex-1 bg-transparent text-xs border-b border-primary outline-none min-w-0"
+              className="flex-1 bg-transparent text-sm border-b border-primary outline-none min-w-0 py-0.5"
               value={editTitleValue}
               onChange={(e) => setEditTitleValue(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter") renameConversation(conv.id, editTitleValue); if (e.key === "Escape") setEditingTitle(null); }}
               autoFocus
               onClick={(e) => e.stopPropagation()}
             />
-            <button onClick={(e) => { e.stopPropagation(); renameConversation(conv.id, editTitleValue); }}><Check className="h-3 w-3" /></button>
-            <button onClick={(e) => { e.stopPropagation(); setEditingTitle(null); }}><X className="h-3 w-3" /></button>
+            <button className="p-1 hover:text-primary" onClick={(e) => { e.stopPropagation(); renameConversation(conv.id, editTitleValue); }}><Check className="h-4 w-4" /></button>
+            <button className="p-1 hover:text-foreground" onClick={(e) => { e.stopPropagation(); setEditingTitle(null); }}><X className="h-4 w-4" /></button>
           </div>
         ) : (
           <>
             <div className="flex-1 min-w-0">
-              <span className="truncate text-xs block font-medium">{conv.title}</span>
-              <div className="flex items-center gap-1 mt-0.5">
-                <span className="text-[10px] text-muted-foreground truncate">{conv.model?.split("-").slice(0, 2).join("-")}</span>
-                {conv.folder_id && (() => {
-                  const f = folders.find((f) => f.id === conv.folder_id);
-                  return f ? (
-                    <span className="text-[9px] text-muted-foreground flex items-center gap-0.5 truncate">
-                      <Folder className="h-2 w-2 flex-shrink-0" style={{ color: f.color }} />
-                      {f.name}
-                    </span>
-                  ) : null;
-                })()}
+              <div className="flex items-center gap-1.5">
+                <span className="truncate text-sm font-medium">{conv.title}</span>
+                {conv.pinned && <Pin className="h-3 w-3 fill-amber-500 text-amber-500 flex-shrink-0" />}
+              </div>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <span className="text-xs text-muted-foreground">{conv.model?.split("-").slice(0, 2).join("-")}</span>
                 {convTags.length > 0 && (
-                  <div className="flex gap-0.5 flex-shrink-0">
+                  <div className="flex gap-1 flex-shrink-0">
                     {convTags.slice(0, 3).map((tag) => (
-                      <span key={tag.id} className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: tag.color }} title={tag.name} />
+                      <span key={tag.id} className="h-2 w-2 rounded-full" style={{ backgroundColor: tag.color }} title={tag.name} />
                     ))}
                   </div>
                 )}
               </div>
             </div>
-            {/* Minimal hover actions — pin + delete. Full menu via right-click. */}
-            <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 flex items-center gap-0.5 mt-0.5">
-              <button className="p-0.5 hover:text-amber-500" title={conv.pinned ? "Unpin" : "Pin"} onClick={(e) => { e.stopPropagation(); togglePin(conv.id); }}>
-                <Pin className={cn("h-3 w-3", conv.pinned && "fill-amber-500 text-amber-500")} />
-              </button>
-              <button className="p-0.5 hover:text-destructive" title="Delete" onClick={(e) => { e.stopPropagation(); deleteConversation(conv.id); }}>
-                <Trash2 className="h-3 w-3" />
-              </button>
-            </div>
+            {/* Single hover action — trash. Everything else via right-click. */}
+            <button
+              className="flex-shrink-0 opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-destructive/10 hover:text-destructive transition-all"
+              title="Delete"
+              onClick={(e) => { e.stopPropagation(); deleteConversation(conv.id); }}
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </button>
           </>
         )}
       </div>
@@ -1084,365 +1074,274 @@ export default function ChatPage() {
         "border-r bg-muted/30 flex flex-col transition-all duration-200 min-w-0",
         sidebarOpen ? "w-80 flex-shrink-0" : "w-0 overflow-hidden"
       )}>
-        <div className="p-3 space-y-2 border-b flex-shrink-0">
-          <div className="flex gap-1.5">
-            <Button variant="outline" className="flex-1 justify-start gap-2 text-sm" onClick={startNewChat}>
-              <Plus className="h-4 w-4" />
-              New Chat
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-9 w-9 flex-shrink-0"
-              title="New folder"
-              onClick={() => { setShowNewFolder(true); setSidebarTab("folders"); }}
-            >
-              <FolderPlus className="h-4 w-4" />
-            </Button>
-          </div>
-          {/* Search bar */}
-          <div className="relative">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder={searchMode === "fulltext" ? "Search all messages..." : "Search chats..."}
-              value={searchQuery}
-              onChange={(e) => handleSearchChange(e.target.value)}
-              className="w-full h-8 rounded-md border bg-background pl-8 pr-16 text-xs outline-none focus:ring-1 focus:ring-primary"
-            />
-            <button
-              type="button"
-              onClick={() => { setSearchMode(searchMode === "title" ? "fulltext" : "title"); setSearchResults([]); setSearchQuery(""); }}
-              className={cn(
-                "absolute right-1.5 top-1/2 -translate-y-1/2 h-5 px-2 rounded text-[9px] font-medium transition-colors",
-                searchMode === "fulltext" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-muted"
-              )}
-              title={searchMode === "fulltext" ? "Searching message content" : "Searching titles only"}
-            >
-              {searchMode === "fulltext" ? "Messages" : "Titles"}
-            </button>
-          </div>
-        </div>
-
-        {/* Tag filter chips */}
-        {tags.length > 0 && (
-          <div className="px-3 py-1.5 border-b flex gap-1 flex-wrap flex-shrink-0">
-            {activeFilterTag && (
-              <button
-                className="h-5 px-1.5 rounded text-[9px] font-medium bg-muted text-muted-foreground hover:text-foreground"
-                onClick={() => setActiveFilterTag(null)}
-              >
-                Clear
-              </button>
-            )}
-            {tags.map((tag) => (
-              <button
-                key={tag.id}
-                className={cn(
-                  "h-5 px-1.5 rounded text-[9px] font-medium transition-colors flex items-center gap-1",
-                  activeFilterTag === tag.id ? "ring-1 ring-primary bg-primary/5" : "hover:bg-muted"
-                )}
-                onClick={() => setActiveFilterTag(activeFilterTag === tag.id ? null : tag.id)}
-              >
-                <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: tag.color }} />
-                {tag.name}
-              </button>
-            ))}
-          </div>
-        )}
-
-        {/* View toggle: Chats / Folders */}
-        <div className="flex border-b flex-shrink-0">
-          <button
-            className={cn("flex-1 py-1.5 text-[10px] font-medium transition-colors", sidebarTab === "chats" ? "text-primary border-b-2 border-primary" : "text-muted-foreground")}
-            onClick={() => setSidebarTab("chats")}
-          >
-            Chats
-          </button>
-          <button
-            className={cn("flex-1 py-1.5 text-[10px] font-medium transition-colors", sidebarTab === "folders" ? "text-primary border-b-2 border-primary" : "text-muted-foreground")}
-            onClick={() => setSidebarTab("folders")}
-          >
-            Folders{folders.length > 0 && ` (${folders.length})`}
-          </button>
-        </div>
-
-        <ScrollArea className="flex-1">
-          {/* Full-text search results */}
-          {searchMode === "fulltext" && searchQuery.length >= 2 && (
-            <div className="p-2 space-y-1">
-              {searchingFullText && <p className="text-xs text-muted-foreground text-center py-4"><Loader2 className="h-3 w-3 animate-spin inline mr-1" />Searching...</p>}
-              {!searchingFullText && searchResults.length === 0 && <p className="text-xs text-muted-foreground text-center py-4">No results</p>}
-              {searchResults.map((r) => (
-                <button
-                  key={r.messageId}
-                  className="w-full text-left rounded-lg px-2.5 py-2 hover:bg-muted transition-colors"
-                  onClick={() => loadConversation(r.conversationId)}
-                >
-                  <p className="text-xs font-medium truncate">{r.conversationTitle}</p>
-                  <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-2">{r.snippet}</p>
-                  <p className="text-[9px] text-muted-foreground mt-0.5">{r.role} · {new Date(r.created_at).toLocaleDateString()}</p>
-                </button>
-              ))}
-            </div>
-          )}
-
-          {/* Conversation list / folder view */}
-          {(searchMode !== "fulltext" || searchQuery.length < 2) && (
-            <div className="p-2 space-y-1">
-              {/* ── Chats tab: time-grouped, unfiled conversations ── */}
-              {sidebarTab === "chats" && (
-                <>
-                  {conversations.length === 0 && !loadingConvs && (
-                    <p className="text-xs text-muted-foreground text-center py-8">No conversations yet</p>
-                  )}
-                  {pinnedConvs.length > 0 && (
-                    <ConvSection label="Pinned" icon={<Pin className="h-2.5 w-2.5" />}>
-                      {pinnedConvs.map(renderConvItem)}
-                    </ConvSection>
-                  )}
-                  {/* Show folder groups inline if any conversations are in folders */}
-                  {folders.map((folder) => {
-                    const folderConvs = filteredConversations.filter((c) => c.folder_id === folder.id && !c.pinned);
-                    if (folderConvs.length === 0) return null;
-                    return (
-                      <ConvSection
-                        key={folder.id}
-                        label={folder.name}
-                        icon={<Folder className="h-2.5 w-2.5" style={{ color: folder.color }} />}
-                        collapsible
-                      >
-                        {folderConvs.map(renderConvItem)}
-                      </ConvSection>
-                    );
-                  })}
-                  {todayConvs.length > 0 && <ConvSection label="Today">{todayConvs.map(renderConvItem)}</ConvSection>}
-                  {weekConvs.length > 0 && <ConvSection label="This Week">{weekConvs.map(renderConvItem)}</ConvSection>}
-                  {olderConvs.length > 0 && <ConvSection label="Older" collapsible>{olderConvs.map(renderConvItem)}</ConvSection>}
-                </>
-              )}
-
-              {/* ── Folders tab: manage folders + see all by folder ── */}
-              {sidebarTab === "folders" && (
-                <>
-                  {folders.length === 0 && !showNewFolder && (
-                    <div className="text-center py-6">
-                      <Folder className="h-8 w-8 text-muted-foreground/30 mx-auto mb-2" />
-                      <p className="text-xs text-muted-foreground mb-2">Organize chats into folders</p>
-                      <Button variant="outline" size="sm" className="text-xs gap-1.5" onClick={() => setShowNewFolder(true)}>
-                        <FolderPlus className="h-3 w-3" />
-                        Create folder
-                      </Button>
-                    </div>
-                  )}
-
-                  {folders.map((folder) => {
-                    const folderConvs = filteredConversations.filter((c) => c.folder_id === folder.id);
-                    return (
-                      <ConvSection
-                        key={folder.id}
-                        label={`${folder.name} (${folderConvs.length})`}
-                        icon={<FolderOpen className="h-2.5 w-2.5" style={{ color: folder.color }} />}
-                        collapsible
-                      >
-                        {folderConvs.length === 0 && <p className="text-[10px] text-muted-foreground px-2.5 py-1">Empty — drag a chat here or use its menu</p>}
-                        {folderConvs.map(renderConvItem)}
-                        <button
-                          className="w-full text-left text-[10px] text-destructive/60 hover:text-destructive px-2.5 py-1 transition-colors"
-                          onClick={() => deleteFolder(folder.id)}
-                        >
-                          Delete folder
-                        </button>
-                      </ConvSection>
-                    );
-                  })}
-
-                  {/* Unfiled */}
-                  {filteredConversations.filter((c) => !c.folder_id).length > 0 && (
-                    <ConvSection label="Unfiled" icon={<MessageSquare className="h-2.5 w-2.5" />} collapsible>
-                      {filteredConversations.filter((c) => !c.folder_id).map(renderConvItem)}
-                    </ConvSection>
-                  )}
-
-                  {/* New folder inline form */}
-                  {showNewFolder ? (
-                    <div className="px-2.5 py-2 flex gap-1.5">
-                      <input
-                        className="flex-1 h-7 rounded-md border bg-background px-2.5 text-xs outline-none focus:ring-1 focus:ring-primary min-w-0"
-                        placeholder="Folder name"
-                        value={newFolderName}
-                        onChange={(e) => setNewFolderName(e.target.value)}
-                        onKeyDown={(e) => { if (e.key === "Enter") createFolder(); if (e.key === "Escape") setShowNewFolder(false); }}
-                        autoFocus
-                      />
-                      <button className="text-primary hover:text-primary/80" onClick={createFolder}><Check className="h-4 w-4" /></button>
-                      <button className="text-muted-foreground hover:text-foreground" onClick={() => setShowNewFolder(false)}><X className="h-4 w-4" /></button>
-                    </div>
-                  ) : folders.length > 0 && (
-                    <button
-                      className="flex items-center gap-1.5 px-2.5 py-2 text-xs text-muted-foreground hover:text-foreground transition-colors w-full"
-                      onClick={() => setShowNewFolder(true)}
-                    >
-                      <FolderPlus className="h-3.5 w-3.5" />
-                      New folder
-                    </button>
-                  )}
-                </>
-              )}
-            </div>
-          )}
-        </ScrollArea>
-
-        {/* Bottom bar: new tag + folder actions */}
-        <div className="border-t p-2 flex-shrink-0">
-          {showNewTag ? (
-            <div className="flex gap-1.5 items-center">
+        {/* Top actions */}
+        <div className="p-3 border-b flex-shrink-0">
+          <Button variant="outline" className="w-full justify-start gap-2 h-10 text-sm" onClick={startNewChat}>
+            <Plus className="h-4 w-4" />
+            New Chat
+          </Button>
+          {conversations.length > 3 && (
+            <div className="relative mt-2">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
               <input
-                className="flex-1 h-7 rounded-md border bg-background px-2.5 text-xs outline-none focus:ring-1 focus:ring-primary min-w-0"
-                placeholder="Tag name"
-                value={newTagName}
-                onChange={(e) => setNewTagName(e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Enter") createTag(); if (e.key === "Escape") setShowNewTag(false); }}
-                autoFocus
+                type="text"
+                placeholder="Search conversations..."
+                value={searchQuery}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                className="w-full h-9 rounded-lg border bg-background pl-9 pr-3 text-sm outline-none focus:ring-1 focus:ring-primary"
               />
-              <div className="flex gap-0.5 flex-shrink-0">
-                {TAG_COLORS.slice(0, 5).map((c) => (
+            </div>
+          )}
+        </div>
+
+        {/* Conversation list */}
+        <ScrollArea className="flex-1">
+          <div className="p-2">
+            {/* Full-text search results */}
+            {searchMode === "fulltext" && searchQuery.length >= 2 ? (
+              <div className="space-y-0.5">
+                {searchingFullText && <p className="text-sm text-muted-foreground text-center py-8"><Loader2 className="h-4 w-4 animate-spin inline mr-2" />Searching...</p>}
+                {!searchingFullText && searchResults.length === 0 && <p className="text-sm text-muted-foreground text-center py-8">No results</p>}
+                {searchResults.map((r) => (
                   <button
-                    key={c}
-                    className={cn("h-4 w-4 rounded-full border", newTagColor === c && "ring-1 ring-offset-1 ring-primary")}
-                    style={{ backgroundColor: c }}
-                    onClick={() => setNewTagColor(c)}
-                  />
+                    key={r.messageId}
+                    className="w-full text-left rounded-lg px-3 py-2.5 hover:bg-muted transition-colors"
+                    onClick={() => loadConversation(r.conversationId)}
+                  >
+                    <p className="text-sm font-medium truncate">{r.conversationTitle}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{r.snippet}</p>
+                  </button>
                 ))}
               </div>
-              <button className="text-primary hover:text-primary/80 flex-shrink-0" onClick={createTag}><Check className="h-4 w-4" /></button>
-              <button className="text-muted-foreground hover:text-foreground flex-shrink-0" onClick={() => setShowNewTag(false)}><X className="h-4 w-4" /></button>
-            </div>
-          ) : (
-            <button
-              className="flex items-center gap-1.5 text-[10px] text-muted-foreground hover:text-foreground transition-colors"
-              onClick={() => setShowNewTag(true)}
-            >
-              <Tag className="h-3 w-3" />
-              New tag
-            </button>
-          )}
-        </div>
+            ) : (
+              <div className="space-y-0.5">
+                {conversations.length === 0 && !loadingConvs && (
+                  <p className="text-sm text-muted-foreground text-center py-12">No conversations yet</p>
+                )}
+
+                {/* Pinned */}
+                {pinnedConvs.length > 0 && (
+                  <ConvSection label="Pinned" icon={<Pin className="h-3 w-3" />}>
+                    {pinnedConvs.map(renderConvItem)}
+                  </ConvSection>
+                )}
+
+                {/* Folders with conversations */}
+                {folders.map((folder) => {
+                  const folderConvs = filteredConversations.filter((c) => c.folder_id === folder.id && !c.pinned);
+                  if (folderConvs.length === 0) return null;
+                  return (
+                    <ConvSection
+                      key={folder.id}
+                      label={folder.name}
+                      icon={<Folder className="h-3 w-3" style={{ color: folder.color }} />}
+                      collapsible
+                    >
+                      {folderConvs.map(renderConvItem)}
+                    </ConvSection>
+                  );
+                })}
+
+                {/* Time groups (unfiled only) */}
+                {todayConvs.length > 0 && <ConvSection label="Today">{todayConvs.map(renderConvItem)}</ConvSection>}
+                {weekConvs.length > 0 && <ConvSection label="This Week">{weekConvs.map(renderConvItem)}</ConvSection>}
+                {olderConvs.length > 0 && <ConvSection label="Older" collapsible>{olderConvs.map(renderConvItem)}</ConvSection>}
+              </div>
+            )}
+          </div>
+        </ScrollArea>
       </div>
 
       {/* Right-click context menu */}
       {contextMenu && (() => {
         const conv = conversations.find((c) => c.id === contextMenu.convId);
         if (!conv) return null;
-        // Clamp menu position to viewport
-        const menuX = Math.min(contextMenu.x, window.innerWidth - 220);
-        const menuY = Math.min(contextMenu.y, window.innerHeight - 300);
+        const menuW = 200;
+        const menuH = 320;
+        const menuX = Math.min(contextMenu.x, (typeof window !== "undefined" ? window.innerWidth : 1200) - menuW);
+        const menuY = Math.min(contextMenu.y, (typeof window !== "undefined" ? window.innerHeight : 800) - menuH);
         return (
           <>
             <div className="fixed inset-0 z-40" onClick={() => { setContextMenu(null); setContextSubmenu(null); }} onContextMenu={(e) => { e.preventDefault(); setContextMenu(null); setContextSubmenu(null); }} />
             <div
-              className="fixed z-50 bg-popover border rounded-lg shadow-xl py-1 min-w-[180px]"
+              className="fixed z-50 bg-popover border rounded-xl shadow-2xl py-1.5 w-[200px]"
               style={{ left: menuX, top: menuY }}
               onClick={(e) => e.stopPropagation()}
             >
               {/* Pin/Unpin */}
               <button
-                className="flex items-center gap-2.5 w-full px-3 py-1.5 text-xs hover:bg-muted transition-colors"
+                className="flex items-center gap-3 w-full px-3 py-2 text-sm hover:bg-muted transition-colors"
                 onClick={() => { togglePin(conv.id); setContextMenu(null); }}
               >
-                <Pin className={cn("h-3.5 w-3.5", conv.pinned && "fill-amber-500 text-amber-500")} />
+                <Pin className={cn("h-4 w-4", conv.pinned && "fill-amber-500 text-amber-500")} />
                 {conv.pinned ? "Unpin" : "Pin to top"}
               </button>
 
               {/* Rename */}
               <button
-                className="flex items-center gap-2.5 w-full px-3 py-1.5 text-xs hover:bg-muted transition-colors"
+                className="flex items-center gap-3 w-full px-3 py-2 text-sm hover:bg-muted transition-colors"
                 onClick={() => { setEditingTitle(conv.id); setEditTitleValue(conv.title); setContextMenu(null); }}
               >
-                <Pencil className="h-3.5 w-3.5" />
+                <Pencil className="h-4 w-4" />
                 Rename
               </button>
 
-              <div className="border-t my-1" />
+              <div className="border-t my-1 mx-2" />
 
               {/* Tags submenu */}
-              <div className="relative">
+              <div className="relative" onMouseEnter={() => setContextSubmenu("tags")} onMouseLeave={() => { if (contextSubmenu === "tags") setContextSubmenu(null); }}>
                 <button
-                  className={cn("flex items-center gap-2.5 w-full px-3 py-1.5 text-xs hover:bg-muted transition-colors", contextSubmenu === "tags" && "bg-muted")}
+                  className={cn("flex items-center gap-3 w-full px-3 py-2 text-sm hover:bg-muted transition-colors", contextSubmenu === "tags" && "bg-muted")}
                   onClick={() => setContextSubmenu(contextSubmenu === "tags" ? null : "tags")}
                 >
-                  <Tag className="h-3.5 w-3.5" />
+                  <Tag className="h-4 w-4" />
                   <span className="flex-1 text-left">Tags</span>
-                  <ChevronRight className="h-3 w-3 text-muted-foreground" />
+                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
                 </button>
                 {contextSubmenu === "tags" && (
-                  <div className="absolute left-full top-0 ml-1 bg-popover border rounded-lg shadow-xl py-1 min-w-[160px] z-50">
-                    {tags.length === 0 && <p className="text-[10px] text-muted-foreground px-3 py-1">No tags yet</p>}
+                  <div className="absolute left-full top-0 ml-0.5 bg-popover border rounded-xl shadow-2xl py-1.5 min-w-[180px] z-50">
                     {tags.map((tag) => (
                       <button
                         key={tag.id}
-                        className="flex items-center gap-2 w-full px-3 py-1.5 text-xs hover:bg-muted transition-colors"
+                        className="flex items-center gap-2.5 w-full px-3 py-2 text-sm hover:bg-muted transition-colors"
                         onClick={() => toggleConvTag(conv.id, tag.id)}
                       >
-                        <span className="h-2.5 w-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: tag.color }} />
+                        <span className="h-3 w-3 rounded-full flex-shrink-0 border" style={{ backgroundColor: tag.color }} />
                         <span className="flex-1 text-left truncate">{tag.name}</span>
-                        {conv.tag_ids?.includes(tag.id) && <Check className="h-3 w-3 text-primary flex-shrink-0" />}
+                        {conv.tag_ids?.includes(tag.id) && <Check className="h-4 w-4 text-primary flex-shrink-0" />}
                       </button>
                     ))}
+                    {tags.length > 0 && <div className="border-t my-1 mx-2" />}
+                    <button
+                      className="flex items-center gap-2.5 w-full px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                      onClick={() => { setShowNewTag(true); setContextMenu(null); }}
+                    >
+                      <Plus className="h-4 w-4" />
+                      Create tag
+                    </button>
                   </div>
                 )}
               </div>
 
               {/* Move to folder submenu */}
-              <div className="relative">
+              <div className="relative" onMouseEnter={() => setContextSubmenu("folders")} onMouseLeave={() => { if (contextSubmenu === "folders") setContextSubmenu(null); }}>
                 <button
-                  className={cn("flex items-center gap-2.5 w-full px-3 py-1.5 text-xs hover:bg-muted transition-colors", contextSubmenu === "folders" && "bg-muted")}
+                  className={cn("flex items-center gap-3 w-full px-3 py-2 text-sm hover:bg-muted transition-colors", contextSubmenu === "folders" && "bg-muted")}
                   onClick={() => setContextSubmenu(contextSubmenu === "folders" ? null : "folders")}
                 >
-                  <Folder className="h-3.5 w-3.5" />
+                  <Folder className="h-4 w-4" />
                   <span className="flex-1 text-left">Move to folder</span>
-                  <ChevronRight className="h-3 w-3 text-muted-foreground" />
+                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
                 </button>
                 {contextSubmenu === "folders" && (
-                  <div className="absolute left-full top-0 ml-1 bg-popover border rounded-lg shadow-xl py-1 min-w-[160px] z-50">
+                  <div className="absolute left-full top-0 ml-0.5 bg-popover border rounded-xl shadow-2xl py-1.5 min-w-[180px] z-50">
                     <button
-                      className="flex items-center gap-2 w-full px-3 py-1.5 text-xs hover:bg-muted transition-colors"
+                      className="flex items-center gap-2.5 w-full px-3 py-2 text-sm hover:bg-muted transition-colors"
                       onClick={() => { moveToFolder(conv.id, null); setContextMenu(null); }}
                     >
-                      <MessageSquare className="h-3 w-3 flex-shrink-0 text-muted-foreground" />
+                      <X className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
                       <span>No folder</span>
-                      {!conv.folder_id && <Check className="h-3 w-3 text-primary flex-shrink-0" />}
+                      {!conv.folder_id && <Check className="h-4 w-4 text-primary flex-shrink-0" />}
                     </button>
                     {folders.map((f) => (
-                      <button
-                        key={f.id}
-                        className="flex items-center gap-2 w-full px-3 py-1.5 text-xs hover:bg-muted transition-colors"
-                        onClick={() => { moveToFolder(conv.id, f.id); setContextMenu(null); }}
-                      >
-                        <Folder className="h-3 w-3 flex-shrink-0" style={{ color: f.color }} />
-                        <span className="flex-1 text-left truncate">{f.name}</span>
-                        {conv.folder_id === f.id && <Check className="h-3 w-3 text-primary flex-shrink-0" />}
-                      </button>
+                      <div key={f.id} className="group/folder flex items-center hover:bg-muted transition-colors">
+                        <button
+                          className="flex items-center gap-2.5 flex-1 px-3 py-2 text-sm min-w-0"
+                          onClick={() => { moveToFolder(conv.id, f.id); setContextMenu(null); }}
+                        >
+                          <Folder className="h-4 w-4 flex-shrink-0" style={{ color: f.color }} />
+                          <span className="flex-1 text-left truncate">{f.name}</span>
+                          {conv.folder_id === f.id && <Check className="h-4 w-4 text-primary flex-shrink-0" />}
+                        </button>
+                        <button
+                          className="p-1 mr-1 opacity-0 group-hover/folder:opacity-100 hover:text-destructive transition-all"
+                          title={`Delete "${f.name}" folder`}
+                          onClick={(e) => { e.stopPropagation(); deleteFolder(f.id); }}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </button>
+                      </div>
                     ))}
-                    {folders.length === 0 && <p className="text-[10px] text-muted-foreground px-3 py-1">No folders yet</p>}
+                    <div className="border-t my-1 mx-2" />
+                    <button
+                      className="flex items-center gap-2.5 w-full px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                      onClick={() => { setShowNewFolder(true); setContextMenu(null); }}
+                    >
+                      <FolderPlus className="h-4 w-4" />
+                      Create folder
+                    </button>
                   </div>
                 )}
               </div>
 
-              <div className="border-t my-1" />
+              <div className="border-t my-1 mx-2" />
 
               {/* Delete */}
               <button
-                className="flex items-center gap-2.5 w-full px-3 py-1.5 text-xs hover:bg-destructive/10 text-destructive transition-colors"
+                className="flex items-center gap-3 w-full px-3 py-2 text-sm text-destructive hover:bg-destructive/10 transition-colors"
                 onClick={() => { deleteConversation(conv.id); setContextMenu(null); }}
               >
-                <Trash2 className="h-3.5 w-3.5" />
+                <Trash2 className="h-4 w-4" />
                 Delete
               </button>
             </div>
           </>
         );
       })()}
+
+      {/* New folder dialog — shown when triggered from context menu */}
+      {showNewFolder && (
+        <>
+          <div className="fixed inset-0 z-40 bg-black/20" onClick={() => setShowNewFolder(false)} />
+          <div className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-popover border rounded-xl shadow-2xl p-5 w-[320px]">
+            <h3 className="text-sm font-semibold mb-3">Create Folder</h3>
+            <input
+              className="w-full h-10 rounded-lg border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-primary"
+              placeholder="Folder name"
+              value={newFolderName}
+              onChange={(e) => setNewFolderName(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") createFolder(); if (e.key === "Escape") setShowNewFolder(false); }}
+              autoFocus
+            />
+            <div className="flex justify-end gap-2 mt-4">
+              <Button variant="outline" size="sm" onClick={() => setShowNewFolder(false)}>Cancel</Button>
+              <Button size="sm" onClick={createFolder} disabled={!newFolderName.trim()}>Create</Button>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* New tag dialog — shown when triggered from context menu */}
+      {showNewTag && (
+        <>
+          <div className="fixed inset-0 z-40 bg-black/20" onClick={() => setShowNewTag(false)} />
+          <div className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-popover border rounded-xl shadow-2xl p-5 w-[320px]">
+            <h3 className="text-sm font-semibold mb-3">Create Tag</h3>
+            <input
+              className="w-full h-10 rounded-lg border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-primary mb-3"
+              placeholder="Tag name"
+              value={newTagName}
+              onChange={(e) => setNewTagName(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") createTag(); if (e.key === "Escape") setShowNewTag(false); }}
+              autoFocus
+            />
+            <div className="flex gap-1.5 mb-4">
+              {TAG_COLORS.map((c) => (
+                <button
+                  key={c}
+                  className={cn("h-6 w-6 rounded-full border-2 transition-all", newTagColor === c ? "border-foreground scale-110" : "border-transparent hover:scale-105")}
+                  style={{ backgroundColor: c }}
+                  onClick={() => setNewTagColor(c)}
+                />
+              ))}
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" size="sm" onClick={() => setShowNewTag(false)}>Cancel</Button>
+              <Button size="sm" onClick={createTag} disabled={!newTagName.trim()}>Create</Button>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* ─── Main chat area ─── */}
       <div className={cn("flex-1 flex min-w-0", compareMode ? "flex-row" : "flex-col")}>

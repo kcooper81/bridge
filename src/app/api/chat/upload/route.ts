@@ -225,7 +225,7 @@ function isCodeFile(ext: string): boolean {
     "cs", "swift", "kt", "scala", "php", "sh", "bash", "zsh", "ps1",
     "sql", "graphql", "gql",
     "html", "htm", "css", "scss", "sass", "less",
-    "json", "yaml", "yml", "toml", "ini", "env", "conf", "cfg",
+    "json", "yaml", "yml", "toml", "ini", "conf", "cfg",
     "xml", "svg",
     "md", "mdx", "rst", "tex",
     "csv", "tsv",

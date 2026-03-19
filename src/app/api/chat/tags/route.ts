@@ -74,7 +74,11 @@ export async function PATCH(request: NextRequest) {
   if (!id) return NextResponse.json({ error: "id required" }, { status: 400 });
 
   const updates: Record<string, unknown> = {};
-  if (name !== undefined) updates.name = name.trim();
+  if (name !== undefined) {
+    const trimmed = name.trim();
+    if (!trimmed) return NextResponse.json({ error: "Name cannot be empty" }, { status: 400 });
+    updates.name = trimmed;
+  }
   if (color !== undefined) updates.color = color;
 
   await db.from("chat_tags").update(updates).eq("id", id).eq("user_id", user.id);

@@ -691,13 +691,12 @@ export default function ChatPage() {
           // Build messages directly (avoid stale closure from setTimeout)
           const prompt = promptMap[command];
           const userMsg: ChatMsg = { id: Date.now().toString(), role: "user", content: prompt };
-          setMessages((prev) => {
-            const allMsgs = [...prev, userMsg];
-            // Kick off the send after state update
-            sendMessageDirect(allMsgs, data.context);
-            return allMsgs;
-          });
+          // Build the full messages array from current state via ref
+          const currentMessages = [...messages, userMsg];
+          setMessages(currentMessages);
           setChatInput("");
+          // Send after state update — use the array we just built, not state
+          sendMessageDirect(currentMessages, data.context);
         } catch {
           toast.error("Failed to fetch admin data");
         }
@@ -835,7 +834,6 @@ export default function ChatPage() {
       if (slashMenuRef.current && !slashMenuRef.current.contains(e.target as Node) &&
           inputRef.current && !inputRef.current.contains(e.target as Node)) {
         setSlashMenuOpen(false);
-        setChatInput("");
       }
     }
     document.addEventListener("mousedown", handleClick);
@@ -916,6 +914,7 @@ export default function ChatPage() {
     setChatInput("");
     setAdminContext(null);
     setPresetSystemPrompt(null);
+    setCompareMode(false);
     setCompareMessages([]);
     setPendingFiles([]);
     setPendingImages([]);
@@ -930,6 +929,16 @@ export default function ChatPage() {
 
     // Show undo toast (3 seconds to undo)
     let undone = false;
+    let deleted = false;
+    const doDelete = () => {
+      if (undone || deleted) return;
+      deleted = true;
+      fetch("/api/chat/conversations", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: convId }),
+      }).catch(() => {});
+    };
     toast("Conversation deleted", {
       action: {
         label: "Undo",
@@ -939,23 +948,8 @@ export default function ChatPage() {
         },
       },
       duration: 3000,
-      onDismiss: () => {
-        if (undone) return;
-        // Actually delete on server after toast dismisses
-        fetch("/api/chat/conversations", {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id: convId }),
-        }).catch(() => {});
-      },
-      onAutoClose: () => {
-        if (undone) return;
-        fetch("/api/chat/conversations", {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id: convId }),
-        }).catch(() => {});
-      },
+      onDismiss: doDelete,
+      onAutoClose: doDelete,
     });
   }
 
@@ -1266,6 +1260,11 @@ export default function ChatPage() {
               <div className="space-y-0.5">
                 {conversations.length === 0 && !loadingConvs && (
                   <p className="text-sm text-muted-foreground text-center py-12">No conversations yet</p>
+                )}
+                {pinnedConvs.length > 0 && (
+                  <ConvSection label="Favorites" icon={<Star className="h-3 w-3 text-amber-400" />}>
+                    {pinnedConvs.map(renderConvItem)}
+                  </ConvSection>
                 )}
                 {todayConvs.length > 0 && <ConvSection label="Today">{todayConvs.map(renderConvItem)}</ConvSection>}
                 {yesterdayConvs.length > 0 && <ConvSection label="Yesterday">{yesterdayConvs.map(renderConvItem)}</ConvSection>}

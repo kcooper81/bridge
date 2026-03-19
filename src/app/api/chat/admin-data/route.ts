@@ -331,7 +331,7 @@ ${(() => {
         .map(([week, users]) => `  - ${week}: ${users.size} active users`)
         .join("\n");
 
-      context = `## Prompt & AI Usage Analytics — Past 30 Days (Real Data)
+      context = `## Prompt & AI Usage Analytics — Past 30 Days (Real Data)${filterLabel}
 
 ### Adoption
 - Active AI users (30d): ${uniqueUsers.size} / ${totalMembers} team members (${totalMembers > 0 ? Math.round(uniqueUsers.size / totalMembers * 100) : 0}%)

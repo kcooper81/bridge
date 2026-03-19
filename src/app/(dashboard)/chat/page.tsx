@@ -997,7 +997,7 @@ export default function ChatPage() {
           <>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1.5">
-                <span className="truncate text-sm font-medium">{conv.title}</span>
+                <span className="truncate text-sm font-medium" title={conv.title}>{conv.title}</span>
                 {conv.pinned && <Pin className="h-3 w-3 fill-amber-500 text-amber-500 flex-shrink-0" />}
               </div>
               <div className="flex items-center gap-1.5 mt-0.5">

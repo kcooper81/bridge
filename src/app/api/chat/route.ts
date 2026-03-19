@@ -106,6 +106,17 @@ export async function POST(request: NextRequest) {
         const overrideDisabled = orgSettings.allow_guardrail_override === false;
 
         if (hasBlock || (overrideDisabled && violations.length > 0)) {
+          // Log blocked event to conversation_logs (fire-and-forget)
+          try {
+            await db.from("conversation_logs").insert({
+              org_id: profile.org_id,
+              user_id: user.id,
+              ai_tool: "teamprompt_chat",
+              action: "blocked",
+              metadata: { violations: violations.map((v) => ({ rule: v.ruleName, category: v.category, severity: v.severity })) },
+            });
+          } catch { /* non-critical */ }
+
           // Fire Slack notification (fire-and-forget)
           if (violations.length > 0) {
             const top = violations[0];

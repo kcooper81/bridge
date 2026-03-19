@@ -1,5 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
+
+// This file builds formatted context strings for admin slash commands.
+// Heavy use of `any` for Supabase query results and reduce callbacks.
 
 /**
  * POST /api/chat/admin-data — fetch real DB data for admin slash commands.
@@ -21,27 +25,43 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Admin access required" }, { status: 403 });
   }
 
-  const { command } = await request.json();
+  const { command, userId: filterUserId, teamId: filterTeamId } = await request.json();
   const orgId = profile.org_id;
   const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
   const monthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
 
+  // Helper: apply optional user/team filter to a query
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  function applyFilter(query: any, userCol = "user_id") {
+    if (filterUserId) return query.eq(userCol, filterUserId);
+    return query;
+  }
+
   let context = "";
+  const filterLabel = filterUserId
+    ? ` (filtered to specific user)`
+    : filterTeamId
+    ? ` (filtered to specific team)`
+    : "";
 
   switch (command) {
     case "/activity": {
       // Get conversation logs from the past week
       const [logsResult, convResult, membersResult] = await Promise.all([
-        db.from("conversation_logs")
-          .select("user_id, ai_tool, action, metadata, created_at")
-          .eq("org_id", orgId)
-          .gte("created_at", weekAgo)
-          .order("created_at", { ascending: false })
-          .limit(500),
-        db.from("chat_conversations")
-          .select("id, user_id, model, provider, created_at")
-          .eq("org_id", orgId)
-          .gte("created_at", weekAgo),
+        applyFilter(
+          db.from("conversation_logs")
+            .select("user_id, ai_tool, action, metadata, created_at")
+            .eq("org_id", orgId)
+            .gte("created_at", weekAgo)
+            .order("created_at", { ascending: false })
+            .limit(500)
+        ),
+        applyFilter(
+          db.from("chat_conversations")
+            .select("id, user_id, model, provider, created_at")
+            .eq("org_id", orgId)
+            .gte("created_at", weekAgo)
+        ),
         db.from("profiles")
           .select("id, name, email")
           .eq("org_id", orgId),
@@ -89,7 +109,7 @@ export async function POST(request: NextRequest) {
         .map(([model, count]) => `  - ${model}: ${count} conversations`)
         .join("\n");
 
-      context = `## Team AI Activity — Past 7 Days (Real Data)
+      context = `## Team AI Activity — Past 7 Days (Real Data)${filterLabel}
 
 ### Summary
 - Total AI interactions logged: ${totalLogs}
@@ -122,13 +142,25 @@ ${(() => {
     }
 
     case "/violations": {
-      const [violationsResult, rulesResult, membersResult] = await Promise.all([
-        db.from("security_violations")
-          .select("id, rule_id, matched_text, user_id, action_taken, detection_type, created_at")
-          .eq("org_id", orgId)
-          .gte("created_at", weekAgo)
-          .order("created_at", { ascending: false })
-          .limit(200),
+      const [violationsResult, blockedLogsResult, rulesResult, membersResult] = await Promise.all([
+        applyFilter(
+          db.from("security_violations")
+            .select("id, rule_id, matched_text, user_id, action_taken, detection_type, created_at")
+            .eq("org_id", orgId)
+            .gte("created_at", weekAgo)
+            .order("created_at", { ascending: false })
+            .limit(200)
+        ),
+        // Also get blocked events from conversation_logs (chat DLP blocks)
+        applyFilter(
+          db.from("conversation_logs")
+            .select("user_id, action, metadata, created_at")
+            .eq("org_id", orgId)
+            .eq("action", "blocked")
+            .gte("created_at", weekAgo)
+            .order("created_at", { ascending: false })
+            .limit(200)
+        ),
         db.from("security_rules")
           .select("id, name, category, severity")
           .eq("org_id", orgId),
@@ -138,6 +170,7 @@ ${(() => {
       ]);
 
       const violations = violationsResult.data || [];
+      const blockedLogs = blockedLogsResult.data || [];
       const ruleMap = new Map((rulesResult.data || []).map(r => [r.id, r]));
       const memberMap = new Map((membersResult.data || []).map(m => [m.id, m.name || m.email]));
 
@@ -146,11 +179,12 @@ ${(() => {
       const userViolations: Record<string, number> = {};
       const ruleCounts: Record<string, number> = {};
 
+      // Count from security_violations table
       for (const v of violations) {
         const rule = ruleMap.get(v.rule_id);
         const category = rule?.category || "unknown";
         const severity = rule?.severity || "unknown";
-        const ruleName = rule?.name || v.rule_id;
+        const ruleName = rule?.name || v.rule_id || "unknown";
         const userName = memberMap.get(v.user_id) || v.user_id;
 
         categoryCounts[category] = (categoryCounts[category] || 0) + 1;
@@ -158,6 +192,21 @@ ${(() => {
         userViolations[userName] = (userViolations[userName] || 0) + 1;
         ruleCounts[ruleName] = (ruleCounts[ruleName] || 0) + 1;
       }
+
+      // Also count from conversation_logs blocked events (chat DLP)
+      for (const log of blockedLogs) {
+        const userName = memberMap.get(log.user_id) || log.user_id;
+        userViolations[userName] = (userViolations[userName] || 0) + 1;
+        severityCounts["block"] = (severityCounts["block"] || 0) + 1;
+        const meta = log.metadata as { violations?: Array<{ rule?: string; category?: string; severity?: string }> } | null;
+        if (meta?.violations) {
+          for (const mv of meta.violations) {
+            if (mv.rule) ruleCounts[mv.rule] = (ruleCounts[mv.rule] || 0) + 1;
+            if (mv.category) categoryCounts[mv.category] = (categoryCounts[mv.category] || 0) + 1;
+          }
+        }
+      }
+      const totalViolationCount = violations.length + blockedLogs.length;
 
       const topRules = Object.entries(ruleCounts)
         .sort((a, b) => b[1] - a[1])
@@ -177,12 +226,12 @@ ${(() => {
         .map(([name, count]) => `  - ${name}: ${count} violations`)
         .join("\n");
 
-      context = `## DLP Violations Report — Past 7 Days (Real Data)
+      context = `## DLP Violations Report — Past 7 Days (Real Data)${filterLabel}
 
 ### Summary
-- Total violations: ${violations.length}
+- Total violations: ${totalViolationCount} (${violations.length} from extension scans, ${blockedLogs.length} from chat DLP)
 - Severity breakdown: ${Object.entries(severityCounts).map(([s, c]) => `${s}: ${c}`).join(", ") || "none"}
-- Action types: ${violations.reduce((acc, v) => { acc[v.action_taken] = (acc[v.action_taken] || 0) + 1; return acc; }, {} as Record<string, number>).blocked || 0} blocked, ${violations.reduce((acc, v) => { acc[v.action_taken] = (acc[v.action_taken] || 0) + 1; return acc; }, {} as Record<string, number>).overridden || 0} overridden
+- Action types: ${violations.reduce((acc: Record<string, number>, v: any) => { acc[v.action_taken] = (acc[v.action_taken] || 0) + 1; return acc; }, {} as Record<string, number>).blocked || 0} blocked, ${violations.reduce((acc: Record<string, number>, v: any) => { acc[v.action_taken] = (acc[v.action_taken] || 0) + 1; return acc; }, {} as Record<string, number>).overridden || 0} overridden
 
 ### Categories Detected
 ${topCategories || "  No violations"}
@@ -194,11 +243,23 @@ ${topRules || "  No data"}
 ${repeatOffenders || "  None"}
 
 ### Recent Violations (Last 10)
-${violations.slice(0, 10).map(v => {
-  const rule = ruleMap.get(v.rule_id);
-  const user = memberMap.get(v.user_id) || "unknown";
-  return `  - ${v.created_at.slice(0, 16)} | ${user} | ${rule?.name || "unknown rule"} (${rule?.category || "?"}) | ${v.action_taken}`;
-}).join("\n") || "  No recent violations"}`;
+${(() => {
+  // Merge both sources and sort by time
+  const allEvents = [
+    ...violations.map((v: any) => {
+      const rule = ruleMap.get(v.rule_id);
+      const user = memberMap.get(v.user_id) || "unknown";
+      return { time: v.created_at, text: `${v.created_at.slice(0, 16)} | ${user} | ${rule?.name || "unknown rule"} (${rule?.category || "?"}) | ${v.action_taken}` };
+    }),
+    ...blockedLogs.map((log: any) => {
+      const user = memberMap.get(log.user_id) || "unknown";
+      const meta = log.metadata as { violations?: Array<{ rule?: string; category?: string }> } | null;
+      const ruleNames = meta?.violations?.map(v => v.rule).join(", ") || "chat DLP";
+      return { time: log.created_at, text: `${log.created_at.slice(0, 16)} | ${user} | ${ruleNames} | blocked (chat)` };
+    }),
+  ].sort((a, b) => b.time.localeCompare(a.time));
+  return allEvents.slice(0, 10).map(e => `  - ${e.text}`).join("\n") || "  No recent violations";
+})()}`;
       break;
     }
 
@@ -209,11 +270,13 @@ ${violations.slice(0, 10).map(v => {
           .eq("org_id", orgId)
           .order("usage_count", { ascending: false })
           .limit(100),
-        db.from("conversation_logs")
-          .select("user_id, prompt_id, ai_tool, created_at")
-          .eq("org_id", orgId)
-          .gte("created_at", monthAgo)
-          .limit(1000),
+        applyFilter(
+          db.from("conversation_logs")
+            .select("user_id, prompt_id, ai_tool, created_at")
+            .eq("org_id", orgId)
+            .gte("created_at", monthAgo)
+            .limit(1000)
+        ),
         db.from("profiles")
           .select("id, name, email")
           .eq("org_id", orgId),
@@ -235,7 +298,7 @@ ${violations.slice(0, 10).map(v => {
         .join("\n");
 
       // User adoption stats
-      const uniqueUsers = new Set(logs.map(l => l.user_id));
+      const uniqueUsers = new Set(logs.map((l: any) => l.user_id));
       const totalMembers = (membersResult.data || []).length;
 
       // Weekly trend
@@ -284,11 +347,13 @@ ${(() => {
     case "/audit": {
       // Get recent audit trail
       const [logsResult, membersResult] = await Promise.all([
-        db.from("conversation_logs")
-          .select("user_id, ai_tool, action, prompt_text, metadata, created_at")
-          .eq("org_id", orgId)
-          .order("created_at", { ascending: false })
-          .limit(100),
+        applyFilter(
+          db.from("conversation_logs")
+            .select("user_id, ai_tool, action, prompt_text, metadata, created_at")
+            .eq("org_id", orgId)
+            .order("created_at", { ascending: false })
+            .limit(100)
+        ),
         db.from("profiles")
           .select("id, name, email")
           .eq("org_id", orgId),
@@ -297,7 +362,7 @@ ${(() => {
       const logs = logsResult.data || [];
       const memberMap = new Map((membersResult.data || []).map(m => [m.id, m.name || m.email]));
 
-      const recentLogs = logs.slice(0, 50).map(log => {
+      const recentLogs = logs.slice(0, 50).map((log: any) => {
         const user = memberMap.get(log.user_id) || "unknown";
         const model = log.metadata?.model || "?";
         const tokens = log.metadata?.tokens || 0;
@@ -308,7 +373,7 @@ ${(() => {
 
 ### Summary
 - Total logged events: ${logs.length} (showing last 50)
-- Unique users: ${new Set(logs.map(l => l.user_id)).size}
+- Unique users: ${new Set(logs.map((l: any) => l.user_id)).size}
 - Time range: ${logs.length > 0 ? `${logs[logs.length - 1].created_at.slice(0, 10)} to ${logs[0].created_at.slice(0, 10)}` : "no data"}
 
 ### Recent Events

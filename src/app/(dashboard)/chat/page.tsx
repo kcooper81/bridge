@@ -1201,12 +1201,17 @@ export default function ChatPage() {
   function renderConvItem(conv: Conversation) {
     const convCollections = collections.filter((c) => conv.tag_ids?.includes(c.id));
     const hoverInfo = [conv.model, new Date(conv.updated_at).toLocaleDateString()].filter(Boolean).join(" · ");
+    const isOld = new Date(conv.updated_at).getTime() < Date.now() - 7 * 24 * 60 * 60 * 1000;
+    const isActive = activeConvId === conv.id;
     return (
       <div
         key={conv.id}
         className={cn(
-          "group flex items-center gap-2 rounded-lg px-3 py-2 cursor-pointer transition-colors",
-          activeConvId === conv.id ? "bg-primary/10 text-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"
+          "group flex items-center gap-2 rounded-lg px-3 py-2 cursor-pointer transition-all duration-150",
+          isActive
+            ? "bg-primary/10 text-foreground border-l-2 border-l-primary pl-[10px]"
+            : "text-muted-foreground hover:bg-muted hover:text-foreground hover:translate-x-0.5 border-l-2 border-l-transparent pl-[10px]",
+          isOld && !isActive && "opacity-70"
         )}
         onClick={() => loadConversation(conv.id)}
         onDoubleClick={(e) => { e.stopPropagation(); setEditingTitle(conv.id); setEditTitleValue(conv.title); }}
@@ -2157,25 +2162,41 @@ export default function ChatPage() {
     return (
       <div key={message.id} className="group mb-8 animate-in fade-in-0 slide-in-from-bottom-2 duration-300">
         <div className="flex gap-3">
-          <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-            <Bot className="h-4 w-4 text-primary" />
+          <div className="h-8 w-8 rounded-full bg-primary/5 flex items-center justify-center flex-shrink-0 mt-0.5 border border-primary/10">
+            <img src="/brand/logo-icon-blue.svg" alt="TeamPrompt" className="h-4 w-4" />
           </div>
           <div className="flex-1 min-w-0 pt-0.5">
             <div className="prose dark:prose-invert max-w-none text-[15px] leading-7 [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_pre]:relative [&_pre]:bg-zinc-900 [&_pre]:text-zinc-100 [&_pre]:rounded-xl [&_pre]:p-4 [&_pre]:text-[13px] [&_pre]:overflow-x-auto [&_pre]:my-4 [&_code]:text-[13px] [&_code]:bg-muted [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded-md [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:mt-6 [&_h2]:mb-3 [&_h3]:text-base [&_h3]:font-semibold [&_h3]:mt-5 [&_h3]:mb-2 [&_p]:mb-3 [&_ul]:mb-3 [&_ol]:mb-3 [&_li]:mb-1 [&_blockquote]:border-l-2 [&_blockquote]:border-primary/30 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-muted-foreground [&_table]:text-sm [&_th]:text-left [&_th]:font-semibold [&_td]:py-1.5 [&_td]:pr-4">
               <ReactMarkdown
                 components={{
-                  pre: ({ children, ...props }) => (
-                    <div className="relative group/code">
-                      <pre {...props}>{children}</pre>
-                      <button
-                        className="absolute top-3 right-3 p-1.5 rounded-md bg-zinc-700/80 text-zinc-300 hover:bg-zinc-600 hover:text-white opacity-0 group-hover/code:opacity-100 transition-opacity"
-                        onClick={() => {
-                          const code = (children as React.ReactElement)?.props?.children;
-                          if (typeof code === "string") { navigator.clipboard.writeText(code); toast.success("Copied!"); }
-                        }}
-                      >
-                        <Copy className="h-3.5 w-3.5" />
-                      </button>
+                  pre: ({ children, ...props }) => {
+                    // Extract language from className (e.g. "language-python")
+                    const codeEl = children as React.ReactElement;
+                    const className = codeEl?.props?.className || "";
+                    const lang = className.replace("language-", "").split(" ")[0] || "";
+                    const codeText = codeEl?.props?.children;
+                    return (
+                      <div className="group/code rounded-xl overflow-hidden border border-zinc-700/50 my-4">
+                        {/* Header bar with language + copy */}
+                        <div className="flex items-center justify-between bg-zinc-800 px-4 py-2">
+                          <span className="text-[11px] font-medium text-zinc-400 uppercase tracking-wide">{lang || "code"}</span>
+                          <button
+                            className="flex items-center gap-1.5 text-[11px] text-zinc-400 hover:text-zinc-200 transition-colors"
+                            onClick={() => {
+                              if (typeof codeText === "string") { navigator.clipboard.writeText(codeText); toast.success("Copied!"); }
+                            }}
+                          >
+                            <Copy className="h-3 w-3" />
+                            Copy
+                          </button>
+                        </div>
+                        <pre {...props} className="!rounded-none !mt-0 !mb-0 !border-0">{children}</pre>
+                      </div>
+                    );
+                  },
+                  table: ({ children, ...props }) => (
+                    <div className="overflow-x-auto my-4 rounded-lg border">
+                      <table {...props} className="!my-0">{children}</table>
                     </div>
                   ),
                 }}

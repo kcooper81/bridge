@@ -237,7 +237,10 @@ export default function ChatPage() {
   const [compareProvider, setCompareProvider] = useState("");
   const [compareMessages, setCompareMessages] = useState<ChatMsg[]>([]);
   const [compareLoading, setCompareLoading] = useState(false);
-  const [adminNoticeDismissed, setAdminNoticeDismissed] = useState(false);
+  const [adminNoticeDismissed, setAdminNoticeDismissed] = useState(() => {
+    if (typeof window !== "undefined") return localStorage.getItem("chat-admin-notice-dismissed") === "1";
+    return false;
+  });
   const [sidebarWidth, setSidebarWidth] = useState(320);
   const [isResizing, setIsResizing] = useState(false);
 
@@ -1736,7 +1739,7 @@ export default function ChatPage() {
                   </Link>{" "}
                   in Settings &rarr; Security when you&apos;re ready.
                 </span>
-                <button onClick={() => setAdminNoticeDismissed(true)} className="text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 flex-shrink-0">
+                <button onClick={() => { setAdminNoticeDismissed(true); localStorage.setItem("chat-admin-notice-dismissed", "1"); }} className="text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 flex-shrink-0">
                   <X className="h-3.5 w-3.5" />
                 </button>
               </div>

@@ -84,7 +84,7 @@ export function SensitiveTermsManager({ canEdit, teams = [] }: SensitiveTermsMan
   const [termType, setTermType] = useState<"exact" | "pattern" | "keyword">("exact");
   const [category, setCategory] = useState<SensitiveTermCategory>("custom");
   const [description, setDescription] = useState("");
-  const [severity, setSeverity] = useState<"block" | "warn">("warn");
+  const [severity, setSeverity] = useState<"block" | "warn" | "redact">("warn");
   const [scopeTeamId, setScopeTeamId] = useState<string>("global");
 
   const teamNameMap = new Map(teams.map((t) => [t.id, t.name]));
@@ -344,10 +344,10 @@ export function SensitiveTermsManager({ canEdit, teams = [] }: SensitiveTermsMan
                           </TableCell>
                           <TableCell>
                             <Badge
-                              variant={t.severity === "block" ? "destructive" : "default"}
+                              variant={t.severity === "block" ? "destructive" : t.severity === "redact" ? "outline" : "default"}
                               className="text-xs"
                             >
-                              {t.severity === "block" ? "Block" : "Warn"}
+                              {t.severity === "block" ? "Block" : t.severity === "redact" ? "Redact" : "Warn"}
                             </Badge>
                           </TableCell>
                           <TableCell>
@@ -457,6 +457,7 @@ export function SensitiveTermsManager({ canEdit, teams = [] }: SensitiveTermsMan
                   <SelectContent>
                     <SelectItem value="block">Block (prevent submission)</SelectItem>
                     <SelectItem value="warn">Warn (allow with alert)</SelectItem>
+                    <SelectItem value="redact">Redact</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

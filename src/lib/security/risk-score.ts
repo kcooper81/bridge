@@ -18,7 +18,7 @@
  */
 
 interface Violation {
-  severity: "block" | "warn";
+  severity: "block" | "warn" | "redact";
   category: string;
   detectionType: string;
 }
@@ -62,7 +62,7 @@ export function calculateRiskScore(violations: Violation[]): number {
     }
 
     // Severity multiplier
-    const severityMult = v.severity === "block" ? 1.5 : 1.0;
+    const severityMult = v.severity === "block" ? 1.5 : v.severity === "redact" ? 1.2 : 1.0;
 
     // Detection type multiplier
     const detectionMult = DETECTION_MULTIPLIERS[v.detectionType] || 1.0;

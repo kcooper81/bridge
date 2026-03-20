@@ -177,7 +177,7 @@ export default function ApprovalsPage() {
     setRulePattern("");
     const validPatternTypes: SecurityPatternType[] = ["exact", "regex", "glob", "keywords"];
     const validCategories: SecurityCategory[] = ["api_keys", "credentials", "internal_terms", "internal", "pii", "secrets", "financial", "health", "custom"];
-    const validSeverities: SecuritySeverity[] = ["block", "warn"];
+    const validSeverities: SecuritySeverity[] = ["block", "warn", "redact"];
     setRulePatternType(validPatternTypes.includes(suggestion.category as SecurityPatternType) ? suggestion.category as SecurityPatternType : "exact");
     setRuleCategory(validCategories.includes(suggestion.category as SecurityCategory) ? suggestion.category as SecurityCategory : "custom");
     setRuleSeverity(validSeverities.includes(suggestion.severity as SecuritySeverity) ? suggestion.severity as SecuritySeverity : "block");
@@ -418,10 +418,10 @@ export default function ApprovalsPage() {
                       </TableCell>
                       <TableCell>
                         <Badge
-                          variant={s.severity === "block" ? "destructive" : "default"}
+                          variant={s.severity === "block" ? "destructive" : s.severity === "redact" ? "outline" : "default"}
                           className="text-xs"
                         >
-                          {s.severity === "block" ? "Block" : "Warn"}
+                          {s.severity === "block" ? "Block" : s.severity === "redact" ? "Redact" : "Warn"}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-sm">
@@ -621,6 +621,7 @@ export default function ApprovalsPage() {
                     <SelectContent>
                       <SelectItem value="block">Block</SelectItem>
                       <SelectItem value="warn">Warn</SelectItem>
+                      <SelectItem value="redact">Redact</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

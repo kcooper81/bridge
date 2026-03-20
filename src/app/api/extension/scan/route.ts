@@ -140,7 +140,7 @@ export async function POST(request: NextRequest) {
           rule_id: rule.id,
           matched_text: redactMatch(matched),
           user_id: user.id,
-          action_taken: rule.severity === "block" ? "blocked" : "overridden",
+          action_taken: rule.severity === "block" ? "blocked" : rule.severity === "redact" ? "auto_redacted" : "overridden",
           detection_type: "pattern",
         });
         if (violationErr) console.error("Failed to log pattern violation:", violationErr.message);
@@ -166,7 +166,7 @@ export async function POST(request: NextRequest) {
           rule_id: null,
           matched_text: redactMatch(matched),
           user_id: user.id,
-          action_taken: term.severity === "block" ? "blocked" : "overridden",
+          action_taken: term.severity === "block" ? "blocked" : term.severity === "redact" ? "auto_redacted" : "overridden",
           detection_type: "term",
         });
         if (termViolationErr) console.error("Failed to log term violation:", termViolationErr.message);
@@ -193,7 +193,7 @@ export async function POST(request: NextRequest) {
             rule_id: null,
             matched_text: redactMatch(matched),
             user_id: user.id,
-            action_taken: smartRule.severity === "block" ? "blocked" : "overridden",
+            action_taken: smartRule.severity === "block" ? "blocked" : smartRule.severity === "redact" ? "auto_redacted" : "overridden",
             detection_type: "smart_pattern",
           });
           if (smartViolationErr) console.error("Failed to log smart pattern violation:", smartViolationErr.message);
@@ -238,6 +238,7 @@ export async function POST(request: NextRequest) {
     const hasBlock =
       violations.some((v) => v.severity === "block") ||
       (overrideDisabled && violations.some((v) => v.severity === "warn"));
+    const hasRedact = violations.some((v) => v.severity === "redact");
 
     // Build sanitized content with placeholder tokens
     let sanitized_content: string | undefined;
@@ -337,7 +338,7 @@ export async function POST(request: NextRequest) {
     let action: string;
     if (hasBlock) {
       action = "block";
-    } else if (autoRedactEnabled && violations.length > 0) {
+    } else if (hasRedact || (autoRedactEnabled && violations.length > 0)) {
       action = "auto_redact";
     } else if (violations.length > 0) {
       action = "warn";
@@ -345,7 +346,7 @@ export async function POST(request: NextRequest) {
       action = "allow";
     }
 
-    const risk_score = calculateRiskScore(violations as Array<{ severity: "block" | "warn"; category: string; detectionType: string }>);
+    const risk_score = calculateRiskScore(violations as Array<{ severity: "block" | "warn" | "redact"; category: string; detectionType: string }>);
 
     // Fire-and-forget Slack notification for violations
     if (violations.length > 0) {

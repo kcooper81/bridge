@@ -587,8 +587,8 @@ export default function GuardrailsPage() {
                       <p className="text-sm font-medium">{rule.name}</p>
                       {rule.description && <p className="text-xs text-muted-foreground truncate">{rule.description}</p>}
                     </div>
-                    <Badge variant={rule.severity === "block" ? "destructive" : "secondary"} className="text-[10px] shrink-0">
-                      {rule.severity === "block" ? "Blocks" : "Warns"}
+                    <Badge variant={rule.severity === "block" ? "destructive" : rule.severity === "redact" ? "outline" : "secondary"} className="text-[10px] shrink-0">
+                      {rule.severity === "block" ? "Blocks" : rule.severity === "redact" ? "Redacts" : "Warns"}
                     </Badge>
                     <ChevronDown className="h-3.5 w-3.5 text-muted-foreground shrink-0 transition-transform group-open:rotate-180" />
                   </summary>
@@ -610,7 +610,7 @@ export default function GuardrailsPage() {
                       </div>
                       <div>
                         <p className="text-xs font-medium text-muted-foreground">Severity</p>
-                        <p className="text-sm capitalize">{rule.severity === "block" ? "Blocked — message will not send" : "Warning — message sends with alert"}</p>
+                        <p className="text-sm capitalize">{rule.severity === "block" ? "Blocked — message will not send" : rule.severity === "redact" ? "Redacted — sensitive data replaced before sending" : "Warning — message sends with alert"}</p>
                       </div>
                     </div>
                     {rule.source_pack && (
@@ -915,8 +915,8 @@ export default function GuardrailsPage() {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={rule.severity === "block" ? "destructive" : "default"} className="text-xs">
-                          {rule.severity === "block" ? "Blocked" : "Warning"}
+                        <Badge variant={rule.severity === "block" ? "destructive" : rule.severity === "redact" ? "outline" : "default"} className="text-xs">
+                          {rule.severity === "block" ? "Blocked" : rule.severity === "redact" ? "Redacts" : "Warning"}
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -1191,10 +1191,10 @@ export default function GuardrailsPage() {
                       <p className="text-xs text-muted-foreground">{rule.description}</p>
                     </div>
                     <Badge
-                      variant={rule.severity === "block" ? "destructive" : "default"}
+                      variant={rule.severity === "block" ? "destructive" : rule.severity === "redact" ? "outline" : "default"}
                       className="text-[10px] shrink-0"
                     >
-                      {rule.severity === "block" ? "Block" : "Warn"}
+                      {rule.severity === "block" ? "Block" : rule.severity === "redact" ? "Redact" : "Warn"}
                     </Badge>
                   </div>
                   <div className="space-y-1">
@@ -1464,6 +1464,7 @@ export default function GuardrailsPage() {
                   <SelectContent>
                     <SelectItem value="block">Blocked (prevent save)</SelectItem>
                     <SelectItem value="warn">Warning (allow with alert)</SelectItem>
+                    <SelectItem value="redact">Redact</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -1620,6 +1621,7 @@ function MemberSuggestRule() {
                   <SelectContent>
                     <SelectItem value="block">Block (prevent sending)</SelectItem>
                     <SelectItem value="warn">Warn (allow with alert)</SelectItem>
+                    <SelectItem value="redact">Redact</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

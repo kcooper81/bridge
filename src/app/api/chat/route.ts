@@ -59,6 +59,7 @@ export async function POST(request: NextRequest) {
 
     // Get the latest user message for DLP scanning
     const lastUserMessage = [...messages].reverse().find((m: { role: string }) => m.role === "user");
+    let streamRedactions: Array<{original: string; replacement: string; category: string}> | null = null;
 
     // Load org settings (needed for DLP + system prompt)
     const { data: orgData } = await db
@@ -108,10 +109,13 @@ export async function POST(request: NextRequest) {
           }
         }
 
-        const hasBlock = violations.some((v) => v.severity === "block");
+        const blockViolations = violations.filter((v) => v.severity === "block");
+        const redactViolations = violations.filter((v) => v.severity === "redact");
         const overrideDisabled = orgSettings.allow_guardrail_override === false;
 
-        if (hasBlock || (overrideDisabled && violations.length > 0)) {
+        const hasBlock = blockViolations.length > 0 || (overrideDisabled && violations.some((v) => v.severity === "warn"));
+
+        if (hasBlock) {
           // Log blocked event to conversation_logs (fire-and-forget)
           try {
             await db.from("conversation_logs").insert({
@@ -146,6 +150,50 @@ export async function POST(request: NextRequest) {
             status: 200,
             headers: { "Content-Type": "application/json" },
           });
+        }
+
+        // Apply redactions to message content if redact violations exist
+        if (redactViolations.length > 0 && lastUserMessage) {
+          let redactedContent = lastUserMessage.content;
+          const redactionsList: Array<{original: string; replacement: string; category: string}> = [];
+
+          for (const v of redactViolations) {
+            const matchedRule = (rulesResult.data || []).find((r) => r.name === v.ruleName);
+            const matchedTerm = (termsResult.data || []).find((t) => v.ruleName.includes(t.term));
+
+            const categoryLabel = (v.category || "SENSITIVE").toUpperCase().replace(/[^A-Z_]/g, "_");
+            const replacement = `[${categoryLabel}]`;
+
+            if (matchedRule) {
+              try {
+                const regex = new RegExp(matchedRule.pattern, "gi");
+                const matches = redactedContent.match(regex);
+                if (matches) {
+                  for (const match of matches) {
+                    redactionsList.push({ original: match.slice(0, 3) + "***", replacement, category: v.category });
+                  }
+                  redactedContent = redactedContent.replace(regex, replacement);
+                }
+              } catch { /* invalid regex — skip */ }
+            } else if (matchedTerm) {
+              const termRegex = new RegExp(matchedTerm.term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi");
+              const matches = redactedContent.match(termRegex);
+              if (matches) {
+                for (const match of matches) {
+                  redactionsList.push({ original: match.slice(0, 3) + "***", replacement, category: v.category });
+                }
+                redactedContent = redactedContent.replace(termRegex, replacement);
+              }
+            }
+          }
+
+          // Use redacted content for the AI
+          lastUserMessage.content = redactedContent;
+
+          // Store redactions list to include in stream prefix
+          if (redactionsList.length > 0) {
+            streamRedactions = redactionsList;
+          }
         }
       }
     }
@@ -301,11 +349,12 @@ export async function POST(request: NextRequest) {
 
     const textStream = result.toTextStreamResponse();
 
-    // Wrap the stream to prepend conversation ID as first line
+    // Wrap the stream to prepend conversation ID (and optional redactions) as first lines
     if (convId && textStream.body) {
       const reader = textStream.body.getReader();
       const encoder = new TextEncoder();
-      const prefix = encoder.encode(`__CONV_ID__${convId}__\n`);
+      const redactionsPrefix = streamRedactions ? `__REDACTIONS__${JSON.stringify(streamRedactions)}__\n` : "";
+      const prefix = encoder.encode(`${redactionsPrefix}__CONV_ID__${convId}__\n`);
       let prefixSent = false;
 
       const wrappedStream = new ReadableStream({

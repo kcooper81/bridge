@@ -198,6 +198,7 @@ export default function ChatPage() {
   const [selectedProvider, setSelectedProvider] = useState("");
   const [loadingConvs, setLoadingConvs] = useState(true);
   const [dlpBlock, setDlpBlock] = useState<DlpViolation[] | null>(null);
+  const [redactions, setRedactions] = useState<Array<{original: string; replacement: string; category: string}> | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [editingTitle, setEditingTitle] = useState<string | null>(null);
   const [editTitleValue, setEditTitleValue] = useState("");
@@ -355,6 +356,7 @@ export default function ChatPage() {
     if (pendingFiles.some((f) => f.uploading)) { toast.info("Files are still processing..."); return; }
 
     setDlpBlock(null);
+    setRedactions(null);
 
     // Build message content with file text
     let messageContent = input;
@@ -457,6 +459,17 @@ export default function ChatPage() {
 
             if (!convIdParsed) {
               buffer += chunk;
+
+              // Parse optional __REDACTIONS__ prefix before __CONV_ID__
+              const redactMatch = buffer.match(/^__REDACTIONS__(.*?)__\n/);
+              if (redactMatch) {
+                try {
+                  const parsed = JSON.parse(redactMatch[1]);
+                  setRedactions(parsed);
+                } catch { /* ignore parse errors */ }
+                buffer = buffer.slice(redactMatch[0].length);
+              }
+
               const match = buffer.match(/^__CONV_ID__([a-f0-9-]+)__\n/);
               if (match) {
                 if (!activeConvId) {
@@ -548,6 +561,9 @@ export default function ChatPage() {
 
             if (!prefixParsed) {
               buffer += chunk;
+              // Strip optional __REDACTIONS__ prefix
+              const redactPfx = buffer.match(/^__REDACTIONS__.*?__\n/);
+              if (redactPfx) buffer = buffer.slice(redactPfx[0].length);
               const match = buffer.match(/^__CONV_ID__[a-f0-9-]+__\n/);
               if (match) {
                 prefixParsed = true;
@@ -754,6 +770,9 @@ export default function ChatPage() {
             let chunk = decoder.decode(value, { stream: true });
             if (!convIdParsed) {
               buffer += chunk;
+              // Strip optional __REDACTIONS__ prefix
+              const redactPfx = buffer.match(/^__REDACTIONS__.*?__\n/);
+              if (redactPfx) buffer = buffer.slice(redactPfx[0].length);
               const match = buffer.match(/^__CONV_ID__([a-f0-9-]+)__\n/);
               if (match) {
                 if (!activeConvId) { setActiveConvId(match[1]); loadConversations(); }
@@ -935,6 +954,7 @@ export default function ChatPage() {
   async function loadConversation(convId: string) {
     setActiveConvId(convId);
     setDlpBlock(null);
+    setRedactions(null);
     setCompareMessages([]);
     try {
       const res = await fetch(`/api/chat/conversations/${convId}`);
@@ -962,6 +982,7 @@ export default function ChatPage() {
     setActiveConvId(null);
     setMessages([]);
     setDlpBlock(null);
+    setRedactions(null);
     setChatInput("");
     setAdminContext(null);
     setPresetSystemPrompt(null);
@@ -1866,6 +1887,24 @@ export default function ChatPage() {
                       </ul>
                     </div>
                     <button onClick={() => setDlpBlock(null)} className="text-red-400 hover:text-red-600"><X className="h-3.5 w-3.5" /></button>
+                  </div>
+                )}
+
+                {/* Redaction Banner */}
+                {redactions && (
+                  <div className="mx-4 mb-2 rounded-lg border border-amber-200 dark:border-amber-800/50 bg-amber-50/80 dark:bg-amber-950/30 p-3 flex items-start gap-2">
+                    <Shield className="h-4 w-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-amber-800 dark:text-amber-300">{redactions.length} item{redactions.length > 1 ? "s" : ""} redacted before sending</p>
+                      <ul className="mt-1 space-y-0.5">
+                        {redactions.map((r, i) => (
+                          <li key={i} className="text-[11px] text-amber-700 dark:text-amber-400">
+                            {r.category} &rarr; replaced with {r.replacement}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <button onClick={() => setRedactions(null)}><X className="h-3.5 w-3.5 text-amber-400" /></button>
                   </div>
                 )}
 

@@ -33,7 +33,7 @@ export type SecurityCategory =
   | "financial"
   | "health"
   | "custom";
-export type SecuritySeverity = "block" | "warn";
+export type SecuritySeverity = "block" | "warn" | "redact";
 export type SecurityAction = "blocked" | "overridden" | "auto_redacted";
 
 // ─── Variable Config ───

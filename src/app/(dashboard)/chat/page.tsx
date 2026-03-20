@@ -1212,6 +1212,44 @@ export default function ChatPage() {
   }
 
   const noProviders = providers.length === 0 && !loadingConvs;
+  const [isDragging, setIsDragging] = useState(false);
+  const dragCounterRef = useRef(0);
+
+  function handleDragEnter(e: React.DragEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounterRef.current++;
+    if (e.dataTransfer.types.includes("Files")) {
+      setIsDragging(true);
+    }
+  }
+
+  function handleDragLeave(e: React.DragEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounterRef.current--;
+    if (dragCounterRef.current === 0) {
+      setIsDragging(false);
+    }
+  }
+
+  function handleDragOver(e: React.DragEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+
+  function handleDrop(e: React.DragEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    dragCounterRef.current = 0;
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      // Reuse the same file handler as the paperclip button
+      const fakeEvent = { target: { files, value: "" } } as unknown as React.ChangeEvent<HTMLInputElement>;
+      handleFileSelect(fakeEvent);
+    }
+  }
 
   // ── Filter conversations ──
   const filteredConversations = conversations.filter((c) => {
@@ -1681,7 +1719,23 @@ export default function ChatPage() {
       )}
 
       {/* ─── Main chat area ─── */}
-      <div className={cn("flex-1 flex min-w-0", compareMode ? "flex-row" : "flex-col")}>
+      <div
+        className={cn("flex-1 flex min-w-0 relative", compareMode ? "flex-row" : "flex-col")}
+        onDragEnter={handleDragEnter}
+        onDragLeave={handleDragLeave}
+        onDragOver={handleDragOver}
+        onDrop={handleDrop}
+      >
+        {/* Drop overlay */}
+        {isDragging && (
+          <div className="absolute inset-0 z-50 bg-primary/5 border-2 border-dashed border-primary/40 rounded-xl flex items-center justify-center pointer-events-none">
+            <div className="text-center">
+              <Paperclip className="h-10 w-10 text-primary/50 mx-auto mb-3" />
+              <p className="text-lg font-medium text-primary/70">Drop files here</p>
+              <p className="text-sm text-muted-foreground mt-1">PDFs, docs, code files, images</p>
+            </div>
+          </div>
+        )}
         {compareMode ? (
           // ── Compare mode: side-by-side ──
           <>

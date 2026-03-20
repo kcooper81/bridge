@@ -2319,18 +2319,23 @@ export default function ChatPage() {
         "border-l bg-background flex flex-col transition-all duration-200 overflow-hidden",
         outlinePanelOpen ? "w-80" : "w-0"
       )}>
-        <div className="p-3 border-b flex items-center justify-between flex-shrink-0">
-          <div className="flex gap-1">
-            <button
-              className={cn("flex-1 py-1 text-xs font-medium rounded transition-colors", flyoutTab === "outline" ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground")}
-              onClick={() => setFlyoutTab("outline")}
-            >Outline</button>
-            <button
-              className={cn("flex-1 py-1 text-xs font-medium rounded transition-colors", flyoutTab === "saved" ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground")}
-              onClick={() => { setFlyoutTab("saved"); loadSavedItems(); }}
-            >Saved</button>
+        <div className="flex items-center justify-between border-b flex-shrink-0 px-1">
+          <div className="flex flex-1">
+            {(["outline", "saved"] as const).map((tab) => (
+              <button
+                key={tab}
+                className={cn(
+                  "flex-1 py-2.5 text-xs font-medium transition-colors relative text-center",
+                  flyoutTab === tab ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+                )}
+                onClick={() => { setFlyoutTab(tab); if (tab === "saved") loadSavedItems(); }}
+              >
+                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                {flyoutTab === tab && <div className="absolute bottom-0 left-2 right-2 h-0.5 bg-primary rounded-full" />}
+              </button>
+            ))}
           </div>
-          <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => setOutlinePanelOpen(false)}>
+          <Button variant="ghost" size="sm" className="h-6 w-6 p-0 flex-shrink-0" onClick={() => setOutlinePanelOpen(false)}>
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>

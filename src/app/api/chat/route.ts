@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
       .single();
     const orgSettings = (orgData?.settings || {}) as Record<string, unknown>;
 
-    if (lastUserMessage) {
+    if (lastUserMessage && !compareOnly) {
       // Run DLP scan on the user's message
       const [rulesResult, termsResult] = await Promise.all([
         db.from("security_rules")
@@ -272,7 +272,10 @@ export async function POST(request: NextRequest) {
     // Check for injected context
     const adminContext = body.adminContext as string | undefined;
     const presetSystemPrompt = body.presetSystemPrompt as string | undefined;
-    const fileContext = body.fileContext as string | undefined;
+    const rawFileContext = body.fileContext as string | undefined;
+    const fileContext = rawFileContext && rawFileContext.length > 200000
+      ? rawFileContext.slice(0, 200000) + "\n\n[File content truncated at 200,000 characters]"
+      : rawFileContext;
 
     // Stream AI response
     const aiModel = createAIModel(provider || "openai", selectedModel, apiKey);

@@ -23,7 +23,10 @@ export async function GET(request: NextRequest) {
   }
 
   if (q && q.trim().length >= 2) {
-    query = query.or(`title.ilike.%${q}%,content.ilike.%${q}%`);
+    const safeQ = q.replace(/[%_,.()"']/g, "");
+    if (safeQ.length >= 2) {
+      query = query.or(`title.ilike.%${safeQ}%,content.ilike.%${safeQ}%`);
+    }
   }
 
   const { data, error } = await query;

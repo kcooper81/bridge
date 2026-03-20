@@ -263,6 +263,7 @@ export default function ChatPage() {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const compareAbortRef = useRef<AbortController | null>(null);
+  const fileContextRef = useRef<string | null>(null);
   const slashMenuRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -386,6 +387,7 @@ export default function ChatPage() {
         fileContext = fileTexts.join("\n\n");
       }
     }
+    fileContextRef.current = fileContext;
 
     if (!messageContent && pendingImages.length > 0) {
       messageContent = "What's in this image?";
@@ -565,6 +567,7 @@ export default function ChatPage() {
           model: compareModel,
           provider: compareProvider,
           compareOnly: true, // don't create a conversation on server
+          ...(fileContextRef.current ? { fileContext: fileContextRef.current } : {}),
         }),
         signal: controller.signal,
       });
@@ -594,10 +597,7 @@ export default function ChatPage() {
               // Parse optional __REDACTIONS__ prefix
               const redactPfx = buffer.match(/^__REDACTIONS__(.*?)__\n/);
               if (redactPfx) {
-                try {
-                  const rp = JSON.parse(redactPfx[1]);
-                  setRedactions(Array.isArray(rp.items || rp) ? (rp.items || rp) : []);
-                } catch { /* ignore parse errors */ }
+                // Strip redactions prefix but don't set state (primary stream already handled it)
                 buffer = buffer.slice(redactPfx[0].length);
               }
               const match = buffer.match(/^__CONV_ID__[a-f0-9-]+__\n/);
@@ -694,6 +694,7 @@ export default function ChatPage() {
       case "/prompt":
       case "/template":
         setPromptPanelOpen(true);
+        setOutlinePanelOpen(false);
         setPromptFilter(command === "/template" ? "templates" : "all");
         break;
       case "/scan":
@@ -1874,7 +1875,7 @@ export default function ChatPage() {
                   variant="ghost"
                   size="sm"
                   className={cn("h-8 px-2 gap-1.5 text-xs", outlinePanelOpen && "bg-muted")}
-                  onClick={() => setOutlinePanelOpen(!outlinePanelOpen)}
+                  onClick={() => { setOutlinePanelOpen(!outlinePanelOpen); if (!outlinePanelOpen) setPromptPanelOpen(false); }}
                   title="Conversation outline & saved items"
                 >
                   <FileText className="h-3.5 w-3.5" />
@@ -2576,8 +2577,8 @@ export default function ChatPage() {
     const rating = messageRatings[message.id] || 0;
     const timestamp = message.created_at
       ? new Date(message.created_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
-      : message.id && !isNaN(Number(message.id))
-        ? new Date(Number(message.id)).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
+      : message.id && !isNaN(Number(message.id.split("-")[0]))
+        ? new Date(Number(message.id.split("-")[0])).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
         : "";
     // ── User message ──
     if (message.role === "user") {

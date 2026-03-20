@@ -1,6 +1,18 @@
+"use client";
+
+import { useEffect } from "react";
 import Link from "next/link";
 
 export default function LPLayout({ children }: { children: React.ReactNode }) {
+  // Force light theme on landing pages
+  useEffect(() => {
+    const prev = document.documentElement.getAttribute("data-theme");
+    document.documentElement.setAttribute("data-theme", "light");
+    return () => {
+      if (prev) document.documentElement.setAttribute("data-theme", prev);
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       {/* Minimal header — just logo, no navigation */}

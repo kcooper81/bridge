@@ -2342,81 +2342,133 @@ export default function ChatPage() {
 
         {flyoutTab === "outline" && (
         <ScrollArea className="flex-1">
-          <div className="p-3 space-y-5">
-            {/* Files section */}
-            {(() => {
-              const allFiles = messages.flatMap((m, i) => (m.files || []).map((f) => ({ ...f, msgIndex: i + 1, role: m.role })));
-              return allFiles.length > 0 ? (
-                <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Files ({allFiles.length})</p>
-                  <div className="space-y-1.5">
-                    {allFiles.map((f, i) => (
-                      <div key={i} className="flex items-center gap-2 px-2.5 py-2 rounded-lg bg-muted/50 text-xs">
-                        <FileText className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                        <div className="min-w-0 flex-1">
-                          <p className="font-medium truncate">{f.name}</p>
-                          <p className="text-[10px] text-muted-foreground">msg #{f.msgIndex} · {f.role}</p>
-                        </div>
+          <div className="p-3">
+            {messages.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-8">Start a conversation to see its outline</p>
+            ) : (
+              <div className="space-y-0.5">
+                {/* Timeline — auto-detected entries from message content */}
+                {messages.map((m, i) => {
+                  // Skip assistant messages with no content (loading state)
+                  if (!m.content) return null;
+
+                  // Detect entry type and generate summary
+                  let icon = "💬";
+                  let summary = "";
+                  let accent = "";
+
+                  if (m.role === "user") {
+                    // User messages
+                    if (m.files && m.files.length > 0) {
+                      icon = "📄";
+                      summary = `Uploaded ${m.files.map(f => f.name).join(", ")}`;
+                      accent = "text-blue-600";
+                    } else if (/\[[A-Z_]+\]/.test(m.content)) {
+                      icon = "🛡️";
+                      const placeholders = Array.from(new Set(m.content.match(/\[[A-Z_]+\]/g) || []));
+                      summary = `Redacted: ${placeholders.join(", ")}`;
+                      accent = "text-amber-600";
+                    } else {
+                      icon = "💬";
+                      summary = m.content.split("\n")[0].slice(0, 60);
+                      if (m.content.length > 60) summary += "...";
+                    }
+                  } else {
+                    // Assistant messages — detect content type
+                    const hasCode = /```[\s\S]*?```/.test(m.content);
+                    const hasTable = /\|.*\|.*\|/.test(m.content);
+                    const hasList = /^\s*[-*•]\s/m.test(m.content) || /^\s*\d+\.\s/m.test(m.content);
+                    const hasHeadings = /^#{1,3}\s/m.test(m.content);
+                    const hasLinks = /https?:\/\/[^\s)]+/.test(m.content);
+
+                    // Check for specific content patterns
+                    const hasQuiz = /\?\s*\n\s*[A-D]\)/i.test(m.content) || /correct answer|quiz|question \d/i.test(m.content);
+                    const hasComparison = /\bvs\.?\b|compared to|difference between|pros and cons/i.test(m.content);
+                    const hasSteps = /step \d|first,.*second,|1\.\s.*\n2\.\s/i.test(m.content);
+                    const hasEmail = /subject:|dear |hi |hello |regards|sincerely/i.test(m.content) && m.content.length < 2000;
+                    const hasSummary = /summary|key (takeaways|points|findings)|in (summary|conclusion)|tl;?dr/i.test(m.content);
+
+                    if (hasCode) {
+                      icon = "💻";
+                      const langMatch = m.content.match(/```(\w+)/);
+                      summary = langMatch ? `Generated ${langMatch[1]} code` : "Generated code";
+                      accent = "text-emerald-600";
+                    } else if (hasQuiz) {
+                      icon = "🧠";
+                      summary = "Quiz / Q&A";
+                      accent = "text-purple-600";
+                    } else if (hasComparison) {
+                      icon = "⚖️";
+                      summary = "Comparison / analysis";
+                      accent = "text-indigo-600";
+                    } else if (hasEmail) {
+                      icon = "✉️";
+                      summary = "Drafted email/message";
+                      accent = "text-sky-600";
+                    } else if (hasSummary) {
+                      icon = "📌";
+                      summary = "Summary / key points";
+                      accent = "text-orange-600";
+                    } else if (hasTable) {
+                      icon = "📊";
+                      summary = "Generated table/data";
+                      accent = "text-violet-600";
+                    } else if (hasLinks) {
+                      icon = "🔗";
+                      const linkCount = (m.content.match(/https?:\/\/[^\s)]+/g) || []).length;
+                      summary = `Shared ${linkCount} link${linkCount > 1 ? "s" : ""}`;
+                      accent = "text-blue-600";
+                    } else if (hasSteps) {
+                      icon = "📋";
+                      summary = "Step-by-step instructions";
+                      accent = "text-teal-600";
+                    } else if (hasHeadings && hasList) {
+                      icon = "📝";
+                      const firstHeading = m.content.match(/^#{1,3}\s+(.+)/m);
+                      summary = firstHeading ? firstHeading[1].slice(0, 50) : "Detailed response";
+                    } else if (hasList) {
+                      icon = "📋";
+                      summary = "Listed items";
+                    } else {
+                      icon = "💡";
+                      const firstSentence = m.content.match(/^[^.!?\n]+[.!?]?/);
+                      summary = firstSentence ? firstSentence[0].slice(0, 55) : m.content.slice(0, 55);
+                      if (summary.length >= 55) summary += "...";
+                    }
+                  }
+
+                  return (
+                    <button
+                      key={m.id || i}
+                      className={cn(
+                        "w-full flex items-start gap-2.5 px-2.5 py-2 rounded-lg text-left transition-colors hover:bg-muted/50",
+                        m.role === "user" ? "opacity-60" : ""
+                      )}
+                      onClick={() => {
+                        // Scroll to this message
+                        const el = document.querySelector(`[data-msg-id="${m.id}"]`);
+                        if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+                      }}
+                    >
+                      <span className="text-sm flex-shrink-0 mt-0.5">{icon}</span>
+                      <div className="min-w-0 flex-1">
+                        <p className={cn("text-xs truncate", accent || "text-foreground")}>{summary}</p>
+                        <p className="text-[10px] text-muted-foreground mt-0.5">
+                          {m.role === "user" ? "You" : "AI"}{m.created_at ? ` · ${new Date(m.created_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}` : ""}
+                        </p>
                       </div>
-                    ))}
+                    </button>
+                  );
+                })}
+
+                {/* Stats at bottom */}
+                <div className="mt-4 pt-3 border-t">
+                  <div className="text-[10px] text-muted-foreground/60 px-2.5 space-y-0.5">
+                    <p>{messages.length} messages · {messages.reduce((a, m) => a + m.content.length, 0).toLocaleString()} chars</p>
+                    <p>Model: {selectedModel}</p>
                   </div>
-                </div>
-              ) : null;
-            })()}
-
-            {/* DLP Events */}
-            {(() => {
-              const dlpEvents: Array<{type: string; detail: string; msgIndex: number}> = [];
-              // Collect from redactions state
-              if (redactions && redactions.length > 0) {
-                dlpEvents.push({ type: "Redacted", detail: `${redactions.length} item${redactions.length > 1 ? "s" : ""} auto-replaced`, msgIndex: messages.length });
-              }
-              // Collect from messages that have [CATEGORY] placeholders
-              messages.forEach((m, i) => {
-                if (m.role === "user" && /\[[A-Z_]+\]/.test(m.content)) {
-                  const placeholders = m.content.match(/\[[A-Z_]+\]/g) || [];
-                  const unique = Array.from(new Set(placeholders));
-                  dlpEvents.push({ type: "Redacted", detail: unique.join(", "), msgIndex: i + 1 });
-                }
-              });
-              // Deduplicate by msgIndex
-              const seen = new Set<number>();
-              const uniqueEvents = dlpEvents.filter((e) => { if (seen.has(e.msgIndex)) return false; seen.add(e.msgIndex); return true; });
-
-              return uniqueEvents.length > 0 ? (
-                <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">DLP Events ({uniqueEvents.length})</p>
-                  <div className="space-y-1.5">
-                    {uniqueEvents.map((e, i) => (
-                      <div key={i} className="flex items-center gap-2 px-2.5 py-2 rounded-lg bg-amber-50 dark:bg-amber-950/20 text-xs">
-                        <Shield className="h-4 w-4 text-amber-600 flex-shrink-0" />
-                        <div className="min-w-0">
-                          <p className="font-medium text-amber-800 dark:text-amber-300">{e.type}</p>
-                          <p className="text-[10px] text-amber-600/70">{e.detail} · msg #{e.msgIndex}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : null;
-            })()}
-
-            {/* Stats */}
-            {messages.length > 0 && (
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Stats</p>
-                <div className="space-y-1 text-xs text-muted-foreground px-2.5">
-                  <p>{messages.length} messages ({messages.filter(m => m.role === "user").length} you, {messages.filter(m => m.role === "assistant").length} AI)</p>
-                  <p>{messages.reduce((acc, m) => acc + m.content.length, 0).toLocaleString()} characters total</p>
-                  {messages[0]?.created_at && <p>Started {new Date(messages[0].created_at).toLocaleString()}</p>}
-                  <p>Model: {selectedModel}</p>
                 </div>
               </div>
-            )}
-
-            {/* Empty state */}
-            {messages.length === 0 && (
-              <p className="text-sm text-muted-foreground text-center py-8">Start a conversation to see its outline</p>
             )}
           </div>
         </ScrollArea>
@@ -2498,7 +2550,7 @@ export default function ChatPage() {
     // ── User message ──
     if (message.role === "user") {
       return (
-        <div key={message.id} className="group flex justify-end mb-8 animate-in fade-in-0 slide-in-from-bottom-2 duration-300">
+        <div key={message.id} data-msg-id={message.id} className="group flex justify-end mb-8 animate-in fade-in-0 slide-in-from-bottom-2 duration-300">
           <div className="max-w-[75%] min-w-0">
             <div className="rounded-2xl bg-primary text-primary-foreground px-5 py-3 text-[15px] leading-7 overflow-hidden break-words">
               {message.images && message.images.length > 0 && (
@@ -2535,7 +2587,7 @@ export default function ChatPage() {
 
     // ── Assistant message — no bubble, clean document-like rendering ──
     return (
-      <div key={message.id} className="group mb-8 animate-in fade-in-0 slide-in-from-bottom-2 duration-300">
+      <div key={message.id} data-msg-id={message.id} className="group mb-8 animate-in fade-in-0 slide-in-from-bottom-2 duration-300">
         <div className="flex gap-3">
           <div className="h-8 w-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0 mt-0.5">
             <img src="/brand/logo-icon.svg" alt="TeamPrompt" className="h-4 w-4 dark:hidden" />

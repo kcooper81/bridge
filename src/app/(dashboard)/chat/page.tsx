@@ -2312,6 +2312,8 @@ export default function ChatPage() {
             </Button>
           </Link>
         </div>
+      </div>
+
       {/* ─── Conversation Outline Panel (right flyout) ─── */}
       <div className={cn(
         "border-l bg-background flex flex-col transition-all duration-200 overflow-hidden",
@@ -2475,7 +2477,6 @@ export default function ChatPage() {
             </div>
           </ScrollArea>
         )}
-      </div>
       </div>
     </div>
   );

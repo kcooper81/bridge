@@ -50,6 +50,10 @@ import {
   Printer,
   Bookmark,
   BookmarkCheck,
+  ExternalLink,
+  ListOrdered,
+  List,
+  HelpCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -2353,35 +2357,31 @@ export default function ChatPage() {
                   if (!m.content) return null;
 
                   // Detect entry type and generate summary
-                  let icon = "💬";
+                  let IconComp: React.ComponentType<{className?: string}> = MessageSquare;
                   let summary = "";
-                  let accent = "";
+                  let accent = "text-muted-foreground";
 
                   if (m.role === "user") {
-                    // User messages
                     if (m.files && m.files.length > 0) {
-                      icon = "📄";
+                      IconComp = FileText;
                       summary = `Uploaded ${m.files.map(f => f.name).join(", ")}`;
                       accent = "text-blue-600";
                     } else if (/\[[A-Z_]+\]/.test(m.content)) {
-                      icon = "🛡️";
+                      IconComp = Shield;
                       const placeholders = Array.from(new Set(m.content.match(/\[[A-Z_]+\]/g) || []));
                       summary = `Redacted: ${placeholders.join(", ")}`;
                       accent = "text-amber-600";
                     } else {
-                      icon = "💬";
+                      IconComp = MessageSquare;
                       summary = m.content.split("\n")[0].slice(0, 60);
                       if (m.content.length > 60) summary += "...";
                     }
                   } else {
-                    // Assistant messages — detect content type
                     const hasCode = /```[\s\S]*?```/.test(m.content);
                     const hasTable = /\|.*\|.*\|/.test(m.content);
                     const hasList = /^\s*[-*•]\s/m.test(m.content) || /^\s*\d+\.\s/m.test(m.content);
                     const hasHeadings = /^#{1,3}\s/m.test(m.content);
                     const hasLinks = /https?:\/\/[^\s)]+/.test(m.content);
-
-                    // Check for specific content patterns
                     const hasQuiz = /\?\s*\n\s*[A-D]\)/i.test(m.content) || /correct answer|quiz|question \d/i.test(m.content);
                     const hasComparison = /\bvs\.?\b|compared to|difference between|pros and cons/i.test(m.content);
                     const hasSteps = /step \d|first,.*second,|1\.\s.*\n2\.\s/i.test(m.content);
@@ -2389,48 +2389,48 @@ export default function ChatPage() {
                     const hasSummary = /summary|key (takeaways|points|findings)|in (summary|conclusion)|tl;?dr/i.test(m.content);
 
                     if (hasCode) {
-                      icon = "💻";
+                      IconComp = Braces;
                       const langMatch = m.content.match(/```(\w+)/);
                       summary = langMatch ? `Generated ${langMatch[1]} code` : "Generated code";
                       accent = "text-emerald-600";
                     } else if (hasQuiz) {
-                      icon = "🧠";
+                      IconComp = HelpCircle;
                       summary = "Quiz / Q&A";
                       accent = "text-purple-600";
                     } else if (hasComparison) {
-                      icon = "⚖️";
+                      IconComp = BarChart3;
                       summary = "Comparison / analysis";
                       accent = "text-indigo-600";
                     } else if (hasEmail) {
-                      icon = "✉️";
+                      IconComp = Send;
                       summary = "Drafted email/message";
                       accent = "text-sky-600";
                     } else if (hasSummary) {
-                      icon = "📌";
+                      IconComp = Pin;
                       summary = "Summary / key points";
                       accent = "text-orange-600";
                     } else if (hasTable) {
-                      icon = "📊";
+                      IconComp = BarChart3;
                       summary = "Generated table/data";
                       accent = "text-violet-600";
                     } else if (hasLinks) {
-                      icon = "🔗";
+                      IconComp = ExternalLink;
                       const linkCount = (m.content.match(/https?:\/\/[^\s)]+/g) || []).length;
                       summary = `Shared ${linkCount} link${linkCount > 1 ? "s" : ""}`;
                       accent = "text-blue-600";
                     } else if (hasSteps) {
-                      icon = "📋";
+                      IconComp = ListOrdered;
                       summary = "Step-by-step instructions";
                       accent = "text-teal-600";
                     } else if (hasHeadings && hasList) {
-                      icon = "📝";
+                      IconComp = FileText;
                       const firstHeading = m.content.match(/^#{1,3}\s+(.+)/m);
                       summary = firstHeading ? firstHeading[1].slice(0, 50) : "Detailed response";
                     } else if (hasList) {
-                      icon = "📋";
+                      IconComp = List;
                       summary = "Listed items";
                     } else {
-                      icon = "💡";
+                      IconComp = Sparkles;
                       const firstSentence = m.content.match(/^[^.!?\n]+[.!?]?/);
                       summary = firstSentence ? firstSentence[0].slice(0, 55) : m.content.slice(0, 55);
                       if (summary.length >= 55) summary += "...";
@@ -2450,7 +2450,7 @@ export default function ChatPage() {
                         if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
                       }}
                     >
-                      <span className="text-sm flex-shrink-0 mt-0.5">{icon}</span>
+                      <IconComp className={cn("h-3.5 w-3.5 flex-shrink-0 mt-0.5", accent)} />
                       <div className="min-w-0 flex-1">
                         <p className={cn("text-xs truncate", accent || "text-foreground")}>{summary}</p>
                         <p className="text-[10px] text-muted-foreground mt-0.5">

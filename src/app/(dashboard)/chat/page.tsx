@@ -2346,7 +2346,7 @@ export default function ChatPage() {
 
         {flyoutTab === "outline" && (
         <ScrollArea className="flex-1">
-          <div className="p-3">
+          <div className="p-3 w-0 min-w-full overflow-hidden">
             {messages.length === 0 ? (
               <p className="text-sm text-muted-foreground text-center py-8">Start a conversation to see its outline</p>
             ) : (
@@ -2492,7 +2492,7 @@ export default function ChatPage() {
 
         {flyoutTab === "saved" && (
           <ScrollArea className="flex-1">
-            <div className="p-3 space-y-2 overflow-hidden">
+            <div className="p-3 space-y-2 overflow-hidden w-0 min-w-full">
               {/* Search */}
               <div className="relative">
                 <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />

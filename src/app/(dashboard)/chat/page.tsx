@@ -1803,43 +1803,14 @@ export default function ChatPage() {
         ) : (
           // ── Normal mode ──
           <>
-            {/* Header — clean and minimal */}
-            <div className="flex items-center gap-3 px-4 py-2.5 border-b bg-background flex-shrink-0">
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setSidebarOpen(!sidebarOpen)}>
-                <ChevronLeft className={cn("h-4 w-4 transition-transform", !sidebarOpen && "rotate-180")} />
-              </Button>
-
-              {availableModels.length > 0 && (
-                <Select
-                  value={`${selectedProvider}:${selectedModel}`}
-                  onValueChange={(val) => {
-                    const [prov, ...rest] = val.split(":");
-                    setSelectedProvider(prov);
-                    setSelectedModel(rest.join(":"));
-                  }}
-                >
-                  <SelectTrigger className="w-[200px] h-8 text-xs border-0 bg-transparent hover:bg-muted transition-colors">
-                    <SelectValue placeholder="Select model" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableModels.map((m) => (
-                      <SelectItem key={`${m.provider}:${m.model}`} value={`${m.provider}:${m.model}`}>
-                        <span className="text-muted-foreground mr-1">{m.providerLabel}</span>
-                        {m.modelLabel}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-
-              <div className="flex-1" />
-
-              {/* DLP badge — always visible */}
-              <Link href="/guardrails" className="flex items-center gap-1.5 rounded-full border border-green-200 dark:border-green-800/50 bg-green-50/80 dark:bg-green-950/30 px-2.5 py-1 hover:bg-green-100/80 dark:hover:bg-green-950/50 transition-colors">
-                <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
-                <span className="text-[10px] font-medium text-green-700 dark:text-green-400">DLP Active</span>
-              </Link>
-            </div>
+            {/* Header — just sidebar toggle */}
+            {!sidebarOpen && (
+              <div className="absolute top-3 left-3 z-10">
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setSidebarOpen(true)}>
+                  <ChevronLeft className="h-4 w-4 rotate-180" />
+                </Button>
+              </div>
+            )}
 
             {/* Admin notice — dismissible */}
             {isAdmin && !chatEnabledForMembers && !adminNoticeDismissed && (
@@ -2128,9 +2099,38 @@ export default function ChatPage() {
                         </button>
                       </div>
                     </form>
-                    <p className="text-center text-[10px] text-muted-foreground/50 mt-2">
-                      Protected by DLP · Type / for commands
-                    </p>
+                    {/* Model selector + DLP badge below input */}
+                    <div className="flex items-center justify-between mt-2">
+                      <div className="flex items-center gap-2">
+                        {availableModels.length > 0 && (
+                          <Select
+                            value={`${selectedProvider}:${selectedModel}`}
+                            onValueChange={(val) => {
+                              const [prov, ...rest] = val.split(":");
+                              setSelectedProvider(prov);
+                              setSelectedModel(rest.join(":"));
+                            }}
+                          >
+                            <SelectTrigger className="h-7 text-[11px] border-0 bg-transparent hover:bg-muted transition-colors px-2 gap-1 w-auto">
+                              <SelectValue placeholder="Model" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {availableModels.map((m) => (
+                                <SelectItem key={`${m.provider}:${m.model}`} value={`${m.provider}:${m.model}`}>
+                                  <span className="text-muted-foreground mr-1">{m.providerLabel}</span>
+                                  {m.modelLabel}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        )}
+                        <span className="text-[10px] text-muted-foreground/40">Type / for commands</span>
+                      </div>
+                      <Link href="/guardrails" className="flex items-center gap-1 text-[10px] text-green-600/60 hover:text-green-600 transition-colors">
+                        <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
+                        DLP
+                      </Link>
+                    </div>
                   </div>
                 </div>
               </>

@@ -90,22 +90,27 @@ interface NavItem {
 
 const navSections: { title: string; items: NavItem[] }[] = [
   {
-    title: "Workspace",
+    title: "",
     items: [
-      { label: "Prompts", href: "/vault", icon: Archive },
-      { label: "Templates", href: "/templates", icon: Library },
       { label: "AI Chat", href: "/chat", icon: MessageSquare, roles: ["__ai_chat__"] },
-      { label: "Approvals", href: "/approvals", icon: CheckSquare, roles: ["admin", "manager"] },
-      { label: "Guidelines", href: "/guidelines", icon: BookOpen },
-      { label: "Team", href: "/team", icon: Users },
+      { label: "Prompt Library", href: "/vault", icon: Archive },
+      { label: "Template Packs", href: "/templates", icon: Library },
     ],
   },
   {
-    title: "Intelligence",
+    title: "Security",
     items: [
-      { label: "Analytics", href: "/analytics", icon: BarChart3, roles: ["admin", "manager"] },
-      { label: "Activity & Audit", href: "/activity", icon: Activity, roles: ["admin", "manager"] },
       { label: "Guardrails", href: "/guardrails", icon: Shield },
+      { label: "Activity Log", href: "/activity", icon: Activity, roles: ["admin", "manager"] },
+      { label: "Analytics", href: "/analytics", icon: BarChart3, roles: ["admin", "manager"] },
+    ],
+  },
+  {
+    title: "Manage",
+    items: [
+      { label: "Team", href: "/team", icon: Users },
+      { label: "Approvals", href: "/approvals", icon: CheckSquare, roles: ["admin", "manager"] },
+      { label: "Guidelines", href: "/guidelines", icon: BookOpen },
     ],
   },
 ];
@@ -184,13 +189,13 @@ function NavContent({ onItemClick, collapsed: isCollapsed, onToggleCollapse }: {
           if (visibleItems.length === 0) return null;
 
           return (
-            <div key={section.title}>
-              {!isCollapsed && (
+            <div key={section.title || "main"}>
+              {section.title && !isCollapsed && (
                 <p className="mb-3 px-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/70">
                   {section.title}
                 </p>
               )}
-              {isCollapsed && (
+              {section.title && isCollapsed && (
                 <div className="mb-2 mx-auto w-6 border-t border-border/50" />
               )}
               <div className="space-y-1">

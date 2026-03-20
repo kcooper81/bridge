@@ -2170,7 +2170,8 @@ export default function ChatPage() {
       <div key={message.id} className="group mb-8 animate-in fade-in-0 slide-in-from-bottom-2 duration-300">
         <div className="flex gap-3">
           <div className="h-8 w-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0 mt-0.5">
-            <img src="/brand/logo-icon-dark.svg" alt="TeamPrompt" className="h-4 w-4 dark:invert" />
+            <img src="/brand/logo-icon.svg" alt="TeamPrompt" className="h-4 w-4 dark:hidden" />
+            <img src="/brand/logo-icon-dark.svg" alt="TeamPrompt" className="h-4 w-4 hidden dark:block" />
           </div>
           <div className="flex-1 min-w-0 pt-0.5">
             <div className="prose dark:prose-invert max-w-none text-[15px] leading-7 [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_pre]:relative [&_pre]:bg-zinc-900 [&_pre]:text-zinc-100 [&_pre]:rounded-xl [&_pre]:p-4 [&_pre]:text-[13px] [&_pre]:overflow-x-auto [&_pre]:my-4 [&_code]:text-[13px] [&_code]:bg-muted [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded-md [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:mt-6 [&_h2]:mb-3 [&_h3]:text-base [&_h3]:font-semibold [&_h3]:mt-5 [&_h3]:mb-2 [&_p]:mb-3 [&_ul]:mb-3 [&_ol]:mb-3 [&_li]:mb-1 [&_blockquote]:border-l-2 [&_blockquote]:border-primary/30 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-muted-foreground [&_table]:text-sm [&_th]:text-left [&_th]:font-semibold [&_td]:py-1.5 [&_td]:pr-4">

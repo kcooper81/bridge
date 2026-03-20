@@ -205,6 +205,7 @@ export default function ChatPage() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [promptPanelOpen, setPromptPanelOpen] = useState(false);
+  const [outlinePanelOpen, setOutlinePanelOpen] = useState(false);
   const [promptPanelPinned, setPromptPanelPinned] = useState(false);
   const [promptSearch, setPromptSearch] = useState("");
   const [promptFilter, setPromptFilter] = useState<"all" | "favorites" | "templates">("all");
@@ -1803,11 +1804,25 @@ export default function ChatPage() {
         ) : (
           // ── Normal mode ──
           <>
-            {/* Header — just sidebar toggle */}
+            {/* Floating controls */}
             {!sidebarOpen && (
               <div className="absolute top-3 left-3 z-10">
                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setSidebarOpen(true)}>
                   <ChevronLeft className="h-4 w-4 rotate-180" />
+                </Button>
+              </div>
+            )}
+            {messages.length > 0 && (
+              <div className="absolute top-3 right-3 z-10">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={cn("h-8 px-2 gap-1.5 text-xs", outlinePanelOpen && "bg-muted")}
+                  onClick={() => setOutlinePanelOpen(!outlinePanelOpen)}
+                  title="Conversation outline"
+                >
+                  <FileText className="h-3.5 w-3.5" />
+                  Outline
                 </Button>
               </div>
             )}
@@ -2249,6 +2264,98 @@ export default function ChatPage() {
             </Button>
           </Link>
         </div>
+      {/* ─── Conversation Outline Panel (right flyout) ─── */}
+      <div className={cn(
+        "border-l bg-background flex flex-col transition-all duration-200 overflow-hidden",
+        outlinePanelOpen ? "w-80" : "w-0"
+      )}>
+        <div className="p-3 border-b flex items-center justify-between flex-shrink-0">
+          <h3 className="text-sm font-semibold">Conversation Outline</h3>
+          <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => setOutlinePanelOpen(false)}>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+
+        <ScrollArea className="flex-1">
+          <div className="p-3 space-y-5">
+            {/* Files section */}
+            {(() => {
+              const allFiles = messages.flatMap((m, i) => (m.files || []).map((f) => ({ ...f, msgIndex: i + 1, role: m.role })));
+              return allFiles.length > 0 ? (
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Files ({allFiles.length})</p>
+                  <div className="space-y-1.5">
+                    {allFiles.map((f, i) => (
+                      <div key={i} className="flex items-center gap-2 px-2.5 py-2 rounded-lg bg-muted/50 text-xs">
+                        <FileText className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                        <div className="min-w-0 flex-1">
+                          <p className="font-medium truncate">{f.name}</p>
+                          <p className="text-[10px] text-muted-foreground">msg #{f.msgIndex} · {f.role}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null;
+            })()}
+
+            {/* DLP Events */}
+            {(() => {
+              const dlpEvents: Array<{type: string; detail: string; msgIndex: number}> = [];
+              // Collect from redactions state
+              if (redactions && redactions.length > 0) {
+                dlpEvents.push({ type: "Redacted", detail: `${redactions.length} item${redactions.length > 1 ? "s" : ""} auto-replaced`, msgIndex: messages.length });
+              }
+              // Collect from messages that have [CATEGORY] placeholders
+              messages.forEach((m, i) => {
+                if (m.role === "user" && /\[[A-Z_]+\]/.test(m.content)) {
+                  const placeholders = m.content.match(/\[[A-Z_]+\]/g) || [];
+                  const unique = Array.from(new Set(placeholders));
+                  dlpEvents.push({ type: "Redacted", detail: unique.join(", "), msgIndex: i + 1 });
+                }
+              });
+              // Deduplicate by msgIndex
+              const seen = new Set<number>();
+              const uniqueEvents = dlpEvents.filter((e) => { if (seen.has(e.msgIndex)) return false; seen.add(e.msgIndex); return true; });
+
+              return uniqueEvents.length > 0 ? (
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">DLP Events ({uniqueEvents.length})</p>
+                  <div className="space-y-1.5">
+                    {uniqueEvents.map((e, i) => (
+                      <div key={i} className="flex items-center gap-2 px-2.5 py-2 rounded-lg bg-amber-50 dark:bg-amber-950/20 text-xs">
+                        <Shield className="h-4 w-4 text-amber-600 flex-shrink-0" />
+                        <div className="min-w-0">
+                          <p className="font-medium text-amber-800 dark:text-amber-300">{e.type}</p>
+                          <p className="text-[10px] text-amber-600/70">{e.detail} · msg #{e.msgIndex}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null;
+            })()}
+
+            {/* Stats */}
+            {messages.length > 0 && (
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Stats</p>
+                <div className="space-y-1 text-xs text-muted-foreground px-2.5">
+                  <p>{messages.length} messages ({messages.filter(m => m.role === "user").length} you, {messages.filter(m => m.role === "assistant").length} AI)</p>
+                  <p>{messages.reduce((acc, m) => acc + m.content.length, 0).toLocaleString()} characters total</p>
+                  {messages[0]?.created_at && <p>Started {new Date(messages[0].created_at).toLocaleString()}</p>}
+                  <p>Model: {selectedModel}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Empty state */}
+            {messages.length === 0 && (
+              <p className="text-sm text-muted-foreground text-center py-8">Start a conversation to see its outline</p>
+            )}
+          </div>
+        </ScrollArea>
+      </div>
       </div>
     </div>
   );

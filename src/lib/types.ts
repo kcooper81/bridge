@@ -72,6 +72,7 @@ export interface Organization {
     activity_log_retention_days?: number | null;
     auto_deprovision_on_sync?: boolean;
   } | null;
+  industry?: string | null;
   security_settings?: Record<string, unknown> | null;
   is_suspended?: boolean;
   created_at: string;

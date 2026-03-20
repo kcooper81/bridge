@@ -9,19 +9,37 @@ import { Button } from "@/components/ui/button";
 import {
   Building,
   Check,
+  Code,
+  DollarSign,
   ExternalLink,
   FileText,
   Globe,
+  GraduationCap,
+  Megaphone,
   MessageSquare,
   Rocket,
+  Scale,
+  Stethoscope,
   UserPlus,
   Users,
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { detectBrowser, getStoreForBrowser } from "@/lib/browser-detect";
+import { createClient } from "@/lib/supabase/client";
 
 const DISMISS_KEY = "teamprompt-setup-wizard-dismissed";
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const INDUSTRIES = [
+  { id: "healthcare", label: "Healthcare", icon: Stethoscope, color: "bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800 hover:border-red-400 dark:hover:border-red-600", iconColor: "text-red-500" },
+  { id: "finance", label: "Finance", icon: DollarSign, color: "bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800 hover:border-emerald-400 dark:hover:border-emerald-600", iconColor: "text-emerald-500" },
+  { id: "technology", label: "Technology", icon: Code, color: "bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800 hover:border-blue-400 dark:hover:border-blue-600", iconColor: "text-blue-500" },
+  { id: "legal", label: "Legal", icon: Scale, color: "bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800 hover:border-amber-400 dark:hover:border-amber-600", iconColor: "text-amber-500" },
+  { id: "education", label: "Education", icon: GraduationCap, color: "bg-purple-50 dark:bg-purple-950/30 border-purple-200 dark:border-purple-800 hover:border-purple-400 dark:hover:border-purple-600", iconColor: "text-purple-500" },
+  { id: "marketing", label: "Marketing", icon: Megaphone, color: "bg-pink-50 dark:bg-pink-950/30 border-pink-200 dark:border-pink-800 hover:border-pink-400 dark:hover:border-pink-600", iconColor: "text-pink-500" },
+  { id: "other", label: "Other", icon: Building, color: "bg-gray-50 dark:bg-gray-950/30 border-gray-200 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-500", iconColor: "text-gray-500" },
+] as const;
 
 interface Step {
   id: string;
@@ -35,10 +53,12 @@ interface Step {
 }
 
 export function SetupWizard() {
-  const { org, members, teams, prompts, currentUserRole } = useOrg();
+  const { org, members, teams, prompts, currentUserRole, refresh } = useOrg();
   const { detected: extensionDetected } = useExtensionDetection();
   const [dismissed, setDismissed] = useState(true);
   const [hasAiProviders, setHasAiProviders] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [industryLoading, setIndustryLoading] = useState(false);
 
   // Check if AI providers are configured
   useEffect(() => {
@@ -46,6 +66,33 @@ export function SetupWizard() {
       setHasAiProviders((data.providers || []).length > 0);
     }).catch(() => {});
   }, []);
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async function handleIndustrySelect(industry: string) {
+    setIndustryLoading(true);
+    try {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) return;
+
+      const res = await fetch("/api/org/industry", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ industry }),
+      });
+
+      if (res.ok) {
+        await refresh();
+      }
+    } catch (e) {
+      console.error("Failed to set industry:", e);
+    } finally {
+      setIndustryLoading(false);
+    }
+  }
 
   const browser = useMemo(() => detectBrowser(), []);
   const store = useMemo(() => getStoreForBrowser(browser), [browser]);
@@ -58,6 +105,15 @@ export function SetupWizard() {
   if (currentUserRole !== "admin") return null;
 
   const steps: Step[] = [
+    {
+      id: "choose-industry",
+      title: "Choose your industry",
+      description: "We'll set up prompts tailored to your field.",
+      done: !!org?.industry,
+      href: "#",
+      actionLabel: "Choose Industry",
+      icon: Building,
+    },
     {
       id: "name-org",
       title: "Name your organization",
@@ -154,6 +210,44 @@ export function SetupWizard() {
             />
           </div>
         </div>
+
+        {/* ── Industry Picker (shown when industry step is current) ── */}
+        {currentStepIndex === 0 && !org?.industry && (
+          <div className="mb-6">
+            <h3 className="text-sm font-semibold mb-1">What industry are you in?</h3>
+            <p className="text-xs text-muted-foreground mb-4">
+              We&apos;ll add starter prompts tailored to your team&apos;s needs.
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+              {INDUSTRIES.map((ind) => {
+                const Icon = ind.icon;
+                return (
+                  <button
+                    key={ind.id}
+                    disabled={industryLoading}
+                    onClick={() => handleIndustrySelect(ind.id)}
+                    className={cn(
+                      "flex flex-col items-center gap-2 rounded-xl border-2 p-4 transition-all cursor-pointer",
+                      "focus:outline-none focus:ring-2 focus:ring-primary/50",
+                      "disabled:opacity-50 disabled:cursor-not-allowed",
+                      ind.color
+                    )}
+                  >
+                    <Icon className={cn("h-8 w-8", ind.iconColor)} />
+                    <span className="text-sm font-medium">{ind.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+            <button
+              onClick={() => handleIndustrySelect("other")}
+              disabled={industryLoading}
+              className="mt-3 text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors disabled:opacity-50"
+            >
+              Skip this step
+            </button>
+          </div>
+        )}
 
         {/* ── Horizontal stepper (lg+) ── */}
         <div className="hidden lg:block">

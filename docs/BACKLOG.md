@@ -103,6 +103,7 @@
 - [ ] **Shadow AI Detection** — Detect 50+ AI tool domains, admin alerts
 - [ ] **Per-Team Policy Engine** — Rules scoped to teams/departments
 - [ ] **SIEM Webhook** — One endpoint that POSTs violation events as JSON
+- [ ] **Industry-Specific Guardrails** — Seed industry-specific sensitive terms on onboarding (warn severity, free plan compatible). Healthcare: patient/diagnosis/MRN/PHI. Finance: account number/routing number. Legal: privileged/attorney-client. Education: student record/FERPA. Show "HIPAA pack ready — upgrade" teaser in guardrails.
 - [ ] **Google Ads + GA4 Analytics Dashboard** — Admin panel for ad performance, conversions, keyword data
 
 ## Pending — Medium Priority (Differentiators)

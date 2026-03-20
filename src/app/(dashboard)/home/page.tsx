@@ -6,7 +6,8 @@ import { createClient } from "@/lib/supabase/client";
 import { useOrg } from "@/components/providers/org-provider";
 import { useAuth } from "@/components/providers/auth-provider";
 import { PageHeader } from "@/components/dashboard/page-header";
-import { SetupWizard } from "@/components/dashboard/setup-wizard";
+import { OnboardingFlow } from "@/components/dashboard/onboarding-flow";
+import { SetupChecklist } from "@/components/dashboard/setup-checklist";
 import { DashboardWidgets } from "@/components/dashboard/dashboard-widgets";
 import { NoOrgBanner } from "@/components/dashboard/no-org-banner";
 import { PageSkeleton } from "@/components/dashboard/skeleton-loader";
@@ -84,7 +85,8 @@ export default function DashboardHomePage() {
         title="Home"
         description={`${greeting}${firstName ? `, ${firstName}` : ""}`}
       />
-      <SetupWizard />
+      <OnboardingFlow />
+      <SetupChecklist />
       <DashboardWidgets analytics={analytics} loading={analyticsLoading} />
     </>
   );

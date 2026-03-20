@@ -1764,7 +1764,10 @@ export default function ChatPage() {
               </div>
               <ScrollArea className="flex-1">
                 <div className="max-w-2xl mx-auto px-4 py-6">
-                  {messages.map((message) => renderMessage(message))}
+                  {messages.map((message) => {
+                    if (message.role === "assistant" && !message.content && isLoading) return null;
+                    return renderMessage(message);
+                  })}
                   {isLoading && (messages[messages.length - 1]?.role === "user" || (messages[messages.length - 1]?.role === "assistant" && !messages[messages.length - 1]?.content)) && renderLoadingDots()}
                   <div ref={messagesEndRef} />
                 </div>
@@ -1938,7 +1941,11 @@ export default function ChatPage() {
                       </div>
                     )}
 
-                    {messages.map((message, idx) => renderMessage(message, idx))}
+                    {messages.map((message, idx) => {
+                      // Skip empty assistant messages — loading dots handle that state
+                      if (message.role === "assistant" && !message.content && isLoading) return null;
+                      return renderMessage(message, idx);
+                    })}
 
                     {isLoading && (messages[messages.length - 1]?.role === "user" || (messages[messages.length - 1]?.role === "assistant" && !messages[messages.length - 1]?.content)) && renderLoadingDots()}
 
@@ -2260,7 +2267,7 @@ export default function ChatPage() {
       return (
         <div key={message.id} className="group flex justify-end mb-8 animate-in fade-in-0 slide-in-from-bottom-2 duration-300">
           <div className="max-w-[75%] min-w-0">
-            <div className="rounded-2xl bg-primary text-primary-foreground px-5 py-3 text-[15px] leading-7">
+            <div className="rounded-2xl bg-primary text-primary-foreground px-5 py-3 text-[15px] leading-7 overflow-hidden break-words">
               {message.images && message.images.length > 0 && (
                 <div className="flex gap-2 flex-wrap mb-2">
                   {message.images.map((img, imgIdx) => (
@@ -2373,8 +2380,9 @@ export default function ChatPage() {
   function renderLoadingDots() {
     return (
       <div className="flex gap-3 mb-8">
-        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-          <Bot className="h-4 w-4 text-primary" />
+        <div className="h-8 w-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0">
+          <img src="/brand/logo-icon.svg" alt="TeamPrompt" className="h-4 w-4 dark:hidden" />
+          <img src="/brand/logo-icon-dark.svg" alt="TeamPrompt" className="h-4 w-4 hidden dark:block" />
         </div>
         <div className="pt-2">
           <div className="flex items-center gap-1.5">

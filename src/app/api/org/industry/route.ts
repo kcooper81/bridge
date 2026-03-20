@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
-import { seedOrgDefaults, INDUSTRY_SEED_PROMPTS } from "@/lib/seed-defaults";
+import { INDUSTRY_SEED_PROMPTS } from "@/lib/seed-defaults";
 
 const VALID_INDUSTRIES = [
   "healthcare",
@@ -81,8 +81,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Only seed industry prompts if org has <= 1 prompt (the default seed)
-    // and the industry has specific prompts defined
+    // Only seed industry prompts (NOT guidelines/rules — those are already seeded)
+    // Only if org has <= 1 prompt (the default seed) and industry has prompts defined
     if (industry !== "other" && INDUSTRY_SEED_PROMPTS[industry]) {
       const { count: promptCount } = await db
         .from("prompts")
@@ -90,7 +90,23 @@ export async function POST(request: NextRequest) {
         .eq("org_id", profile.org_id);
 
       if ((promptCount ?? 0) <= 1) {
-        await seedOrgDefaults(db, profile.org_id, user.id, industry);
+        // Insert only the industry-specific prompts, not full seedOrgDefaults
+        const prompts = INDUSTRY_SEED_PROMPTS[industry];
+        await db.from("prompts").insert(
+          prompts.map((p) => ({
+            org_id: profile.org_id,
+            owner_id: user.id,
+            title: p.title,
+            content: p.content,
+            description: p.description,
+            tags: p.tags,
+            tone: p.tone,
+            status: "approved",
+            version: 1,
+            is_template: p.is_template,
+            template_variables: p.template_variables,
+          }))
+        );
       }
     }
 

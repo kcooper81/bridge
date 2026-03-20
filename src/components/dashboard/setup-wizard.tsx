@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
+import { toast } from "sonner";
 import { useOrg } from "@/components/providers/org-provider";
 import { useExtensionDetection } from "@/hooks/use-extension-detection";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -83,9 +84,13 @@ export function SetupWizard() {
 
       if (res.ok) {
         await refresh();
+        if (industry !== "other") toast.success("Industry prompts added to your library");
+      } else {
+        toast.error("Failed to set industry");
       }
     } catch (e) {
       console.error("Failed to set industry:", e);
+      toast.error("Failed to set industry");
     } finally {
       setIndustryLoading(false);
     }

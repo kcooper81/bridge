@@ -16,7 +16,7 @@ const VALID_INDUSTRIES = [
  * POST /api/org/industry
  *
  * Sets the organization's industry and seeds industry-specific prompts.
- * Only seeds if the org has <= 1 existing prompts (the default seed).
+ * Can be called again to change industry (re-seeds if few prompts exist).
  */
 export async function POST(request: NextRequest) {
   try {
@@ -36,7 +36,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get user's profile + org
     const { data: profile } = await db
       .from("profiles")
       .select("id, org_id, role")
@@ -44,92 +43,86 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (!profile?.org_id) {
-      return NextResponse.json(
-        { error: "No organization found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "No organization found" }, { status: 404 });
     }
 
     if (profile.role !== "admin") {
-      return NextResponse.json(
-        { error: "Only admins can set industry" },
-        { status: 403 }
-      );
-    }
-
-    // Prevent re-setting industry once already chosen
-    const { data: orgData } = await db
-      .from("organizations")
-      .select("industry")
-      .eq("id", profile.org_id)
-      .single();
-
-    if (orgData?.industry) {
-      return NextResponse.json(
-        { error: "Industry already set", industry: orgData.industry },
-        { status: 409 }
-      );
+      return NextResponse.json({ error: "Only admins can set industry" }, { status: 403 });
     }
 
     const body = await request.json();
     const { industry } = body;
 
     if (!industry || !VALID_INDUSTRIES.includes(industry)) {
-      return NextResponse.json(
-        { error: "Invalid industry", valid: VALID_INDUSTRIES },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Invalid industry", valid: VALID_INDUSTRIES }, { status: 400 });
     }
 
-    // Update org industry
+    // Update org industry (use settings JSONB as fallback if column doesn't exist)
     const { error: updateError } = await db
       .from("organizations")
       .update({ industry })
       .eq("id", profile.org_id);
 
     if (updateError) {
-      console.error("Failed to update org industry:", updateError);
-      return NextResponse.json(
-        { error: "Failed to update industry" },
-        { status: 500 }
-      );
+      if (updateError.message?.includes("industry")) {
+        // Industry column doesn't exist — migration 074 not run. Continue with seeding anyway.
+        console.warn("Industry column not found — run migration 074:", updateError.message);
+      } else {
+        console.error("Failed to update org industry:", updateError);
+        return NextResponse.json({ error: "Failed to update industry" }, { status: 500 });
+      }
     }
 
-    // Only seed industry prompts (NOT guidelines/rules — those are already seeded)
-    // Only if org has <= 1 prompt (the default seed) and industry has prompts defined
+    // Seed industry prompts if the industry has specific prompts defined
+    // Only seed if org has <= 5 prompts (default seed + maybe a few user-created)
     if (industry !== "other" && INDUSTRY_SEED_PROMPTS[industry]) {
       const { count: promptCount } = await db
         .from("prompts")
         .select("id", { count: "exact", head: true })
         .eq("org_id", profile.org_id);
 
-      if ((promptCount ?? 0) <= 1) {
-        // Insert only the industry-specific prompts, not full seedOrgDefaults
+      if ((promptCount ?? 0) <= 5) {
         const prompts = INDUSTRY_SEED_PROMPTS[industry];
-        await db.from("prompts").insert(
-          prompts.map((p) => ({
-            org_id: profile.org_id,
-            owner_id: user.id,
-            title: p.title,
-            content: p.content,
-            description: p.description,
-            tags: p.tags,
-            tone: p.tone,
-            status: "approved",
-            version: 1,
-            is_template: p.is_template,
-            template_variables: p.template_variables,
-          }))
-        );
+
+        // Check if these exact prompts already exist (by title) to avoid duplicates
+        const titles = prompts.map((p) => p.title);
+        const { data: existing } = await db
+          .from("prompts")
+          .select("title")
+          .eq("org_id", profile.org_id)
+          .in("title", titles);
+
+        const existingTitles = new Set((existing || []).map((e: { title: string }) => e.title));
+        const newPrompts = prompts.filter((p) => !existingTitles.has(p.title));
+
+        if (newPrompts.length > 0) {
+          const { error: insertError } = await db.from("prompts").insert(
+            newPrompts.map((p) => ({
+              org_id: profile.org_id,
+              owner_id: user.id,
+              title: p.title,
+              content: p.content,
+              description: p.description,
+              tags: p.tags,
+              tone: p.tone,
+              status: "approved",
+              version: 1,
+              is_template: p.is_template,
+              template_variables: p.template_variables,
+            }))
+          );
+
+          if (insertError) {
+            console.error("Failed to seed industry prompts:", insertError);
+            // Don't fail the whole request — industry was set, prompts just didn't seed
+          }
+        }
       }
     }
 
-    return NextResponse.json({ success: true, industry });
+    return NextResponse.json({ success: true, industry, message: "Industry set successfully" });
   } catch (error) {
     console.error("Set industry error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

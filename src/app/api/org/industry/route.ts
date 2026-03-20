@@ -57,6 +57,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Prevent re-setting industry once already chosen
+    const { data: orgData } = await db
+      .from("organizations")
+      .select("industry")
+      .eq("id", profile.org_id)
+      .single();
+
+    if (orgData?.industry) {
+      return NextResponse.json(
+        { error: "Industry already set", industry: orgData.industry },
+        { status: 409 }
+      );
+    }
+
     const body = await request.json();
     const { industry } = body;
 

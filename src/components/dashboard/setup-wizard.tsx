@@ -330,16 +330,19 @@ export function SetupWizard() {
                         <p className="text-xs text-muted-foreground max-w-[180px]">
                           {step.description}
                         </p>
-                        <Button size="sm" asChild>
-                          {step.external ? (
-                            <a href={step.href} target="_blank" rel="noopener noreferrer">
-                              {step.actionLabel}
-                              <ExternalLink className="ml-1.5 h-3.5 w-3.5" />
-                            </a>
-                          ) : (
-                            <Link href={step.href}>{step.actionLabel}</Link>
-                          )}
-                        </Button>
+                        {/* Hide action button for industry step — inline picker handles it */}
+                        {step.id !== "choose-industry" && (
+                          <Button size="sm" asChild>
+                            {step.external ? (
+                              <a href={step.href} target="_blank" rel="noopener noreferrer">
+                                {step.actionLabel}
+                                <ExternalLink className="ml-1.5 h-3.5 w-3.5" />
+                              </a>
+                            ) : (
+                              <Link href={step.href}>{step.actionLabel}</Link>
+                            )}
+                          </Button>
+                        )}
                       </div>
                     )}
                   </div>
@@ -404,16 +407,19 @@ export function SetupWizard() {
                         <h4 className="font-semibold text-sm">{step.title}</h4>
                       </div>
                       <p className="text-sm text-muted-foreground">{step.description}</p>
-                      <Button size="sm" asChild>
-                        {step.external ? (
-                          <a href={step.href} target="_blank" rel="noopener noreferrer">
-                            {step.actionLabel}
-                            <ExternalLink className="ml-1.5 h-3.5 w-3.5" />
-                          </a>
-                        ) : (
-                          <Link href={step.href}>{step.actionLabel}</Link>
-                        )}
-                      </Button>
+                      {/* Hide action button for industry step — inline picker handles it */}
+                      {step.id !== "choose-industry" && (
+                        <Button size="sm" asChild>
+                          {step.external ? (
+                            <a href={step.href} target="_blank" rel="noopener noreferrer">
+                              {step.actionLabel}
+                              <ExternalLink className="ml-1.5 h-3.5 w-3.5" />
+                            </a>
+                          ) : (
+                            <Link href={step.href}>{step.actionLabel}</Link>
+                          )}
+                        </Button>
+                      )}
                     </div>
                   ) : (
                     <p className="pt-1.5 text-sm text-muted-foreground/40">

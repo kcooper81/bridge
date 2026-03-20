@@ -1808,7 +1808,7 @@ export default function ChatPage() {
             {/* Left panel — primary model */}
             <div className="flex-1 flex flex-col min-w-0 border-r">
               <div className="flex items-center gap-2 px-4 py-2 border-b bg-background flex-shrink-0">
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setSidebarOpen(!sidebarOpen)}>
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setSidebarOpen(!sidebarOpen)} aria-label={sidebarOpen ? "Close sidebar" : "Open sidebar"}>
                   <ChevronLeft className={cn("h-4 w-4 transition-transform", !sidebarOpen && "rotate-180")} />
                 </Button>
                 {availableModels.length > 0 && (
@@ -1872,7 +1872,7 @@ export default function ChatPage() {
             {/* Floating controls */}
             {!sidebarOpen && (
               <div className="absolute top-3 left-3 z-10">
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setSidebarOpen(true)}>
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setSidebarOpen(true)} aria-label="Open sidebar">
                   <ChevronLeft className="h-4 w-4 rotate-180" />
                 </Button>
               </div>
@@ -2284,7 +2284,7 @@ export default function ChatPage() {
                 rows={1}
                 disabled={isLoading || noProviders}
               />
-              <Button type="submit" size="icon" className="h-[44px] w-[44px] rounded-xl flex-shrink-0" disabled={(!chatInput.trim() && pendingImages.length === 0 && pendingFiles.length === 0) || isLoading || noProviders}>
+              <Button type="submit" size="icon" className="h-[44px] w-[44px] rounded-xl flex-shrink-0" disabled={(!chatInput.trim() && pendingImages.length === 0 && pendingFiles.length === 0) || isLoading || noProviders} aria-label={isLoading ? "Generating response" : "Send message"}>
                 {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
               </Button>
             </form>
@@ -2305,7 +2305,7 @@ export default function ChatPage() {
             <Button variant="ghost" size="sm" className={cn("h-6 w-6 p-0", promptPanelPinned && "text-primary")} title={promptPanelPinned ? "Unpin panel" : "Pin panel open"} onClick={() => setPromptPanelPinned(!promptPanelPinned)}>
               <Pin className={cn("h-3.5 w-3.5", promptPanelPinned && "fill-primary")} />
             </Button>
-            <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => { setPromptPanelOpen(false); setPromptPanelPinned(false); }}>
+            <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => { setPromptPanelOpen(false); setPromptPanelPinned(false); }} aria-label="Close prompt panel">
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
@@ -2404,7 +2404,7 @@ export default function ChatPage() {
               </button>
             ))}
           </div>
-          <Button variant="ghost" size="sm" className="h-6 w-6 p-0 flex-shrink-0" onClick={() => setOutlinePanelOpen(false)}>
+          <Button variant="ghost" size="sm" className="h-6 w-6 p-0 flex-shrink-0" onClick={() => setOutlinePanelOpen(false)} aria-label="Close outline panel">
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>

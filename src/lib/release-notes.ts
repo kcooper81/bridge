@@ -7,9 +7,32 @@ export interface ReleaseNote {
   badge?: "new" | "fix" | "improvement";
 }
 
-export const APP_VERSION = "1.13.0";
+export const APP_VERSION = "1.14.0";
 
 export const RELEASE_NOTES: ReleaseNote[] = [
+  {
+    version: "1.14.0",
+    date: "2026-03-19",
+    title: "AI Chat Overhaul, Smart Redaction & File Uploads",
+    highlights: [
+      "Smart Redaction — new 'Redact' severity option auto-replaces sensitive data with placeholders instead of blocking. API keys become [API_KEYS], emails become [PII]. Message still sends safely.",
+      "File upload support in AI Chat — upload PDFs, Word docs, code files, CSVs. Files are scanned by DLP before text is extracted and sent to the AI.",
+      "AI Chat UI redesign — clean document-style assistant messages (no bubbles), integrated composer input bar, minimal header, 2x2 suggestion cards",
+      "Collections — organize conversations with color-coded labels. Right-click to add, click to filter. Replaces folders and tags.",
+      "Favorites — star conversations to pin them to the top. Visible in both Chats and Favorites tabs.",
+      "Admin slash commands with real data — /activity, /violations, /usage, /audit query your actual database and inject results as AI context",
+      "Multi-model compare — send the same message to two different AI models side-by-side",
+      "Right-click context menu on conversations — pin, rename, share, export, collections, delete",
+      "ChatGPT-style smart scroll — auto-scrolls during streaming but stops if you scroll up to read",
+      "Code blocks with language headers and copy buttons",
+      "Response rating (thumbs up/down) on AI messages",
+      "Sidebar restructured — Security section (Guardrails, Activity Log, Analytics) now front and center",
+      "10 new SEO blog articles on AI DLP, governance, and security",
+      "4 conversion-optimized Google Ads landing pages",
+      "55 bugs fixed across 2 QA passes",
+    ],
+    badge: "new",
+  },
   {
     version: "1.13.0",
     date: "2026-03-17",

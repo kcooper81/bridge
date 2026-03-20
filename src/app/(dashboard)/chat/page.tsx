@@ -48,6 +48,8 @@ import {
   Share2,
   FileDown,
   Printer,
+  Bookmark,
+  BookmarkCheck,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -206,6 +208,11 @@ export default function ChatPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [promptPanelOpen, setPromptPanelOpen] = useState(false);
   const [outlinePanelOpen, setOutlinePanelOpen] = useState(false);
+  const [flyoutTab, setFlyoutTab] = useState<"outline" | "saved">("outline");
+  const [savedItems, setSavedItems] = useState<Array<{id: string; title: string; content: string; content_type: string; board: string; tags: string[]; conversation_id?: string; source_message_id?: string; created_at: string}>>([]);
+  const [savedBoards, setSavedBoards] = useState<string[]>([]);
+  const [savedFilter, setSavedFilter] = useState("All");
+  const [savingMessageId, setSavingMessageId] = useState<string | null>(null);
   const [promptPanelPinned, setPromptPanelPinned] = useState(false);
   const [promptSearch, setPromptSearch] = useState("");
   const [promptFilter, setPromptFilter] = useState<"all" | "favorites" | "templates">("all");
@@ -893,12 +900,54 @@ export default function ChatPage() {
     } catch { /* non-critical */ }
   }, []);
 
+  const loadSavedItems = useCallback(async () => {
+    try {
+      const res = await fetch("/api/chat/saved");
+      const data = await res.json();
+      setSavedItems(data.items || []);
+      setSavedBoards(data.boards || []);
+    } catch { /* non-critical */ }
+  }, []);
+
   useEffect(() => {
     loadConversations();
     loadProviders();
     loadCollections();
     loadPresets();
-  }, [loadConversations, loadProviders, loadCollections, loadPresets]);
+    loadSavedItems();
+  }, [loadConversations, loadProviders, loadCollections, loadPresets, loadSavedItems]);
+
+  async function saveMessageContent(messageId: string, content: string) {
+    setSavingMessageId(messageId);
+    try {
+      const res = await fetch("/api/chat/saved", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          content,
+          conversation_id: activeConvId,
+          source_message_id: messageId,
+        }),
+      });
+      const data = await res.json();
+      if (data.item) {
+        setSavedItems((prev) => [data.item, ...prev]);
+        toast.success("Saved to your items");
+      }
+    } catch { toast.error("Failed to save"); }
+    finally { setSavingMessageId(null); }
+  }
+
+  async function deleteSavedItem(itemId: string) {
+    setSavedItems((prev) => prev.filter((i) => i.id !== itemId));
+    try {
+      await fetch("/api/chat/saved", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: itemId }),
+      });
+    } catch { /* non-critical */ }
+  }
 
   // Close slash menu on click outside
   useEffect(() => {
@@ -1819,10 +1868,9 @@ export default function ChatPage() {
                   size="sm"
                   className={cn("h-8 px-2 gap-1.5 text-xs", outlinePanelOpen && "bg-muted")}
                   onClick={() => setOutlinePanelOpen(!outlinePanelOpen)}
-                  title="Conversation outline"
+                  title="Conversation outline & saved items"
                 >
                   <FileText className="h-3.5 w-3.5" />
-                  Outline
                 </Button>
               </div>
             )}
@@ -2270,12 +2318,22 @@ export default function ChatPage() {
         outlinePanelOpen ? "w-80" : "w-0"
       )}>
         <div className="p-3 border-b flex items-center justify-between flex-shrink-0">
-          <h3 className="text-sm font-semibold">Conversation Outline</h3>
+          <div className="flex gap-1">
+            <button
+              className={cn("flex-1 py-1 text-xs font-medium rounded transition-colors", flyoutTab === "outline" ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground")}
+              onClick={() => setFlyoutTab("outline")}
+            >Outline</button>
+            <button
+              className={cn("flex-1 py-1 text-xs font-medium rounded transition-colors", flyoutTab === "saved" ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground")}
+              onClick={() => { setFlyoutTab("saved"); loadSavedItems(); }}
+            >Saved</button>
+          </div>
           <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => setOutlinePanelOpen(false)}>
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
 
+        {flyoutTab === "outline" && (
         <ScrollArea className="flex-1">
           <div className="p-3 space-y-5">
             {/* Files section */}
@@ -2355,6 +2413,68 @@ export default function ChatPage() {
             )}
           </div>
         </ScrollArea>
+        )}
+
+        {flyoutTab === "saved" && (
+          <ScrollArea className="flex-1">
+            <div className="p-3 space-y-3">
+              {/* Board filter */}
+              {savedBoards.length > 0 && (
+                <div className="flex gap-1 flex-wrap">
+                  <button
+                    className={cn("text-[10px] px-2 py-0.5 rounded-full font-medium transition-colors", savedFilter === "All" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground")}
+                    onClick={() => setSavedFilter("All")}
+                  >All</button>
+                  {savedBoards.map((b) => (
+                    <button
+                      key={b}
+                      className={cn("text-[10px] px-2 py-0.5 rounded-full font-medium transition-colors", savedFilter === b ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground")}
+                      onClick={() => setSavedFilter(b)}
+                    >{b}</button>
+                  ))}
+                </div>
+              )}
+
+              {/* Items */}
+              {savedItems.filter(i => savedFilter === "All" || i.board === savedFilter).length === 0 ? (
+                <div className="text-center py-8">
+                  <Bookmark className="h-8 w-8 text-muted-foreground/30 mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">No saved items yet</p>
+                  <p className="text-xs text-muted-foreground/60 mt-1">Hover an AI response and click the bookmark icon</p>
+                </div>
+              ) : (
+                savedItems.filter(i => savedFilter === "All" || i.board === savedFilter).map((item) => (
+                  <div key={item.id} className="group border rounded-lg p-3 hover:border-primary/30 transition-colors">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs font-medium truncate">{item.title}</p>
+                        <p className="text-[10px] text-muted-foreground mt-0.5">
+                          {item.content_type} · {item.board} · {new Date(item.created_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <button
+                        className="p-0.5 text-muted-foreground/40 hover:text-destructive opacity-0 group-hover:opacity-100 transition-all"
+                        onClick={() => deleteSavedItem(item.id)}
+                        title="Remove"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-2 line-clamp-3 whitespace-pre-wrap">{item.content}</p>
+                    {item.conversation_id && (
+                      <button
+                        className="text-[10px] text-primary hover:underline mt-1.5"
+                        onClick={() => { loadConversation(item.conversation_id!); setOutlinePanelOpen(false); }}
+                      >
+                        Go to conversation →
+                      </button>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          </ScrollArea>
+        )}
       </div>
       </div>
     </div>
@@ -2456,6 +2576,26 @@ export default function ChatPage() {
             <div className="flex items-center gap-1 mt-2">
               {timestamp && <span className="text-[10px] text-muted-foreground/40 mr-1">{timestamp}</span>}
               <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button
+                  className={cn("p-1 rounded transition-colors",
+                    savedItems.some(s => s.source_message_id === message.id)
+                      ? "text-primary bg-primary/10"
+                      : "text-muted-foreground hover:text-primary hover:bg-muted"
+                  )}
+                  title={savedItems.some(s => s.source_message_id === message.id) ? "Saved" : "Save to items"}
+                  onClick={() => {
+                    if (!savedItems.some(s => s.source_message_id === message.id)) {
+                      saveMessageContent(message.id, message.content);
+                    }
+                  }}
+                >
+                  {savingMessageId === message.id
+                    ? <Loader2 className="h-3 w-3 animate-spin" />
+                    : savedItems.some(s => s.source_message_id === message.id)
+                      ? <BookmarkCheck className="h-3 w-3" />
+                      : <Bookmark className="h-3 w-3" />
+                  }
+                </button>
                 <button className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors" title="Copy" onClick={() => copyMessage(message.content, message.id)}>
                   {copiedId === message.id ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
                 </button>

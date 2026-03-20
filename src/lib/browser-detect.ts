@@ -25,12 +25,12 @@ export const EXTENSION_STORES: Record<
   },
   firefox: {
     name: "Firefox Add-ons",
-    url: "https://addons.mozilla.org/en-US/firefox/addon/teamprompt-manage-shield/",
+    url: "https://addons.mozilla.org/en-US/firefox/addon/teamprompt-ai-prompt-manager/",
     buttonLabel: "Install for Firefox",
   },
   edge: {
-    name: "Edge Add-ons",
-    url: "https://microsoftedge.microsoft.com/addons/detail/teamprompt",
+    name: "Chrome Web Store",
+    url: "https://chromewebstore.google.com/detail/teamprompt/hpdekjimndbhdkebpedfgaceohplbpil",
     buttonLabel: "Install for Edge",
   },
 };

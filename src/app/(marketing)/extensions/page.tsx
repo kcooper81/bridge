@@ -123,7 +123,7 @@ const browsers = [
   {
     name: "Firefox",
     storeName: "Firefox Add-ons",
-    url: "https://addons.mozilla.org/en-US/firefox/addon/teamprompt-manage-shield/",
+    url: "https://addons.mozilla.org/en-US/firefox/addon/teamprompt-ai-prompt-manager/",
     note: "Full feature support on Firefox",
     color: "from-orange-500/20 to-red-500/10",
     borderColor: "border-orange-500/20",
@@ -131,9 +131,9 @@ const browsers = [
   },
   {
     name: "Edge",
-    storeName: "Edge Add-ons",
-    url: "https://microsoftedge.microsoft.com/addons/detail/teamprompt",
-    note: "Native Edge integration",
+    storeName: "Chrome Web Store",
+    url: "https://chromewebstore.google.com/detail/teamprompt/hpdekjimndbhdkebpedfgaceohplbpil",
+    note: "Install via Chrome Web Store (Edge supports Chrome extensions)",
     color: "from-blue-500/20 to-cyan-500/10",
     borderColor: "border-blue-500/20",
     iconColor: "text-blue-500",

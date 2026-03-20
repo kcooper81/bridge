@@ -3,6 +3,7 @@ import Link from "next/link";
 import {
   Activity,
   AlertTriangle,
+  ArrowRight,
   Archive,
   BarChart3,
   BookOpen,
@@ -984,6 +985,7 @@ const features = [
     icon: MessageSquare,
     title: "Built-In AI Chat",
     badge: "NEW",
+    href: "/features/ai-chat",
     description:
       "A DLP-protected AI chat for your team. Connect OpenAI, Anthropic, or Google — every message is scanned by your security rules before it reaches the AI.",
     details: [
@@ -1059,6 +1061,15 @@ export default function FeaturesPage() {
                       </li>
                     ))}
                   </ul>
+                  {"href" in feature && feature.href && (
+                    <Link
+                      href={feature.href as string}
+                      className="inline-flex items-center gap-1.5 mt-6 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+                    >
+                      Learn more
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </Link>
+                  )}
                 </div>
                 <div className="flex-1 w-full max-w-lg">
                   {Mockup ? <Mockup /> : (

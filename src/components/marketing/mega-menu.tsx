@@ -12,6 +12,7 @@ import {
   Landmark,
   Laptop,
   Lock,
+  MessageSquare,
   PiggyBank,
   Shield,
   ShieldCheck,
@@ -34,6 +35,7 @@ const useCases = [
   { label: "DLP & Compliance", description: "Prevent data leaks in AI tools", href: "/solutions/ai-dlp", icon: ShieldCheck, bg: "bg-sky-500/10" },
   { label: "AI Governance", description: "Policies, audit trails, and controls", href: "/solutions/ai-governance", icon: Shield, bg: "bg-violet-500/10" },
   { label: "Prompt Templates", description: "Ready-to-use templates for teams", href: "/solutions/prompt-templates", icon: FileText, bg: "bg-indigo-500/10" },
+  { label: "AI Chat", description: "DLP-protected built-in AI chat", href: "/features/ai-chat", icon: MessageSquare, bg: "bg-violet-500/10" },
 ];
 
 const iconClass = "text-foreground/70";

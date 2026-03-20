@@ -77,6 +77,7 @@ const supportedTools = [
   "Gemini",
   "Copilot",
   "Perplexity",
+  "TeamPrompt Chat",
 ];
 
 export default function LandingPage() {
@@ -559,7 +560,7 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 max-w-5xl mx-auto">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 max-w-6xl mx-auto">
             {/* Slack */}
             <Link href="/integrations" className="group rounded-2xl border border-border bg-card p-6 hover:border-primary/30 hover:shadow-md transition-all block">
               <div className="flex items-center gap-3 mb-3">
@@ -609,6 +610,19 @@ export default function LandingPage() {
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed">
                 Sync your user directory and groups for automatic team management and onboarding.
+              </p>
+            </Link>
+
+            {/* Built-In AI Chat */}
+            <Link href="/features/ai-chat" className="group rounded-2xl border border-border bg-card p-6 hover:border-primary/30 hover:shadow-md transition-all block">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-50 dark:bg-violet-950/30">
+                  <MessageSquare className="h-5 w-5 text-violet-600" />
+                </div>
+                <h3 className="font-semibold">Built-In AI Chat</h3>
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                A DLP-protected chat with GPT-4o, Claude, and Gemini — no extension needed. Every message scanned by your security rules.
               </p>
             </Link>
           </div>

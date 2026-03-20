@@ -586,7 +586,7 @@ export default function ChatPage() {
       if (reader) {
         try {
           let buffer = "";
-          let prefixParsed = false;
+          let prefixParsed = true; // compareOnly responses have no stream prefix
           while (true) {
             const { done, value } = await reader.read();
             if (done) break;
@@ -1088,6 +1088,7 @@ export default function ChatPage() {
     setCompareMessages([]);
     setPendingFiles([]);
     setPendingImages([]);
+    fileContextRef.current = null;
     inputRef.current?.focus();
   }
 

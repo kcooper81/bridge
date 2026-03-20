@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 type Theme = "light" | "dark";
 
@@ -28,18 +29,23 @@ function isDashboardRoute(): boolean {
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>("light");
   const [mounted, setMounted] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY) as Theme | null;
-    if (stored === "dark" && isDashboardRoute()) {
-      setThemeState(stored);
-      document.documentElement.setAttribute("data-theme", stored);
+    if (isDashboardRoute()) {
+      const stored = localStorage.getItem(STORAGE_KEY) as Theme | null;
+      if (stored === "dark") {
+        setThemeState("dark");
+        document.documentElement.setAttribute("data-theme", "dark");
+      } else {
+        document.documentElement.setAttribute("data-theme", "light");
+      }
     } else {
-      // Force light on non-dashboard routes
+      setThemeState("light");
       document.documentElement.setAttribute("data-theme", "light");
     }
     setMounted(true);
-  }, []);
+  }, [pathname]);
 
   const setTheme = useCallback((newTheme: Theme) => {
     setThemeState(newTheme);

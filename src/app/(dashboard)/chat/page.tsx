@@ -2441,7 +2441,7 @@ export default function ChatPage() {
                     <button
                       key={m.id || i}
                       className={cn(
-                        "w-full flex items-start gap-2.5 px-2.5 py-2 rounded-lg text-left transition-colors hover:bg-muted/50",
+                        "group/entry w-full flex items-start gap-2.5 px-2.5 py-2 rounded-lg text-left transition-colors hover:bg-muted/50",
                         m.role === "user" ? "opacity-60" : ""
                       )}
                       onClick={() => {
@@ -2457,6 +2457,22 @@ export default function ChatPage() {
                           {m.role === "user" ? "You" : "AI"}{m.created_at ? ` · ${new Date(m.created_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}` : ""}
                         </p>
                       </div>
+                      {m.role === "assistant" && m.content && (
+                        <button
+                          className={cn("p-0.5 flex-shrink-0 opacity-0 group-hover/entry:opacity-100 transition-all",
+                            savedItems.some(s => s.source_message_id === m.id) ? "text-primary" : "text-muted-foreground/40 hover:text-primary"
+                          )}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (!savedItems.some(s => s.source_message_id === m.id)) {
+                              saveMessageContent(m.id, m.content);
+                            }
+                          }}
+                          title={savedItems.some(s => s.source_message_id === m.id) ? "Saved" : "Save"}
+                        >
+                          {savedItems.some(s => s.source_message_id === m.id) ? <BookmarkCheck className="h-3 w-3" /> : <Bookmark className="h-3 w-3" />}
+                        </button>
+                      )}
                     </button>
                   );
                 })}
@@ -2476,7 +2492,23 @@ export default function ChatPage() {
 
         {flyoutTab === "saved" && (
           <ScrollArea className="flex-1">
-            <div className="p-3 space-y-3">
+            <div className="p-3 space-y-2 overflow-hidden">
+              {/* Search */}
+              <div className="relative">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="Search saved items..."
+                  className="w-full h-8 rounded-lg border bg-background pl-8 pr-3 text-xs outline-none focus:ring-1 focus:ring-primary"
+                  onChange={(e) => {
+                    const q = e.target.value;
+                    if (q.length >= 2) {
+                      fetch(`/api/chat/saved?q=${encodeURIComponent(q)}`).then(r => r.json()).then(d => setSavedItems(d.items || [])).catch(() => {});
+                    } else if (q.length === 0) { loadSavedItems(); }
+                  }}
+                />
+              </div>
+
               {/* Board filter */}
               {savedBoards.length > 0 && (
                 <div className="flex gap-1 flex-wrap">
@@ -2503,29 +2535,26 @@ export default function ChatPage() {
                 </div>
               ) : (
                 savedItems.filter(i => savedFilter === "All" || i.board === savedFilter).map((item) => (
-                  <div key={item.id} className="group border rounded-lg p-3 hover:border-primary/30 transition-colors">
-                    <div className="flex items-start justify-between gap-2">
+                  <div key={item.id} className="group border rounded-lg p-3 hover:border-primary/30 transition-colors overflow-hidden">
+                    <div className="flex items-start justify-between gap-2 min-w-0">
                       <div className="min-w-0 flex-1">
                         <p className="text-xs font-medium truncate">{item.title}</p>
                         <p className="text-[10px] text-muted-foreground mt-0.5">
                           {item.content_type} · {item.board} · {new Date(item.created_at).toLocaleDateString()}
                         </p>
                       </div>
-                      <button
-                        className="p-0.5 text-muted-foreground/40 hover:text-destructive opacity-0 group-hover:opacity-100 transition-all"
-                        onClick={() => deleteSavedItem(item.id)}
-                        title="Remove"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
+                      <div className="flex gap-0.5 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-all">
+                        <button className="p-0.5 text-muted-foreground/40 hover:text-foreground" onClick={() => { navigator.clipboard.writeText(item.content); toast.success("Copied!"); }} title="Copy"><Copy className="h-3 w-3" /></button>
+                        <button className="p-0.5 text-muted-foreground/40 hover:text-destructive" onClick={() => deleteSavedItem(item.id)} title="Remove"><X className="h-3 w-3" /></button>
+                      </div>
                     </div>
-                    <p className="text-xs text-muted-foreground mt-2 line-clamp-3 whitespace-pre-wrap">{item.content}</p>
+                    <p className="text-xs text-muted-foreground mt-2 line-clamp-3 break-words overflow-hidden">{item.content}</p>
                     {item.conversation_id && (
                       <button
                         className="text-[10px] text-primary hover:underline mt-1.5"
                         onClick={() => { loadConversation(item.conversation_id!); setOutlinePanelOpen(false); }}
                       >
-                        Go to conversation →
+                        Go to conversation
                       </button>
                     )}
                   </div>

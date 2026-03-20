@@ -1363,7 +1363,7 @@ export default function ChatPage() {
           "group flex items-center gap-2 rounded-lg px-3 py-2 cursor-pointer transition-all duration-150",
           isActive
             ? "bg-primary/10 text-foreground"
-            : "text-muted-foreground hover:bg-muted hover:text-foreground",
+            : "text-muted-foreground dark:text-zinc-400 hover:bg-muted hover:text-foreground",
           isOld && !isActive && "opacity-70"
         )}
         onClick={() => loadConversation(conv.id)}

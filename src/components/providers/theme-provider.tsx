@@ -14,15 +14,29 @@ const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 const STORAGE_KEY = "teamprompt-theme";
 
+// Only apply dark theme on dashboard app routes
+const DASHBOARD_ROUTES = ["/vault", "/chat", "/templates", "/approvals",
+  "/guidelines", "/team", "/guardrails", "/activity", "/analytics",
+  "/settings", "/home", "/import-export", "/testing-guide", "/notifications"];
+
+function isDashboardRoute(): boolean {
+  if (typeof window === "undefined") return false;
+  const path = window.location.pathname;
+  return DASHBOARD_ROUTES.some((r) => path.startsWith(r));
+}
+
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>("light");
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY) as Theme | null;
-    if (stored === "dark" || stored === "light") {
+    if (stored === "dark" && isDashboardRoute()) {
       setThemeState(stored);
       document.documentElement.setAttribute("data-theme", stored);
+    } else {
+      // Force light on non-dashboard routes
+      document.documentElement.setAttribute("data-theme", "light");
     }
     setMounted(true);
   }, []);
@@ -30,7 +44,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const setTheme = useCallback((newTheme: Theme) => {
     setThemeState(newTheme);
     localStorage.setItem(STORAGE_KEY, newTheme);
-    document.documentElement.setAttribute("data-theme", newTheme);
+    if (isDashboardRoute()) {
+      document.documentElement.setAttribute("data-theme", newTheme);
+    }
   }, []);
 
   return (

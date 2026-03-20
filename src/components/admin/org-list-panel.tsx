@@ -110,7 +110,7 @@ export function OrgListPanel({ orgs, selectedOrgId, onSelect }: OrgListPanelProp
                 <div className="flex items-center justify-between gap-2">
                   <span className="font-medium text-sm truncate">{org.name}</span>
                   {org.is_suspended && (
-                    <span className="text-[10px] font-medium text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/30 px-1.5 py-0.5 rounded shrink-0">
+                    <span className="text-[10px] font-medium text-red-600 bg-red-100 px-1.5 py-0.5 rounded shrink-0">
                       Suspended
                     </span>
                   )}

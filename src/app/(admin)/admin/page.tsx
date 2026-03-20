@@ -196,7 +196,7 @@ export default function AdminDashboardPage() {
         count: newTicketCount,
         label: "new support tickets",
         href: "/admin/tickets",
-        color: "bg-amber-50 border-amber-200 text-amber-800 dark:bg-amber-950 dark:border-amber-800 dark:text-amber-200",
+        color: "bg-amber-50 border-amber-200 text-amber-800",
         icon: Ticket,
       });
     }
@@ -206,7 +206,7 @@ export default function AdminDashboardPage() {
         count: unresolvedErrorCount,
         label: "unresolved errors",
         href: "/admin/errors",
-        color: "bg-red-50 border-red-200 text-red-800 dark:bg-red-950 dark:border-red-800 dark:text-red-200",
+        color: "bg-red-50 border-red-200 text-red-800",
         icon: AlertTriangle,
       });
     }
@@ -216,7 +216,7 @@ export default function AdminDashboardPage() {
         count: pastDueCount,
         label: "past-due subscriptions",
         href: "/admin/subscriptions",
-        color: "bg-orange-50 border-orange-200 text-orange-800 dark:bg-orange-950 dark:border-orange-800 dark:text-orange-200",
+        color: "bg-orange-50 border-orange-200 text-orange-800",
         icon: CreditCard,
       });
     }
@@ -407,25 +407,25 @@ export default function AdminDashboardPage() {
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-4">
-            <div className="text-center p-4 bg-slate-100 dark:bg-slate-800 rounded-lg">
+            <div className="text-center p-4 bg-slate-100 rounded-lg">
               <div className="text-2xl font-bold">
                 {stats?.planDistribution.free || 0}
               </div>
               <div className="text-sm text-muted-foreground">Free</div>
             </div>
-            <div className="text-center p-4 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+            <div className="text-center p-4 bg-blue-100 rounded-lg">
               <div className="text-2xl font-bold">
                 {stats?.planDistribution.pro || 0}
               </div>
               <div className="text-sm text-muted-foreground">Pro</div>
             </div>
-            <div className="text-center p-4 bg-violet-100 dark:bg-violet-900/30 rounded-lg">
+            <div className="text-center p-4 bg-violet-100 rounded-lg">
               <div className="text-2xl font-bold">
                 {stats?.planDistribution.team || 0}
               </div>
               <div className="text-sm text-muted-foreground">Team</div>
             </div>
-            <div className="text-center p-4 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
+            <div className="text-center p-4 bg-amber-100 rounded-lg">
               <div className="text-2xl font-bold">
                 {stats?.planDistribution.business || 0}
               </div>
@@ -446,7 +446,7 @@ export default function AdminDashboardPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-4 md:grid-cols-4">
-            <div className="text-center p-4 bg-green-100 dark:bg-green-900/30 rounded-lg">
+            <div className="text-center p-4 bg-green-100 rounded-lg">
               <div className="text-2xl font-bold">
                 {stats?.protectionCoverage.protected || 0}
               </div>
@@ -455,7 +455,7 @@ export default function AdminDashboardPage() {
                 Protected
               </div>
             </div>
-            <div className="text-center p-4 bg-slate-100 dark:bg-slate-800 rounded-lg">
+            <div className="text-center p-4 bg-slate-100 rounded-lg">
               <div className="text-2xl font-bold">
                 {stats?.protectionCoverage.inactive || 0}
               </div>
@@ -464,7 +464,7 @@ export default function AdminDashboardPage() {
                 Inactive
               </div>
             </div>
-            <div className="text-center p-4 bg-red-100 dark:bg-red-900/30 rounded-lg">
+            <div className="text-center p-4 bg-red-100 rounded-lg">
               <div className="text-2xl font-bold">
                 {stats?.protectionCoverage.unprotected || 0}
               </div>
@@ -473,7 +473,7 @@ export default function AdminDashboardPage() {
                 Unprotected
               </div>
             </div>
-            <div className="text-center p-4 bg-slate-100 dark:bg-slate-800 rounded-lg">
+            <div className="text-center p-4 bg-slate-100 rounded-lg">
               <div className="text-2xl font-bold">
                 {stats?.protectionCoverage.noExtension || 0}
               </div>
@@ -535,7 +535,7 @@ export default function AdminDashboardPage() {
                 <Link
                   key={org.id}
                   href={`/admin/organizations/${org.id}`}
-                  className="flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800 -mx-2 px-2 py-2 rounded-lg transition-colors"
+                  className="flex items-center justify-between hover:bg-slate-50 -mx-2 px-2 py-2 rounded-lg transition-colors"
                 >
                   <div className="min-w-0">
                     <p className="font-medium text-sm truncate">{org.name}</p>

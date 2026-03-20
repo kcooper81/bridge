@@ -136,13 +136,13 @@ export default function SettingsPage() {
           <CardContent className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">RLS</span>
-              <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
+              <Badge className="bg-green-100 text-green-800">
                 Enabled
               </Badge>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Super Admin Access</span>
-              <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
+              <Badge className="bg-green-100 text-green-800">
                 Profile-based
               </Badge>
             </div>
@@ -170,7 +170,7 @@ export default function SettingsPage() {
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Webhook</span>
-              <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
+              <Badge className="bg-green-100 text-green-800">
                 Active
               </Badge>
             </div>
@@ -241,7 +241,7 @@ export default function SettingsPage() {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">Google Verification</span>
-                  <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
+                  <Badge className="bg-green-100 text-green-800">
                     DNS Verified
                   </Badge>
                 </div>
@@ -255,7 +255,7 @@ export default function SettingsPage() {
                 </h4>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">API Key</span>
-                  <Badge className={process.env.NEXT_PUBLIC_SUPABASE_URL ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300" : "bg-red-100 text-red-800"}>
+                  <Badge className={process.env.NEXT_PUBLIC_SUPABASE_URL ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}>
                     Configured
                   </Badge>
                 </div>

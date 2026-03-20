@@ -134,7 +134,7 @@ export function OrgDetailPanel({
           <div className="flex items-center gap-2 flex-wrap">
             <h2 className="text-xl font-bold tracking-tight truncate">{org.name}</h2>
             {org.is_suspended && (
-              <span className="text-xs font-medium text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/30 px-2 py-0.5 rounded">
+              <span className="text-xs font-medium text-red-600 bg-red-100 px-2 py-0.5 rounded">
                 Suspended
               </span>
             )}

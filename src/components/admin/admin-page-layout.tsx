@@ -34,12 +34,12 @@ export interface StatCardProps {
 }
 
 const COLOR_MAP = {
-  blue: "bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400",
-  green: "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400",
-  red: "bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400",
-  amber: "bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400",
-  purple: "bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400",
-  slate: "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400",
+  blue: "bg-blue-100 text-blue-600",
+  green: "bg-green-100 text-green-600",
+  red: "bg-red-100 text-red-600",
+  amber: "bg-amber-100 text-amber-600",
+  purple: "bg-purple-100 text-purple-600",
+  slate: "bg-slate-100 text-slate-600",
 } as const;
 
 export function StatCard({ label, value, icon: Icon, color, subtitle, onClick }: StatCardProps) {
@@ -375,10 +375,10 @@ export function AdminLoadingState() {
 
 export function PlanBadge({ plan }: { plan: string }) {
   const colors: Record<string, string> = {
-    business: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 border-purple-200 dark:border-purple-800",
-    team: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border-blue-200 dark:border-blue-800",
-    pro: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 border-green-200 dark:border-green-800",
-    free: "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border-slate-200 dark:border-slate-700",
+    business: "bg-purple-100 text-purple-700 border-purple-200",
+    team: "bg-blue-100 text-blue-700 border-blue-200",
+    pro: "bg-green-100 text-green-700 border-green-200",
+    free: "bg-slate-100 text-slate-600 border-slate-200",
   };
   return (
     <Badge variant="outline" className={`capitalize text-[11px] ${colors[plan] || colors.free}`}>
@@ -389,12 +389,12 @@ export function PlanBadge({ plan }: { plan: string }) {
 
 export function StatusBadge({ status }: { status: string }) {
   const colors: Record<string, string> = {
-    active: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300",
-    trialing: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
-    past_due: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300",
-    canceled: "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400",
-    paused: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300",
-    no_subscription: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300",
+    active: "bg-green-100 text-green-700",
+    trialing: "bg-blue-100 text-blue-700",
+    past_due: "bg-red-100 text-red-700",
+    canceled: "bg-slate-100 text-slate-600",
+    paused: "bg-amber-100 text-amber-700",
+    no_subscription: "bg-orange-100 text-orange-700",
   };
   const labels: Record<string, string> = {
     past_due: "past due",
@@ -409,8 +409,8 @@ export function StatusBadge({ status }: { status: string }) {
 
 export function RoleBadge({ role }: { role: string }) {
   const colors: Record<string, string> = {
-    admin: "border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-400",
-    manager: "border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-400",
+    admin: "border-amber-300 text-amber-700",
+    manager: "border-blue-300 text-blue-700",
     member: "",
   };
   return (

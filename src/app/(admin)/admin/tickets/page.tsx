@@ -298,7 +298,7 @@ function TicketContent({
           </div>
           <div className="flex items-center gap-1 flex-shrink-0">
             {isSnoozed(ticket) && (
-              <Badge variant="outline" className="text-[10px] h-5 gap-0.5 border-purple-300 text-purple-700 dark:border-purple-700 dark:text-purple-400">
+              <Badge variant="outline" className="text-[10px] h-5 gap-0.5 border-purple-300 text-purple-700">
                 <AlarmClock className="h-2.5 w-2.5" />
                 {snoozeLabel(ticket.snoozed_until!)}
               </Badge>
@@ -307,7 +307,7 @@ function TicketContent({
               {ticket.type}
             </Badge>
             {ticket.direction === "outbound" && (
-              <Badge variant="outline" className="text-[10px] h-5 border-purple-300 text-purple-700 dark:border-purple-700 dark:text-purple-400">
+              <Badge variant="outline" className="text-[10px] h-5 border-purple-300 text-purple-700">
                 Outbound
               </Badge>
             )}
@@ -519,16 +519,16 @@ function ThreadMessage({
       accent: "bg-primary",
     },
     outbound: {
-      border: "border-blue-200 dark:border-blue-800/50",
-      header: "bg-blue-50/80 dark:bg-blue-950/30",
-      icon: "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400",
+      border: "border-blue-200",
+      header: "bg-blue-50/80",
+      icon: "bg-blue-100 text-blue-600",
       iconEl: <Send className="h-3 w-3" />,
       accent: "bg-blue-500",
     },
     internal: {
-      border: "border-amber-200 dark:border-amber-800/50",
-      header: "bg-amber-50/80 dark:bg-amber-950/30",
-      icon: "bg-amber-100 dark:bg-amber-900 text-amber-600 dark:text-amber-400",
+      border: "border-amber-200",
+      header: "bg-amber-50/80",
+      icon: "bg-amber-100 text-amber-600",
       iconEl: <Lock className="h-3 w-3" />,
       accent: "bg-amber-500",
     },
@@ -567,12 +567,12 @@ function ThreadMessage({
             </span>
           )}
           {direction === "internal" && (
-            <span className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold px-1.5 py-0.5 rounded bg-amber-100/60 dark:bg-amber-900/40 flex-shrink-0">
+            <span className="text-[10px] text-amber-600 font-semibold px-1.5 py-0.5 rounded bg-amber-100/60/40 flex-shrink-0">
               Internal Note
             </span>
           )}
           {emailSent && (
-            <span className="text-[10px] text-blue-600 dark:text-blue-400 font-medium flex items-center gap-0.5 flex-shrink-0">
+            <span className="text-[10px] text-blue-600 font-medium flex items-center gap-0.5 flex-shrink-0">
               <CheckCircle className="h-2.5 w-2.5" /> Sent
             </span>
           )}
@@ -1336,7 +1336,7 @@ export default function TicketsPage() {
           className={cn(
             "flex gap-3 px-4 py-3 cursor-pointer transition-colors active:bg-accent/80",
             isUnread
-              ? "bg-blue-50/50 dark:bg-blue-950/15"
+              ? "bg-blue-50/50"
               : "hover:bg-accent/40"
           )}
           onClick={() => openTicketMobile(ticket)}
@@ -1381,23 +1381,23 @@ export default function TicketsPage() {
                 {preview}
               </p>
               {ticket.priority === "urgent" && (
-                <span className="text-[10px] font-semibold text-red-600 dark:text-red-400 flex-shrink-0">!</span>
+                <span className="text-[10px] font-semibold text-red-600 flex-shrink-0">!</span>
               )}
               {ticket.priority === "high" && (
-                <span className="text-[10px] font-semibold text-orange-600 dark:text-orange-400 flex-shrink-0">!</span>
+                <span className="text-[10px] font-semibold text-orange-600 flex-shrink-0">!</span>
               )}
             </div>
 
             {/* Line 4: minimal status indicators */}
             <div className="flex items-center gap-2 mt-1">
               {snoozed && (
-                <span className="inline-flex items-center gap-0.5 text-[10px] text-purple-600 dark:text-purple-400">
+                <span className="inline-flex items-center gap-0.5 text-[10px] text-purple-600">
                   <AlarmClock className="h-2.5 w-2.5" />
                   {snoozeLabel(ticket.snoozed_until!)}
                 </span>
               )}
               {ticket.direction === "outbound" && (
-                <span className="text-[10px] text-purple-600 dark:text-purple-400 font-medium">Sent</span>
+                <span className="text-[10px] text-purple-600 font-medium">Sent</span>
               )}
               {ticket.notes_count > 0 && (
                 <span className="inline-flex items-center gap-0.5 text-[10px] text-muted-foreground">
@@ -1435,7 +1435,7 @@ export default function TicketsPage() {
           isActive
             ? "bg-primary/10 border-l-2 border-l-primary"
             : isUnread
-              ? "bg-blue-50/70 dark:bg-blue-950/20 border-l-2 border-l-blue-500 hover:bg-blue-100/70 dark:hover:bg-blue-950/30"
+              ? "bg-blue-50/70 border-l-2 border-l-blue-500 hover:bg-blue-100/70"
               : "border-l-2 border-l-transparent hover:bg-accent/60",
           isSelected && !isActive && "bg-primary/5",
           focusedIndex === index && !isActive && "ring-1 ring-inset ring-primary/30"
@@ -1503,12 +1503,12 @@ export default function TicketsPage() {
               {ticket.type}
             </Badge>
             {ticket.direction === "outbound" && (
-              <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 border-purple-300 text-purple-700 dark:border-purple-700 dark:text-purple-400">
+              <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 border-purple-300 text-purple-700">
                 Sent
               </Badge>
             )}
             {snoozed && (
-              <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 gap-0.5 border-purple-300 text-purple-700 dark:border-purple-700 dark:text-purple-400">
+              <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 gap-0.5 border-purple-300 text-purple-700">
                 <AlarmClock className="h-2.5 w-2.5" />
                 {snoozeLabel(ticket.snoozed_until!)}
               </Badge>
@@ -1548,7 +1548,7 @@ export default function TicketsPage() {
                   type="button"
                   title="Assign to me"
                   onClick={(e) => { e.stopPropagation(); assignTicket(ticket.id, userId); }}
-                  className="h-7 w-7 rounded-full flex items-center justify-center hover:bg-blue-100 dark:hover:bg-blue-900/30 text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400 transition-all"
+                  className="h-7 w-7 rounded-full flex items-center justify-center hover:bg-blue-100 text-muted-foreground hover:text-blue-600 transition-all"
                 >
                   <UserRound className="h-3.5 w-3.5" />
                 </button>
@@ -1558,7 +1558,7 @@ export default function TicketsPage() {
                   type="button"
                   title="Snooze"
                   onClick={(e) => e.stopPropagation()}
-                  className="h-7 w-7 rounded-full flex items-center justify-center hover:bg-purple-100 dark:hover:bg-purple-900/30 text-muted-foreground hover:text-purple-600 dark:hover:text-purple-400 transition-all"
+                  className="h-7 w-7 rounded-full flex items-center justify-center hover:bg-purple-100 text-muted-foreground hover:text-purple-600 transition-all"
                 >
                   <AlarmClock className="h-3.5 w-3.5" />
                 </button>
@@ -1568,7 +1568,7 @@ export default function TicketsPage() {
                   type="button"
                   title="Mark as done"
                   onClick={(e) => { e.stopPropagation(); updateStatus(ticket.id, "closed"); }}
-                  className="h-7 w-7 rounded-full flex items-center justify-center hover:bg-green-100 dark:hover:bg-green-900/30 text-muted-foreground hover:text-green-600 dark:hover:text-green-400 transition-all"
+                  className="h-7 w-7 rounded-full flex items-center justify-center hover:bg-green-100 text-muted-foreground hover:text-green-600 transition-all"
                 >
                   <CheckCircle className="h-3.5 w-3.5" />
                 </button>
@@ -1580,7 +1580,7 @@ export default function TicketsPage() {
               type="button"
               title="Move to inbox"
               onClick={(e) => { e.stopPropagation(); moveToFolder([ticket.id], "inbox"); }}
-              className="h-7 w-7 rounded-full flex items-center justify-center hover:bg-blue-100 dark:hover:bg-blue-900/30 text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400 transition-all"
+              className="h-7 w-7 rounded-full flex items-center justify-center hover:bg-blue-100 text-muted-foreground hover:text-blue-600 transition-all"
             >
               <ArchiveRestore className="h-3.5 w-3.5" />
             </button>
@@ -1721,7 +1721,7 @@ export default function TicketsPage() {
           <button
             type="button"
             onClick={() => { setReplyMode("reply"); setReplyExpanded(true); }}
-            className="flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-blue-600 hover:border-blue-300 dark:hover:border-blue-700 transition-colors"
+            className="flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-blue-600 hover:border-blue-300 transition-colors"
           >
             <Mail className="h-3 w-3" />
             Reply
@@ -1729,7 +1729,7 @@ export default function TicketsPage() {
           <button
             type="button"
             onClick={() => { setReplyMode("note"); setReplyExpanded(true); }}
-            className="flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-amber-600 hover:border-amber-300 dark:hover:border-amber-700 transition-colors"
+            className="flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-amber-600 hover:border-amber-300 transition-colors"
           >
             <Lock className="h-3 w-3" />
             Note
@@ -1737,7 +1737,7 @@ export default function TicketsPage() {
           <button
             type="button"
             onClick={() => { setReplyMode("forward"); setReplyExpanded(true); }}
-            className="flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-purple-600 hover:border-purple-300 dark:hover:border-purple-700 transition-colors"
+            className="flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-purple-600 hover:border-purple-300 transition-colors"
           >
             <Forward className="h-3 w-3" />
             Forward
@@ -1795,7 +1795,7 @@ export default function TicketsPage() {
         {/* Reply context */}
         {replyMode === "reply" && (
           <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground truncate hidden sm:flex">
-            <span>to {selectedTicket.user_email || <span className="text-amber-600 dark:text-amber-400">no email</span>}</span>
+            <span>to {selectedTicket.user_email || <span className="text-amber-600">no email</span>}</span>
             {selectedTicket.inbox_email && <span>via {selectedTicket.inbox_email.split("@")[0]}</span>}
             {!showCc && (
               <button type="button" onClick={() => setShowCc(true)} className="text-primary hover:underline ml-1">
@@ -1936,7 +1936,7 @@ export default function TicketsPage() {
       {/* Footer with send */}
       <div className="flex items-center justify-between px-3 sm:px-4 pb-3">
         {replyMode === "reply" && !selectedTicket.user_email ? (
-          <p className="text-[11px] text-amber-600 dark:text-amber-400 flex items-center gap-1">
+          <p className="text-[11px] text-amber-600 flex items-center gap-1">
             <AlertTriangle className="h-3 w-3" />
             No email — saved as note only
           </p>
@@ -2024,7 +2024,7 @@ export default function TicketsPage() {
             {folder === "spam" ? "Spam" : folder === "trash" ? "Trash" : "Inbox"}
           </h1>
           {folder === "inbox" && stats.unread > 0 && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 px-2 py-0.5 text-xs font-medium">
+            <span className="inline-flex items-center gap-1 rounded-full bg-blue-100/40 text-blue-700 px-2 py-0.5 text-xs font-medium">
               {stats.unread} unread
             </span>
           )}

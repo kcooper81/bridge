@@ -1232,7 +1232,7 @@ export default function ContentPage() {
 
               {/* Content preview */}
               <div
-                className="prose prose-sm prose-zinc dark:prose-invert max-w-none mt-4
+                className="prose prose-sm prose-zinc max-w-none mt-4
                   prose-headings:font-semibold prose-headings:tracking-tight
                   prose-h2:text-lg prose-h2:mt-8 prose-h2:mb-3
                   prose-p:leading-relaxed prose-p:text-foreground/80

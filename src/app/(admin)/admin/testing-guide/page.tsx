@@ -1453,9 +1453,9 @@ const statusConfig: Record<StepStatus, { label: string; color: string; icon: Rea
 };
 
 const priorityConfig: Record<Priority, { label: string; className: string }> = {
-  P0: { label: "P0", className: "bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-400" },
-  P1: { label: "P1", className: "bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400" },
-  P2: { label: "P2", className: "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400" },
+  P0: { label: "P0", className: "bg-red-100 text-red-700" },
+  P1: { label: "P1", className: "bg-amber-100 text-amber-700" },
+  P2: { label: "P2", className: "bg-slate-100 text-slate-500" },
 };
 
 function exportResults(state: Record<string, StepState>): string {
@@ -1515,7 +1515,7 @@ function ProgressBar({ counts, total }: { counts: Record<StepStatus, number>; to
   const tested = counts.pass + counts.fail + counts.skip;
   return (
     <div className="space-y-2">
-      <div className="h-3 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden flex">
+      <div className="h-3 rounded-full bg-slate-200 overflow-hidden flex">
         {passPct > 0 && (
           <div
             className="h-full bg-emerald-500 transition-all duration-300"
@@ -1546,7 +1546,7 @@ function ProgressBar({ counts, total }: { counts: Record<StepStatus, number>; to
           <span className="w-2 h-2 rounded-full bg-amber-400" /> {counts.skip} skip
         </span>
         <span className="flex items-center gap-1">
-          <span className="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-600" /> {counts.untested} untested
+          <span className="w-2 h-2 rounded-full bg-slate-300" /> {counts.untested} untested
         </span>
         <span className="ml-auto font-medium tabular-nums">
           {tested}/{total} tested ({total === 0 ? 0 : Math.round((tested / total) * 100)}%)
@@ -1573,7 +1573,7 @@ function StatusCycleButton({
       onClick={() => onChange(nextStatus)}
       className={cn(
         "flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium transition-colors",
-        "hover:bg-slate-100 dark:hover:bg-slate-800",
+        "hover:bg-slate-100",
         config.color
       )}
       title={`Click to cycle: ${config.label} → ${statusConfig[nextStatus].label}`}
@@ -1637,10 +1637,10 @@ function SectionBlock({
   const failCount = counts.fail;
 
   return (
-    <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 overflow-hidden">
+    <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
       <button
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center gap-3 p-4 sm:p-5 text-left hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors"
+        className="w-full flex items-center gap-3 p-4 sm:p-5 text-left hover:bg-slate-50/40 transition-colors"
       >
         {open ? (
           <ChevronDown className="h-4 w-4 text-slate-400 shrink-0" />
@@ -1655,7 +1655,7 @@ function SectionBlock({
               {section.steps.length} steps
             </span>
             {failCount > 0 && (
-              <span className="text-xs font-medium text-red-600 bg-red-100 dark:bg-red-500/15 px-1.5 py-0.5 rounded-full flex items-center gap-1">
+              <span className="text-xs font-medium text-red-600 bg-red-100 px-1.5 py-0.5 rounded-full flex items-center gap-1">
                 <Bug className="h-3 w-3" /> {failCount} fail
               </span>
             )}
@@ -1678,14 +1678,14 @@ function SectionBlock({
       </button>
 
       {open && (
-        <div className="border-t border-slate-100 dark:border-slate-800">
+        <div className="border-t border-slate-100">
           {/* Preconditions */}
           {section.preconditions.length > 0 && (
-            <div className="px-4 sm:px-5 py-3 bg-blue-50/50 dark:bg-blue-500/[0.04] border-b border-slate-100 dark:border-slate-800">
-              <p className="text-[11px] font-semibold uppercase tracking-wider text-blue-600 dark:text-blue-400 mb-1.5">
+            <div className="px-4 sm:px-5 py-3 bg-blue-50/50 border-b border-slate-100">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-blue-600 mb-1.5">
                 Preconditions
               </p>
-              <ul className="text-xs text-slate-600 dark:text-slate-400 space-y-0.5">
+              <ul className="text-xs text-slate-600 space-y-0.5">
                 {section.preconditions.map((p) => (
                   <li key={p} className="flex items-start gap-1.5">
                     <AlertTriangle className="h-3 w-3 text-blue-400 shrink-0 mt-0.5" />
@@ -1707,10 +1707,10 @@ function SectionBlock({
               <div
                 key={key}
                 className={cn(
-                  "px-4 sm:px-5 py-3 border-b border-slate-100 dark:border-slate-800 last:border-0 transition-colors",
-                  s.status === "pass" && "bg-emerald-50/40 dark:bg-emerald-500/[0.03]",
-                  s.status === "fail" && "bg-red-50/40 dark:bg-red-500/[0.03]",
-                  s.status === "skip" && "bg-amber-50/30 dark:bg-amber-500/[0.02]"
+                  "px-4 sm:px-5 py-3 border-b border-slate-100 last:border-0 transition-colors",
+                  s.status === "pass" && "bg-emerald-50/40",
+                  s.status === "fail" && "bg-red-50/40",
+                  s.status === "skip" && "bg-amber-50/30"
                 )}
               >
                 <div className="flex items-start gap-3">
@@ -1752,7 +1752,7 @@ function SectionBlock({
                     <div className="flex items-center gap-2 mt-2 ml-5">
                       <button
                         onClick={() => toggleNote(key)}
-                        className="text-[11px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 flex items-center gap-1"
+                        className="text-[11px] text-slate-400 hover:text-slate-600 flex items-center gap-1"
                       >
                         {noteOpen ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
                         {s.note ? "Edit note" : "Add note"}
@@ -1775,7 +1775,7 @@ function SectionBlock({
                     {noteOpen && (
                       <div className="mt-2 ml-5">
                         <textarea
-                          className="w-full text-xs border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 placeholder:text-slate-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                          className="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 bg-white text-slate-700 placeholder:text-slate-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 resize-none"
                           rows={2}
                           placeholder="Notes, actual result, reproduction steps..."
                           value={s.note}
@@ -1867,8 +1867,8 @@ export default function TestingGuidePage() {
   if (!mounted) {
     return (
       <div className="max-w-4xl">
-        <div className="h-8 w-48 rounded bg-slate-200 dark:bg-slate-800 animate-pulse mb-4" />
-        <div className="h-4 w-96 rounded bg-slate-200 dark:bg-slate-800 animate-pulse" />
+        <div className="h-8 w-48 rounded bg-slate-200 animate-pulse mb-4" />
+        <div className="h-4 w-96 rounded bg-slate-200 animate-pulse" />
       </div>
     );
   }
@@ -1938,10 +1938,10 @@ export default function TestingGuidePage() {
             placeholder="Search test steps..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 placeholder:text-slate-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-lg bg-white text-slate-700 placeholder:text-slate-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
-        <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 rounded-lg p-0.5">
+        <div className="flex items-center gap-1 bg-slate-100 rounded-lg p-0.5">
           <Filter className="h-3.5 w-3.5 text-slate-400 mx-1.5" />
           {filterOptions.map((opt) => (
             <button
@@ -1950,8 +1950,8 @@ export default function TestingGuidePage() {
               className={cn(
                 "text-xs font-medium px-2 py-1 rounded-md transition-colors tabular-nums",
                 filter === opt.value
-                  ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm"
-                  : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                  ? "bg-white text-slate-900 shadow-sm"
+                  : "text-slate-500 hover:text-slate-700"
               )}
             >
               {opt.label}
@@ -1981,26 +1981,26 @@ export default function TestingGuidePage() {
         <div className={cn(
           "mt-8 rounded-xl border p-6 text-center",
           counts.fail > 0
-            ? "border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-500/10"
-            : "border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-500/10"
+            ? "border-red-200 bg-red-50"
+            : "border-emerald-200 bg-emerald-50"
         )}>
           {counts.fail > 0 ? (
             <>
-              <Bug className="h-8 w-8 text-red-600 dark:text-red-400 mx-auto mb-2" />
-              <p className="text-lg font-semibold text-red-700 dark:text-red-400">
+              <Bug className="h-8 w-8 text-red-600 mx-auto mb-2" />
+              <p className="text-lg font-semibold text-red-700">
                 Testing complete — {counts.fail} failure{counts.fail > 1 ? "s" : ""} found
               </p>
-              <p className="text-sm text-red-600/80 dark:text-red-400/70 mt-1">
+              <p className="text-sm text-red-600/80/70 mt-1">
                 Export the report to share results with the team.
               </p>
             </>
           ) : (
             <>
-              <UserCheck className="h-8 w-8 text-emerald-600 dark:text-emerald-400 mx-auto mb-2" />
-              <p className="text-lg font-semibold text-emerald-700 dark:text-emerald-400">
+              <UserCheck className="h-8 w-8 text-emerald-600 mx-auto mb-2" />
+              <p className="text-lg font-semibold text-emerald-700">
                 All tests passed!
               </p>
-              <p className="text-sm text-emerald-600/80 dark:text-emerald-400/70 mt-1">
+              <p className="text-sm text-emerald-600/80/70 mt-1">
                 Every feature has been verified across all roles.
               </p>
             </>

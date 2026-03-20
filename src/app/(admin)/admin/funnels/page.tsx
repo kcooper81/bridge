@@ -371,19 +371,19 @@ export default function FunnelsPage() {
               <p className="text-3xl font-bold">{data.totalOrgs - data.orgsWithSubscription}</p>
               <p className="text-xs text-muted-foreground mt-1">Free</p>
             </div>
-            <div className="text-center p-4 rounded-lg bg-blue-50 dark:bg-blue-950/30">
+            <div className="text-center p-4 rounded-lg bg-blue-50">
               <p className="text-3xl font-bold text-blue-600">{data.trialOrgs}</p>
               <p className="text-xs text-muted-foreground mt-1">Trialing</p>
             </div>
-            <div className="text-center p-4 rounded-lg bg-green-50 dark:bg-green-950/30">
+            <div className="text-center p-4 rounded-lg bg-green-50">
               <p className="text-3xl font-bold text-green-600">{data.paidProOrgs}</p>
               <p className="text-xs text-muted-foreground mt-1">Pro Plan</p>
             </div>
-            <div className="text-center p-4 rounded-lg bg-sky-50 dark:bg-sky-950/30">
+            <div className="text-center p-4 rounded-lg bg-sky-50">
               <p className="text-3xl font-bold text-sky-600">{data.paidTeamOrgs}</p>
               <p className="text-xs text-muted-foreground mt-1">Team Plan</p>
             </div>
-            <div className="text-center p-4 rounded-lg bg-purple-50 dark:bg-purple-950/30">
+            <div className="text-center p-4 rounded-lg bg-purple-50">
               <p className="text-3xl font-bold text-purple-600">{data.paidBusinessOrgs}</p>
               <p className="text-xs text-muted-foreground mt-1">Business Plan</p>
             </div>

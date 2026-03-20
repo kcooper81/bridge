@@ -183,8 +183,8 @@ export default function AnalyticsPage() {
       <div className="grid grid-cols-3 gap-3">
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="rounded-lg p-2 bg-blue-100 dark:bg-blue-900/30">
-              <Building2 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            <div className="rounded-lg p-2 bg-blue-100">
+              <Building2 className="h-5 w-5 text-blue-600" />
             </div>
             <div>
               <p className="text-2xl font-bold">{totals.orgs}</p>
@@ -194,8 +194,8 @@ export default function AnalyticsPage() {
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="rounded-lg p-2 bg-green-100 dark:bg-green-900/30">
-              <Users className="h-5 w-5 text-green-600 dark:text-green-400" />
+            <div className="rounded-lg p-2 bg-green-100">
+              <Users className="h-5 w-5 text-green-600" />
             </div>
             <div>
               <p className="text-2xl font-bold">{totals.users}</p>
@@ -205,8 +205,8 @@ export default function AnalyticsPage() {
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="rounded-lg p-2 bg-violet-100 dark:bg-violet-900/30">
-              <Archive className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+            <div className="rounded-lg p-2 bg-violet-100">
+              <Archive className="h-5 w-5 text-violet-600" />
             </div>
             <div>
               <p className="text-2xl font-bold">{totals.prompts}</p>

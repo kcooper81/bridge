@@ -150,7 +150,7 @@ export function trackInviteAccepted() {
   trackEvent({ action: "invite_accepted", category: "engagement" });
 }
 
-export function trackGuardrailViolation(severity: "block" | "warn") {
+export function trackGuardrailViolation(severity: "block" | "warn" | "redact") {
   trackEvent({
     action: "guardrail_violation",
     category: "security",

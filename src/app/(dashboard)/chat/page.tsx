@@ -561,9 +561,15 @@ export default function ChatPage() {
 
             if (!prefixParsed) {
               buffer += chunk;
-              // Strip optional __REDACTIONS__ prefix
-              const redactPfx = buffer.match(/^__REDACTIONS__.*?__\n/);
-              if (redactPfx) buffer = buffer.slice(redactPfx[0].length);
+              // Parse optional __REDACTIONS__ prefix
+              const redactPfx = buffer.match(/^__REDACTIONS__(.*?)__\n/);
+              if (redactPfx) {
+                try {
+                  const parsed = JSON.parse(redactPfx[1]);
+                  setRedactions(parsed);
+                } catch { /* ignore parse errors */ }
+                buffer = buffer.slice(redactPfx[0].length);
+              }
               const match = buffer.match(/^__CONV_ID__[a-f0-9-]+__\n/);
               if (match) {
                 prefixParsed = true;
@@ -770,9 +776,15 @@ export default function ChatPage() {
             let chunk = decoder.decode(value, { stream: true });
             if (!convIdParsed) {
               buffer += chunk;
-              // Strip optional __REDACTIONS__ prefix
-              const redactPfx = buffer.match(/^__REDACTIONS__.*?__\n/);
-              if (redactPfx) buffer = buffer.slice(redactPfx[0].length);
+              // Parse optional __REDACTIONS__ prefix
+              const redactPfx = buffer.match(/^__REDACTIONS__(.*?)__\n/);
+              if (redactPfx) {
+                try {
+                  const parsed = JSON.parse(redactPfx[1]);
+                  setRedactions(parsed);
+                } catch { /* ignore parse errors */ }
+                buffer = buffer.slice(redactPfx[0].length);
+              }
               const match = buffer.match(/^__CONV_ID__([a-f0-9-]+)__\n/);
               if (match) {
                 if (!activeConvId) { setActiveConvId(match[1]); loadConversations(); }

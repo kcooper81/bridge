@@ -187,10 +187,12 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      const hasBlock = violations.some((v) => v.severity === "block");
+      const blockViolations = violations.filter((v) => v.severity === "block");
+      const redactViolations = violations.filter((v) => v.severity === "redact");
       const overrideDisabled = orgSettings.allow_guardrail_override === false;
+      const hasBlock = blockViolations.length > 0 || (overrideDisabled && violations.some((v) => v.severity === "warn"));
 
-      if (hasBlock || (overrideDisabled && violations.length > 0)) {
+      if (hasBlock) {
         // Log the blocked upload
         try {
           await db.from("conversation_logs").insert({
@@ -210,6 +212,57 @@ export async function POST(request: NextRequest) {
           blocked: true,
           violations,
           files: results.map((r) => ({ name: r.name, type: r.type, size: r.size })),
+        });
+      }
+
+      // Apply redactions to file text if redact violations exist
+      const redactionsList: Array<{original: string; replacement: string; category: string}> = [];
+      if (redactViolations.length > 0) {
+        for (const v of redactViolations) {
+          const categoryLabel = (v.category || "SENSITIVE").toUpperCase().replace(/[^A-Z_]/g, "_");
+          const replacement = `[${categoryLabel}]`;
+
+          const matchedRule = (rulesResult.data || []).find((r) => r.name === v.ruleName);
+          const matchedTerm = (termsResult.data || []).find((t) => v.ruleName === `Sensitive term: "${t.term}"`);
+
+          for (const result of results) {
+            if (result.text.startsWith("[")) continue; // skip placeholder text
+
+            if (matchedRule) {
+              try {
+                const regex = new RegExp(matchedRule.pattern, "gi");
+                const matches = result.text.match(regex);
+                if (matches) {
+                  for (const match of matches) {
+                    redactionsList.push({ original: match.slice(0, 3) + "***", replacement, category: v.category });
+                  }
+                  result.text = result.text.replace(regex, replacement);
+                }
+              } catch { /* invalid regex — skip */ }
+            } else if (matchedTerm) {
+              const termRegex = new RegExp(matchedTerm.term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi");
+              const matches = result.text.match(termRegex);
+              if (matches) {
+                for (const match of matches) {
+                  redactionsList.push({ original: match.slice(0, 3) + "***", replacement, category: v.category });
+                }
+                result.text = result.text.replace(termRegex, replacement);
+              }
+            }
+          }
+        }
+      }
+
+      if (redactionsList.length > 0) {
+        return NextResponse.json({
+          files: results.map((r) => ({
+            name: r.name,
+            type: r.type,
+            size: r.size,
+            text: r.text,
+            truncated: r.truncated,
+          })),
+          redactions: redactionsList,
         });
       }
     }

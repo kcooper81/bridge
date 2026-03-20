@@ -87,7 +87,7 @@ export async function importSensitiveTerms(
     term_type: "exact" | "pattern" | "keyword";
     category: string;
     description?: string;
-    severity?: "block" | "warn";
+    severity?: "block" | "warn" | "redact";
   }>
 ): Promise<{ imported: number; failed: number }> {
   const supabase = createClient();

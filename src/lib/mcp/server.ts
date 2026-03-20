@@ -184,6 +184,8 @@ export function createMcpServer(orgId: string, scopes: string[]): McpServer {
 
         const violations: string[] = [];
         let action = "allow";
+        let redactedContent = content;
+        const redactions: Array<{original: string; replacement: string; category: string}> = [];
 
         // Check security rules
         for (const rule of rulesResult.data || []) {
@@ -192,7 +194,19 @@ export function createMcpServer(orgId: string, scopes: string[]): McpServer {
             if (regex.test(content)) {
               violations.push(`[${rule.severity}] ${rule.name} (${rule.category})`);
               if (rule.severity === "block") action = "block";
-              else if (action !== "block") action = "warn";
+              else if (rule.severity === "redact") {
+                if (action !== "block") action = "auto_redact";
+                const categoryLabel = (rule.category || "SENSITIVE").toUpperCase().replace(/[^A-Z_]/g, "_");
+                const replacement = `[${categoryLabel}]`;
+                const matches = redactedContent.match(new RegExp(rule.pattern, "gi"));
+                if (matches) {
+                  for (const m of matches) {
+                    redactions.push({ original: m.slice(0, 3) + "***", replacement, category: rule.category });
+                  }
+                  redactedContent = redactedContent.replace(new RegExp(rule.pattern, "gi"), replacement);
+                }
+              }
+              else if (action !== "block" && action !== "auto_redact") action = "warn";
             }
           } catch { /* invalid regex — skip */ }
         }
@@ -204,14 +218,39 @@ export function createMcpServer(orgId: string, scopes: string[]): McpServer {
             if (content.toLowerCase().includes(termLower)) {
               violations.push(`[${term.severity}] Sensitive term: "${term.term}" (${term.category})`);
               if (term.severity === "block") action = "block";
-              else if (action !== "block") action = "warn";
+              else if (term.severity === "redact") {
+                if (action !== "block") action = "auto_redact";
+                const categoryLabel = (term.category || "SENSITIVE").toUpperCase().replace(/[^A-Z_]/g, "_");
+                const replacement = `[${categoryLabel}]`;
+                const termRegex = new RegExp(term.term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi");
+                const matches = redactedContent.match(termRegex);
+                if (matches) {
+                  for (const m of matches) {
+                    redactions.push({ original: m.slice(0, 3) + "***", replacement, category: term.category });
+                  }
+                  redactedContent = redactedContent.replace(termRegex, replacement);
+                }
+              }
+              else if (action !== "block" && action !== "auto_redact") action = "warn";
             }
           } else if (term.term_type === "regex") {
             try {
               if (new RegExp(term.term, "gi").test(content)) {
                 violations.push(`[${term.severity}] Pattern match: "${term.term}" (${term.category})`);
                 if (term.severity === "block") action = "block";
-                else if (action !== "block") action = "warn";
+                else if (term.severity === "redact") {
+                  if (action !== "block") action = "auto_redact";
+                  const categoryLabel = (term.category || "SENSITIVE").toUpperCase().replace(/[^A-Z_]/g, "_");
+                  const replacement = `[${categoryLabel}]`;
+                  const matches = redactedContent.match(new RegExp(term.term, "gi"));
+                  if (matches) {
+                    for (const m of matches) {
+                      redactions.push({ original: m.slice(0, 3) + "***", replacement, category: term.category });
+                    }
+                    redactedContent = redactedContent.replace(new RegExp(term.term, "gi"), replacement);
+                  }
+                }
+                else if (action !== "block" && action !== "auto_redact") action = "warn";
               }
             } catch { /* skip */ }
           }
@@ -221,7 +260,10 @@ export function createMcpServer(orgId: string, scopes: string[]): McpServer {
           return { content: [{ type: "text" as const, text: "✓ No sensitive data detected. Safe to send." }] };
         }
 
-        const text = `⚠ Found ${violations.length} issue(s) — Action: **${action.toUpperCase()}**\n\n${violations.map((v) => `• ${v}`).join("\n")}`;
+        let text = `⚠ Found ${violations.length} issue(s) — Action: **${action.toUpperCase()}**\n\n${violations.map((v) => `• ${v}`).join("\n")}`;
+        if (action === "auto_redact" && redactions.length > 0) {
+          text += `\n\n**Redacted content:**\n${redactedContent}`;
+        }
         return { content: [{ type: "text" as const, text }] };
       }
     );

@@ -49,9 +49,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (severity && !["block", "warn"].includes(severity)) {
+    if (severity && !["block", "warn", "redact"].includes(severity)) {
       return NextResponse.json(
-        { error: "severity must be 'block' or 'warn'" },
+        { error: "severity must be 'block', 'warn', or 'redact'" },
         { status: 400 }
       );
     }

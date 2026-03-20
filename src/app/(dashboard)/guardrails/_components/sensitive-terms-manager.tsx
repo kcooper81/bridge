@@ -223,7 +223,7 @@ export function SensitiveTermsManager({ canEdit, teams = [] }: SensitiveTermsMan
             term_type: "exact" as const,
             category: (parts[1] as SensitiveTermCategory) || "custom",
             description: parts[2] || undefined,
-            severity: (parts[3] as "block" | "warn") || "warn",
+            severity: (parts[3] as "block" | "warn" | "redact") || "warn",
           };
         })
         .filter((t) => t.term);
@@ -515,6 +515,9 @@ ACME-2024, internal_codes`}
               </code>
               <p className="mt-2">
                 Categories: customer_data, employee_data, project_names, product_names, internal_codes, partner_data, financial_data, legal_data, custom
+              </p>
+              <p className="mt-1">
+                Severity: block, warn, or redact (default: warn)
               </p>
             </div>
           </div>

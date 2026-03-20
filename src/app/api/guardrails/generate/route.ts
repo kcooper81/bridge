@@ -27,7 +27,7 @@ Each rule must have:
   - "regex": JavaScript-compatible regular expression (for structured formats like IDs, keys, numbers)
   - "glob": wildcard pattern using * (for prefix/suffix matching)
 - category: One of "api_keys", "credentials", "pii", "secrets", "internal_terms", "internal", "financial", "health", "custom"
-- severity: "block" (prevent sending) or "warn" (alert but allow)
+- severity: "block" (prevent sending), "warn" (alert but allow), or "redact" (auto-replace matched text with a placeholder and allow the message through)
 
 Guidelines:
 - Prefer "keywords" for simple word/phrase lists — it's the easiest for admins to understand and edit
@@ -189,7 +189,7 @@ export async function POST(request: NextRequest) {
     // Validate and sanitize each rule
     const validCategories = new Set(["api_keys", "credentials", "pii", "secrets", "internal_terms", "internal", "financial", "health", "custom"]);
     const validPatternTypes = new Set(["keywords", "exact", "regex", "glob"]);
-    const validSeverities = new Set(["block", "warn"]);
+    const validSeverities = new Set(["block", "warn", "redact"]);
 
     const sanitized: GeneratedRule[] = rules.slice(0, 10).map((r) => ({
       name: String(r.name || "").slice(0, 100),

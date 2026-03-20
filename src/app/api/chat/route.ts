@@ -159,7 +159,7 @@ export async function POST(request: NextRequest) {
 
           for (const v of redactViolations) {
             const matchedRule = (rulesResult.data || []).find((r) => r.name === v.ruleName);
-            const matchedTerm = (termsResult.data || []).find((t) => v.ruleName.includes(t.term));
+            const matchedTerm = (termsResult.data || []).find((t) => v.ruleName === `Sensitive term: "${t.term}"`);
 
             const categoryLabel = (v.category || "SENSITIVE").toUpperCase().replace(/[^A-Z_]/g, "_");
             const replacement = `[${categoryLabel}]`;

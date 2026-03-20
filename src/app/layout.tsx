@@ -68,6 +68,14 @@ export default function RootLayout({
             __html: `
               (function() {
                 try {
+                  var path = window.location.pathname;
+                  // Only apply dark theme on dashboard app routes
+                  // Marketing, admin, LP, auth pages are always light
+                  var dashboardRoutes = ['/vault','/chat','/templates','/approvals',
+                    '/guidelines','/team','/guardrails','/activity','/analytics',
+                    '/settings','/home','/import-export','/testing-guide','/notifications'];
+                  var isDashboard = dashboardRoutes.some(function(r) { return path.startsWith(r); });
+                  if (!isDashboard) return;
                   var theme = localStorage.getItem('teamprompt-theme');
                   if (theme === 'dark') {
                     document.documentElement.setAttribute('data-theme', 'dark');

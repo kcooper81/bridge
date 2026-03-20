@@ -1954,7 +1954,7 @@ export default function ChatPage() {
                       <div className="flex items-end rounded-2xl border bg-background shadow-sm focus-within:ring-1 focus-within:ring-primary/30 focus-within:border-primary/30 transition-all">
                         <button
                           type="button"
-                          className="p-3 text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
+                          className="pb-3.5 pt-3.5 px-3 text-muted-foreground hover:text-foreground transition-colors flex-shrink-0 self-end"
                           onClick={() => fileInputRef.current?.click()}
                           disabled={isLoading || noProviders}
                           title="Attach files"
@@ -1979,7 +1979,7 @@ export default function ChatPage() {
                         <button
                           type="submit"
                           className={cn(
-                            "p-3 flex-shrink-0 transition-colors",
+                            "pb-3.5 pt-3.5 px-3 flex-shrink-0 transition-colors self-end",
                             (!chatInput.trim() && pendingImages.length === 0 && pendingFiles.length === 0) || isLoading || noProviders
                               ? "text-muted-foreground/30"
                               : "text-primary hover:text-primary/80"

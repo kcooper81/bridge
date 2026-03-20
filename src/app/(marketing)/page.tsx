@@ -54,6 +54,11 @@ import {
   Lock,
   Building,
   Bell,
+  MessageSquare,
+  Monitor,
+  FileUp,
+  Terminal,
+  RefreshCw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 // Plan constants removed — pricing section now links to /pricing page
@@ -131,7 +136,7 @@ export default function LandingPage() {
               </h1>
 
               <p className="mt-6 text-lg sm:text-xl text-zinc-400 max-w-xl leading-relaxed">
-                Monitor what your team sends to ChatGPT, Claude, and Gemini. Block sensitive data before it leaves the browser — and give everyone a shared prompt library so they don&apos;t start from scratch.
+                Protect sensitive data across ChatGPT, Claude, and Gemini with real-time DLP scanning. Give your team a shared prompt library and a built-in AI chat — all protected by 19 compliance frameworks.
               </p>
 
               <div className="mt-10 flex flex-col sm:flex-row gap-4">
@@ -160,7 +165,8 @@ export default function LandingPage() {
                   dark
                   stats={[
                     { value: "5", label: "AI tools supported" },
-                    { value: "14", label: "Built-in guidelines" },
+                    { value: "19", label: "Compliance Packs" },
+                    { value: "2", label: "Ways to Deploy" },
                     { value: "<2m", label: "Setup time" },
                   ]}
                   className="max-w-md"
@@ -689,7 +695,7 @@ export default function LandingPage() {
               { icon: Building2, value: "20+", label: "Industries" },
               { icon: Layers, value: "500+", label: "SEO Pages" },
               { icon: Sparkles, value: "5", label: "AI Platforms Supported" },
-              { icon: Shield, value: "14", label: "Built-in Guidelines" },
+              { icon: Shield, value: "19", label: "Compliance Packs" },
             ].map((stat) => (
               <div
                 key={stat.label}
@@ -759,6 +765,82 @@ export default function LandingPage() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ━━━ BUILT-IN AI CHAT ━━━ */}
+      <section className="py-20 sm:py-28 border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="max-w-2xl mb-14">
+            <SectionLabel>AI Chat</SectionLabel>
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
+              A DLP-Protected AI Chat, Built In
+            </h2>
+            <p className="mt-4 text-lg text-muted-foreground">
+              Your team gets a secure AI chat that scans every message before it reaches the AI. Upload files, compare models side-by-side, and use admin commands to query real usage data — all with the same DLP rules protecting your browser extension.
+            </p>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <FeatureCard
+              icon={Layers}
+              title="Multi-Model Support"
+              description="Connect OpenAI, Anthropic, or Google. Switch models per conversation."
+              iconBg="bg-violet-500/10"
+            />
+            <FeatureCard
+              icon={RefreshCw}
+              title="Smart Redaction"
+              description="Sensitive data is automatically replaced with placeholders. Messages still send safely."
+              iconBg="bg-amber-500/10"
+            />
+            <FeatureCard
+              icon={FileUp}
+              title="File Upload with DLP"
+              description="Upload PDFs, Word docs, code files. Every file is scanned before text reaches the AI."
+              iconBg="bg-emerald-500/10"
+            />
+            <FeatureCard
+              icon={Terminal}
+              title="Admin Commands"
+              description="Type /activity, /violations, or /usage to query real data from your database."
+              iconBg="bg-blue-500/10"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* ━━━ TWO WAYS TO DEPLOY ━━━ */}
+      <section className="py-20 sm:py-28 border-b border-border">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-14">
+            <SectionLabel>Deployment</SectionLabel>
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
+              Use AI Your Way — Extension or Built-In Chat
+            </h2>
+          </div>
+
+          <div className="grid gap-6 sm:grid-cols-2">
+            <div className="rounded-2xl border border-border bg-card p-8 hover:border-primary/30 transition-all duration-300">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-500/10 mb-5">
+                <Monitor className="h-5 w-5 text-foreground/70" />
+              </div>
+              <h3 className="text-xl font-semibold">Browser Extension</h3>
+              <p className="mt-2 text-muted-foreground leading-relaxed">
+                Works inside ChatGPT, Claude, Gemini, Copilot, and Perplexity. Scans prompts in real time. Insert prompts from your library with one click.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-border bg-card p-8 hover:border-primary/30 transition-all duration-300">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-500/10 mb-5">
+                <MessageSquare className="h-5 w-5 text-foreground/70" />
+              </div>
+              <h3 className="text-xl font-semibold">Built-In AI Chat</h3>
+              <p className="mt-2 text-muted-foreground leading-relaxed">
+                A secure chat powered by your own API keys. DLP scanning, file uploads, smart redaction, and admin analytics — all in one place.
+              </p>
+            </div>
           </div>
         </div>
       </section>

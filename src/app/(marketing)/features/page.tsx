@@ -29,6 +29,8 @@ import {
   Upload,
   Users,
   Zap,
+  MessageSquare,
+  FileUp,
 } from "lucide-react";
 import { generatePageMetadata } from "@/lib/seo/metadata";
 import { generateBreadcrumbSchema } from "@/lib/seo/schemas";
@@ -520,12 +522,12 @@ function AutoSanitizationMockup() {
         <div className="rounded-lg border border-emerald-500/20 p-3 bg-emerald-500/[0.03]">
           <div className="flex items-center gap-1.5 mb-2">
             <ShieldCheck className="w-3 h-3 text-emerald-500" />
-            <p className="text-[10px] text-emerald-600 font-semibold">Sanitized — safe to send</p>
+            <p className="text-[10px] text-emerald-600 font-semibold">Redacted — safe to send</p>
           </div>
           <p className="text-[11px] text-foreground leading-relaxed">
-            Patient <span className="bg-primary/15 text-primary px-1 rounded font-mono text-[10px]">{"{{PATIENT_NAME}}"}</span>, SSN{" "}
-            <span className="bg-primary/15 text-primary px-1 rounded font-mono text-[10px]">{"{{SSN}}"}</span>, was admitted to{" "}
-            <span className="bg-primary/15 text-primary px-1 rounded font-mono text-[10px]">{"{{FACILITY}}"}</span> on Jan 15.
+            Patient <span className="bg-primary/15 text-primary px-1 rounded font-mono text-[10px]">{"[PII]"}</span>, SSN{" "}
+            <span className="bg-primary/15 text-primary px-1 rounded font-mono text-[10px]">{"[SSN]"}</span>, was admitted to{" "}
+            <span className="bg-primary/15 text-primary px-1 rounded font-mono text-[10px]">{"[FACILITY]"}</span> on Jan 15.
           </p>
         </div>
       </div>
@@ -740,6 +742,60 @@ function BulkOperationsMockup() {
   );
 }
 
+function AIChatMockup() {
+  return (
+    <MockBrowser>
+      <div className="space-y-3">
+        {/* Chat header */}
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <MessageSquare className="w-3.5 h-3.5 text-primary" />
+            <span className="text-xs font-semibold text-foreground">AI Chat</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="text-[9px] bg-violet-500/10 text-violet-600 px-2 py-0.5 rounded-full font-medium">GPT-4o</span>
+            <span className="text-[9px] bg-muted text-muted-foreground px-2 py-0.5 rounded-full font-medium">Claude</span>
+            <span className="text-[9px] bg-muted text-muted-foreground px-2 py-0.5 rounded-full font-medium">Gemini</span>
+          </div>
+        </div>
+        {/* Chat messages */}
+        <div className="rounded-lg border border-border p-3 space-y-2">
+          <div className="flex gap-2">
+            <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center text-[8px] font-bold text-primary shrink-0">U</div>
+            <div className="flex-1">
+              <p className="text-[10px] text-foreground">Analyze this patient record and summarize the key findings...</p>
+            </div>
+          </div>
+          {/* Redaction banner */}
+          <div className="rounded-md bg-amber-500/10 border border-amber-500/20 px-2.5 py-1.5 flex items-center gap-2">
+            <ShieldCheck className="w-3 h-3 text-amber-500 shrink-0" />
+            <span className="text-[9px] text-amber-700 font-medium">2 items redacted: [PATIENT_NAME], [SSN]</span>
+          </div>
+          <div className="flex gap-2">
+            <div className="w-5 h-5 rounded-full bg-violet-500/10 flex items-center justify-center shrink-0">
+              <Sparkles className="w-2.5 h-2.5 text-violet-600" />
+            </div>
+            <div className="flex-1">
+              <p className="text-[10px] text-foreground">Based on the record for [PATIENT_NAME], the key findings are...</p>
+            </div>
+          </div>
+        </div>
+        {/* File upload indicator */}
+        <div className="rounded-lg border border-border p-2 flex items-center gap-2">
+          <FileUp className="w-3 h-3 text-primary" />
+          <span className="text-[9px] text-foreground font-medium">report.pdf</span>
+          <span className="text-[8px] text-emerald-600 font-medium ml-auto flex items-center gap-0.5"><CheckCircle2 className="w-2 h-2" />Scanned</span>
+        </div>
+        {/* Admin command */}
+        <div className="rounded-lg bg-zinc-900 border border-zinc-700 p-2">
+          <p className="text-[10px] text-zinc-400 font-mono">&gt; /violations --days 7</p>
+          <p className="text-[9px] text-emerald-400 font-mono mt-1">15 violations blocked this week (3 SSN, 5 API keys, 7 PII)</p>
+        </div>
+      </div>
+    </MockBrowser>
+  );
+}
+
 const mockups: Record<string, () => React.JSX.Element> = {
   "Prompt Library": VaultMockup,
   "Sensitive Data Blocking": GuardrailsMockup,
@@ -749,11 +805,12 @@ const mockups: Record<string, () => React.JSX.Element> = {
   "Analytics & Insights": AnalyticsMockup,
   "Import / Export": ImportMockup,
   "Compliance Rule Packs": CompliancePacksMockup,
-  "Auto-Sanitization": AutoSanitizationMockup,
+  "Smart Redaction": AutoSanitizationMockup,
   "Approval Queue": ApprovalQueueMockup,
   "Version Diff": VersionDiffMockup,
   "Admin Security Settings": AdminSecurityMockup,
   "Bulk Operations": BulkOperationsMockup,
+  "Built-In AI Chat": AIChatMockup,
 };
 
 /* ── Feature data ────────────────────────────────────────── */
@@ -860,15 +917,15 @@ const features = [
   },
   {
     icon: ShieldCheck,
-    title: "Auto-Sanitization",
+    title: "Smart Redaction",
     badge: "NEW",
     description:
-      "Automatically replace sensitive data with safe placeholders before prompts reach AI tools. Keep the context, remove the risk.",
+      "Automatically replaces sensitive data with category placeholders like [API_KEY], [EMAIL], or [PII]. The message still sends safely — your team's workflow isn't interrupted. Configure per-rule: choose Block, Warn, or Redact for each security policy.",
     details: [
-      "Replaces detected data with safe placeholders like {{PATIENT_NAME}}",
-      "Works with all built-in and custom security rules",
-      "Preserves prompt structure and intent",
-      "Sanitized version logged for the activity log",
+      "Three severity levels: Block, Warn, Redact",
+      "Category-aware placeholders ([API_KEY], [EMAIL], [PII], [SSN])",
+      "Works in both browser extension and built-in chat",
+      "Amber notification banner shows what was redacted",
     ],
   },
   {
@@ -923,6 +980,23 @@ const features = [
       "Domain-based auto-join for zero-friction onboarding",
     ],
   },
+  {
+    icon: MessageSquare,
+    title: "Built-In AI Chat",
+    badge: "NEW",
+    description:
+      "A DLP-protected AI chat for your team. Connect OpenAI, Anthropic, or Google — every message is scanned by your security rules before it reaches the AI.",
+    details: [
+      "Multi-model support (GPT-4o, Claude, Gemini)",
+      "File upload with DLP scanning (PDF, DOCX, code files)",
+      "Smart redaction — auto-replace sensitive data",
+      "Admin slash commands (/activity, /violations, /usage, /audit)",
+      "Conversation collections and favorites",
+      "Compare mode — side-by-side model responses",
+      "Response rating (thumbs up/down)",
+      "Conversation presets and system prompts",
+    ],
+  },
 ];
 
 const breadcrumbs = generateBreadcrumbSchema([
@@ -946,9 +1020,7 @@ export default function FeaturesPage() {
             One place for your team&apos;s prompts, security, and quality standards
           </h1>
           <p className="mt-6 text-lg text-muted-foreground leading-relaxed max-w-2xl">
-            TeamPrompt replaces scattered docs and shared drives with a
-            shared library, data protection, and quality rules your whole
-            team can use.
+            TeamPrompt combines a shared prompt library, real-time DLP protection, and a built-in AI chat — so your team can use AI safely and productively.
           </p>
         </div>
 

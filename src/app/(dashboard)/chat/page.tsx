@@ -1360,22 +1360,17 @@ export default function ChatPage() {
 
         {/* Tabs */}
         <div className="flex border-b flex-shrink-0">
-          {([
-            { id: "chats" as const, label: "Chats", icon: MessageSquare },
-            { id: "favorites" as const, label: "Favorites", icon: Star },
-            { id: "collections" as const, label: "Collections", icon: Circle },
-          ]).map((tab) => (
+          {(["chats", "favorites", "collections"] as const).map((tab) => (
             <button
-              key={tab.id}
+              key={tab}
               className={cn(
-                "flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium transition-colors relative",
-                sidebarTab === tab.id ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+                "flex-1 py-2.5 text-xs font-medium transition-colors relative text-center",
+                sidebarTab === tab ? "text-foreground" : "text-muted-foreground hover:text-foreground"
               )}
-              onClick={() => { setSidebarTab(tab.id); setActiveCollection(null); }}
+              onClick={() => { setSidebarTab(tab); setActiveCollection(null); }}
             >
-              <tab.icon className={cn("h-3.5 w-3.5", sidebarTab === tab.id && tab.id === "favorites" && "fill-amber-400 text-amber-400")} />
-              {tab.label}
-              {sidebarTab === tab.id && <div className="absolute bottom-0 left-2 right-2 h-0.5 bg-primary rounded-full" />}
+              {tab.charAt(0).toUpperCase() + tab.slice(1)}
+              {sidebarTab === tab && <div className="absolute bottom-0 left-2 right-2 h-0.5 bg-primary rounded-full" />}
             </button>
           ))}
         </div>

@@ -370,9 +370,11 @@ export default function ChatPage() {
     setDlpBlock(null);
     setRedactions(null);
 
-    // Build message content with file text
+    // Build user message — keep it clean, file text sent separately as context
     let messageContent = input;
     const filesMeta: Array<{ name: string; type: string; size: number }> = [];
+    let fileContext: string | null = null;
+
     if (pendingFiles.length > 0) {
       const fileTexts = pendingFiles
         .filter((f) => f.extractedText && !f.error)
@@ -381,15 +383,15 @@ export default function ChatPage() {
           return `--- File: ${f.name} ---\n${f.extractedText}`;
         });
       if (fileTexts.length > 0) {
-        const fileContext = fileTexts.join("\n\n");
-        messageContent = messageContent
-          ? `${messageContent}\n\n${fileContext}`
-          : `Analyze the following file(s):\n\n${fileContext}`;
+        fileContext = fileTexts.join("\n\n");
       }
     }
 
     if (!messageContent && pendingImages.length > 0) {
       messageContent = "What's in this image?";
+    }
+    if (!messageContent && filesMeta.length > 0) {
+      messageContent = `Analyze ${filesMeta.length === 1 ? filesMeta[0].name : `these ${filesMeta.length} files`}`;
     }
     if (!messageContent && !messagesToSend) return;
 
@@ -432,6 +434,7 @@ export default function ChatPage() {
           conversationId: activeConvId,
           ...(contextToSend ? { adminContext: contextToSend } : {}),
           ...(presetPrompt ? { presetSystemPrompt: presetPrompt } : {}),
+          ...(fileContext ? { fileContext } : {}),
         }),
         signal: controller.signal,
       });
@@ -2590,11 +2593,16 @@ export default function ChatPage() {
                 </div>
               )}
               {message.files && message.files.length > 0 && (
-                <div className="flex gap-2 flex-wrap mb-2">
+                <div className="flex gap-2 flex-wrap mb-3">
                   {message.files.map((f, fIdx) => (
-                    <div key={fIdx} className="flex items-center gap-1.5 bg-white/10 rounded-md px-2 py-1">
-                      <FileText className="h-3.5 w-3.5 flex-shrink-0 opacity-70" />
-                      <span className="text-xs font-medium">{f.name}</span>
+                    <div key={fIdx} className="flex items-center gap-2.5 bg-white/10 backdrop-blur rounded-lg px-3 py-2.5 min-w-[140px]">
+                      <div className="h-8 w-8 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
+                        <FileText className="h-4 w-4 opacity-80" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-medium truncate">{f.name}</p>
+                        <p className="text-[10px] opacity-60">{f.type?.split("/").pop() || "file"} · {formatFileSize(f.size)}</p>
+                      </div>
                     </div>
                   ))}
                 </div>

@@ -272,17 +272,24 @@ export async function POST(request: NextRequest) {
     // Check for injected context
     const adminContext = body.adminContext as string | undefined;
     const presetSystemPrompt = body.presetSystemPrompt as string | undefined;
+    const fileContext = body.fileContext as string | undefined;
 
     // Stream AI response
     const aiModel = createAIModel(provider || "openai", selectedModel, apiKey);
 
-    // Build system messages (order: org prompt → preset prompt → admin data)
+    // Build system messages (order: org prompt → preset prompt → file context → admin data)
     const systemMessages: Array<{ role: "system"; content: string }> = [];
     if (orgSystemPrompt) {
       systemMessages.push({ role: "system", content: orgSystemPrompt });
     }
     if (presetSystemPrompt) {
       systemMessages.push({ role: "system", content: presetSystemPrompt });
+    }
+    if (fileContext) {
+      systemMessages.push({
+        role: "system",
+        content: `The user has uploaded the following file(s). Use this content to answer their question:\n\n${fileContext}`,
+      });
     }
     if (adminContext) {
       systemMessages.push({

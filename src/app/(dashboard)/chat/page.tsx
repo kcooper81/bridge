@@ -465,7 +465,22 @@ export default function ChatPage() {
               if (redactMatch) {
                 try {
                   const parsed = JSON.parse(redactMatch[1]);
-                  setRedactions(parsed);
+                  const items = parsed.items || parsed;
+                  const redactedContent = parsed.redactedContent;
+                  setRedactions(Array.isArray(items) ? items : []);
+                  // Update the last user message to show what the AI actually received
+                  if (redactedContent) {
+                    setMessages((prev) => {
+                      const updated = [...prev];
+                      for (let i = updated.length - 1; i >= 0; i--) {
+                        if (updated[i].role === "user") {
+                          updated[i] = { ...updated[i], content: redactedContent };
+                          break;
+                        }
+                      }
+                      return updated;
+                    });
+                  }
                 } catch { /* ignore parse errors */ }
                 buffer = buffer.slice(redactMatch[0].length);
               }
@@ -565,8 +580,8 @@ export default function ChatPage() {
               const redactPfx = buffer.match(/^__REDACTIONS__(.*?)__\n/);
               if (redactPfx) {
                 try {
-                  const parsed = JSON.parse(redactPfx[1]);
-                  setRedactions(parsed);
+                  const rp = JSON.parse(redactPfx[1]);
+                  setRedactions(Array.isArray(rp.items || rp) ? (rp.items || rp) : []);
                 } catch { /* ignore parse errors */ }
                 buffer = buffer.slice(redactPfx[0].length);
               }
@@ -780,8 +795,21 @@ export default function ChatPage() {
               const redactPfx = buffer.match(/^__REDACTIONS__(.*?)__\n/);
               if (redactPfx) {
                 try {
-                  const parsed = JSON.parse(redactPfx[1]);
-                  setRedactions(parsed);
+                  const rp = JSON.parse(redactPfx[1]);
+                  setRedactions(Array.isArray(rp.items || rp) ? (rp.items || rp) : []);
+                  // Update user message with redacted content
+                  if (rp.redactedContent) {
+                    setMessages((prev) => {
+                      const updated = [...prev];
+                      for (let i = updated.length - 1; i >= 0; i--) {
+                        if (updated[i].role === "user") {
+                          updated[i] = { ...updated[i], content: rp.redactedContent };
+                          break;
+                        }
+                      }
+                      return updated;
+                    });
+                  }
                 } catch { /* ignore parse errors */ }
                 buffer = buffer.slice(redactPfx[0].length);
               }

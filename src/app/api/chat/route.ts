@@ -190,7 +190,7 @@ export async function POST(request: NextRequest) {
           // Use redacted content for the AI
           lastUserMessage.content = redactedContent;
 
-          // Store redactions list to include in stream prefix
+          // Store redactions + redacted content for stream prefix
           if (redactionsList.length > 0) {
             streamRedactions = redactionsList;
           }
@@ -353,7 +353,9 @@ export async function POST(request: NextRequest) {
     if (convId && textStream.body) {
       const reader = textStream.body.getReader();
       const encoder = new TextEncoder();
-      const redactionsPrefix = streamRedactions ? `__REDACTIONS__${JSON.stringify(streamRedactions)}__\n` : "";
+      const redactionsPrefix = streamRedactions
+        ? `__REDACTIONS__${JSON.stringify({ items: streamRedactions, redactedContent: lastUserMessage?.content || "" })}__\n`
+        : "";
       const prefix = encoder.encode(`${redactionsPrefix}__CONV_ID__${convId}__\n`);
       let prefixSent = false;
 

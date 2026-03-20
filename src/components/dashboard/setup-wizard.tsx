@@ -30,7 +30,6 @@ import { createClient } from "@/lib/supabase/client";
 
 const DISMISS_KEY = "teamprompt-setup-wizard-dismissed";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const INDUSTRIES = [
   { id: "healthcare", label: "Healthcare", icon: Stethoscope, color: "bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800 hover:border-red-400 dark:hover:border-red-600", iconColor: "text-red-500" },
   { id: "finance", label: "Finance", icon: DollarSign, color: "bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800 hover:border-emerald-400 dark:hover:border-emerald-600", iconColor: "text-emerald-500" },
@@ -57,7 +56,6 @@ export function SetupWizard() {
   const { detected: extensionDetected } = useExtensionDetection();
   const [dismissed, setDismissed] = useState(true);
   const [hasAiProviders, setHasAiProviders] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [industryLoading, setIndustryLoading] = useState(false);
 
   // Check if AI providers are configured
@@ -67,7 +65,6 @@ export function SetupWizard() {
     }).catch(() => {});
   }, []);
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async function handleIndustrySelect(industry: string) {
     setIndustryLoading(true);
     try {

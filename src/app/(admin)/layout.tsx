@@ -9,6 +9,7 @@ import { AuthProvider } from "@/components/providers/auth-provider";
 import { AdminNav } from "@/components/admin/nav";
 import { AdminHeader } from "@/components/admin/header";
 import { SupportAccessGuard } from "@/components/admin/support-access-guard";
+import { ForceLightTheme } from "@/components/admin/force-light-theme";
 import { SUPER_ADMIN_EMAILS } from "@/lib/constants";
 import type { SuperAdminRole } from "@/lib/constants";
 
@@ -63,7 +64,8 @@ export default async function AdminLayout({
 
   return (
     <AuthProvider initialUser={user} initialSession={session}>
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
+      <ForceLightTheme />
+      <div className="min-h-screen bg-slate-50">
         <AdminHeader user={user} />
         {isSupportStaff && !isSuperAdmin && (
           <SupportAccessGuard allowedPages={profile?.support_allowed_pages || []} />

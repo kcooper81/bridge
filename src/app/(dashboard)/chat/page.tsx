@@ -986,13 +986,6 @@ export default function ChatPage() {
       const { scrollTop, scrollHeight, clientHeight } = viewport;
       const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
       userScrolledUpRef.current = distanceFromBottom > 200;
-      // Update minimap viewport indicator
-      if (scrollHeight > clientHeight) {
-        setMinimapScroll({
-          top: (scrollTop / scrollHeight) * 100,
-          height: (clientHeight / scrollHeight) * 100,
-        });
-      }
     };
     viewport.addEventListener("scroll", handleScroll, { passive: true });
     return () => viewport.removeEventListener("scroll", handleScroll);
@@ -1278,7 +1271,6 @@ export default function ChatPage() {
 
   const noProviders = providers.length === 0 && !loadingConvs;
   const [isDragging, setIsDragging] = useState(false);
-  const [minimapScroll, setMinimapScroll] = useState({ top: 0, height: 100 });
   const dragCounterRef = useRef(0);
 
   function handleDragEnter(e: React.DragEvent) {
@@ -1924,8 +1916,7 @@ export default function ChatPage() {
               </div>
             ) : (
               <>
-                {/* Messages + Minimap */}
-                <div className="flex-1 flex min-h-0 relative">
+                {/* Messages */}
                 <ScrollArea className="flex-1" ref={scrollAreaRef}>
                   <div className="max-w-3xl mx-auto px-4 py-6">
                     {messages.length === 0 && !isLoading && (
@@ -2004,57 +1995,6 @@ export default function ChatPage() {
                   </div>
                 </ScrollArea>
 
-                {/* Minimap scrollbar */}
-                {messages.length > 3 && (
-                  <div
-                    className="w-[28px] flex-shrink-0 bg-muted/20 border-l relative cursor-pointer hidden sm:block"
-                    onClick={(e) => {
-                      const viewport = scrollAreaRef.current?.querySelector("[data-radix-scroll-area-viewport]") as HTMLElement | null;
-                      if (!viewport) return;
-                      const rect = e.currentTarget.getBoundingClientRect();
-                      const pct = (e.clientY - rect.top) / rect.height;
-                      viewport.scrollTop = pct * (viewport.scrollHeight - viewport.clientHeight);
-                    }}
-                  >
-                    {/* Message blocks */}
-                    {(() => {
-                      const totalChars = messages.reduce((a, m) => a + Math.max(m.content.length, 20), 0);
-                      let yOffset = 0;
-                      return messages.map((m) => {
-                        const height = Math.max((m.content.length / totalChars) * 100, 0.5);
-                        const top = yOffset;
-                        yOffset += height;
-                        const hasCode = /```/.test(m.content);
-                        const hasFile = m.files && m.files.length > 0;
-                        const isRedacted = /\[[A-Z_]+\]/.test(m.content);
-
-                        let bg = m.role === "user"
-                          ? "bg-primary/40"
-                          : hasCode ? "bg-emerald-500/30" : "bg-muted-foreground/15";
-                        if (hasFile) bg = "bg-blue-500/30";
-                        if (isRedacted) bg = "bg-amber-500/30";
-
-                        return (
-                          <div
-                            key={m.id}
-                            className={`absolute left-[3px] right-[3px] rounded-[2px] ${bg} transition-colors`}
-                            style={{ top: `${top}%`, height: `${Math.max(height, 0.5)}%` }}
-                            title={m.role === "user" ? "You" : "AI"}
-                          />
-                        );
-                      });
-                    })()}
-
-                    {/* Viewport indicator */}
-                    {minimapScroll.height < 100 && (
-                      <div
-                        className="absolute left-0 right-0 border border-primary/30 bg-primary/5 rounded-sm pointer-events-none transition-all duration-75"
-                        style={{ top: `${minimapScroll.top}%`, height: `${Math.max(minimapScroll.height, 3)}%` }}
-                      />
-                    )}
-                  </div>
-                )}
-                </div>
 
                 {/* Stop / Regenerate bar */}
                 {(isLoading || lastIsAssistant) && (

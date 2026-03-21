@@ -8,7 +8,7 @@ import {
   generateWebSiteSchema,
 } from "@/lib/seo/schemas";
 import { SectionLabel } from "@/components/marketing/section-label";
-import { StatsRow } from "@/components/marketing/stats-row";
+
 import { FeatureCard } from "@/components/marketing/feature-card";
 import { CTASection } from "@/components/marketing/cta-section";
 import {
@@ -21,64 +21,43 @@ import {
   MockupCheckIcon,
 } from "@/components/marketing/app-mockup";
 import {
-  Archive,
+  AlertTriangle,
   ArrowRight,
-  BarChart3,
-  BookOpen,
-  Braces,
-  Building2,
   CheckCircle2,
-  CheckSquare,
-  FileCheck,
+  ClipboardList,
+
+  EyeOff,
+  FileSearch,
   Globe,
-  Heart,
-  Layers,
   Quote,
   Search,
   Shield,
-  Sparkles,
-  Star,
-  Users,
-  Zap,
-  GraduationCap,
-  Landmark,
-  Scale,
-  Cpu,
-  DollarSign,
+  ShieldAlert,
   ShieldCheck,
-  BookMarked,
-  HelpCircle,
-  History,
-  Plug,
-  Plug2,
-  Lock,
-  Building,
-  Bell,
-  MessageSquare,
-  Monitor,
-  FileUp,
-  Terminal,
-  RefreshCw,
+
+  Users,
+  XCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-// Plan constants removed — pricing section now links to /pricing page
 
 export const metadata: Metadata = generatePageMetadata({
-  title: "AI Data Loss Prevention for ChatGPT & AI Tools — Secure AI Adoption",
+  title: "AI DLP & Prompt Management for Teams — Secure ChatGPT, Claude & Gemini",
   description:
-    "Monitor, detect, and block sensitive data before employees send it to AI. DLP protection, shared prompt library, and audit logging for teams using ChatGPT, Claude, Gemini, and more.",
+    "Protect your team's data with real-time DLP for ChatGPT, Claude & Gemini. Share prompts securely, enforce AI policies, and get full compliance audit trails. Free for up to 3 members.",
   path: "/",
-  keywords: ["AI DLP", "AI data loss prevention", "ChatGPT security", "AI governance", "AI compliance", "prompt management", "sensitive data protection", "enterprise AI security"],
+  keywords: [
+    "AI DLP",
+    "AI data loss prevention",
+    "ChatGPT security",
+    "AI governance",
+    "AI compliance",
+    "prompt management",
+    "sensitive data protection",
+    "enterprise AI security",
+    "AI security for teams",
+    "secure AI adoption",
+  ],
 });
-
-const supportedTools = [
-  "ChatGPT",
-  "Claude",
-  "Gemini",
-  "Copilot",
-  "Perplexity",
-  "TeamPrompt Chat",
-];
 
 export default function LandingPage() {
   return (
@@ -95,7 +74,7 @@ export default function LandingPage() {
         }}
       />
 
-      {/* ━━━ HERO ━━━ Dark background with gradient mesh */}
+      {/* ━━━ 1. HERO ━━━ Dark with grid pattern */}
       <section className="relative overflow-hidden bg-zinc-950 text-white">
         {/* Gradient mesh background */}
         <div
@@ -108,12 +87,12 @@ export default function LandingPage() {
             ].join(", "),
           }}
         />
-        {/* Subtle grid overlay */}
+        {/* Grid overlay */}
         <div
-          className="absolute inset-0 pointer-events-none opacity-[0.03]"
+          className="absolute inset-0 pointer-events-none opacity-[0.04]"
           style={{
             backgroundImage:
-              "linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)",
+              "linear-gradient(rgba(255,255,255,.15) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.15) 1px, transparent 1px)",
             backgroundSize: "64px 64px",
           }}
         />
@@ -123,21 +102,21 @@ export default function LandingPage() {
             <div>
               <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-zinc-300 mb-8 backdrop-blur-sm">
                 <Shield className="h-3.5 w-3.5 text-blue-400" />
-                <span>19 compliance packs — HIPAA, SOC 2, PCI-DSS & more</span>
+                <span>Real-time AI data loss prevention</span>
                 <ArrowRight className="h-3 w-3 text-zinc-500" />
               </div>
 
               <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.05]">
-                Stop sensitive data
-                <br />
-                from reaching{" "}
-                <span className="bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
-                  AI tools
+                AI DLP{" "}
+                <span className="bg-gradient-to-r from-blue-400 via-blue-500 to-violet-500 bg-clip-text text-transparent">
+                  & prompt management
                 </span>
+                <br />
+                for your team
               </h1>
 
               <p className="mt-6 text-lg sm:text-xl text-zinc-400 max-w-xl leading-relaxed">
-                Protect sensitive data across ChatGPT, Claude, and Gemini with real-time DLP scanning. Give your team a shared prompt library and a built-in AI chat — all protected by 19 compliance frameworks.
+                Block sensitive data before it reaches ChatGPT, Claude, or Gemini. Give your team shared prompts, compliance guardrails, and a full audit trail — all in one platform.
               </p>
 
               <div className="mt-10 flex flex-col sm:flex-row gap-4">
@@ -146,7 +125,7 @@ export default function LandingPage() {
                     size="lg"
                     className="text-base px-8 h-12 rounded-full bg-white text-zinc-900 hover:bg-zinc-200 font-semibold"
                   >
-                    Start for free
+                    Start Free
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </Link>
@@ -156,44 +135,21 @@ export default function LandingPage() {
                     size="lg"
                     className="text-base px-8 h-12 rounded-full border-white/20 text-white hover:bg-white/10 hover:text-white font-semibold bg-transparent"
                   >
-                    See how it works
+                    See How It Works
                   </Button>
                 </Link>
               </div>
 
-              <div className="mt-16 sm:mt-20">
-                <StatsRow
-                  dark
-                  stats={[
-                    { value: "5", label: "AI tools supported" },
-                    { value: "19", label: "Compliance Packs" },
-                    { value: "2", label: "Ways to Deploy" },
-                    { value: "<2m", label: "Setup time" },
-                  ]}
-                  className="max-w-md"
-                />
-              </div>
+              <p className="mt-4 text-sm text-zinc-500">
+                No credit card required. Free for up to 3 members.
+              </p>
             </div>
 
-            {/* Hero mockup */}
+            {/* Hero mockup — guardrails/security focused */}
             <div className="relative hidden lg:block">
               <AppMockup
                 variant="vault"
                 items={[
-                  {
-                    title: "Customer Onboarding Prompt",
-                    stat: "142 uses",
-                    subtitle: "Marketing · 4.8★",
-                    iconColor: "blue",
-                    highlight: "shared",
-                    badge: "Shared",
-                  },
-                  {
-                    title: "Weekly Report Summary",
-                    stat: "89 uses",
-                    subtitle: "Operations · 4.5★",
-                    iconColor: "green",
-                  },
                   {
                     title: "SSN detected — input blocked",
                     badge: "Blocked",
@@ -202,12 +158,26 @@ export default function LandingPage() {
                     highlight: "block",
                   },
                   {
-                    title: "Sales Outreach Drafter",
-                    stat: "34 uses",
-                    subtitle: "Sales · new",
-                    iconColor: "purple",
-                    highlight: "new",
-                    badge: "Approved",
+                    title: "Credit card number — redacted",
+                    badge: "Redacted",
+                    stat: "2m ago",
+                    iconColor: "amber",
+                    highlight: "warn",
+                  },
+                  {
+                    title: "Customer Onboarding Prompt",
+                    stat: "142 uses",
+                    subtitle: "Marketing",
+                    iconColor: "blue",
+                    highlight: "shared",
+                    badge: "Shared",
+                  },
+                  {
+                    title: "Patient name flagged — warned",
+                    badge: "Warned",
+                    stat: "5m ago",
+                    iconColor: "red",
+                    highlight: "block",
                   },
                 ]}
                 sidebarUser={{ name: "Alex J.", initials: "AJ" }}
@@ -221,421 +191,303 @@ export default function LandingPage() {
                 ]}
               />
               <FloatingCard
-                label="Shared to Marketing"
-                icon={<MockupShareIcon className="h-3 w-3" />}
-                color="blue"
-                position="top-right"
-              />
-              <FloatingCard
-                label="Prompt approved"
-                icon={<MockupCheckIcon className="h-3 w-3" />}
-                color="green"
-                position="top-left"
-              />
-              <FloatingCard
                 label="HIPAA pack active"
                 icon={<MockupShieldCheck className="h-3 w-3" />}
                 color="amber"
-                position="mid-left"
+                position="top-right"
               />
               <FloatingCard
                 label="3 violations blocked"
                 icon={<MockupShieldBlock className="h-3 w-3" />}
                 color="red"
-                position="bottom-left"
+                position="top-left"
               />
               <FloatingCard
                 label="Sensitive data removed"
                 icon={<MockupSparklesIcon className="h-3 w-3" />}
                 color="cyan"
-                position="mid-right"
+                position="mid-left"
+              />
+              <FloatingCard
+                label="Prompt approved"
+                icon={<MockupCheckIcon className="h-3 w-3" />}
+                color="green"
+                position="bottom-left"
               />
               <FloatingCard
                 label="47 prompts shared"
                 icon={<MockupShareIcon className="h-3 w-3" />}
                 color="green"
-                position="bottom-right"
+                position="mid-right"
               />
             </div>
           </div>
         </div>
       </section>
 
-      {/* ━━━ WORKS WITH STRIP ━━━ */}
+      {/* ━━━ 2. TRUST / LOGO BAR ━━━ */}
       <section className="border-b border-border bg-card/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-          <p className="text-center text-xs font-medium uppercase tracking-widest text-muted-foreground mb-6">
-            Works with your favorite AI tools
-          </p>
-          <div className="flex items-center justify-center gap-8 sm:gap-12 flex-wrap">
-            {supportedTools.map((name) => (
-              <span
-                key={name}
-                className="text-sm sm:text-base font-semibold text-muted-foreground tracking-wide"
-              >
-                {name}
-              </span>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ━━━ EXTENSION CTA ━━━ */}
-      <section className="py-16 sm:py-20 border-b border-border">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6">
-          <div className="rounded-2xl border border-border bg-gradient-to-br from-blue-50/50 to-violet-50/50 dark:from-blue-950/20 dark:to-violet-950/20 p-8 sm:p-12 flex flex-col lg:flex-row items-center gap-8">
-            <div className="flex-1 text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 rounded-full bg-blue-100 dark:bg-blue-900/30 px-3 py-1 text-xs font-medium text-blue-700 dark:text-blue-300 mb-4">
-                <Globe className="h-3 w-3" />
-                Chrome, Edge &amp; Firefox
-              </div>
-              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
-                Use your prompts inside every AI tool
-              </h2>
-              <p className="mt-3 text-muted-foreground max-w-lg">
-                The TeamPrompt extension lives in your browser sidebar. Search and insert shared prompts directly into ChatGPT, Claude, Gemini, Copilot, and Perplexity — no copy-paste, no tab switching.
-              </p>
-              <div className="mt-4 flex items-center gap-3 text-sm text-muted-foreground justify-center lg:justify-start flex-wrap">
-                {supportedTools.map((tool) => (
-                  <span key={tool} className="flex items-center gap-1">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
-                    {tool}
-                  </span>
-                ))}
-              </div>
-              <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
-                <Link href="/extensions">
-                  <Button className="rounded-full font-semibold px-6">
-                    Install Extension
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </Link>
-                <Link href="/features#browser-extension">
-                  <Button variant="outline" className="rounded-full font-semibold px-6">
-                    Learn more
-                  </Button>
-                </Link>
-              </div>
+          {/* Works with */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-10">
+            <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground shrink-0">
+              Works with
+            </p>
+            <div className="flex items-center gap-6 sm:gap-8 flex-wrap justify-center">
+              {[
+                { name: "ChatGPT", color: "text-emerald-600 dark:text-emerald-400" },
+                { name: "Claude", color: "text-orange-600 dark:text-orange-400" },
+                { name: "Gemini", color: "text-blue-600 dark:text-blue-400" },
+                { name: "Copilot", color: "text-sky-600 dark:text-sky-400" },
+                { name: "Perplexity", color: "text-teal-600 dark:text-teal-400" },
+              ].map((tool) => (
+                <span
+                  key={tool.name}
+                  className={cn("text-sm sm:text-base font-bold tracking-wide", tool.color)}
+                >
+                  {tool.name}
+                </span>
+              ))}
             </div>
-            <div className="shrink-0 w-64 sm:w-72">
-              {/* Mini extension mockup */}
-              <div className="rounded-xl bg-white dark:bg-zinc-900 border border-border shadow-lg p-4 space-y-2.5">
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded bg-blue-500 flex items-center justify-center">
-                    <Braces className="h-3 w-3 text-white" />
-                  </div>
-                  <span className="text-xs font-bold">TeamPrompt</span>
-                </div>
-                <div className="h-7 rounded-md bg-muted flex items-center px-2.5">
-                  <Search className="h-3 w-3 text-muted-foreground mr-1.5" />
-                  <span className="text-[10px] text-muted-foreground">Search prompts...</span>
-                </div>
-                <div className="flex gap-3 border-b pb-1.5">
-                  {["Faves", "Recent", "Prompts"].map((t, i) => (
-                    <span key={t} className={cn("text-[10px] font-medium pb-1", i === 0 ? "text-blue-600 border-b border-blue-600" : "text-muted-foreground")}>{t}</span>
-                  ))}
-                </div>
-                {[
-                  { title: "Sales Outreach", tag: "Sales" },
-                  { title: "Bug Report Template", tag: "Engineering" },
-                  { title: "Meeting Summary", tag: "General" },
-                ].map((item) => (
-                  <div key={item.title} className="flex items-center justify-between py-1">
-                    <span className="text-[11px] font-medium">{item.title}</span>
-                    <span className="text-[9px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">{item.tag}</span>
-                  </div>
-                ))}
-              </div>
+
+            <div className="hidden sm:block w-px h-8 bg-border" />
+
+            <div className="flex items-center gap-4 flex-wrap justify-center">
+              {["HIPAA Ready", "SOC 2 Ready", "PCI-DSS", "GDPR"].map((badge) => (
+                <span
+                  key={badge}
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground bg-muted/60 border border-border rounded-full px-3 py-1"
+                >
+                  <ShieldCheck className="h-3 w-3" />
+                  {badge}
+                </span>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      {/* ━━━ BENTO FEATURES ━━━ */}
+      {/* ━━━ 3. PROBLEM / SOLUTION ━━━ */}
       <section className="py-20 sm:py-28">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="max-w-2xl mb-14">
-            <SectionLabel>Platform</SectionLabel>
+          <div className="text-center mb-14">
+            <SectionLabel>Why TeamPrompt</SectionLabel>
             <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-              Built for how teams actually use AI
+              AI data loss prevention{" "}
+              <span className="text-primary">that works where your team does</span>
+            </h2>
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            {/* The Problem */}
+            <div className="rounded-2xl border border-destructive/20 bg-destructive/[0.02] p-8">
+              <h3 className="text-lg font-bold text-destructive flex items-center gap-2 mb-6">
+                <XCircle className="h-5 w-5" />
+                The Problem
+              </h3>
+              <div className="space-y-5">
+                {[
+                  {
+                    title: "Employees paste sensitive data into AI",
+                    desc: "SSNs, patient records, API keys, and financial data end up in ChatGPT prompts with no guardrails.",
+                  },
+                  {
+                    title: "Zero visibility into AI usage",
+                    desc: "No audit trail, no logs, no way to know what data has been shared with AI tools.",
+                  },
+                  {
+                    title: "No standards for prompt quality",
+                    desc: "Every person writes prompts differently. Inconsistent output, wasted time, no best practices.",
+                  },
+                ].map((item) => (
+                  <div key={item.title} className="flex gap-3">
+                    <AlertTriangle className="h-4 w-4 text-destructive shrink-0 mt-1" />
+                    <div>
+                      <p className="font-semibold text-sm">{item.title}</p>
+                      <p className="text-sm text-muted-foreground mt-0.5 leading-relaxed">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* The Solution */}
+            <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.02] p-8">
+              <h3 className="text-lg font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-2 mb-6">
+                <CheckCircle2 className="h-5 w-5" />
+                The Solution
+              </h3>
+              <div className="space-y-5">
+                {[
+                  {
+                    title: "Real-time DLP scanning",
+                    desc: "Detect and block PII, credentials, and confidential data before it reaches any AI tool.",
+                  },
+                  {
+                    title: "Full audit trail and compliance",
+                    desc: "Every AI interaction is logged. 19 compliance packs for HIPAA, SOC 2, PCI-DSS, and more.",
+                  },
+                  {
+                    title: "Shared prompt library with standards",
+                    desc: "One searchable library of approved prompts. Quality guidelines, approval workflows, templates.",
+                  },
+                ].map((item) => (
+                  <div key={item.title} className="flex gap-3">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-1" />
+                    <div>
+                      <p className="font-semibold text-sm">{item.title}</p>
+                      <p className="text-sm text-muted-foreground mt-0.5 leading-relaxed">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ━━━ 4. CORE FEATURES — BENTO GRID ━━━ */}
+      <section className="py-20 sm:py-28 border-t border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="max-w-2xl mb-14">
+            <SectionLabel>Core Features</SectionLabel>
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
+              Shared prompt library & AI governance.{" "}
+              <span className="text-primary">One platform.</span>
             </h2>
             <p className="mt-4 text-lg text-muted-foreground">
-              Tools for sharing prompts, catching data leaks, and keeping
-              quality consistent — across every department.
+              No competitor combines data loss prevention, a shared prompt library, and built-in secure chat. TeamPrompt does all three.
             </p>
           </div>
 
-          {/* Bento grid */}
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <FeatureCard
-              icon={Archive}
-              title="Shared Prompt Library"
-              description="Your team writes the same prompts over and over — in docs, Slack, and personal notes. The library gives everyone one searchable place to find what already works."
-              large
-              href="/features#prompt-library"
-              iconBg="bg-blue-500/10"
-            >
-              {/* Mini table mockup matching features page library style */}
-              <div className="mt-6 rounded-xl border border-border bg-background/50 p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="h-7 flex-1 rounded-md border border-border bg-background px-3 flex items-center gap-2">
-                    <Search className="h-3 w-3 text-muted-foreground" />
-                    <span className="text-xs text-muted-foreground">Search prompts...</span>
-                  </div>
-                  <span className="text-[10px] text-muted-foreground">All Categories</span>
-                </div>
-                {/* Table header */}
-                <div className="flex items-center gap-2 py-1.5 text-[8px] font-semibold uppercase tracking-wider text-muted-foreground border-b border-border mb-1">
-                  <span className="w-4" />
-                  <span className="flex-1">Prompt</span>
-                  <span className="w-10 text-center">Uses</span>
-                  <span className="w-14 text-center">Rating</span>
-                </div>
-                {[
-                  { name: "Customer Onboarding Email", uses: "142", rating: 5, fav: true, template: false },
-                  { name: "Code Review Feedback", uses: "89", rating: 4, fav: false, template: true },
-                  { name: "Weekly Status Update", uses: "67", rating: 0, fav: true, template: true },
-                ].map((p) => (
-                  <div key={p.name} className="flex items-center gap-2 py-2 border-b border-border/40 last:border-0">
-                    <Heart className={cn("w-3 h-3 shrink-0", p.fav ? "text-red-500 fill-red-500" : "text-muted-foreground/20")} />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1.5">
-                        <p className="text-[11px] font-medium text-foreground truncate">{p.name}</p>
-                        {p.template && <span className="text-[7px] font-semibold bg-primary/10 text-primary px-1.5 py-0.5 rounded">{"{}"} Template</span>}
-                      </div>
-                    </div>
-                    <span className="w-10 text-center text-[10px] text-muted-foreground tabular-nums">{p.uses}</span>
-                    <div className="w-14 flex items-center justify-center gap-0.5">
-                      {[1, 2, 3, 4, 5].map((s) => (
-                        <Star key={s} className={cn("w-2 h-2", s <= p.rating ? "text-amber-400 fill-amber-400" : "text-muted-foreground/20")} />
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </FeatureCard>
-
+          <div className="grid gap-4 sm:grid-cols-2">
+            {/* Feature 1: Real-Time DLP */}
             <FeatureCard
               icon={Shield}
-              title="Sensitive Data Blocking"
-              description="Catch patient records, financial data, passwords, and confidential info before they get pasted into AI tools. Block or warn automatically."
-              badge="New"
+              title="Real-Time DLP Scanning"
+              description="Detect SSNs, credit cards, API keys, patient records, and confidential data in real time. Choose to block, warn, or auto-redact before data reaches the AI."
+              large={false}
               href="/security"
               iconBg="bg-red-500/10"
             >
               <div className="mt-5 space-y-2">
                 {[
-                  { label: "SSN detected", severity: "block" },
-                  { label: "Patient name blocked", severity: "block" },
-                  { label: "Credit card warning", severity: "warn" },
+                  { label: "SSN detected in prompt", action: "Blocked", severity: "block" },
+                  { label: "Credit card number found", action: "Redacted", severity: "warn" },
+                  { label: "API key pattern matched", action: "Blocked", severity: "block" },
                 ].map((item) => (
-                  <div key={item.label} className="flex items-center gap-2 rounded-lg bg-destructive/5 border border-destructive/10 px-3 py-1.5">
-                    <div className={cn("w-1.5 h-1.5 rounded-full", item.severity === "block" ? "bg-destructive" : "bg-yellow-500")} />
+                  <div
+                    key={item.label}
+                    className="flex items-center gap-2 rounded-lg bg-destructive/5 border border-destructive/10 px-3 py-1.5"
+                  >
+                    <div
+                      className={cn(
+                        "w-1.5 h-1.5 rounded-full shrink-0",
+                        item.severity === "block" ? "bg-destructive" : "bg-yellow-500"
+                      )}
+                    />
                     <span className="text-xs text-muted-foreground flex-1">{item.label}</span>
-                    <span className={cn("text-[9px] font-bold uppercase", item.severity === "block" ? "text-destructive" : "text-yellow-600")}>
-                      {item.severity === "block" ? "Blocked" : "Warning"}
+                    <span
+                      className={cn(
+                        "text-[9px] font-bold uppercase",
+                        item.severity === "block" ? "text-destructive" : "text-yellow-600"
+                      )}
+                    >
+                      {item.action}
                     </span>
                   </div>
                 ))}
               </div>
             </FeatureCard>
 
+            {/* Feature 2: Shared Prompt Library */}
             <FeatureCard
-              icon={BookOpen}
-              title="Quality Guidelines"
-              description="Set rules like &quot;every prompt needs a clear role and output format&quot; — prompts get flagged if they don&apos;t meet the bar."
-              href="/features#quality-guidelines"
-              iconBg="bg-emerald-500/10"
+              icon={ClipboardList}
+              title="Shared Prompt Library"
+              description="One searchable library of approved, reusable prompts. Templates with variables, approval workflows, quality guidelines, and usage analytics across your team."
+              large={false}
+              href="/features#prompt-library"
+              iconBg="bg-blue-500/10"
             >
-              {/* Mini guideline cards matching features page style */}
-              <div className="mt-5 grid grid-cols-2 gap-2">
+              <div className="mt-5 rounded-xl border border-border bg-background/50 p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="h-6 flex-1 rounded-md border border-border bg-background px-2.5 flex items-center gap-1.5">
+                    <Search className="h-3 w-3 text-muted-foreground" />
+                    <span className="text-[10px] text-muted-foreground">Search prompts...</span>
+                  </div>
+                </div>
                 {[
-                  { name: "Clear Instructions", active: true },
-                  { name: "Role Definition", active: true },
-                  { name: "Output Format", active: false },
-                  { name: "Context Window", active: true },
-                ].map((g) => (
-                  <div key={g.name} className="rounded-lg border border-border px-3 py-2 flex items-center justify-between">
-                    <span className="text-[10px] font-medium text-foreground truncate">{g.name}</span>
-                    <div className={cn("w-5 h-3 rounded-full p-0.5 flex items-center shrink-0", g.active ? "bg-primary justify-end" : "bg-muted justify-start")}>
-                      <div className="w-2 h-2 rounded-full bg-white shadow-sm" />
+                  { name: "Customer Onboarding Email", uses: "142", status: "Approved" },
+                  { name: "Code Review Feedback", uses: "89", status: "Template" },
+                  { name: "Weekly Status Update", uses: "67", status: "Shared" },
+                ].map((p) => (
+                  <div
+                    key={p.name}
+                    className="flex items-center justify-between py-1.5 border-b border-border/40 last:border-0"
+                  >
+                    <span className="text-[11px] font-medium truncate">{p.name}</span>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-[10px] text-muted-foreground tabular-nums">{p.uses} uses</span>
+                      <span className="text-[8px] font-semibold bg-primary/10 text-primary px-1.5 py-0.5 rounded">
+                        {p.status}
+                      </span>
                     </div>
                   </div>
                 ))}
               </div>
             </FeatureCard>
 
-            <FeatureCard
-              icon={Braces}
-              title="Prompt Templates"
-              description="Create reusable templates with fill-in-the-blank variables that your team completes each time. Consistent output, every time."
-              href="/features#prompt-library"
-              iconBg="bg-amber-500/10"
-            >
-              {/* Mini template preview */}
-              <div className="mt-5 rounded-lg border border-border bg-background/50 p-3 space-y-2">
-                <p className="text-[10px] text-muted-foreground">
-                  Draft a follow-up email to <span className="bg-primary/10 text-primary px-1 rounded font-mono">{"{{"}client_name{"}}"}</span> regarding our <span className="bg-primary/10 text-primary px-1 rounded font-mono">{"{{"}product{"}}"}</span> demo...
-                </p>
-                <div className="flex gap-2">
-                  <div className="flex-1 h-5 rounded border border-border bg-background px-2 flex items-center">
-                    <span className="text-[9px] text-emerald-600 font-medium">Sarah Chen</span>
-                  </div>
-                  <div className="flex-1 h-5 rounded border border-border bg-background px-2 flex items-center">
-                    <span className="text-[9px] text-emerald-600 font-medium">Enterprise Suite</span>
-                  </div>
-                </div>
-              </div>
-            </FeatureCard>
-
+            {/* Feature 3: Browser Extension */}
             <FeatureCard
               icon={Globe}
               title="Browser Extension"
-              description="Use your saved prompts directly inside ChatGPT, Claude, Gemini, and Copilot — no copy-paste needed."
-              href="/features#browser-extension"
+              description="Works directly inside ChatGPT, Claude, Gemini, Copilot, and Perplexity. No proxy, no VPN. Install in under 2 minutes and DLP scanning starts immediately."
+              large={false}
+              href="/extensions"
               iconBg="bg-violet-500/10"
             >
-              {/* Extension mockup mini — dark theme */}
-              <div className="mt-5 rounded-lg bg-zinc-900 border border-zinc-700 p-3 space-y-1.5">
-                <div className="flex items-center gap-2 mb-1">
-                  <div className="w-3 h-3 rounded bg-blue-500" />
-                  <span className="text-[10px] font-bold text-white">TeamPrompt</span>
-                </div>
-                <div className="h-5 rounded bg-zinc-800 flex items-center px-2">
-                  <span className="text-[9px] text-zinc-500">Search prompts...</span>
-                </div>
-                <div className="flex gap-2">
-                  {["Faves", "Recent", "Prompts"].map((t, i) => (
-                    <span key={t} className={cn("text-[8px] font-medium", i === 0 ? "text-blue-400" : "text-zinc-500")}>{t}</span>
-                  ))}
-                </div>
-                {["Code Review Feedback", "Weekly Status Update"].map((p) => (
-                  <div key={p} className="rounded bg-zinc-800/60 border border-zinc-700/50 px-2 py-1">
-                    <p className="text-[9px] text-white font-medium">{p}</p>
-                    <span className="text-[7px] text-rose-400 font-bold">Template</span>
-                  </div>
+              <div className="mt-5 flex items-center gap-3 text-sm text-muted-foreground flex-wrap">
+                {["ChatGPT", "Claude", "Gemini", "Copilot", "Perplexity"].map((tool) => (
+                  <span key={tool} className="flex items-center gap-1">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-green-500 shrink-0" />
+                    <span className="text-xs">{tool}</span>
+                  </span>
                 ))}
               </div>
             </FeatureCard>
-          </div>
 
-          {/* Secondary features row */}
-          <div className="mt-4 grid gap-4 sm:grid-cols-3 lg:grid-cols-5">
-            {[
-              { icon: Users, title: "Teams & Roles", desc: "Admin, Manager, Member — the right access for the right people.", href: "/features#team-management", bg: "bg-sky-500/10" },
-              { icon: BarChart3, title: "Usage Analytics", desc: "See which prompts actually get reused and which sit unused.", href: "/features#analytics-insights", bg: "bg-indigo-500/10" },
-              { icon: FileCheck, title: "Compliance Rules", desc: "One-click security rules for healthcare, finance, and regulated industries.", href: "/features#compliance-policy-packs", bg: "bg-teal-500/10" },
-              { icon: CheckSquare, title: "Approval Queue", desc: "Managers review and approve prompts before the team can use them.", href: "/features#approval-queue", bg: "bg-violet-500/10" },
-              { icon: Zap, title: "Import / Export", desc: "Bring existing prompts in or share them with another team.", href: "/features#import-export", bg: "bg-yellow-500/10" },
-            ].map((f) => (
-              <Link key={f.title} href={f.href} className="group rounded-2xl border border-border bg-card p-6 hover:border-primary/30 transition-all duration-300 block">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className={cn("flex h-9 w-9 items-center justify-center rounded-lg", f.bg)}>
-                      <f.icon className="h-4 w-4 text-foreground/70" />
-                    </div>
-                    <h3 className="font-semibold">{f.title}</h3>
-                  </div>
-                  <ArrowRight className="h-3.5 w-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300" />
-                </div>
-                <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
-                  {f.desc}
-                </p>
-              </Link>
-            ))}
+            {/* Feature 4: Compliance & Audit Trail */}
+            <FeatureCard
+              icon={FileSearch}
+              title="Compliance & Audit Trail"
+              description="19 pre-built compliance packs for HIPAA, SOC 2, PCI-DSS, GDPR, and more. Full activity log of every AI interaction with exportable reports for auditors."
+              large={false}
+              href="/features#compliance-policy-packs"
+              iconBg="bg-teal-500/10"
+            >
+              <div className="mt-5 flex flex-wrap gap-1.5">
+                {["HIPAA", "SOC 2", "PCI-DSS", "GDPR", "FERPA", "CCPA", "GLBA", "+12 more"].map(
+                  (pack) => (
+                    <span
+                      key={pack}
+                      className={cn(
+                        "text-[10px] font-semibold rounded-md px-2 py-1 border",
+                        pack.startsWith("+")
+                          ? "border-dashed border-border text-muted-foreground"
+                          : "border-border bg-muted/50 text-foreground/70"
+                      )}
+                    >
+                      {pack}
+                    </span>
+                  )
+                )}
+              </div>
+            </FeatureCard>
           </div>
         </div>
       </section>
 
-      {/* ━━━ INTEGRATIONS SHOWCASE ━━━ */}
-      <section className="py-20 sm:py-28 border-t border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-14">
-            <SectionLabel>Integrations</SectionLabel>
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-              Works where your team works
-            </h2>
-            <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-              Browser extension for AI tools. Slack for alerts. MCP for coding tools. Google Workspace for team sync.
-            </p>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 max-w-6xl mx-auto">
-            {/* Slack */}
-            <Link href="/integrations" className="group rounded-2xl border border-border bg-card p-6 hover:border-primary/30 hover:shadow-md transition-all block">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-50 dark:bg-purple-950/30">
-                  <Bell className="h-5 w-5 text-purple-600" />
-                </div>
-                <h3 className="font-semibold">Slack</h3>
-              </div>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                DLP violation alerts, prompt approval notifications, and weekly AI usage digests — right in your channels.
-              </p>
-            </Link>
-
-            {/* MCP */}
-            <Link href="/settings/integrations/mcp" className="group rounded-2xl border border-border bg-card p-6 hover:border-primary/30 hover:shadow-md transition-all block">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 dark:bg-indigo-950/30">
-                  <Plug2 className="h-5 w-5 text-indigo-600" />
-                </div>
-                <h3 className="font-semibold">MCP Server</h3>
-              </div>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Connect Claude Desktop, Cursor, and Windsurf to your prompt library, DLP, and audit logging.
-              </p>
-            </Link>
-
-            {/* Browser Extension */}
-            <Link href="/integrations" className="group rounded-2xl border border-border bg-card p-6 hover:border-primary/30 hover:shadow-md transition-all block">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-950/30">
-                  <Globe className="h-5 w-5 text-blue-600" />
-                </div>
-                <h3 className="font-semibold">5 AI Tools</h3>
-              </div>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Browser extension for ChatGPT, Claude, Gemini, Copilot, and Perplexity — insert prompts and scan in real-time.
-              </p>
-            </Link>
-
-            {/* Google Workspace */}
-            <Link href="/integrations" className="group rounded-2xl border border-border bg-card p-6 hover:border-primary/30 hover:shadow-md transition-all block">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-50 dark:bg-green-950/30">
-                  <Users className="h-5 w-5 text-green-600" />
-                </div>
-                <h3 className="font-semibold">Google Workspace</h3>
-              </div>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Sync your user directory and groups for automatic team management and onboarding.
-              </p>
-            </Link>
-
-            {/* Built-In AI Chat */}
-            <Link href="/features/ai-chat" className="group rounded-2xl border border-border bg-card p-6 hover:border-primary/30 hover:shadow-md transition-all block">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-50 dark:bg-violet-950/30">
-                  <MessageSquare className="h-5 w-5 text-violet-600" />
-                </div>
-                <h3 className="font-semibold">Built-In AI Chat</h3>
-              </div>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                A DLP-protected chat with GPT-4o, Claude, and Gemini — no extension needed. Every message scanned by your security rules.
-              </p>
-            </Link>
-          </div>
-
-          <p className="text-center mt-8 text-sm text-muted-foreground">
-            <Link href="/integrations" className="text-primary hover:underline font-medium">
-              See all integrations &rarr;
-            </Link>
-          </p>
-        </div>
-      </section>
-
-      {/* ━━━ SOCIAL PROOF / HOW IT WORKS ━━━ */}
+      {/* ━━━ 5. HOW IT WORKS ━━━ Dark section */}
       <section className="py-20 sm:py-28 bg-zinc-950 text-white relative overflow-hidden">
         <div
           className="absolute inset-0 pointer-events-none"
@@ -644,43 +496,64 @@ export default function LandingPage() {
               "radial-gradient(ellipse 60% 50% at 50% 50%, hsl(221 83% 53% / 0.08) 0%, transparent 70%)",
           }}
         />
+        {/* Grid overlay */}
+        <div
+          className="absolute inset-0 pointer-events-none opacity-[0.03]"
+          style={{
+            backgroundImage:
+              "linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)",
+            backgroundSize: "64px 64px",
+          }}
+        />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-16">
             <SectionLabel dark className="text-center">
-              How it works
+              How It Works
             </SectionLabel>
             <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-              From scattered prompts to one shared library
+              Protected in{" "}
+              <span className="bg-gradient-to-r from-blue-400 to-violet-400 bg-clip-text text-transparent">
+                three steps
+              </span>
             </h2>
             <p className="mt-4 text-lg text-zinc-400 max-w-2xl mx-auto">
-              Three steps to get your team on the same page.
+              From install to full AI security coverage in under two minutes.
             </p>
           </div>
 
-          <div className="grid gap-8 sm:grid-cols-3 max-w-4xl mx-auto">
+          <div className="grid gap-8 sm:grid-cols-3 max-w-4xl mx-auto relative">
+            {/* Connecting line */}
+            <div className="hidden sm:block absolute top-8 left-[20%] right-[20%] h-px bg-gradient-to-r from-blue-500/30 via-blue-500/50 to-blue-500/30" />
+
             {[
               {
                 step: "01",
-                title: "Create your workspace",
-                desc: "Sign up, name your org, invite your team. Takes less than two minutes.",
+                title: "Install",
+                desc: "Add the browser extension to Chrome, Edge, or Firefox. Or use the built-in secure chat. Takes less than 2 minutes.",
+                icon: Globe,
               },
               {
                 step: "02",
-                title: "Add prompts and security rules",
-                desc: "Import existing prompts or write new ones. Turn on data protection to block sensitive info from reaching AI tools.",
+                title: "Configure",
+                desc: "Enable compliance packs for your industry. Add your team's prompts. Set DLP rules to block, warn, or auto-redact.",
+                icon: Shield,
               },
               {
                 step: "03",
-                title: "Your team starts reusing",
-                desc: "Members search the library, use the browser extension, and your best prompts get adopted across the org.",
+                title: "Protected",
+                desc: "Every AI interaction is scanned in real time. Your team has shared standards. You have a full audit trail.",
+                icon: ShieldCheck,
               },
             ].map((item) => (
-              <div key={item.step} className="relative">
-                <span className="text-5xl font-black text-white/5">
+              <div key={item.step} className="relative text-center">
+                <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-500/10 border border-blue-500/20 mb-5">
+                  <item.icon className="h-7 w-7 text-blue-400" />
+                </div>
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 -translate-y-full text-xs font-bold text-blue-400/60 tracking-widest">
                   {item.step}
-                </span>
-                <h3 className="mt-2 text-lg font-semibold">{item.title}</h3>
-                <p className="mt-2 text-sm text-zinc-400 leading-relaxed">
+                </div>
+                <h3 className="text-lg font-semibold">{item.title}</h3>
+                <p className="mt-2 text-sm text-zinc-400 leading-relaxed max-w-xs mx-auto">
                   {item.desc}
                 </p>
               </div>
@@ -689,27 +562,16 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ━━━ SOCIAL PROOF / TRUST ━━━ */}
+      {/* ━━━ 6. SOCIAL PROOF ━━━ */}
       <section className="py-20 sm:py-28 border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-14">
-            <SectionLabel>Social Proof</SectionLabel>
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-              Trusted by teams across every industry
-            </h2>
-            <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-              From healthcare to engineering, teams rely on TeamPrompt to keep
-              AI usage consistent, compliant, and collaborative.
-            </p>
-          </div>
-
-          {/* Trust stats */}
+          {/* Stats */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 max-w-4xl mx-auto mb-16">
             {[
-              { icon: Building2, value: "20+", label: "Industries" },
-              { icon: Layers, value: "500+", label: "SEO Pages" },
-              { icon: Sparkles, value: "5", label: "AI Platforms Supported" },
-              { icon: Shield, value: "19", label: "Compliance Packs" },
+              { icon: ShieldAlert, value: "Real-time", label: "PII detection" },
+              { icon: FileSearch, value: "19", label: "Compliance frameworks" },
+              { icon: Globe, value: "<2 min", label: "Setup time" },
+              { icon: EyeOff, value: "3 modes", label: "Block, Warn, or Redact" },
             ].map((stat) => (
               <div
                 key={stat.label}
@@ -720,17 +582,17 @@ export default function LandingPage() {
                     <stat.icon className="h-5 w-5 text-primary" />
                   </div>
                 </div>
-                <p className="text-3xl font-bold tracking-tight">
-                  {stat.value}
-                </p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {stat.label}
-                </p>
+                <p className="text-2xl sm:text-3xl font-bold tracking-tight">{stat.value}</p>
+                <p className="mt-1 text-sm text-muted-foreground">{stat.label}</p>
               </div>
             ))}
           </div>
 
-          {/* Testimonial cards */}
+          {/* Testimonials */}
+          <div className="text-center mb-10">
+            <SectionLabel>What Teams Are Saying</SectionLabel>
+          </div>
+
           <div className="grid gap-6 sm:grid-cols-3 max-w-5xl mx-auto">
             {[
               {
@@ -739,13 +601,15 @@ export default function LandingPage() {
                 name: "Dr. Rebecca Lin",
                 role: "Compliance Officer",
                 company: "Regional Health System",
+                roleIcon: Shield,
               },
               {
                 quote:
-                  "Our team was writing the same outreach prompts from scratch every week. Now we have one library everyone pulls from — and the quality is way more consistent.",
+                  "Our team was writing the same outreach prompts from scratch every week. Now we have one library everyone pulls from -- and the quality is way more consistent.",
                 name: "James Okoro",
                 role: "Marketing Team Lead",
                 company: "B2B SaaS Company",
+                roleIcon: Users,
               },
               {
                 quote:
@@ -753,231 +617,80 @@ export default function LandingPage() {
                 name: "Priya Sharma",
                 role: "Engineering Manager",
                 company: "Fintech Startup",
+                roleIcon: Globe,
               },
             ].map((testimonial) => (
               <div
                 key={testimonial.name}
-                className="relative rounded-2xl border border-border bg-card p-6 sm:p-8"
+                className="relative rounded-2xl border border-border bg-card p-6 sm:p-8 hover:border-primary/20 transition-colors duration-300"
               >
-                <Quote className="h-8 w-8 text-primary/15 mb-4" />
+                <Quote className="h-8 w-8 text-primary/10 mb-4" />
                 <p className="text-sm leading-relaxed text-muted-foreground">
                   &ldquo;{testimonial.quote}&rdquo;
                 </p>
                 <div className="mt-6 flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
-                    {testimonial.name
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")}
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                    <testimonial.roleIcon className="h-4 w-4 text-primary" />
                   </div>
                   <div>
                     <p className="text-sm font-semibold">{testimonial.name}</p>
                     <p className="text-xs text-muted-foreground">
-                      {testimonial.role} · {testimonial.company}
+                      {testimonial.role}, {testimonial.company}
                     </p>
                   </div>
                 </div>
               </div>
             ))}
           </div>
+
+          <p className="text-center mt-6 text-xs text-muted-foreground/60">
+            Placeholder testimonials shown. Real customer quotes coming soon.
+          </p>
         </div>
       </section>
 
-      {/* ━━━ BUILT-IN AI CHAT ━━━ */}
-      <section className="py-20 sm:py-28 border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="max-w-2xl mb-14">
-            <SectionLabel>AI Chat</SectionLabel>
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-              A DLP-Protected AI Chat, Built In
-            </h2>
-            <p className="mt-4 text-lg text-muted-foreground">
-              Your team gets a secure AI chat that scans every message before it reaches the AI. Upload files, compare models side-by-side, and use admin commands to query real usage data — all with the same DLP rules protecting your browser extension.
-            </p>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <FeatureCard
-              icon={Layers}
-              title="Multi-Model Support"
-              description="Connect OpenAI, Anthropic, or Google. Switch models per conversation."
-              iconBg="bg-violet-500/10"
-            />
-            <FeatureCard
-              icon={RefreshCw}
-              title="Smart Redaction"
-              description="Sensitive data is automatically replaced with placeholders. Messages still send safely."
-              iconBg="bg-amber-500/10"
-            />
-            <FeatureCard
-              icon={FileUp}
-              title="File Upload with DLP"
-              description="Upload PDFs, Word docs, code files. Every file is scanned before text reaches the AI."
-              iconBg="bg-emerald-500/10"
-            />
-            <FeatureCard
-              icon={Terminal}
-              title="Admin Commands"
-              description="Type /activity, /violations, or /usage to query real data from your database."
-              iconBg="bg-blue-500/10"
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* ━━━ TWO WAYS TO DEPLOY ━━━ */}
-      <section className="py-20 sm:py-28 border-b border-border">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-14">
-            <SectionLabel>Deployment</SectionLabel>
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-              Use AI Your Way — Extension or Built-In Chat
-            </h2>
-          </div>
-
-          <div className="grid gap-6 sm:grid-cols-2">
-            <div className="rounded-2xl border border-border bg-card p-8 hover:border-primary/30 transition-all duration-300">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-500/10 mb-5">
-                <Monitor className="h-5 w-5 text-foreground/70" />
-              </div>
-              <h3 className="text-xl font-semibold">Browser Extension</h3>
-              <p className="mt-2 text-muted-foreground leading-relaxed">
-                Works inside ChatGPT, Claude, Gemini, Copilot, and Perplexity. Scans prompts in real time. Insert prompts from your library with one click.
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-border bg-card p-8 hover:border-primary/30 transition-all duration-300">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-500/10 mb-5">
-                <MessageSquare className="h-5 w-5 text-foreground/70" />
-              </div>
-              <h3 className="text-xl font-semibold">Built-In AI Chat</h3>
-              <p className="mt-2 text-muted-foreground leading-relaxed">
-                A secure chat powered by your own API keys. DLP scanning, file uploads, smart redaction, and admin analytics — all in one place.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ━━━ PRICING PREVIEW ━━━ */}
+      {/* ━━━ 7. PRICING PREVIEW ━━━ */}
       <section className="py-20 sm:py-28">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <div className="rounded-2xl border border-border bg-card p-10 sm:p-14 text-center">
             <SectionLabel className="text-center">Pricing</SectionLabel>
             <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mt-3">
-              Start free. Scale as you grow.
+              Free for up to 3 members.{" "}
+              <span className="text-primary">Pro starts at $8/user/month.</span>
             </h2>
             <p className="mt-4 text-lg text-muted-foreground max-w-xl mx-auto">
-              Free for up to 3 members. Pro starts at $8/user/month. Team plans for larger organizations with advanced DLP, compliance packs, and integrations.
+              DLP scanning, shared prompts, browser extension, and compliance packs.
+              No competitor offers all three at this price.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-8">
               <Link href="/signup">
                 <Button size="lg" className="rounded-full font-semibold px-8">
                   Get Started Free
+                  <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
               <Link href="/pricing">
                 <Button variant="outline" size="lg" className="rounded-full font-semibold px-8">
-                  Compare Plans &rarr;
+                  Compare Plans
+                  <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
             </div>
             <p className="mt-6 text-sm text-muted-foreground">
-              All plans include the browser extension for ChatGPT, Claude, Gemini, Copilot, and Perplexity. 14-day free trial on paid plans.
+              14-day free trial on paid plans. No credit card required to start.
             </p>
           </div>
         </div>
       </section>
 
-      {/* ━━━ EXPLORE BY INDUSTRY ━━━ */}
-      <section className="py-16 sm:py-20 border-t border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-10">
-            <SectionLabel>Industries</SectionLabel>
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
-              Explore by Industry
-            </h2>
-            <p className="mt-3 text-muted-foreground">
-              See how teams in your industry use TeamPrompt to manage AI prompts.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap items-center justify-center gap-3 max-w-3xl mx-auto">
-            {[
-              { name: "Healthcare", href: "/industries/healthcare", icon: Heart },
-              { name: "Legal", href: "/industries/legal", icon: Scale },
-              { name: "Technology", href: "/industries/technology", icon: Cpu },
-              { name: "Finance", href: "/industries/finance", icon: DollarSign },
-              { name: "Government", href: "/industries/government", icon: Landmark },
-              { name: "Education", href: "/industries/education", icon: GraduationCap },
-              { name: "Insurance", href: "/industries/insurance", icon: ShieldCheck },
-            ].map((industry) => (
-              <Link
-                key={industry.name}
-                href={industry.href}
-                className="group inline-flex items-center gap-2 rounded-full border border-border bg-card px-5 py-2.5 text-sm font-medium hover:border-primary/30 hover:bg-primary/5 transition-all duration-200"
-              >
-                <industry.icon className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                {industry.name}
-                <ArrowRight className="h-3 w-3 text-muted-foreground opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200" />
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ━━━ RESOURCES ━━━ */}
-      <section className="py-16 sm:py-20 border-t border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-10">
-            <SectionLabel>Resources</SectionLabel>
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
-              Resources
-            </h2>
-            <p className="mt-3 text-muted-foreground">
-              Guides, updates, and everything you need to get the most from TeamPrompt.
-            </p>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 max-w-4xl mx-auto">
-            {[
-              { title: "Blog", desc: "Learn best practices for AI prompt management", href: "/blog", icon: BookMarked },
-              { title: "Help Center", desc: "Get started with guides and tutorials", href: "/help", icon: HelpCircle },
-              { title: "Changelog", desc: "See what's new in TeamPrompt", href: "/changelog", icon: History },
-              { title: "Integrations", desc: "Connect with your favorite AI tools", href: "/integrations", icon: Plug },
-              { title: "Security", desc: "Enterprise-grade data protection", href: "/security", icon: Lock },
-              { title: "Enterprise", desc: "Solutions for large organizations", href: "/enterprise", icon: Building },
-            ].map((resource) => (
-              <Link
-                key={resource.title}
-                href={resource.href}
-                className="group flex items-start gap-4 rounded-xl border border-border bg-card p-5 hover:border-primary/30 hover:shadow-sm transition-all duration-200"
-              >
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                  <resource.icon className="h-4 w-4 text-primary" />
-                </div>
-                <div className="min-w-0">
-                  <h3 className="text-sm font-semibold flex items-center gap-1.5">
-                    {resource.title}
-                    <ArrowRight className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all duration-200" />
-                  </h3>
-                  <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-                    {resource.desc}
-                  </p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ━━━ BOTTOM CTA ━━━ */}
+      {/* ━━━ 8. FINAL CTA ━━━ */}
       <section className="py-20 sm:py-28 border-t border-border">
         <div className="max-w-3xl mx-auto px-4 sm:px-6">
           <CTASection
             headline="Your team is already using AI."
-            gradientText="Now make it consistent."
-            subtitle="Set up your workspace in under two minutes. No credit card needed."
+            gradientText="Make sure it's secure."
+            subtitle="Set up AI data loss prevention in under two minutes. No credit card needed."
+            buttonText="Start for free"
           />
         </div>
       </section>

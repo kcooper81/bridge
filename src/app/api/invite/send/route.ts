@@ -37,7 +37,8 @@ export async function POST(request: NextRequest) {
     const rl = await checkRateLimit(limiters.invite, profile.org_id);
     if (!rl.success) return rl.response;
 
-    const { email, role = "member", team_id = null } = await request.json();
+    const { email: rawEmail, role = "member", team_id = null } = await request.json();
+    const email = rawEmail?.trim()?.toLowerCase();
 
     // Validate role
     const validRoles = ["admin", "manager", "member"];
@@ -102,12 +103,12 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Check if this email belongs to an existing org member
+    // Check if this email belongs to an existing org member (case-insensitive)
     const { data: existingMember } = await db
       .from("profiles")
       .select("id")
       .eq("org_id", profile.org_id)
-      .eq("email", email)
+      .ilike("email", email)
       .single();
 
     if (existingMember) {
@@ -117,12 +118,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check for existing pending invite
+    // Check for existing pending invite (case-insensitive)
     const { data: existingInvite } = await db
       .from("invites")
       .select("id")
       .eq("org_id", profile.org_id)
-      .eq("email", email)
+      .ilike("email", email)
       .eq("status", "pending")
       .single();
 

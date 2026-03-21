@@ -58,6 +58,7 @@ export const limiters = {
   packRequest: createLimiter(10, "1 m", "pack-request"),
   approvals: createLimiter(20, "1 m", "approvals"),
   transferAdmin: createLimiter(3, "10 m", "transfer-admin"),
+  adminData: createLimiter(10, "1 m", "admin-data"),
 };
 
 export async function checkRateLimit(

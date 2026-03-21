@@ -54,16 +54,18 @@
 ## Google Ads & Marketing (Built 2026-03-18/19/20)
 - [x] GA4 event audit and fixes
 - [x] 4 Google Ads landing pages (conversion-optimized, dark hero, mockups)
+- [x] LP pages redesigned with visual variety (before/after, step flows, FAQ sections)
 - [x] 10 SEO blog articles
 - [x] Sitemap updated
 - [x] Google Ads campaign optimization (keyword cleanup, bidding)
 - [x] Homepage updated (AI Chat section, "Two Ways to Deploy", Smart Redaction)
 - [x] Features page updated (AI Chat block, Smart Redaction, "Learn more" links)
-- [x] AI Chat showcase page (/features/ai-chat) with mockups
+- [x] AI Chat showcase page (/features/ai-chat) redesigned with interactive mockups
 - [x] Solutions page redesigned (category nav, previews, featured)
 - [x] Header mega menu — AI Chat added under use cases
 - [x] "Works with your favorite tools" — TeamPrompt Chat added
 - [x] "Works where your team works" — Built-In AI Chat card added
+- [x] AppMockup sidebar nav updated to match current app structure
 
 ## Sidebar & Navigation (Built 2026-03-19)
 - [x] Nav restructured — Security section (Guardrails, Activity Log, Analytics)
@@ -82,32 +84,39 @@
 - [x] Edge redirected to Chrome Web Store (not yet approved on Edge store)
 - [x] Old extension zips archived
 
-## Industry Onboarding (Building 2026-03-20)
-- [ ] Industry picker in setup wizard (Healthcare, Finance, Tech, Legal, Education, Marketing)
-- [ ] Industry-specific seed prompts (5 per industry)
-- [ ] Industry field on organizations table
-- [ ] API to save industry + trigger seeding
+## Industry Onboarding (Built 2026-03-20)
+- [x] Industry picker in onboarding flow (Healthcare, Finance, Tech, Legal, Education, Marketing, Other)
+- [x] Industry-specific seed prompts (5 per industry)
+- [x] Industry field on organizations table (migration 074)
+- [x] API to save industry + trigger seeding (POST /api/org/industry)
+- [x] 3-step onboarding flow (industry → workspace name → extension/chat)
+- [x] Setup checklist (choose industry, install extension, invite teammate)
+- [x] Signup/login redirect fixed to /home for onboarding
+- [x] Dismiss keys scoped per org ID
+
+## Prompt Risk Scoring (Built 2026-03-20)
+- [x] Score every prompt 0-100 with risk levels (low/moderate/high/critical/severe)
+- [x] Category weights (secrets, credentials, PII, financial, medical, legal)
+- [x] Severity multipliers (block=1.5x, redact=1.2x, warn=1.0x)
 
 ## Database Migrations
 - [x] 070_chat_pinned_column.sql
 - [x] 071_chat_features.sql (idempotent)
 - [x] 072_add_redact_severity.sql
 - [x] 073_saved_items.sql
-- [ ] 074_org_industry.sql
+- [x] 074_org_industry.sql
 
 ---
 
 ## Pending — High Priority (Product Roadmap)
-- [x] **Smart Redaction** — DONE
-- [ ] **Prompt Risk Scoring** — Score every prompt 0-100 instead of binary block/warn
 - [ ] **Shadow AI Detection** — Detect 50+ AI tool domains, admin alerts
 - [ ] **Per-Team Policy Engine** — Rules scoped to teams/departments
 - [ ] **SIEM Webhook** — One endpoint that POSTs violation events as JSON
 - [ ] **Industry-Specific Guardrails** — Seed industry-specific sensitive terms on onboarding (warn severity, free plan compatible). Healthcare: patient/diagnosis/MRN/PHI. Finance: account number/routing number. Legal: privileged/attorney-client. Education: student record/FERPA. Show "HIPAA pack ready — upgrade" teaser in guardrails.
 - [ ] **Google Ads + GA4 Analytics Dashboard** — Admin panel for ad performance, conversions, keyword data
+- [ ] **Prompt Injection Detection** — Detect "ignore previous instructions" patterns
 
 ## Pending — Medium Priority (Differentiators)
-- [ ] **Prompt Injection Detection** — Detect "ignore previous instructions" patterns
 - [ ] **Team/Department Analytics Dashboard** — Visual comparison by department
 - [ ] **User Coaching** — Contextual education when user does something risky
 - [ ] **Data Fingerprinting** — Detect internal documents pasted into AI
@@ -119,12 +128,10 @@
 - [ ] Edit sent messages / branching
 - [ ] Inline annotations (highlight → "Explain this" / "Simplify")
 - [ ] Quick action buttons ("Make shorter", "More formal", "Add examples")
-- [x] Syntax-highlighted code blocks with language label — DONE
 - [ ] Mermaid diagram rendering
 - [ ] LaTeX math rendering
 - [ ] Markdown preview in input
 - [ ] @ mentions (reference conversations or team members)
-- [x] Drag-and-drop files anywhere on page — DONE
 - [ ] Streaming token counter
 
 ## Pending — AI Chat Personalization
@@ -135,12 +142,12 @@
 
 ## Pending — Platform & Enterprise
 - [ ] Chrome Web Store API for automated extension updates
-- [ ] Slack integration — ALREADY BUILT (DLP alerts, notifications, digest)
+- [x] Slack integration — DONE (DLP alerts, notifications, digest cron)
 - [ ] Microsoft Teams integration
 - [ ] Microsoft Entra ID (Azure AD) directory sync
 - [ ] SCIM 2.0 provisioning (Okta, OneLogin, JumpCloud)
 - [ ] SAML 2.0 SSO
-- [x] MCP Server for Claude Desktop — ALREADY BUILT
+- [x] MCP Server for Claude Desktop — DONE
 - [ ] Clipboard monitor companion app (Tauri/Electron system tray)
 - [ ] API/Backend coverage (monitor direct API calls)
 - [ ] Compliance report generator (one-click PDF for auditors)

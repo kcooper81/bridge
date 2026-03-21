@@ -56,7 +56,12 @@ export async function GET(request: NextRequest) {
             .eq("id", authUser.id)
             .single();
 
-          if (profile?.org_id) {
+          if (!profile) {
+            // Profile doesn't exist yet — brand new account, DB trigger may not have fired
+            // Send to /home so OrgProvider can create profile + org, then show onboarding
+            finalNext = "/home";
+            authDebug.log("callback", "no profile found, likely new account — redirecting to /home");
+          } else if (profile.org_id) {
             const { data: org } = await svc
               .from("organizations")
               .select("name, industry")
@@ -68,11 +73,16 @@ export async function GET(request: NextRequest) {
               finalNext = "/home";
               authDebug.log("callback", "fresh account detected, redirecting to /home for onboarding");
             }
+          } else {
+            // Profile exists but no org — send to /home so OrgProvider can handle
+            finalNext = "/home";
+            authDebug.log("callback", "profile has no org, redirecting to /home");
           }
         }
       } catch {
-        // Don't block auth flow if org check fails
-        authDebug.error("callback", "org check failed, using default redirect");
+        // If org check fails, default to /home for safety — OrgProvider will handle setup
+        finalNext = "/home";
+        authDebug.error("callback", "org check failed, defaulting to /home");
       }
 
       // Pass auth tracking params to the destination so the client can fire GA4/LinkedIn events

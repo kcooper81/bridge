@@ -30,9 +30,11 @@ export function SetupChecklist() {
   const store = useMemo(() => getStoreForBrowser(browser), [browser]);
 
   // Key dismiss by org ID so it resets on new account/org
-  const dismissKey = org?.id ? `${DISMISS_KEY}-${org.id}` : DISMISS_KEY;
+  // Don't use fallback key — wait for org to load
+  const dismissKey = org?.id ? `${DISMISS_KEY}-${org.id}` : null;
 
   useEffect(() => {
+    if (!dismissKey) return;
     setDismissed(localStorage.getItem(dismissKey) === "true");
   }, [dismissKey]);
 
@@ -68,7 +70,7 @@ export function SetupChecklist() {
   if (allDone) return null;
 
   function handleDismiss() {
-    localStorage.setItem(dismissKey, "true");
+    if (dismissKey) localStorage.setItem(dismissKey, "true");
     setDismissed(true);
   }
 

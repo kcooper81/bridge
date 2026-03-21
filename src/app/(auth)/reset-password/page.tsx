@@ -34,7 +34,7 @@ export default function ResetPasswordPage() {
     // Use a generous timeout to account for slow networks
     const timeout = setTimeout(() => {
       setSessionValid((prev) => (prev === null ? false : prev));
-    }, 10000);
+    }, 20000);
 
     return () => {
       subscription.unsubscribe();

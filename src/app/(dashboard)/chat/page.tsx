@@ -322,6 +322,10 @@ export default function ChatPage() {
           const fd = new FormData();
           fd.append("files", file);
           const res = await fetch("/api/chat/upload", { method: "POST", body: fd });
+          if (!res.ok) {
+            setPendingFiles((prev) => prev.map((f) => f.file === file ? { ...f, uploading: false, error: `Upload failed (${res.status})` } : f));
+            continue;
+          }
           const data = await res.json();
 
           if (data.blocked) {
@@ -459,6 +463,13 @@ export default function ChatPage() {
         if (data.error) { toast.error(data.error); setIsLoading(false); return; }
       }
 
+      if (!res.ok) {
+        toast.error(`Chat request failed (${res.status})`);
+        if (!messagesToSend) setMessages((prev) => prev.slice(0, -1));
+        setIsLoading(false);
+        return;
+      }
+
       const reader = res.body?.getReader();
       const decoder = new TextDecoder();
       const assistantId = nextMsgId();
@@ -571,6 +582,8 @@ export default function ChatPage() {
         }),
         signal: controller.signal,
       });
+
+      if (!res.ok) { setCompareLoading(false); return; }
 
       const contentType = res.headers.get("content-type");
       if (contentType?.includes("application/json")) {
@@ -746,6 +759,7 @@ export default function ChatPage() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ command }),
           });
+          if (!res.ok) { toast.error(`Failed to fetch admin data (${res.status})`); break; }
           const data = await res.json();
           if (data.error) { toast.error(data.error); break; }
           // Build messages directly (avoid stale closure from setTimeout)
@@ -1055,6 +1069,7 @@ export default function ChatPage() {
     setCompareMessages([]);
     try {
       const res = await fetch(`/api/chat/conversations/${convId}`);
+      if (!res.ok) { toast.error("Failed to load conversation"); return; }
       const data = await res.json();
       if (data.messages) {
         setMessages(data.messages.map((m: { id: string; role: string; content: string; rating?: number; created_at?: string; model?: string }) => ({
@@ -1068,9 +1083,9 @@ export default function ChatPage() {
         }
         setMessageRatings(ratings);
       }
-      if (data.conversation) {
+      if (data.conversation?.model) {
         setSelectedModel(data.conversation.model);
-        setSelectedProvider(data.conversation.provider);
+        setSelectedProvider(data.conversation.provider || "openai");
       }
     } catch { toast.error("Failed to load conversation"); }
   }

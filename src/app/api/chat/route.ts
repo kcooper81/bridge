@@ -249,10 +249,14 @@ export async function POST(request: NextRequest) {
           })
           .select("id")
           .single();
-        if (convError) {
+        if (convError || !conv?.id) {
           console.error("Failed to create conversation:", convError);
+          return new Response(JSON.stringify({ error: "Failed to create conversation" }), {
+            status: 500,
+            headers: { "Content-Type": "application/json" },
+          });
         }
-        convId = conv?.id;
+        convId = conv.id;
       }
 
       // Save user message

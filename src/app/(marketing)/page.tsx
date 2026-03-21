@@ -652,6 +652,42 @@ export default function LandingPage() {
       {/* ━━━ 7. PRICING PREVIEW ━━━ */}
       <section className="py-20 sm:py-28">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
+          {/* Comparison callout */}
+          <div className="rounded-2xl border border-primary/20 bg-primary/[0.03] p-6 sm:p-8 mb-8">
+            <div className="grid sm:grid-cols-2 gap-6 items-center">
+              <div>
+                <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-2">ChatGPT Teams</p>
+                <p className="text-2xl sm:text-3xl font-bold">$30<span className="text-lg text-muted-foreground">/user/mo</span></p>
+                <div className="mt-3 space-y-1.5">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <XCircle className="h-4 w-4 text-red-500 shrink-0" />No shared prompt library
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <XCircle className="h-4 w-4 text-red-500 shrink-0" />No DLP or data scanning
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <XCircle className="h-4 w-4 text-red-500 shrink-0" />No admin audit trail
+                  </div>
+                </div>
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-primary uppercase tracking-wider mb-2">TeamPrompt Pro</p>
+                <p className="text-2xl sm:text-3xl font-bold">$8<span className="text-lg text-muted-foreground">/user/mo</span></p>
+                <div className="mt-3 space-y-1.5">
+                  <div className="flex items-center gap-2 text-sm text-foreground font-medium">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />Shared prompt library + templates
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-foreground font-medium">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />Real-time DLP scanning + smart redaction
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-foreground font-medium">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />Full admin audit trail + 19 compliance packs
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div className="rounded-2xl border border-border bg-card p-10 sm:p-14 text-center">
             <SectionLabel className="text-center">Pricing</SectionLabel>
             <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mt-3">
@@ -659,8 +695,7 @@ export default function LandingPage() {
               <span className="text-primary">Pro starts at $8/user/month.</span>
             </h2>
             <p className="mt-4 text-lg text-muted-foreground max-w-xl mx-auto">
-              DLP scanning, shared prompts, browser extension, and compliance packs.
-              No competitor offers all three at this price.
+              DLP scanning, shared prompts, browser extension, and compliance packs — at a fraction of what ChatGPT Teams charges.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-8">
               <Link href="/signup">

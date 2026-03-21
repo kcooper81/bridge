@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { createServiceClient } from "@/lib/supabase/server";
 import { authDebug } from "@/lib/auth-debug"; // AUTH-DEBUG
 
 function sanitizeRedirect(next: string | null): string {
@@ -43,11 +44,42 @@ export async function GET(request: NextRequest) {
 
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
+      // Check if this is a fresh account that needs onboarding
+      let finalNext = next;
+      try {
+        const { data: { user: authUser } } = await supabase.auth.getUser();
+        if (authUser) {
+          const svc = createServiceClient();
+          const { data: profile } = await svc
+            .from("profiles")
+            .select("org_id")
+            .eq("id", authUser.id)
+            .single();
+
+          if (profile?.org_id) {
+            const { data: org } = await svc
+              .from("organizations")
+              .select("name, industry")
+              .eq("id", profile.org_id)
+              .single();
+
+            // Fresh account: no industry set and still has default org name
+            if (org && !org.industry && org.name?.includes("'s Org")) {
+              finalNext = "/home";
+              authDebug.log("callback", "fresh account detected, redirecting to /home for onboarding");
+            }
+          }
+        }
+      } catch {
+        // Don't block auth flow if org check fails
+        authDebug.error("callback", "org check failed, using default redirect");
+      }
+
       // Pass auth tracking params to the destination so the client can fire GA4/LinkedIn events
       const authEvent = searchParams.get("auth_event");
       const authMethod = searchParams.get("auth_method");
       if (authEvent && authMethod) {
-        const redirectUrl = new URL(`${origin}${next}`);
+        const redirectUrl = new URL(`${origin}${finalNext}`);
         redirectUrl.searchParams.set("auth_event", authEvent);
         redirectUrl.searchParams.set("auth_method", authMethod);
         const trackingResponse = NextResponse.redirect(redirectUrl.toString());
@@ -59,6 +91,17 @@ export async function GET(request: NextRequest) {
         authDebug.attachToResponse(trackingResponse); // AUTH-DEBUG
         return trackingResponse;
       }
+
+      if (finalNext !== next) {
+        const onboardingResponse = NextResponse.redirect(`${origin}${finalNext}`);
+        supabaseResponse.cookies.getAll().forEach(({ name: n, value: v }) => {
+          onboardingResponse.cookies.set(n, v);
+        });
+        authDebug.log("callback", "redirecting fresh account to", finalNext);
+        authDebug.attachToResponse(onboardingResponse);
+        return onboardingResponse;
+      }
+
       authDebug.log("callback", "code exchange success, redirecting to", next);
       authDebug.attachToResponse(supabaseResponse); // AUTH-DEBUG
       return supabaseResponse;

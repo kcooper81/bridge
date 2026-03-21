@@ -29,9 +29,12 @@ export function SetupChecklist() {
   const browser = useMemo(() => detectBrowser(), []);
   const store = useMemo(() => getStoreForBrowser(browser), [browser]);
 
+  // Key dismiss by org ID so it resets on new account/org
+  const dismissKey = org?.id ? `${DISMISS_KEY}-${org.id}` : DISMISS_KEY;
+
   useEffect(() => {
-    setDismissed(localStorage.getItem(DISMISS_KEY) === "true");
-  }, []);
+    setDismissed(localStorage.getItem(dismissKey) === "true");
+  }, [dismissKey]);
 
   if (dismissed) return null;
   if (currentUserRole !== "admin") return null;
@@ -65,7 +68,7 @@ export function SetupChecklist() {
   if (allDone) return null;
 
   function handleDismiss() {
-    localStorage.setItem(DISMISS_KEY, "true");
+    localStorage.setItem(dismissKey, "true");
     setDismissed(true);
   }
 

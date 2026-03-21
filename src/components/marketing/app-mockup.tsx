@@ -9,7 +9,7 @@ import {
   CheckSquare,
   FileText,
   HelpCircle,
-  LayoutDashboard,
+
   Search,
   Settings,
   Share2,
@@ -51,18 +51,21 @@ export interface AppMockupProps {
 
 /* ── Sidebar nav structure matching the real app ── */
 const workspaceNav = [
-  { label: "Dashboard", icon: LayoutDashboard },
-  { label: "Prompts", icon: StickyNote },
-  { label: "Templates", icon: FileText },
-  { label: "Approvals", icon: CheckSquare },
-  { label: "Guidelines", icon: BookOpen },
-  { label: "Team", icon: Users },
+  { label: "AI Chat", icon: Sparkles },
+  { label: "Prompt Library", icon: StickyNote },
+  { label: "Template Packs", icon: FileText },
 ];
 
-const intelligenceNav = [
-  { label: "Analytics", icon: BarChart3 },
+const securityNav = [
+  { label: "Guardrails", icon: Shield },
   { label: "Activity Log", icon: Activity },
-  { label: "Security", icon: Shield },
+  { label: "Analytics", icon: BarChart3 },
+];
+
+const manageNav = [
+  { label: "Team", icon: Users },
+  { label: "Approvals", icon: CheckSquare },
+  { label: "Guidelines", icon: BookOpen },
 ];
 
 const highlightStyles = {
@@ -180,8 +183,8 @@ function ToastNotification({ toast }: { toast: ToastOverlay }) {
 
 /* Maps variant → active sidebar label */
 const variantNavMap: Record<string, string> = {
-  vault: "Prompts",
-  guardrails: "Security",
+  vault: "Prompt Library",
+  guardrails: "Guardrails",
   guidelines: "Guidelines",
 };
 
@@ -265,11 +268,8 @@ export function AppMockup({
           </div>
 
           <div className="flex-1 px-2 pt-3 space-y-3 overflow-hidden">
-            {/* WORKSPACE section */}
+            {/* Main nav */}
             <div>
-              <p className="text-[8px] font-semibold uppercase tracking-widest text-muted-foreground/60 px-2 mb-1">
-                Workspace
-              </p>
               <nav className="space-y-0.5">
                 {workspaceNav.map((item) => (
                   <NavItem
@@ -282,13 +282,30 @@ export function AppMockup({
               </nav>
             </div>
 
-            {/* INTELLIGENCE section */}
+            {/* SECURITY section */}
             <div>
               <p className="text-[8px] font-semibold uppercase tracking-widest text-muted-foreground/60 px-2 mb-1">
-                Intelligence
+                Security
               </p>
               <nav className="space-y-0.5">
-                {intelligenceNav.map((item) => (
+                {securityNav.map((item) => (
+                  <NavItem
+                    key={item.label}
+                    item={item}
+                    active={item.label === active}
+                    badge={navBadges?.[item.label]}
+                  />
+                ))}
+              </nav>
+            </div>
+
+            {/* MANAGE section */}
+            <div>
+              <p className="text-[8px] font-semibold uppercase tracking-widest text-muted-foreground/60 px-2 mb-1">
+                Manage
+              </p>
+              <nav className="space-y-0.5">
+                {manageNav.map((item) => (
                   <NavItem
                     key={item.label}
                     item={item}

@@ -17,11 +17,11 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const rawRedirect = searchParams.get("redirect") || "/vault";
+  const rawRedirect = searchParams.get("redirect") || "/home";
   // Only allow relative paths — prevent open redirects
   const redirectTo = rawRedirect.startsWith("/") && !rawRedirect.startsWith("//")
     ? rawRedirect
-    : "/vault";
+    : "/home";
   const plan = searchParams.get("plan");
   const inviteEmail = searchParams.get("email");
 

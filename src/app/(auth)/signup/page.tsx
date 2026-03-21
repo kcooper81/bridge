@@ -20,11 +20,11 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const plan = searchParams.get("plan");
-  const rawRedirect = searchParams.get("redirect") || "/vault";
+  const rawRedirect = searchParams.get("redirect") || "/home";
   // Only allow relative paths — prevent open redirects
   const redirectTo = rawRedirect.startsWith("/") && !rawRedirect.startsWith("//")
     ? rawRedirect
-    : "/vault";
+    : "/home";
   const inviteEmail = searchParams.get("email");
 
   async function handleSignup(e: React.FormEvent) {

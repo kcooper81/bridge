@@ -48,10 +48,13 @@ export function OnboardingFlow() {
   const browser = useMemo(() => detectBrowser(), []);
   const store = useMemo(() => getStoreForBrowser(browser), [browser]);
 
+  // Key dismiss by org ID so it resets on new account/org
+  const dismissKey = org?.id ? `${DISMISS_KEY}-${org.id}` : DISMISS_KEY;
+
   // Determine if onboarding should show
   useEffect(() => {
     if (!org) return;
-    const dismissed = localStorage.getItem(DISMISS_KEY) === "true";
+    const dismissed = localStorage.getItem(dismissKey) === "true";
     if (dismissed) return;
 
     const isFreshAccount = !org.industry && org.name?.includes("'s Org");
@@ -59,10 +62,10 @@ export function OnboardingFlow() {
       setVisible(true);
       setWorkspaceName(org.name || "");
     }
-  }, [org]);
+  }, [org, dismissKey]);
 
   function dismiss() {
-    localStorage.setItem(DISMISS_KEY, "true");
+    localStorage.setItem(dismissKey, "true");
     setVisible(false);
   }
 

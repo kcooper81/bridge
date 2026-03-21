@@ -71,6 +71,11 @@ export async function POST(request: NextRequest) {
       return withCors(NextResponse.json({ error: "metadata must be an object" }, { status: 400 }), request);
     }
 
+    // Limit metadata size to prevent storage bloat
+    if (metadata && JSON.stringify(metadata).length > 10000) {
+      return withCors(NextResponse.json({ error: "metadata too large" }, { status: 400 }), request);
+    }
+
     // If activity logging is disabled, skip the insert but still increment usage
     if (orgSettings.activity_logging_enabled === false) {
       if (prompt_id && action !== "blocked") {

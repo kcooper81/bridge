@@ -144,8 +144,18 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: "Managers cannot remove admins" }, { status: 403 });
     }
 
-    // Remove from all teams first
-    await db.from("team_members").delete().eq("user_id", memberId);
+    // Remove from all teams in this org first
+    const { data: orgTeams } = await db
+      .from("teams")
+      .select("id")
+      .eq("org_id", caller.org_id);
+    if (orgTeams?.length) {
+      await db
+        .from("team_members")
+        .delete()
+        .eq("user_id", memberId)
+        .in("team_id", orgTeams.map((t: { id: string }) => t.id));
+    }
 
     // Set org_id to null (removes from org)
     const { error } = await db

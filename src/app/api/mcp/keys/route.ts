@@ -62,6 +62,11 @@ export async function POST(request: NextRequest) {
   );
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+  const { checkRateLimit } = await import("@/lib/rate-limit");
+  const { limiters } = await import("@/lib/rate-limit");
+  const rl = await checkRateLimit(limiters.mcpKeys, user.id);
+  if (!rl.success) return rl.response;
+
   const { data: profile } = await db
     .from("profiles")
     .select("org_id, role")

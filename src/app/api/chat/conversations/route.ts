@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { limiters, checkRateLimit } from "@/lib/rate-limit";
 
 /** GET — list user's conversations */
 export async function GET() {
@@ -7,6 +8,9 @@ export async function GET() {
   const { data: { user } } = await auth.auth.getUser();
   const db = createServiceClient();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const rl = await checkRateLimit(limiters.chatConversations, user.id);
+  if (!rl.success) return rl.response;
 
   const { data: profile } = await db
     .from("profiles")

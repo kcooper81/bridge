@@ -59,6 +59,8 @@ export const limiters = {
   approvals: createLimiter(20, "1 m", "approvals"),
   transferAdmin: createLimiter(3, "10 m", "transfer-admin"),
   adminData: createLimiter(10, "1 m", "admin-data"),
+  chatConversations: createLimiter(30, "1 m", "chat-conversations"),
+  mcpKeys: createLimiter(5, "1 m", "mcp-keys"),
 };
 
 export async function checkRateLimit(

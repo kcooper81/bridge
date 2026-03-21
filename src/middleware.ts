@@ -21,6 +21,7 @@ const PUBLIC_ROUTES = [
   "/extensions",
   "/blog",
   "/pitch",
+  "/lp",
 ];
 
 function isPublicRoute(pathname: string) {

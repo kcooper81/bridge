@@ -42,6 +42,11 @@ export default function AIProvidersPage() {
   const loadProviders = useCallback(async () => {
     try {
       const res = await fetch("/api/chat/providers");
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        toast.error(err.error || `Request failed (${res.status})`);
+        return;
+      }
       const data = await res.json();
       setProviders(data.providers || []);
     } catch {
@@ -84,11 +89,16 @@ export default function AIProvidersPage() {
 
   async function removeProvider(provider: string) {
     try {
-      await fetch("/api/chat/providers", {
+      const res = await fetch("/api/chat/providers", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ provider }),
       });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        toast.error(err.error || `Request failed (${res.status})`);
+        return;
+      }
       toast.success("Provider removed");
       setDeleteProvider(null);
       await loadProviders();

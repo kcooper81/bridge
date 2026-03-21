@@ -76,6 +76,11 @@ export default function McpSettingsPage() {
   const loadKeys = useCallback(async () => {
     try {
       const res = await fetch("/api/mcp/keys");
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        toast.error(err.error || `Request failed (${res.status})`);
+        return;
+      }
       const data = await res.json();
       setKeys(data.keys || []);
     } catch {

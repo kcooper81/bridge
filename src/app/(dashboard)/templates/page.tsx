@@ -376,18 +376,20 @@ export default function TemplatesPage() {
         }),
       });
 
-      const data = await res.json();
-      if (res.ok) {
-        const parts = [];
-        if (data.promptsCreated > 0) parts.push(`${data.promptsCreated} prompt(s)`);
-        if (data.guidelinesCreated > 0) parts.push(`${data.guidelinesCreated} guideline(s)`);
-        if (data.rulesCreated > 0) parts.push(`${data.rulesCreated} policy(ies)`);
-        toast.success(`Installed ${parts.join(", ") || "pack"}`);
-        setInstallDialogOpen(false);
-        refresh();
-      } else {
-        toast.error(data.error || "Failed to install pack");
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        toast.error(err.error || `Request failed (${res.status})`);
+        return;
       }
+
+      const data = await res.json();
+      const parts = [];
+      if (data.promptsCreated > 0) parts.push(`${data.promptsCreated} prompt(s)`);
+      if (data.guidelinesCreated > 0) parts.push(`${data.guidelinesCreated} guideline(s)`);
+      if (data.rulesCreated > 0) parts.push(`${data.rulesCreated} policy(ies)`);
+      toast.success(`Installed ${parts.join(", ") || "pack"}`);
+      setInstallDialogOpen(false);
+      refresh();
     } catch {
       toast.error("Failed to install pack");
     } finally {

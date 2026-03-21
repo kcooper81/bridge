@@ -66,6 +66,11 @@ export default function BillingPage() {
         },
         body: JSON.stringify({ orgId: org.id }),
       });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        toast.error(err.error || `Request failed (${res.status})`);
+        return;
+      }
       const data = await res.json();
       if (data.url) {
         window.location.href = data.url;
@@ -115,6 +120,11 @@ export default function BillingPage() {
           interval,
         }),
       });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        toast.error(err.error || `Request failed (${res.status})`);
+        return;
+      }
       const data = await res.json();
       if (data.url) {
         window.location.href = data.url;

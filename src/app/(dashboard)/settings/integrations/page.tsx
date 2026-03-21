@@ -216,10 +216,15 @@ export default function IntegrationsPage() {
         return;
       }
 
-      await fetch("/api/integrations/google/disconnect", {
+      const res = await fetch("/api/integrations/google/disconnect", {
         method: "DELETE",
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        toast.error(err.error || `Request failed (${res.status})`);
+        return;
+      }
       setGoogleStatus({ connected: false });
       toast.success("Google Workspace disconnected");
     } catch {
@@ -279,8 +284,13 @@ export default function IntegrationsPage() {
       const res = await fetch("/api/integrations/slack/channels", {
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        toast.error(err.error || `Request failed (${res.status})`);
+        return;
+      }
       const data = await res.json();
-      if (res.ok) setSlackChannels(data.channels || []);
+      setSlackChannels(data.channels || []);
     } catch {
       toast.error("Failed to load channels");
     } finally {

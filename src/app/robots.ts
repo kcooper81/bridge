@@ -23,7 +23,6 @@ export default function robots(): MetadataRoute.Robots {
     "/reset-password",
     "/invite",
     "/auth/",
-    "/media",
     "/pitch",
   ];
 

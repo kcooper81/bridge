@@ -351,6 +351,9 @@ export async function POST(request: NextRequest) {
     });
 
     // Build provider-specific options for extended thinking
+    // Anthropic: enables explicit thinking blocks (streamed as reasoning-delta)
+    // OpenAI: o1/o3/o3-mini reason internally — no separate API param, reasoning not exposed
+    // Google: no extended thinking support
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const providerOptions: any = {};
     if (thinking && (provider || "openai") === "anthropic") {

@@ -75,35 +75,48 @@ import { useOrg } from "@/components/providers/org-provider";
 
 // ── LaTeX delimiter normalizer (OpenAI uses \(...\) and \[...\], remark-math expects $...$ and $$...$$) ──
 function normalizeLatexDelimiters(content: string): string {
-  return content
-    .replace(/\\\[/g, "$$")
-    .replace(/\\\]/g, "$$")
-    .replace(/\\\(/g, "$")
-    .replace(/\\\)/g, "$");
+  // Convert paired \[...\] to $$...$$ (display math)
+  let result = content.replace(/\\\[([\s\S]*?)\\\]/g, (_, inner) => `$$${inner}$$`);
+  // Convert paired \(...\) to $...$ (inline math) — avoid matching \( in non-math contexts
+  result = result.replace(/\\\(([\s\S]*?)\\\)/g, (_, inner) => `$${inner}$`);
+  return result;
 }
 
 // ── Mermaid diagram component (client-side only) ──
+
+let _mermaidIdCounter = 0;
+
+function sanitizeSvg(svg: string): string {
+  // Strip event handlers and script elements from SVG to prevent XSS
+  return svg
+    .replace(/<script[\s\S]*?<\/script>/gi, "")
+    .replace(/\son\w+="[^"]*"/gi, "")
+    .replace(/\son\w+='[^']*'/gi, "");
+}
 
 function MermaidDiagram({ code }: { code: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [svg, setSvg] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showCode, setShowCode] = useState(false);
-  const idRef = useRef(`mermaid-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`);
+  const idRef = useRef(`mermaid-${++_mermaidIdCounter}-${Math.random().toString(36).slice(2, 10)}`);
 
   useEffect(() => {
     let cancelled = false;
+    const timeout = setTimeout(() => { if (!cancelled) setError("Diagram rendering timed out"); }, 15000);
     (async () => {
       try {
         const mermaid = (await import("mermaid")).default;
         mermaid.initialize({ startOnLoad: false, theme: "neutral", securityLevel: "strict", maxTextSize: 50000, maxEdges: 500 });
         const { svg: rendered } = await mermaid.render(idRef.current, code);
-        if (!cancelled) setSvg(rendered);
+        if (!cancelled) setSvg(sanitizeSvg(rendered));
       } catch (err) {
         if (!cancelled) setError(err instanceof Error ? err.message : "Failed to render diagram");
+      } finally {
+        clearTimeout(timeout);
       }
     })();
-    return () => { cancelled = true; };
+    return () => { cancelled = true; clearTimeout(timeout); };
   }, [code]);
 
   if (error || showCode) {
@@ -1425,22 +1438,23 @@ export default function ChatPage() {
     setArchivedConversations((prev) => [archivedConv, ...prev]);
     if (activeConvId === convId) startNewChat();
 
-    let undone = false;
-    let archived = false;
-    const doArchive = () => {
-      if (undone || archived) return;
-      archived = true;
-      fetch("/api/chat/conversations", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: convId, archived: true }),
-      }).catch(() => {});
-    };
+    // Archive immediately (don't wait for toast to dismiss)
+    fetch("/api/chat/conversations", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: convId, archived: true }),
+    }).catch(() => {});
+
     toast("Conversation archived", {
       action: {
         label: "Undo",
         onClick: () => {
-          undone = true;
+          // Undo: unarchive via API and move back to main list
+          fetch("/api/chat/conversations", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id: convId, archived: false }),
+          }).catch(() => {});
           setArchivedConversations((prev) => prev.filter((c) => c.id !== convId));
           if (conv) {
             setConversations((prev) => [...prev, conv].sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()));
@@ -1448,8 +1462,6 @@ export default function ChatPage() {
         },
       },
       duration: 3000,
-      onDismiss: doArchive,
-      onAutoClose: doArchive,
     });
   }
 
@@ -2125,15 +2137,28 @@ export default function ChatPage() {
               <ArrowLeft className="h-4 w-4" />
             </Button>
             <h3 className="text-sm font-semibold flex-1">Archived</h3>
-            <span className="text-xs text-muted-foreground">{archivedConversations.length}</span>
           </div>
+          {archivedConversations.length > 3 && (
+            <div className="relative mt-2">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Search archived..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full h-9 rounded-lg border bg-background pl-9 pr-3 text-sm outline-none focus:ring-1 focus:ring-primary"
+              />
+            </div>
+          )}
         </div>
         <ScrollArea className="flex-1">
           <div className="p-2 space-y-0.5">
             {archivedConversations.length === 0 && (
               <p className="text-sm text-muted-foreground text-center py-12">No archived chats</p>
             )}
-            {archivedConversations.map((c) => renderConvItem(c, { isArchived: true }))}
+            {archivedConversations
+              .filter((c) => !searchQuery || c.title.toLowerCase().includes(searchQuery.toLowerCase()))
+              .map((c) => renderConvItem(c, { isArchived: true }))}
           </div>
         </ScrollArea>
         </>
@@ -2240,11 +2265,6 @@ export default function ChatPage() {
             onClick={() => setSidebarView(sidebarView === "archived" ? "main" : "archived")}
           >
             <Archive className="h-4 w-4" />
-            {archivedConversations.length > 0 && sidebarView !== "archived" && (
-              <span className="absolute -top-1 -right-1 min-w-[16px] h-4 rounded-full bg-primary text-primary-foreground text-[10px] font-medium flex items-center justify-center px-1">
-                {archivedConversations.length}
-              </span>
-            )}
           </button>
           {conversations.length > 0 && (
             <button

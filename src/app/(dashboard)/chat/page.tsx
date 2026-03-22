@@ -55,6 +55,11 @@ import {
   List,
   HelpCircle,
   SlidersHorizontal,
+  Archive,
+  ArchiveRestore,
+  CheckSquare,
+  SquareIcon,
+  FolderInput,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -98,6 +103,7 @@ interface Conversation {
   updated_at: string;
   pinned?: boolean;
   folder_id?: string | null;
+  archived_at?: string | null;
   tag_ids?: string[]; // collection IDs (reusing tag_ids from DB)
 }
 
@@ -261,6 +267,14 @@ export default function ChatPage() {
     if (typeof window !== "undefined") return localStorage.getItem("chat-admin-notice-dismissed") === "1";
     return false;
   });
+  // Archive state
+  const [archivedConversations, setArchivedConversations] = useState<Conversation[]>([]);
+  const [showArchived, setShowArchived] = useState(false);
+  // Bulk selection state
+  const [bulkMode, setBulkMode] = useState(false);
+  const [selectedConvIds, setSelectedConvIds] = useState<Set<string>>(new Set());
+  const [bulkCollectionMenu, setBulkCollectionMenu] = useState(false);
+
   const [sidebarWidth, setSidebarWidth] = useState(320);
   const [isResizing, setIsResizing] = useState(false);
   const [customInstructionsOpen, setCustomInstructionsOpen] = useState(false);
@@ -932,6 +946,14 @@ export default function ChatPage() {
     } catch { /* non-critical */ } finally { setLoadingConvs(false); }
   }, []);
 
+  const loadArchivedConversations = useCallback(async () => {
+    try {
+      const res = await fetch("/api/chat/conversations?archived=true");
+      const data = await res.json();
+      setArchivedConversations(data.conversations || []);
+    } catch { /* non-critical */ }
+  }, []);
+
   const selectedModelRef = useRef(selectedModel);
   selectedModelRef.current = selectedModel;
   const activeConvIdRef = useRef(activeConvId);
@@ -988,12 +1010,13 @@ export default function ChatPage() {
 
   useEffect(() => {
     loadConversations();
+    loadArchivedConversations();
     loadProviders();
     loadCollections();
     loadPresets();
     loadSavedItems();
     loadUserInstructions();
-  }, [loadConversations, loadProviders, loadCollections, loadPresets, loadSavedItems, loadUserInstructions]);
+  }, [loadConversations, loadArchivedConversations, loadProviders, loadCollections, loadPresets, loadSavedItems, loadUserInstructions]);
 
   async function saveMessageContent(messageId: string, content: string) {
     setSavingMessageId(messageId);
@@ -1117,11 +1140,15 @@ export default function ChatPage() {
         e.preventDefault();
         startNewChat();
       }
+      // Escape — exit bulk mode
+      if (e.key === "Escape" && bulkMode) {
+        exitBulkMode();
+      }
     }
     document.addEventListener("keydown", handleGlobalKeyDown);
     return () => document.removeEventListener("keydown", handleGlobalKeyDown);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [bulkMode]);
 
   // ── Sidebar resize ──
   useEffect(() => {
@@ -1224,6 +1251,173 @@ export default function ChatPage() {
       onDismiss: doDelete,
       onAutoClose: doDelete,
     });
+  }
+
+  async function archiveConversation(convId: string) {
+    const conv = conversations.find((c) => c.id === convId);
+    if (!conv) return;
+    // Optimistically move to archived
+    setConversations((prev) => prev.filter((c) => c.id !== convId));
+    const archivedConv = { ...conv, archived_at: new Date().toISOString() };
+    setArchivedConversations((prev) => [archivedConv, ...prev]);
+    if (activeConvId === convId) startNewChat();
+
+    let undone = false;
+    let archived = false;
+    const doArchive = () => {
+      if (undone || archived) return;
+      archived = true;
+      fetch("/api/chat/conversations", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: convId, archived: true }),
+      }).catch(() => {});
+    };
+    toast("Conversation archived", {
+      action: {
+        label: "Undo",
+        onClick: () => {
+          undone = true;
+          setArchivedConversations((prev) => prev.filter((c) => c.id !== convId));
+          if (conv) {
+            setConversations((prev) => [...prev, conv].sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()));
+          }
+        },
+      },
+      duration: 3000,
+      onDismiss: doArchive,
+      onAutoClose: doArchive,
+    });
+  }
+
+  async function unarchiveConversation(convId: string) {
+    const conv = archivedConversations.find((c) => c.id === convId);
+    if (!conv) return;
+    // Optimistically move back
+    setArchivedConversations((prev) => prev.filter((c) => c.id !== convId));
+    const restoredConv = { ...conv, archived_at: null };
+    setConversations((prev) => [restoredConv, ...prev].sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()));
+
+    try {
+      await fetch("/api/chat/conversations", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: convId, archived: false }),
+      });
+    } catch {
+      // Revert on failure
+      setConversations((prev) => prev.filter((c) => c.id !== convId));
+      if (conv) setArchivedConversations((prev) => [conv, ...prev]);
+      toast.error("Failed to unarchive");
+    }
+  }
+
+  // ── Bulk actions ──
+  function exitBulkMode() {
+    setBulkMode(false);
+    setSelectedConvIds(new Set());
+    setBulkCollectionMenu(false);
+  }
+
+  function toggleBulkSelect(convId: string) {
+    setSelectedConvIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(convId)) next.delete(convId);
+      else next.add(convId);
+      return next;
+    });
+  }
+
+  async function bulkDelete() {
+    const ids = Array.from(selectedConvIds);
+    if (ids.length === 0) return;
+    if (!confirm(`Delete ${ids.length} conversation${ids.length > 1 ? "s" : ""}?`)) return;
+
+    const removedConvs = conversations.filter((c) => selectedConvIds.has(c.id));
+    setConversations((prev) => prev.filter((c) => !selectedConvIds.has(c.id)));
+    if (activeConvId && selectedConvIds.has(activeConvId)) startNewChat();
+    exitBulkMode();
+
+    try {
+      const res = await fetch("/api/chat/conversations", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids }),
+      });
+      if (!res.ok) throw new Error("Failed");
+      toast.success(`Deleted ${ids.length} conversation${ids.length > 1 ? "s" : ""}`);
+    } catch {
+      // Revert
+      setConversations((prev) => [...prev, ...removedConvs].sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()));
+      toast.error("Failed to delete conversations");
+    }
+  }
+
+  async function bulkArchive() {
+    const ids = Array.from(selectedConvIds);
+    if (ids.length === 0) return;
+
+    const movedConvs = conversations.filter((c) => selectedConvIds.has(c.id));
+    setConversations((prev) => prev.filter((c) => !selectedConvIds.has(c.id)));
+    const archivedVersions = movedConvs.map((c) => ({ ...c, archived_at: new Date().toISOString() }));
+    setArchivedConversations((prev) => [...archivedVersions, ...prev]);
+    if (activeConvId && selectedConvIds.has(activeConvId)) startNewChat();
+    exitBulkMode();
+
+    let undone = false;
+    let archived = false;
+    const doArchive = () => {
+      if (undone || archived) return;
+      archived = true;
+      fetch("/api/chat/conversations", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids, archived: true }),
+      }).catch(() => {});
+    };
+    toast(`Archived ${ids.length} conversation${ids.length > 1 ? "s" : ""}`, {
+      action: {
+        label: "Undo",
+        onClick: () => {
+          undone = true;
+          setArchivedConversations((prev) => prev.filter((c) => !ids.includes(c.id)));
+          setConversations((prev) => [...prev, ...movedConvs].sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()));
+        },
+      },
+      duration: 3000,
+      onDismiss: doArchive,
+      onAutoClose: doArchive,
+    });
+  }
+
+  async function bulkMoveToCollection(collectionId: string) {
+    const ids = Array.from(selectedConvIds);
+    if (ids.length === 0) return;
+
+    // Optimistic update
+    setConversations((prev) => prev.map((c) => {
+      if (!selectedConvIds.has(c.id)) return c;
+      const tagIds = c.tag_ids || [];
+      if (tagIds.includes(collectionId)) return c;
+      return { ...c, tag_ids: [...tagIds, collectionId] };
+    }));
+    exitBulkMode();
+
+    // Send individual tag operations
+    try {
+      await Promise.all(ids.map((convId) =>
+        fetch("/api/chat/tags", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ conversationId: convId, tagId: collectionId, action: "add" }),
+        })
+      ));
+      const col = collections.find((c) => c.id === collectionId);
+      toast.success(`Moved ${ids.length} conversation${ids.length > 1 ? "s" : ""} to ${col?.name || "collection"}`);
+    } catch {
+      toast.error("Failed to move some conversations");
+      loadConversations();
+    }
   }
 
   async function renameConversation(convId: string, title: string) {
@@ -1409,8 +1603,9 @@ export default function ChatPage() {
     }
   }
 
-  // ── Filter conversations ──
+  // ── Filter conversations (archived are always excluded from main list) ──
   const filteredConversations = conversations.filter((c) => {
+    if (c.archived_at) return false; // never show archived in main list
     // If viewing a collection, only show conversations in that collection
     if (activeCollection && !c.tag_ids?.includes(activeCollection)) return false;
     if (searchQuery) {
@@ -1459,27 +1654,45 @@ export default function ChatPage() {
   }
 
   // ── Render conversation item ──
-  function renderConvItem(conv: Conversation) {
+  function renderConvItem(conv: Conversation, options?: { isArchived?: boolean }) {
     const convCollections = collections.filter((c) => conv.tag_ids?.includes(c.id));
     const hoverInfo = [conv.model, new Date(conv.updated_at).toLocaleDateString()].filter(Boolean).join(" · ");
     const isOld = new Date(conv.updated_at).getTime() < Date.now() - 7 * 24 * 60 * 60 * 1000;
     const isActive = activeConvId === conv.id;
+    const isSelected = selectedConvIds.has(conv.id);
     return (
       <div
         key={conv.id}
         className={cn(
           "group flex items-center gap-2 rounded-lg px-3 py-2 cursor-pointer transition-all duration-150",
-          isActive
+          isActive && !bulkMode
             ? "bg-primary/10 text-foreground"
             : "text-foreground/80 dark:text-zinc-400 hover:bg-muted hover:text-foreground",
-          isOld && !isActive && "opacity-60"
+          isOld && !isActive && "opacity-60",
+          bulkMode && isSelected && "bg-primary/10 ring-1 ring-primary/30"
         )}
-        onClick={() => loadConversation(conv.id)}
-        onDoubleClick={(e) => { e.stopPropagation(); setEditingTitle(conv.id); setEditTitleValue(conv.title); }}
-        onContextMenu={(e) => openContextMenu(e, conv.id)}
+        onClick={() => {
+          if (bulkMode) {
+            toggleBulkSelect(conv.id);
+          } else {
+            loadConversation(conv.id);
+          }
+        }}
+        onDoubleClick={(e) => { if (!bulkMode) { e.stopPropagation(); setEditingTitle(conv.id); setEditTitleValue(conv.title); } }}
+        onContextMenu={(e) => { if (!bulkMode) openContextMenu(e, conv.id); }}
         title={hoverInfo}
       >
-        {editingTitle === conv.id ? (
+        {/* Bulk mode checkbox */}
+        {bulkMode && (
+          <div className="flex-shrink-0" onClick={(e) => { e.stopPropagation(); toggleBulkSelect(conv.id); }}>
+            {isSelected ? (
+              <CheckSquare className="h-4 w-4 text-primary" />
+            ) : (
+              <SquareIcon className="h-4 w-4 text-muted-foreground" />
+            )}
+          </div>
+        )}
+        {editingTitle === conv.id && !bulkMode ? (
           <div className="flex-1 flex items-center gap-2 min-w-0">
             <input
               className="flex-1 bg-transparent text-[13px] border-b border-primary outline-none min-w-0 py-0.5"
@@ -1496,6 +1709,7 @@ export default function ChatPage() {
           <>
             <div className="flex-1 min-w-0 overflow-hidden flex items-center gap-1.5">
               {conv.pinned && <Star className="h-3 w-3 fill-amber-400 text-amber-400 flex-shrink-0" />}
+              {options?.isArchived && <Archive className="h-3 w-3 text-muted-foreground flex-shrink-0" />}
               <span className="truncate text-[13px] flex-1 min-w-0 text-foreground">{conv.title}</span>
               {isLoading && activeConvId === conv.id && (
                 <span className="h-2 w-2 rounded-full bg-primary animate-pulse flex-shrink-0" />
@@ -1508,13 +1722,24 @@ export default function ChatPage() {
                 </div>
               )}
             </div>
-            <button
-              className="flex-shrink-0 opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-destructive/10 hover:text-destructive transition-all"
-              title="Delete"
-              onClick={(e) => { e.stopPropagation(); deleteConversation(conv.id); }}
-            >
-              <Trash2 className="h-3 w-3" />
-            </button>
+            {!bulkMode && !options?.isArchived && (
+              <button
+                className="flex-shrink-0 opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-destructive/10 hover:text-destructive transition-all"
+                title="Delete"
+                onClick={(e) => { e.stopPropagation(); deleteConversation(conv.id); }}
+              >
+                <Trash2 className="h-3 w-3" />
+              </button>
+            )}
+            {!bulkMode && options?.isArchived && (
+              <button
+                className="flex-shrink-0 opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-muted hover:text-foreground transition-all"
+                title="Unarchive"
+                onClick={(e) => { e.stopPropagation(); unarchiveConversation(conv.id); }}
+              >
+                <ArchiveRestore className="h-3 w-3" />
+              </button>
+            )}
           </>
         )}
       </div>
@@ -1535,11 +1760,24 @@ export default function ChatPage() {
       >
         {/* Top actions */}
         <div className="p-3 border-b flex-shrink-0">
-          <Button variant="outline" className="w-full justify-start gap-2 h-10 text-sm" onClick={startNewChat}>
-            <Plus className="h-4 w-4" />
-            New Chat
-            <kbd className="ml-auto text-[10px] text-muted-foreground/50 font-mono bg-muted rounded px-1.5 py-0.5">Ctrl+N</kbd>
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" className="flex-1 justify-start gap-2 h-10 text-sm" onClick={startNewChat}>
+              <Plus className="h-4 w-4" />
+              New Chat
+              <kbd className="ml-auto text-[10px] text-muted-foreground/50 font-mono bg-muted rounded px-1.5 py-0.5">Ctrl+N</kbd>
+            </Button>
+            {conversations.length > 0 && (
+              <Button
+                variant={bulkMode ? "default" : "outline"}
+                size="icon"
+                className="h-10 w-10 flex-shrink-0"
+                title={bulkMode ? "Exit select mode" : "Select multiple"}
+                onClick={() => { if (bulkMode) exitBulkMode(); else setBulkMode(true); }}
+              >
+                <CheckSquare className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
           {conversations.length > 3 && (
             <div className="relative mt-2">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
@@ -1609,18 +1847,38 @@ export default function ChatPage() {
             {/* ── Chats tab ── */}
             {sidebarTab === "chats" && searchResults === null && (
               <div className="space-y-0.5">
-                {conversations.length === 0 && !loadingConvs && (
+                {conversations.length === 0 && !loadingConvs && archivedConversations.length === 0 && (
                   <p className="text-sm text-muted-foreground text-center py-12">No conversations yet</p>
                 )}
                 {pinnedConvs.length > 0 && (
                   <ConvSection label="Favorites" icon={<Star className="h-3 w-3 text-amber-400" />}>
-                    {pinnedConvs.map(renderConvItem)}
+                    {pinnedConvs.map((c) => renderConvItem(c))}
                   </ConvSection>
                 )}
-                {todayConvs.length > 0 && <ConvSection label="Today">{todayConvs.map(renderConvItem)}</ConvSection>}
-                {yesterdayConvs.length > 0 && <ConvSection label="Yesterday">{yesterdayConvs.map(renderConvItem)}</ConvSection>}
-                {weekConvs.length > 0 && <ConvSection label="Previous 7 Days" collapsible defaultOpen={false}>{weekConvs.map(renderConvItem)}</ConvSection>}
-                {olderConvs.length > 0 && <ConvSection label="Older" collapsible defaultOpen={false}>{olderConvs.map(renderConvItem)}</ConvSection>}
+                {todayConvs.length > 0 && <ConvSection label="Today">{todayConvs.map((c) => renderConvItem(c))}</ConvSection>}
+                {yesterdayConvs.length > 0 && <ConvSection label="Yesterday">{yesterdayConvs.map((c) => renderConvItem(c))}</ConvSection>}
+                {weekConvs.length > 0 && <ConvSection label="Previous 7 Days" collapsible defaultOpen={false}>{weekConvs.map((c) => renderConvItem(c))}</ConvSection>}
+                {olderConvs.length > 0 && <ConvSection label="Older" collapsible defaultOpen={false}>{olderConvs.map((c) => renderConvItem(c))}</ConvSection>}
+
+                {/* Show archived toggle */}
+                {archivedConversations.length > 0 && (
+                  <>
+                    <div className="border-t my-2 mx-2" />
+                    <button
+                      className="flex items-center gap-2 w-full px-3 py-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                      onClick={() => setShowArchived(!showArchived)}
+                    >
+                      <Archive className="h-3.5 w-3.5" />
+                      <span>{showArchived ? "Hide" : "Show"} archived ({archivedConversations.length})</span>
+                      <ChevronRight className={cn("h-3 w-3 ml-auto transition-transform", showArchived && "rotate-90")} />
+                    </button>
+                    {showArchived && (
+                      <div className="space-y-0.5 opacity-70">
+                        {archivedConversations.map((c) => renderConvItem(c, { isArchived: true }))}
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
             )}
 
@@ -1634,7 +1892,7 @@ export default function ChatPage() {
                     <p className="text-xs text-muted-foreground/60 mt-1">Right-click a chat to add it</p>
                   </div>
                 ) : (
-                  pinnedConvs.map(renderConvItem)
+                  pinnedConvs.map((c) => renderConvItem(c))
                 )}
               </div>
             )}
@@ -1696,7 +1954,7 @@ export default function ChatPage() {
                     {filteredConversations.length === 0 && (
                       <p className="text-sm text-muted-foreground text-center py-8">No chats in this collection yet.<br /><span className="text-xs">Right-click any chat to add it.</span></p>
                     )}
-                    {filteredConversations.map(renderConvItem)}
+                    {filteredConversations.map((c) => renderConvItem(c))}
                   </div>
                 </div>
               );
@@ -1704,6 +1962,93 @@ export default function ChatPage() {
 
           </div>
         </ScrollArea>
+
+        {/* ── Bulk action bar ── */}
+        {bulkMode && (
+          <div className="border-t bg-muted/50 p-2 flex-shrink-0">
+            <div className="flex items-center justify-between mb-2 px-1">
+              <span className="text-xs font-medium text-foreground">{selectedConvIds.size} selected</span>
+              <div className="flex gap-1">
+                <button
+                  className="text-[11px] text-primary hover:underline"
+                  onClick={() => {
+                    const allIds = filteredConversations.map((c) => c.id);
+                    setSelectedConvIds(new Set(allIds));
+                  }}
+                >
+                  Select All
+                </button>
+                <span className="text-muted-foreground/40">|</span>
+                <button
+                  className="text-[11px] text-muted-foreground hover:text-foreground"
+                  onClick={() => setSelectedConvIds(new Set())}
+                >
+                  Deselect
+                </button>
+              </div>
+            </div>
+            <div className="flex gap-1.5">
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1 h-8 text-xs gap-1.5 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                disabled={selectedConvIds.size === 0}
+                onClick={bulkDelete}
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                Delete
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1 h-8 text-xs gap-1.5"
+                disabled={selectedConvIds.size === 0}
+                onClick={bulkArchive}
+              >
+                <Archive className="h-3.5 w-3.5" />
+                Archive
+              </Button>
+              <div className="relative flex-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full h-8 text-xs gap-1.5"
+                  disabled={selectedConvIds.size === 0 || collections.length === 0}
+                  onClick={() => setBulkCollectionMenu(!bulkCollectionMenu)}
+                >
+                  <FolderInput className="h-3.5 w-3.5" />
+                  Move to...
+                </Button>
+                {bulkCollectionMenu && (
+                  <>
+                    <div className="fixed inset-0 z-30" onClick={() => setBulkCollectionMenu(false)} />
+                    <div className="absolute bottom-full left-0 mb-1 bg-popover border rounded-xl shadow-2xl py-1.5 min-w-[180px] z-40">
+                      {collections.map((col) => (
+                        <button
+                          key={col.id}
+                          className="flex items-center gap-2.5 w-full px-3 py-2 text-sm hover:bg-muted transition-colors"
+                          onClick={() => { bulkMoveToCollection(col.id); setBulkCollectionMenu(false); }}
+                        >
+                          <span className="h-3 w-3 rounded-full flex-shrink-0" style={{ backgroundColor: col.color }} />
+                          <span className="flex-1 text-left truncate">{col.name}</span>
+                        </button>
+                      ))}
+                      {collections.length === 0 && (
+                        <p className="text-xs text-muted-foreground text-center py-3">No collections yet</p>
+                      )}
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+            <button
+              className="w-full mt-1.5 text-[11px] text-muted-foreground hover:text-foreground text-center py-1"
+              onClick={exitBulkMode}
+            >
+              Cancel (Esc)
+            </button>
+          </div>
+        )}
 
         {/* Resize handle */}
         {sidebarOpen && (
@@ -1718,7 +2063,7 @@ export default function ChatPage() {
 
       {/* ── Right-click context menu (conversation) ── */}
       {contextMenu && (() => {
-        const conv = conversations.find((c) => c.id === contextMenu.convId);
+        const conv = conversations.find((c) => c.id === contextMenu.convId) || archivedConversations.find((c) => c.id === contextMenu.convId);
         if (!conv) return null;
         const menuX = Math.min(contextMenu.x, (typeof window !== "undefined" ? window.innerWidth : 1200) - 200);
         const menuY = Math.min(contextMenu.y, (typeof window !== "undefined" ? window.innerHeight : 800) - 320);
@@ -1821,6 +2166,10 @@ export default function ChatPage() {
                 )}
               </div>
               <div className="border-t my-1 mx-2" />
+              <button className="flex items-center gap-3 w-full px-3 py-2 text-sm hover:bg-muted transition-colors" onClick={() => { archiveConversation(conv.id); setContextMenu(null); }}>
+                <Archive className="h-4 w-4" />
+                Archive
+              </button>
               <button className="flex items-center gap-3 w-full px-3 py-2 text-sm text-destructive hover:bg-destructive/10 transition-colors" onClick={() => { deleteConversation(conv.id); setContextMenu(null); }}>
                 <Trash2 className="h-4 w-4" />
                 Delete

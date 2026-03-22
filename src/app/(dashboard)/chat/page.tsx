@@ -62,6 +62,7 @@ import {
   FolderInput,
   Brain,
   ChevronDown,
+  Lightbulb,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -403,6 +404,12 @@ export default function ChatPage() {
   const [contextSubmenu, setContextSubmenu] = useState<"collections" | null>(null);
   const [messageRatings, setMessageRatings] = useState<Record<string, number>>({});
   const [thinkingMode, setThinkingMode] = useState(false);
+  // Memory state
+  const [memoryDialogOpen, setMemoryDialogOpen] = useState(false);
+  const [memories, setMemories] = useState<Array<{id: string; fact: string; category: string; dlp_status: string; created_at: string; updated_at: string}>>([]);
+  const [editingMemoryId, setEditingMemoryId] = useState<string | null>(null);
+  const [editMemoryFact, setEditMemoryFact] = useState("");
+  const extractedConvIds = useRef<Set<string>>(new Set());
   const [compareMode, setCompareMode] = useState(false);
   const [compareModel, setCompareModel] = useState("");
   const [compareProvider, setCompareProvider] = useState("");
@@ -1184,6 +1191,32 @@ export default function ChatPage() {
     } catch { /* non-critical — table may not exist yet */ }
   }, []);
 
+  const loadMemories = useCallback(async () => {
+    try {
+      const res = await fetch("/api/chat/memory");
+      if (!res.ok) return;
+      const data = await res.json();
+      setMemories(data.memories || []);
+    } catch { /* non-critical */ }
+  }, []);
+
+  const extractMemories = useCallback(async (conversationId: string, msgs: ChatMsg[]) => {
+    if (extractedConvIds.current.has(conversationId)) return;
+    const relevantMsgs = msgs.filter(m => m.role === "user" || m.role === "assistant");
+    if (relevantMsgs.length < 4) return;
+    extractedConvIds.current.add(conversationId);
+    try {
+      await fetch("/api/chat/memory", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          conversationId,
+          messages: relevantMsgs.map(m => ({ role: m.role, content: m.content })),
+        }),
+      });
+    } catch { /* fire-and-forget */ }
+  }, []);
+
   useEffect(() => {
     loadConversations();
     loadArchivedConversations();
@@ -1192,7 +1225,8 @@ export default function ChatPage() {
     loadPresets();
     loadSavedItems();
     loadUserInstructions();
-  }, [loadConversations, loadArchivedConversations, loadProviders, loadCollections, loadPresets, loadSavedItems, loadUserInstructions]);
+    loadMemories();
+  }, [loadConversations, loadArchivedConversations, loadProviders, loadCollections, loadPresets, loadSavedItems, loadUserInstructions, loadMemories]);
 
   async function saveMessageContent(messageId: string, content: string) {
     setSavingMessageId(messageId);
@@ -1351,6 +1385,10 @@ export default function ChatPage() {
 
   // ── Conversation operations ──
   async function loadConversation(convId: string) {
+    // Fire-and-forget: extract memories from the conversation we're leaving
+    if (activeConvIdRef.current && activeConvIdRef.current !== convId && !compareMode) {
+      extractMemories(activeConvIdRef.current, messages);
+    }
     setActiveConvId(convId);
     setDlpBlock(null);
     setRedactions(null);
@@ -1379,6 +1417,10 @@ export default function ChatPage() {
   }
 
   function startNewChat() {
+    // Fire-and-forget: extract memories from conversation we're leaving
+    if (activeConvIdRef.current && !compareMode) {
+      extractMemories(activeConvIdRef.current, messages);
+    }
     setActiveConvId(null);
     setMessages([]);
     setDlpBlock(null);
@@ -2581,6 +2623,139 @@ export default function ChatPage() {
         </>
       )}
 
+      {/* ── Memory dialog ── */}
+      {memoryDialogOpen && (
+        <>
+          <div className="fixed inset-0 z-40 bg-black/40" onClick={() => { setMemoryDialogOpen(false); setEditingMemoryId(null); }} />
+          <div className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-popover border rounded-xl shadow-2xl p-6 w-[480px] max-h-[85vh] flex flex-col">
+            <h3 className="text-base font-semibold mb-1">Memory</h3>
+            <p className="text-xs text-muted-foreground mb-4">Facts remembered from your conversations. These are automatically injected as context.</p>
+
+            {memories.length === 0 ? (
+              <div className="text-center py-10 text-sm text-muted-foreground">
+                <Brain className="h-8 w-8 mx-auto mb-3 opacity-30" />
+                <p>No memories yet.</p>
+                <p className="text-xs mt-1">As you chat, important facts will be remembered automatically.</p>
+              </div>
+            ) : (
+              <ScrollArea className="flex-1 -mx-2 px-2 max-h-[55vh]">
+                <div className="space-y-2">
+                  {memories.map((mem) => (
+                    <div key={mem.id} className="group rounded-lg border p-3 hover:bg-muted/30 transition-colors">
+                      {editingMemoryId === mem.id ? (
+                        <div>
+                          <textarea
+                            className="w-full rounded-md border bg-background px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-primary resize-none"
+                            rows={2}
+                            value={editMemoryFact}
+                            onChange={(e) => setEditMemoryFact(e.target.value.slice(0, 500))}
+                            autoFocus
+                          />
+                          <div className="flex justify-end gap-1.5 mt-1.5">
+                            <Button variant="ghost" size="sm" className="h-6 text-[10px] px-2" onClick={() => setEditingMemoryId(null)}>Cancel</Button>
+                            <Button size="sm" className="h-6 text-[10px] px-2" onClick={async () => {
+                              try {
+                                const res = await fetch("/api/chat/memory", {
+                                  method: "PUT",
+                                  headers: { "Content-Type": "application/json" },
+                                  body: JSON.stringify({ id: mem.id, fact: editMemoryFact }),
+                                });
+                                if (!res.ok) {
+                                  const err = await res.json().catch(() => ({}));
+                                  toast.error(err.error || "Failed to update");
+                                  return;
+                                }
+                                const data = await res.json();
+                                setMemories((prev) => prev.map((m) => m.id === mem.id ? { ...m, ...data.memory } : m));
+                                setEditingMemoryId(null);
+                                toast.success("Memory updated");
+                              } catch { toast.error("Failed to update"); }
+                            }}>Save</Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="flex items-start gap-2">
+                            <p className="text-sm flex-1">{mem.fact}</p>
+                            <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+                              <button
+                                type="button"
+                                className="h-6 w-6 flex items-center justify-center rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                                title="Edit"
+                                onClick={() => { setEditingMemoryId(mem.id); setEditMemoryFact(mem.fact); }}
+                              >
+                                <Pencil className="h-3 w-3" />
+                              </button>
+                              <button
+                                type="button"
+                                className="h-6 w-6 flex items-center justify-center rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+                                title="Delete"
+                                onClick={async () => {
+                                  try {
+                                    await fetch("/api/chat/memory", {
+                                      method: "DELETE",
+                                      headers: { "Content-Type": "application/json" },
+                                      body: JSON.stringify({ id: mem.id }),
+                                    });
+                                    setMemories((prev) => prev.filter((m) => m.id !== mem.id));
+                                    toast.success("Memory deleted");
+                                  } catch { toast.error("Failed to delete"); }
+                                }}
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 mt-1.5">
+                            <span className={cn(
+                              "text-[10px] px-1.5 py-0.5 rounded-full font-medium",
+                              mem.category === "preference" && "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+                              mem.category === "context" && "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+                              mem.category === "project" && "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
+                              mem.category === "expertise" && "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
+                              mem.category === "style" && "bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400",
+                              !["preference", "context", "project", "expertise", "style"].includes(mem.category) && "bg-muted text-muted-foreground",
+                            )}>
+                              {mem.category}
+                            </span>
+                            {mem.dlp_status === "redacted" && (
+                              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 font-medium flex items-center gap-0.5">
+                                <Shield className="h-2.5 w-2.5" /> redacted
+                              </span>
+                            )}
+                            <span className="text-[10px] text-muted-foreground/50 ml-auto">
+                              {new Date(mem.created_at).toLocaleDateString()}
+                            </span>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            )}
+
+            <div className="flex justify-between items-center mt-4 pt-3 border-t">
+              {memories.length > 0 ? (
+                <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive text-xs h-7" onClick={async () => {
+                  if (!confirm("Clear all memories? This cannot be undone.")) return;
+                  try {
+                    await fetch("/api/chat/memory", {
+                      method: "DELETE",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ clearAll: true }),
+                    });
+                    setMemories([]);
+                    toast.success("All memories cleared");
+                  } catch { toast.error("Failed to clear memories"); }
+                }}>Clear all memories</Button>
+              ) : <div />}
+              <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => { setMemoryDialogOpen(false); setEditingMemoryId(null); }}>Close</Button>
+            </div>
+          </div>
+        </>
+      )}
+
       {/* ─── Main chat area ─── */}
       <div
         className={cn("flex-1 flex min-w-0 relative", compareMode ? "flex-row" : "flex-col")}
@@ -3003,6 +3178,7 @@ export default function ChatPage() {
                           </Select>
                         )}
                         <button type="button" onClick={() => setCustomInstructionsOpen(true)} className={cn("h-7 w-7 flex items-center justify-center rounded-md hover:bg-muted transition-colors", userInstructions.is_active && (userInstructions.role_description || userInstructions.tone || userInstructions.expertise_level || userInstructions.custom_context) ? "text-primary" : "text-muted-foreground/50")} title="Custom instructions"><SlidersHorizontal className="h-3.5 w-3.5" /></button>
+                        <button type="button" onClick={() => { loadMemories(); setMemoryDialogOpen(true); }} className={cn("h-7 w-7 flex items-center justify-center rounded-md hover:bg-muted transition-colors", memories.length > 0 ? "text-amber-500" : "text-muted-foreground/50")} title={`Memory${memories.length > 0 ? ` (${memories.length} facts)` : ""}`}><Lightbulb className="h-3.5 w-3.5" /></button>
                         <button
                           type="button"
                           onClick={() => setThinkingMode(!thinkingMode)}

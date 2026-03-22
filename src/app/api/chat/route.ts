@@ -305,13 +305,34 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Build system messages (order: org prompt → user instructions → preset prompt → file context → admin data)
+    // Load user memories
+    let userMemories: Array<{ fact: string; category: string }> | null = null;
+    {
+      const { data: memories } = await db
+        .from("chat_user_memory")
+        .select("fact, category")
+        .eq("user_id", user.id)
+        .eq("org_id", profile.org_id)
+        .eq("is_active", true)
+        .order("created_at", { ascending: false })
+        .limit(50);
+      if (memories?.length) userMemories = memories;
+    }
+
+    // Build system messages (order: org prompt → user instructions → user memories → preset prompt → file context → admin data)
     const systemMessages: Array<{ role: "system"; content: string }> = [];
     if (orgSystemPrompt) {
       systemMessages.push({ role: "system", content: orgSystemPrompt });
     }
     if (userInstructionsPrompt) {
       systemMessages.push({ role: "system", content: userInstructionsPrompt });
+    }
+    if (userMemories?.length) {
+      const memoryText = userMemories.map(m => `- ${m.fact}`).join("\n");
+      systemMessages.push({
+        role: "system",
+        content: `The following facts are remembered about the user from previous conversations:\n${memoryText}\n\nUse this context naturally. Don't mention that you "remember" unless asked.`,
+      });
     }
     if (presetSystemPrompt) {
       systemMessages.push({ role: "system", content: presetSystemPrompt });

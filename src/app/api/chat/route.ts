@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { messages, model, provider, conversationId, compareOnly } = body;
+    const { messages, model, provider, conversationId, compareOnly, thinking } = body;
 
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
       return new Response(JSON.stringify({ error: "Messages required" }), {
@@ -350,9 +350,19 @@ export async function POST(request: NextRequest) {
       };
     });
 
+    // Build provider-specific options for extended thinking
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const providerOptions: any = {};
+    if (thinking && (provider || "openai") === "anthropic") {
+      providerOptions.anthropic = {
+        thinking: { type: "enabled", budgetTokens: 10000 },
+      };
+    }
+
     const result = streamText({
       model: aiModel,
       messages: [...systemMessages, ...aiMessages],
+      ...(Object.keys(providerOptions).length > 0 ? { providerOptions } : {}),
       onFinish: async ({ text, usage }) => {
         // Save assistant message (skip for compare-only)
         if (convId && !compareOnly) {
@@ -385,39 +395,52 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    const textStream = result.toTextStreamResponse();
+    // Build a custom stream that includes thinking content (if present) and text
+    const encoder = new TextEncoder();
+    const redactionsPrefix = streamRedactions
+      ? `__REDACTIONS__${JSON.stringify({ items: streamRedactions, redactedContent: lastUserMessage?.content || "" })}__\n`
+      : "";
+    const convPrefix = convId ? `${redactionsPrefix}__CONV_ID__${convId}__\n` : "";
 
-    // Wrap the stream to prepend conversation ID (and optional redactions) as first lines
-    if (convId && textStream.body) {
-      const reader = textStream.body.getReader();
-      const encoder = new TextEncoder();
-      const redactionsPrefix = streamRedactions
-        ? `__REDACTIONS__${JSON.stringify({ items: streamRedactions, redactedContent: lastUserMessage?.content || "" })}__\n`
-        : "";
-      const prefix = encoder.encode(`${redactionsPrefix}__CONV_ID__${convId}__\n`);
-      let prefixSent = false;
+    // Use fullStream to capture reasoning-delta parts alongside text-delta
+    const fullStream = result.fullStream;
+    let reasoningBuffer = "";
+    let reasoningSent = false;
 
-      const wrappedStream = new ReadableStream({
-        async pull(controller) {
-          if (!prefixSent) {
-            controller.enqueue(prefix);
-            prefixSent = true;
+    const wrappedStream = new ReadableStream({
+      async start(controller) {
+        if (convPrefix) {
+          controller.enqueue(encoder.encode(convPrefix));
+        }
+        try {
+          for await (const part of fullStream) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const p = part as any;
+            if (part.type === "reasoning-delta" && thinking) {
+              reasoningBuffer += p.text ?? p.textDelta ?? p.delta ?? "";
+            } else if (part.type === "text-delta") {
+              // Before sending first text chunk, send accumulated thinking content
+              if (thinking && reasoningBuffer && !reasoningSent) {
+                controller.enqueue(encoder.encode(`__THINKING__${reasoningBuffer}__END_THINKING__\n`));
+                reasoningSent = true;
+              }
+              controller.enqueue(encoder.encode(p.text ?? p.textDelta ?? p.delta ?? ""));
+            }
           }
-          const { done, value } = await reader.read();
-          if (done) {
-            controller.close();
-          } else {
-            controller.enqueue(value);
+          // If we got reasoning but no text followed, still send it
+          if (thinking && reasoningBuffer && !reasoningSent) {
+            controller.enqueue(encoder.encode(`__THINKING__${reasoningBuffer}__END_THINKING__\n`));
           }
-        },
-      });
+          controller.close();
+        } catch (err) {
+          controller.error(err);
+        }
+      },
+    });
 
-      return new Response(wrappedStream, {
-        headers: { "Content-Type": "text/plain; charset=utf-8" },
-      });
-    }
-
-    return textStream;
+    return new Response(wrappedStream, {
+      headers: { "Content-Type": "text/plain; charset=utf-8" },
+    });
   } catch (error) {
     console.error("Chat error:", error);
     return new Response(JSON.stringify({ error: "Failed to process chat request" }), {

@@ -60,13 +60,149 @@ import {
   CheckSquare,
   SquareIcon,
   FolderInput,
+  Brain,
+  ChevronDown,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
+import "katex/dist/katex.min.css";
 import { trackChatMessageSent, trackChatConversationCreated, trackChatFileUploaded, trackChatCompareUsed, trackChatPresetUsed, trackChatAdminCommand, trackChatCollectionCreated } from "@/lib/analytics";
 import { useOrg } from "@/components/providers/org-provider";
+
+// ── LaTeX delimiter normalizer (OpenAI uses \(...\) and \[...\], remark-math expects $...$ and $$...$$) ──
+function normalizeLatexDelimiters(content: string): string {
+  return content
+    .replace(/\\\[/g, "$$")
+    .replace(/\\\]/g, "$$")
+    .replace(/\\\(/g, "$")
+    .replace(/\\\)/g, "$");
+}
+
+// ── Mermaid diagram component (client-side only) ──
+
+function MermaidDiagram({ code }: { code: string }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [svg, setSvg] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [showCode, setShowCode] = useState(false);
+  const idRef = useRef(`mermaid-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const mermaid = (await import("mermaid")).default;
+        mermaid.initialize({ startOnLoad: false, theme: "neutral", securityLevel: "strict", maxTextSize: 50000, maxEdges: 500 });
+        const { svg: rendered } = await mermaid.render(idRef.current, code);
+        if (!cancelled) setSvg(rendered);
+      } catch (err) {
+        if (!cancelled) setError(err instanceof Error ? err.message : "Failed to render diagram");
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [code]);
+
+  if (error || showCode) {
+    return (
+      <div className="group/code rounded-xl overflow-hidden border border-zinc-700/50 my-4">
+        <div className="flex items-center justify-between bg-zinc-800 px-4 py-2">
+          <span className="text-[11px] font-medium text-zinc-400 uppercase tracking-wide">mermaid{error ? " (render error)" : ""}</span>
+          <div className="flex items-center gap-2">
+            {svg && (
+              <button
+                className="flex items-center gap-1.5 text-[11px] text-zinc-400 hover:text-zinc-200 transition-colors"
+                onClick={() => setShowCode(false)}
+              >
+                Diagram
+              </button>
+            )}
+            <button
+              className="flex items-center gap-1.5 text-[11px] text-zinc-400 hover:text-zinc-200 transition-colors"
+              onClick={() => { navigator.clipboard.writeText(code); toast.success("Copied!"); }}
+            >
+              <Copy className="h-3 w-3" />
+              Copy
+            </button>
+          </div>
+        </div>
+        <pre className="!rounded-none !mt-0 !mb-0 !border-0 bg-zinc-900 text-zinc-100 p-4 text-[13px] overflow-x-auto">
+          <code>{code}</code>
+        </pre>
+      </div>
+    );
+  }
+
+  if (!svg) {
+    return (
+      <div className="flex items-center justify-center py-8 text-muted-foreground">
+        <Loader2 className="h-5 w-5 animate-spin mr-2" />
+        Rendering diagram...
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-xl overflow-hidden border my-4">
+      <div className="flex items-center justify-between bg-muted/50 px-4 py-2">
+        <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">mermaid diagram</span>
+        <div className="flex items-center gap-2">
+          <button
+            className="flex items-center gap-1.5 text-[11px] text-muted-foreground hover:text-foreground transition-colors"
+            onClick={() => setShowCode(true)}
+          >
+            <Braces className="h-3 w-3" />
+            Code
+          </button>
+          <button
+            className="flex items-center gap-1.5 text-[11px] text-muted-foreground hover:text-foreground transition-colors"
+            onClick={() => { navigator.clipboard.writeText(code); toast.success("Copied!"); }}
+          >
+            <Copy className="h-3 w-3" />
+            Copy
+          </button>
+        </div>
+      </div>
+      <div
+        ref={containerRef}
+        className="p-4 bg-white dark:bg-zinc-900 flex justify-center overflow-x-auto [&_svg]:max-w-full"
+        dangerouslySetInnerHTML={{ __html: svg }}
+      />
+    </div>
+  );
+}
+
+// ── Thinking/Reasoning collapsible block ──
+
+function ThinkingBlock({ content }: { content: string }) {
+  const [expanded, setExpanded] = useState(false);
+  return (
+    <div className="mb-3 rounded-lg border border-violet-200 dark:border-violet-800/50 bg-violet-50/50 dark:bg-violet-950/20 overflow-hidden">
+      <button
+        type="button"
+        onClick={() => setExpanded(!expanded)}
+        className="flex items-center gap-2 w-full px-3 py-2 text-left text-xs font-medium text-violet-600 dark:text-violet-400 hover:bg-violet-100/50 dark:hover:bg-violet-900/30 transition-colors"
+      >
+        <Brain className="h-3.5 w-3.5 flex-shrink-0" />
+        <span>Thinking</span>
+        <span className="text-violet-400 dark:text-violet-500 font-normal">
+          ({Math.ceil(content.length / 4)} tokens)
+        </span>
+        <ChevronDown className={cn("h-3 w-3 ml-auto transition-transform", expanded && "rotate-180")} />
+      </button>
+      {expanded && (
+        <div className="px-3 pb-3 pt-1 border-t border-violet-200 dark:border-violet-800/50">
+          <pre className="text-[12px] leading-5 text-violet-700/80 dark:text-violet-300/60 whitespace-pre-wrap font-mono overflow-x-auto max-h-[400px] overflow-y-auto">
+            {content}
+          </pre>
+        </div>
+      )}
+    </div>
+  );
+}
 
 // ── Shared sub-components ──
 
@@ -151,6 +287,7 @@ interface ChatMsg {
   files?: Array<{ name: string; type: string; size: number }>; // attached file metadata
   created_at?: string; // ISO timestamp from server
   model?: string; // model that generated this message
+  thinking?: string; // extended thinking/reasoning content
 }
 
 interface PendingFile {
@@ -252,6 +389,7 @@ export default function ChatPage() {
   const [collectionContextMenu, setCollectionContextMenu] = useState<{ collectionId: string; x: number; y: number } | null>(null);
   const [contextSubmenu, setContextSubmenu] = useState<"collections" | null>(null);
   const [messageRatings, setMessageRatings] = useState<Record<string, number>>({});
+  const [thinkingMode, setThinkingMode] = useState(false);
   const [compareMode, setCompareMode] = useState(false);
   const [compareModel, setCompareModel] = useState("");
   const [compareProvider, setCompareProvider] = useState("");
@@ -464,6 +602,7 @@ export default function ChatPage() {
           model: selectedModel,
           provider: selectedProvider,
           conversationId: activeConvId,
+          ...(thinkingMode ? { thinking: true } : {}),
           ...(contextToSend ? { adminContext: contextToSend } : {}),
           ...(presetPrompt ? { presetSystemPrompt: presetPrompt } : {}),
           ...(fileContext ? { fileContext } : {}),
@@ -502,6 +641,8 @@ export default function ChatPage() {
       setMessages((prev) => [...prev, { id: assistantId, role: "assistant", content: "", rating: 0 }]);
 
       let convIdParsed = false;
+      let thinkingParsed = false;
+      let thinkingBuffer = "";
 
       if (reader) {
         try {
@@ -554,6 +695,28 @@ export default function ChatPage() {
                 buffer = "";
               } else {
                 continue;
+              }
+            }
+
+            // Parse __THINKING__...__END_THINKING__ prefix for extended thinking content
+            if (!thinkingParsed && chunk) {
+              thinkingBuffer += chunk;
+              const thinkEnd = thinkingBuffer.indexOf("__END_THINKING__\n");
+              if (thinkingBuffer.startsWith("__THINKING__") && thinkEnd !== -1) {
+                const thinkingContent = thinkingBuffer.slice("__THINKING__".length, thinkEnd);
+                setMessages((prev) =>
+                  prev.map((m) => m.id === assistantId ? { ...m, thinking: thinkingContent } : m)
+                );
+                thinkingParsed = true;
+                chunk = thinkingBuffer.slice(thinkEnd + "__END_THINKING__\n".length);
+                thinkingBuffer = "";
+              } else if (!thinkingBuffer.startsWith("__THINKING__") || thinkingBuffer.length > 500000) {
+                // Not a thinking response or buffer too large
+                thinkingParsed = true;
+                chunk = thinkingBuffer;
+                thinkingBuffer = "";
+              } else {
+                continue; // keep buffering thinking content
               }
             }
 
@@ -1561,6 +1724,26 @@ export default function ChatPage() {
       return;
     }
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  }
+
+  // ── Clipboard paste handler for images (Ctrl+V / Cmd+V) ──
+  async function handlePaste(e: React.ClipboardEvent) {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    for (const item of Array.from(items)) {
+      if (item.type.startsWith("image/")) {
+        e.preventDefault();
+        const file = item.getAsFile();
+        if (!file) continue;
+        try {
+          const compressed = await compressImage(file);
+          setPendingImages((prev) => [...prev, compressed]);
+          toast.success("Image pasted");
+        } catch {
+          toast.error("Failed to process pasted image");
+        }
+      }
+    }
   }
 
   const noProviders = providers.length === 0 && !loadingConvs;
@@ -2754,6 +2937,7 @@ export default function ChatPage() {
                             el.style.height = `${Math.min(el.scrollHeight, 200)}px`;
                           }}
                           onKeyDown={handleKeyDown}
+                          onPaste={handlePaste}
                           placeholder="Message TeamPrompt..."
                           className="min-h-[52px] max-h-[200px] resize-none text-[15px] border-0 shadow-none focus-visible:ring-0 rounded-none py-3.5 px-0 overflow-y-auto"
                           rows={1}
@@ -2799,6 +2983,20 @@ export default function ChatPage() {
                           </Select>
                         )}
                         <button type="button" onClick={() => setCustomInstructionsOpen(true)} className={cn("h-7 w-7 flex items-center justify-center rounded-md hover:bg-muted transition-colors", userInstructions.is_active && (userInstructions.role_description || userInstructions.tone || userInstructions.expertise_level || userInstructions.custom_context) ? "text-primary" : "text-muted-foreground/50")} title="Custom instructions"><SlidersHorizontal className="h-3.5 w-3.5" /></button>
+                        <button
+                          type="button"
+                          onClick={() => setThinkingMode(!thinkingMode)}
+                          className={cn(
+                            "h-7 flex items-center gap-1 px-1.5 rounded-md transition-colors",
+                            thinkingMode
+                              ? "text-violet-500 bg-violet-500/10 hover:bg-violet-500/20"
+                              : "text-muted-foreground/50 hover:bg-muted hover:text-muted-foreground"
+                          )}
+                          title="Extended thinking — deeper reasoning, slower responses"
+                        >
+                          <Brain className={cn("h-3.5 w-3.5", thinkingMode && "animate-pulse")} />
+                          {thinkingMode && <span className="text-[10px] font-medium">Thinking</span>}
+                        </button>
                         <span className="text-[10px] text-muted-foreground/40">Type / for commands</span>
                       </div>
                       <Link href="/guardrails" className="flex items-center gap-1 text-[10px] text-green-600/60 hover:text-green-600 transition-colors">
@@ -2822,6 +3020,7 @@ export default function ChatPage() {
                 value={chatInput}
                 onChange={(e) => { handleInputChange(e.target.value); const el = e.target; el.style.height = "auto"; el.style.height = `${Math.min(el.scrollHeight, 200)}px`; }}
                 onKeyDown={handleKeyDown}
+                onPaste={handlePaste}
                 placeholder="Send to both models..."
                 className="min-h-[44px] max-h-[200px] resize-none text-sm rounded-xl overflow-y-auto"
                 rows={1}
@@ -3306,8 +3505,12 @@ export default function ChatPage() {
             <img src="/brand/logo-icon-dark.svg" alt="TeamPrompt" className="h-4 w-4 hidden dark:block" />
           </div>
           <div className="flex-1 min-w-0 pt-0.5">
+            {/* Collapsible thinking/reasoning section */}
+            {message.thinking && <ThinkingBlock content={message.thinking} />}
             <div className="prose dark:prose-invert max-w-none text-[15px] leading-7 [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_pre]:relative [&_pre]:bg-zinc-900 [&_pre]:text-zinc-100 [&_pre]:rounded-xl [&_pre]:p-4 [&_pre]:text-[13px] [&_pre]:overflow-x-auto [&_pre]:my-4 [&_code]:text-[13px] [&_code]:bg-muted [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded-md [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:mt-6 [&_h2]:mb-3 [&_h3]:text-base [&_h3]:font-semibold [&_h3]:mt-5 [&_h3]:mb-2 [&_p]:mb-3 [&_ul]:mb-3 [&_ol]:mb-3 [&_li]:mb-1 [&_blockquote]:border-l-2 [&_blockquote]:border-primary/30 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-muted-foreground [&_table]:text-sm [&_th]:text-left [&_th]:font-semibold [&_td]:py-1.5 [&_td]:pr-4">
               <ReactMarkdown
+                remarkPlugins={[remarkMath]}
+                rehypePlugins={[rehypeKatex]}
                 components={{
                   pre: ({ children, ...props }) => {
                     // Extract language from className (e.g. "language-python")
@@ -3315,6 +3518,12 @@ export default function ChatPage() {
                     const className = codeEl?.props?.className || "";
                     const lang = className.replace("language-", "").split(" ")[0] || "";
                     const codeText = codeEl?.props?.children;
+
+                    // Render mermaid diagrams as SVG
+                    if (lang === "mermaid" && typeof codeText === "string") {
+                      return <MermaidDiagram code={codeText} />;
+                    }
+
                     return (
                       <div className="group/code rounded-xl overflow-hidden border border-zinc-700/50 my-4">
                         {/* Header bar with language + copy */}
@@ -3340,7 +3549,7 @@ export default function ChatPage() {
                     </div>
                   ),
                 }}
-              >{message.content}</ReactMarkdown>
+              >{normalizeLatexDelimiters(message.content)}</ReactMarkdown>
             </div>
             {/* Actions */}
             <div className="flex items-center gap-1 mt-2">

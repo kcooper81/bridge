@@ -43,6 +43,8 @@ export const PROVIDER_MODELS: Record<string, ProviderInfo> = {
       { id: "gpt-4.1", label: "GPT-4.1", contextWindow: 1047576 },
       { id: "gpt-4.1-mini", label: "GPT-4.1 Mini", contextWindow: 1047576 },
       { id: "o3-mini", label: "o3-mini", contextWindow: 128000 },
+      { id: "o3", label: "o3", contextWindow: 200000 },
+      { id: "o1", label: "o1", contextWindow: 200000 },
     ],
   },
   anthropic: {

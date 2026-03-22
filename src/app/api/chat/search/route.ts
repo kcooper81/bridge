@@ -11,28 +11,33 @@ export async function GET(request: NextRequest) {
   const q = request.nextUrl.searchParams.get("q")?.trim();
   if (!q || q.length < 2) return NextResponse.json({ results: [] });
 
-  // Search messages in user's conversations using full-text search
+  // Search messages in user's non-archived conversations using full-text search
+  const selectCols = `
+    id,
+    content,
+    role,
+    created_at,
+    conversation_id,
+    chat_conversations!inner (
+      id,
+      title,
+      user_id,
+      archived_at
+    )
+  `;
+
   const { data: messages } = await db
     .from("chat_messages")
-    .select(`
-      id,
-      content,
-      role,
-      created_at,
-      conversation_id,
-      chat_conversations!inner (
-        id,
-        title,
-        user_id
-      )
-    `)
+    .select(selectCols)
     .eq("chat_conversations.user_id", user.id)
+    .is("chat_conversations.archived_at", null)
     .textSearch("content", q, { type: "websearch" })
     .order("created_at", { ascending: false })
     .limit(30);
 
   // If FTS fails (index might not exist), fall back to ILIKE
   if (!messages || messages.length === 0) {
+    // Try without archived_at filter in case migration hasn't run
     const { data: fallback } = await db
       .from("chat_messages")
       .select(`

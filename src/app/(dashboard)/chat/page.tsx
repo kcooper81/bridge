@@ -1972,7 +1972,10 @@ export default function ChatPage() {
                 <button
                   className="text-[11px] text-primary hover:underline"
                   onClick={() => {
-                    const allIds = filteredConversations.map((c) => c.id);
+                    const allIds = [
+                      ...filteredConversations.map((c) => c.id),
+                      ...(showArchived ? archivedConversations.map((c) => c.id) : []),
+                    ];
                     setSelectedConvIds(new Set(allIds));
                   }}
                 >
@@ -2166,9 +2169,12 @@ export default function ChatPage() {
                 )}
               </div>
               <div className="border-t my-1 mx-2" />
-              <button className="flex items-center gap-3 w-full px-3 py-2 text-sm hover:bg-muted transition-colors" onClick={() => { archiveConversation(conv.id); setContextMenu(null); }}>
-                <Archive className="h-4 w-4" />
-                Archive
+              <button className="flex items-center gap-3 w-full px-3 py-2 text-sm hover:bg-muted transition-colors" onClick={() => {
+                if (conv.archived_at) { unarchiveConversation(conv.id); } else { archiveConversation(conv.id); }
+                setContextMenu(null);
+              }}>
+                {conv.archived_at ? <ArchiveRestore className="h-4 w-4" /> : <Archive className="h-4 w-4" />}
+                {conv.archived_at ? "Unarchive" : "Archive"}
               </button>
               <button className="flex items-center gap-3 w-full px-3 py-2 text-sm text-destructive hover:bg-destructive/10 transition-colors" onClick={() => { deleteConversation(conv.id); setContextMenu(null); }}>
                 <Trash2 className="h-4 w-4" />

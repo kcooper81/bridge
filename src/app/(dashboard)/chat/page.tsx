@@ -684,10 +684,13 @@ export default function ChatPage() {
     // Delete messages from DB if conversation is saved
     if (activeConvId) {
       try {
-        await fetch(`/api/chat/conversations/${activeConvId}/messages?after=${messageId}`, {
+        const delRes = await fetch(`/api/chat/conversations/${activeConvId}/messages?after=${messageId}`, {
           method: "DELETE",
         });
-      } catch { /* non-critical, will be overwritten anyway */ }
+        if (!delRes.ok) console.warn("Failed to delete messages from DB:", delRes.status);
+      } catch (err) {
+        console.warn("Failed to delete messages:", err);
+      }
     }
 
     const newMessages = [...truncated, editedMsg];
@@ -977,9 +980,10 @@ export default function ChatPage() {
   const loadUserInstructions = useCallback(async () => {
     try {
       const res = await fetch("/api/chat/instructions");
+      if (!res.ok) return;
       const data = await res.json();
       if (data.instructions) setUserInstructions(data.instructions);
-    } catch { /* non-critical */ }
+    } catch { /* non-critical — table may not exist yet */ }
   }, []);
 
   useEffect(() => {
@@ -1076,7 +1080,7 @@ export default function ChatPage() {
   }, [messages]);
   useEffect(() => { inputRef.current?.focus(); }, [activeConvId]);
 
-  // Debounced full-text search
+  // Debounced full-text search with AbortController to prevent race conditions
   useEffect(() => {
     if (searchQuery.length < 2) {
       setSearchResults(null);
@@ -1084,22 +1088,25 @@ export default function ChatPage() {
       return;
     }
     setSearchLoading(true);
+    const controller = new AbortController();
     const timer = setTimeout(async () => {
       try {
-        const res = await fetch(`/api/chat/search?q=${encodeURIComponent(searchQuery)}`);
+        const res = await fetch(`/api/chat/search?q=${encodeURIComponent(searchQuery)}`, {
+          signal: controller.signal,
+        });
         if (res.ok) {
           const data = await res.json();
           setSearchResults(data.results || []);
         } else {
           setSearchResults([]);
         }
-      } catch {
-        setSearchResults([]);
+      } catch (err) {
+        if ((err as Error)?.name !== "AbortError") setSearchResults([]);
       } finally {
         setSearchLoading(false);
       }
     }, 300);
-    return () => clearTimeout(timer);
+    return () => { clearTimeout(timer); controller.abort(); };
   }, [searchQuery]);
 
   // Global keyboard shortcuts
@@ -1464,8 +1471,8 @@ export default function ChatPage() {
           "group flex items-center gap-2 rounded-lg px-3 py-2 cursor-pointer transition-all duration-150",
           isActive
             ? "bg-primary/10 text-foreground"
-            : "text-muted-foreground dark:text-zinc-400 hover:bg-muted hover:text-foreground",
-          isOld && !isActive && "opacity-70"
+            : "text-foreground/80 dark:text-zinc-400 hover:bg-muted hover:text-foreground",
+          isOld && !isActive && "opacity-60"
         )}
         onClick={() => loadConversation(conv.id)}
         onDoubleClick={(e) => { e.stopPropagation(); setEditingTitle(conv.id); setEditTitleValue(conv.title); }}
@@ -1556,7 +1563,7 @@ export default function ChatPage() {
                 "flex-1 py-2.5 text-xs font-medium transition-colors relative text-center",
                 sidebarTab === tab ? "text-foreground" : "text-muted-foreground hover:text-foreground"
               )}
-              onClick={() => { setSidebarTab(tab); setActiveCollection(null); }}
+              onClick={() => { setSidebarTab(tab); setActiveCollection(null); setSearchQuery(""); setSearchResults(null); }}
             >
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
               {sidebarTab === tab && <div className="absolute bottom-0 left-2 right-2 h-0.5 bg-primary rounded-full" />}
@@ -1964,19 +1971,28 @@ export default function ChatPage() {
 
             <div className="flex justify-end gap-2">
               <Button variant="outline" size="sm" onClick={() => setCustomInstructionsOpen(false)}>Cancel</Button>
-              <Button size="sm" onClick={async () => {
+              <Button size="sm" onClick={async (e) => {
+                const btn = e.currentTarget;
+                btn.disabled = true;
                 try {
                   const res = await fetch("/api/chat/instructions", {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(userInstructions),
                   });
-                  const data = await res.json();
-                  if (!res.ok) throw new Error(data.error);
-                  if (data.instructions) setUserInstructions(data.instructions);
-                  toast.success("Custom instructions saved");
+                  if (!res.ok) {
+                    const err = await res.json().catch(() => ({}));
+                    toast.error(err.error || "Failed to save instructions");
+                  } else {
+                    const data = await res.json();
+                    if (data.instructions) setUserInstructions(data.instructions);
+                    toast.success("Custom instructions saved");
+                  }
                   setCustomInstructionsOpen(false);
-                } catch { toast.error("Failed to save instructions"); }
+                } catch {
+                  toast.error("Failed to save instructions");
+                  setCustomInstructionsOpen(false);
+                } finally { btn.disabled = false; }
               }}>Save</Button>
             </div>
           </div>
@@ -2572,7 +2588,7 @@ export default function ChatPage() {
                   // Detect entry type and generate summary
                   let IconComp: React.ComponentType<{className?: string}> = MessageSquare;
                   let summary = "";
-                  let accent = "text-muted-foreground";
+                  let accent = "text-foreground/70";
 
                   if (m.role === "user") {
                     if (m.files && m.files.length > 0) {
@@ -2655,7 +2671,7 @@ export default function ChatPage() {
                       key={m.id || i}
                       className={cn(
                         "group/entry w-full flex items-start gap-2.5 px-2.5 py-2 rounded-lg text-left transition-colors hover:bg-muted/50",
-                        m.role === "user" ? "opacity-60" : ""
+                        m.role === "user" ? "opacity-75" : ""
                       )}
                       onClick={() => {
                         // Scroll to this message
@@ -2842,7 +2858,7 @@ export default function ChatPage() {
                   <Button
                     size="sm"
                     className="h-7 text-xs"
-                    disabled={!editMessageContent.trim()}
+                    disabled={!editMessageContent.trim() || isLoading}
                     onClick={() => editAndResubmit(message.id, editMessageContent.trim())}
                   >
                     Save &amp; Submit

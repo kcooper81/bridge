@@ -269,7 +269,7 @@ export default function ChatPage() {
   });
   // Archive state
   const [archivedConversations, setArchivedConversations] = useState<Conversation[]>([]);
-  const [showArchived, setShowArchived] = useState(false);
+  const [sidebarView, setSidebarView] = useState<"main" | "archived">("main");
   // Bulk selection state
   const [bulkMode, setBulkMode] = useState(false);
   const [selectedConvIds, setSelectedConvIds] = useState<Set<string>>(new Set());
@@ -1758,6 +1758,7 @@ export default function ChatPage() {
         )}
         style={sidebarOpen ? { width: sidebarWidth, minWidth: sidebarWidth, maxWidth: sidebarWidth } : undefined}
       >
+        {sidebarView === "main" ? (<>
         {/* Top actions */}
         <div className="p-3 border-b flex-shrink-0">
           <div className="flex gap-2">
@@ -1766,17 +1767,6 @@ export default function ChatPage() {
               New Chat
               <kbd className="ml-auto text-[10px] text-muted-foreground/50 font-mono bg-muted rounded px-1.5 py-0.5">Ctrl+N</kbd>
             </Button>
-            {conversations.length > 0 && (
-              <Button
-                variant={bulkMode ? "default" : "outline"}
-                size="icon"
-                className="h-10 w-10 flex-shrink-0"
-                title={bulkMode ? "Exit select mode" : "Select multiple"}
-                onClick={() => { if (bulkMode) exitBulkMode(); else setBulkMode(true); }}
-              >
-                <CheckSquare className="h-4 w-4" />
-              </Button>
-            )}
           </div>
           {conversations.length > 3 && (
             <div className="relative mt-2">
@@ -1860,25 +1850,6 @@ export default function ChatPage() {
                 {weekConvs.length > 0 && <ConvSection label="Previous 7 Days" collapsible defaultOpen={false}>{weekConvs.map((c) => renderConvItem(c))}</ConvSection>}
                 {olderConvs.length > 0 && <ConvSection label="Older" collapsible defaultOpen={false}>{olderConvs.map((c) => renderConvItem(c))}</ConvSection>}
 
-                {/* Show archived toggle */}
-                {archivedConversations.length > 0 && (
-                  <>
-                    <div className="border-t my-2 mx-2" />
-                    <button
-                      className="flex items-center gap-2 w-full px-3 py-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
-                      onClick={() => setShowArchived(!showArchived)}
-                    >
-                      <Archive className="h-3.5 w-3.5" />
-                      <span>{showArchived ? "Hide" : "Show"} archived ({archivedConversations.length})</span>
-                      <ChevronRight className={cn("h-3 w-3 ml-auto transition-transform", showArchived && "rotate-90")} />
-                    </button>
-                    {showArchived && (
-                      <div className="space-y-0.5 opacity-70">
-                        {archivedConversations.map((c) => renderConvItem(c, { isArchived: true }))}
-                      </div>
-                    )}
-                  </>
-                )}
               </div>
             )}
 
@@ -1962,6 +1933,28 @@ export default function ChatPage() {
 
           </div>
         </ScrollArea>
+        </>) : (
+        <>
+        {/* ── Archived view ── */}
+        <div className="p-3 border-b flex-shrink-0">
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0" onClick={() => setSidebarView("main")}>
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <h3 className="text-sm font-semibold flex-1">Archived</h3>
+            <span className="text-xs text-muted-foreground">{archivedConversations.length}</span>
+          </div>
+        </div>
+        <ScrollArea className="flex-1">
+          <div className="p-2 space-y-0.5">
+            {archivedConversations.length === 0 && (
+              <p className="text-sm text-muted-foreground text-center py-12">No archived chats</p>
+            )}
+            {archivedConversations.map((c) => renderConvItem(c, { isArchived: true }))}
+          </div>
+        </ScrollArea>
+        </>
+        )}
 
         {/* ── Bulk action bar ── */}
         {bulkMode && (
@@ -1974,7 +1967,7 @@ export default function ChatPage() {
                   onClick={() => {
                     const allIds = [
                       ...filteredConversations.map((c) => c.id),
-                      ...(showArchived ? archivedConversations.map((c) => c.id) : []),
+                      ...(sidebarView === "archived" ? archivedConversations.map((c) => c.id) : []),
                     ];
                     setSelectedConvIds(new Set(allIds));
                   }}
@@ -2052,6 +2045,37 @@ export default function ChatPage() {
             </button>
           </div>
         )}
+
+        {/* ── Sidebar footer ── */}
+        <div className="border-t bg-muted/30 px-3 py-2 flex items-center gap-2 flex-shrink-0">
+          <button
+            className={cn(
+              "relative p-1.5 rounded-md transition-colors",
+              sidebarView === "archived" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"
+            )}
+            title="Archived chats"
+            onClick={() => setSidebarView(sidebarView === "archived" ? "main" : "archived")}
+          >
+            <Archive className="h-4 w-4" />
+            {archivedConversations.length > 0 && sidebarView !== "archived" && (
+              <span className="absolute -top-1 -right-1 min-w-[16px] h-4 rounded-full bg-primary text-primary-foreground text-[10px] font-medium flex items-center justify-center px-1">
+                {archivedConversations.length}
+              </span>
+            )}
+          </button>
+          {conversations.length > 0 && (
+            <button
+              className={cn(
+                "p-1.5 rounded-md transition-colors",
+                bulkMode ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"
+              )}
+              title={bulkMode ? "Exit select mode" : "Select multiple"}
+              onClick={() => { if (bulkMode) exitBulkMode(); else setBulkMode(true); }}
+            >
+              <CheckSquare className="h-4 w-4" />
+            </button>
+          )}
+        </div>
 
         {/* Resize handle */}
         {sidebarOpen && (

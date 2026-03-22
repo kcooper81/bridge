@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { CheckCircle2, X } from "lucide-react";
 import { generatePageMetadata } from "@/lib/seo/metadata";
 import { FAQSection } from "@/components/marketing/faq-section";
 import { CTASection } from "@/components/marketing/cta-section";
@@ -94,6 +95,68 @@ export default function PricingPage() {
             </a>{" "}
             for custom enterprise pricing.
           </p>
+        </div>
+
+        {/* What AI tools are missing */}
+        <div className="mt-16 max-w-6xl mx-auto">
+          <h2 className="text-2xl font-semibold tracking-tight text-center mb-2">
+            What ChatGPT, Claude, and Gemini are missing
+          </h2>
+          <p className="text-center text-muted-foreground mb-6 max-w-2xl mx-auto text-sm">
+            Even on team plans at $25-30/user/mo, AI tools don&apos;t include DLP, shared prompts, or audit trails. TeamPrompt adds what they&apos;re missing.
+          </p>
+          <div className="rounded-2xl border border-border bg-card overflow-hidden">
+            <div className="grid grid-cols-3 text-sm">
+              {/* Header */}
+              <div className="px-5 py-3 border-b border-border bg-muted/40 font-semibold" />
+              <div className="px-5 py-3 border-b border-border bg-muted/40 text-center font-semibold">
+                AI Team Plans
+                <span className="block text-xs font-normal text-muted-foreground">ChatGPT, Claude, Gemini</span>
+              </div>
+              <div className="px-5 py-3 border-b border-border bg-primary/5 text-center font-semibold text-primary">
+                + TeamPrompt
+                <span className="block text-xs font-normal text-muted-foreground">Add for $8/user/mo</span>
+              </div>
+              {/* Price */}
+              <div className="px-5 py-3 border-b border-border text-muted-foreground">
+                Price
+              </div>
+              <div className="px-5 py-3 border-b border-border text-center">
+                $25-30/user/mo
+              </div>
+              <div className="px-5 py-3 border-b border-border bg-primary/5 text-center font-semibold text-primary">
+                $8/user/mo
+              </div>
+              {/* Rows */}
+              {[
+                { feature: "Shared prompt library", chatgpt: false, tp: true },
+                { feature: "DLP scanning", chatgpt: false, tp: true },
+                { feature: "Admin audit trails", chatgpt: false, tp: true },
+                { feature: "Compliance packs", chatgpt: false, tp: "19 packs" },
+                { feature: "Multi-model AI chat", chatgpt: false, tp: true },
+              ].map((row) => (
+                <div key={row.feature} className="contents">
+                  <div className="px-5 py-2.5 border-b border-border text-muted-foreground">
+                    {row.feature}
+                  </div>
+                  <div className="px-5 py-2.5 border-b border-border flex justify-center">
+                    {row.chatgpt ? (
+                      <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                    ) : (
+                      <X className="h-4 w-4 text-muted-foreground/40" />
+                    )}
+                  </div>
+                  <div className="px-5 py-2.5 border-b border-border bg-primary/5 flex justify-center items-center gap-1.5">
+                    {typeof row.tp === "string" ? (
+                      <span className="text-xs font-medium text-primary">{row.tp}</span>
+                    ) : (
+                      <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Learn More */}

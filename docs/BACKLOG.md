@@ -125,8 +125,17 @@
 - [x] Per-user custom instructions (role, tone, expertise, custom context — injected as system prompt)
 - [x] Edit & re-submit messages (inline edit, truncate, re-send — no branching)
 - [x] Full-text search in chat sidebar (debounced FTS, AbortController, snippet previews)
-- [x] Archive conversations (hide without deleting, undo toast, show/hide toggle)
+- [x] Archive conversations (hide without deleting, sidebar nav, search in archive)
 - [x] Bulk actions (select multiple, bulk delete, bulk archive, bulk move to collection)
+- [x] Image/vision input (clipboard paste Ctrl+V, multimodal for OpenAI/Anthropic/Google)
+- [x] LaTeX math rendering (KaTeX, remark-math, rehype-katex, delimiter normalizer)
+- [x] Mermaid diagram rendering (lazy-loaded, securityLevel strict, SVG sanitized, code/diagram toggle)
+- [x] Thinking/reasoning toggle (Brain icon, Anthropic extended thinking, o1/o3/o3-mini models)
+- [x] Sidebar footer icons (archive nav, bulk select)
+
+## Database Migrations (2026-03-22)
+- [x] 075_chat_user_instructions.sql
+- [x] 076_chat_archive.sql
 
 ## Pending — AI Chat UI
 - [ ] Wide mode toggle (expand message area)
@@ -134,13 +143,21 @@
 - [ ] Keyboard navigation (arrow keys in sidebar)
 - [ ] Inline annotations (highlight → "Explain this" / "Simplify")
 - [ ] Quick action buttons ("Make shorter", "More formal", "Add examples")
-- [ ] Mermaid diagram rendering
-- [ ] LaTeX math rendering
 - [ ] Markdown preview in input
 - [ ] @ mentions (reference conversations or team members)
 - [ ] Streaming token counter
-- [ ] Image/vision input analysis
-- [ ] Thinking/reasoning toggle (o1/o3, Claude extended thinking)
+- [ ] Web search in chat (search API + inject results as context)
+- [ ] Canvas / Artifacts side panel (code + document editor alongside chat)
+
+## Pending — AI Chat Hardening (from QA)
+- [ ] KaTeX error boundary for malformed math during streaming
+- [ ] Thinking budget configurable per org (currently hardcoded 10K tokens)
+- [ ] Vision model capability check (warn when images sent to non-vision models)
+- [ ] Compare mode thinking support
+- [ ] Saved items board query add org_id filter (defense-in-depth)
+- [ ] Redaction prefix JSON parse show warning instead of silent fail
+- [ ] Migration fallback error handling (distinguish schema vs permission errors)
+- [ ] Edit flow: rollback UI if DB message delete fails
 
 ## Pending — AI Chat Personalization
 - [ ] **Response formatting preferences** — bullet points vs paragraphs, code comments style, language preferences

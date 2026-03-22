@@ -29,6 +29,11 @@
 | 19 compliance packs | BUILT | HIPAA, SOC 2, PCI-DSS, GDPR, CCPA, etc. |
 | Slack DLP violation alerts | BUILT | Real-time notifications + digest cron |
 | Undo delete conversation | BUILT | 3-second toast with undo |
+| Per-user custom instructions | BUILT (2026-03-22) | Role, tone, expertise, custom context — injected as system prompt |
+| Edit & re-submit messages | BUILT (2026-03-22) | Inline edit, truncate conversation, re-send |
+| Full-text search in chat | BUILT (2026-03-22) | Debounced FTS with AbortController, snippet previews |
+| Archive conversations | BUILT (2026-03-22) | Hide without deleting, undo toast, show/hide toggle |
+| Bulk actions | BUILT (2026-03-22) | Select multiple, bulk delete/archive/move to collection |
 
 ## Features Both Competitors Have That We Don't
 

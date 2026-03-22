@@ -121,11 +121,17 @@
 - [ ] **User Coaching** — Contextual education when user does something risky
 - [ ] **Data Fingerprinting** — Detect internal documents pasted into AI
 
+## AI Chat Features (Built 2026-03-22)
+- [x] Per-user custom instructions (role, tone, expertise, custom context — injected as system prompt)
+- [x] Edit & re-submit messages (inline edit, truncate, re-send — no branching)
+- [x] Full-text search in chat sidebar (debounced FTS, AbortController, snippet previews)
+- [x] Archive conversations (hide without deleting, undo toast, show/hide toggle)
+- [x] Bulk actions (select multiple, bulk delete, bulk archive, bulk move to collection)
+
 ## Pending — AI Chat UI
 - [ ] Wide mode toggle (expand message area)
 - [ ] Cmd+K command palette (quick switch conversations, search)
 - [ ] Keyboard navigation (arrow keys in sidebar)
-- [ ] Edit sent messages / branching
 - [ ] Inline annotations (highlight → "Explain this" / "Simplify")
 - [ ] Quick action buttons ("Make shorter", "More formal", "Add examples")
 - [ ] Mermaid diagram rendering
@@ -133,9 +139,10 @@
 - [ ] Markdown preview in input
 - [ ] @ mentions (reference conversations or team members)
 - [ ] Streaming token counter
+- [ ] Image/vision input analysis
+- [ ] Thinking/reasoning toggle (o1/o3, Claude extended thinking)
 
 ## Pending — AI Chat Personalization
-- [ ] **User tone/style preferences** — like ChatGPT's "Custom Instructions". User sets: preferred response length, tone (formal/casual), expertise level, industry context. Stored per-user, injected as system prompt.
 - [ ] **Response formatting preferences** — bullet points vs paragraphs, code comments style, language preferences
 - [ ] **Memory across conversations** — AI remembers context from previous chats (like ChatGPT memory). User can view/delete remembered facts.
 - [ ] **Custom instructions per conversation** — override org-wide system prompt for specific conversations

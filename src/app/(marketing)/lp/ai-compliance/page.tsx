@@ -745,6 +745,13 @@ export default function AiComplianceLandingPage() {
           <p className="mt-4 text-sm text-zinc-500">
             No credit card &middot; 2 min setup &middot; Cancel anytime
           </p>
+
+          <div className="mt-10 max-w-2xl mx-auto rounded-xl border border-white/10 bg-white/[0.03] px-5 py-4">
+            <p className="text-sm text-zinc-300 leading-relaxed text-center">
+              ChatGPT, Claude, and Gemini don&apos;t come with shared prompt libraries, DLP, or admin audit trails — even on team plans at $25-30/user/mo.{" "}
+              <span className="text-white font-semibold">TeamPrompt adds all three for $8/user/mo.</span>
+            </p>
+          </div>
         </div>
       </section>
     </>

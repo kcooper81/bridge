@@ -55,7 +55,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-        <link rel="apple-touch-icon" href="/brand/logo-icon-blue.svg" />
+        <link rel="apple-touch-icon" href="/brand/logo-icon-white-bg.svg" />
         <meta name="theme-color" content="#2563EB" />
         {process.env.NEXT_PUBLIC_SLACK_APP_ID && (
           <meta name="slack-app-id" content={process.env.NEXT_PUBLIC_SLACK_APP_ID} />

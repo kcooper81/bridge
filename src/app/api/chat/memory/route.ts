@@ -379,7 +379,13 @@ export async function PUT(request: NextRequest) {
     .single();
   const orgSettings = (orgData?.settings || {}) as Record<string, unknown>;
 
+  let scannedFact = cleanFact;
+  let dlpStatus = "clean";
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const dlpFlags: any[] = [];
+
   if (orgSettings.guardrails_enabled !== false) {
+    // Check for blocks first
     for (const rule of rulesResult.data || []) {
       if (safeRegexTest(rule.pattern, "i", cleanFact) && rule.severity === "block") {
         return NextResponse.json({ error: "Memory contains blocked content" }, { status: 400 });
@@ -396,10 +402,32 @@ export async function PUT(request: NextRequest) {
         }
       }
     }
+    // Apply redactions
+    for (const rule of rulesResult.data || []) {
+      if (rule.severity === "redact" && safeRegexTest(rule.pattern, "gi", scannedFact)) {
+        try {
+          const regex = new RegExp(rule.pattern, "gi");
+          const replacement = `[${rule.category?.toUpperCase() || "REDACTED"}]`;
+          scannedFact = scannedFact.replace(regex, replacement);
+          dlpStatus = "redacted";
+          dlpFlags.push({ rule: rule.name, category: rule.category, severity: "redact" });
+        } catch { /* invalid regex */ }
+      }
+    }
+    for (const term of termsResult.data || []) {
+      if (term.severity === "redact") {
+        const replacement = `[${term.category?.toUpperCase() || "REDACTED"}]`;
+        if ((term.term_type === "keyword" || term.term_type === "exact") && scannedFact.toLowerCase().includes(term.term.toLowerCase())) {
+          scannedFact = scannedFact.replace(new RegExp(term.term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi"), replacement);
+          dlpStatus = "redacted";
+          dlpFlags.push({ rule: term.term, category: term.category, severity: "redact" });
+        }
+      }
+    }
   }
 
   const { data, error } = await db.from("chat_user_memory")
-    .update({ fact: cleanFact, dlp_status: "clean", dlp_flags: [], updated_at: new Date().toISOString() })
+    .update({ fact: scannedFact, dlp_status: dlpStatus, dlp_flags: dlpFlags, updated_at: new Date().toISOString() })
     .eq("id", id)
     .eq("user_id", user.id)
     .eq("org_id", profile.org_id)

@@ -305,10 +305,10 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Load user memories
+    // Load user memories (graceful fallback if table doesn't exist yet)
     let userMemories: Array<{ fact: string; category: string }> | null = null;
     {
-      const { data: memories } = await db
+      const { data: memories, error: memError } = await db
         .from("chat_user_memory")
         .select("fact, category")
         .eq("user_id", user.id)
@@ -316,7 +316,7 @@ export async function POST(request: NextRequest) {
         .eq("is_active", true)
         .order("created_at", { ascending: false })
         .limit(50);
-      if (memories?.length) userMemories = memories;
+      if (!memError && memories?.length) userMemories = memories;
     }
 
     // Build system messages (order: org prompt → user instructions → user memories → preset prompt → file context → admin data)

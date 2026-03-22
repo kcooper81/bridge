@@ -97,25 +97,64 @@
 
 - [x] Per-user custom instructions — role, tone, expertise, custom context per user, injected as system prompt
 - [x] Edit & re-submit messages — inline edit, truncate conversation, re-send (no branching)
-- [x] Full-text search UI in chat sidebar — debounced FTS with AbortController, snippet previews, click to open
+- [x] Full-text search UI in chat sidebar — debounced FTS with AbortController, snippet previews
+- [x] Archive conversations — sidebar nav stack, search in archive, immediate API persistence
+- [x] Bulk actions — select multiple, bulk delete/archive/move to collection, floating action bar
+- [x] Image/vision input — clipboard paste (Ctrl+V), multimodal for OpenAI/Anthropic/Google via Vercel AI SDK
+- [x] LaTeX math rendering — KaTeX + remark-math + rehype-katex, delimiter normalizer for \(...\) → $...$
+- [x] Mermaid diagram rendering — lazy-loaded, securityLevel strict, SVG sanitized, code/diagram toggle
+- [x] Thinking/reasoning toggle — Brain icon, Anthropic extended thinking (10K budget), o1/o3/o3-mini models
+- [x] Sidebar footer icons — archive nav + bulk select moved to footer
 
 ## Feature Roadmap Priority (Recommended Build Order)
 
-### Phase 1: Easy Wins (1-2 days each)
-1. Archive conversations (hide without deleting)
-2. Wide mode toggle (expand message area)
-3. More keyboard shortcuts (Cmd+K palette, arrow key nav)
+### Phase 3: High-Impact Differentiators
 
-### Phase 2: High-Impact Medium Effort (3-5 days each)
-4. Image/vision input (leverage existing file upload, send as base64 multimodal)
-5. LaTeX math rendering (KaTeX library)
-6. Mermaid diagram rendering (mermaid.js library)
-7. Thinking/reasoning toggle (expose o1/o3 and Claude extended thinking)
+| # | Feature | Effort | Cost | Why |
+|---|---------|--------|------|-----|
+| 1 | **Prompt injection detection** | Medium (3-5 days) | $0 | OWASP #1 LLM vulnerability. 76% jailbreak success rate. Neither ChatGPT nor Claude has this. Unique security differentiator. Already on high-priority roadmap. |
+| 2 | **Persistent memory across chats** | Hard (1-2 weeks) | $0 (DB) | Both ChatGPT + Claude have it. #1 most-requested personalization feature. Unique angle: DLP-scan remembered facts so sensitive data isn't persisted. |
+| 3 | **Web search in chat** | Medium (3-5 days) | Low (~$0.01/query) | Both competitors have it. Users want current info. Unique angle: DLP-scan search results before injecting into prompt. |
+| 4 | **Wide mode toggle** | Easy (1 day) | $0 | ChatGPT has Alt+Z. Simple UX win for wide monitors. |
+| 5 | **Quick action buttons** | Easy (1 day) | $0 | "Make shorter", "More formal", "Add examples" — ChatGPT has these. Reduces friction for non-power users. |
 
-### Phase 3: Hard But Expected (1-2 weeks each)
-8. Persistent memory across chats (store user facts, inject as context)
-9. Web search in chat (search API + inject results as context)
-10. Artifacts/Canvas side panel (code + document editor alongside chat)
+### Phase 4: Table Stakes Features
+
+| # | Feature | Effort | Cost | Why |
+|---|---------|--------|------|-----|
+| 6 | **Cmd+K command palette** | Easy (1 day) | $0 | Quick switch conversations, run commands, search. Power user expectation. |
+| 7 | **Keyboard navigation (arrow keys)** | Easy (1 day) | $0 | Navigate sidebar with keyboard. Accessibility improvement. |
+| 8 | **Inline annotations** | Medium (3-5 days) | $0 | Highlight text → "Explain this" / "Simplify". Both competitors moving toward this. |
+| 9 | **Streaming token counter** | Easy (1 day) | $0 | Show token usage during streaming. Helps users manage API costs (BYOK). |
+| 10 | **Markdown preview in input** | Easy (1 day) | $0 | Preview formatted text before sending. |
+
+### Phase 5: Hard But High Value
+
+| # | Feature | Effort | Cost | Why |
+|---|---------|--------|------|-----|
+| 11 | **Canvas / Artifacts side panel** | Hard (2 weeks) | $0 | Both ChatGPT + Claude have it. Side editor for code + docs alongside chat. Biggest UI gap remaining. |
+| 12 | **Response formatting preferences** | Easy (1 day) | $0 | Bullet points vs paragraphs, code comment style. Stored per-user like custom instructions. |
+| 13 | **Custom instructions per conversation** | Medium (3 days) | $0 | Override org-wide system prompt for specific conversations. Claude has per-project instructions. |
+| 14 | **@ mentions** | Medium (3 days) | $0 | Reference conversations or team members. Team collaboration feature. |
+
+## Security-First Differentiators (Our Moat)
+
+Features neither ChatGPT nor Claude can offer — our unique positioning as the security layer:
+
+| Feature | What It Does | Why Competitors Can't |
+|---------|-------------|----------------------|
+| **DLP on every message** | Scan for PII, secrets, credentials before sending | They ARE the AI — can't scan their own input |
+| **DLP on file uploads** | Scan documents before text extraction | Same — they process files directly |
+| **Smart Redaction** | Auto-replace sensitive data with [CATEGORY] | Would require intercepting their own pipeline |
+| **DLP on memory** (planned) | Scan remembered facts so sensitive data isn't persisted | They store everything — no filtering |
+| **DLP on web search** (planned) | Scan search results before injecting into prompt | They inject results directly |
+| **Prompt injection detection** (planned) | Detect "ignore previous instructions" patterns | They focus on output safety, not input safety |
+| **Multi-provider + BYOK** | Use GPT + Claude + Gemini with your own keys | Single-provider lock-in by design |
+| **Org-wide system prompts** | Admin-controlled AI behavior for all members | No admin control over system prompts |
+| **Prompt risk scoring** | Score every prompt 0-100 for risk | No concept of prompt risk |
+| **19 compliance packs** | HIPAA, SOC 2, PCI-DSS pre-built rules | No compliance tooling in chat |
+
+**Key positioning**: Every new feature we add should be viewed through the security lens. Memory? DLP-scan it. Web search? DLP-scan results. Canvas? DLP-scan generated code. This is what makes TeamPrompt fundamentally different — not just another AI chat, but the secure wrapper that teams need.
 
 ## Community Research (Reddit, Forums, HN — March 2026)
 

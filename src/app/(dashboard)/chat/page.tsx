@@ -54,6 +54,7 @@ import {
   ListOrdered,
   List,
   HelpCircle,
+  SlidersHorizontal,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -250,12 +251,23 @@ export default function ChatPage() {
   const [compareProvider, setCompareProvider] = useState("");
   const [compareMessages, setCompareMessages] = useState<ChatMsg[]>([]);
   const [compareLoading, setCompareLoading] = useState(false);
+  // Edit & re-submit state
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+  const [editMessageContent, setEditMessageContent] = useState("");
+  // Full-text search state
+  const [searchResults, setSearchResults] = useState<Array<{ messageId: string; conversationId: string; conversationTitle: string; role: string; snippet: string; created_at: string }> | null>(null);
+  const [searchLoading, setSearchLoading] = useState(false);
   const [adminNoticeDismissed, setAdminNoticeDismissed] = useState(() => {
     if (typeof window !== "undefined") return localStorage.getItem("chat-admin-notice-dismissed") === "1";
     return false;
   });
   const [sidebarWidth, setSidebarWidth] = useState(320);
   const [isResizing, setIsResizing] = useState(false);
+  const [customInstructionsOpen, setCustomInstructionsOpen] = useState(false);
+  const [userInstructions, setUserInstructions] = useState<{
+    role_description: string; tone: string; expertise_level: string;
+    custom_context: string; is_active: boolean;
+  }>({ role_description: "", tone: "", expertise_level: "", custom_context: "", is_active: true });
 
   const msgIdCounter = useRef(0);
   const nextMsgId = () => `${Date.now()}-${++msgIdCounter.current}`;
@@ -655,6 +667,37 @@ export default function ChatPage() {
     sendMessage(messagesWithoutLast);
   }
 
+  async function editAndResubmit(messageId: string, newContent: string) {
+    const msgIndex = messages.findIndex((m) => m.id === messageId);
+    if (msgIndex === -1) return;
+
+    const originalMsg = messages[msgIndex];
+    const truncated = messages.slice(0, msgIndex);
+    const editedMsg: ChatMsg = {
+      id: nextMsgId(),
+      role: "user",
+      content: newContent,
+      images: originalMsg.images,
+      files: originalMsg.files,
+    };
+
+    // Delete messages from DB if conversation is saved
+    if (activeConvId) {
+      try {
+        await fetch(`/api/chat/conversations/${activeConvId}/messages?after=${messageId}`, {
+          method: "DELETE",
+        });
+      } catch { /* non-critical, will be overwritten anyway */ }
+    }
+
+    const newMessages = [...truncated, editedMsg];
+    setMessages(newMessages);
+    setCompareMessages([]);
+    setEditingMessageId(null);
+    setEditMessageContent("");
+    sendMessage(newMessages);
+  }
+
   function copyMessage(content: string, id: string) {
     navigator.clipboard.writeText(content);
     setCopiedId(id);
@@ -931,13 +974,22 @@ export default function ChatPage() {
     } catch { /* non-critical */ }
   }, []);
 
+  const loadUserInstructions = useCallback(async () => {
+    try {
+      const res = await fetch("/api/chat/instructions");
+      const data = await res.json();
+      if (data.instructions) setUserInstructions(data.instructions);
+    } catch { /* non-critical */ }
+  }, []);
+
   useEffect(() => {
     loadConversations();
     loadProviders();
     loadCollections();
     loadPresets();
     loadSavedItems();
-  }, [loadConversations, loadProviders, loadCollections, loadPresets, loadSavedItems]);
+    loadUserInstructions();
+  }, [loadConversations, loadProviders, loadCollections, loadPresets, loadSavedItems, loadUserInstructions]);
 
   async function saveMessageContent(messageId: string, content: string) {
     setSavingMessageId(messageId);
@@ -1023,6 +1075,32 @@ export default function ChatPage() {
     }
   }, [messages]);
   useEffect(() => { inputRef.current?.focus(); }, [activeConvId]);
+
+  // Debounced full-text search
+  useEffect(() => {
+    if (searchQuery.length < 2) {
+      setSearchResults(null);
+      setSearchLoading(false);
+      return;
+    }
+    setSearchLoading(true);
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/chat/search?q=${encodeURIComponent(searchQuery)}`);
+        if (res.ok) {
+          const data = await res.json();
+          setSearchResults(data.results || []);
+        } else {
+          setSearchResults([]);
+        }
+      } catch {
+        setSearchResults([]);
+      } finally {
+        setSearchLoading(false);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   // Global keyboard shortcuts
   useEffect(() => {
@@ -1411,7 +1489,7 @@ export default function ChatPage() {
           <>
             <div className="flex-1 min-w-0 overflow-hidden flex items-center gap-1.5">
               {conv.pinned && <Star className="h-3 w-3 fill-amber-400 text-amber-400 flex-shrink-0" />}
-              <span className="truncate text-[13px] flex-1 min-w-0">{conv.title}</span>
+              <span className="truncate text-[13px] flex-1 min-w-0 text-foreground">{conv.title}</span>
               {isLoading && activeConvId === conv.id && (
                 <span className="h-2 w-2 rounded-full bg-primary animate-pulse flex-shrink-0" />
               )}
@@ -1460,7 +1538,7 @@ export default function ChatPage() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
               <input
                 type="text"
-                placeholder="Search conversations..."
+                placeholder="Search messages..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full h-9 rounded-lg border bg-background pl-9 pr-3 text-sm outline-none focus:ring-1 focus:ring-primary"
@@ -1490,8 +1568,39 @@ export default function ChatPage() {
         <ScrollArea className="flex-1">
           <div className="p-2 overflow-hidden transition-all duration-200 w-0 min-w-full">
 
+            {/* ── Search results overlay ── */}
+            {searchResults !== null && (
+              <div className="space-y-0.5">
+                {searchLoading && (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                  </div>
+                )}
+                {!searchLoading && searchResults.length === 0 && (
+                  <p className="text-sm text-muted-foreground text-center py-12">No results found</p>
+                )}
+                {!searchLoading && searchResults.map((result) => (
+                  <button
+                    key={`${result.conversationId}-${result.messageId}`}
+                    className="w-full flex flex-col gap-1 rounded-lg px-3 py-2.5 text-left hover:bg-muted transition-colors"
+                    onClick={() => {
+                      loadConversation(result.conversationId);
+                      setSearchQuery("");
+                      setSearchResults(null);
+                    }}
+                  >
+                    <span className="text-[13px] font-medium truncate">{result.conversationTitle}</span>
+                    <span className="text-xs text-muted-foreground line-clamp-2">{result.snippet}</span>
+                    <span className="text-[10px] text-muted-foreground/60">
+                      {result.role === "user" ? "You" : "AI"} &middot; {new Date(result.created_at).toLocaleDateString()}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+
             {/* ── Chats tab ── */}
-            {sidebarTab === "chats" && (
+            {sidebarTab === "chats" && searchResults === null && (
               <div className="space-y-0.5">
                 {conversations.length === 0 && !loadingConvs && (
                   <p className="text-sm text-muted-foreground text-center py-12">No conversations yet</p>
@@ -1509,7 +1618,7 @@ export default function ChatPage() {
             )}
 
             {/* ── Favorites tab ── */}
-            {sidebarTab === "favorites" && (
+            {sidebarTab === "favorites" && searchResults === null && (
               <div className="space-y-0.5">
                 {pinnedConvs.length === 0 ? (
                   <div className="text-center py-12">
@@ -1524,7 +1633,7 @@ export default function ChatPage() {
             )}
 
             {/* ── Collections tab ── */}
-            {sidebarTab === "collections" && !activeCollection && (
+            {sidebarTab === "collections" && !activeCollection && searchResults === null && (
               <div className="space-y-1">
                 {sortedCollections.length === 0 && (
                   <div className="text-center py-12">
@@ -1563,7 +1672,7 @@ export default function ChatPage() {
             )}
 
             {/* ── Collection detail view ── */}
-            {sidebarTab === "collections" && activeCollection && (() => {
+            {sidebarTab === "collections" && activeCollection && searchResults === null && (() => {
               const col = collections.find((c) => c.id === activeCollection);
               return (
                 <div className="space-y-1">
@@ -1786,6 +1895,89 @@ export default function ChatPage() {
             <div className="flex justify-end gap-2 mt-4">
               <Button variant="outline" size="sm" onClick={() => setEditingCollection(null)}>Cancel</Button>
               <Button size="sm" onClick={() => renameCollection(editingCollection, editCollectionName.trim())} disabled={!editCollectionName.trim()}>Save</Button>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* ── Custom instructions dialog ── */}
+      {customInstructionsOpen && (
+        <>
+          <div className="fixed inset-0 z-40 bg-black/40" onClick={() => setCustomInstructionsOpen(false)} />
+          <div className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-popover border rounded-xl shadow-2xl p-6 w-[420px] max-h-[85vh] overflow-y-auto">
+            <h3 className="text-base font-semibold mb-1">Custom Instructions</h3>
+            <p className="text-xs text-muted-foreground mb-4">Personalize how the AI responds to you. These apply to all your conversations.</p>
+
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">Your role</label>
+            <input
+              className="w-full h-9 rounded-lg border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-primary mb-3"
+              placeholder="e.g. Product Manager, Software Engineer"
+              value={userInstructions.role_description}
+              onChange={(e) => setUserInstructions((prev) => ({ ...prev, role_description: e.target.value.slice(0, 500) }))}
+            />
+
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">Preferred tone</label>
+            <select
+              className="w-full h-9 rounded-lg border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-primary mb-3 appearance-none"
+              value={userInstructions.tone}
+              onChange={(e) => setUserInstructions((prev) => ({ ...prev, tone: e.target.value }))}
+            >
+              <option value="">No preference</option>
+              <option value="professional">Professional</option>
+              <option value="casual">Casual</option>
+              <option value="concise">Concise</option>
+              <option value="detailed">Detailed</option>
+              <option value="technical">Technical</option>
+            </select>
+
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">Expertise level</label>
+            <select
+              className="w-full h-9 rounded-lg border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-primary mb-3 appearance-none"
+              value={userInstructions.expertise_level}
+              onChange={(e) => setUserInstructions((prev) => ({ ...prev, expertise_level: e.target.value }))}
+            >
+              <option value="">No preference</option>
+              <option value="beginner">Beginner</option>
+              <option value="intermediate">Intermediate</option>
+              <option value="expert">Expert</option>
+            </select>
+
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">Custom context <span className="font-normal text-muted-foreground/60">({userInstructions.custom_context.length}/2000)</span></label>
+            <textarea
+              className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary mb-3 resize-none"
+              rows={4}
+              placeholder="Any additional context about how the AI should respond to you..."
+              value={userInstructions.custom_context}
+              onChange={(e) => setUserInstructions((prev) => ({ ...prev, custom_context: e.target.value.slice(0, 2000) }))}
+            />
+
+            <div className="flex items-center justify-between mb-4">
+              <label className="text-sm font-medium">Active</label>
+              <button
+                type="button"
+                onClick={() => setUserInstructions((prev) => ({ ...prev, is_active: !prev.is_active }))}
+                className={cn("relative inline-flex h-5 w-9 items-center rounded-full transition-colors", userInstructions.is_active ? "bg-primary" : "bg-muted")}
+              >
+                <span className={cn("inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform", userInstructions.is_active ? "translate-x-[18px]" : "translate-x-[3px]")} />
+              </button>
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" size="sm" onClick={() => setCustomInstructionsOpen(false)}>Cancel</Button>
+              <Button size="sm" onClick={async () => {
+                try {
+                  const res = await fetch("/api/chat/instructions", {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(userInstructions),
+                  });
+                  const data = await res.json();
+                  if (!res.ok) throw new Error(data.error);
+                  if (data.instructions) setUserInstructions(data.instructions);
+                  toast.success("Custom instructions saved");
+                  setCustomInstructionsOpen(false);
+                } catch { toast.error("Failed to save instructions"); }
+              }}>Save</Button>
             </div>
           </div>
         </>
@@ -2211,6 +2403,7 @@ export default function ChatPage() {
                             </SelectContent>
                           </Select>
                         )}
+                        <button type="button" onClick={() => setCustomInstructionsOpen(true)} className={cn("h-7 w-7 flex items-center justify-center rounded-md hover:bg-muted transition-colors", userInstructions.is_active && (userInstructions.role_description || userInstructions.tone || userInstructions.expertise_level || userInstructions.custom_context) ? "text-primary" : "text-muted-foreground/50")} title="Custom instructions"><SlidersHorizontal className="h-3.5 w-3.5" /></button>
                         <span className="text-[10px] text-muted-foreground/40">Type / for commands</span>
                       </div>
                       <Link href="/guardrails" className="flex items-center gap-1 text-[10px] text-green-600/60 hover:text-green-600 transition-colors">
@@ -2598,42 +2791,112 @@ export default function ChatPage() {
         : "";
     // ── User message ──
     if (message.role === "user") {
+      const isEditingThis = editingMessageId === message.id;
       return (
         <div key={message.id} data-msg-id={message.id} className="group flex justify-end mb-8 animate-in fade-in-0 slide-in-from-bottom-2 duration-300">
           <div className="max-w-[75%] min-w-0">
-            <div className="rounded-2xl bg-primary text-primary-foreground px-5 py-3 text-[15px] leading-7 overflow-hidden break-words">
-              {message.images && message.images.length > 0 && (
-                <div className="flex gap-2 flex-wrap mb-2">
-                  {message.images.map((img, imgIdx) => (
-                    <img key={imgIdx} src={img} alt={`Attachment ${imgIdx + 1}`} className="max-h-48 rounded-lg object-contain" />
-                  ))}
-                </div>
-              )}
-              {message.files && message.files.length > 0 && (
-                <div className="flex gap-2 flex-wrap mb-3">
-                  {message.files.map((f, fIdx) => (
-                    <div key={fIdx} className="flex items-center gap-2.5 bg-white/10 backdrop-blur rounded-lg px-3 py-2.5 min-w-[140px]">
-                      <div className="h-8 w-8 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
-                        <FileText className="h-4 w-4 opacity-80" />
+            {isEditingThis ? (
+              <div className="rounded-2xl border bg-muted/50 px-4 py-3">
+                {message.images && message.images.length > 0 && (
+                  <div className="flex gap-2 flex-wrap mb-2">
+                    {message.images.map((img, imgIdx) => (
+                      <img key={imgIdx} src={img} alt={`Attachment ${imgIdx + 1}`} className="max-h-32 rounded-lg object-contain opacity-60" />
+                    ))}
+                  </div>
+                )}
+                {message.files && message.files.length > 0 && (
+                  <div className="flex gap-2 flex-wrap mb-2">
+                    {message.files.map((f, fIdx) => (
+                      <div key={fIdx} className="flex items-center gap-2 bg-muted rounded-lg px-2 py-1.5 text-xs text-muted-foreground">
+                        <FileText className="h-3.5 w-3.5" />
+                        <span className="truncate">{f.name}</span>
                       </div>
-                      <div className="min-w-0">
-                        <p className="text-xs font-medium truncate">{f.name}</p>
-                        <p className="text-[10px] opacity-60">{f.type?.split("/").pop() || "file"} · {formatFileSize(f.size)}</p>
-                      </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
+                )}
+                <Textarea
+                  value={editMessageContent}
+                  onChange={(e) => setEditMessageContent(e.target.value)}
+                  className="min-h-[80px] text-[15px] leading-7 resize-none bg-background"
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      if (editMessageContent.trim()) editAndResubmit(message.id, editMessageContent.trim());
+                    }
+                    if (e.key === "Escape") {
+                      setEditingMessageId(null);
+                      setEditMessageContent("");
+                    }
+                  }}
+                />
+                <div className="flex items-center gap-2 mt-2 justify-end">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={() => { setEditingMessageId(null); setEditMessageContent(""); }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    size="sm"
+                    className="h-7 text-xs"
+                    disabled={!editMessageContent.trim()}
+                    onClick={() => editAndResubmit(message.id, editMessageContent.trim())}
+                  >
+                    Save &amp; Submit
+                  </Button>
                 </div>
-              )}
-              <p className="whitespace-pre-wrap">{message.content}</p>
-            </div>
-            <div className="flex items-center gap-1 mt-1.5 justify-end">
-              {timestamp && <span className="text-[10px] text-muted-foreground/40">{timestamp}</span>}
-              <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                <button className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors" title="Copy" onClick={() => copyMessage(message.content, message.id)}>
-                  {copiedId === message.id ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
-                </button>
               </div>
-            </div>
+            ) : (
+              <>
+                <div className="rounded-2xl bg-primary text-primary-foreground px-5 py-3 text-[15px] leading-7 overflow-hidden break-words">
+                  {message.images && message.images.length > 0 && (
+                    <div className="flex gap-2 flex-wrap mb-2">
+                      {message.images.map((img, imgIdx) => (
+                        <img key={imgIdx} src={img} alt={`Attachment ${imgIdx + 1}`} className="max-h-48 rounded-lg object-contain" />
+                      ))}
+                    </div>
+                  )}
+                  {message.files && message.files.length > 0 && (
+                    <div className="flex gap-2 flex-wrap mb-3">
+                      {message.files.map((f, fIdx) => (
+                        <div key={fIdx} className="flex items-center gap-2.5 bg-white/10 backdrop-blur rounded-lg px-3 py-2.5 min-w-[140px]">
+                          <div className="h-8 w-8 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
+                            <FileText className="h-4 w-4 opacity-80" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-xs font-medium truncate">{f.name}</p>
+                            <p className="text-[10px] opacity-60">{f.type?.split("/").pop() || "file"} · {formatFileSize(f.size)}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <p className="whitespace-pre-wrap">{message.content}</p>
+                </div>
+                <div className="flex items-center gap-1 mt-1.5 justify-end">
+                  {timestamp && <span className="text-[10px] text-muted-foreground/40">{timestamp}</span>}
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5">
+                    <button
+                      className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors disabled:opacity-30"
+                      title="Edit message"
+                      disabled={isLoading}
+                      onClick={() => {
+                        setEditingMessageId(message.id);
+                        setEditMessageContent(message.content);
+                      }}
+                    >
+                      <Pencil className="h-3 w-3" />
+                    </button>
+                    <button className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors" title="Copy" onClick={() => copyMessage(message.content, message.id)}>
+                      {copiedId === message.id ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       );

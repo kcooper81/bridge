@@ -284,10 +284,34 @@ export async function POST(request: NextRequest) {
     // Stream AI response
     const aiModel = createAIModel(provider || "openai", selectedModel, apiKey);
 
-    // Build system messages (order: org prompt → preset prompt → file context → admin data)
+    // Load user custom instructions
+    let userInstructionsPrompt: string | null = null;
+    {
+      const { data: instrRow } = await db
+        .from("chat_user_instructions")
+        .select("role_description, tone, expertise_level, custom_context, is_active")
+        .eq("user_id", user.id)
+        .eq("org_id", profile.org_id)
+        .single();
+      if (instrRow?.is_active) {
+        const parts: string[] = [];
+        if (instrRow.role_description) parts.push(`Role: ${instrRow.role_description}`);
+        if (instrRow.tone) parts.push(`Tone: ${instrRow.tone}`);
+        if (instrRow.expertise_level) parts.push(`Expertise level: ${instrRow.expertise_level}`);
+        if (instrRow.custom_context) parts.push(`Additional context: ${instrRow.custom_context}`);
+        if (parts.length > 0) {
+          userInstructionsPrompt = `The user has set the following custom instructions for how you should respond:\n${parts.join("\n")}`;
+        }
+      }
+    }
+
+    // Build system messages (order: org prompt → user instructions → preset prompt → file context → admin data)
     const systemMessages: Array<{ role: "system"; content: string }> = [];
     if (orgSystemPrompt) {
       systemMessages.push({ role: "system", content: orgSystemPrompt });
+    }
+    if (userInstructionsPrompt) {
+      systemMessages.push({ role: "system", content: userInstructionsPrompt });
     }
     if (presetSystemPrompt) {
       systemMessages.push({ role: "system", content: presetSystemPrompt });

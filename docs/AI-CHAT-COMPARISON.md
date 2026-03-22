@@ -36,8 +36,8 @@
 
 | Feature | ChatGPT | Claude | TeamPrompt | Effort | Impact |
 |---------|---------|--------|------------|--------|--------|
-| Per-user custom instructions | Yes | Yes (3 layers) | No | Easy | HIGH — table stakes, every user expects personalization |
-| Edit sent messages & re-submit | Yes (branches) | Yes (branches) | No | Medium | HIGH — critical daily workflow, frustrating without it |
+| Per-user custom instructions | Yes | Yes (3 layers) | **Yes (built 2026-03-22)** | Easy | DONE — role, tone, expertise, custom context per user |
+| Edit sent messages & re-submit | Yes (branches) | Yes (branches) | **Yes (built 2026-03-22)** | Medium | DONE — inline edit, truncate & re-send, no branching |
 | Persistent memory across chats | Yes | Yes | No | Hard | HIGH — becoming expected, both competitors shipped it |
 | Web search / browsing | Yes | Yes | No | Medium | HIGH — users expect current info access |
 | Image/vision input analysis | Yes | Yes | No | Medium | MEDIUM — screenshot analysis is common workflow |
@@ -53,7 +53,7 @@
 | Extended thinking / reasoning toggle | Yes (o1/o3) | Yes | No | Medium | MEDIUM |
 | Response regeneration with model switch | Yes | Yes | Partial | Easy | LOW |
 | Archive conversations | Yes | Yes (Cowork) | No | Easy | LOW |
-| Full-text search in chat UI | Yes (basic) | Yes (semantic) | API exists, no UI | Easy | MEDIUM |
+| Full-text search in chat UI | Yes (basic) | Yes (semantic) | **Yes (built 2026-03-22)** | Easy | DONE — debounced FTS with AbortController, snippet previews |
 | Keyboard shortcuts (comprehensive) | Yes (10+) | Yes | Partial (Ctrl+N) | Easy | LOW |
 | Wide mode / focused mode | Yes (Alt+Z) | No | No | Easy | LOW |
 
@@ -88,26 +88,29 @@
 
 **Key stat**: ChatGPT Teams at $30/user/mo still doesn't have shared prompt libraries, DLP, or admin audit trails. TeamPrompt adds all three for $8/user/mo.
 
+## Recently Completed (2026-03-22)
+
+- [x] Per-user custom instructions — role, tone, expertise, custom context per user, injected as system prompt
+- [x] Edit & re-submit messages — inline edit, truncate conversation, re-send (no branching)
+- [x] Full-text search UI in chat sidebar — debounced FTS with AbortController, snippet previews, click to open
+
 ## Feature Roadmap Priority (Recommended Build Order)
 
 ### Phase 1: Easy Wins (1-2 days each)
-1. Per-user custom instructions (tone, role, expertise — stored per-user, injected as system prompt)
-2. Full-text search UI in chat (API already built, just needs search bar in sidebar)
-3. Archive conversations (hide without deleting)
-4. Wide mode toggle (expand message area)
-5. More keyboard shortcuts (Cmd+K palette, arrow key nav)
+1. Archive conversations (hide without deleting)
+2. Wide mode toggle (expand message area)
+3. More keyboard shortcuts (Cmd+K palette, arrow key nav)
 
 ### Phase 2: High-Impact Medium Effort (3-5 days each)
-6. Edit sent messages & re-submit (without branching — simpler than competitors)
-7. Image/vision input (leverage existing file upload, send as base64 multimodal)
-8. LaTeX math rendering (KaTeX library)
-9. Mermaid diagram rendering (mermaid.js library)
-10. Thinking/reasoning toggle (expose o1/o3 and Claude extended thinking)
+4. Image/vision input (leverage existing file upload, send as base64 multimodal)
+5. LaTeX math rendering (KaTeX library)
+6. Mermaid diagram rendering (mermaid.js library)
+7. Thinking/reasoning toggle (expose o1/o3 and Claude extended thinking)
 
 ### Phase 3: Hard But Expected (1-2 weeks each)
-11. Persistent memory across chats (store user facts, inject as context)
-12. Web search in chat (search API + inject results as context)
-13. Artifacts/Canvas side panel (code + document editor alongside chat)
+8. Persistent memory across chats (store user facts, inject as context)
+9. Web search in chat (search API + inject results as context)
+10. Artifacts/Canvas side panel (code + document editor alongside chat)
 
 ## Community Research (Reddit, Forums, HN — March 2026)
 
@@ -125,6 +128,30 @@
 
 6. **No admin audit trail** (HIGH for enterprise) — Claude Cowork has "no activity in audit logs — a complete blind spot." **TeamPrompt already has this.**
 
+### Additional Community Findings (Forums, HN, Product Hunt — March 2026)
+
+7. **Custom instructions / personalization** (HIGH) — Users want per-user tone, role, expertise settings. Both ChatGPT and Claude have it. **TeamPrompt now has this (built 2026-03-22).**
+
+8. **Edit & re-submit messages** (HIGH) — "I want to refine a prompt without starting over." Both competitors have it with branching. **TeamPrompt now has this (built 2026-03-22).**
+
+9. **Conversation search** (HIGH) — "I can't find my old conversations." ChatGPT only has title search, Claude has semantic. 4+ Chrome extensions with 16K users built to solve this. **TeamPrompt now has full-text search (built 2026-03-22).**
+
+10. **Prompt injection / jailbreak detection** (MODERATE-HIGH) — OWASP ranks it #1 LLM vulnerability. 76% jailbreak success rates. **TeamPrompt has this on roadmap.**
+
+11. **Data export / portability** (MODERATE-HIGH) — EU Digital Markets Act will mandate data portability. Users want backup capability. **TeamPrompt has Markdown + PDF export.**
+
+12. **Admin controls & compliance gaps** (HIGH for enterprise) — Claude Cowork has "no activity in audit logs — a complete blind spot." ChatGPT Enterprise compliance tools are limited to 13+ DLP partner integrations. **TeamPrompt has native DLP + audit trail.**
+
+### Key Stats for Marketing
+
+- 34.8% of employee ChatGPT inputs contain sensitive data (up from 11%)
+- 56.4% increase in AI privacy incidents year-over-year
+- 225,000+ ChatGPT credentials found on dark web
+- Samsung banned ChatGPT after source code leaks
+- Average user accumulates 500+ conversations in first year
+- ChatGPT Teams: $30/user/mo — no DLP, no shared prompts, no audit trail
+- TeamPrompt Pro: $8/user/mo — all three included
+
 ### Marketing Angles Based on Research
 
 1. "Your conversations, organized" — #1 power-user pain point, we solve it
@@ -132,3 +159,4 @@
 3. "One interface, every model" — eliminates subscription juggling
 4. "Built for teams, not individuals" — shared prompts + admin controls
 5. "No surprise limits" — transparent BYOK pricing vs opaque rate caps
+6. "ChatGPT, Claude, and Gemini don't come with DLP, shared prompts, or audit trails — even on team plans at $25-30/user/mo. TeamPrompt adds all three for $8/user/mo."

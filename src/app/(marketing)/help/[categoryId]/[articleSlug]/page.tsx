@@ -31,6 +31,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: `${result.article.q} — ${result.category.title} — Help`,
     description: result.article.a.slice(0, 160),
     path: `/help/${categoryId}/${articleSlug}`,
+    noIndex: true, // Individual help articles are thin — let category pages represent them
     keywords: [
       result.category.title,
       ...(result.article.keywords || []),

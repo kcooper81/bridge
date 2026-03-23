@@ -1,5 +1,22 @@
 import { MetadataRoute } from "next";
-import { allSeoPages } from "@/lib/seo-pages/data";
+
+/**
+ * SITEMAP STRATEGY (2026-03-22):
+ *
+ * Google marked 600 pages as "Duplicate without user-selected canonical"
+ * after 1 month. Only 39 of 630 pages were indexed. The 527 programmatic
+ * /solutions/* pages are seen as thin/duplicate content and are dragging
+ * down crawl budget.
+ *
+ * Strategy: Submit only high-quality, unique pages (~80) in the sitemap.
+ * The /solutions/* pages remain accessible via URL but are excluded from
+ * the sitemap until domain authority grows. This tells Google to focus
+ * on our real content.
+ *
+ * The /solutions/* pages still exist and are linked from the /solutions
+ * index page — Google can discover them organically through internal links
+ * if it chooses to crawl them.
+ */
 
 const BLOG_SLUGS = [
   "how-to-build-a-team-prompt-library",
@@ -35,85 +52,6 @@ const HELP_CATEGORIES = [
   "account-security",
 ];
 
-const HELP_ARTICLES: Record<string, string[]> = {
-  "getting-started": [
-    "create-a-workspace",
-    "invite-my-team",
-    "install-the-browser-extension",
-    "create-my-first-prompt",
-    "user-roles",
-    "approval-workflow",
-    "approval-queue",
-  ],
-  "prompt-library": [
-    "create-and-edit-prompts",
-    "prompt-templates",
-    "tags-and-filtering",
-    "prompt-approval-workflow",
-    "share-prompts-with-my-team",
-    "import-existing-prompts",
-    "compare-prompt-versions",
-  ],
-  guidelines: [
-    "quality-guidelines",
-    "create-guidelines",
-    "pre-built-guidelines",
-    "difference-between-guidelines-and-security-rules",
-  ],
-  "security-rules": [
-    "dlp-scanning",
-    "default-patterns",
-    "create-custom-security-rules",
-    "block-and-warn",
-    "enforce-security-rules",
-    "violation-history",
-    "enable-security-rules",
-    "admin-security-settings",
-    "compliance-policy-packs",
-    "auto-sanitization",
-    "suggest-a-security-rule",
-  ],
-  extension: [
-    "supported-ai-tools",
-    "install-and-sign-in",
-    "insert-prompts-into-ai-tools",
-    "shield-indicator",
-    "offline-usage",
-    "side-panel",
-  ],
-  "team-management": [
-    "invite-and-manage-members",
-    "teams",
-    "change-someone-role",
-    "remove-a-member",
-    "extension-status",
-    "change-roles-for-multiple-members",
-    "customize-the-invite-welcome-email",
-    "domain-based-auto-join",
-    "connect-google-workspace-to-sync-my-directory",
-  ],
-  analytics: ["analytics-page", "activity-log", "export-activity-data"],
-  "import-export": [
-    "import-prompts",
-    "export-my-data",
-    "migrate-from-another-tool",
-    "template-packs",
-  ],
-  billing: [
-    "available-plans",
-    "upgrade-or-downgrade",
-    "free-trial",
-    "cancel-subscription",
-    "payment-methods",
-  ],
-  "account-security": [
-    "reset-my-password",
-    "delete-my-account",
-    "data-stored-and-protected",
-    "does-teamprompt-store-the-text-i-send-to-ai-tools",
-  ],
-};
-
 const INDUSTRY_SLUGS = [
   "healthcare",
   "legal",
@@ -124,11 +62,48 @@ const INDUSTRY_SLUGS = [
   "insurance",
 ];
 
+// Only the highest-value /solutions/* pages — hand-picked for indexing
+const TOP_SOLUTION_SLUGS = [
+  "prompt-management",
+  "ai-dlp",
+  "ai-governance",
+  "prompt-templates",
+  "ai-compliance-reporting",
+  "for-marketers",
+  "for-educators",
+  "chatgpt-team-prompts",
+  "claude",
+  "ai-prompt-library-software",
+  "ai-prompt-templates-guide",
+  "prompt-management-101",
+];
+
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl =
     process.env.NEXT_PUBLIC_SITE_URL || "https://teamprompt.app";
   const today = new Date().toISOString().split("T")[0];
 
+  // Tier 1: Core pages (highest priority — must be indexed)
+  const corePages: MetadataRoute.Sitemap = [
+    { url: baseUrl, lastModified: today, changeFrequency: "weekly", priority: 1 },
+    { url: `${baseUrl}/pricing`, lastModified: today, changeFrequency: "weekly", priority: 0.9 },
+    { url: `${baseUrl}/features`, lastModified: today, changeFrequency: "monthly", priority: 0.9 },
+    { url: `${baseUrl}/features/ai-chat`, lastModified: today, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${baseUrl}/security`, lastModified: today, changeFrequency: "monthly", priority: 0.9 },
+    { url: `${baseUrl}/enterprise`, lastModified: today, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${baseUrl}/integrations`, lastModified: today, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${baseUrl}/extensions`, lastModified: today, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${baseUrl}/solutions`, lastModified: today, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${baseUrl}/blog`, lastModified: today, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${baseUrl}/help`, lastModified: today, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${baseUrl}/contact`, lastModified: today, changeFrequency: "monthly", priority: 0.5 },
+    { url: `${baseUrl}/changelog`, lastModified: today, changeFrequency: "weekly", priority: 0.5 },
+    { url: `${baseUrl}/media`, lastModified: today, changeFrequency: "monthly", priority: 0.4 },
+    { url: `${baseUrl}/privacy`, lastModified: today, changeFrequency: "monthly", priority: 0.3 },
+    { url: `${baseUrl}/terms`, lastModified: today, changeFrequency: "monthly", priority: 0.3 },
+  ];
+
+  // Tier 2: Landing pages for Google Ads (must be indexed)
   const landingPages: MetadataRoute.Sitemap = [
     { url: `${baseUrl}/lp/ai-dlp`, lastModified: today, changeFrequency: "monthly", priority: 0.8 },
     { url: `${baseUrl}/lp/shadow-ai`, lastModified: today, changeFrequency: "monthly", priority: 0.8 },
@@ -136,23 +111,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${baseUrl}/lp/prompt-library`, lastModified: today, changeFrequency: "monthly", priority: 0.8 },
   ];
 
-  const corePages: MetadataRoute.Sitemap = [
-    { url: baseUrl, lastModified: today, changeFrequency: "weekly", priority: 1 },
-    { url: `${baseUrl}/pricing`, lastModified: today, changeFrequency: "weekly", priority: 0.9 },
-    { url: `${baseUrl}/features`, lastModified: today, changeFrequency: "monthly", priority: 0.8 },
-    { url: `${baseUrl}/security`, lastModified: today, changeFrequency: "monthly", priority: 0.8 },
-    { url: `${baseUrl}/enterprise`, lastModified: today, changeFrequency: "monthly", priority: 0.8 },
-    { url: `${baseUrl}/integrations`, lastModified: today, changeFrequency: "monthly", priority: 0.8 },
-    { url: `${baseUrl}/extensions`, lastModified: today, changeFrequency: "monthly", priority: 0.7 },
-    { url: `${baseUrl}/solutions`, lastModified: today, changeFrequency: "weekly", priority: 0.8 },
-    { url: `${baseUrl}/blog`, lastModified: today, changeFrequency: "weekly", priority: 0.8 },
-    { url: `${baseUrl}/help`, lastModified: today, changeFrequency: "monthly", priority: 0.7 },
-    { url: `${baseUrl}/contact`, lastModified: today, changeFrequency: "monthly", priority: 0.7 },
-    { url: `${baseUrl}/changelog`, lastModified: today, changeFrequency: "weekly", priority: 0.6 },
-    { url: `${baseUrl}/privacy`, lastModified: today, changeFrequency: "monthly", priority: 0.4 },
-    { url: `${baseUrl}/terms`, lastModified: today, changeFrequency: "monthly", priority: 0.4 },
-  ];
-
+  // Tier 3: Industry pages (unique content per industry)
   const industryPages: MetadataRoute.Sitemap = INDUSTRY_SLUGS.map((slug) => ({
     url: `${baseUrl}/industries/${slug}`,
     lastModified: today,
@@ -160,32 +119,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
-  const seoPages: MetadataRoute.Sitemap = allSeoPages.map((page) => ({
-    url: `${baseUrl}/solutions/${page.slug}`,
-    lastModified: today,
-    changeFrequency: "monthly",
-    priority: 0.6,
-  }));
-
-  const helpCategoryPages: MetadataRoute.Sitemap = HELP_CATEGORIES.map(
-    (cat) => ({
-      url: `${baseUrl}/help/${cat}`,
-      lastModified: today,
-      changeFrequency: "monthly",
-      priority: 0.5,
-    })
-  );
-
-  const helpArticlePages: MetadataRoute.Sitemap = HELP_CATEGORIES.flatMap(
-    (cat) =>
-      (HELP_ARTICLES[cat] || []).map((slug) => ({
-        url: `${baseUrl}/help/${cat}/${slug}`,
-        lastModified: today,
-        changeFrequency: "monthly",
-        priority: 0.5,
-      }))
-  );
-
+  // Tier 4: Blog posts (unique long-form content — Google loves these)
   const blogPages: MetadataRoute.Sitemap = BLOG_SLUGS.map((slug) => ({
     url: `${baseUrl}/blog/${slug}`,
     lastModified: today,
@@ -193,16 +127,33 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
-  // Deduplicate by URL (strip trailing slashes)
+  // Tier 5: Top solution pages only (12 hand-picked, not all 527)
+  const topSolutionPages: MetadataRoute.Sitemap = TOP_SOLUTION_SLUGS.map((slug) => ({
+    url: `${baseUrl}/solutions/${slug}`,
+    lastModified: today,
+    changeFrequency: "monthly",
+    priority: 0.6,
+  }));
+
+  // Tier 6: Help category index pages (not individual articles — too thin)
+  const helpCategoryPages: MetadataRoute.Sitemap = HELP_CATEGORIES.map((cat) => ({
+    url: `${baseUrl}/help/${cat}`,
+    lastModified: today,
+    changeFrequency: "monthly",
+    priority: 0.5,
+  }));
+
+  // Total: ~80 pages instead of 630
   const all = [
     ...corePages,
     ...landingPages,
     ...industryPages,
-    ...seoPages,
     ...blogPages,
+    ...topSolutionPages,
     ...helpCategoryPages,
-    ...helpArticlePages,
   ];
+
+  // Deduplicate by URL
   const seen = new Set<string>();
   return all.filter((entry) => {
     const normalized = entry.url.replace(/\/+$/, "");

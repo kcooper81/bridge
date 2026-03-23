@@ -8,6 +8,23 @@ export function generateStaticParams() {
   return allSeoPages.map((page) => ({ slug: page.slug }));
 }
 
+// Only these solution pages are submitted in the sitemap for indexing.
+// All others are noIndex to prevent Google "duplicate content" penalties.
+const INDEXED_SOLUTIONS = new Set([
+  "prompt-management",
+  "ai-dlp",
+  "ai-governance",
+  "prompt-templates",
+  "ai-compliance-reporting",
+  "for-marketers",
+  "for-educators",
+  "chatgpt-team-prompts",
+  "claude",
+  "ai-prompt-library-software",
+  "ai-prompt-templates-guide",
+  "prompt-management-101",
+]);
+
 export function generateMetadata({
   params,
 }: {
@@ -21,6 +38,7 @@ export function generateMetadata({
     description: page.meta.description,
     path: `/solutions/${page.slug}`,
     keywords: page.meta.keywords,
+    noIndex: !INDEXED_SOLUTIONS.has(page.slug),
   });
 }
 

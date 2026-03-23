@@ -50,6 +50,7 @@ const HELP_CATEGORIES = [
   "import-export",
   "billing",
   "account-security",
+  "integrations",
 ];
 
 const INDUSTRY_SLUGS = [

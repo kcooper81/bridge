@@ -1,34 +1,21 @@
-"use client";
-
-import { useEffect } from "react";
-import { usePathname } from "next/navigation";
+import { Suspense } from "react";
 import { MarketingHeader } from "@/components/marketing/header";
 import { MarketingFooter } from "@/components/marketing/footer";
+import { MarketingThemeForcer } from "@/components/marketing/theme-forcer";
+import { MarketingMain } from "@/components/marketing/marketing-main";
 
 export default function MarketingLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const pathname = usePathname();
-  const isHomepage = pathname === "/";
-
-  // Force light theme on marketing pages — app theme toggle should not affect marketing site
-  useEffect(() => {
-    const prev = document.documentElement.getAttribute("data-theme");
-    document.documentElement.setAttribute("data-theme", "light");
-    return () => {
-      // Restore previous theme when navigating away from marketing
-      if (prev) document.documentElement.setAttribute("data-theme", prev);
-    };
-  }, []);
-
   return (
     <div className="min-h-screen bg-background">
+      <MarketingThemeForcer />
       <MarketingHeader />
-      <main className={isHomepage ? "" : "pt-16"}>
-        {children}
-      </main>
+      <MarketingMain>
+        <Suspense>{children}</Suspense>
+      </MarketingMain>
       <MarketingFooter />
     </div>
   );

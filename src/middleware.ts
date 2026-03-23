@@ -58,8 +58,17 @@ export async function middleware(request: NextRequest) {
   authDebug.initServer(request);
   authDebug.log("middleware", `processing ${request.method} ${request.nextUrl.pathname}`);
 
-  const { supabaseResponse, user, aal } = await updateSession(request);
   const { pathname } = request.nextUrl;
+
+  // Skip expensive Supabase auth call for public marketing pages (faster landing page loads)
+  if (isPublicRoute(pathname) && pathname !== "/") {
+    authDebug.log("middleware", "fast-path: public route, skipping auth", { pathname });
+    const response = NextResponse.next({ request: { headers: request.headers } });
+    setSecurityHeaders(response);
+    return response;
+  }
+
+  const { supabaseResponse, user, aal } = await updateSession(request);
 
   authDebug.log("middleware", "user resolved", user ? { id: user.id, email: user.email } : null);
 

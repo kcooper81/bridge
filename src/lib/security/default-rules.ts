@@ -171,7 +171,7 @@ export const SMART_DETECTION_RULES: DefaultRule[] = [
   {
     name: "International Phone Number",
     description: "Detects international phone numbers with country codes",
-    pattern: "\\b\\+[1-9]\\d{1,14}\\b",
+    pattern: "(?:^|\\s)\\+[1-9]\\d{6,14}\\b",
     pattern_type: "regex",
     category: "pii",
     severity: "warn",

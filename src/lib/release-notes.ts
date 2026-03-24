@@ -7,9 +7,23 @@ export interface ReleaseNote {
   badge?: "new" | "fix" | "improvement";
 }
 
-export const APP_VERSION = "1.14.0";
+export const APP_VERSION = "1.14.1";
 
 export const RELEASE_NOTES: ReleaseNote[] = [
+  {
+    version: "1.14.1",
+    date: "2026-03-24",
+    title: "Guardrail Fixes, Team Install Email & UI Gates",
+    highlights: [
+      "Send Install Email — new button on Team page lets admins email members a link to install the browser extension (individual or bulk)",
+      "Smart pattern detection fix — all smart detection rules (phone, DOB, IP, internal domains, file paths, etc.) now fire correctly when enabled in org settings",
+      "CVV pattern fix — now detects natural phrasing like 'The CVV is 742' in addition to 'CVV: 742'",
+      "International phone number pattern fix — correctly detects numbers like +442071234567",
+      "Import/Export button — now visible on all plans (Free plan users are directed to upgrade page)",
+      "Member billing gates — members can now navigate to Billing and Plan & Usage tabs where they see 'Contact admin' messaging instead of hidden tabs",
+    ],
+    badge: "fix",
+  },
   {
     version: "1.14.0",
     date: "2026-03-19",

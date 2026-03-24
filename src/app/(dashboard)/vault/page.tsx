@@ -373,10 +373,17 @@ export default function VaultPage() {
         description="Manage and organize your team's AI prompts"
         actions={
           <div className="flex items-center gap-2">
-            {canAccess("import_export") && (
+            {canAccess("import_export") ? (
               <Button variant="outline" size="sm" onClick={() => setImportExportOpen(true)}>
                 <Import className="mr-2 h-4 w-4" />
                 Import / Export
+              </Button>
+            ) : (
+              <Button variant="outline" size="sm" asChild>
+                <a href="/import-export">
+                  <Import className="mr-2 h-4 w-4" />
+                  Import / Export
+                </a>
               </Button>
             )}
             <Button onClick={openNewPrompt}>

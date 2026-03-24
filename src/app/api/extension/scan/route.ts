@@ -174,9 +174,9 @@ export async function POST(request: NextRequest) {
     }
 
     // ── 3. Smart pattern detection (if enabled) ──
+    // When org enables smart patterns, ALL rules fire — the org toggle is the activation switch
     if (securitySettings.smart_patterns_enabled) {
       for (const smartRule of SMART_DETECTION_RULES) {
-        if (!smartRule.is_active) continue;
         const matched = matchPattern(content, smartRule.pattern, smartRule.pattern_type);
         if (matched) {
           violations.push({
@@ -265,7 +265,6 @@ export async function POST(request: NextRequest) {
 
       if (securitySettings.smart_patterns_enabled) {
         for (const smartRule of SMART_DETECTION_RULES) {
-          if (!smartRule.is_active) continue;
           const match = matchPatternWithPosition(content, smartRule.pattern, smartRule.pattern_type);
           if (match) {
             matchPositions.push({ ...match, category: smartRule.category });

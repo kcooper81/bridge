@@ -105,7 +105,7 @@ export const COMPLIANCE_TEMPLATES: ComplianceTemplate[] = [
       {
         name: "CVV/CVC Code",
         description: "Detects card verification codes",
-        pattern: "\\b(?:CVV|CVC|CVV2|CVC2)[:\\s]*\\d{3,4}\\b",
+        pattern: "\\b(?:CVV|CVC|CVV2|CVC2)(?:[:\\s]+(?:is\\s+)?|\\s+)\\d{3,4}\\b",
         pattern_type: "regex",
         category: "financial",
         severity: "block",

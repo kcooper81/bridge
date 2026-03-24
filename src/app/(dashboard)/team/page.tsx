@@ -113,6 +113,12 @@ export default function TeamPage() {
   const [transferNewRole, setTransferNewRole] = useState<UserRole>("member");
   const [transferring, setTransferring] = useState(false);
 
+  // Send extension install email
+  const [installEmailOpen, setInstallEmailOpen] = useState(false);
+  const [installEmailMode, setInstallEmailMode] = useState<"all" | "select">("all");
+  const [installEmailSelected, setInstallEmailSelected] = useState<Set<string>>(new Set());
+  const [sendingInstallEmail, setSendingInstallEmail] = useState(false);
+
   // Google Workspace sync
   const [googleConnected, setGoogleConnected] = useState<boolean | null>(null);
   const [lastSyncedAt, setLastSyncedAt] = useState<string | null>(null);
@@ -166,6 +172,36 @@ export default function TeamPage() {
       toast.error("Sync failed");
     } finally {
       setSyncingGoogle(false);
+    }
+  }
+
+  async function handleSendInstallEmail() {
+    setSendingInstallEmail(true);
+    try {
+      const supabase = (await import("@/lib/supabase/client")).createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) { toast.error("Not authenticated"); return; }
+      const body: { all?: boolean; emails?: string[] } =
+        installEmailMode === "all"
+          ? { all: true }
+          : { emails: members.filter((m) => installEmailSelected.has(m.id)).map((m) => m.email) };
+      const res = await fetch("/api/invite/extension-email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (!res.ok) { toast.error(data.error || "Failed to send"); return; }
+      toast.success(data.sent > 0 ? `Install email sent to ${data.sent} member${data.sent !== 1 ? "s" : ""}` : "No members to email (all have extension installed)");
+      setInstallEmailOpen(false);
+      setInstallEmailSelected(new Set());
+    } catch {
+      toast.error("Failed to send install emails");
+    } finally {
+      setSendingInstallEmail(false);
     }
   }
 
@@ -1010,6 +1046,10 @@ export default function TeamPage() {
                 Import Members
               </Button>
             )}
+            <Button variant="outline" size="sm" onClick={() => setInstallEmailOpen(true)}>
+              <Mail className="mr-2 h-4 w-4" />
+              Send Install Email
+            </Button>
             <Button variant="outline" size="sm" onClick={() => setInviteModalOpen(true)}>
               <UserPlus className="mr-2 h-4 w-4" />
               Invite Member
@@ -2278,6 +2318,64 @@ export default function TeamPage() {
             >
               {transferring && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Transfer Admin
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Send Install Email Dialog */}
+      <Dialog open={installEmailOpen} onOpenChange={(open) => { setInstallEmailOpen(open); if (!open) { setInstallEmailSelected(new Set()); setInstallEmailMode("all"); } }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Send Install Email</DialogTitle>
+            <DialogDescription>
+              Send an email to members with a link to install the TeamPrompt browser extension.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex gap-2">
+              <Button variant={installEmailMode === "all" ? "default" : "outline"} size="sm" onClick={() => setInstallEmailMode("all")}>
+                All without extension
+              </Button>
+              <Button variant={installEmailMode === "select" ? "default" : "outline"} size="sm" onClick={() => setInstallEmailMode("select")}>
+                Select members
+              </Button>
+            </div>
+            {installEmailMode === "select" && (
+              <div className="max-h-60 overflow-y-auto space-y-1 rounded-lg border p-2">
+                {members.filter((m) => !m.isCurrentUser).map((m) => (
+                  <label key={m.id} className="flex items-center gap-2 rounded px-2 py-1.5 hover:bg-muted/50 cursor-pointer">
+                    <Checkbox
+                      checked={installEmailSelected.has(m.id)}
+                      onCheckedChange={(checked) => {
+                        const next = new Set(installEmailSelected);
+                        if (checked) next.add(m.id); else next.delete(m.id);
+                        setInstallEmailSelected(next);
+                      }}
+                    />
+                    <span className="text-sm truncate flex-1">{m.name || m.email}</span>
+                    <ExtensionStatusBadge lastActive={m.last_extension_active} version={null} />
+                  </label>
+                ))}
+              </div>
+            )}
+            {installEmailMode === "all" && (
+              <p className="text-sm text-muted-foreground">
+                This will email all members who haven&apos;t installed the extension yet.
+              </p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setInstallEmailOpen(false)} disabled={sendingInstallEmail}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSendInstallEmail}
+              disabled={sendingInstallEmail || (installEmailMode === "select" && installEmailSelected.size === 0)}
+            >
+              {sendingInstallEmail && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              <Send className="mr-2 h-4 w-4" />
+              Send Email
             </Button>
           </DialogFooter>
         </DialogContent>

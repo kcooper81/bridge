@@ -14,8 +14,8 @@ const tabs: { label: string; href: string; icon: typeof User; roles?: UserRole[]
   { label: "Security", href: "/settings/security", icon: ShieldCheck, roles: ["admin"] as UserRole[] },
   { label: "Integrations", href: "/settings/integrations", icon: Plug2, roles: ["admin"] as UserRole[] },
   { label: "AI Providers", href: "/settings/ai-providers", icon: Bot, roles: ["admin"] as UserRole[] },
-  { label: "Plan & Usage", href: "/settings/plan", icon: CreditCard, roles: ["admin", "manager"] },
-  { label: "Billing", href: "/settings/billing", icon: Receipt, roles: ["admin", "manager"] },
+  { label: "Plan & Usage", href: "/settings/plan", icon: CreditCard },
+  { label: "Billing", href: "/settings/billing", icon: Receipt },
 ];
 
 export default function SettingsLayout({

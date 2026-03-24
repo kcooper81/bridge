@@ -1415,6 +1415,7 @@ const sections: Section[] = [
 
 /* ── Storage key ────────────────────────────────── */
 const STORAGE_KEY = "tp-testing-guide-v2";
+const MIGRATED_KEY = "tp-testing-guide-migrated";
 
 /* ── Helpers ────────────────────────────────────── */
 
@@ -1422,7 +1423,7 @@ function getDefaultState(): Record<string, StepState> {
   return {};
 }
 
-function getSavedState(): Record<string, StepState> {
+function getLocalState(): Record<string, StepState> {
   if (typeof window === "undefined") return {};
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -1433,8 +1434,109 @@ function getSavedState(): Record<string, StepState> {
   }
 }
 
-function saveState(state: Record<string, StepState>) {
+// Keep localStorage as a local backup
+function saveLocalBackup(state: Record<string, StepState>) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+/* ── DB sync helpers ───────────────────────────── */
+
+interface DbStepRow {
+  step_key: string;
+  status: StepStatus;
+  note: string;
+  updated_by_email?: string;
+  updated_at?: string;
+}
+
+// Track who last updated each step (for display)
+const stepMeta: Record<string, { email: string; at: string }> = {};
+
+async function loadFromDb(): Promise<Record<string, StepState>> {
+  try {
+    const res = await fetch("/api/admin/testing-guide");
+    if (!res.ok) return {};
+    const { steps } = await res.json() as { steps: DbStepRow[] };
+    const state: Record<string, StepState> = {};
+    for (const row of steps) {
+      state[row.step_key] = { status: row.status, note: row.note };
+      if (row.updated_by_email) {
+        stepMeta[row.step_key] = {
+          email: row.updated_by_email,
+          at: row.updated_at || "",
+        };
+      }
+    }
+    return state;
+  } catch {
+    return {};
+  }
+}
+
+async function saveStepToDb(stepKey: string, status: StepStatus, note: string) {
+  try {
+    await fetch("/api/admin/testing-guide", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ step_key: stepKey, status, note }),
+    });
+  } catch {
+    // silent fail — localStorage backup is still intact
+  }
+}
+
+async function migrateLocalStorageToDb(): Promise<boolean> {
+  if (typeof window === "undefined") return false;
+  if (localStorage.getItem(MIGRATED_KEY)) return false;
+
+  const local = getLocalState();
+  const entries = Object.entries(local);
+  if (entries.length === 0) {
+    localStorage.setItem(MIGRATED_KEY, "1");
+    return false;
+  }
+
+  try {
+    const steps = entries
+      .filter(([, v]) => v.status !== "untested")
+      .map(([key, v]) => ({
+        step_key: key,
+        status: v.status,
+        note: v.note || "",
+      }));
+
+    if (steps.length === 0) {
+      localStorage.setItem(MIGRATED_KEY, "1");
+      return false;
+    }
+
+    const res = await fetch("/api/admin/testing-guide", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ steps }),
+    });
+
+    if (res.ok) {
+      localStorage.setItem(MIGRATED_KEY, "1");
+      return true;
+    }
+  } catch {
+    // Migration failed — will retry next load. localStorage untouched.
+  }
+  return false;
+}
+
+async function resetDb(): Promise<boolean> {
+  try {
+    const res = await fetch("/api/admin/testing-guide", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ confirm: true }),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
 }
 
 function stepKey(sectionId: string, stepIndex: number) {
@@ -1805,19 +1907,36 @@ function SectionBlock({
 export default function TestingGuidePage() {
   const [state, setState] = useState<Record<string, StepState>>(getDefaultState);
   const [mounted, setMounted] = useState(false);
+  const [syncing, setSyncing] = useState(true);
   const [filter, setFilter] = useState<FilterMode>("all");
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    setState(getSavedState());
-    setMounted(true);
+    async function init() {
+      // 1. Migrate localStorage → DB if not done yet (preserves existing data)
+      await migrateLocalStorageToDb();
+
+      // 2. Load shared state from DB
+      const dbState = await loadFromDb();
+
+      // 3. If DB has data, use it. Otherwise fall back to localStorage.
+      const hasDbData = Object.keys(dbState).length > 0;
+      const finalState = hasDbData ? dbState : getLocalState();
+
+      setState(finalState);
+      saveLocalBackup(finalState); // always keep localStorage in sync as backup
+      setSyncing(false);
+      setMounted(true);
+    }
+    init();
   }, []);
 
   const handleStatusChange = useCallback((key: string, status: StepStatus) => {
     setState((prev) => {
       const current = getStepState(prev, key);
       const next = { ...prev, [key]: { ...current, status } };
-      saveState(next);
+      saveLocalBackup(next);
+      saveStepToDb(key, status, current.note);
       return next;
     });
   }, []);
@@ -1826,15 +1945,18 @@ export default function TestingGuidePage() {
     setState((prev) => {
       const current = getStepState(prev, key);
       const next = { ...prev, [key]: { ...current, note } };
-      saveState(next);
+      saveLocalBackup(next);
+      saveStepToDb(key, current.status, note);
       return next;
     });
   }, []);
 
-  const handleReset = useCallback(() => {
+  const handleReset = useCallback(async () => {
     if (!window.confirm("Reset all test progress? This cannot be undone.")) return;
     setState({});
     localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(MIGRATED_KEY);
+    await resetDb();
   }, []);
 
   const handleExport = useCallback(() => {
@@ -1864,11 +1986,14 @@ export default function TestingGuidePage() {
     return c;
   }, [state]);
 
-  if (!mounted) {
+  if (!mounted || syncing) {
     return (
       <div className="max-w-4xl">
         <div className="h-8 w-48 rounded bg-slate-200 animate-pulse mb-4" />
         <div className="h-4 w-96 rounded bg-slate-200 animate-pulse" />
+        {syncing && (
+          <p className="text-sm text-slate-400 mt-4">Loading shared testing state...</p>
+        )}
       </div>
     );
   }
@@ -1888,8 +2013,8 @@ export default function TestingGuidePage() {
         <div>
           <h1 className="text-2xl font-bold">Testing Guide</h1>
           <p className="text-sm text-slate-500 mt-1">
-            Step-by-step QA checklist. Click the status icon to cycle through
-            Pass / Fail / Skip. Add notes and export results.
+            Shared QA checklist — all super admins see the same progress.
+            Click the status icon to cycle through Pass / Fail / Skip. Add notes and export results.
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">

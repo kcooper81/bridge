@@ -363,13 +363,19 @@ export default function CampaignsPage() {
       });
       const data = await res.json();
       if (res.ok) {
-        toast.success(`Imported ${data.imported} contacts${data.failed > 0 ? ` (${data.failed} no email found)` : ""}`);
+        if (data.imported > 0) {
+          toast.success(`Imported ${data.imported} contacts with emails${data.failed > 0 ? `. ${data.failed} had no email.` : ""}`);
+        } else if (data.failed > 0) {
+          toast.warning(`No emails found for ${data.failed} prospects. Hunter.io couldn't match their emails. List "${pdlListName.trim() || `IT Leads ${new Date().toLocaleDateString()}`}" was not created.`);
+        } else {
+          toast.info("No contacts to import");
+        }
         setPdlSelected(new Set());
         loadAudienceLists();
       } else {
         toast.error(data.error || "Import failed");
       }
-    } catch { toast.error("Import failed"); }
+    } catch (err) { console.error("PDL import error:", err); toast.error("Import failed — check console"); }
     finally { setPdlImporting(false); }
   }
 

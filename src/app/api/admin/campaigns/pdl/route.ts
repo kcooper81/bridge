@@ -181,10 +181,15 @@ async function handleSearch(apiKey: string, body: Record<string, unknown>) {
     });
 
     if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      console.error("PDL search error:", res.status, JSON.stringify(errData));
+      const errText = await res.text();
+      console.error("PDL search error:", res.status, errText);
+      let errMsg = `PDL search failed (${res.status})`;
+      try {
+        const errData = JSON.parse(errText);
+        errMsg = errData.error?.message || errData.message || errData.error?.type || errMsg;
+      } catch { /* not JSON */ }
       return NextResponse.json(
-        { error: errData.error?.message || errData.message || `PDL search failed (${res.status})` },
+        { error: errMsg, debug: { query: searchBody } },
         { status: res.status }
       );
     }

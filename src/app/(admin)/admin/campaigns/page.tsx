@@ -295,6 +295,8 @@ export default function CampaignsPage() {
   const [pdlImporting, setPdlImporting] = useState(false);
   const [pdlSelected, setPdlSelected] = useState<Set<string>>(new Set());
   const [pdlListName, setPdlListName] = useState("");
+  const [pdlPageSize, setPdlPageSize] = useState(25);
+  const [pdlResultFilter, setPdlResultFilter] = useState("");
   const [pdlTitleRole, setPdlTitleRole] = useState("information technology");
   const [pdlTitleLevels, setPdlTitleLevels] = useState<string[]>(["director", "vp", "c_suite"]);
   const [pdlCountry, setPdlCountry] = useState("united states");
@@ -326,7 +328,7 @@ export default function CampaignsPage() {
           company_size_min: pdlSizeMin ? Number(pdlSizeMin) : undefined,
           company_size_max: pdlSizeMax ? Number(pdlSizeMax) : undefined,
           industry: pdlIndustry || undefined,
-          size: 10,
+          size: pdlPageSize,
           scroll_token: scrollToken || undefined,
         }),
       });
@@ -2602,12 +2604,24 @@ export default function CampaignsPage() {
                   </Card>
 
                   {/* Results */}
-                  {pdlResults.length > 0 && (
+                  {pdlResults.length > 0 && (() => {
+                    const filteredPdl = pdlResultFilter
+                      ? pdlResults.filter((p) => {
+                          const q = pdlResultFilter.toLowerCase();
+                          return p.full_name.toLowerCase().includes(q) || p.job_title.toLowerCase().includes(q) || p.company_name.toLowerCase().includes(q) || p.company_industry.toLowerCase().includes(q) || p.location_locality.toLowerCase().includes(q) || p.location_region.toLowerCase().includes(q);
+                        })
+                      : pdlResults;
+                    return (
                     <Card className="p-4 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <h3 className="text-sm font-semibold">{pdlTotal.toLocaleString()} leads match</h3>
+                      <div className="flex items-center justify-between flex-wrap gap-2">
+                        <div>
+                          <h3 className="text-sm font-semibold">{pdlTotal.toLocaleString()} leads match</h3>
+                          <p className="text-xs text-muted-foreground">
+                            Showing {filteredPdl.length} of {pdlResults.length} loaded · {pdlSelected.size} selected
+                          </p>
+                        </div>
                         <div className="flex items-center gap-2">
-                          <Input value={pdlListName} onChange={(e) => setPdlListName(e.target.value)} placeholder="List name (optional)" className="w-48 h-8 text-xs" />
+                          <Input value={pdlListName} onChange={(e) => setPdlListName(e.target.value)} placeholder="List name (optional)" className="w-44 h-8 text-xs" />
                           <Button size="sm" onClick={enrichAndImportPdl} disabled={pdlImporting || pdlSelected.size === 0}>
                             {pdlImporting ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <Download className="h-3.5 w-3.5 mr-1.5" />}
                             Enrich + Import {pdlSelected.size > 0 ? `(${pdlSelected.size})` : ""}
@@ -2619,12 +2633,39 @@ export default function CampaignsPage() {
                           Add HUNTER_API_KEY to enrich leads with verified emails. Without it, leads import without email addresses.
                         </p>
                       )}
+                      {/* Filter + page size controls */}
+                      <div className="flex items-center gap-2">
+                        <Input value={pdlResultFilter} onChange={(e) => setPdlResultFilter(e.target.value)} placeholder="Filter results by name, title, company..." className="h-8 text-xs flex-1" />
+                        <Select value={String(pdlPageSize)} onValueChange={(v) => setPdlPageSize(Number(v))}>
+                          <SelectTrigger className="h-8 w-[100px] text-xs"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="10">10 / page</SelectItem>
+                            <SelectItem value="25">25 / page</SelectItem>
+                            <SelectItem value="50">50 / page</SelectItem>
+                            <SelectItem value="100">100 / page</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Button size="sm" variant="outline" className="text-xs h-8" onClick={() => {
+                          const allIds = new Set(filteredPdl.map((p) => p.id));
+                          const allSelected = filteredPdl.every((p) => pdlSelected.has(p.id));
+                          if (allSelected) {
+                            setPdlSelected((prev) => { const next = new Set(prev); filteredPdl.forEach((p) => next.delete(p.id)); return next; });
+                          } else {
+                            setPdlSelected((prev) => new Set([...Array.from(prev), ...Array.from(allIds)]));
+                          }
+                        }}>
+                          {filteredPdl.every((p) => pdlSelected.has(p.id)) ? "Deselect" : "Select"} {pdlResultFilter ? "filtered" : "all"} ({filteredPdl.length})
+                        </Button>
+                      </div>
                       <div className="rounded-lg border overflow-hidden">
                         <table className="w-full text-sm">
                           <thead>
                             <tr className="bg-muted/50">
                               <th className="p-2 w-8">
-                                <input type="checkbox" checked={pdlSelected.size === pdlResults.length && pdlResults.length > 0} onChange={(e) => { if (e.target.checked) setPdlSelected(new Set(pdlResults.map((p) => p.id))); else setPdlSelected(new Set()); }} className="rounded" />
+                                <input type="checkbox" checked={filteredPdl.length > 0 && filteredPdl.every((p) => pdlSelected.has(p.id))} onChange={(e) => {
+                                  if (e.target.checked) setPdlSelected((prev) => new Set([...Array.from(prev), ...filteredPdl.map((p) => p.id)]));
+                                  else setPdlSelected((prev) => { const next = new Set(prev); filteredPdl.forEach((p) => next.delete(p.id)); return next; });
+                                }} className="rounded" />
                               </th>
                               <th className="p-2 text-left text-xs font-medium">Name</th>
                               <th className="p-2 text-left text-xs font-medium">Title</th>
@@ -2633,7 +2674,7 @@ export default function CampaignsPage() {
                             </tr>
                           </thead>
                           <tbody>
-                            {pdlResults.map((p) => (
+                            {filteredPdl.map((p) => (
                               <tr key={p.id} className="border-t hover:bg-muted/30 cursor-pointer" onClick={() => setPdlSelected((prev) => { const next = new Set(prev); if (next.has(p.id)) next.delete(p.id); else next.add(p.id); return next; })}>
                                 <td className="p-2"><input type="checkbox" checked={pdlSelected.has(p.id)} onChange={() => {}} className="rounded" /></td>
                                 <td className="p-2">
@@ -2655,17 +2696,24 @@ export default function CampaignsPage() {
                                 </td>
                               </tr>
                             ))}
+                            {filteredPdl.length === 0 && (
+                              <tr><td colSpan={5} className="p-4 text-center text-xs text-muted-foreground">No results match your filter</td></tr>
+                            )}
                           </tbody>
                         </table>
                       </div>
-                      {pdlScrollToken && (
-                        <Button size="sm" variant="outline" onClick={() => searchPdl(pdlScrollToken)} disabled={pdlSearching}>
-                          {pdlSearching ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : null}
-                          Load More
-                        </Button>
-                      )}
+                      <div className="flex items-center justify-between">
+                        {pdlScrollToken ? (
+                          <Button size="sm" variant="outline" onClick={() => searchPdl(pdlScrollToken)} disabled={pdlSearching}>
+                            {pdlSearching ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : null}
+                            Load {pdlPageSize} More
+                          </Button>
+                        ) : <span />}
+                        <p className="text-xs text-muted-foreground">{pdlResults.length} loaded of {pdlTotal.toLocaleString()} total</p>
+                      </div>
                     </Card>
-                  )}
+                    );
+                  })()}
 
                   {pdlResults.length === 0 && !pdlSearching && pdlConfigured && (
                     <Card className="flex flex-col items-center justify-center py-16 text-center">

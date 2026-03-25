@@ -116,48 +116,51 @@ async function handleSearch(apiKey: string, body: Record<string, unknown>) {
     scroll_token,
   } = body;
 
-  // Build Elasticsearch DSL query
-  const must: Record<string, unknown>[] = [];
+  // Build SQL query — PDL's SQL syntax is more reliable than their ES DSL subset
+  const conditions: string[] = [];
 
   if (job_title_role && typeof job_title_role === "string") {
-    must.push({ term: { job_title_role: job_title_role.toLowerCase() } });
+    conditions.push(`job_title_role='${job_title_role.toLowerCase()}'`);
   }
 
   if (Array.isArray(job_title_levels) && job_title_levels.length > 0) {
-    // Use "terms" (OR) for seniority levels — person matches ANY of the selected levels
-    must.push({ terms: { job_title_levels: job_title_levels.map((level) => String(level).toLowerCase()) } });
+    const levels = job_title_levels.map((l) => `'${String(l).toLowerCase()}'`).join(", ");
+    conditions.push(`job_title_levels IN (${levels})`);
   }
 
   if (job_title && typeof job_title === "string") {
-    must.push({ match: { job_title: job_title } });
+    conditions.push(`job_title='${job_title.toLowerCase()}'`);
   }
 
   if (location_country && typeof location_country === "string") {
-    must.push({ term: { location_country: location_country.toLowerCase() } });
+    conditions.push(`location_country='${location_country.toLowerCase()}'`);
   }
 
   if (location_region && typeof location_region === "string") {
-    must.push({ term: { location_region: location_region.toLowerCase() } });
+    conditions.push(`location_region='${location_region.toLowerCase()}'`);
   }
 
-  if (company_size_min || company_size_max) {
-    const range: Record<string, number> = {};
-    if (company_size_min) range.gte = Number(company_size_min);
-    if (company_size_max) range.lte = Number(company_size_max);
-    must.push({ range: { job_company_employee_count: range } });
+  if (company_size_min && company_size_max) {
+    conditions.push(`job_company_employee_count >= ${Number(company_size_min)} AND job_company_employee_count <= ${Number(company_size_max)}`);
+  } else if (company_size_min) {
+    conditions.push(`job_company_employee_count >= ${Number(company_size_min)}`);
+  } else if (company_size_max) {
+    conditions.push(`job_company_employee_count <= ${Number(company_size_max)}`);
   }
 
   if (industry && typeof industry === "string") {
-    must.push({ term: { job_company_industry: industry.toLowerCase() } });
+    conditions.push(`job_company_industry='${industry.toLowerCase()}'`);
   }
 
-  if (must.length === 0) {
+  if (conditions.length === 0) {
     return NextResponse.json({ error: "At least one search filter is required" }, { status: 400 });
   }
 
+  const sql = `SELECT * FROM person WHERE ${conditions.join(" AND ")}`;
+
   const searchBody: Record<string, unknown> = {
     size: Math.min(Number(size), 100),
-    query: { bool: { must } },
+    sql,
   };
 
   if (scroll_token && typeof scroll_token === "string") {
@@ -178,6 +181,12 @@ async function handleSearch(apiKey: string, body: Record<string, unknown>) {
     if (!res.ok) {
       const errText = await res.text();
       console.error("PDL search error:", res.status, errText);
+
+      // 404 = no results found — return empty, not error
+      if (res.status === 404) {
+        return NextResponse.json({ people: [], total: 0, scroll_token: null, credits_used: 0 });
+      }
+
       let errMsg = `PDL search failed (${res.status})`;
       try {
         const errData = JSON.parse(errText);

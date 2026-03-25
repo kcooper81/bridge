@@ -277,7 +277,7 @@ export default function CampaignsPage() {
   const [hunterDomain, setHunterDomain] = useState("");
   const [hunterCompany, setHunterCompany] = useState("");
   const [hunterDepartment, setHunterDepartment] = useState("executive");
-  const [hunterSeniority, setHunterSeniority] = useState("");
+  const [hunterSeniority, setHunterSeniority] = useState("all");
   const [hunterSelected, setHunterSelected] = useState<Set<string>>(new Set());
   const [hunterListName, setHunterListName] = useState("");
   const [hunterTotalResults, setHunterTotalResults] = useState(0);
@@ -303,8 +303,8 @@ export default function CampaignsPage() {
           action: "domain_search",
           domain: hunterDomain || undefined,
           company: hunterCompany || undefined,
-          department: hunterDepartment || undefined,
-          seniority: hunterSeniority || undefined,
+          department: hunterDepartment !== "all" ? hunterDepartment : undefined,
+          seniority: hunterSeniority !== "all" ? hunterSeniority : undefined,
           limit: 20,
         }),
       });
@@ -2395,7 +2395,7 @@ export default function CampaignsPage() {
                         <Select value={hunterDepartment} onValueChange={setHunterDepartment}>
                           <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">All</SelectItem>
+                            <SelectItem value="all">All</SelectItem>
                             <SelectItem value="executive">Executive</SelectItem>
                             <SelectItem value="it">IT</SelectItem>
                             <SelectItem value="finance">Finance</SelectItem>
@@ -2412,7 +2412,7 @@ export default function CampaignsPage() {
                         <Select value={hunterSeniority} onValueChange={setHunterSeniority}>
                           <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">All</SelectItem>
+                            <SelectItem value="all">All</SelectItem>
                             <SelectItem value="executive">Executive</SelectItem>
                             <SelectItem value="senior">Senior</SelectItem>
                             <SelectItem value="junior">Junior</SelectItem>

@@ -267,6 +267,90 @@ export default function CampaignsPage() {
     finally { setApolloImporting(false); }
   }
 
+  // Hunter.io Prospecting (free tier: 50 credits/month)
+  interface HunterResult { email: string; type: string; confidence: number; first_name: string; last_name: string; position: string; seniority: string; department: string; linkedin: string; verified: boolean; }
+  const [hunterConfigured, setHunterConfigured] = useState<boolean | null>(null);
+  const [hunterCredits, setHunterCredits] = useState<{ used: number; available: number } | null>(null);
+  const [hunterResults, setHunterResults] = useState<HunterResult[]>([]);
+  const [hunterSearching, setHunterSearching] = useState(false);
+  const [hunterImporting, setHunterImporting] = useState(false);
+  const [hunterDomain, setHunterDomain] = useState("");
+  const [hunterCompany, setHunterCompany] = useState("");
+  const [hunterDepartment, setHunterDepartment] = useState("executive");
+  const [hunterSeniority, setHunterSeniority] = useState("");
+  const [hunterSelected, setHunterSelected] = useState<Set<string>>(new Set());
+  const [hunterListName, setHunterListName] = useState("");
+  const [hunterTotalResults, setHunterTotalResults] = useState(0);
+  const [prospectProvider, setProspectProvider] = useState<"hunter" | "apollo">("hunter");
+
+  async function checkHunterStatus() {
+    try {
+      const res = await fetch("/api/admin/campaigns/hunter");
+      const data = await res.json();
+      setHunterConfigured(data.configured && data.valid);
+      if (data.credits_used !== undefined) setHunterCredits({ used: data.credits_used, available: data.credits_available });
+    } catch { setHunterConfigured(false); }
+  }
+
+  async function searchHunter() {
+    if (!hunterDomain && !hunterCompany) { toast.error("Enter a domain or company name"); return; }
+    setHunterSearching(true);
+    try {
+      const res = await fetch("/api/admin/campaigns/hunter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "domain_search",
+          domain: hunterDomain || undefined,
+          company: hunterCompany || undefined,
+          department: hunterDepartment || undefined,
+          seniority: hunterSeniority || undefined,
+          limit: 20,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setHunterResults(data.emails || []);
+        setHunterTotalResults(data.total_results || 0);
+        setHunterSelected(new Set());
+      } else {
+        toast.error(data.error || "Search failed");
+      }
+    } catch { toast.error("Search failed"); }
+    finally { setHunterSearching(false); }
+  }
+
+  async function importHunterSelected() {
+    const selected = hunterResults.filter((r) => hunterSelected.has(r.email));
+    if (selected.length === 0) { toast.error("Select contacts to import"); return; }
+    setHunterImporting(true);
+    try {
+      const res = await fetch("/api/admin/campaigns/hunter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "import_results",
+          contacts: selected.map((r) => ({
+            email: r.email,
+            first_name: r.first_name,
+            last_name: r.last_name,
+            company: hunterCompany || hunterDomain,
+          })),
+          list_name: hunterListName.trim() || `Hunter Import ${new Date().toLocaleDateString()}`,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toast.success(`Imported ${data.imported} contacts`);
+        setHunterSelected(new Set());
+        loadAudienceLists();
+      } else {
+        toast.error(data.error || "Import failed");
+      }
+    } catch { toast.error("Import failed"); }
+    finally { setHunterImporting(false); }
+  }
+
   const loadCampaigns = useCallback(async () => {
     setLoading(true);
     try {
@@ -1952,7 +2036,7 @@ export default function CampaignsPage() {
             <BarChart3 className="h-3.5 w-3.5" />
             Analytics
           </TabsTrigger>
-          <TabsTrigger value="prospecting" className="gap-1.5" onClick={() => { if (apolloConfigured === null) checkApolloStatus(); }}>
+          <TabsTrigger value="prospecting" className="gap-1.5" onClick={() => { if (hunterConfigured === null) checkHunterStatus(); if (apolloConfigured === null) checkApolloStatus(); }}>
             <Search className="h-3.5 w-3.5" />
             Prospecting
           </TabsTrigger>
@@ -2253,16 +2337,161 @@ export default function CampaignsPage() {
           </div>
         </div>
       ) : listTab === "prospecting" ? (
-        /* ─── Prospecting Tab (Apollo.io) ─── */
+        /* ─── Prospecting Tab ─── */
         <div className="space-y-4">
-          {apolloConfigured === false ? (
+          {/* Provider Switcher */}
+          <div className="flex items-center gap-2">
+            <Badge
+              variant={prospectProvider === "hunter" ? "default" : "outline"}
+              className="cursor-pointer"
+              onClick={() => { setProspectProvider("hunter"); if (hunterConfigured === null) checkHunterStatus(); }}
+            >
+              Hunter.io (Free)
+            </Badge>
+            <Badge
+              variant={prospectProvider === "apollo" ? "default" : "outline"}
+              className="cursor-pointer"
+              onClick={() => { setProspectProvider("apollo"); if (apolloConfigured === null) checkApolloStatus(); }}
+            >
+              Apollo.io
+            </Badge>
+            {prospectProvider === "hunter" && hunterCredits && (
+              <span className="text-xs text-muted-foreground ml-2">
+                {hunterCredits.available - hunterCredits.used} credits remaining
+              </span>
+            )}
+          </div>
+
+          {/* ── Hunter.io Panel ── */}
+          {prospectProvider === "hunter" && (
+            <>
+              {hunterConfigured === false ? (
+                <Card className="flex flex-col items-center justify-center py-16 text-center p-6">
+                  <Search className="h-10 w-10 text-muted-foreground mb-3" />
+                  <h3 className="font-semibold mb-1">Hunter.io Not Configured</h3>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Add <code className="bg-muted px-1.5 py-0.5 rounded text-xs">HUNTER_API_KEY</code> to your environment variables.
+                  </p>
+                  <p className="text-xs text-muted-foreground">Free: 50 credits/month. Get your key at hunter.io/api</p>
+                </Card>
+              ) : (
+                <>
+                  <Card className="p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-sm font-semibold">Search Company Contacts</h3>
+                      <Badge variant="outline" className="text-[10px]">Hunter.io — 1 credit per search</Badge>
+                    </div>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div>
+                        <Label className="text-xs">Company Domain</Label>
+                        <Input value={hunterDomain} onChange={(e) => setHunterDomain(e.target.value)} placeholder="stripe.com" className="mt-1" />
+                      </div>
+                      <div>
+                        <Label className="text-xs">Or Company Name</Label>
+                        <Input value={hunterCompany} onChange={(e) => setHunterCompany(e.target.value)} placeholder="Stripe" className="mt-1" />
+                      </div>
+                      <div>
+                        <Label className="text-xs">Department</Label>
+                        <Select value={hunterDepartment} onValueChange={setHunterDepartment}>
+                          <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="">All</SelectItem>
+                            <SelectItem value="executive">Executive</SelectItem>
+                            <SelectItem value="it">IT</SelectItem>
+                            <SelectItem value="finance">Finance</SelectItem>
+                            <SelectItem value="sales">Sales</SelectItem>
+                            <SelectItem value="marketing">Marketing</SelectItem>
+                            <SelectItem value="hr">HR</SelectItem>
+                            <SelectItem value="engineering">Engineering</SelectItem>
+                            <SelectItem value="support">Support</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label className="text-xs">Seniority</Label>
+                        <Select value={hunterSeniority} onValueChange={setHunterSeniority}>
+                          <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="">All</SelectItem>
+                            <SelectItem value="executive">Executive</SelectItem>
+                            <SelectItem value="senior">Senior</SelectItem>
+                            <SelectItem value="junior">Junior</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <Button size="sm" onClick={searchHunter} disabled={hunterSearching}>
+                      {hunterSearching ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <Search className="h-3.5 w-3.5 mr-1.5" />}
+                      Search Hunter.io
+                    </Button>
+                  </Card>
+
+                  {hunterResults.length > 0 && (
+                    <Card className="p-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-sm font-semibold">{hunterTotalResults} emails found</h3>
+                        <div className="flex items-center gap-2">
+                          <Input value={hunterListName} onChange={(e) => setHunterListName(e.target.value)} placeholder="List name (optional)" className="w-48 h-8 text-xs" />
+                          <Button size="sm" onClick={importHunterSelected} disabled={hunterImporting || hunterSelected.size === 0}>
+                            {hunterImporting ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <Download className="h-3.5 w-3.5 mr-1.5" />}
+                            Import {hunterSelected.size > 0 ? `(${hunterSelected.size})` : "Selected"}
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="rounded-lg border overflow-hidden">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="bg-muted/50">
+                              <th className="p-2 w-8">
+                                <input type="checkbox" checked={hunterSelected.size === hunterResults.length && hunterResults.length > 0} onChange={(e) => { if (e.target.checked) setHunterSelected(new Set(hunterResults.map((r) => r.email))); else setHunterSelected(new Set()); }} className="rounded" />
+                              </th>
+                              <th className="p-2 text-left text-xs font-medium">Email</th>
+                              <th className="p-2 text-left text-xs font-medium">Name</th>
+                              <th className="p-2 text-left text-xs font-medium">Position</th>
+                              <th className="p-2 text-left text-xs font-medium">Confidence</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {hunterResults.map((r) => (
+                              <tr key={r.email} className="border-t hover:bg-muted/30 cursor-pointer" onClick={() => setHunterSelected((prev) => { const next = new Set(prev); if (next.has(r.email)) next.delete(r.email); else next.add(r.email); return next; })}>
+                                <td className="p-2"><input type="checkbox" checked={hunterSelected.has(r.email)} onChange={() => {}} className="rounded" /></td>
+                                <td className="p-2 font-mono text-xs">{r.email}</td>
+                                <td className="p-2 text-xs">{[r.first_name, r.last_name].filter(Boolean).join(" ") || "—"}</td>
+                                <td className="p-2 text-xs text-muted-foreground">{r.position || "—"}</td>
+                                <td className="p-2">
+                                  <Badge variant={r.confidence >= 80 ? "default" : r.confidence >= 50 ? "secondary" : "outline"} className="text-[10px]">
+                                    {r.confidence}%{r.verified && " ✓"}
+                                  </Badge>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </Card>
+                  )}
+
+                  {hunterResults.length === 0 && !hunterSearching && hunterConfigured && (
+                    <Card className="flex flex-col items-center justify-center py-16 text-center">
+                      <Search className="h-10 w-10 text-muted-foreground mb-3" />
+                      <h3 className="font-semibold mb-1">Find Emails by Company</h3>
+                      <p className="text-sm text-muted-foreground">Enter a company domain above to find IT leads with verified emails.</p>
+                    </Card>
+                  )}
+                </>
+              )}
+            </>
+          )}
+
+          {/* ── Apollo Panel ── */}
+          {prospectProvider === "apollo" && (apolloConfigured === false ? (
             <Card className="flex flex-col items-center justify-center py-16 text-center p-6">
               <Search className="h-10 w-10 text-muted-foreground mb-3" />
               <h3 className="font-semibold mb-1">Apollo.io Not Configured</h3>
               <p className="text-sm text-muted-foreground mb-2">
-                Add <code className="bg-muted px-1.5 py-0.5 rounded text-xs">APOLLO_API_KEY</code> to your environment variables to enable lead prospecting.
+                Add <code className="bg-muted px-1.5 py-0.5 rounded text-xs">APOLLO_API_KEY</code> to your environment variables.
               </p>
-              <p className="text-xs text-muted-foreground">Free tier: 10,000 email credits/month. Search is unlimited.</p>
+              <p className="text-xs text-muted-foreground">Requires paid plan ($49/mo+). Use Hunter.io for free access.</p>
             </Card>
           ) : (
             <>
@@ -2479,7 +2708,7 @@ export default function CampaignsPage() {
                 </Card>
               )}
             </>
-          )}
+          ))}
         </div>
       ) : (
         /* ─── Analytics Tab ─── */

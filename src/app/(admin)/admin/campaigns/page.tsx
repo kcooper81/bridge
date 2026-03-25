@@ -142,6 +142,8 @@ export default function CampaignsPage() {
   const [importListDesc, setImportListDesc] = useState("");
   const [audienceLists, setAudienceLists] = useState<AudienceList[]>([]);
   const [editingList, setEditingList] = useState<AudienceList | null>(null);
+  const [listSearch, setListSearch] = useState("");
+  const [listSort, setListSort] = useState<"newest" | "oldest" | "name_asc" | "name_desc" | "contacts_desc" | "contacts_asc">("newest");
   const [editListName, setEditListName] = useState("");
   const [editListDesc, setEditListDesc] = useState("");
   const [savingList, setSavingList] = useState(false);
@@ -2255,7 +2257,7 @@ export default function CampaignsPage() {
           <div>
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-                Audience Lists
+                Audience Lists ({audienceLists.length})
               </h2>
               <div className="flex items-center gap-2">
                 <Button size="sm" variant="outline" onClick={() => setShowCreateList(true)}>
@@ -2268,6 +2270,27 @@ export default function CampaignsPage() {
                 </Button>
               </div>
             </div>
+            {audienceLists.length > 3 && (
+              <div className="flex items-center gap-2 mb-3">
+                <Input
+                  value={listSearch}
+                  onChange={(e) => setListSearch(e.target.value)}
+                  placeholder="Search lists..."
+                  className="h-8 text-xs max-w-xs"
+                />
+                <Select value={listSort} onValueChange={(v) => setListSort(v as typeof listSort)}>
+                  <SelectTrigger className="h-8 w-[150px] text-xs"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="newest">Newest first</SelectItem>
+                    <SelectItem value="oldest">Oldest first</SelectItem>
+                    <SelectItem value="name_asc">Name A-Z</SelectItem>
+                    <SelectItem value="name_desc">Name Z-A</SelectItem>
+                    <SelectItem value="contacts_desc">Most contacts</SelectItem>
+                    <SelectItem value="contacts_asc">Fewest contacts</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             {audienceLists.length === 0 ? (
               <Card className="flex flex-col items-center justify-center py-10 text-center">
                 <List className="h-8 w-8 text-muted-foreground mb-2" />
@@ -2286,7 +2309,20 @@ export default function CampaignsPage() {
               </Card>
             ) : (
               <div className="space-y-2">
-                {audienceLists.map((list) => (
+                {audienceLists
+                  .filter((l) => !listSearch || l.name.toLowerCase().includes(listSearch.toLowerCase()) || (l.description && l.description.toLowerCase().includes(listSearch.toLowerCase())))
+                  .sort((a, b) => {
+                    switch (listSort) {
+                      case "newest": return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+                      case "oldest": return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+                      case "name_asc": return a.name.localeCompare(b.name);
+                      case "name_desc": return b.name.localeCompare(a.name);
+                      case "contacts_desc": return b.contact_count - a.contact_count;
+                      case "contacts_asc": return a.contact_count - b.contact_count;
+                      default: return 0;
+                    }
+                  })
+                  .map((list) => (
                   <Card
                     key={list.id}
                     className={`p-4 hover:bg-slate-50 cursor-pointer transition-colors ${viewingListId === list.id ? "ring-2 ring-primary/50" : ""}`}

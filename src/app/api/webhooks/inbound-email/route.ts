@@ -311,9 +311,9 @@ export async function POST(request: NextRequest) {
       /\b(mailer[- ]?daemon|postmaster)\b/i,
     ];
     const isAutoReplySubject = autoReplySubjectPatterns.some((re) => re.test(subject));
-    const isFromNoreply = /^(no-?reply|noreply|mailer-daemon|postmaster)@/i.test(senderEmail);
-
-    if (isAutoReply || isAutoReplySubject || isFromNoreply) {
+    // Only trash if auto-reply headers or subject detected — noreply senders alone
+    // are NOT trashed (verifications, receipts, notifications come from noreply@)
+    if (isAutoReply || isAutoReplySubject) {
       console.log("Inbound email: auto-reply detected, auto-closing:", { from: senderEmail, subject });
       // Still create the record for tracking, but auto-close it
       const db = createServiceClient();

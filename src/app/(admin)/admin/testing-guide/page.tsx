@@ -320,6 +320,20 @@ const sections: Section[] = [
       },
       {
         action:
+          "Create a rule with team scope — select a specific team from the Scope dropdown when creating/editing a rule",
+        expected:
+          "Rule saves with team scope. Policies table shows team name badge in Scope column. 'Global' shows for rules without team scope. Team filter dropdown filters by scope.",
+        priority: "P1",
+      },
+      {
+        action:
+          "Check the AI-Suggested Rules section on the Guardrails page (requires violation data)",
+        expected:
+          "Shows pending rule suggestions with detection count, confidence percentage, and narrative context (e.g., 'Detected 12 times in recent prompts — high confidence pattern'). Approve creates active rule. Dismiss removes suggestion.",
+        priority: "P1",
+      },
+      {
+        action:
           "Click column headers on the Violations table (Date, User, Policy, Detection, Action)",
         expected:
           "Table sorts by the clicked column. Clicking again reverses sort direction.",
@@ -374,6 +388,12 @@ const sections: Section[] = [
         action: "Check the Dashboard for Guardrail Activity widget (requires violations)",
         expected:
           "Dashboard shows Guardrail Activity card with blocks/warnings this week, total blocks, users flagged, and top 3 triggered rules. Links to /guardrails. Only visible to admin/manager.",
+        priority: "P1",
+      },
+      {
+        action: "Scroll to 'Violations by Team' section on Analytics (requires violations + team members)",
+        expected:
+          "Shows a table with each team's block count, warning count, total violations, and top violation category (e.g., 'Personal Info', 'credentials'). Unassigned users appear as 'Unassigned'.",
         priority: "P1",
       },
       {

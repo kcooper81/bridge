@@ -135,11 +135,16 @@ export function SuggestedRules({ canEdit }: SuggestedRulesProps) {
                       <TableCell>
                         <div>
                           <p className="font-medium text-sm">{rule.name}</p>
-                          {rule.description && (
+                          {rule.detection_count > 0 ? (
+                            <p className="text-xs text-amber-600 dark:text-amber-400">
+                              Detected {rule.detection_count} time{rule.detection_count !== 1 ? "s" : ""} in recent prompts
+                              {rule.confidence >= 0.8 ? " — high confidence pattern" : rule.confidence >= 0.5 ? " — moderate confidence" : ""}
+                            </p>
+                          ) : rule.description ? (
                             <p className="text-xs text-muted-foreground truncate max-w-xs">
                               {rule.description}
                             </p>
-                          )}
+                          ) : null}
                         </div>
                       </TableCell>
                       <TableCell>

@@ -482,6 +482,58 @@ export default function AnalyticsPage() {
                 )}
               </CardContent>
             </Card>
+
+            {/* Violations by Team */}
+            {analytics.teamViolations && analytics.teamViolations.length > 0 && (
+              <Card className="md:col-span-2">
+                <CardHeader>
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <ShieldCheck className="h-4 w-4 text-amber-500" />
+                    Violations by Team
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Team</TableHead>
+                        <TableHead className="w-[70px] text-right">Blocks</TableHead>
+                        <TableHead className="w-[80px] text-right">Warnings</TableHead>
+                        <TableHead className="w-[60px] text-right">Total</TableHead>
+                        <TableHead className="w-[120px]">Top Category</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {analytics.teamViolations.map((t: { teamId: string; teamName: string; blocks: number; warnings: number; total: number; topCategory: string }) => (
+                        <TableRow key={t.teamId}>
+                          <TableCell className="text-sm font-medium">{t.teamName}</TableCell>
+                          <TableCell className="text-right">
+                            {t.blocks > 0 ? (
+                              <Badge variant="destructive" className="text-[10px] tabular-nums">{t.blocks}</Badge>
+                            ) : (
+                              <span className="text-xs text-muted-foreground">0</span>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {t.warnings > 0 ? (
+                              <Badge variant="outline" className="text-[10px] tabular-nums">{t.warnings}</Badge>
+                            ) : (
+                              <span className="text-xs text-muted-foreground">0</span>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-right text-sm font-medium tabular-nums">{t.total}</TableCell>
+                          <TableCell>
+                            <Badge variant="secondary" className="text-[10px] capitalize">
+                              {t.topCategory === "pii" ? "Personal Info" : t.topCategory.replaceAll("_", " ")}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </>
       )}

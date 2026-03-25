@@ -339,6 +339,7 @@ export interface Analytics {
   guardrailWarningsThisWeek: number;
   topTriggeredRules: { name: string; count: number; severity: string }[];
   guardrailUserBreakdown: { userId: string; name: string; blocks: number; warnings: number }[];
+  teamViolations: { teamId: string; teamName: string; blocks: number; warnings: number; total: number; topCategory: string }[];
 }
 
 export interface ConversationLog {

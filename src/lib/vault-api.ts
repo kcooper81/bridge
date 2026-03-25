@@ -906,6 +906,57 @@ export async function getAnalytics(): Promise<Analytics | null> {
       .slice(0, 10);
   }
 
+  // Per-team violation breakdown (join violations → team_members)
+  let teamViolations: { teamId: string; teamName: string; blocks: number; warnings: number; total: number; topCategory: string }[] = [];
+  if (allViolations.length > 0) {
+    const violationUserIds = Array.from(new Set(allViolations.map((v) => v.user_id)));
+    const { data: teamMemberships } = await db
+      .from("team_members")
+      .select("user_id, team_id")
+      .in("user_id", violationUserIds);
+    const { data: teamList } = await db
+      .from("teams")
+      .select("id, name")
+      .eq("org_id", orgId);
+    const teamNameMap = new Map<string, string>((teamList || []).map((t: { id: string; name: string }) => [t.id, t.name]));
+    const userTeamMap = new Map<string, string[]>();
+    for (const m of teamMemberships || []) {
+      if (!userTeamMap.has(m.user_id)) userTeamMap.set(m.user_id, []);
+      userTeamMap.get(m.user_id)!.push(m.team_id);
+    }
+    const teamViolationMap: Record<string, { blocks: number; warnings: number; categories: Record<string, number> }> = {};
+    // Build a rule→category map
+    const ruleIdSet = Array.from(new Set(allViolations.filter((v) => v.rule_id).map((v) => v.rule_id!)));
+    let ruleCategoryMap = new Map<string, string>();
+    if (ruleIdSet.length > 0) {
+      const { data: rCats } = await db.from("security_rules").select("id, category").in("id", ruleIdSet);
+      ruleCategoryMap = new Map((rCats || []).map((r: { id: string; category: string }) => [r.id, r.category]));
+    }
+    for (const v of allViolations) {
+      const teams = userTeamMap.get(v.user_id) || ["unassigned"];
+      const cat = v.rule_id ? (ruleCategoryMap.get(v.rule_id) || "other") : "other";
+      for (const tid of teams) {
+        if (!teamViolationMap[tid]) teamViolationMap[tid] = { blocks: 0, warnings: 0, categories: {} };
+        if (v.action_taken === "blocked") teamViolationMap[tid].blocks++;
+        else teamViolationMap[tid].warnings++;
+        teamViolationMap[tid].categories[cat] = (teamViolationMap[tid].categories[cat] || 0) + 1;
+      }
+    }
+    teamViolations = Object.entries(teamViolationMap)
+      .map(([teamId, data]) => {
+        const topCat = Object.entries(data.categories).sort((a, b) => b[1] - a[1])[0];
+        return {
+          teamId,
+          teamName: teamId === "unassigned" ? "Unassigned" : teamNameMap.get(teamId) || "Unknown Team",
+          blocks: data.blocks,
+          warnings: data.warnings,
+          total: data.blocks + data.warnings,
+          topCategory: topCat ? topCat[0] : "none",
+        };
+      })
+      .sort((a, b) => b.total - a.total);
+  }
+
   return {
     totalPrompts: prompts.length,
     totalUses: prompts.reduce((sum: number, p: { usage_count?: number }) => sum + (p.usage_count || 0), 0),
@@ -923,6 +974,7 @@ export async function getAnalytics(): Promise<Analytics | null> {
     guardrailWarningsThisWeek,
     topTriggeredRules,
     guardrailUserBreakdown,
+    teamViolations,
   };
 }
 

@@ -625,7 +625,7 @@ export default function TicketsPage() {
   const [quickFilter, setQuickFilter] = useState<QuickFilter>("open");
   const [typeFilter, setTypeFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
-  const [folder, setFolder] = useState<"inbox" | "spam" | "trash">("inbox");
+  const [folder, setFolder] = useState<"inbox" | "spam" | "trash" | "all">("inbox");
 
   // Detail
   const [selectedTicket, setSelectedTicket] = useState<TicketRow | null>(null);
@@ -1989,15 +1989,18 @@ export default function TicketsPage() {
     { key: "sent", label: "Sent", count: 0 },
   ];
 
-  const secondaryTabs: { key: QuickFilter | "folder:spam" | "folder:trash"; label: string; count: number; icon: React.ElementType }[] = [
+  const secondaryTabs: { key: QuickFilter | "folder:spam" | "folder:trash" | "folder:all"; label: string; count: number; icon: React.ElementType }[] = [
     { key: "snoozed", label: "Snoozed", count: stats.snoozed, icon: AlarmClock },
-    { key: "all", label: "All", count: 0, icon: Inbox },
+    { key: "folder:all", label: "All Mail", count: 0, icon: Inbox },
     { key: "folder:spam", label: "Spam", count: 0, icon: ShieldBan },
     { key: "folder:trash", label: "Trash", count: 0, icon: Trash2 },
   ];
 
   const handleTabClick = (key: string) => {
-    if (key === "folder:spam") {
+    if (key === "folder:all") {
+      setFolder("all");
+      setQuickFilter("all");
+    } else if (key === "folder:spam") {
       setFolder("spam");
       setQuickFilter("all");
     } else if (key === "folder:trash") {
@@ -2013,7 +2016,7 @@ export default function TicketsPage() {
     setSelectedTicket(null);
   };
 
-  const activeTabKey = folder !== "inbox" ? `folder:${folder}` : quickFilter;
+  const activeTabKey = folder === "inbox" ? quickFilter : `folder:${folder}`;
 
   return (
     <div className="space-y-3">
@@ -2021,7 +2024,7 @@ export default function TicketsPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 sm:gap-3">
           <h1 className="text-lg sm:text-xl font-bold tracking-tight">
-            {folder === "spam" ? "Spam" : folder === "trash" ? "Trash" : "Inbox"}
+            {folder === "all" ? "All Mail" : folder === "spam" ? "Spam" : folder === "trash" ? "Trash" : "Inbox"}
           </h1>
           {folder === "inbox" && stats.unread > 0 && (
             <span className="inline-flex items-center gap-1 rounded-full bg-blue-100/40 text-blue-700 px-2 py-0.5 text-xs font-medium">

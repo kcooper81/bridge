@@ -14,17 +14,24 @@ export async function GET(request: NextRequest) {
   const offset = Number(request.nextUrl.searchParams.get("offset")) || 0;
 
   // Get total count for pagination
-  const { count: totalCount } = await db
+  let countQuery = db
     .from("feedback")
-    .select("*", { count: "exact", head: true })
-    .eq("folder", folder);
+    .select("*", { count: "exact", head: true });
 
-  const { data: tickets, error } = await db
+  let dataQuery = db
     .from("feedback")
     .select("id, type, subject, message, html_body, sender_email, sender_name, status, priority, direction, user_id, org_id, inbox_email, attachments, assigned_to, starred_by, snoozed_until, folder, cc_emails, created_at, updated_at")
-    .eq("folder", folder)
     .order("created_at", { ascending: false })
     .range(offset, offset + limit - 1);
+
+  // "all" folder returns everything; otherwise filter by specific folder
+  if (folder !== "all") {
+    countQuery = countQuery.eq("folder", folder);
+    dataQuery = dataQuery.eq("folder", folder);
+  }
+
+  const { count: totalCount } = await countQuery;
+  const { data: tickets, error } = await dataQuery;
 
   if (error) {
     console.error("Admin tickets fetch error:", error);

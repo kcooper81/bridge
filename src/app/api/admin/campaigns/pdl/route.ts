@@ -124,13 +124,8 @@ async function handleSearch(apiKey: string, body: Record<string, unknown>) {
   }
 
   if (Array.isArray(job_title_levels) && job_title_levels.length > 0) {
-    // Use "should" (OR) for seniority levels — person matches ANY of the selected levels
-    must.push({
-      bool: {
-        should: job_title_levels.map((level) => ({ term: { job_title_levels: String(level).toLowerCase() } })),
-        minimum_should_match: 1,
-      },
-    });
+    // Use "terms" (OR) for seniority levels — person matches ANY of the selected levels
+    must.push({ terms: { job_title_levels: job_title_levels.map((level) => String(level).toLowerCase()) } });
   }
 
   if (job_title && typeof job_title === "string") {

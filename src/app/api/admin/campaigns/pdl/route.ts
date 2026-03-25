@@ -124,9 +124,13 @@ async function handleSearch(apiKey: string, body: Record<string, unknown>) {
   }
 
   if (Array.isArray(job_title_levels) && job_title_levels.length > 0) {
-    for (const level of job_title_levels) {
-      must.push({ term: { job_title_levels: String(level).toLowerCase() } });
-    }
+    // Use "should" (OR) for seniority levels — person matches ANY of the selected levels
+    must.push({
+      bool: {
+        should: job_title_levels.map((level) => ({ term: { job_title_levels: String(level).toLowerCase() } })),
+        minimum_should_match: 1,
+      },
+    });
   }
 
   if (job_title && typeof job_title === "string") {
@@ -166,6 +170,7 @@ async function handleSearch(apiKey: string, body: Record<string, unknown>) {
   }
 
   try {
+    console.log("PDL search query:", JSON.stringify(searchBody, null, 2));
     const res = await fetch(`${PDL_API_BASE}/person/search`, {
       method: "POST",
       headers: {
@@ -177,8 +182,9 @@ async function handleSearch(apiKey: string, body: Record<string, unknown>) {
 
     if (!res.ok) {
       const errData = await res.json().catch(() => ({}));
+      console.error("PDL search error:", res.status, JSON.stringify(errData));
       return NextResponse.json(
-        { error: errData.error?.message || `PDL search failed (${res.status})` },
+        { error: errData.error?.message || errData.message || `PDL search failed (${res.status})` },
         { status: res.status }
       );
     }

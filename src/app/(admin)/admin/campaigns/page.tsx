@@ -94,7 +94,7 @@ interface AudienceList {
 }
 
 type View = "list" | "editor";
-type ListTab = "campaigns" | "audiences" | "analytics";
+type ListTab = "campaigns" | "audiences" | "analytics" | "prospecting";
 
 // ─── Helpers ─────────────────────────────────────────────────────
 
@@ -181,6 +181,91 @@ export default function CampaignsPage() {
 
   // Analytics
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
+
+  // Apollo Prospecting
+  interface ApolloProspect { apollo_id: string; first_name: string; last_name: string; title: string; headline: string; seniority: string; city: string; state: string; country: string; linkedin_url: string; photo_url: string; organization_name: string; organization_website: string; organization_industry: string; organization_size: number | null; }
+  const [apolloConfigured, setApolloConfigured] = useState<boolean | null>(null);
+  const [apolloResults, setApolloResults] = useState<ApolloProspect[]>([]);
+  const [apolloPagination, setApolloPagination] = useState({ page: 1, per_page: 25, total_entries: 0, total_pages: 0 });
+  const [apolloSearching, setApolloSearching] = useState(false);
+  const [apolloImporting, setApolloImporting] = useState(false);
+  const [apolloTitles, setApolloTitles] = useState("IT Director, CISO, IT Consultant, MSP Owner, Head of IT");
+  const [apolloSeniorities, setApolloSeniorities] = useState<string[]>(["director", "vp", "c_suite", "owner"]);
+  const [apolloEmployeeRanges, setApolloEmployeeRanges] = useState<string[]>(["11-50", "51-200", "201-500"]);
+  const [apolloKeywords, setApolloKeywords] = useState("");
+  const [apolloLocations, setApolloLocations] = useState("United States");
+  const [apolloSelected, setApolloSelected] = useState<Set<string>>(new Set());
+  const [apolloListName, setApolloListName] = useState("");
+
+  async function checkApolloStatus() {
+    try {
+      const res = await fetch("/api/admin/campaigns/apollo");
+      const data = await res.json();
+      setApolloConfigured(data.configured && data.valid);
+    } catch { setApolloConfigured(false); }
+  }
+
+  async function searchApollo(page = 1) {
+    setApolloSearching(true);
+    try {
+      const titles = apolloTitles.split(",").map((t) => t.trim()).filter(Boolean);
+      const locations = apolloLocations.split(",").map((l) => l.trim()).filter(Boolean);
+      const res = await fetch("/api/admin/campaigns/apollo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "search",
+          person_titles: titles,
+          person_seniorities: apolloSeniorities,
+          organization_num_employees_ranges: apolloEmployeeRanges,
+          organization_locations: locations,
+          q_keywords: apolloKeywords || undefined,
+          per_page: 25,
+          page,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setApolloResults(data.people || []);
+        setApolloPagination(data.pagination || { page: 1, per_page: 25, total_entries: 0, total_pages: 0 });
+        setApolloSelected(new Set());
+      } else {
+        toast.error(data.error || "Search failed");
+      }
+    } catch { toast.error("Search failed"); }
+    finally { setApolloSearching(false); }
+  }
+
+  async function importApolloSelected() {
+    const selected = apolloResults.filter((p) => apolloSelected.has(p.apollo_id));
+    if (selected.length === 0) { toast.error("Select prospects to import"); return; }
+    setApolloImporting(true);
+    try {
+      const res = await fetch("/api/admin/campaigns/apollo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "enrich_and_import",
+          prospects: selected.map((p) => ({
+            first_name: p.first_name,
+            last_name: p.last_name,
+            organization_name: p.organization_name,
+            linkedin_url: p.linkedin_url || undefined,
+          })),
+          list_name: apolloListName.trim() || `Apollo Import ${new Date().toLocaleDateString()}`,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toast.success(`Imported ${data.imported} contacts${data.failed > 0 ? `, ${data.failed} failed` : ""}`);
+        setApolloSelected(new Set());
+        loadAudienceLists();
+      } else {
+        toast.error(data.error || "Import failed");
+      }
+    } catch { toast.error("Import failed"); }
+    finally { setApolloImporting(false); }
+  }
 
   const loadCampaigns = useCallback(async () => {
     setLoading(true);
@@ -1867,6 +1952,10 @@ export default function CampaignsPage() {
             <BarChart3 className="h-3.5 w-3.5" />
             Analytics
           </TabsTrigger>
+          <TabsTrigger value="prospecting" className="gap-1.5" onClick={() => { if (apolloConfigured === null) checkApolloStatus(); }}>
+            <Search className="h-3.5 w-3.5" />
+            Prospecting
+          </TabsTrigger>
         </TabsList>
       </Tabs>
 
@@ -2162,6 +2251,235 @@ export default function CampaignsPage() {
               </>
             )}
           </div>
+        </div>
+      ) : listTab === "prospecting" ? (
+        /* ─── Prospecting Tab (Apollo.io) ─── */
+        <div className="space-y-4">
+          {apolloConfigured === false ? (
+            <Card className="flex flex-col items-center justify-center py-16 text-center p-6">
+              <Search className="h-10 w-10 text-muted-foreground mb-3" />
+              <h3 className="font-semibold mb-1">Apollo.io Not Configured</h3>
+              <p className="text-sm text-muted-foreground mb-2">
+                Add <code className="bg-muted px-1.5 py-0.5 rounded text-xs">APOLLO_API_KEY</code> to your environment variables to enable lead prospecting.
+              </p>
+              <p className="text-xs text-muted-foreground">Free tier: 10,000 email credits/month. Search is unlimited.</p>
+            </Card>
+          ) : (
+            <>
+              {/* Search Filters */}
+              <Card className="p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-semibold">Search Prospects</h3>
+                  <Badge variant="outline" className="text-[10px]">Apollo.io</Badge>
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div>
+                    <Label className="text-xs">Job Titles (comma-separated)</Label>
+                    <Input
+                      value={apolloTitles}
+                      onChange={(e) => setApolloTitles(e.target.value)}
+                      placeholder="IT Director, CISO, CTO..."
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Keywords</Label>
+                    <Input
+                      value={apolloKeywords}
+                      onChange={(e) => setApolloKeywords(e.target.value)}
+                      placeholder="AI governance, cybersecurity..."
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Locations (comma-separated)</Label>
+                    <Input
+                      value={apolloLocations}
+                      onChange={(e) => setApolloLocations(e.target.value)}
+                      placeholder="United States, United Kingdom..."
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Company Size</Label>
+                    <div className="flex flex-wrap gap-1.5 mt-1">
+                      {["1-10", "11-50", "51-200", "201-500", "501-1000", "1001-5000"].map((range) => (
+                        <Badge
+                          key={range}
+                          variant={apolloEmployeeRanges.includes(range) ? "default" : "outline"}
+                          className="cursor-pointer text-[10px]"
+                          onClick={() => setApolloEmployeeRanges((prev) =>
+                            prev.includes(range) ? prev.filter((r) => r !== range) : [...prev, range]
+                          )}
+                        >
+                          {range}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Label className="text-xs">Seniority</Label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {[
+                      { value: "c_suite", label: "C-Suite" },
+                      { value: "vp", label: "VP" },
+                      { value: "director", label: "Director" },
+                      { value: "owner", label: "Owner" },
+                      { value: "manager", label: "Manager" },
+                    ].map((s) => (
+                      <Badge
+                        key={s.value}
+                        variant={apolloSeniorities.includes(s.value) ? "default" : "outline"}
+                        className="cursor-pointer text-[10px]"
+                        onClick={() => setApolloSeniorities((prev) =>
+                          prev.includes(s.value) ? prev.filter((v) => v !== s.value) : [...prev, s.value]
+                        )}
+                      >
+                        {s.label}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+                <Button size="sm" onClick={() => searchApollo(1)} disabled={apolloSearching}>
+                  {apolloSearching ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <Search className="h-3.5 w-3.5 mr-1.5" />}
+                  Search Apollo
+                </Button>
+              </Card>
+
+              {/* Results */}
+              {apolloResults.length > 0 && (
+                <Card className="p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold">
+                      Results ({apolloPagination.total_entries.toLocaleString()} found)
+                    </h3>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        value={apolloListName}
+                        onChange={(e) => setApolloListName(e.target.value)}
+                        placeholder="List name (optional)"
+                        className="w-48 h-8 text-xs"
+                      />
+                      <Button
+                        size="sm"
+                        onClick={importApolloSelected}
+                        disabled={apolloImporting || apolloSelected.size === 0}
+                      >
+                        {apolloImporting ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <Download className="h-3.5 w-3.5 mr-1.5" />}
+                        Import {apolloSelected.size > 0 ? `(${apolloSelected.size})` : "Selected"}
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="rounded-lg border overflow-hidden">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="bg-muted/50">
+                          <th className="p-2 text-left w-8">
+                            <input
+                              type="checkbox"
+                              checked={apolloSelected.size === apolloResults.length && apolloResults.length > 0}
+                              onChange={(e) => {
+                                if (e.target.checked) setApolloSelected(new Set(apolloResults.map((p) => p.apollo_id)));
+                                else setApolloSelected(new Set());
+                              }}
+                              className="rounded"
+                            />
+                          </th>
+                          <th className="p-2 text-left text-xs font-medium">Name</th>
+                          <th className="p-2 text-left text-xs font-medium">Title</th>
+                          <th className="p-2 text-left text-xs font-medium">Company</th>
+                          <th className="p-2 text-left text-xs font-medium">Location</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {apolloResults.map((p) => (
+                          <tr
+                            key={p.apollo_id}
+                            className="border-t hover:bg-muted/30 cursor-pointer"
+                            onClick={() => setApolloSelected((prev) => {
+                              const next = new Set(prev);
+                              if (next.has(p.apollo_id)) next.delete(p.apollo_id); else next.add(p.apollo_id);
+                              return next;
+                            })}
+                          >
+                            <td className="p-2">
+                              <input
+                                type="checkbox"
+                                checked={apolloSelected.has(p.apollo_id)}
+                                onChange={() => {}}
+                                className="rounded"
+                              />
+                            </td>
+                            <td className="p-2">
+                              <div className="flex items-center gap-2">
+                                {p.linkedin_url ? (
+                                  <a href={p.linkedin_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline font-medium" onClick={(e) => e.stopPropagation()}>
+                                    {p.first_name} {p.last_name}
+                                  </a>
+                                ) : (
+                                  <span className="font-medium">{p.first_name} {p.last_name}</span>
+                                )}
+                              </div>
+                            </td>
+                            <td className="p-2 text-xs text-muted-foreground">{p.title}</td>
+                            <td className="p-2 text-xs">
+                              <div>{p.organization_name}</div>
+                              {p.organization_size && (
+                                <span className="text-muted-foreground">{p.organization_size} emp</span>
+                              )}
+                            </td>
+                            <td className="p-2 text-xs text-muted-foreground">
+                              {[p.city, p.state, p.country].filter(Boolean).join(", ")}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Pagination */}
+                  {apolloPagination.total_pages > 1 && (
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs text-muted-foreground">
+                        Page {apolloPagination.page} of {apolloPagination.total_pages}
+                      </p>
+                      <div className="flex gap-1.5">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={apolloPagination.page <= 1 || apolloSearching}
+                          onClick={() => searchApollo(apolloPagination.page - 1)}
+                        >
+                          Previous
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={apolloPagination.page >= apolloPagination.total_pages || apolloSearching}
+                          onClick={() => searchApollo(apolloPagination.page + 1)}
+                        >
+                          Next
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </Card>
+              )}
+
+              {/* Empty state after search */}
+              {apolloResults.length === 0 && !apolloSearching && apolloPagination.total_entries === 0 && apolloConfigured && (
+                <Card className="flex flex-col items-center justify-center py-16 text-center">
+                  <Search className="h-10 w-10 text-muted-foreground mb-3" />
+                  <h3 className="font-semibold mb-1">Find IT Leads</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Search Apollo&apos;s database of 275M+ contacts. Adjust filters above and click Search.
+                  </p>
+                </Card>
+              )}
+            </>
+          )}
         </div>
       ) : (
         /* ─── Analytics Tab ─── */

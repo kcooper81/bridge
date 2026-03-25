@@ -281,7 +281,97 @@ export default function CampaignsPage() {
   const [hunterSelected, setHunterSelected] = useState<Set<string>>(new Set());
   const [hunterListName, setHunterListName] = useState("");
   const [hunterTotalResults, setHunterTotalResults] = useState(0);
-  const [prospectProvider, setProspectProvider] = useState<"hunter" | "apollo">("hunter");
+  const [prospectProvider, setProspectProvider] = useState<"pdl" | "hunter" | "apollo">("pdl");
+
+  // PDL (People Data Labs) — person discovery
+  interface PdlPerson { id: string; full_name: string; first_name: string; last_name: string; job_title: string; job_title_role: string; job_title_levels: string[]; company_name: string; company_domain: string; company_size: string; company_industry: string; company_employee_count: number | null; location_country: string; location_region: string; location_locality: string; linkedin_url: string; has_email: boolean; }
+  const [pdlConfigured, setPdlConfigured] = useState<boolean | null>(null);
+  const [pdlResults, setPdlResults] = useState<PdlPerson[]>([]);
+  const [pdlTotal, setPdlTotal] = useState(0);
+  const [pdlScrollToken, setPdlScrollToken] = useState<string | null>(null);
+  const [pdlSearching, setPdlSearching] = useState(false);
+  const [pdlImporting, setPdlImporting] = useState(false);
+  const [pdlSelected, setPdlSelected] = useState<Set<string>>(new Set());
+  const [pdlListName, setPdlListName] = useState("");
+  const [pdlTitleRole, setPdlTitleRole] = useState("information technology");
+  const [pdlTitleLevels, setPdlTitleLevels] = useState<string[]>(["director", "vp", "c_suite"]);
+  const [pdlCountry, setPdlCountry] = useState("united states");
+  const [pdlSizeMin, setPdlSizeMin] = useState("50");
+  const [pdlSizeMax, setPdlSizeMax] = useState("500");
+  const [pdlIndustry, setPdlIndustry] = useState("");
+  const [pdlHunterConfigured, setPdlHunterConfigured] = useState<boolean | null>(null);
+
+  async function checkPdlStatus() {
+    try {
+      const res = await fetch("/api/admin/campaigns/pdl");
+      const data = await res.json();
+      setPdlConfigured(data.pdl_configured && data.pdl_valid);
+      setPdlHunterConfigured(data.hunter_configured);
+    } catch { setPdlConfigured(false); }
+  }
+
+  async function searchPdl(scrollToken?: string) {
+    setPdlSearching(true);
+    try {
+      const res = await fetch("/api/admin/campaigns/pdl", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "search",
+          job_title_role: pdlTitleRole || undefined,
+          job_title_levels: pdlTitleLevels.length > 0 ? pdlTitleLevels : undefined,
+          location_country: pdlCountry || undefined,
+          company_size_min: pdlSizeMin ? Number(pdlSizeMin) : undefined,
+          company_size_max: pdlSizeMax ? Number(pdlSizeMax) : undefined,
+          industry: pdlIndustry || undefined,
+          size: 10,
+          scroll_token: scrollToken || undefined,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setPdlResults(scrollToken ? [...pdlResults, ...(data.people || [])] : data.people || []);
+        setPdlTotal(data.total || 0);
+        setPdlScrollToken(data.scroll_token || null);
+        if (!scrollToken) setPdlSelected(new Set());
+      } else {
+        toast.error(data.error || "Search failed");
+      }
+    } catch { toast.error("Search failed"); }
+    finally { setPdlSearching(false); }
+  }
+
+  async function enrichAndImportPdl() {
+    const selected = pdlResults.filter((p) => pdlSelected.has(p.id));
+    if (selected.length === 0) { toast.error("Select leads to import"); return; }
+    setPdlImporting(true);
+    try {
+      const res = await fetch("/api/admin/campaigns/pdl", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "enrich_and_import",
+          prospects: selected.map((p) => ({
+            first_name: p.first_name,
+            last_name: p.last_name,
+            company_domain: p.company_domain,
+            company_name: p.company_name,
+            job_title: p.job_title,
+          })),
+          list_name: pdlListName.trim() || `IT Leads ${new Date().toLocaleDateString()}`,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toast.success(`Imported ${data.imported} contacts${data.failed > 0 ? ` (${data.failed} no email found)` : ""}`);
+        setPdlSelected(new Set());
+        loadAudienceLists();
+      } else {
+        toast.error(data.error || "Import failed");
+      }
+    } catch { toast.error("Import failed"); }
+    finally { setPdlImporting(false); }
+  }
 
   async function checkHunterStatus() {
     try {
@@ -2036,7 +2126,7 @@ export default function CampaignsPage() {
             <BarChart3 className="h-3.5 w-3.5" />
             Analytics
           </TabsTrigger>
-          <TabsTrigger value="prospecting" className="gap-1.5" onClick={() => { if (hunterConfigured === null) checkHunterStatus(); if (apolloConfigured === null) checkApolloStatus(); }}>
+          <TabsTrigger value="prospecting" className="gap-1.5" onClick={() => { if (pdlConfigured === null) checkPdlStatus(); }}>
             <Search className="h-3.5 w-3.5" />
             Prospecting
           </TabsTrigger>
@@ -2342,11 +2432,18 @@ export default function CampaignsPage() {
           {/* Provider Switcher */}
           <div className="flex items-center gap-2">
             <Badge
+              variant={prospectProvider === "pdl" ? "default" : "outline"}
+              className="cursor-pointer"
+              onClick={() => { setProspectProvider("pdl"); if (pdlConfigured === null) checkPdlStatus(); }}
+            >
+              Find Leads (PDL)
+            </Badge>
+            <Badge
               variant={prospectProvider === "hunter" ? "default" : "outline"}
               className="cursor-pointer"
               onClick={() => { setProspectProvider("hunter"); if (hunterConfigured === null) checkHunterStatus(); }}
             >
-              Hunter.io (Free)
+              Company Emails (Hunter)
             </Badge>
             <Badge
               variant={prospectProvider === "apollo" ? "default" : "outline"}
@@ -2361,6 +2458,184 @@ export default function CampaignsPage() {
               </span>
             )}
           </div>
+
+          {/* ── PDL Panel — Find IT Leads ── */}
+          {prospectProvider === "pdl" && (
+            <>
+              {pdlConfigured === false ? (
+                <Card className="flex flex-col items-center justify-center py-16 text-center p-6">
+                  <Users className="h-10 w-10 text-muted-foreground mb-3" />
+                  <h3 className="font-semibold mb-1">People Data Labs Not Configured</h3>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Add <code className="bg-muted px-1.5 py-0.5 rounded text-xs">PDL_API_KEY</code> to your environment variables.
+                  </p>
+                  <p className="text-xs text-muted-foreground">Free: 100 leads/month. Sign up at peopledatalabs.com</p>
+                  {!pdlHunterConfigured && (
+                    <p className="text-xs text-amber-600 mt-2">Also add <code className="bg-muted px-1.5 py-0.5 rounded text-xs">HUNTER_API_KEY</code> for email enrichment (50 free/month)</p>
+                  )}
+                </Card>
+              ) : (
+                <>
+                  <Card className="p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-sm font-semibold">Find IT Leads</h3>
+                        <p className="text-xs text-muted-foreground">PDL finds people → Hunter.io gets their emails → imported to your campaign list</p>
+                      </div>
+                      <Badge variant="outline" className="text-[10px]">1 credit per lead found</Badge>
+                    </div>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div>
+                        <Label className="text-xs">Department / Role</Label>
+                        <Select value={pdlTitleRole} onValueChange={setPdlTitleRole}>
+                          <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="information technology">Information Technology</SelectItem>
+                            <SelectItem value="engineering">Engineering</SelectItem>
+                            <SelectItem value="operations">Operations</SelectItem>
+                            <SelectItem value="executive">Executive</SelectItem>
+                            <SelectItem value="finance">Finance</SelectItem>
+                            <SelectItem value="sales">Sales</SelectItem>
+                            <SelectItem value="marketing">Marketing</SelectItem>
+                            <SelectItem value="human resources">Human Resources</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label className="text-xs">Country</Label>
+                        <Select value={pdlCountry} onValueChange={setPdlCountry}>
+                          <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="united states">United States</SelectItem>
+                            <SelectItem value="united kingdom">United Kingdom</SelectItem>
+                            <SelectItem value="canada">Canada</SelectItem>
+                            <SelectItem value="australia">Australia</SelectItem>
+                            <SelectItem value="germany">Germany</SelectItem>
+                            <SelectItem value="france">France</SelectItem>
+                            <SelectItem value="india">India</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label className="text-xs">Company Size (employees)</Label>
+                        <div className="flex gap-2 mt-1">
+                          <Input value={pdlSizeMin} onChange={(e) => setPdlSizeMin(e.target.value)} placeholder="Min" className="w-20" />
+                          <span className="self-center text-xs text-muted-foreground">to</span>
+                          <Input value={pdlSizeMax} onChange={(e) => setPdlSizeMax(e.target.value)} placeholder="Max" className="w-20" />
+                        </div>
+                      </div>
+                      <div>
+                        <Label className="text-xs">Industry (optional)</Label>
+                        <Input value={pdlIndustry} onChange={(e) => setPdlIndustry(e.target.value)} placeholder="computer software, consulting..." className="mt-1" />
+                      </div>
+                    </div>
+                    <div>
+                      <Label className="text-xs">Seniority Level</Label>
+                      <div className="flex flex-wrap gap-1.5 mt-1">
+                        {[
+                          { value: "c_suite", label: "C-Suite" },
+                          { value: "vp", label: "VP" },
+                          { value: "director", label: "Director" },
+                          { value: "owner", label: "Owner" },
+                          { value: "manager", label: "Manager" },
+                          { value: "senior", label: "Senior" },
+                        ].map((s) => (
+                          <Badge
+                            key={s.value}
+                            variant={pdlTitleLevels.includes(s.value) ? "default" : "outline"}
+                            className="cursor-pointer text-[10px]"
+                            onClick={() => setPdlTitleLevels((prev) =>
+                              prev.includes(s.value) ? prev.filter((v) => v !== s.value) : [...prev, s.value]
+                            )}
+                          >
+                            {s.label}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                    <Button size="sm" onClick={() => searchPdl()} disabled={pdlSearching}>
+                      {pdlSearching ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <Search className="h-3.5 w-3.5 mr-1.5" />}
+                      Find Leads
+                    </Button>
+                  </Card>
+
+                  {/* Results */}
+                  {pdlResults.length > 0 && (
+                    <Card className="p-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-sm font-semibold">{pdlTotal.toLocaleString()} leads match</h3>
+                        <div className="flex items-center gap-2">
+                          <Input value={pdlListName} onChange={(e) => setPdlListName(e.target.value)} placeholder="List name (optional)" className="w-48 h-8 text-xs" />
+                          <Button size="sm" onClick={enrichAndImportPdl} disabled={pdlImporting || pdlSelected.size === 0}>
+                            {pdlImporting ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <Download className="h-3.5 w-3.5 mr-1.5" />}
+                            Enrich + Import {pdlSelected.size > 0 ? `(${pdlSelected.size})` : ""}
+                          </Button>
+                        </div>
+                      </div>
+                      {!pdlHunterConfigured && (
+                        <p className="text-xs text-amber-600 bg-amber-50 dark:bg-amber-950/20 rounded p-2">
+                          Add HUNTER_API_KEY to enrich leads with verified emails. Without it, leads import without email addresses.
+                        </p>
+                      )}
+                      <div className="rounded-lg border overflow-hidden">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="bg-muted/50">
+                              <th className="p-2 w-8">
+                                <input type="checkbox" checked={pdlSelected.size === pdlResults.length && pdlResults.length > 0} onChange={(e) => { if (e.target.checked) setPdlSelected(new Set(pdlResults.map((p) => p.id))); else setPdlSelected(new Set()); }} className="rounded" />
+                              </th>
+                              <th className="p-2 text-left text-xs font-medium">Name</th>
+                              <th className="p-2 text-left text-xs font-medium">Title</th>
+                              <th className="p-2 text-left text-xs font-medium">Company</th>
+                              <th className="p-2 text-left text-xs font-medium">Location</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {pdlResults.map((p) => (
+                              <tr key={p.id} className="border-t hover:bg-muted/30 cursor-pointer" onClick={() => setPdlSelected((prev) => { const next = new Set(prev); if (next.has(p.id)) next.delete(p.id); else next.add(p.id); return next; })}>
+                                <td className="p-2"><input type="checkbox" checked={pdlSelected.has(p.id)} onChange={() => {}} className="rounded" /></td>
+                                <td className="p-2">
+                                  {p.linkedin_url ? (
+                                    <a href={p.linkedin_url.startsWith("http") ? p.linkedin_url : `https://${p.linkedin_url}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline font-medium text-xs" onClick={(e) => e.stopPropagation()}>
+                                      {p.full_name}
+                                    </a>
+                                  ) : (
+                                    <span className="font-medium text-xs">{p.full_name}</span>
+                                  )}
+                                </td>
+                                <td className="p-2 text-xs text-muted-foreground">{p.job_title}</td>
+                                <td className="p-2 text-xs">
+                                  <div>{p.company_name}</div>
+                                  <span className="text-muted-foreground">{p.company_size}{p.company_industry ? ` · ${p.company_industry}` : ""}</span>
+                                </td>
+                                <td className="p-2 text-xs text-muted-foreground">
+                                  {[p.location_locality, p.location_region, p.location_country].filter(Boolean).join(", ")}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                      {pdlScrollToken && (
+                        <Button size="sm" variant="outline" onClick={() => searchPdl(pdlScrollToken)} disabled={pdlSearching}>
+                          {pdlSearching ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : null}
+                          Load More
+                        </Button>
+                      )}
+                    </Card>
+                  )}
+
+                  {pdlResults.length === 0 && !pdlSearching && pdlConfigured && (
+                    <Card className="flex flex-col items-center justify-center py-16 text-center">
+                      <Users className="h-10 w-10 text-muted-foreground mb-3" />
+                      <h3 className="font-semibold mb-1">Discover IT Decision Makers</h3>
+                      <p className="text-sm text-muted-foreground">Set your ideal customer profile above and click Find Leads.<br/>PDL searches 1.5B+ profiles to match your criteria.</p>
+                    </Card>
+                  )}
+                </>
+              )}
+            </>
+          )}
 
           {/* ── Hunter.io Panel ── */}
           {prospectProvider === "hunter" && (

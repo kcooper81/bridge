@@ -108,23 +108,35 @@ export async function POST(request: NextRequest) {
     }
 
     if (listId) {
-      // Get contact IDs for all imported emails
-      const { data: contactRows } = await db
-        .from("campaign_contacts")
-        .select("id, email")
-        .in("email", valid.map((c) => c.email));
+      // Get contact IDs for all imported emails (batch to avoid URL length limits)
+      const allContactRows: { id: string; email: string }[] = [];
+      const emailBatches: string[][] = [];
+      for (let i = 0; i < valid.length; i += 50) {
+        emailBatches.push(valid.slice(i, i + 50).map((c) => c.email));
+      }
+      for (const batch of emailBatches) {
+        const { data } = await db
+          .from("campaign_contacts")
+          .select("id, email")
+          .in("email", batch);
+        if (data) allContactRows.push(...data);
+      }
+      const contactRows = allContactRows;
 
-      if (contactRows && contactRows.length > 0) {
-        // Link contacts to the list
-        await db
-          .from("audience_list_contacts")
-          .upsert(
-            contactRows.map((c) => ({
-              list_id: listId!,
-              contact_id: c.id,
-            })),
-            { onConflict: "list_id,contact_id" }
-          );
+      if (contactRows.length > 0) {
+        // Link contacts to the list (batch upserts too)
+        for (let i = 0; i < contactRows.length; i += 50) {
+          const batch = contactRows.slice(i, i + 50);
+          await db
+            .from("audience_list_contacts")
+            .upsert(
+              batch.map((c) => ({
+                list_id: listId!,
+                contact_id: c.id,
+              })),
+              { onConflict: "list_id,contact_id" }
+            );
+        }
 
         // Update contact count (count actual linked contacts, not just this batch)
         const { count: totalLinked } = await db
@@ -192,17 +204,55 @@ export async function GET(request: NextRequest) {
   const search = url.searchParams.get("search")?.trim().toLowerCase();
   const listId = url.searchParams.get("list_id");
 
-  // If filtering by list, get contact IDs first
-  let listContactIds: string[] | null = null;
+  // If filtering by list, use a join instead of .in() to avoid URL length limits
   if (listId) {
-    const { data: linked } = await db
+    // Count contacts in this list
+    const { count: listTotal } = await db
+      .from("audience_list_contacts")
+      .select("contact_id", { count: "exact", head: true })
+      .eq("list_id", listId);
+
+    if (!listTotal || listTotal === 0) {
+      return NextResponse.json({ contacts: [], total: 0, limit, offset });
+    }
+
+    // Get contact IDs for current page
+    const linkedQuery = db
       .from("audience_list_contacts")
       .select("contact_id")
       .eq("list_id", listId);
-    listContactIds = (linked || []).map((l) => l.contact_id);
+
+    const { data: linked } = await linkedQuery;
+    const listContactIds = (linked || []).map((l) => l.contact_id);
+
     if (listContactIds.length === 0) {
       return NextResponse.json({ contacts: [], total: 0, limit, offset });
     }
+
+    // Batch the .in() query to avoid URL length limits
+    const allContacts: Array<Record<string, unknown>> = [];
+    for (let i = 0; i < listContactIds.length; i += 50) {
+      const batch = listContactIds.slice(i, i + 50);
+      let q = db
+        .from("campaign_contacts")
+        .select("id, email, first_name, last_name, company, unsubscribed, source, created_at")
+        .in("id", batch);
+
+      if (search) {
+        const safe = search.replace(/[,().\\]/g, "");
+        if (safe) q = q.or(`email.ilike.%${safe}%,first_name.ilike.%${safe}%,last_name.ilike.%${safe}%,company.ilike.%${safe}%`);
+      }
+
+      const { data } = await q;
+      if (data) allContacts.push(...data);
+    }
+
+    // Sort by created_at desc and paginate
+    allContacts.sort((a, b) => new Date(b.created_at as string).getTime() - new Date(a.created_at as string).getTime());
+    const total = allContacts.length;
+    const paginated = allContacts.slice(offset, offset + limit);
+
+    return NextResponse.json({ contacts: paginated, total, limit, offset });
   }
 
   // Build query
@@ -215,11 +265,6 @@ export async function GET(request: NextRequest) {
     .select("id, email, first_name, last_name, company, unsubscribed, source, created_at")
     .order("created_at", { ascending: false })
     .range(offset, offset + limit - 1);
-
-  if (listContactIds) {
-    countQuery = countQuery.in("id", listContactIds);
-    dataQuery = dataQuery.in("id", listContactIds);
-  }
 
   if (search) {
     // Escape special PostgREST filter characters

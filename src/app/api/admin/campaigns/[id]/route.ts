@@ -84,15 +84,16 @@ export async function PATCH(
   return NextResponse.json({ campaign: data });
 }
 
-/** DELETE — remove a campaign (drafts only) */
+/** DELETE — remove a draft campaign, or archive a sent campaign (?archive=true) */
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const auth = await verifyAdminAccess();
   if (!auth) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const { id } = await params;
+  const archive = new URL(request.url).searchParams.get("archive") === "true";
   const db = createServiceClient();
 
   const { data: existing } = await db
@@ -104,9 +105,21 @@ export async function DELETE(
   if (!existing) {
     return NextResponse.json({ error: "Campaign not found" }, { status: 404 });
   }
+
+  if (archive) {
+    // Archive: set status to "archived"
+    const { error } = await db.from("email_campaigns").update({ status: "archived" }).eq("id", id);
+    if (error) {
+      console.error("Campaign archive error:", error);
+      return NextResponse.json({ error: "Failed to archive campaign" }, { status: 500 });
+    }
+    return NextResponse.json({ success: true, archived: true });
+  }
+
+  // Delete: only drafts
   if (existing.status !== "draft") {
     return NextResponse.json(
-      { error: "Only draft campaigns can be deleted" },
+      { error: "Only draft campaigns can be deleted. Use ?archive=true for sent campaigns." },
       { status: 400 }
     );
   }

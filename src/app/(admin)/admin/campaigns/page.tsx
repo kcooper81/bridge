@@ -13,6 +13,8 @@ import {
   Download,
   CheckCircle2,
   AlertCircle,
+  Archive,
+  ChevronRight,
   Eye,
   Users,
   Megaphone,
@@ -64,7 +66,7 @@ interface Campaign {
   body_html: string;
   segment_name: string | null;
   resend_broadcast_id: string | null;
-  status: "draft" | "scheduled" | "queued" | "sending" | "sent" | "failed";
+  status: "draft" | "scheduled" | "queued" | "sending" | "sent" | "failed" | "archived";
   scheduled_at: string | null;
   sent_at: string | null;
   recipient_count: number;
@@ -105,6 +107,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.
   sending: { label: "Sending", color: "bg-amber-100 text-amber-700", icon: Send },
   sent: { label: "Sent", color: "bg-green-100 text-green-700", icon: CheckCircle2 },
   failed: { label: "Failed", color: "bg-red-100 text-red-700", icon: AlertCircle },
+  archived: { label: "Archived", color: "bg-slate-100 text-slate-500", icon: Archive },
 };
 
 function timeAgo(dateStr: string): string {
@@ -144,6 +147,8 @@ export default function CampaignsPage() {
   const [editingList, setEditingList] = useState<AudienceList | null>(null);
   const [listSearch, setListSearch] = useState("");
   const [listSort, setListSort] = useState<"newest" | "oldest" | "name_asc" | "name_desc" | "contacts_desc" | "contacts_asc">("newest");
+  const [campaignSearch, setCampaignSearch] = useState("");
+  const [campaignSort, setCampaignSort] = useState<"newest" | "oldest" | "name_asc" | "name_desc">("newest");
   const [editListName, setEditListName] = useState("");
   const [editListDesc, setEditListDesc] = useState("");
   const [savingList, setSavingList] = useState(false);
@@ -647,6 +652,17 @@ export default function CampaignsPage() {
       await loadCampaigns();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to delete");
+    }
+  }
+
+  async function archiveCampaign(id: string) {
+    try {
+      const res = await fetch(`/api/admin/campaigns/${id}?archive=true`, { method: "DELETE" });
+      if (!res.ok) { const data = await res.json(); throw new Error(data.error); }
+      toast.success("Campaign archived");
+      await loadCampaigns();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to archive");
     }
   }
 
@@ -2072,11 +2088,23 @@ export default function CampaignsPage() {
 
   // ─── List View ───────────────────────────────────────────────
 
-  const drafts = campaigns.filter((c) => c.status === "draft");
-  const scheduled = campaigns.filter((c) => c.status === "scheduled");
-  const sent = campaigns.filter((c) =>
+  const filteredCampaigns = campaigns
+    .filter((c) => !campaignSearch || c.name.toLowerCase().includes(campaignSearch.toLowerCase()) || c.subject.toLowerCase().includes(campaignSearch.toLowerCase()))
+    .sort((a, b) => {
+      switch (campaignSort) {
+        case "newest": return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        case "oldest": return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+        case "name_asc": return a.name.localeCompare(b.name);
+        case "name_desc": return b.name.localeCompare(a.name);
+        default: return 0;
+      }
+    });
+  const drafts = filteredCampaigns.filter((c) => c.status === "draft");
+  const scheduled = filteredCampaigns.filter((c) => c.status === "scheduled");
+  const sent = filteredCampaigns.filter((c) =>
     ["queued", "sending", "sent", "failed"].includes(c.status)
   );
+  const archived = filteredCampaigns.filter((c) => c.status === "archived");
 
   return (
     <div className="space-y-6">
@@ -2163,6 +2191,21 @@ export default function CampaignsPage() {
             </Card>
           ) : (
             <div className="space-y-6">
+              {/* Search & Sort */}
+              {campaigns.length > 3 && (
+                <div className="flex items-center gap-2">
+                  <Input value={campaignSearch} onChange={(e) => setCampaignSearch(e.target.value)} placeholder="Search campaigns..." className="h-8 text-xs max-w-xs" />
+                  <Select value={campaignSort} onValueChange={(v) => setCampaignSort(v as typeof campaignSort)}>
+                    <SelectTrigger className="h-8 w-[140px] text-xs"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="newest">Newest first</SelectItem>
+                      <SelectItem value="oldest">Oldest first</SelectItem>
+                      <SelectItem value="name_asc">Name A-Z</SelectItem>
+                      <SelectItem value="name_desc">Name Z-A</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
               {/* Analytics Overview */}
               {sent.length > 0 && (() => {
                 const totalSent = sent.reduce((s, c) => s + c.recipient_count, 0);
@@ -2233,6 +2276,18 @@ export default function CampaignsPage() {
                   campaigns={sent}
                   onEdit={openEditCampaign}
                   onDuplicate={duplicateCampaign}
+                  onArchive={archiveCampaign}
+                />
+              )}
+
+              {/* Archived */}
+              {archived.length > 0 && (
+                <CampaignSection
+                  title="Archived"
+                  campaigns={archived}
+                  onEdit={openEditCampaign}
+                  onDuplicate={duplicateCampaign}
+                  defaultCollapsed
                 />
               )}
             </div>
@@ -3573,19 +3628,28 @@ function CampaignSection({
   onEdit,
   onDelete,
   onDuplicate,
+  onArchive,
+  defaultCollapsed,
 }: {
   title: string;
   campaigns: Campaign[];
   onEdit: (c: Campaign) => void;
   onDelete?: (id: string) => void;
   onDuplicate?: (c: Campaign) => void;
+  onArchive?: (id: string) => void;
+  defaultCollapsed?: boolean;
 }) {
+  const [collapsed, setCollapsed] = useState(defaultCollapsed || false);
   return (
     <div>
-      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+      <h2
+        className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-2 cursor-pointer flex items-center gap-1.5"
+        onClick={() => setCollapsed(!collapsed)}
+      >
+        <ChevronRight className={`h-3.5 w-3.5 transition-transform ${collapsed ? "" : "rotate-90"}`} />
         {title} ({campaigns.length})
       </h2>
-      <div className="space-y-2">
+      {collapsed ? null : <div className="space-y-2">
         {campaigns.map((c) => {
           const status = STATUS_CONFIG[c.status] || STATUS_CONFIG.draft;
           const StatusIcon = status.icon;
@@ -3676,11 +3740,25 @@ function CampaignSection({
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>
                 )}
+                {onArchive && c.status !== "draft" && c.status !== "archived" && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-muted-foreground hover:text-amber-600"
+                    title="Archive"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onArchive(c.id);
+                    }}
+                  >
+                    <Archive className="h-3.5 w-3.5" />
+                  </Button>
+                )}
               </div>
             </Card>
           );
         })}
-      </div>
+      </div>}
     </div>
   );
 }

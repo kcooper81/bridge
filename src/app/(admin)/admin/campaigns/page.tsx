@@ -173,6 +173,7 @@ export default function CampaignsPage() {
   const [customTemplates, setCustomTemplates] = useState<Array<{ id: string; name: string; subject: string; body_html: string; created_at: string }>>([]);
   const [testEmail, setTestEmail] = useState("");
   const [sendingTest, setSendingTest] = useState(false);
+  const [mailboxes, setMailboxes] = useState<Array<{ email: string; display_name: string }>>([]);
 
   // Editor form state
   const [formName, setFormName] = useState("");
@@ -499,12 +500,23 @@ export default function CampaignsPage() {
     }
   }, []);
 
+  const loadMailboxes = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/mailboxes");
+      const data = await res.json();
+      setMailboxes(data.mailboxes || []);
+    } catch {
+      // Non-critical
+    }
+  }, []);
+
   useEffect(() => {
     loadCampaigns();
     loadSegments();
     loadExternalCount();
     loadAudienceLists();
     loadCustomTemplates();
+    loadMailboxes();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadCampaigns, loadSegments, loadExternalCount, loadAudienceLists]);
 
@@ -1207,12 +1219,25 @@ export default function CampaignsPage() {
               </div>
               <div>
                 <Label htmlFor="campaign-from">From</Label>
-                <Input
-                  id="campaign-from"
-                  value={formFrom}
-                  onChange={(e) => setFormFrom(e.target.value)}
-                  className="mt-1"
-                />
+                <Select value={formFrom} onValueChange={setFormFrom}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select sender" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="TeamPrompt <hello@teamprompt.app>">
+                      TeamPrompt &lt;hello@teamprompt.app&gt;
+                    </SelectItem>
+                    {mailboxes.map((mb) => {
+                      const val = `${mb.display_name} <${mb.email}>`;
+                      if (val === "TeamPrompt <hello@teamprompt.app>") return null;
+                      return (
+                        <SelectItem key={mb.email} value={val}>
+                          {mb.display_name} &lt;{mb.email}&gt;
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
               </div>
             </Card>
 

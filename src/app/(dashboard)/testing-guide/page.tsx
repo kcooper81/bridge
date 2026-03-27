@@ -67,13 +67,13 @@ const TEST_STEPS: TestStep[] = [
   // ── Full-page gates (UpgradeGate) ─────────────────────────────
   {
     id: "FG-1",
-    page: "Analytics",
-    path: "/analytics",
+    page: "Audit",
+    path: "/audit",
     plan: "Free",
     component: "UpgradeGate",
     what: "Full-page feature gate",
-    trigger: "Navigate to /analytics as a Free user",
-    expected: "Centered card with BarChart3 icon, \"Analytics\" heading, 3 benefit bullets, \"Upgrade to Pro\" button linking to /settings/billing, and \"Pro plan\" badge.",
+    trigger: "Navigate to /audit as a Free user (must be admin/manager)",
+    expected: "Centered card with BarChart3 icon, \"Analytics\" heading, 3 benefit bullets, \"Upgrade to Pro\" button linking to /settings/billing, and \"Pro plan\" badge. Members see a role-gate message instead.",
   },
   {
     id: "FG-2",
@@ -149,13 +149,13 @@ const TEST_STEPS: TestStep[] = [
   },
   {
     id: "LP-3",
-    page: "Guidelines",
-    path: "/guidelines",
+    page: "Prompt Library → Guidelines tab",
+    path: "/vault",
     plan: "Free at 5/5",
     component: "UpgradePrompt",
     what: "At-limit inline banner",
-    trigger: "As a Free user with 5 guidelines, visit /guidelines",
-    expected: "Below the page header: banner with BookOpen icon showing \"You've used 5 of 5 guidelines\", subtitle \"Upgrade to Pro for up to 14 guidelines\", and \"Upgrade\" button. Clicking \"New Guideline\" does nothing (no toast).",
+    trigger: "As a Free user with 5 guidelines, visit /vault and click the Guidelines tab",
+    expected: "Banner with BookOpen icon showing \"You've used 5 of 5 guidelines\", subtitle \"Upgrade to Pro for up to 14 guidelines\", and \"Upgrade\" button. Clicking \"New Guideline\" does nothing (no toast).",
   },
 
   // ── Approaching-limit nudges (LimitNudge) ─────────────────────

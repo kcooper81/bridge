@@ -169,17 +169,17 @@ const _RAW_CATEGORIES: RawCategory[] = [
       },
       {
         q: "How do I create guidelines?",
-        a: "Go to the Guidelines page from the sidebar. Click \"New Guideline\" and define a name, description, category, and the specific rules it contains. Guidelines can be suggestions or enforced requirements depending on your configuration.",
+        a: "Go to the Prompt Library and click the \"Guidelines\" tab. Click \"New Guideline\" and define a name, description, category, and the specific rules it contains. Guidelines can be suggestions or enforced requirements depending on your configuration.",
         keywords: ["create", "new guideline", "add", "configure"],
       },
       {
         q: "Can I install pre-built guidelines?",
-        a: "Yes. TeamPrompt ships with a library of default guidelines covering common needs — professional writing, coding standards, customer support tone, marketing voice, and executive communication. Install them with one click from the Templates page and customize to fit your team.",
+        a: "Yes. TeamPrompt ships with a library of default guidelines covering common needs — professional writing, coding standards, customer support tone, marketing voice, and executive communication. Install them with one click from the Guidelines tab in the Prompt Library, or browse template packs by clicking \"Browse Packs\" in the Prompt Library header.",
         keywords: ["default", "pre-built", "install", "library", "template"],
       },
       {
         q: "What's the difference between guidelines and security rules?",
-        a: "Guidelines define quality standards (tone, format, best practices) and are advisory. Security rules detect sensitive data and can block or warn in real-time. Guidelines live on the Guidelines page; security rules live on the Security page under Intelligence.",
+        a: "Guidelines define quality standards (tone, format, best practices) and are advisory. Security rules detect sensitive data and can block or warn in real-time. Guidelines live on the Guidelines tab in the Prompt Library; security rules live on the Guardrails page.",
         keywords: ["difference", "guidelines", "security rules", "security", "quality"],
       },
     ],
@@ -385,13 +385,13 @@ const _RAW_CATEGORIES: RawCategory[] = [
     description: "Track AI usage, security events, audit trails, and team activity.",
     articles: [
       {
-        q: "What does the Analytics page show?",
-        a: "Analytics provides an overview of your workspace's AI usage — total interactions, most-used prompts, active users, interactions by AI tool, prompt effectiveness metrics, and guardrail activity.\n\nThe effectiveness view shows rating distributions, average scores, and trends over time so you can see which prompts actually deliver results.\n\nThe **Guardrail Activity** section (visible to admins and managers when violations exist) shows total blocks and warnings, block rate percentage, number of flagged users, a bar chart of most-triggered rules by severity, a per-member violation breakdown table, and a **Violations by Team** table showing each team's block/warning counts and top violation category. Use it to understand adoption patterns, identify which teams trigger the most security events, and track compliance.",
-        keywords: ["analytics", "dashboard", "metrics", "usage", "stats", "effectiveness", "ratings", "guardrail activity", "violations", "blocks", "warnings"],
+        q: "What does the Audit page show?",
+        a: "The Audit & Compliance page provides a comprehensive view of your organization's AI security posture. It includes:\n\n• **Hero stats** — Total interactions, violations blocked, compliance score, and active policies.\n• **Interaction Flow** — A Sankey diagram showing how teams interact with different AI tools (ChatGPT, Claude, Gemini, etc.).\n• **Violation Trend** — An area chart showing blocked and warned violations over 30 or 90 days.\n• **Violations by Time** — A heatmap showing when violations occur by day-of-week and hour.\n• **Violation Categories** — A donut chart breaking down what types of data are being caught (PII, credentials, API keys, etc.).\n• **Risk Distribution** — A histogram of interaction risk scores.\n• **Compliance Coverage** — Shows which regulatory frameworks (HIPAA, GDPR, PCI-DSS, etc.) have active policies.\n• **Top Triggered Rules** — The most-hit security rules with severity badges.\n• **Usage Overview** — Daily usage chart and top prompts.\n\nUse it for compliance reporting, audit preparation, and understanding your team's AI risk posture. Available to admins and managers.",
+        keywords: ["audit", "analytics", "dashboard", "metrics", "usage", "stats", "compliance", "sankey", "heatmap", "violations", "blocks", "warnings"],
       },
       {
         q: "What guardrail data appears on the dashboard?",
-        a: "For admins and managers, the dashboard shows a Guardrail Activity widget when violations have been recorded. It displays blocks and warnings for the current week, total blocks, number of flagged users, and the top 3 most-triggered rules with severity badges and hit counts. Click the widget to navigate to the full Guardrails page for detailed analysis.",
+        a: "For admins and managers, the dashboard home shows a Guardrail Activity widget when violations have been recorded. It displays blocks and warnings for the current week, total blocks, number of flagged users, and the top 3 most-triggered rules with severity badges and hit counts. For full analytics, visit the Audit page from the sidebar.",
         keywords: ["dashboard", "guardrail widget", "guardrail summary", "blocks", "warnings", "admin dashboard"],
       },
       {
@@ -459,7 +459,7 @@ const _RAW_CATEGORIES: RawCategory[] = [
       },
       {
         q: "What are template packs?",
-        a: "Template packs are curated collections of prompt templates bundled together for a specific use case or workflow. TeamPrompt includes built-in packs for common scenarios like customer support, sales outreach, and content creation. You can also create custom packs by selecting prompts and exporting them as a named pack. Template packs can be shared across organizations or imported from JSON files.",
+        a: "Template packs are curated collections of prompt templates bundled together for a specific use case or workflow. TeamPrompt includes built-in packs for common scenarios like customer support, sales outreach, and content creation. Access template packs by clicking \"Browse Packs\" in the Prompt Library header — they open in a side panel. You can also create custom packs by selecting prompts and exporting them as a named pack.",
         keywords: ["template packs", "packs", "bundles", "collections", "curated", "built-in"],
       },
     ],

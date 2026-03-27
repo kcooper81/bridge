@@ -2,11 +2,11 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { SectionLabel } from "@/components/marketing/section-label";
 import { DarkSection } from "@/components/marketing/dark-section";
-import { CTASection } from "@/components/marketing/cta-section";
+import { GetStartedSteps } from "@/components/marketing/get-started-steps";
+import { LeadCaptureForm } from "@/components/marketing/lead-capture-form";
 import { FAQSection } from "@/components/marketing/faq-section";
 import { StatsRow } from "@/components/marketing/stats-row";
 import { AppMockup } from "@/components/marketing/app-mockup";
-import { HeroImage } from "@/components/marketing/hero-image";
 import { ArrowRight, Shield, MessageCircle, ArrowUpRight } from "lucide-react";
 import {
   Archive,
@@ -61,16 +61,6 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   UserX,
 };
 
-const industryHeroImages: Record<string, { src: string; alt: string; badgeIcon: string; badgeHeadline: string; badgeSubtitle: string; topBadgeIcon: string; topBadgeHeadline: string; topBadgeSubtitle: string }> = {
-  healthcare: { src: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=640&q=80&auto=format&fit=crop", alt: "Healthcare professional reviewing patient information", badgeIcon: "ShieldCheck", badgeHeadline: "PHI detection", badgeSubtitle: "HIPAA-ready scanning", topBadgeIcon: "Eye", topBadgeHeadline: "17 rules active", topBadgeSubtitle: "Real-time monitoring" },
-  legal: { src: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=640&q=80&auto=format&fit=crop", alt: "Legal professional reviewing documents", badgeIcon: "Scale", badgeHeadline: "Client data protected", badgeSubtitle: "Privileged info secured", topBadgeIcon: "Lock", topBadgeHeadline: "100% blocked", topBadgeSubtitle: "Sensitive data caught" },
-  technology: { src: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=640&q=80&auto=format&fit=crop", alt: "Software team collaborating on code", badgeIcon: "Key", badgeHeadline: "Secrets detected", badgeSubtitle: "API keys & tokens caught", topBadgeIcon: "Shield", topBadgeHeadline: "DLP active", topBadgeSubtitle: "Code protected" },
-  finance: { src: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=640&q=80&auto=format&fit=crop", alt: "Finance team analyzing data", badgeIcon: "Lock", badgeHeadline: "PII protected", badgeSubtitle: "Financial data secured", topBadgeIcon: "BarChart3", topBadgeHeadline: "SOX ready", topBadgeSubtitle: "Audit trail active" },
-  government: { src: "https://images.unsplash.com/photo-1555848962-6e79363ec58f?w=640&q=80&auto=format&fit=crop", alt: "United States Capitol building", badgeIcon: "Shield", badgeHeadline: "CUI compliant", badgeSubtitle: "Controlled info blocked", topBadgeIcon: "Lock", topBadgeHeadline: "FedRAMP aligned", topBadgeSubtitle: "Security controls" },
-  education: { src: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=640&q=80&auto=format&fit=crop", alt: "Students collaborating in classroom", badgeIcon: "Users", badgeHeadline: "Student data safe", badgeSubtitle: "FERPA-ready protection", topBadgeIcon: "ShieldCheck", topBadgeHeadline: "PII blocked", topBadgeSubtitle: "Auto-detected" },
-  insurance: { src: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=640&q=80&auto=format&fit=crop", alt: "Insurance professional at desk", badgeIcon: "ShieldAlert", badgeHeadline: "Claims secured", badgeSubtitle: "PII auto-detected", topBadgeIcon: "Eye", topBadgeHeadline: "15 blocked", topBadgeSubtitle: "This week" },
-};
-
 const relatedIndustries: Record<string, { slug: string; name: string; desc: string }[]> = {
   healthcare: [
     { slug: "insurance", name: "Insurance", desc: "Claims & policyholder data protection" },
@@ -110,7 +100,6 @@ const relatedIndustries: Record<string, { slug: string; name: string; desc: stri
 };
 
 export function IndustryPage({ data }: { data: IndustryPageData }) {
-  const heroImg = industryHeroImages[data.slug];
   return (
     <>
       {/* Structured Data */}
@@ -131,124 +120,105 @@ export function IndustryPage({ data }: { data: IndustryPageData }) {
         }}
       />
 
-      {/* ━━━ HERO ━━━ */}
-      <section className="relative overflow-hidden bg-zinc-950 text-white">
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: [
-              "radial-gradient(ellipse 80% 60% at 50% -10%, hsl(221 83% 53% / 0.3) 0%, transparent 60%)",
-              "radial-gradient(ellipse 50% 40% at 80% 50%, hsl(260 60% 50% / 0.12) 0%, transparent 60%)",
-            ].join(", "),
-          }}
-        />
-        <div
-          className="absolute inset-0 pointer-events-none opacity-[0.03]"
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)",
-            backgroundSize: "64px 64px",
-          }}
-        />
+      {/* ━━━ HERO ━━━ Light, centered */}
+      <section className="bg-[#FAFBFC] border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-32 pb-20 sm:pt-40 sm:pb-28 text-center">
+          {/* Compliance badges */}
+          <div className="flex flex-wrap gap-2 mb-8 justify-center">
+            {data.compliance.map((badge) => (
+              <span
+                key={badge}
+                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/60 px-3 py-1 text-xs font-medium text-muted-foreground"
+              >
+                <Shield className="h-3 w-3 text-primary" />
+                {badge}
+              </span>
+            ))}
+          </div>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-32 pb-20 sm:pt-40 sm:pb-28">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
-              {/* Compliance badges */}
-              <div className="flex flex-wrap gap-2 mb-8">
-                {data.compliance.map((badge) => (
-                  <span
-                    key={badge}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-zinc-300 backdrop-blur-sm"
-                  >
-                    <Shield className="h-3 w-3 text-blue-400" />
-                    {badge}
-                  </span>
-                ))}
-              </div>
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.08] max-w-4xl mx-auto">
+            {data.headline}
+          </h1>
 
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.08]">
-                {data.headline}
-              </h1>
+          <p className="mt-6 text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+            {data.subtitle}
+          </p>
 
-              <p className="mt-6 text-lg sm:text-xl text-zinc-400 max-w-xl leading-relaxed">
-                {data.subtitle}
-              </p>
-
-              <div className="mt-10 flex flex-col sm:flex-row gap-4">
-                <Link href="/signup">
-                  <Button
-                    size="lg"
-                    className="text-base px-8 h-12 rounded-full bg-white text-zinc-900 hover:bg-zinc-200 font-semibold"
-                  >
-                    Start for free
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </Link>
-                <Link href="/security">
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    className="text-base px-8 h-12 rounded-full border-white/20 text-white hover:bg-white/10 hover:text-white font-semibold bg-transparent"
-                  >
-                    See data protection
-                  </Button>
-                </Link>
-              </div>
-            </div>
-
-            {heroImg && (() => {
-              const BadgeIcon = iconMap[heroImg.badgeIcon] || Shield;
-              const TopIcon = iconMap[heroImg.topBadgeIcon] || Shield;
-              return (
-                <HeroImage
-                  src={heroImg.src}
-                  alt={heroImg.alt}
-                  badge={{
-                    icon: <BadgeIcon className="h-4 w-4" />,
-                    headline: heroImg.badgeHeadline,
-                    subtitle: heroImg.badgeSubtitle,
-                  }}
-                  topBadge={{
-                    icon: <TopIcon className="h-3.5 w-3.5" />,
-                    headline: heroImg.topBadgeHeadline,
-                    subtitle: heroImg.topBadgeSubtitle,
-                  }}
-                  dark
-                />
-              );
-            })()}
+          <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/signup">
+              <Button
+                size="lg"
+                className="text-base px-8 h-12 rounded-full font-semibold"
+              >
+                Start for free
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+            <Link href="/security">
+              <Button
+                variant="outline"
+                size="lg"
+                className="text-base px-8 h-12 rounded-full font-semibold"
+              >
+                See data protection
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* ━━━ PAIN POINTS ━━━ */}
-      <section className="py-20 sm:py-28 bg-muted/30 border-y border-border">
+      {/* ━━━ PAIN POINTS — Before / After split ━━━ */}
+      <section className="py-20 sm:py-28">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="max-w-2xl mb-14">
-            <SectionLabel>The Problem</SectionLabel>
+          <div className="text-center mb-14">
             <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-              Without TeamPrompt
+              What changes with TeamPrompt
             </h2>
-            <p className="mt-4 text-lg text-muted-foreground">
-              Teams across {data.industry.toLowerCase()} face the same risks when AI tools go unmanaged.
+            <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
+              {data.industry} teams face real risks when AI tools go unmanaged. Here&apos;s how TeamPrompt fixes each one.
             </p>
           </div>
 
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto">
+          <div className="max-w-5xl mx-auto space-y-4">
             {data.painPoints.map((point, i) => (
               <div
                 key={point.title}
-                className="relative rounded-2xl border border-destructive/20 bg-card p-6 pl-8 overflow-hidden"
+                className="grid sm:grid-cols-2 rounded-2xl border border-border overflow-hidden"
               >
-                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-destructive/60 to-destructive/20" />
-                <span className="text-[10px] font-bold uppercase tracking-wider text-destructive/60 mb-3 block">
-                  Risk {i + 1}
-                </span>
-                <h3 className="font-semibold mb-2">{point.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {point.description}
-                </p>
+                {/* Before — the problem */}
+                <div className="p-6 sm:p-8 bg-red-50/50 dark:bg-red-950/10 border-b sm:border-b-0 sm:border-r border-border">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-red-500/10">
+                      <span className="text-[10px] font-bold text-red-500">{i + 1}</span>
+                    </div>
+                    <span className="text-xs font-semibold uppercase tracking-wider text-red-500/70">Without TeamPrompt</span>
+                  </div>
+                  <h3 className="font-semibold text-foreground mb-1.5">{point.title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {point.description}
+                  </p>
+                </div>
+
+                {/* After — the fix */}
+                <div className="p-6 sm:p-8 bg-emerald-50/50 dark:bg-emerald-950/10">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/10">
+                      <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
+                    </div>
+                    <span className="text-xs font-semibold uppercase tracking-wider text-emerald-500/70">With TeamPrompt</span>
+                  </div>
+                  <p className="text-sm text-foreground leading-relaxed font-medium">
+                    {point.title.includes("sensitive") || point.title.includes("data") || point.title.includes("leak")
+                      ? "Real-time DLP scanning detects and blocks sensitive data before it reaches any AI tool."
+                      : point.title.includes("compliance") || point.title.includes("audit") || point.title.includes("regulation")
+                      ? "19 pre-built compliance packs with full audit trails and exportable reports for regulators."
+                      : point.title.includes("prompt") || point.title.includes("quality") || point.title.includes("standard")
+                      ? "One shared prompt library with approval workflows, templates, and quality guidelines."
+                      : point.title.includes("visibility") || point.title.includes("shadow") || point.title.includes("monitor")
+                      ? "Complete visibility into who uses which AI tools, what data is shared, and when."
+                      : "Automated guardrails that protect your team without slowing them down."}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
@@ -418,16 +388,11 @@ export function IndustryPage({ data }: { data: IndustryPageData }) {
         </section>
       )}
 
-      {/* ━━━ CTA ━━━ */}
-      <section className="py-20 sm:py-28 border-t border-border">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6">
-          <CTASection
-            headline={data.cta.headline}
-            gradientText={data.cta.gradientText}
-            subtitle={data.cta.subtitle}
-          />
-        </div>
-      </section>
+      {/* ━━━ GET STARTED + LEAD CAPTURE ━━━ */}
+      <div className="border-t border-border">
+        <GetStartedSteps />
+      </div>
+      <LeadCaptureForm />
     </>
   );
 }

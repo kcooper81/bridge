@@ -7,6 +7,7 @@ import {
   BookOpen,
   CheckCircle2,
   CheckSquare,
+  Eye,
   FileCheck,
   Globe,
   Heart,
@@ -31,7 +32,8 @@ import { cn } from "@/lib/utils";
 import { SectionLabel } from "@/components/marketing/section-label";
 import { FeatureCard } from "@/components/marketing/feature-card";
 
-import { CTASection } from "@/components/marketing/cta-section";
+import { GetStartedSteps } from "@/components/marketing/get-started-steps";
+import { LeadCaptureForm } from "@/components/marketing/lead-capture-form";
 
 export const metadata: Metadata = generatePageMetadata({
   title: "Features — AI DLP, Prompt Library, Compliance & Extensions",
@@ -383,9 +385,9 @@ const primaryFeatures = [
   },
 ];
 
-/* ── Secondary feature data ── */
+/* ── Governance & Security features ── */
 
-const secondaryFeatures = [
+const governanceFeatures = [
   {
     icon: ShieldCheck,
     title: "Smart Redaction",
@@ -393,47 +395,88 @@ const secondaryFeatures = [
       "Automatically replaces sensitive data with category placeholders like [API_KEY] or [SSN]. The message still sends safely without interrupting your team.",
   },
   {
-    icon: Users,
-    title: "Team Management",
+    icon: Activity,
+    title: "Violation Tracking",
     description:
-      "Admin, Manager, and Member roles. Bulk CSV import, Google Workspace sync, domain-based auto-join, and custom welcome emails.",
+      "Every blocked, warned, or redacted interaction is logged with the matched rule, user, AI tool, and timestamp. Risk scoring rates each violation 0-100.",
+  },
+  {
+    icon: Settings,
+    title: "40+ Detection Rules",
+    description:
+      "Pre-built rules for AWS keys, GitHub tokens, Stripe keys, JWT tokens, SSNs, credit cards, passwords, PEM keys, connection strings, and more.",
+  },
+  {
+    icon: Sparkles,
+    title: "AI-Powered Detection",
+    description:
+      "Entropy-based scanning catches high-randomness strings like API keys. AI detection via multiple providers flags data that regex patterns miss.",
   },
   {
     icon: BarChart3,
-    title: "Analytics & Insights",
+    title: "Analytics Dashboard",
     description:
-      "30-day usage charts, top prompts ranking, effectiveness ratings, per-user breakdowns, and week-over-week trend tracking.",
+      "Usage by team, by member, by AI tool. Violation trends, block rates, most-triggered rules, top-rated prompts, and week-over-week comparisons.",
   },
   {
-    icon: BookOpen,
-    title: "Quality Guidelines",
+    icon: Eye,
+    title: "Full Audit Trail",
     description:
-      "Enforce prompt quality with do/don't lists, banned words, required fields, and length constraints. 14 built-in guidelines to start.",
+      "Metadata-only or full-text logging of every AI interaction. Filter by tool, action, date range. Export to CSV or JSON for compliance reviews.",
   },
-  {
-    icon: Import,
-    title: "Import / Export",
-    description:
-      "Bring existing prompts in or share them out. Export named prompt packs as JSON, drag-and-drop import, and move prompts between orgs.",
-  },
+];
+
+/* ── Platform features ── */
+
+const platformFeatures = [
   {
     icon: MessageSquare,
     title: "Built-In AI Chat",
     href: "/features/ai-chat",
     description:
-      "A DLP-protected AI chat with multi-model support (GPT-4o, Claude, Gemini), file uploads, admin commands, and conversation collections.",
+      "DLP-protected AI chat with GPT-4o, Claude Sonnet/Opus, Gemini Flash/Pro. File uploads, conversation collections, compare mode, and admin commands.",
+  },
+  {
+    icon: Users,
+    title: "Team Management",
+    description:
+      "Admin, Manager, and Member roles with per-team policies. Bulk CSV import, Google Workspace sync, domain auto-join, and invite tracking.",
+  },
+  {
+    icon: BookOpen,
+    title: "Quality Guidelines",
+    description:
+      "14 built-in guideline categories. Enforce tone rules, banned words, required fields, and length constraints. Scope them per-team or org-wide.",
   },
   {
     icon: CheckSquare,
-    title: "Approval Queue",
+    title: "Approval Workflows",
     description:
-      "Managers review prompts and rule suggestions before the team can use them. Approve or reject with inline feedback, all in one place.",
+      "Managers review prompts and AI-suggested rules before they go live. Approve or reject with inline feedback. Full audit trail of decisions.",
+  },
+  {
+    icon: Import,
+    title: "Import / Export",
+    description:
+      "Export prompt packs as JSON, import from file, bulk CSV user import. Move prompts between orgs or share curated packs with teams.",
   },
   {
     icon: FileCheck,
     title: "Template Packs",
     description:
-      "Pre-built prompt packs for marketing, sales, engineering, and support. Install a pack and your team is productive on day one.",
+      "8 pre-built packs for marketing, sales, engineering, support, HR, legal, executive, and analytics. Install and your team is productive on day one.",
+  },
+  {
+    icon: Star,
+    title: "Sensitive Terms Manager",
+    description:
+      "Custom sensitive terms by category: customer data, employee data, project names, financial data. Import from CSV or let AI suggest terms from violations.",
+  },
+  {
+    icon: Globe,
+    title: "MCP Integration",
+    description:
+      "Model Context Protocol support for AI coding tools like Claude Desktop, Cursor, and Windsurf. Generate API keys and configure MCP-enabled tools.",
   },
 ];
 
@@ -449,22 +492,21 @@ export default function FeaturesPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbs) }}
       />
+    {/* ── Hero ── Light, Lumia-inspired */}
+    <section className="bg-[#FAFBFC] border-b border-border pt-32 pb-20 sm:pt-40 sm:pb-28">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center">
+        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-tight">
+          AI Usage Control.{" "}
+          <span className="text-primary">One Platform.</span>
+        </h1>
+        <p className="mt-6 text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto">
+          TeamPrompt combines a shared prompt library, real-time DLP protection, compliance packs for 19 frameworks, and a browser extension that works inside ChatGPT, Claude, and Gemini.
+        </p>
+      </div>
+    </section>
+
     <div className="py-20 sm:py-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
-
-        {/* ── Hero ── */}
-        <div className="max-w-3xl mb-24">
-          <SectionLabel>Features</SectionLabel>
-          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight leading-tight">
-            One place for your team&apos;s prompts, security, and compliance
-          </h1>
-          <p className="mt-6 text-lg text-muted-foreground leading-relaxed max-w-2xl">
-            TeamPrompt combines a shared prompt library, real-time DLP protection, compliance packs for 19 frameworks, and a browser extension that works inside ChatGPT, Claude, and Gemini.
-          </p>
-          <p className="mt-3 text-base text-muted-foreground/80 max-w-2xl">
-            Everything your team needs to use AI safely and productively, without changing how they work.
-          </p>
-        </div>
 
         {/* ── Primary Features ── */}
         <div className="space-y-28">
@@ -506,19 +548,42 @@ export default function FeaturesPage() {
           })}
         </div>
 
-        {/* ── Secondary Features ── */}
+        {/* ── Governance & Security ── */}
         <div className="mt-32">
           <div className="text-center mb-12">
-            <SectionLabel>More capabilities</SectionLabel>
+            <SectionLabel>Governance & Security</SectionLabel>
             <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
-              Everything else your team needs
+              Visibility, enforcement, and accountability
             </h2>
             <p className="mt-4 text-muted-foreground max-w-xl mx-auto">
-              Beyond the core platform, TeamPrompt includes the tools to manage teams, enforce quality, and keep improving.
+              40+ detection rules, AI-powered scanning, violation tracking with risk scores, and full audit trails for every AI interaction.
+            </p>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {governanceFeatures.map((feature) => (
+              <FeatureCard
+                key={feature.title}
+                icon={feature.icon}
+                title={feature.title}
+                description={feature.description}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* ── Platform Capabilities ── */}
+        <div className="mt-32">
+          <div className="text-center mb-12">
+            <SectionLabel>Platform</SectionLabel>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
+              Everything your team needs to use AI productively
+            </h2>
+            <p className="mt-4 text-muted-foreground max-w-xl mx-auto">
+              Multi-model AI chat, team management, approval workflows, template packs, MCP integration, and more.
             </p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {secondaryFeatures.map((feature) => (
+            {platformFeatures.map((feature) => (
               <FeatureCard
                 key={feature.title}
                 icon={feature.icon}
@@ -559,17 +624,14 @@ export default function FeaturesPage() {
           </div>
         </div>
 
-        {/* ── Bottom CTA ── */}
-        <div className="mt-0">
-          <CTASection
-            headline="See it for yourself."
-            gradientText="Start for free."
-            subtitle="Create a free workspace in under two minutes. No credit card required."
-            buttonText="Start for free"
-          />
-        </div>
       </div>
     </div>
+
+    {/* ── Get Started + Lead Capture ── */}
+    <div className="border-t border-border">
+      <GetStartedSteps />
+    </div>
+    <LeadCaptureForm />
     </>
   );
 }

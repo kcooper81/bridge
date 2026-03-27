@@ -1,14 +1,13 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { SectionLabel } from "@/components/marketing/section-label";
-import { DarkSection } from "@/components/marketing/dark-section";
-import { CTASection } from "@/components/marketing/cta-section";
+import { GetStartedSteps } from "@/components/marketing/get-started-steps";
+import { LeadCaptureForm } from "@/components/marketing/lead-capture-form";
 import { FAQSection } from "@/components/marketing/faq-section";
 import { StatsRow } from "@/components/marketing/stats-row";
 import { BenefitsGrid } from "@/components/marketing/benefits-grid";
 import { AppMockup } from "@/components/marketing/app-mockup";
 import { ContactSalesModal } from "@/components/marketing/contact-sales-modal";
-import { HeroImage } from "@/components/marketing/hero-image";
 import { generatePageMetadata } from "@/lib/seo/metadata";
 import { generateBreadcrumbSchema, generateFAQSchema } from "@/lib/seo/schemas";
 import {
@@ -186,87 +185,52 @@ export default function EnterprisePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
-      {/* ━━━ HERO ━━━ */}
-      <section className="relative overflow-hidden bg-zinc-950 text-white">
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: [
-              "radial-gradient(ellipse 80% 60% at 50% -10%, hsl(221 83% 53% / 0.25) 0%, transparent 60%)",
-              "radial-gradient(ellipse 50% 40% at 20% 80%, hsl(260 60% 50% / 0.1) 0%, transparent 60%)",
-            ].join(", "),
-          }}
-        />
-        <div
-          className="absolute inset-0 pointer-events-none opacity-[0.03]"
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)",
-            backgroundSize: "64px 64px",
-          }}
-        />
+      {/* ━━━ HERO ━━━ Light, Lumia-inspired */}
+      <section className="bg-[#FAFBFC] border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-32 pb-20 sm:pt-40 sm:pb-28 text-center">
+          <div className="flex flex-wrap gap-2 mb-8 justify-center">
+            {capabilityBadges.map((badge) => (
+              <span
+                key={badge}
+                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/60 px-3 py-1 text-xs font-medium text-muted-foreground"
+              >
+                <Shield className="h-3 w-3 text-primary" />
+                {badge}
+              </span>
+            ))}
+          </div>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-32 pb-20 sm:pt-40 sm:pb-28">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <div className="flex flex-wrap gap-2 mb-8">
-                {capabilityBadges.map((badge) => (
-                  <span
-                    key={badge}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-zinc-300 backdrop-blur-sm"
-                  >
-                    <Shield className="h-3 w-3 text-blue-400" />
-                    {badge}
-                  </span>
-                ))}
-              </div>
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.08] max-w-4xl mx-auto">
+            Your employees paste customer data into AI every day
+          </h1>
 
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.08]">
-                Your employees paste customer
-                <br />
-                data into AI every day
-              </h1>
+          <p className="mt-6 text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+            Auto-install TeamPrompt on every company browser. Employees
+            get data protection, a shared prompt library, and activity
+            logging from day one — with zero setup on their end.
+          </p>
 
-              <p className="mt-6 text-lg sm:text-xl text-zinc-400 max-w-xl leading-relaxed">
-                Auto-install TeamPrompt on every company browser. Employees
-                get data protection, a shared prompt library, and activity
-                logging from day one — with zero setup on their end.
-              </p>
-
-              <div className="mt-10 flex flex-col sm:flex-row gap-4">
-                <Link href="/signup">
-                  <Button
-                    size="lg"
-                    className="text-base px-8 h-12 rounded-full bg-white text-zinc-900 hover:bg-zinc-200 font-semibold"
-                  >
-                    Start for free
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </Link>
-                <ContactSalesModal buttonVariant="outline-dark" />
-              </div>
-            </div>
-
-            <HeroImage
-              src="https://images.unsplash.com/photo-1553877522-43269d4ea984?w=640&q=80&auto=format&fit=crop"
-              alt="Professional working at desk"
-              badge={{
-                icon: <Monitor className="h-4 w-4" />,
-                headline: "Zero employee setup",
-                subtitle: "Auto-install on every browser",
-              }}
-              dark
-            />
+          <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/signup">
+              <Button
+                size="lg"
+                className="text-base px-8 h-12 rounded-full font-semibold"
+              >
+                Start for free
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+            <ContactSalesModal />
           </div>
         </div>
       </section>
 
       {/* ━━━ STATS ━━━ */}
-      <DarkSection className="mx-4 sm:mx-6 lg:mx-auto max-w-5xl -mt-8 relative z-10">
-        <div className="py-4">
-          <StatsRow stats={stats} dark className="max-w-3xl mx-auto" />
+      <section className="py-10 border-b border-border">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+          <StatsRow stats={stats} className="max-w-3xl mx-auto" />
         </div>
-      </DarkSection>
+      </section>
 
       {/* ━━━ HOW IT WORKS — DEPLOYMENT ━━━ */}
       <section className="py-20 sm:py-28">
@@ -461,34 +425,11 @@ export default function EnterprisePage() {
         </div>
       </section>
 
-      {/* ━━━ CTA ━━━ */}
-      <section className="py-20 sm:py-28 border-t border-border">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6">
-          <CTASection
-            headline="Ready to protect your team's"
-            gradientText="AI usage?"
-            subtitle="Start with the free plan, or talk to sales about company-wide deployment."
-            buttonText="Start for free"
-          />
-          <div className="flex items-center justify-center gap-6 mt-8 text-sm">
-            <Link
-              href="/security"
-              className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-primary transition-colors"
-            >
-              <Shield className="h-4 w-4" />
-              Data protection details
-            </Link>
-            <span className="text-border">|</span>
-            <Link
-              href="/pricing"
-              className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-primary transition-colors"
-            >
-              <BarChart3 className="h-4 w-4" />
-              Compare plans & pricing
-            </Link>
-          </div>
-        </div>
-      </section>
+      {/* ━━━ GET STARTED + LEAD CAPTURE ━━━ */}
+      <div className="border-t border-border">
+        <GetStartedSteps />
+      </div>
+      <LeadCaptureForm />
     </>
   );
 }

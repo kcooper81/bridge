@@ -10,7 +10,6 @@ import {
   Key,
   Lock,
   Scale,
-  Shield,
   ShieldAlert,
   ShieldCheck,
   UserX,
@@ -20,8 +19,8 @@ import { generateBreadcrumbSchema } from "@/lib/seo/schemas";
 import { DarkSection } from "@/components/marketing/dark-section";
 import { SectionLabel } from "@/components/marketing/section-label";
 import { BenefitsGrid } from "@/components/marketing/benefits-grid";
-import { CTASection } from "@/components/marketing/cta-section";
-import { HeroImage } from "@/components/marketing/hero-image";
+import { GetStartedSteps } from "@/components/marketing/get-started-steps";
+import { LeadCaptureForm } from "@/components/marketing/lead-capture-form";
 
 export const metadata: Metadata = generatePageMetadata({
   title: "Sensitive Data Protection for AI Tools",
@@ -87,43 +86,31 @@ export default function SecurityPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbs) }}
       />
+    {/* Hero — Light, Lumia-inspired */}
+    <section className="bg-[#FAFBFC] border-b border-border">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-32 pb-20 sm:pt-40 sm:pb-28 text-center">
+        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-tight max-w-4xl mx-auto">
+          Stop sensitive data{" "}
+          <span className="text-primary">before it reaches AI.</span>
+        </h1>
+        <p className="mt-6 text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto">
+          TeamPrompt automatically detects and blocks sensitive information
+          — patient records, financial data, passwords, and more — before
+          it reaches AI tools like ChatGPT, Claude, and Gemini.
+        </p>
+        <div className="mt-8">
+          <Link href="/signup">
+            <Button size="lg" className="text-base px-8 h-12 rounded-full font-semibold">
+              Get Protected
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </Link>
+        </div>
+      </div>
+    </section>
+
     <div className="py-20 sm:py-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        {/* Hero */}
-        <div className="grid lg:grid-cols-2 gap-12 items-center mb-20">
-          <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm text-primary mb-6">
-              <Shield className="h-3.5 w-3.5" />
-              <span className="font-medium">Data Protection</span>
-            </div>
-            <h1 className="text-4xl sm:text-5xl font-bold tracking-tight leading-tight">
-              Stop sensitive data from leaking into AI tools
-            </h1>
-            <p className="mt-6 text-lg text-muted-foreground leading-relaxed max-w-2xl">
-              TeamPrompt automatically detects and blocks sensitive information
-              — patient records, financial data, passwords, and more — before
-              it reaches AI tools like ChatGPT, Claude, and Gemini.
-            </p>
-            <div className="mt-8">
-              <Link href="/signup">
-                <Button size="lg" className="text-base px-8 h-12 rounded-full font-semibold">
-                  Get Protected
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
-            </div>
-          </div>
-
-          <HeroImage
-            src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=640&q=80&auto=format&fit=crop"
-            alt="Person working at laptop"
-            badge={{
-              icon: <ShieldCheck className="h-4 w-4" />,
-              headline: "Real-time scanning",
-              subtitle: "Block data before it leaks",
-            }}
-          />
-        </div>
 
         {/* Categories — bento layout */}
         <div className="grid gap-4 sm:grid-cols-2 mb-24">
@@ -269,15 +256,14 @@ export default function SecurityPage() {
           </div>
         </div>
 
-        {/* CTA */}
-        <CTASection
-          headline="Your team is already pasting sensitive data into AI."
-          gradientText="Fix that today."
-          subtitle="Free tier includes basic data protection. Upgrade for custom rules and full activity logging."
-          buttonText="Start Free"
-        />
       </div>
     </div>
+
+    {/* Get Started + Lead Capture */}
+    <div className="border-t border-border">
+      <GetStartedSteps />
+    </div>
+    <LeadCaptureForm />
     </>
   );
 }

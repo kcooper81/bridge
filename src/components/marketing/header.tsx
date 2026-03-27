@@ -7,12 +7,29 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, ChevronDown, BookOpen, MessageSquare, PenLine } from "lucide-react";
-import { SolutionsDropdown, MobileSolutionsMenu } from "./mega-menu";
+import {
+  Menu,
+  ChevronDown,
+  BookOpen,
+  MessageSquare,
+  PenLine,
+  Shield,
+  Lock,
+  FileSearch,
+  ClipboardList,
+  Eye,
+  Zap,
+  HeartPulse,
+  Gavel,
+  Laptop,
+  PiggyBank,
+  Landmark,
+  GraduationCap,
+  ShieldCheck,
+} from "lucide-react";
 
 export function MarketingHeader() {
   const pathname = usePathname();
-  const isHomepage = pathname === "/";
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -26,21 +43,10 @@ export function MarketingHeader() {
 
   const headerBg = scrolled
     ? "bg-background/80 backdrop-blur-xl border-b border-border/50 shadow-sm"
-    : isHomepage
-      ? "bg-transparent"
-      : "bg-background border-b border-border";
+    : "bg-background border-b border-border";
 
-  const textClass = isHomepage && !scrolled
-    ? "text-zinc-300 hover:text-white"
-    : "text-foreground/90 hover:text-foreground";
-
-  const activeTextClass = isHomepage && !scrolled
-    ? "text-white"
-    : "text-foreground";
-
-  const logoTextClass = isHomepage && !scrolled
-    ? "text-white"
-    : "text-foreground";
+  const textClass = "text-foreground/70 hover:text-foreground";
+  const activeTextClass = "text-foreground";
 
   return (
     <header
@@ -52,8 +58,8 @@ export function MarketingHeader() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2.5">
-          <Image src={isHomepage && !scrolled ? "/logo-dark.svg" : "/logo.svg"} alt="TeamPrompt" width={28} height={28} className="rounded-lg" />
-          <span className={cn("text-lg font-bold transition-colors", logoTextClass)}>
+          <Image src="/logo.svg" alt="TeamPrompt" width={28} height={28} className="rounded-lg" />
+          <span className="text-lg font-bold text-foreground">
             TeamPrompt
           </span>
         </Link>
@@ -67,13 +73,12 @@ export function MarketingHeader() {
               pathname === "/features" ? activeTextClass : textClass
             )}
           >
-            Features
+            Platform
           </Link>
 
-          <SolutionsDropdown
-            textClass={textClass}
-            activeTextClass={activeTextClass}
-          />
+          <UseCasesDropdown textClass={textClass} activeTextClass={activeTextClass} />
+
+          <SolutionsDropdown textClass={textClass} activeTextClass={activeTextClass} />
 
           <Link
             href="/pricing"
@@ -85,30 +90,9 @@ export function MarketingHeader() {
             Pricing
           </Link>
 
-          <Link
-            href="/extensions"
-            className={cn(
-              "text-sm font-medium transition-colors",
-              pathname === "/extensions" ? activeTextClass : textClass
-            )}
-          >
-            Extensions
-          </Link>
-
-          <Link
-            href="/enterprise"
-            className={cn(
-              "text-sm font-medium transition-colors",
-              pathname === "/enterprise" ? activeTextClass : textClass
-            )}
-          >
-            Enterprise
-          </Link>
-
-          <HelpDropdown
+          <ResourcesDropdown
             textClass={textClass}
             activeTextClass={activeTextClass}
-            pathname={pathname}
           />
         </nav>
 
@@ -134,11 +118,7 @@ export function MarketingHeader() {
         <div className="md:hidden">
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
             <SheetTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className={isHomepage && !scrolled ? "text-white hover:bg-white/10" : ""}
-              >
+              <Button variant="ghost" size="icon">
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
@@ -150,10 +130,11 @@ export function MarketingHeader() {
                   onClick={() => setMobileOpen(false)}
                   className="text-lg font-medium hover:text-primary transition-colors"
                 >
-                  Features
+                  Platform
                 </Link>
 
-                <MobileSolutionsMenu onNavigate={() => setMobileOpen(false)} />
+                <MobileAccordion title="Use Cases" onNavigate={() => setMobileOpen(false)} items={useCaseItems} />
+                <MobileAccordion title="Solutions" onNavigate={() => setMobileOpen(false)} items={solutionItems} />
 
                 <Link
                   href="/pricing"
@@ -162,21 +143,9 @@ export function MarketingHeader() {
                 >
                   Pricing
                 </Link>
-                <Link
-                  href="/extensions"
-                  onClick={() => setMobileOpen(false)}
-                  className="text-lg font-medium hover:text-primary transition-colors"
-                >
-                  Extensions
-                </Link>
-                <Link
-                  href="/enterprise"
-                  onClick={() => setMobileOpen(false)}
-                  className="text-lg font-medium hover:text-primary transition-colors"
-                >
-                  Enterprise
-                </Link>
-                <MobileHelpMenu onNavigate={() => setMobileOpen(false)} />
+
+                <MobileAccordion title="Resources" onNavigate={() => setMobileOpen(false)} items={resourceItems} />
+
                 <div className="border-t border-border pt-4 mt-4 flex flex-col gap-3">
                   <Link href="/signup" onClick={() => setMobileOpen(false)}>
                     <Button className="w-full rounded-full">Get Started</Button>
@@ -198,16 +167,47 @@ export function MarketingHeader() {
   );
 }
 
-/* ── Help dropdown (desktop) ────────────────────── */
+/* ── Data ────────────────────── */
 
-function HelpDropdown({
+const useCaseItems = [
+  { label: "Teams & Employees", desc: "Enable AI without the risk.", href: "/features", icon: Zap, bg: "bg-blue-500/10" },
+  { label: "Enterprise", desc: "Auto-deploy across your organization.", href: "/enterprise", icon: Shield, bg: "bg-violet-500/10" },
+  { label: "Healthcare", desc: "HIPAA-ready AI workflows.", href: "/industries/healthcare", icon: HeartPulse, bg: "bg-rose-500/10" },
+  { label: "Legal", desc: "Confidential prompt governance.", href: "/industries/legal", icon: Gavel, bg: "bg-amber-500/10" },
+  { label: "Finance", desc: "Compliant AI for financial teams.", href: "/industries/finance", icon: PiggyBank, bg: "bg-emerald-500/10" },
+  { label: "Technology", desc: "Ship faster with shared prompts.", href: "/industries/technology", icon: Laptop, bg: "bg-blue-500/10" },
+  { label: "Government", desc: "Secure AI for public sector.", href: "/industries/government", icon: Landmark, bg: "bg-violet-500/10" },
+  { label: "Education", desc: "FERPA-safe AI for institutions.", href: "/industries/education", icon: GraduationCap, bg: "bg-orange-500/10" },
+];
+
+const solutionItems = [
+  { label: "Shadow AI Analysis", desc: "Discover how AI is actually used.", href: "/security", icon: Eye, bg: "bg-violet-500/10" },
+  { label: "Leakage Prevention", desc: "Block sensitive data in real time.", href: "/security", icon: Lock, bg: "bg-red-500/10" },
+  { label: "Maintaining Compliance", desc: "19 frameworks, one-click enable.", href: "/features#compliance-policy-packs", icon: FileSearch, bg: "bg-emerald-500/10" },
+  { label: "Prompt Library", desc: "Organize and share prompt collections.", href: "/features#prompt-library", icon: ClipboardList, bg: "bg-blue-500/10" },
+  { label: "Browser Extension", desc: "Works inside ChatGPT, Claude & more.", href: "/extensions", icon: ShieldCheck, bg: "bg-teal-500/10" },
+];
+
+const resourceItems = [
+  { label: "Documentation", desc: "Guides & articles.", href: "/help", icon: BookOpen, bg: "bg-blue-500/10" },
+  { label: "Blog", desc: "Tips, insights & research.", href: "/blog", icon: PenLine, bg: "bg-amber-500/10" },
+  { label: "Contact", desc: "Get in touch.", href: "/contact", icon: MessageSquare, bg: "bg-emerald-500/10" },
+];
+
+/* ── Reusable desktop dropdown ────────────────────── */
+
+function NavDropdown({
+  label,
+  items,
   textClass,
   activeTextClass,
-  pathname,
+  wide = false,
 }: {
+  label: string;
+  items: typeof useCaseItems;
   textClass: string;
   activeTextClass: string;
-  pathname: string;
+  wide?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -218,8 +218,6 @@ function HelpDropdown({
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
   }, []);
-
-  const isActive = pathname === "/help" || pathname.startsWith("/help/") || pathname === "/contact" || pathname.startsWith("/blog");
 
   return (
     <div
@@ -236,11 +234,11 @@ function HelpDropdown({
       <button
         className={cn(
           "text-sm font-medium transition-colors flex items-center gap-1",
-          open || isActive ? activeTextClass : textClass
+          open ? activeTextClass : textClass
         )}
         onClick={() => setOpen(!open)}
       >
-        Help
+        {label}
         <ChevronDown
           className={cn(
             "h-3.5 w-3.5 transition-transform duration-200",
@@ -250,47 +248,29 @@ function HelpDropdown({
       </button>
 
       {open && (
-        <div className="absolute top-full right-0 pt-3 z-50">
-          <div className="w-52 rounded-xl border border-border bg-card shadow-xl shadow-black/10 p-2">
-            <Link
-              href="/help"
-              onClick={() => setOpen(false)}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-foreground/80 hover:text-foreground hover:bg-muted/50 transition-colors"
-            >
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10 shrink-0">
-                <BookOpen className="h-4 w-4 text-foreground/70" />
-              </span>
-              <div>
-                <p className="text-sm font-medium">Documentation</p>
-                <p className="text-xs text-muted-foreground">Guides & articles</p>
-              </div>
-            </Link>
-            <Link
-              href="/blog"
-              onClick={() => setOpen(false)}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-foreground/80 hover:text-foreground hover:bg-muted/50 transition-colors"
-            >
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10 shrink-0">
-                <PenLine className="h-4 w-4 text-foreground/70" />
-              </span>
-              <div>
-                <p className="text-sm font-medium">Blog</p>
-                <p className="text-xs text-muted-foreground">Tips & insights</p>
-              </div>
-            </Link>
-            <Link
-              href="/contact"
-              onClick={() => setOpen(false)}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-foreground/80 hover:text-foreground hover:bg-muted/50 transition-colors"
-            >
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10 shrink-0">
-                <MessageSquare className="h-4 w-4 text-foreground/70" />
-              </span>
-              <div>
-                <p className="text-sm font-medium">Contact</p>
-                <p className="text-xs text-muted-foreground">Get in touch</p>
-              </div>
-            </Link>
+        <div className="absolute top-full left-1/2 -translate-x-1/2 pt-3 z-50">
+          <div className={cn(
+            "rounded-xl border border-border bg-card shadow-xl shadow-black/10 p-3",
+            wide ? "w-[480px]" : "w-72"
+          )}>
+            <div className={wide ? "grid grid-cols-2 gap-1" : "space-y-1"}>
+              {items.map((item) => (
+                <Link
+                  key={item.href + item.label}
+                  href={item.href}
+                  onClick={() => setOpen(false)}
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-foreground/80 hover:text-foreground hover:bg-muted/50 transition-colors"
+                >
+                  <span className={cn("flex h-8 w-8 items-center justify-center rounded-lg shrink-0", item.bg)}>
+                    <item.icon className="h-4 w-4 text-foreground/70" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium">{item.label}</p>
+                    <p className="text-xs text-muted-foreground truncate">{item.desc}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       )}
@@ -298,9 +278,29 @@ function HelpDropdown({
   );
 }
 
-/* ── Help accordion (mobile) ────────────────────── */
+function UseCasesDropdown({ textClass, activeTextClass }: { textClass: string; activeTextClass: string }) {
+  return <NavDropdown label="Use Cases" items={useCaseItems} textClass={textClass} activeTextClass={activeTextClass} wide />;
+}
 
-function MobileHelpMenu({ onNavigate }: { onNavigate: () => void }) {
+function SolutionsDropdown({ textClass, activeTextClass }: { textClass: string; activeTextClass: string }) {
+  return <NavDropdown label="Solutions" items={solutionItems} textClass={textClass} activeTextClass={activeTextClass} />;
+}
+
+function ResourcesDropdown({ textClass, activeTextClass }: { textClass: string; activeTextClass: string }) {
+  return <NavDropdown label="Resources" items={resourceItems} textClass={textClass} activeTextClass={activeTextClass} />;
+}
+
+/* ── Mobile accordion ────────────────────── */
+
+function MobileAccordion({
+  title,
+  items,
+  onNavigate,
+}: {
+  title: string;
+  items: typeof useCaseItems;
+  onNavigate: () => void;
+}) {
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -309,7 +309,7 @@ function MobileHelpMenu({ onNavigate }: { onNavigate: () => void }) {
         onClick={() => setExpanded(!expanded)}
         className="text-lg font-medium hover:text-primary transition-colors flex items-center gap-1 w-full"
       >
-        Help
+        {title}
         <ChevronDown
           className={cn(
             "h-4 w-4 transition-transform duration-200",
@@ -319,36 +319,21 @@ function MobileHelpMenu({ onNavigate }: { onNavigate: () => void }) {
       </button>
       {expanded && (
         <div className="ml-4 mt-2 space-y-3">
-          <Link
-            href="/help"
-            onClick={onNavigate}
-            className="flex items-center gap-2 text-sm text-foreground/80 hover:text-foreground transition-colors"
-          >
-            <span className="flex h-6 w-6 items-center justify-center rounded-md bg-blue-500/10 shrink-0">
-              <BookOpen className="h-3.5 w-3.5 text-foreground/70" />
-            </span>
-            Documentation
-          </Link>
-          <Link
-            href="/blog"
-            onClick={onNavigate}
-            className="flex items-center gap-2 text-sm text-foreground/80 hover:text-foreground transition-colors"
-          >
-            <span className="flex h-6 w-6 items-center justify-center rounded-md bg-amber-500/10 shrink-0">
-              <PenLine className="h-3.5 w-3.5 text-foreground/70" />
-            </span>
-            Blog
-          </Link>
-          <Link
-            href="/contact"
-            onClick={onNavigate}
-            className="flex items-center gap-2 text-sm text-foreground/80 hover:text-foreground transition-colors"
-          >
-            <span className="flex h-6 w-6 items-center justify-center rounded-md bg-emerald-500/10 shrink-0">
-              <MessageSquare className="h-3.5 w-3.5 text-foreground/70" />
-            </span>
-            Contact
-          </Link>
+          {items.map((item) => (
+            <Link
+              key={item.href + item.label}
+              href={item.href}
+              onClick={onNavigate}
+              className="flex items-center gap-2 text-sm text-foreground/80 hover:text-foreground transition-colors"
+            >
+              <span className={cn("flex h-6 w-6 items-center justify-center rounded-md shrink-0", item.bg)}>
+                <item.icon className="h-3.5 w-3.5 text-foreground/70" />
+              </span>
+              <div className="min-w-0">
+                <p className="text-sm font-medium">{item.label}</p>
+              </div>
+            </Link>
+          ))}
         </div>
       )}
     </div>

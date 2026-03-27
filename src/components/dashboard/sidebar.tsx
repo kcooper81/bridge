@@ -13,12 +13,10 @@ import {
   Activity,
   Archive,
   BarChart3,
-  BookOpen,
   CheckSquare,
   ChevronLeft,
   HelpCircle,
   LayoutDashboard,
-  Library,
   MessageSquare,
   Shield,
   Users,
@@ -94,15 +92,14 @@ const navSections: { title: string; items: NavItem[] }[] = [
     items: [
       { label: "AI Chat", href: "/chat", icon: MessageSquare, roles: ["__ai_chat__"] },
       { label: "Prompt Library", href: "/vault", icon: Archive },
-      { label: "Template Packs", href: "/templates", icon: Library },
     ],
   },
   {
     title: "Security",
     items: [
       { label: "Guardrails", href: "/guardrails", icon: Shield },
-      { label: "Activity Log", href: "/activity", icon: Activity, roles: ["admin", "manager"] },
-      { label: "Analytics", href: "/analytics", icon: BarChart3, roles: ["admin", "manager"] },
+      { label: "Activity", href: "/activity", icon: Activity, roles: ["admin", "manager"] },
+      { label: "Audit", href: "/audit", icon: BarChart3, roles: ["admin", "manager"] },
     ],
   },
   {
@@ -110,7 +107,6 @@ const navSections: { title: string; items: NavItem[] }[] = [
     items: [
       { label: "Team", href: "/team", icon: Users },
       { label: "Approvals", href: "/approvals", icon: CheckSquare, roles: ["admin", "manager"] },
-      { label: "Guidelines", href: "/guidelines", icon: BookOpen },
     ],
   },
 ];

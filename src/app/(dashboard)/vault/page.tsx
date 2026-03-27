@@ -77,6 +77,11 @@ import { ImportExportModal } from "@/components/dashboard/import-export-modal";
 import { FolderManager } from "@/components/dashboard/folder-manager";
 import { ManageCategoriesModal } from "@/components/dashboard/manage-categories-modal";
 import { FillTemplateModal } from "@/components/modals/fill-template-modal";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { VaultGuidelines } from "@/components/dashboard/vault-guidelines";
+import { VaultTemplatePacks } from "@/components/dashboard/vault-template-packs";
+import { Library } from "lucide-react";
 
 const STATUS_TABS: { label: string; value: PromptStatus | "all" }[] = [
   { label: "All", value: "all" },
@@ -141,6 +146,7 @@ export default function VaultPage() {
   const [vaultPageSize, setVaultPageSize] = useState(VAULT_PAGE_SIZE);
   const [modalOpen, setModalOpen] = useState(false);
   const [importExportOpen, setImportExportOpen] = useState(false);
+  const [packsOpen, setPacksOpen] = useState(false);
   const [categoriesOpen, setCategoriesOpen] = useState(false);
   const [editPrompt, setEditPrompt] = useState<Prompt | null>(null);
   const [fillPrompt, setFillPrompt] = useState<Prompt | null>(null);
@@ -360,7 +366,7 @@ export default function VaultPage() {
   if (noOrg) {
     return (
       <>
-        <PageHeader title="Prompts" description="Manage and organize your team's AI prompts" />
+        <PageHeader title="Prompt Library" description="Manage prompts, guidelines, and template packs" />
         <NoOrgBanner />
       </>
     );
@@ -369,10 +375,14 @@ export default function VaultPage() {
   return (
     <>
       <PageHeader
-        title="Prompts"
-        description="Manage and organize your team's AI prompts"
+        title="Prompt Library"
+        description="Manage prompts, guidelines, and template packs"
         actions={
           <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => setPacksOpen(true)}>
+              <Library className="mr-2 h-4 w-4" />
+              Browse Packs
+            </Button>
             {canAccess("import_export") ? (
               <Button variant="outline" size="sm" onClick={() => setImportExportOpen(true)}>
                 <Import className="mr-2 h-4 w-4" />
@@ -393,6 +403,19 @@ export default function VaultPage() {
           </div>
         }
       />
+
+      {/* Top-level Tabs */}
+      <Tabs defaultValue="prompts" className="mb-6">
+        <TabsList>
+          <TabsTrigger value="prompts">Prompts</TabsTrigger>
+          <TabsTrigger value="guidelines">Guidelines</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="guidelines" className="mt-6">
+          <VaultGuidelines />
+        </TabsContent>
+
+        <TabsContent value="prompts" className="mt-0">
 
       {!checkLimit("create_prompt", prompts.length) && (
         <UpgradePrompt feature="create_prompt" current={prompts.length} max={planLimits.max_prompts} className="mb-6" />
@@ -1045,6 +1068,21 @@ export default function VaultPage() {
         open={categoriesOpen}
         onOpenChange={setCategoriesOpen}
       />
+
+      </TabsContent>
+      </Tabs>
+
+      {/* Browse Packs Sheet */}
+      <Sheet open={packsOpen} onOpenChange={setPacksOpen}>
+        <SheetContent className="sm:max-w-lg overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>Template Packs</SheetTitle>
+          </SheetHeader>
+          <div className="mt-6">
+            <VaultTemplatePacks />
+          </div>
+        </SheetContent>
+      </Sheet>
     </>
   );
 }

@@ -1,0 +1,1411 @@
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
+import { useOrg } from "@/components/providers/org-provider";
+import { createClient } from "@/lib/supabase/client";
+import { PageSkeleton } from "@/components/dashboard/skeleton-loader";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { NoOrgBanner } from "@/components/dashboard/no-org-banner";
+import { installLibraryPack } from "@/lib/vault-api";
+import { LIBRARY_PACKS } from "@/lib/library/packs";
+import type { LibraryPack } from "@/lib/library/packs";
+import { toast } from "sonner";
+import {
+  BookOpen,
+  Check,
+  CheckCircle2,
+  Clock,
+  Code2,
+  Crown,
+  Download,
+  FileText,
+  FolderOpen,
+  Headphones,
+  LayoutDashboard,
+  Loader2,
+  Megaphone,
+  Package,
+  Plus,
+  Scale,
+  Send,
+  Shield,
+  Trash2,
+  TrendingUp,
+  Users,
+  X,
+} from "lucide-react";
+
+// Map icon string names to components
+const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
+  Code2,
+  Megaphone,
+  Headphones,
+  TrendingUp,
+  Users,
+  Scale,
+  LayoutDashboard,
+  Crown,
+  FolderOpen,
+  Package,
+};
+
+// ─── Custom pack type ───
+interface CustomPack {
+  id: string;
+  org_id: string;
+  name: string;
+  description: string | null;
+  icon: string;
+  visibility: string;
+  team_id: string | null;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+  promptIds: string[];
+  guidelineIds: string[];
+  ruleIds: string[];
+  prompts: { id: string; title: string; description: string | null; tags: string[]; content: string }[];
+  guidelines: { id: string; name: string; description: string | null; category: string }[];
+  rules: { id: string; name: string; description: string | null; category: string; severity: string; pattern_type: string }[];
+}
+
+// ─── Pack install request type ───
+interface PackInstallRequest {
+  id: string;
+  org_id: string;
+  pack_id: string;
+  pack_type: "builtin" | "custom";
+  requested_by: string;
+  requester_name: string;
+  status: "pending" | "approved" | "rejected";
+  reviewed_by: string | null;
+  created_at: string;
+  reviewed_at: string | null;
+}
+
+// ─── Preview item type (union of built-in + custom) ───
+type PreviewItem =
+  | { type: "builtin"; pack: LibraryPack }
+  | { type: "custom"; pack: CustomPack };
+
+export function VaultTemplatePacks() {
+  const { loading, noOrg, prompts, folders, refresh, currentUserRole, members } = useOrg();
+  const [installedPacks, setInstalledPacks] = useState<Set<string>>(new Set());
+  const [installingPack, setInstallingPack] = useState<string | null>(null);
+  const [previewItem, setPreviewItem] = useState<PreviewItem | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
+
+  // Custom packs
+  const [customPacks, setCustomPacks] = useState<CustomPack[]>([]);
+  const [loadingCustom, setLoadingCustom] = useState(true);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [deletingPackId, setDeletingPackId] = useState<string | null>(null);
+  const [installingCustomId, setInstallingCustomId] = useState<string | null>(null);
+
+  // Install dialog for custom pack
+  const [installDialogOpen, setInstallDialogOpen] = useState(false);
+  const [installTargetPack, setInstallTargetPack] = useState<CustomPack | null>(null);
+  const [installFolderId, setInstallFolderId] = useState<string>("__none__");
+
+  // Pack install requests
+  const [installRequests, setInstallRequests] = useState<PackInstallRequest[]>([]);
+  const [requestingPackId, setRequestingPackId] = useState<string | null>(null);
+  const [processingRequestId, setProcessingRequestId] = useState<string | null>(null);
+
+  const canManage = currentUserRole === "admin" || currentUserRole === "manager";
+  const isMember = currentUserRole === "member";
+
+  const currentUserId = members.find((m) => m.isCurrentUser)?.id;
+  const pendingRequests = installRequests.filter((r) => r.status === "pending");
+  const myPendingPackIds = new Set(
+    installRequests
+      .filter((r) => r.status === "pending" && r.requested_by === currentUserId)
+      .map((r) => r.pack_id)
+  );
+
+  // Detect which built-in packs are already installed
+  const detectInstalled = useCallback(() => {
+    const promptTitles = new Set(prompts.map((p) => p.title));
+    const installed = new Set<string>();
+
+    for (const pack of LIBRARY_PACKS) {
+      const matchCount = pack.prompts.filter((sp) =>
+        promptTitles.has(sp.title)
+      ).length;
+      if (matchCount >= Math.ceil(pack.prompts.length / 2)) {
+        installed.add(pack.id);
+      }
+    }
+
+    setInstalledPacks(installed);
+  }, [prompts]);
+
+  useEffect(() => {
+    detectInstalled();
+  }, [detectInstalled]);
+
+  // Fetch custom packs
+  const fetchCustomPacks = useCallback(async () => {
+    try {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const res = await fetch("/api/template-packs", {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setCustomPacks(data);
+      }
+    } catch {
+      // Silently fail — table may not exist yet
+    } finally {
+      setLoadingCustom(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchCustomPacks();
+  }, [fetchCustomPacks]);
+
+  // Fetch pack install requests
+  const fetchRequests = useCallback(async () => {
+    try {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const res = await fetch("/api/template-packs/request", {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setInstallRequests(data);
+      }
+    } catch {
+      // Silently fail — table may not exist yet
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchRequests();
+  }, [fetchRequests]);
+
+  async function handleRequestInstall(packId: string, packType: "builtin" | "custom") {
+    setRequestingPackId(packId);
+    try {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const res = await fetch("/api/template-packs/request", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ pack_id: packId, pack_type: packType }),
+      });
+
+      if (res.ok) {
+        toast.success("Install request sent to your admin");
+        fetchRequests();
+      } else {
+        const data = await res.json();
+        toast.error(data.error || "Failed to submit request");
+      }
+    } catch {
+      toast.error("Failed to submit request");
+    } finally {
+      setRequestingPackId(null);
+    }
+  }
+
+  async function handleReviewRequest(requestId: string, action: "approve" | "reject", packId: string, packType: string) {
+    setProcessingRequestId(requestId);
+    try {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const res = await fetch(`/api/template-packs/request/${requestId}`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ action }),
+      });
+
+      if (res.ok) {
+        if (action === "approve") {
+          // Trigger the actual install client-side
+          if (packType === "builtin") {
+            await handleInstallBuiltin(packId);
+          } else {
+            const customPack = customPacks.find((p) => p.id === packId);
+            if (customPack) {
+              openCustomInstallDialog(customPack);
+            }
+          }
+          toast.success("Request approved and pack installed");
+        } else {
+          toast.success("Request rejected");
+        }
+        fetchRequests();
+      } else {
+        const data = await res.json();
+        toast.error(data.error || "Failed to process request");
+      }
+    } catch {
+      toast.error("Failed to process request");
+    } finally {
+      setProcessingRequestId(null);
+    }
+  }
+
+  async function handleInstallBuiltin(packId: string) {
+    if (!confirm("Install this template pack? Prompts, guidelines, and guardrails will be added to your workspace.")) return;
+    setInstallingPack(packId);
+    try {
+      const result = await installLibraryPack(packId);
+
+      if (result.error) {
+        toast.error(result.error);
+        return;
+      }
+
+      const parts: string[] = [];
+      if (result.promptsCreated > 0) parts.push(`${result.promptsCreated} prompts`);
+      if (result.guidelinesCreated > 0) parts.push(`${result.guidelinesCreated} guidelines`);
+      if (result.rulesCreated > 0) parts.push(`${result.rulesCreated} guardrails`);
+
+      toast.success(parts.length > 0 ? `Installed: ${parts.join(", ")}` : "Pack installed");
+      setInstalledPacks((prev) => {
+        const next = new Set(Array.from(prev));
+        next.add(packId);
+        return next;
+      });
+      refresh();
+    } catch {
+      toast.error("Failed to install pack");
+    } finally {
+      setInstallingPack(null);
+    }
+  }
+
+  async function handleDeleteCustomPack(packId: string) {
+    if (!confirm("Are you sure you want to delete this pack? This cannot be undone.")) return;
+    setDeletingPackId(packId);
+    try {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const res = await fetch(`/api/template-packs?id=${packId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      if (res.ok) {
+        setCustomPacks((prev) => prev.filter((p) => p.id !== packId));
+        toast.success("Pack deleted");
+        if (previewItem?.type === "custom" && previewItem.pack.id === packId) {
+          setPreviewOpen(false);
+        }
+      } else {
+        const data = await res.json();
+        toast.error(data.error || "Failed to delete pack");
+      }
+    } catch {
+      toast.error("Failed to delete pack");
+    } finally {
+      setDeletingPackId(null);
+    }
+  }
+
+  function openCustomInstallDialog(pack: CustomPack) {
+    setInstallTargetPack(pack);
+    setInstallFolderId("__none__");
+    setInstallDialogOpen(true);
+  }
+
+  async function handleInstallCustomPack() {
+    if (!installTargetPack) return;
+    setInstallingCustomId(installTargetPack.id);
+    try {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const res = await fetch(`/api/template-packs/${installTargetPack.id}/install`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          folderId: installFolderId === "__none__" ? null : installFolderId,
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        toast.error(err.error || `Request failed (${res.status})`);
+        return;
+      }
+
+      const data = await res.json();
+      const parts = [];
+      if (data.promptsCreated > 0) parts.push(`${data.promptsCreated} prompt(s)`);
+      if (data.guidelinesCreated > 0) parts.push(`${data.guidelinesCreated} guideline(s)`);
+      if (data.rulesCreated > 0) parts.push(`${data.rulesCreated} policy(ies)`);
+      toast.success(`Installed ${parts.join(", ") || "pack"}`);
+      setInstallDialogOpen(false);
+      refresh();
+    } catch {
+      toast.error("Failed to install pack");
+    } finally {
+      setInstallingCustomId(null);
+    }
+  }
+
+  function openPreview(item: PreviewItem) {
+    setPreviewItem(item);
+    setPreviewOpen(true);
+  }
+
+  if (loading) {
+    return <PageSkeleton />;
+  }
+
+  if (noOrg) {
+    return <NoOrgBanner />;
+  }
+
+  return (
+    <>
+      {/* New Pack button for admins/managers */}
+      {canManage && (
+        <div className="flex justify-end mb-4">
+          <Button onClick={() => setCreateOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            New Pack
+          </Button>
+        </div>
+      )}
+
+      {/* Pending Requests Banner (admin/manager) */}
+      {canManage && pendingRequests.length > 0 && (
+        <div className="mb-6 rounded-lg border border-tp-yellow/30 bg-tp-yellow/10 p-4">
+          <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+            <Clock className="h-4 w-4 text-tp-yellow" />
+            {pendingRequests.length} pending install {pendingRequests.length === 1 ? "request" : "requests"}
+          </h3>
+          <div className="space-y-2">
+            {pendingRequests.map((req) => {
+              const builtinPack = LIBRARY_PACKS.find((p) => p.id === req.pack_id);
+              const customPack = customPacks.find((p) => p.id === req.pack_id);
+              const packName = builtinPack?.name || customPack?.name || req.pack_id;
+
+              return (
+                <div key={req.id} className="flex items-center gap-3 rounded-md border border-border bg-background px-3 py-2">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{packName}</p>
+                    <p className="text-xs text-muted-foreground">
+                      Requested by {req.requester_name} &middot; {req.pack_type}
+                    </p>
+                  </div>
+                  <div className="flex gap-1.5 shrink-0">
+                    <Button
+                      size="sm"
+                      variant="default"
+                      className="h-7 px-2.5 text-xs"
+                      disabled={processingRequestId === req.id}
+                      onClick={() => handleReviewRequest(req.id, "approve", req.pack_id, req.pack_type)}
+                    >
+                      {processingRequestId === req.id ? (
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                      ) : (
+                        <><CheckCircle2 className="mr-1 h-3 w-3" />Approve</>
+                      )}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-7 px-2.5 text-xs"
+                      disabled={processingRequestId === req.id}
+                      onClick={() => handleReviewRequest(req.id, "reject", req.pack_id, req.pack_type)}
+                    >
+                      <X className="mr-1 h-3 w-3" />Reject
+                    </Button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* My Packs Section */}
+      {(customPacks.length > 0 || loadingCustom) && (
+        <div className="mb-8">
+          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <Package className="h-5 w-5 text-muted-foreground" />
+            My Packs
+          </h2>
+          {loadingCustom ? (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {[1, 2].map((i) => (
+                <div key={i} className="h-48 rounded-lg bg-muted animate-pulse" />
+              ))}
+            </div>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {customPacks.map((pack) => {
+                const IconComponent = ICON_MAP[pack.icon] || FolderOpen;
+                const pCount = pack.prompts.length;
+                const gCount = pack.guidelines?.length || 0;
+                const rCount = pack.rules?.length || 0;
+
+                return (
+                  <Card
+                    key={pack.id}
+                    className="flex flex-col cursor-pointer hover:border-primary/30 transition-colors"
+                    onClick={() => openPreview({ type: "custom", pack })}
+                  >
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start justify-between">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+                          <IconComponent className="h-5 w-5 text-primary" />
+                        </div>
+                        <Badge variant="outline" className="text-xs capitalize">
+                          {pack.visibility}
+                        </Badge>
+                      </div>
+                      <CardTitle className="mt-3 text-base">{pack.name}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex flex-1 flex-col">
+                      {pack.description && (
+                        <p className="text-sm text-muted-foreground mb-4 line-clamp-2 flex-1">
+                          {pack.description}
+                        </p>
+                      )}
+                      {!pack.description && <div className="flex-1" />}
+
+                      <div className="flex flex-wrap gap-1.5 mb-4">
+                        {pCount > 0 && (
+                          <Badge variant="secondary" className="text-xs">
+                            {pCount} {pCount === 1 ? "prompt" : "prompts"}
+                          </Badge>
+                        )}
+                        {gCount > 0 && (
+                          <Badge variant="secondary" className="text-xs">
+                            {gCount} {gCount === 1 ? "guideline" : "guidelines"}
+                          </Badge>
+                        )}
+                        {rCount > 0 && (
+                          <Badge variant="secondary" className="text-xs">
+                            {rCount} {rCount === 1 ? "policy" : "policies"}
+                          </Badge>
+                        )}
+                      </div>
+
+                      <div className="flex gap-2">
+                        {isMember ? (
+                          <Button
+                            variant={myPendingPackIds.has(pack.id) ? "outline" : "default"}
+                            size="sm"
+                            className="flex-1"
+                            disabled={myPendingPackIds.has(pack.id) || requestingPackId === pack.id}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRequestInstall(pack.id, "custom");
+                            }}
+                          >
+                            {requestingPackId === pack.id ? (
+                              <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Requesting...</>
+                            ) : myPendingPackIds.has(pack.id) ? (
+                              <><Clock className="mr-2 h-4 w-4" />Requested</>
+                            ) : (
+                              <><Send className="mr-2 h-4 w-4" />Request Install</>
+                            )}
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="default"
+                            size="sm"
+                            className="flex-1"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openCustomInstallDialog(pack);
+                            }}
+                          >
+                            <Download className="mr-2 h-4 w-4" />
+                            Install
+                          </Button>
+                        )}
+                        {canManage && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-destructive hover:text-destructive"
+                            disabled={deletingPackId === pack.id}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteCustomPack(pack.id);
+                            }}
+                          >
+                            {deletingPackId === pack.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="h-4 w-4" />
+                            )}
+                          </Button>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Built-in Packs Section */}
+      <div>
+        {customPacks.length > 0 && (
+          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <BookOpen className="h-5 w-5 text-muted-foreground" />
+            Built-in Packs
+          </h2>
+        )}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {LIBRARY_PACKS.map((pack) => {
+            const IconComponent = ICON_MAP[pack.icon] || Code2;
+            const isInstalled = installedPacks.has(pack.id);
+            const isInstalling = installingPack === pack.id;
+            const promptCount = pack.prompts.length;
+            const guidelineCount = pack.guidelines.length;
+            const guardrailCount = pack.guardrailCategories?.length || 0;
+
+            return (
+              <Card
+                key={pack.id}
+                className="flex flex-col cursor-pointer hover:border-primary/30 transition-colors"
+                onClick={() => openPreview({ type: "builtin", pack })}
+              >
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+                      <IconComponent className="h-5 w-5 text-primary" />
+                    </div>
+                    {isInstalled && (
+                      <Badge variant="outline" className="text-green-600 border-green-200 dark:text-green-400 dark:border-green-800">
+                        <Check className="mr-1 h-3 w-3" />
+                        Installed
+                      </Badge>
+                    )}
+                  </div>
+                  <CardTitle className="mt-3 text-base">{pack.name}</CardTitle>
+                </CardHeader>
+                <CardContent className="flex flex-1 flex-col">
+                  <p className="text-sm text-muted-foreground mb-4 line-clamp-2 flex-1">
+                    {pack.description}
+                  </p>
+
+                  <div className="flex flex-wrap gap-1.5 mb-4">
+                    <Badge variant="secondary" className="text-xs">
+                      {promptCount} {promptCount === 1 ? "prompt" : "prompts"}
+                    </Badge>
+                    {guidelineCount > 0 && (
+                      <Badge variant="secondary" className="text-xs">
+                        {guidelineCount} {guidelineCount === 1 ? "guideline" : "guidelines"}
+                      </Badge>
+                    )}
+                    {guardrailCount > 0 && (
+                      <Badge variant="secondary" className="text-xs">
+                        {guardrailCount} {guardrailCount === 1 ? "guardrail" : "guardrails"}
+                      </Badge>
+                    )}
+                  </div>
+
+                  {isMember && !isInstalled ? (
+                    <Button
+                      variant={myPendingPackIds.has(pack.id) ? "outline" : "default"}
+                      size="sm"
+                      className="w-full"
+                      disabled={myPendingPackIds.has(pack.id) || requestingPackId === pack.id}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRequestInstall(pack.id, "builtin");
+                      }}
+                    >
+                      {requestingPackId === pack.id ? (
+                        <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Requesting...</>
+                      ) : myPendingPackIds.has(pack.id) ? (
+                        <><Clock className="mr-2 h-4 w-4" />Requested</>
+                      ) : (
+                        <><Send className="mr-2 h-4 w-4" />Request Install</>
+                      )}
+                    </Button>
+                  ) : (
+                    <Button
+                      variant={isInstalled ? "outline" : "default"}
+                      size="sm"
+                      className="w-full"
+                      disabled={isInstalled || isInstalling}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleInstallBuiltin(pack.id);
+                      }}
+                    >
+                      {isInstalling ? (
+                        <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Installing...</>
+                      ) : isInstalled ? (
+                        <><Check className="mr-2 h-4 w-4" />Installed</>
+                      ) : (
+                        <><Download className="mr-2 h-4 w-4" />Install Pack</>
+                      )}
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Pack Preview Sheet */}
+      <Sheet open={previewOpen} onOpenChange={setPreviewOpen}>
+        <SheetContent className="sm:max-w-lg overflow-y-auto">
+          {previewItem?.type === "builtin" && (
+            <BuiltinPackPreview
+              pack={previewItem.pack}
+              isInstalled={installedPacks.has(previewItem.pack.id)}
+              isInstalling={installingPack === previewItem.pack.id}
+              onInstall={() => handleInstallBuiltin(previewItem.pack.id)}
+              isMember={isMember}
+              isPendingRequest={myPendingPackIds.has(previewItem.pack.id)}
+              isRequesting={requestingPackId === previewItem.pack.id}
+              onRequestInstall={() => handleRequestInstall(previewItem.pack.id, "builtin")}
+            />
+          )}
+          {previewItem?.type === "custom" && (
+            <CustomPackPreview
+              pack={previewItem.pack}
+              onInstall={() => openCustomInstallDialog(previewItem.pack)}
+              isInstalling={installingCustomId === previewItem.pack.id}
+              isMember={isMember}
+              isPendingRequest={myPendingPackIds.has(previewItem.pack.id)}
+              isRequesting={requestingPackId === previewItem.pack.id}
+              onRequestInstall={() => handleRequestInstall(previewItem.pack.id, "custom")}
+            />
+          )}
+        </SheetContent>
+      </Sheet>
+
+      {/* New Pack Dialog */}
+      <CreatePackDialog
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        onCreated={() => {
+          fetchCustomPacks();
+          setCreateOpen(false);
+        }}
+      />
+
+      {/* Install Custom Pack Dialog (category chooser) */}
+      <Dialog open={installDialogOpen} onOpenChange={setInstallDialogOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Install Pack</DialogTitle>
+            <DialogDescription>
+              {[
+                installTargetPack?.prompts.length ? `${installTargetPack.prompts.length} prompt(s)` : null,
+                installTargetPack?.guidelines?.length ? `${installTargetPack.guidelines.length} guideline(s)` : null,
+                installTargetPack?.rules?.length ? `${installTargetPack.rules.length} policy(ies)` : null,
+              ].filter(Boolean).join(", ") || "Items"}{" "}
+              will be duplicated into your workspace. Optionally assign prompts to a category.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="space-y-2">
+              <Label>Assign to category</Label>
+              <Select value={installFolderId} onValueChange={setInstallFolderId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="No category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">No category</SelectItem>
+                  {folders.map((f) => (
+                    <SelectItem key={f.id} value={f.id}>{f.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setInstallDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleInstallCustomPack}
+              disabled={!!installingCustomId}
+            >
+              {installingCustomId ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Installing...
+                </>
+              ) : (
+                <>
+                  <Download className="mr-2 h-4 w-4" />
+                  Install
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
+
+// ─── Built-in Pack Preview ───
+
+function BuiltinPackPreview({
+  pack,
+  isInstalled,
+  isInstalling,
+  onInstall,
+  isMember,
+  isPendingRequest,
+  isRequesting,
+  onRequestInstall,
+}: {
+  pack: LibraryPack;
+  isInstalled: boolean;
+  isInstalling: boolean;
+  onInstall: () => void;
+  isMember: boolean;
+  isPendingRequest: boolean;
+  isRequesting: boolean;
+  onRequestInstall: () => void;
+}) {
+  const IconComponent = ICON_MAP[pack.icon] || Code2;
+  const promptCount = pack.prompts.length;
+  const guidelineCount = pack.guidelines.length;
+  const guardrailCount = pack.guardrailCategories?.length || 0;
+
+  return (
+    <div className="flex flex-col gap-6">
+      <SheetHeader>
+        <div className="flex items-center gap-3">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 shrink-0">
+            <IconComponent className="h-6 w-6 text-primary" />
+          </div>
+          <div>
+            <SheetTitle className="text-lg">{pack.name}</SheetTitle>
+            <p className="text-sm text-muted-foreground mt-1">{pack.description}</p>
+          </div>
+        </div>
+      </SheetHeader>
+
+      <div className="flex flex-wrap gap-2">
+        <Badge variant="secondary" className="gap-1.5">
+          <FileText className="h-3 w-3" />
+          {promptCount} {promptCount === 1 ? "prompt" : "prompts"}
+        </Badge>
+        {guidelineCount > 0 && (
+          <Badge variant="secondary" className="gap-1.5">
+            <BookOpen className="h-3 w-3" />
+            {guidelineCount} {guidelineCount === 1 ? "guideline" : "guidelines"}
+          </Badge>
+        )}
+        {guardrailCount > 0 && (
+          <Badge variant="secondary" className="gap-1.5">
+            <Shield className="h-3 w-3" />
+            {guardrailCount} {guardrailCount === 1 ? "guardrail" : "guardrails"}
+          </Badge>
+        )}
+      </div>
+
+      {isMember && !isInstalled ? (
+        <Button
+          variant={isPendingRequest ? "outline" : "default"}
+          className="w-full"
+          disabled={isPendingRequest || isRequesting}
+          onClick={onRequestInstall}
+        >
+          {isRequesting ? (
+            <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Requesting...</>
+          ) : isPendingRequest ? (
+            <><Clock className="mr-2 h-4 w-4" />Requested</>
+          ) : (
+            <><Send className="mr-2 h-4 w-4" />Request Install</>
+          )}
+        </Button>
+      ) : (
+        <Button
+          variant={isInstalled ? "outline" : "default"}
+          className="w-full"
+          disabled={isInstalled || isInstalling}
+          onClick={onInstall}
+        >
+          {isInstalling ? (
+            <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Installing...</>
+          ) : isInstalled ? (
+            <><Check className="mr-2 h-4 w-4" />Installed</>
+          ) : (
+            <><Download className="mr-2 h-4 w-4" />Install Pack</>
+          )}
+        </Button>
+      )}
+
+      {pack.prompts.length > 0 && (
+        <div>
+          <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+            <FileText className="h-4 w-4 text-muted-foreground" />
+            Prompts
+          </h3>
+          <div className="space-y-3">
+            {pack.prompts.map((prompt, i) => (
+              <div key={i} className="rounded-lg border border-border p-3">
+                <p className="text-sm font-medium">{prompt.title}</p>
+                {prompt.description && (
+                  <p className="text-xs text-muted-foreground mt-1">{prompt.description}</p>
+                )}
+                {prompt.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {prompt.tags.map((tag) => (
+                      <Badge key={tag} variant="outline" className="text-[10px] px-1.5 py-0">{tag}</Badge>
+                    ))}
+                  </div>
+                )}
+                <p className="text-xs text-muted-foreground/70 mt-2 line-clamp-2 font-mono">
+                  {prompt.content.slice(0, 150)}{prompt.content.length > 150 ? "..." : ""}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {pack.guidelines.length > 0 && (
+        <div>
+          <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+            <BookOpen className="h-4 w-4 text-muted-foreground" />
+            Guidelines
+          </h3>
+          <div className="space-y-2">
+            {pack.guidelines.map((g, i) => (
+              <div key={i} className="rounded-lg border border-border p-3">
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-medium">{g.name}</p>
+                  <Badge variant="outline" className="text-[10px] px-1.5 py-0">{g.category}</Badge>
+                </div>
+                {g.description && (
+                  <p className="text-xs text-muted-foreground mt-1">{g.description}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {pack.guardrailCategories && pack.guardrailCategories.length > 0 && (
+        <div>
+          <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+            <Shield className="h-4 w-4 text-muted-foreground" />
+            Guardrail Categories
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {pack.guardrailCategories.map((cat) => (
+              <Badge key={cat} variant="secondary" className="capitalize">
+                {cat.replace(/_/g, " ")}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Custom Pack Preview ───
+
+function CustomPackPreview({
+  pack,
+  onInstall,
+  isInstalling,
+  isMember,
+  isPendingRequest,
+  isRequesting,
+  onRequestInstall,
+}: {
+  pack: CustomPack;
+  onInstall: () => void;
+  isInstalling: boolean;
+  isMember: boolean;
+  isPendingRequest: boolean;
+  isRequesting: boolean;
+  onRequestInstall: () => void;
+}) {
+  const IconComponent = ICON_MAP[pack.icon] || FolderOpen;
+
+  return (
+    <div className="flex flex-col gap-6">
+      <SheetHeader>
+        <div className="flex items-center gap-3">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 shrink-0">
+            <IconComponent className="h-6 w-6 text-primary" />
+          </div>
+          <div>
+            <SheetTitle className="text-lg">{pack.name}</SheetTitle>
+            {pack.description && (
+              <p className="text-sm text-muted-foreground mt-1">{pack.description}</p>
+            )}
+          </div>
+        </div>
+      </SheetHeader>
+
+      <div className="flex flex-wrap gap-2">
+        {pack.prompts.length > 0 && (
+          <Badge variant="secondary" className="gap-1.5">
+            <FileText className="h-3 w-3" />
+            {pack.prompts.length} {pack.prompts.length === 1 ? "prompt" : "prompts"}
+          </Badge>
+        )}
+        {pack.guidelines && pack.guidelines.length > 0 && (
+          <Badge variant="secondary" className="gap-1.5">
+            <BookOpen className="h-3 w-3" />
+            {pack.guidelines.length} {pack.guidelines.length === 1 ? "guideline" : "guidelines"}
+          </Badge>
+        )}
+        {pack.rules && pack.rules.length > 0 && (
+          <Badge variant="secondary" className="gap-1.5">
+            <Shield className="h-3 w-3" />
+            {pack.rules.length} {pack.rules.length === 1 ? "policy" : "policies"}
+          </Badge>
+        )}
+        <Badge variant="outline" className="capitalize">{pack.visibility}</Badge>
+      </div>
+
+      {isMember ? (
+        <Button
+          variant={isPendingRequest ? "outline" : "default"}
+          className="w-full"
+          disabled={isPendingRequest || isRequesting}
+          onClick={onRequestInstall}
+        >
+          {isRequesting ? (
+            <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Requesting...</>
+          ) : isPendingRequest ? (
+            <><Clock className="mr-2 h-4 w-4" />Requested</>
+          ) : (
+            <><Send className="mr-2 h-4 w-4" />Request Install</>
+          )}
+        </Button>
+      ) : (
+        <Button className="w-full" onClick={onInstall} disabled={isInstalling}>
+          {isInstalling ? (
+            <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Installing...</>
+          ) : (
+            <><Download className="mr-2 h-4 w-4" />Install Pack</>
+          )}
+        </Button>
+      )}
+
+      {pack.prompts.length > 0 && (
+        <div>
+          <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+            <FileText className="h-4 w-4 text-muted-foreground" />
+            Prompts
+          </h3>
+          <div className="space-y-3">
+            {pack.prompts.map((prompt) => (
+              <div key={prompt.id} className="rounded-lg border border-border p-3">
+                <p className="text-sm font-medium">{prompt.title}</p>
+                {prompt.description && (
+                  <p className="text-xs text-muted-foreground mt-1">{prompt.description}</p>
+                )}
+                {prompt.tags && prompt.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {prompt.tags.map((tag) => (
+                      <Badge key={tag} variant="outline" className="text-[10px] px-1.5 py-0">{tag}</Badge>
+                    ))}
+                  </div>
+                )}
+                <p className="text-xs text-muted-foreground/70 mt-2 line-clamp-2 font-mono">
+                  {prompt.content.slice(0, 150)}{prompt.content.length > 150 ? "..." : ""}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {pack.guidelines && pack.guidelines.length > 0 && (
+        <div>
+          <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+            <BookOpen className="h-4 w-4 text-muted-foreground" />
+            Guidelines
+          </h3>
+          <div className="space-y-2">
+            {pack.guidelines.map((g) => (
+              <div key={g.id} className="rounded-lg border border-border p-3">
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-medium">{g.name}</p>
+                  {g.category && (
+                    <Badge variant="outline" className="text-[10px] px-1.5 py-0">{g.category}</Badge>
+                  )}
+                </div>
+                {g.description && (
+                  <p className="text-xs text-muted-foreground mt-1">{g.description}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {pack.rules && pack.rules.length > 0 && (
+        <div>
+          <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+            <Shield className="h-4 w-4 text-muted-foreground" />
+            Guardrail Policies
+          </h3>
+          <div className="space-y-2">
+            {pack.rules.map((r) => (
+              <div key={r.id} className="rounded-lg border border-border p-3">
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-medium">{r.name}</p>
+                  <Badge variant={r.severity === "block" ? "destructive" : "outline"} className="text-[10px] px-1.5 py-0">
+                    {r.severity}
+                  </Badge>
+                </div>
+                {r.description && (
+                  <p className="text-xs text-muted-foreground mt-1">{r.description}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Create Pack Dialog ───
+
+function CreatePackDialog({
+  open,
+  onOpenChange,
+  onCreated,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onCreated: () => void;
+}) {
+  const { prompts, guidelines, teams, org } = useOrg();
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [visibility, setVisibility] = useState("org");
+  const [teamId, setTeamId] = useState<string>("__none__");
+  const [selectedPromptIds, setSelectedPromptIds] = useState<Set<string>>(new Set());
+  const [selectedGuidelineIds, setSelectedGuidelineIds] = useState<Set<string>>(new Set());
+  const [selectedRuleIds, setSelectedRuleIds] = useState<Set<string>>(new Set());
+  const [saving, setSaving] = useState(false);
+  const [search, setSearch] = useState("");
+  const [securityRules, setSecurityRules] = useState<{ id: string; name: string; category: string; severity: string }[]>([]);
+
+  // Fetch security rules when dialog opens
+  useEffect(() => {
+    if (!open || !org) return;
+    (async () => {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      const { data } = await supabase
+        .from("security_rules")
+        .select("id, name, category, severity")
+        .eq("org_id", org.id)
+        .order("name");
+      setSecurityRules(data || []);
+    })();
+  }, [open, org]);
+
+  function resetForm() {
+    setName("");
+    setDescription("");
+    setVisibility("org");
+    setTeamId("__none__");
+    setSelectedPromptIds(new Set());
+    setSelectedGuidelineIds(new Set());
+    setSelectedRuleIds(new Set());
+    setSearch("");
+  }
+
+  const filteredPrompts = search
+    ? prompts.filter(
+        (p) =>
+          p.title.toLowerCase().includes(search.toLowerCase()) ||
+          (p.tags || []).some((t) => t.toLowerCase().includes(search.toLowerCase()))
+      )
+    : prompts;
+
+  function toggleSet(setter: React.Dispatch<React.SetStateAction<Set<string>>>, id: string) {
+    setter((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  async function handleCreate() {
+    if (!name.trim()) {
+      toast.error("Name is required");
+      return;
+    }
+    if (selectedPromptIds.size === 0 && selectedGuidelineIds.size === 0 && selectedRuleIds.size === 0) {
+      toast.error("Select at least one prompt, guideline, or policy");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const res = await fetch("/api/template-packs", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: name.trim(),
+          description: description.trim() || null,
+          visibility,
+          team_id: visibility === "team" ? (teamId === "__none__" ? null : teamId) : null,
+          promptIds: Array.from(selectedPromptIds),
+          guidelineIds: Array.from(selectedGuidelineIds),
+          ruleIds: Array.from(selectedRuleIds),
+        }),
+      });
+
+      if (res.ok) {
+        toast.success("Pack created");
+        resetForm();
+        onCreated();
+      } else {
+        const data = await res.json();
+        toast.error(data.error || "Failed to create pack");
+      }
+    } catch {
+      toast.error("Failed to create pack");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const totalSelected = selectedPromptIds.size + selectedGuidelineIds.size + selectedRuleIds.size;
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => { if (!o) resetForm(); onOpenChange(o); }}>
+      <DialogContent className="max-w-lg max-h-[85vh] flex flex-col">
+        <DialogHeader>
+          <DialogTitle>Create Template Pack</DialogTitle>
+          <DialogDescription>
+            Bundle prompts, guidelines, and policies into a reusable pack.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4 flex-1 overflow-y-auto -mx-6 px-6">
+          <div className="space-y-2">
+            <Label>Name</Label>
+            <Input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g., Sales Playbook"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Description</Label>
+            <Input
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="What's in this pack?"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Visibility</Label>
+              <Select value={visibility} onValueChange={setVisibility}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="org">Organization</SelectItem>
+                  <SelectItem value="team">Team</SelectItem>
+                  <SelectItem value="personal">Personal</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {visibility === "team" && (
+              <div className="space-y-2">
+                <Label>Team</Label>
+                <Select value={teamId} onValueChange={setTeamId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select team" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">No team</SelectItem>
+                    {teams.map((t) => (
+                      <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+          </div>
+
+          {/* Prompts */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2">
+              <FileText className="h-3.5 w-3.5 text-muted-foreground" />
+              Prompts ({selectedPromptIds.size} selected)
+            </Label>
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search prompts..."
+              className="mb-2"
+            />
+            <div className="max-h-36 overflow-y-auto rounded-lg border border-border">
+              {filteredPrompts.length === 0 ? (
+                <p className="p-3 text-sm text-muted-foreground text-center">No prompts found</p>
+              ) : (
+                filteredPrompts.map((p) => (
+                  <label
+                    key={p.id}
+                    className="flex items-center gap-3 px-3 py-2 hover:bg-muted/50 cursor-pointer border-b border-border/50 last:border-0"
+                  >
+                    <Checkbox
+                      checked={selectedPromptIds.has(p.id)}
+                      onCheckedChange={() => toggleSet(setSelectedPromptIds, p.id)}
+                    />
+                    <span className="text-sm truncate">{p.title}</span>
+                  </label>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* Guidelines */}
+          {guidelines.length > 0 && (
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                <BookOpen className="h-3.5 w-3.5 text-muted-foreground" />
+                Guidelines ({selectedGuidelineIds.size} selected)
+              </Label>
+              <div className="max-h-36 overflow-y-auto rounded-lg border border-border">
+                {guidelines.map((g) => (
+                  <label
+                    key={g.id}
+                    className="flex items-center gap-3 px-3 py-2 hover:bg-muted/50 cursor-pointer border-b border-border/50 last:border-0"
+                  >
+                    <Checkbox
+                      checked={selectedGuidelineIds.has(g.id)}
+                      onCheckedChange={() => toggleSet(setSelectedGuidelineIds, g.id)}
+                    />
+                    <span className="text-sm truncate">{g.name}</span>
+                    {g.category && (
+                      <Badge variant="outline" className="text-[10px] px-1.5 py-0 ml-auto shrink-0">{g.category}</Badge>
+                    )}
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Security Rules / Policies */}
+          {securityRules.length > 0 && (
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                <Shield className="h-3.5 w-3.5 text-muted-foreground" />
+                Guardrail Policies ({selectedRuleIds.size} selected)
+              </Label>
+              <div className="max-h-36 overflow-y-auto rounded-lg border border-border">
+                {securityRules.map((r) => (
+                  <label
+                    key={r.id}
+                    className="flex items-center gap-3 px-3 py-2 hover:bg-muted/50 cursor-pointer border-b border-border/50 last:border-0"
+                  >
+                    <Checkbox
+                      checked={selectedRuleIds.has(r.id)}
+                      onCheckedChange={() => toggleSet(setSelectedRuleIds, r.id)}
+                    />
+                    <span className="text-sm truncate">{r.name}</span>
+                    <Badge
+                      variant={r.severity === "block" ? "destructive" : "outline"}
+                      className="text-[10px] px-1.5 py-0 ml-auto shrink-0"
+                    >
+                      {r.severity}
+                    </Badge>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => { resetForm(); onOpenChange(false); }}>
+            Cancel
+          </Button>
+          <Button onClick={handleCreate} disabled={saving}>
+            {saving ? (
+              <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Creating...</>
+            ) : (
+              `Create Pack (${totalSelected} items)`
+            )}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}

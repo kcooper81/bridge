@@ -3,8 +3,8 @@ import Link from "next/link";
 import { CheckCircle2, X } from "lucide-react";
 import { generatePageMetadata } from "@/lib/seo/metadata";
 import { FAQSection } from "@/components/marketing/faq-section";
-import { CTASection } from "@/components/marketing/cta-section";
-import { SectionLabel } from "@/components/marketing/section-label";
+import { GetStartedSteps } from "@/components/marketing/get-started-steps";
+import { LeadCaptureForm } from "@/components/marketing/lead-capture-form";
 import { PricingGrid } from "./_components/pricing-grid";
 import { generateBreadcrumbSchema } from "@/lib/seo/schemas";
 
@@ -63,19 +63,22 @@ export default function PricingPage() {
           __html: JSON.stringify(breadcrumbs),
         }}
       />
+    {/* Hero — Light, Lumia-inspired */}
+    <section className="bg-[#FAFBFC] border-b border-border">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-32 pb-20 sm:pt-40 sm:pb-28 text-center">
+        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight">
+          Start free.{" "}
+          <span className="text-primary">Upgrade when your team grows.</span>
+        </h1>
+        <p className="mt-5 text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+          No credit card required. Pro and Team plans include a
+          14-day trial.
+        </p>
+      </div>
+    </section>
+
     <div className="py-20 sm:py-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        {/* Hero */}
-        <div className="text-center mb-16 sm:mb-20">
-          <SectionLabel className="text-center">Pricing</SectionLabel>
-          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">
-            Start free. Upgrade when your team grows.
-          </h1>
-          <p className="mt-5 text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            No credit card required. Pro and Team plans include a
-            14-day trial.
-          </p>
-        </div>
 
         {/* Plan grid with billing toggle (client component) */}
         <PricingGrid />
@@ -194,16 +197,14 @@ export default function PricingPage() {
           <FAQSection faqs={faqs} />
         </div>
 
-        {/* CTA */}
-        <div className="mt-24">
-          <CTASection
-            headline="Ready to give your team"
-            gradientText="a shared prompt library?"
-            subtitle="Set up your workspace in under two minutes. No credit card needed."
-          />
-        </div>
       </div>
     </div>
+
+    {/* Get Started + Lead Capture */}
+    <div className="border-t border-border">
+      <GetStartedSteps />
+    </div>
+    <LeadCaptureForm />
     </>
   );
 }

@@ -61,6 +61,16 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   UserX,
 };
 
+const industryHeroPhotos: Record<string, string> = {
+  healthcare: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=700&q=80&auto=format&fit=crop",
+  legal: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=700&q=80&auto=format&fit=crop",
+  technology: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=700&q=80&auto=format&fit=crop",
+  finance: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=700&q=80&auto=format&fit=crop",
+  government: "https://images.unsplash.com/photo-1555848962-6e79363ec58f?w=700&q=80&auto=format&fit=crop",
+  education: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=700&q=80&auto=format&fit=crop",
+  insurance: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=700&q=80&auto=format&fit=crop",
+};
+
 const relatedIndustries: Record<string, { slug: string; name: string; desc: string }[]> = {
   healthcare: [
     { slug: "insurance", name: "Insurance", desc: "Claims & policyholder data protection" },
@@ -120,49 +130,85 @@ export function IndustryPage({ data }: { data: IndustryPageData }) {
         }}
       />
 
-      {/* ━━━ HERO ━━━ Light, centered */}
-      <section className="border-b border-border" style={{ background: "linear-gradient(180deg, #fff 0%, #F6F2FF 50%, #fff 100%)" }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-32 pb-20 sm:pt-40 sm:pb-28 text-center">
-          {/* Compliance badges */}
-          <div className="flex flex-wrap gap-2 mb-8 justify-center">
-            {data.compliance.map((badge) => (
-              <span
-                key={badge}
-                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/60 px-3 py-1 text-xs font-medium text-muted-foreground"
-              >
-                <Shield className="h-3 w-3 text-primary" />
-                {badge}
-              </span>
-            ))}
-          </div>
+      {/* ━━━ HERO ━━━ 2-column with lifestyle image (Circle-inspired) */}
+      <section
+        className="border-b border-border overflow-hidden"
+        style={{
+          background: "linear-gradient(180deg, #fff 0%, #F6F2FF 50%, #fff 100%)",
+          borderBottomRightRadius: "120px",
+        }}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-32 pb-20 sm:pt-40 sm:pb-24">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            <div>
+              {/* Compliance badges */}
+              <div className="flex flex-wrap gap-2 mb-6">
+                {data.compliance.map((badge) => (
+                  <span
+                    key={badge}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/60 px-3 py-1 text-xs font-medium text-muted-foreground"
+                  >
+                    <Shield className="h-3 w-3 text-primary" />
+                    {badge}
+                  </span>
+                ))}
+              </div>
 
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.08] max-w-4xl mx-auto">
-            {data.headline}
-          </h1>
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-medium tracking-tight leading-[1.08]">
+                {data.headline}
+              </h1>
 
-          <p className="mt-6 text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            {data.subtitle}
-          </p>
+              <p className="mt-6 text-lg text-muted-foreground max-w-xl leading-relaxed">
+                {data.subtitle}
+              </p>
 
-          <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/signup">
-              <Button
-                size="lg"
-                className="text-base px-8 h-12 rounded-full font-semibold"
-              >
-                Start for free
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
-            <Link href="/security">
-              <Button
-                variant="outline"
-                size="lg"
-                className="text-base px-8 h-12 rounded-full font-semibold"
-              >
-                See data protection
-              </Button>
-            </Link>
+              <div className="mt-10 flex flex-col sm:flex-row gap-4">
+                <Link href="/signup">
+                  <Button
+                    size="lg"
+                    className="text-base px-8 h-12 rounded-lg font-bold"
+                  >
+                    Start for free
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+                <Link href="/security">
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="text-base px-8 h-12 rounded-lg font-bold"
+                  >
+                    See data protection
+                  </Button>
+                </Link>
+              </div>
+            </div>
+
+            {/* Lifestyle image with UI overlay */}
+            <div className="relative hidden lg:block">
+              <div className="relative overflow-hidden rounded-[20px] shadow-xl shadow-black/10">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={industryHeroPhotos[data.slug] || "https://images.unsplash.com/photo-1551434678-e076c223a692?w=700&q=80&auto=format&fit=crop"}
+                  alt={`${data.industry} team using AI tools`}
+                  className="w-full h-[380px] object-cover"
+                />
+                <div
+                  className="absolute inset-0 pointer-events-none"
+                  style={{ background: "radial-gradient(circle at 100% 100%, rgba(0,0,0,0.3), transparent 70%)" }}
+                />
+                {/* UI overlay */}
+                <div className="absolute bottom-4 right-4 flex items-center gap-3 rounded-xl bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl px-4 py-3 shadow-lg border border-white/50">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/10">
+                    <ShieldCheck className="h-5 w-5 text-emerald-500" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">{data.compliance[0] || "Compliant"}</p>
+                    <p className="text-xs text-muted-foreground">Policies active and enforced</p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -171,7 +217,7 @@ export function IndustryPage({ data }: { data: IndustryPageData }) {
       <section className="py-20 sm:py-28">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-14">
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
+            <h2 className="text-3xl sm:text-4xl font-medium tracking-tight">
               What changes with TeamPrompt
             </h2>
             <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -183,7 +229,7 @@ export function IndustryPage({ data }: { data: IndustryPageData }) {
             {data.painPoints.map((point, i) => (
               <div
                 key={point.title}
-                className="grid sm:grid-cols-2 rounded-2xl border border-border overflow-hidden"
+                className="grid sm:grid-cols-2 rounded-[20px] border border-border overflow-hidden"
               >
                 {/* Before — the problem */}
                 <div className="p-6 sm:p-8 bg-red-50/50 dark:bg-red-950/10 border-b sm:border-b-0 sm:border-r border-border">
@@ -230,7 +276,7 @@ export function IndustryPage({ data }: { data: IndustryPageData }) {
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-10">
             <SectionLabel>With TeamPrompt</SectionLabel>
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
+            <h2 className="text-3xl sm:text-4xl font-medium tracking-tight">
               Purpose-built for {data.industry.toLowerCase()} teams
             </h2>
             <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -253,7 +299,7 @@ export function IndustryPage({ data }: { data: IndustryPageData }) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-16">
             <SectionLabel>Key Features</SectionLabel>
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
+            <h2 className="text-3xl sm:text-4xl font-medium tracking-tight">
               Built for {data.industry.toLowerCase()} compliance
             </h2>
             <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -363,7 +409,7 @@ export function IndustryPage({ data }: { data: IndustryPageData }) {
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
             <div className="text-center mb-10">
               <SectionLabel>Related Industries</SectionLabel>
-              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
+              <h2 className="text-2xl sm:text-3xl font-medium tracking-tight">
                 Explore other industries we serve
               </h2>
             </div>

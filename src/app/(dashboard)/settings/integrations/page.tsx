@@ -558,6 +558,9 @@ export default function IntegrationsPage() {
           </CardContent>
         </Card>
 
+        {/* Cloudflare Gateway */}
+        <CloudflareCard />
+
         {/* SCIM 2.0 */}
         <Card className="relative overflow-hidden">
           <CardContent className="p-6">
@@ -594,5 +597,257 @@ export default function IntegrationsPage() {
         }}
       />
     </div>
+  );
+}
+
+// ── Cloudflare Gateway Integration Card ──
+
+function CloudflareIcon() {
+  return (
+    <svg className="h-8 w-8" viewBox="0 0 24 24" fill="none">
+      <path d="M16.5 12.5l-2.3-6.8c-.1-.4-.5-.7-1-.7-.4 0-.8.2-1 .5L8.5 12.5H5c-.3 0-.5.2-.5.5s.2.5.5.5h14c.3 0 .5-.2.5-.5s-.2-.5-.5-.5h-2.5z" fill="#F6821F"/>
+      <path d="M19.4 12.5l-1.1-3.4c-.1-.2-.3-.4-.5-.4-.3 0-.5.2-.6.4l-.7 3.4h2.9z" fill="#FBAD41"/>
+    </svg>
+  );
+}
+
+function CloudflareCard() {
+  const [connected, setConnected] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [accountId, setAccountId] = useState("");
+  const [apiToken, setApiToken] = useState("");
+  const [connecting, setConnecting] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const [tools, setTools] = useState<{ id: string; name: string; domains: string[]; category: string; blocked: boolean }[]>([]);
+  const [showSetup, setShowSetup] = useState(false);
+
+  const fetchStatus = useCallback(async () => {
+    try {
+      const supabase = (await import("@/lib/supabase/client")).createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const res = await fetch("/api/integrations/cloudflare", {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setConnected(data.connected);
+        setTools(data.tools || []);
+      }
+    } catch {
+      // Non-critical
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchStatus(); }, [fetchStatus]);
+
+  async function handleConnect() {
+    if (!accountId.trim() || !apiToken.trim()) {
+      toast.error("Account ID and API token are required");
+      return;
+    }
+    setConnecting(true);
+    try {
+      const supabase = (await import("@/lib/supabase/client")).createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const res = await fetch("/api/integrations/cloudflare", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${session.access_token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "connect", account_id: accountId.trim(), api_token: apiToken.trim() }),
+      });
+
+      if (res.ok) {
+        toast.success("Cloudflare Gateway connected");
+        setShowSetup(false);
+        fetchStatus();
+      } else {
+        const data = await res.json();
+        toast.error(data.error || "Failed to connect");
+      }
+    } catch {
+      toast.error("Connection failed");
+    } finally {
+      setConnecting(false);
+    }
+  }
+
+  async function handleSync(blockedToolIds: string[]) {
+    setSyncing(true);
+    try {
+      const supabase = (await import("@/lib/supabase/client")).createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const res = await fetch("/api/integrations/cloudflare", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${session.access_token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "sync", blockedToolIds }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const parts = [];
+        if (data.created > 0) parts.push(`${data.created} blocked`);
+        if (data.deleted > 0) parts.push(`${data.deleted} unblocked`);
+        toast.success(parts.length > 0 ? `Synced: ${parts.join(", ")}` : "Already in sync");
+        fetchStatus();
+      } else {
+        const data = await res.json();
+        toast.error(data.error || "Sync failed");
+      }
+    } catch {
+      toast.error("Sync failed");
+    } finally {
+      setSyncing(false);
+    }
+  }
+
+  async function handleDisconnect() {
+    if (!confirm("Disconnect Cloudflare Gateway? Existing block rules will remain in Cloudflare until manually removed.")) return;
+    try {
+      const supabase = (await import("@/lib/supabase/client")).createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      await fetch("/api/integrations/cloudflare", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${session.access_token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "disconnect" }),
+      });
+      toast.success("Disconnected");
+      setConnected(false);
+      setTools((prev) => prev.map((t) => ({ ...t, blocked: false })));
+    } catch {
+      toast.error("Failed to disconnect");
+    }
+  }
+
+  function toggleTool(toolId: string) {
+    const updated = tools.map((t) =>
+      t.id === toolId ? { ...t, blocked: !t.blocked } : t
+    );
+    setTools(updated);
+    handleSync(updated.filter((t) => t.blocked).map((t) => t.id));
+  }
+
+  if (loading) {
+    return (
+      <Card className="relative overflow-hidden">
+        <CardContent className="p-6">
+          <div className="h-40 flex items-center justify-center">
+            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="relative overflow-hidden">
+      <CardContent className="p-6">
+        <div className="flex items-start justify-between mb-4">
+          <div className="p-2 rounded-lg bg-muted/50">
+            <CloudflareIcon />
+          </div>
+          {connected ? (
+            <Badge className="bg-emerald-500/10 text-emerald-600 border-0">
+              <CheckCircle2 className="mr-1 h-3 w-3" />
+              Connected
+            </Badge>
+          ) : (
+            <Badge variant="outline" className="text-xs">Not Connected</Badge>
+          )}
+        </div>
+
+        <h3 className="font-semibold mb-1">Cloudflare Gateway</h3>
+        <p className="text-sm text-muted-foreground mb-4">
+          Block unapproved AI tools at the DNS level. Covers browser, native apps, and mobile — network-wide enforcement.
+        </p>
+
+        {connected ? (
+          <div className="space-y-3">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">AI Tools</p>
+            <div className="max-h-48 overflow-y-auto space-y-1.5">
+              {tools.map((tool) => (
+                <label
+                  key={tool.id}
+                  className="flex items-center justify-between rounded-lg border border-border px-3 py-2 cursor-pointer hover:bg-muted/50 transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium">{tool.name}</span>
+                    <span className="text-[10px] text-muted-foreground capitalize">{tool.category}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {tool.blocked && (
+                      <span className="text-[10px] font-bold text-red-500 uppercase">Blocked</span>
+                    )}
+                    <input
+                      type="checkbox"
+                      checked={tool.blocked}
+                      onChange={() => toggleTool(tool.id)}
+                      disabled={syncing}
+                      className="rounded"
+                    />
+                  </div>
+                </label>
+              ))}
+            </div>
+            {syncing && (
+              <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                <Loader2 className="h-3 w-3 animate-spin" />
+                Syncing with Cloudflare...
+              </p>
+            )}
+            <Button variant="outline" size="sm" className="w-full text-destructive hover:text-destructive" onClick={handleDisconnect}>
+              <Unplug className="mr-2 h-4 w-4" />
+              Disconnect
+            </Button>
+          </div>
+        ) : showSetup ? (
+          <div className="space-y-3">
+            <div>
+              <label className="text-xs font-medium text-muted-foreground">Account ID</label>
+              <input
+                type="text"
+                value={accountId}
+                onChange={(e) => setAccountId(e.target.value)}
+                placeholder="e.g. a1b2c3d4e5f6..."
+                className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground">API Token</label>
+              <input
+                type="password"
+                value={apiToken}
+                onChange={(e) => setApiToken(e.target.value)}
+                placeholder="Cloudflare API token"
+                className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+              />
+              <p className="text-[10px] text-muted-foreground mt-1">
+                Create a token at Cloudflare Dashboard → My Profile → API Tokens with Gateway:Edit permission.
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Button size="sm" className="flex-1" onClick={handleConnect} disabled={connecting}>
+                {connecting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Connecting...</> : "Connect"}
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => setShowSetup(false)}>
+                Cancel
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <Button variant="outline" size="sm" className="w-full" onClick={() => setShowSetup(true)}>
+            Connect Cloudflare
+          </Button>
+        )}
+      </CardContent>
+    </Card>
   );
 }

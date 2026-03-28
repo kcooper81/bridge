@@ -11,6 +11,7 @@ import { GetStartedSteps } from "@/components/marketing/get-started-steps";
 import { LeadCaptureForm } from "@/components/marketing/lead-capture-form";
 import { FeatureCard } from "@/components/marketing/feature-card";
 import {
+  Activity,
   ArrowRight,
   ClipboardList,
   Eye,
@@ -192,6 +193,138 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ━━━ AUDIT DASHBOARD MOCK — with flanking feature callouts ━━━ */}
+      <section className="py-24 sm:py-32 border-b border-border" style={{ background: "linear-gradient(180deg, #fff 0%, #F1F8FF 40%, #fff 100%)" }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl sm:text-4xl font-medium tracking-tight">
+              See everything in one dashboard
+            </h2>
+            <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
+              Violations blocked, compliance scores, team activity, and risk insights — all at a glance.
+            </p>
+          </div>
+
+          <div className="grid lg:grid-cols-[1fr_2fr_1fr] gap-6 items-center">
+            {/* Left callouts */}
+            <div className="hidden lg:flex flex-col gap-6">
+              {[
+                { icon: Eye, title: "Shadow AI Detection", desc: "See which AI tools your team actually uses" },
+                { icon: Lock, title: "Real-Time DLP", desc: "Block sensitive data before it leaves the browser" },
+                { icon: FileSearch, title: "19 Compliance Packs", desc: "HIPAA, SOC 2, PCI-DSS, GDPR and more" },
+              ].map((item) => (
+                <div key={item.title} className="flex items-start gap-3 text-right">
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold">{item.title}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{item.desc}</p>
+                  </div>
+                  <item.icon className="h-5 w-5 text-foreground/40 shrink-0 mt-0.5" />
+                </div>
+              ))}
+            </div>
+
+            {/* Dashboard mock */}
+            <div className="rounded-[20px] border border-border bg-card shadow-xl shadow-black/5 overflow-hidden">
+              <div className="flex items-center gap-2 px-4 py-2.5 border-b border-border bg-muted/30">
+                <div className="flex gap-1.5">
+                  <div className="w-2.5 h-2.5 rounded-full bg-red-400/60" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-yellow-400/60" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-green-400/60" />
+                </div>
+                <div className="flex-1 flex justify-center">
+                  <div className="px-3 py-0.5 rounded-md bg-background border border-border text-[10px] text-muted-foreground">
+                    app.teamprompt.app/audit
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-5 bg-background">
+                {/* Stat cards */}
+                <div className="grid grid-cols-4 gap-3 mb-4">
+                  {[
+                    { label: "Blocked", value: "847", color: "text-red-500" },
+                    { label: "Shared", value: "1,234", color: "text-blue-500" },
+                    { label: "Interactions", value: "15.2K", color: "text-violet-500" },
+                    { label: "Score", value: "98%", color: "text-emerald-500" },
+                  ].map((s) => (
+                    <div key={s.label} className="rounded-lg border border-border p-3">
+                      <p className={cn("text-lg font-bold tracking-tight", s.color)}>{s.value}</p>
+                      <p className="text-[10px] text-muted-foreground">{s.label}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Mini charts row */}
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                  {/* Trend chart mock */}
+                  <div className="rounded-lg border border-border p-3">
+                    <p className="text-[10px] font-semibold mb-2">Violation Trend</p>
+                    <div className="flex items-end gap-[3px] h-12">
+                      {[3, 5, 2, 7, 4, 8, 6, 3, 5, 9, 4, 6, 8, 5, 3, 7, 4, 6, 2, 5, 8, 4, 6, 3, 5, 7, 4, 6, 8, 5].map((h, i) => (
+                        <div key={i} className="flex-1 bg-red-500/60 rounded-sm" style={{ height: `${h * 10}%` }} />
+                      ))}
+                    </div>
+                  </div>
+                  {/* Donut mock */}
+                  <div className="rounded-lg border border-border p-3">
+                    <p className="text-[10px] font-semibold mb-2">By Category</p>
+                    <div className="flex items-center gap-3">
+                      <svg viewBox="0 0 36 36" className="w-12 h-12">
+                        <circle cx="18" cy="18" r="14" fill="none" stroke="#ef4444" strokeWidth="4" strokeDasharray="35 65" strokeDashoffset="25" />
+                        <circle cx="18" cy="18" r="14" fill="none" stroke="#f59e0b" strokeWidth="4" strokeDasharray="25 75" strokeDashoffset="60" />
+                        <circle cx="18" cy="18" r="14" fill="none" stroke="#3b82f6" strokeWidth="4" strokeDasharray="20 80" strokeDashoffset="85" />
+                        <circle cx="18" cy="18" r="14" fill="none" stroke="#8b5cf6" strokeWidth="4" strokeDasharray="20 80" strokeDashoffset="5" />
+                      </svg>
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-red-500" /><span className="text-[9px] text-muted-foreground">PII</span></div>
+                        <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-amber-500" /><span className="text-[9px] text-muted-foreground">Credentials</span></div>
+                        <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-blue-500" /><span className="text-[9px] text-muted-foreground">API Keys</span></div>
+                        <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-violet-500" /><span className="text-[9px] text-muted-foreground">Secrets</span></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Activity rows */}
+                <div className="rounded-lg border border-border overflow-hidden">
+                  <div className="px-3 py-2 bg-muted/30 border-b border-border">
+                    <p className="text-[10px] font-semibold">Recent Activity</p>
+                  </div>
+                  {[
+                    { event: "SSN detected in ChatGPT", action: "Blocked", severity: "block" },
+                    { event: "Credit card in Claude prompt", action: "Redacted", severity: "warn" },
+                    { event: "API key pattern detected", action: "Blocked", severity: "block" },
+                  ].map((row) => (
+                    <div key={row.event} className="flex items-center gap-3 px-3 py-2 border-b border-border/50 last:border-0">
+                      <div className={cn("w-1.5 h-1.5 rounded-full shrink-0", row.severity === "block" ? "bg-red-500" : "bg-amber-500")} />
+                      <span className="flex-1 text-[10px] text-foreground truncate">{row.event}</span>
+                      <span className={cn("text-[9px] font-bold uppercase", row.severity === "block" ? "text-red-500" : "text-amber-500")}>{row.action}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Right callouts */}
+            <div className="hidden lg:flex flex-col gap-6">
+              {[
+                { icon: ClipboardList, title: "Shared Prompt Library", desc: "Templates, approvals, and usage analytics" },
+                { icon: Activity, title: "Full Audit Trail", desc: "Every AI interaction logged and exportable" },
+                { icon: ShieldCheck, title: "Risk Scoring", desc: "Automatic risk assessment on every prompt" },
+              ].map((item) => (
+                <div key={item.title} className="flex items-start gap-3">
+                  <item.icon className="h-5 w-5 text-foreground/40 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-semibold">{item.title}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{item.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ━━━ 3. PLATFORM — 4-card grid with monochrome icons ━━━ */}
       <section className="py-24 sm:py-32">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
@@ -234,84 +367,6 @@ export default function LandingPage() {
               href="/features#prompt-library"
               mono
             />
-          </div>
-        </div>
-      </section>
-
-      {/* ━━━ DASHBOARD PREVIEW ━━━ */}
-      <section className="py-24 sm:py-32 border-t border-border" style={{ background: "linear-gradient(180deg, #fff 0%, #F1F8FF 40%, #fff 100%)" }}>
-        <div className="max-w-5xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-medium tracking-tight">
-              See everything in one dashboard
-            </h2>
-            <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-              Violations blocked, prompts shared, compliance score, and team activity — all at a glance.
-            </p>
-          </div>
-
-          <div className="rounded-[20px] border border-border bg-card shadow-xl shadow-black/5 overflow-hidden">
-            {/* Window chrome */}
-            <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-muted/30">
-              <div className="flex gap-1.5">
-                <div className="w-3 h-3 rounded-full bg-red-400/60" />
-                <div className="w-3 h-3 rounded-full bg-yellow-400/60" />
-                <div className="w-3 h-3 rounded-full bg-green-400/60" />
-              </div>
-              <div className="flex-1 flex justify-center">
-                <div className="px-4 py-1 rounded-md bg-background border border-border text-xs text-muted-foreground">
-                  app.teamprompt.app/audit
-                </div>
-              </div>
-            </div>
-
-            {/* Dashboard content */}
-            <div className="p-6 sm:p-8 bg-background">
-              <div className="grid grid-cols-4 gap-4 mb-6">
-                {[
-                  { label: "Violations Blocked", value: "847", change: "+12%", color: "text-red-500" },
-                  { label: "Prompts Shared", value: "1,234", change: "+8%", color: "text-blue-500" },
-                  { label: "AI Interactions", value: "15.2K", change: "+24%", color: "text-violet-500" },
-                  { label: "Compliance Score", value: "98%", change: "+2%", color: "text-emerald-500" },
-                ].map((stat) => (
-                  <div key={stat.label} className="rounded-xl border border-border p-4 bg-card">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className={cn("text-xs font-medium", stat.color)}>{stat.change}</span>
-                    </div>
-                    <p className="text-2xl font-bold tracking-tight">{stat.value}</p>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">{stat.label}</p>
-                  </div>
-                ))}
-              </div>
-
-              <div className="rounded-xl border border-border overflow-hidden">
-                <div className="px-4 py-2.5 bg-muted/30 border-b border-border">
-                  <p className="text-xs font-semibold text-foreground">Recent Security Activity</p>
-                </div>
-                {[
-                  { event: "SSN detected in ChatGPT prompt", action: "Blocked", user: "sarah.chen@acme.com", time: "2 min ago", severity: "block" },
-                  { event: "Credit card number in Claude", action: "Redacted", user: "mike.ross@acme.com", time: "8 min ago", severity: "warn" },
-                  { event: "API key pattern detected", action: "Blocked", user: "dev-team@acme.com", time: "15 min ago", severity: "block" },
-                  { event: "Patient name flagged (HIPAA)", action: "Warned", user: "dr.lee@acme.com", time: "22 min ago", severity: "warn" },
-                ].map((row) => (
-                  <div key={row.event} className="flex items-center gap-4 px-4 py-3 border-b border-border/50 last:border-0 text-sm">
-                    <div className={cn(
-                      "w-2 h-2 rounded-full shrink-0",
-                      row.severity === "block" ? "bg-red-500" : "bg-amber-500"
-                    )} />
-                    <span className="flex-1 text-xs text-foreground truncate">{row.event}</span>
-                    <span className="text-xs text-muted-foreground hidden sm:block">{row.user}</span>
-                    <span className={cn(
-                      "text-[10px] font-bold uppercase shrink-0",
-                      row.severity === "block" ? "text-red-500" : "text-amber-500"
-                    )}>
-                      {row.action}
-                    </span>
-                    <span className="text-[10px] text-muted-foreground shrink-0 w-16 text-right">{row.time}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
         </div>
       </section>

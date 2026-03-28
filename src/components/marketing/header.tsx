@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import {
+  ArrowRight,
   Menu,
   ChevronDown,
   BookOpen,
@@ -202,12 +203,14 @@ function NavDropdown({
   textClass,
   activeTextClass,
   wide = false,
+  showPromo = false,
 }: {
   label: string;
   items: typeof useCaseItems;
   textClass: string;
   activeTextClass: string;
   wide?: boolean;
+  showPromo?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -269,6 +272,21 @@ function NavDropdown({
                 </Link>
               ))}
             </div>
+            {showPromo && (
+              <div className="mt-2 pt-2 border-t border-border">
+                <Link
+                  href="/signup"
+                  onClick={() => setOpen(false)}
+                  className="flex items-center justify-between rounded-lg bg-primary/5 hover:bg-primary/10 px-4 py-3 transition-colors"
+                >
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">Get started free</p>
+                    <p className="text-xs text-muted-foreground">No credit card required</p>
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-primary shrink-0" />
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -277,11 +295,11 @@ function NavDropdown({
 }
 
 function UseCasesDropdown({ textClass, activeTextClass }: { textClass: string; activeTextClass: string }) {
-  return <NavDropdown label="Use Cases" items={useCaseItems} textClass={textClass} activeTextClass={activeTextClass} wide />;
+  return <NavDropdown label="Use Cases" items={useCaseItems} textClass={textClass} activeTextClass={activeTextClass} wide showPromo />;
 }
 
 function SolutionsDropdown({ textClass, activeTextClass }: { textClass: string; activeTextClass: string }) {
-  return <NavDropdown label="Solutions" items={solutionItems} textClass={textClass} activeTextClass={activeTextClass} />;
+  return <NavDropdown label="Solutions" items={solutionItems} textClass={textClass} activeTextClass={activeTextClass} showPromo />;
 }
 
 function ResourcesDropdown({ textClass, activeTextClass }: { textClass: string; activeTextClass: string }) {

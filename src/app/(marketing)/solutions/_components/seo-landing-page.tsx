@@ -2,7 +2,8 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { SectionLabel } from "@/components/marketing/section-label";
 import { DarkSection } from "@/components/marketing/dark-section";
-import { CTASection } from "@/components/marketing/cta-section";
+import { GetStartedSteps } from "@/components/marketing/get-started-steps";
+import { LeadCaptureForm } from "@/components/marketing/lead-capture-form";
 import { FAQSection } from "@/components/marketing/faq-section";
 import { BenefitsGrid } from "@/components/marketing/benefits-grid";
 import { StatsRow } from "@/components/marketing/stats-row";
@@ -33,23 +34,6 @@ import { CheckCircle2 } from "lucide-react";
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || "https://teamprompt.app";
-
-const categoryBadgeColors: Record<SeoCategory, string> = {
-  comparison: "text-blue-400",
-  "use-case": "text-blue-400",
-  integration: "text-emerald-400",
-  alternative: "text-violet-400",
-  guide: "text-amber-400",
-  workflow: "text-cyan-400",
-  role: "text-rose-400",
-  template: "text-orange-400",
-  platform: "text-indigo-400",
-  glossary: "text-teal-400",
-  compliance: "text-red-400",
-  "data-protection": "text-red-400",
-  feature: "text-sky-400",
-  policy: "text-amber-400",
-};
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Archive,
@@ -175,27 +159,12 @@ export function SeoLandingPage({ data }: { data: SeoPageData }) {
         }}
       />
 
-      {/* ━━━ HERO ━━━ */}
-      <section className="relative overflow-hidden bg-zinc-950 text-white">
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: [
-              "radial-gradient(ellipse 80% 60% at 50% -10%, hsl(221 83% 53% / 0.3) 0%, transparent 60%)",
-              "radial-gradient(ellipse 50% 40% at 80% 50%, hsl(260 60% 50% / 0.12) 0%, transparent 60%)",
-            ].join(", "),
-          }}
-        />
-        <div
-          className="absolute inset-0 pointer-events-none opacity-[0.03]"
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)",
-            backgroundSize: "64px 64px",
-          }}
-        />
-
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-32 pb-20 sm:pt-40 sm:pb-28">
+      {/* ━━━ HERO ━━━ Circle-inspired light */}
+      <section
+        className="border-b border-border"
+        style={{ background: "linear-gradient(180deg, #fff 0%, #F6F2FF 50%, #fff 100%)" }}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-32 pb-20 sm:pt-40 sm:pb-28">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
               {data.hero.badges && data.hero.badges.length > 0 && (
@@ -203,20 +172,20 @@ export function SeoLandingPage({ data }: { data: SeoPageData }) {
                   {data.hero.badges.map((badge) => (
                     <span
                       key={badge}
-                      className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-zinc-300 backdrop-blur-sm"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/60 px-3 py-1 text-xs font-medium text-muted-foreground"
                     >
-                      <Shield className={`h-3 w-3 ${categoryBadgeColors[data.category] || "text-blue-400"}`} />
+                      <Shield className="h-3 w-3 text-primary" />
                       {badge}
                     </span>
                   ))}
                 </div>
               )}
 
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.08]">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-medium tracking-tight leading-[1.08]">
                 {data.hero.headline}
               </h1>
 
-              <p className="mt-6 text-lg sm:text-xl text-zinc-400 max-w-xl leading-relaxed">
+              <p className="mt-6 text-lg text-muted-foreground max-w-xl leading-relaxed">
                 {data.hero.subtitle}
               </p>
 
@@ -224,7 +193,7 @@ export function SeoLandingPage({ data }: { data: SeoPageData }) {
                 <Link href="/signup">
                   <Button
                     size="lg"
-                    className="text-base px-8 h-12 rounded-full bg-white text-zinc-900 hover:bg-zinc-200 font-semibold"
+                    className="text-base px-8 h-12 rounded-lg font-bold"
                   >
                     Start for free
                     <ArrowRight className="ml-2 h-4 w-4" />
@@ -234,7 +203,7 @@ export function SeoLandingPage({ data }: { data: SeoPageData }) {
                   <Button
                     variant="outline"
                     size="lg"
-                    className="text-base px-8 h-12 rounded-full border-white/20 text-white hover:bg-white/10 hover:text-white font-semibold bg-transparent"
+                    className="text-base px-8 h-12 rounded-lg font-bold"
                   >
                     See all features
                   </Button>
@@ -273,7 +242,7 @@ export function SeoLandingPage({ data }: { data: SeoPageData }) {
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
             <div className="text-center mb-16">
               <SectionLabel>{data.features.sectionLabel}</SectionLabel>
-              <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
+              <h2 className="text-3xl sm:text-4xl font-medium tracking-tight">
                 {data.features.heading}
               </h2>
               <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -328,7 +297,7 @@ export function SeoLandingPage({ data }: { data: SeoPageData }) {
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
             <div className="text-center mb-14">
               <SectionLabel>Benefits</SectionLabel>
-              <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
+              <h2 className="text-3xl sm:text-4xl font-medium tracking-tight">
                 {data.benefits.heading}
               </h2>
             </div>
@@ -363,16 +332,11 @@ export function SeoLandingPage({ data }: { data: SeoPageData }) {
       {/* ━━━ EXPLORE MORE ━━━ */}
       <ExploreMoreLinks />
 
-      {/* ━━━ CTA ━━━ */}
-      <section className="py-20 sm:py-28 border-t border-border">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6">
-          <CTASection
-            headline={data.cta.headline}
-            gradientText={data.cta.gradientText}
-            subtitle={data.cta.subtitle}
-          />
-        </div>
-      </section>
+      {/* ━━━ GET STARTED + LEAD CAPTURE ━━━ */}
+      <div className="border-t border-border">
+        <GetStartedSteps />
+      </div>
+      <LeadCaptureForm />
     </>
   );
 }
@@ -386,7 +350,7 @@ function RelatedSolutions({ slug }: { slug: string }) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-14">
           <SectionLabel>Related Solutions</SectionLabel>
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
+          <h2 className="text-3xl sm:text-4xl font-medium tracking-tight">
             Explore more solutions
           </h2>
         </div>
@@ -478,7 +442,7 @@ function ChecklistSection({ section }: { section: SeoContentSection }) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="max-w-2xl mb-14">
           <SectionLabel>Checklist</SectionLabel>
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">{section.heading}</h2>
+          <h2 className="text-3xl sm:text-4xl font-medium tracking-tight">{section.heading}</h2>
         </div>
         <div className="grid sm:grid-cols-2 gap-4 max-w-4xl mx-auto">
           {[items.slice(0, half), items.slice(half)].map((col, colIdx) => (
@@ -507,7 +471,7 @@ function ComparisonTableSection({ section }: { section: SeoContentSection }) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-14">
           <SectionLabel>Comparison</SectionLabel>
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">{section.heading}</h2>
+          <h2 className="text-3xl sm:text-4xl font-medium tracking-tight">{section.heading}</h2>
         </div>
         <div className="max-w-3xl mx-auto rounded-2xl border border-border overflow-hidden bg-card">
           <table className="w-full text-sm">
@@ -549,7 +513,7 @@ function HowItWorksSection({ section }: { section: SeoContentSection }) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-14">
           <SectionLabel>How it works</SectionLabel>
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">{section.heading}</h2>
+          <h2 className="text-3xl sm:text-4xl font-medium tracking-tight">{section.heading}</h2>
         </div>
         <div className="max-w-4xl mx-auto">
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -580,7 +544,7 @@ function ProseSection({ section }: { section: SeoContentSection }) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="max-w-3xl mx-auto">
           <div className="border-l-4 border-primary/30 pl-6 mb-8">
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">{section.heading}</h2>
+            <h2 className="text-3xl sm:text-4xl font-medium tracking-tight">{section.heading}</h2>
           </div>
           <div className="prose prose-zinc dark:prose-invert max-w-none text-muted-foreground leading-relaxed whitespace-pre-line text-[15px]">
             {body}
@@ -643,7 +607,7 @@ function UseCasesGridSection({ section }: { section: SeoContentSection }) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="max-w-2xl mb-14">
           <SectionLabel>Use cases</SectionLabel>
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">{section.heading}</h2>
+          <h2 className="text-3xl sm:text-4xl font-medium tracking-tight">{section.heading}</h2>
         </div>
         <div className="grid gap-px sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto rounded-2xl border border-border overflow-hidden bg-border">
           {cases.map((c, i) => (

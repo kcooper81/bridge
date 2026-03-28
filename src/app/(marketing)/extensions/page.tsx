@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import { generatePageMetadata } from "@/lib/seo/metadata";
 import { generateBreadcrumbSchema, generateFAQSchema } from "@/lib/seo/schemas";
 import { SectionLabel } from "@/components/marketing/section-label";
-import { CTASection } from "@/components/marketing/cta-section";
 import { FAQSection } from "@/components/marketing/faq-section";
+import { GetStartedSteps } from "@/components/marketing/get-started-steps";
+import { LeadCaptureForm } from "@/components/marketing/lead-capture-form";
 import {
   ArrowRight,
   Download,
@@ -165,7 +166,7 @@ export default function ExtensionsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="max-w-2xl mb-14">
             <SectionLabel>Available For</SectionLabel>
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
+            <h2 className="text-3xl sm:text-4xl font-medium tracking-tight">
               Install for your browser
             </h2>
             <p className="mt-4 text-lg text-muted-foreground">
@@ -215,7 +216,7 @@ export default function ExtensionsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-14">
             <SectionLabel className="text-center">Features</SectionLabel>
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
+            <h2 className="text-3xl sm:text-4xl font-medium tracking-tight">
               Everything your team needs in the browser
             </h2>
           </div>
@@ -244,7 +245,7 @@ export default function ExtensionsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-14">
             <SectionLabel className="text-center">How It Works</SectionLabel>
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
+            <h2 className="text-3xl sm:text-4xl font-medium tracking-tight">
               Up and running in minutes
             </h2>
           </div>
@@ -268,16 +269,11 @@ export default function ExtensionsPage() {
       {/* FAQ */}
       <FAQSection faqs={faqs} includeSchema={false} />
 
-      {/* CTA */}
-      <section className="py-20 sm:py-28">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6">
-          <CTASection
-            headline="Your team uses AI every day."
-            gradientText="Give them the right prompts."
-            subtitle="Install the extension and get AI data loss prevention across every AI tool in minutes."
-          />
-        </div>
-      </section>
+      {/* Get Started + Lead Capture */}
+      <div className="border-t border-border">
+        <GetStartedSteps />
+      </div>
+      <LeadCaptureForm />
     </>
   );
 }

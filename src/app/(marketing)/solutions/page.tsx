@@ -4,7 +4,7 @@ import { ArrowRight, Layers, Plug, GitCompareArrows, Replace, BookOpen, Workflow
 import { generatePageMetadata } from "@/lib/seo/metadata";
 import { generateBreadcrumbSchema } from "@/lib/seo/schemas";
 import { CTASection } from "@/components/marketing/cta-section";
-import { DarkSection } from "@/components/marketing/dark-section";
+
 import { allSeoPages } from "@/lib/seo-pages/data";
 import type { SeoPageData } from "@/lib/seo-pages/types";
 
@@ -87,14 +87,17 @@ export default function SolutionsPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbs) }}
       />
 
-      {/* ━━━ HERO ━━━ */}
-      <DarkSection gradient="center">
+      {/* ━━━ HERO ━━━ Light, Circle-inspired */}
+      <section
+        className="border-b border-border"
+        style={{ background: "linear-gradient(180deg, #fff 0%, #F6F2FF 50%, #fff 100%)" }}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-32 pb-16 sm:pt-40 sm:pb-20">
           <div className="text-center max-w-3xl mx-auto">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.08] text-white">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-medium tracking-tight leading-[1.08]">
               Solutions for every team
             </h1>
-            <p className="mt-6 text-lg sm:text-xl text-zinc-400 max-w-xl mx-auto leading-relaxed">
+            <p className="mt-6 text-lg sm:text-xl text-muted-foreground max-w-xl mx-auto leading-relaxed">
               Explore how TeamPrompt helps teams manage prompts, secure AI usage, and work smarter with AI.
             </p>
           </div>
@@ -107,17 +110,17 @@ export default function SolutionsPage() {
                 <a
                   key={cat.key}
                   href={`#${cat.key}`}
-                  className="flex items-center gap-1.5 rounded-full border border-zinc-700/50 bg-zinc-800/50 px-4 py-2 text-sm text-zinc-300 hover:border-primary/50 hover:text-white transition-colors"
+                  className="flex items-center gap-1.5 rounded-full border border-border bg-muted/60 px-4 py-2 text-sm text-muted-foreground hover:border-primary/50 hover:text-foreground transition-colors"
                 >
                   <cat.icon className="h-3.5 w-3.5" />
                   {cat.label}
-                  <span className="text-xs text-zinc-500 ml-0.5">{count}</span>
+                  <span className="text-xs text-muted-foreground/60 ml-0.5">{count}</span>
                 </a>
               );
             })}
           </div>
         </div>
-      </DarkSection>
+      </section>
 
       {/* ━━━ FEATURED ━━━ */}
       {featured.length > 0 && (

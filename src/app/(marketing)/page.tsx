@@ -101,22 +101,22 @@ export default function LandingPage() {
               </p>
             </div>
 
-            {/* Hero visual — stacked images with UI overlays (Circle-style) */}
+            {/* Hero image with UI overlays */}
             <div className="relative hidden lg:block">
-              {/* Top image — person using AI with "Blocked" overlay */}
-              <div className="relative overflow-hidden rounded-[20px] shadow-xl shadow-black/10">
+              <div className="relative overflow-hidden rounded-[20px] shadow-2xl shadow-black/10">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src="https://images.unsplash.com/photo-1551434678-e076c223a692?w=700&q=80&auto=format&fit=crop"
-                  alt="Team working with AI tools at desk"
-                  className="w-full h-[280px] object-cover"
+                  src="https://images.unsplash.com/photo-1531482615713-2afd69097998?w=900&q=80&auto=format&fit=crop"
+                  alt="Team collaborating with AI tools on screens"
+                  className="w-full h-[480px] object-cover"
                 />
                 <div
                   className="absolute inset-0 pointer-events-none"
-                  style={{ background: "radial-gradient(circle at 100% 100%, rgba(0,0,0,0.3), transparent 70%)" }}
+                  style={{ background: "radial-gradient(circle at 100% 100%, rgba(0,0,0,0.35), transparent 65%)" }}
                 />
-                {/* UI overlay — DLP Block notification */}
-                <div className="absolute bottom-4 right-4 flex items-center gap-3 rounded-xl bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl px-4 py-3 shadow-lg border border-white/50">
+
+                {/* Overlay — DLP Block */}
+                <div className="absolute top-5 left-5 flex items-center gap-3 rounded-xl bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl px-4 py-3 shadow-lg border border-white/50">
                   <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-500/10">
                     <ShieldCheck className="h-5 w-5 text-red-500" />
                   </div>
@@ -125,22 +125,9 @@ export default function LandingPage() {
                     <p className="text-xs text-muted-foreground">Sensitive data detected in ChatGPT</p>
                   </div>
                 </div>
-              </div>
 
-              {/* Bottom image — offset, overlapping — with "Shared" overlay */}
-              <div className="relative overflow-hidden rounded-[20px] shadow-xl shadow-black/10 -mt-8 ml-12 mr-0">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=700&q=80&auto=format&fit=crop"
-                  alt="Professional reviewing compliance dashboard"
-                  className="w-full h-[220px] object-cover"
-                />
-                <div
-                  className="absolute inset-0 pointer-events-none"
-                  style={{ background: "radial-gradient(circle at 0% 100%, rgba(0,0,0,0.25), transparent 70%)" }}
-                />
-                {/* UI overlay — Prompt shared */}
-                <div className="absolute bottom-4 left-4 flex items-center gap-3 rounded-xl bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl px-4 py-3 shadow-lg border border-white/50">
+                {/* Overlay — Prompt shared */}
+                <div className="absolute bottom-5 left-5 flex items-center gap-3 rounded-xl bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl px-4 py-3 shadow-lg border border-white/50">
                   <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/10">
                     <ClipboardList className="h-5 w-5 text-emerald-500" />
                   </div>
@@ -149,12 +136,13 @@ export default function LandingPage() {
                     <p className="text-xs text-muted-foreground">Customer Onboarding — 142 uses</p>
                   </div>
                 </div>
-                {/* UI overlay — Compliance score */}
-                <div className="absolute top-4 right-4 flex items-center gap-2.5 rounded-xl bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl px-4 py-2.5 shadow-lg border border-white/50">
-                  <ShieldCheck className="h-4 w-4 text-emerald-500" />
+
+                {/* Overlay — Compliance score */}
+                <div className="absolute bottom-5 right-5 flex items-center gap-2.5 rounded-xl bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl px-4 py-3 shadow-lg border border-white/50">
+                  <ShieldCheck className="h-5 w-5 text-emerald-500" />
                   <div>
                     <p className="text-xs text-muted-foreground">Compliance</p>
-                    <p className="text-lg font-bold text-foreground leading-none">98%</p>
+                    <p className="text-xl font-bold text-foreground leading-none">98%</p>
                   </div>
                 </div>
               </div>

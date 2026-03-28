@@ -39,7 +39,7 @@ export default defineConfig({
       name: isFirefox
         ? "TeamPrompt — AI Prompt Manager & DLP"  // Firefox: 45 char limit
         : "TeamPrompt — AI Prompt Manager & DLP for ChatGPT, Claude, Gemini",
-      version: "1.0.13",
+      version: "1.0.14",
       description:
         "Shared prompt library with real-time DLP scanning for ChatGPT, Claude, Gemini, Copilot & Perplexity. Blocks sensitive data.",
       icons: {

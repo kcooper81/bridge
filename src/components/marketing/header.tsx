@@ -315,7 +315,7 @@ function UseCasesDropdown({ textClass, activeTextClass }: { textClass: string; a
 }
 
 function SolutionsDropdown({ textClass, activeTextClass }: { textClass: string; activeTextClass: string }) {
-  return <NavDropdown label="Solutions" items={solutionItems} textClass={textClass} activeTextClass={activeTextClass} showPromo />;
+  return <NavDropdown label="Solutions" items={solutionItems} textClass={textClass} activeTextClass={activeTextClass} wide showPromo />;
 }
 
 function ResourcesDropdown({ textClass, activeTextClass }: { textClass: string; activeTextClass: string }) {

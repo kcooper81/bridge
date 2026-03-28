@@ -108,8 +108,8 @@ export default function LandingPage() {
               <div className="overflow-hidden rounded-[20px] shadow-2xl shadow-black/10">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src="https://images.unsplash.com/photo-1531482615713-2afd69097998?w=900&q=80&auto=format&fit=crop"
-                  alt="Team collaborating with AI tools on screens"
+                  src="/images/hero-chatgpt-at-work.webp"
+                  alt="Professional using ChatGPT at work"
                   className="w-full h-[480px] object-cover"
                 />
                 <div
@@ -345,20 +345,20 @@ export default function LandingPage() {
           <div className="grid gap-8 sm:grid-cols-3">
             {[
               {
-                src: "https://images.unsplash.com/photo-1553877522-43269d4ea984?w=600&q=80&auto=format&fit=crop",
-                alt: "Team collaborating around laptop",
+                src: "/images/hero-tech-workers.jpg",
+                alt: "Tech workers in modern office",
                 title: "Real-Time DLP Scanning",
                 desc: "Every prompt is scanned before it leaves the browser. Detect PII, credentials, and confidential data across ChatGPT, Claude, Gemini, and more.",
               },
               {
-                src: "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=600&q=80&auto=format&fit=crop",
-                alt: "Professional at desk with monitor",
+                src: "/images/hero-office-collab.jpg",
+                alt: "Two colleagues collaborating on laptop",
                 title: "Shared Prompt Library",
                 desc: "One searchable library of vetted prompts. Templates with variables, approval workflows, quality guidelines, and usage tracking.",
               },
               {
-                src: "https://images.unsplash.com/photo-1551434678-e076c223a692?w=600&q=80&auto=format&fit=crop",
-                alt: "Team reviewing dashboard on screen",
+                src: "/images/hero-data-breach.jpg",
+                alt: "Data breach alert on laptop screen",
                 title: "Compliance & Audit Trail",
                 desc: "19 compliance packs for HIPAA, SOC 2, PCI-DSS, GDPR, and more. Full activity log with exportable reports for auditors.",
               },

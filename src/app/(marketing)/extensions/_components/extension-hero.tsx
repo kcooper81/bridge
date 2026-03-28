@@ -56,8 +56,8 @@ export function ExtensionHero() {
             <div className="relative overflow-hidden rounded-[20px] shadow-xl shadow-black/10">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=700&q=80&auto=format&fit=crop"
-                alt="Developer using AI tools in browser"
+                src="/images/hero-chatgpt-at-work.webp"
+                alt="Professional using AI tools at desk"
                 className="w-full h-[380px] object-cover"
               />
               <div

@@ -520,51 +520,177 @@ export default function FeaturesPage() {
       </div>
     </section>
 
-    {/* ── How it works — numbered steps ── */}
+    {/* ── How it works — full-width steps with mockups ── */}
     <section className="py-24 sm:py-32">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6">
-        <div className="text-center mb-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="text-center mb-20">
           <p className="text-sm font-semibold tracking-wider text-primary mb-2">How It Works</p>
           <h2 className="text-3xl sm:text-4xl font-medium tracking-tight">
             Three layers of AI governance
           </h2>
         </div>
 
-        <div className="space-y-8">
-          {[
-            {
-              step: "1",
-              title: "Control which AI tools are used",
-              subtitle: "Network-Level Enforcement",
-              desc: "Approve trusted AI tools and block everything else at the DNS level via Cloudflare Gateway. Covers all devices — browser, native apps, mobile, CLI. Users on unapproved tools see a clear block page.",
-              color: "bg-blue-500",
-            },
-            {
-              step: "2",
-              title: "Scan what gets sent to AI",
-              subtitle: "Content-Level DLP",
-              desc: "On approved tools, the browser extension scans every outbound prompt in real time. 40+ detection rules catch SSNs, credit cards, API keys, patient data, and more. Block, warn, or auto-redact before it leaves the browser.",
-              color: "bg-emerald-500",
-            },
-            {
-              step: "3",
-              title: "Audit everything",
-              subtitle: "Compliance & Reporting",
-              desc: "Every AI interaction is logged with user, tool, action, and risk score. Sankey flow diagrams show team→tool usage. Heatmaps show when violations occur. 19 compliance packs cover HIPAA, SOC 2, PCI-DSS, GDPR, and more. Export CSV for auditors.",
-              color: "bg-violet-500",
-            },
-          ].map((item) => (
-            <div key={item.step} className="flex gap-6 items-start">
-              <div className={cn("flex h-10 w-10 items-center justify-center rounded-full text-white font-bold text-sm shrink-0", item.color)}>
-                {item.step}
+        <div className="space-y-24 sm:space-y-32">
+          {/* Step 1: Network Control */}
+          <div className="flex flex-col lg:flex-row gap-12 lg:gap-16 items-center">
+            <div className="flex-1 max-w-xl">
+              <div className="flex items-center gap-3 mb-5">
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-500 text-white text-sm font-bold shrink-0">1</span>
+                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Network-Level Enforcement</span>
               </div>
-              <div className="flex-1 pb-8 border-b border-border last:border-0">
-                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">{item.subtitle}</p>
-                <h3 className="text-xl font-semibold mb-2">{item.title}</h3>
-                <p className="text-muted-foreground leading-relaxed">{item.desc}</p>
+              <h3 className="text-2xl sm:text-3xl font-semibold mb-4">Control which AI tools are used</h3>
+              <p className="text-muted-foreground text-lg leading-relaxed mb-6">
+                Approve trusted AI tools and block everything else at the DNS level via Cloudflare Gateway. Covers all devices on your network.
+              </p>
+              <div className="space-y-2.5">
+                {["Block unapproved tools at DNS — before any connection", "Covers browser, native apps, mobile, and CLI", "Users see a clear block page explaining why", "Powered by Cloudflare Zero Trust (free up to 50 users)"].map((item) => (
+                  <div key={item} className="flex items-start gap-2.5">
+                    <CheckCircle2 className="h-4 w-4 text-blue-500 shrink-0 mt-0.5" />
+                    <span className="text-sm text-muted-foreground">{item}</span>
+                  </div>
+                ))}
               </div>
             </div>
-          ))}
+            {/* Mock: Tool policy UI */}
+            <div className="flex-1 w-full max-w-lg">
+              <div className="rounded-[20px] border border-border bg-card shadow-lg shadow-black/5 p-5">
+                <p className="text-xs font-semibold mb-3">AI Tool Policy</p>
+                {[
+                  { name: "ChatGPT", approved: true },
+                  { name: "Claude", approved: true },
+                  { name: "Gemini", approved: true },
+                  { name: "Poe", approved: false },
+                  { name: "Character.AI", approved: false },
+                  { name: "DeepSeek", approved: false },
+                ].map((tool) => (
+                  <div key={tool.name} className={cn(
+                    "flex items-center justify-between rounded-lg px-3 py-2 mb-1.5 border",
+                    tool.approved ? "border-emerald-500/20 bg-emerald-500/[0.02]" : "border-border"
+                  )}>
+                    <span className="text-sm font-medium">{tool.name}</span>
+                    <span className={cn("text-[10px] font-bold uppercase", tool.approved ? "text-emerald-500" : "text-red-500")}>
+                      {tool.approved ? "Approved" : "Blocked"}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Step 2: Content DLP */}
+          <div className="flex flex-col lg:flex-row-reverse gap-12 lg:gap-16 items-center">
+            <div className="flex-1 max-w-xl">
+              <div className="flex items-center gap-3 mb-5">
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-500 text-white text-sm font-bold shrink-0">2</span>
+                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Content-Level DLP</span>
+              </div>
+              <h3 className="text-2xl sm:text-3xl font-semibold mb-4">Scan what gets sent to AI</h3>
+              <p className="text-muted-foreground text-lg leading-relaxed mb-6">
+                On approved tools, the browser extension scans every outbound prompt in real time. Block, warn, or auto-redact before it leaves the browser.
+              </p>
+              <div className="space-y-2.5">
+                {["40+ detection rules for PII, credentials, API keys, patient data", "Three modes: Block, Warn, or Auto-Redact", "Smart redaction replaces data with safe [PLACEHOLDERS]", "Works inside ChatGPT, Claude, Gemini, Copilot, Perplexity"].map((item) => (
+                  <div key={item} className="flex items-start gap-2.5">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
+                    <span className="text-sm text-muted-foreground">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            {/* Mock: DLP scanning UI */}
+            <div className="flex-1 w-full max-w-lg">
+              <div className="rounded-[20px] border border-border bg-card shadow-lg shadow-black/5 p-5">
+                <p className="text-xs font-semibold mb-3">Real-Time Scan</p>
+                <div className="rounded-lg border border-red-500/20 p-3 bg-red-500/[0.02] mb-3">
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <ShieldX className="w-3 h-3 text-red-500" />
+                    <span className="text-[10px] text-red-600 font-semibold">3 violations detected</span>
+                  </div>
+                  <p className="text-[11px] text-foreground leading-relaxed">
+                    Patient <span className="bg-red-500/15 text-red-600 px-1 rounded font-medium">John Smith</span>, SSN{" "}
+                    <span className="bg-red-500/15 text-red-600 px-1 rounded font-medium">123-45-6789</span>, admitted to{" "}
+                    <span className="bg-red-500/15 text-red-600 px-1 rounded font-medium">St. Mary&apos;s</span>
+                  </p>
+                </div>
+                <div className="flex items-center justify-center gap-2 my-2">
+                  <div className="h-px flex-1 bg-border" />
+                  <Sparkles className="w-3 h-3 text-primary" />
+                  <div className="h-px flex-1 bg-border" />
+                </div>
+                <div className="rounded-lg border border-emerald-500/20 p-3 bg-emerald-500/[0.02]">
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <ShieldCheck className="w-3 h-3 text-emerald-500" />
+                    <span className="text-[10px] text-emerald-600 font-semibold">Redacted — safe to send</span>
+                  </div>
+                  <p className="text-[11px] text-foreground leading-relaxed">
+                    Patient <span className="bg-primary/15 text-primary px-1 rounded font-mono text-[10px]">[PII]</span>, SSN{" "}
+                    <span className="bg-primary/15 text-primary px-1 rounded font-mono text-[10px]">[SSN]</span>, admitted to{" "}
+                    <span className="bg-primary/15 text-primary px-1 rounded font-mono text-[10px]">[FACILITY]</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Step 3: Audit */}
+          <div className="flex flex-col lg:flex-row gap-12 lg:gap-16 items-center">
+            <div className="flex-1 max-w-xl">
+              <div className="flex items-center gap-3 mb-5">
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-violet-500 text-white text-sm font-bold shrink-0">3</span>
+                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Compliance & Reporting</span>
+              </div>
+              <h3 className="text-2xl sm:text-3xl font-semibold mb-4">Audit everything</h3>
+              <p className="text-muted-foreground text-lg leading-relaxed mb-6">
+                Every AI interaction is logged with user, tool, action, and risk score. Visual dashboards make compliance reporting effortless.
+              </p>
+              <div className="space-y-2.5">
+                {["Sankey flow diagrams show team → tool interaction patterns", "Violation heatmaps by day and hour", "19 compliance packs: HIPAA, SOC 2, PCI-DSS, GDPR, and more", "One-click CSV export for auditors"].map((item) => (
+                  <div key={item} className="flex items-start gap-2.5">
+                    <CheckCircle2 className="h-4 w-4 text-violet-500 shrink-0 mt-0.5" />
+                    <span className="text-sm text-muted-foreground">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            {/* Mock: Audit dashboard */}
+            <div className="flex-1 w-full max-w-lg">
+              <div className="rounded-[20px] border border-border bg-card shadow-lg shadow-black/5 p-5">
+                <p className="text-xs font-semibold mb-3">Audit Dashboard</p>
+                <div className="grid grid-cols-3 gap-2 mb-4">
+                  <div className="rounded-lg border border-border p-2.5">
+                    <p className="text-lg font-bold text-red-500">847</p>
+                    <p className="text-[9px] text-muted-foreground">Blocked</p>
+                  </div>
+                  <div className="rounded-lg border border-border p-2.5">
+                    <p className="text-lg font-bold text-emerald-500">98%</p>
+                    <p className="text-[9px] text-muted-foreground">Compliance</p>
+                  </div>
+                  <div className="rounded-lg border border-border p-2.5">
+                    <p className="text-lg font-bold text-violet-500">15.2K</p>
+                    <p className="text-[9px] text-muted-foreground">Interactions</p>
+                  </div>
+                </div>
+                <div className="rounded-lg border border-border p-3 mb-3">
+                  <p className="text-[9px] font-semibold mb-2">Violation Trend (30d)</p>
+                  <div className="flex items-end gap-[2px] h-10">
+                    {[3,5,2,7,4,8,6,3,5,9,4,6,8,5,3,7,4,6,2,5,8,4,6,3,5,7,4,6,8,5].map((h, i) => (
+                      <div key={i} className="flex-1 bg-violet-500/50 rounded-sm" style={{ height: `${h * 10}%` }} />
+                    ))}
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {["HIPAA", "SOC 2", "PCI-DSS", "GDPR", "CCPA", "+14"].map((pack) => (
+                    <span key={pack} className={cn(
+                      "text-[9px] font-semibold rounded-md px-2 py-0.5 border",
+                      pack.startsWith("+") ? "border-dashed border-border text-muted-foreground" : "border-border bg-muted/50"
+                    )}>
+                      {pack}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>

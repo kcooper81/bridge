@@ -7,7 +7,6 @@ import {
   generateOrganizationSchema,
   generateWebSiteSchema,
 } from "@/lib/seo/schemas";
-import { GetStartedSteps } from "@/components/marketing/get-started-steps";
 import { LeadCaptureForm } from "@/components/marketing/lead-capture-form";
 import { FeatureCard } from "@/components/marketing/feature-card";
 import {
@@ -485,12 +484,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ━━━ 8. GET STARTED IN 3 STEPS ━━━ */}
-      <div className="border-t border-border">
-        <GetStartedSteps />
-      </div>
-
-      {/* ━━━ 9. LEAD CAPTURE FORM ━━━ */}
+      {/* ━━━ LEAD CAPTURE FORM ━━━ */}
       <LeadCaptureForm />
     </>
   );

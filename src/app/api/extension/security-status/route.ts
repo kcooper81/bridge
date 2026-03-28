@@ -54,6 +54,7 @@ export async function GET(request: NextRequest) {
       allow_guardrail_override: orgSettings.allow_guardrail_override ?? true,
       auto_redact_sensitive_data: orgSettings.auto_redact_sensitive_data ?? false,
       allow_external_ai_tools: orgSettings.allow_external_ai_tools ?? true,
+      approved_ai_tools: (orgSettings.approved_ai_tools as string[] | undefined) ?? ["chatgpt", "claude", "gemini", "copilot", "perplexity"],
       activity_logging_enabled: orgSettings.activity_logging_enabled ?? true,
       activity_log_mode: orgSettings.activity_log_mode ?? "metadata_only",
     };

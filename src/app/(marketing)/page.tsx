@@ -65,6 +65,7 @@ export default function LandingPage() {
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             {/* Text */}
             <div>
+              <p className="text-sm font-semibold uppercase tracking-widest text-primary mb-4">AI WorkOS</p>
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-medium tracking-tight leading-[1.1]">
                 Your team uses AI.{" "}
                 <span className="text-primary">

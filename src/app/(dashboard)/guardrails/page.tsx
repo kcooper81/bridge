@@ -64,8 +64,10 @@ import {
   ArrowUpDown,
   AlertTriangle,
   ChevronDown,
+  Globe,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { ToolPolicy } from "@/components/dashboard/tool-policy";
 import { DEFAULT_SECURITY_RULES } from "@/lib/security/default-rules";
 import { COMPLIANCE_TEMPLATES, PACK_GROUPS, type ComplianceTemplate } from "@/lib/security/compliance-templates";
 import { installComplianceTemplate } from "@/lib/vault-api";
@@ -740,6 +742,10 @@ export default function GuardrailsPage() {
             <ShieldAlert className="h-4 w-4 hidden sm:inline" />
             Violations ({violations.length})
           </TabsTrigger>
+          <TabsTrigger value="ai-tools" className="gap-1.5">
+            <Globe className="h-4 w-4 hidden sm:inline" />
+            AI Tools
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="policies" className="mt-4">
@@ -1125,6 +1131,11 @@ export default function GuardrailsPage() {
         {/* Suggested Rules Tab */}
         <TabsContent value="suggestions" className="mt-4">
           <SuggestedRules canEdit={canEdit} />
+        </TabsContent>
+
+        {/* AI Tools Tab */}
+        <TabsContent value="ai-tools" className="mt-4">
+          <ToolPolicy />
         </TabsContent>
       </Tabs>
 

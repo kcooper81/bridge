@@ -1,6 +1,5 @@
--- Add Cloudflare Gateway integration fields to org_settings
-ALTER TABLE org_settings
-  ADD COLUMN IF NOT EXISTS cloudflare_account_id TEXT,
-  ADD COLUMN IF NOT EXISTS cloudflare_api_token TEXT,
-  ADD COLUMN IF NOT EXISTS cloudflare_blocked_tools JSONB DEFAULT '[]'::jsonb,
-  ADD COLUMN IF NOT EXISTS cloudflare_connected_at TIMESTAMPTZ;
+-- Cloudflare Gateway integration fields are stored in organizations.settings JSONB
+-- Keys: cloudflare_account_id, cloudflare_api_token, cloudflare_blocked_tools, cloudflare_connected_at
+-- No schema change needed — JSONB is flexible
+-- This migration is a no-op placeholder for documentation
+SELECT 1;

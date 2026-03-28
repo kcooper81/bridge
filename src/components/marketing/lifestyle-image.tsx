@@ -2,12 +2,33 @@
 
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import type { LucideIcon } from "lucide-react";
+import {
+  ShieldAlert,
+  ShieldCheck,
+  ClipboardList,
+  Lock,
+  Eye,
+  Globe,
+  Activity,
+  Shield,
+} from "lucide-react";
+
+const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
+  ShieldAlert,
+  ShieldCheck,
+  ClipboardList,
+  Lock,
+  Eye,
+  Globe,
+  Activity,
+  Shield,
+};
 
 /* ── Overlay Card ── */
 
 interface OverlayCardProps {
-  icon: LucideIcon;
+  /** Icon name string — resolved internally to avoid server→client serialization issues */
+  icon: string;
   label: string;
   value?: string;
   position: "top-left" | "top-right" | "bottom-left" | "bottom-right";
@@ -21,7 +42,8 @@ const positionClasses: Record<OverlayCardProps["position"], string> = {
   "bottom-right": "bottom-4 right-4",
 };
 
-export function OverlayCard({ icon: Icon, label, value, position, className }: OverlayCardProps) {
+export function OverlayCard({ icon, label, value, position, className }: OverlayCardProps) {
+  const Icon = ICON_MAP[icon] || Shield;
   return (
     <div
       className={cn(

@@ -16,10 +16,9 @@ import {
   ClipboardList,
   Eye,
   FileSearch,
-  Quote,
-  ShieldAlert,
-  ShieldCheck,
   Lock,
+  Quote,
+  ShieldCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -111,9 +110,9 @@ export default function LandingPage() {
               gradientFrom="bottom-left"
               priority
               overlayCards={[
-                { icon: ShieldAlert, label: "SSN Blocked", value: "Real-time", position: "top-left" },
-                { icon: ClipboardList, label: "Prompts Shared", value: "1,234", position: "top-right" },
-                { icon: ShieldCheck, label: "Compliance Score", value: "98%", position: "bottom-right" },
+                { icon: "ShieldAlert", label: "SSN Blocked", value: "Real-time", position: "top-left" },
+                { icon: "ClipboardList", label: "Prompts Shared", value: "1,234", position: "top-right" },
+                { icon: "ShieldCheck", label: "Compliance Score", value: "98%", position: "bottom-right" },
               ]}
             />
           </div>

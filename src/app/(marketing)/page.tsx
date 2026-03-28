@@ -339,33 +339,47 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="grid gap-6 sm:grid-cols-2 max-w-5xl mx-auto">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto">
             <FeatureCard
               icon={Eye}
-              title="Shadow AI Analysis"
-              description="Go beyond discovery to understand how AI is actually used across your organization. See which tools, which teams, and what data is being shared."
+              title="Shadow AI Discovery"
+              description="See which AI tools your team actually uses — approved and unapproved. Monitor by department, role, individual, and device."
               href="/security"
               mono
             />
             <FeatureCard
               icon={Lock}
-              title="Leakage & Oversharing Prevention"
+              title="Real-Time DLP Scanning"
               description="Detect and block sensitive information before it reaches AI tools. SSNs, credit cards, API keys, patient records — stopped in real time."
               href="/security"
               mono
             />
             <FeatureCard
+              icon={ShieldCheck}
+              title="AI Tool Policy + Network Blocking"
+              description="Approve the AI tools you trust, block everything else. Enforce at the browser level and at DNS with Cloudflare Gateway — covering native apps, mobile, and CLI."
+              href="/features"
+              mono
+            />
+            <FeatureCard
               icon={FileSearch}
-              title="Maintaining Compliance"
-              description="Ensure AI usage stays aligned with organizational policies, security frameworks, and evolving regulatory requirements. 19 pre-built compliance packs."
+              title="19 Compliance Frameworks"
+              description="HIPAA, SOC 2, PCI-DSS, GDPR, and 15 more. One-click install activates all detection rules for your regulatory requirements."
               href="/features#compliance-policy-packs"
               mono
             />
             <FeatureCard
               icon={ClipboardList}
-              title="Prompt Governance"
+              title="Shared Prompt Library"
               description="One searchable library of approved prompts with templates, approval workflows, quality guidelines, and usage analytics across your team."
               href="/features#prompt-library"
+              mono
+            />
+            <FeatureCard
+              icon={Activity}
+              title="Audit & Compliance Dashboard"
+              description="Sankey flow diagrams, violation heatmaps, risk scoring, compliance coverage, and CSV export — everything auditors need in one view."
+              href="/features"
               mono
             />
           </div>

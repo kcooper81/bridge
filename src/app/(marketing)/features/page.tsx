@@ -424,6 +424,18 @@ const governanceFeatures = [
     description:
       "Metadata-only or full-text logging of every AI interaction. Filter by tool, action, date range. Export to CSV or JSON for compliance reviews.",
   },
+  {
+    icon: Globe,
+    title: "AI Tool Policy + Cloudflare Gateway",
+    description:
+      "Approve trusted AI tools, block everything else. Browser extension enforcement plus optional DNS-level blocking via Cloudflare Gateway — covers native apps and mobile.",
+  },
+  {
+    icon: Shield,
+    title: "Audit & Compliance Dashboard",
+    description:
+      "Sankey flow diagrams showing team→tool usage, violation heatmaps, risk score distribution, compliance framework coverage, and one-click CSV export for auditors.",
+  },
 ];
 
 /* ── Platform features ── */
@@ -559,7 +571,7 @@ export default function FeaturesPage() {
               Visibility, enforcement, and accountability
             </h2>
             <p className="mt-4 text-muted-foreground max-w-xl mx-auto">
-              40+ detection rules, AI-powered scanning, violation tracking with risk scores, and full audit trails for every AI interaction.
+              40+ detection rules, AI-powered scanning, violation tracking, network-level tool blocking, and audit dashboards with Sankey diagrams and heatmaps.
             </p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

@@ -270,6 +270,16 @@ const _RAW_CATEGORIES: RawCategory[] = [
         a: "Admins and managers can use AI to generate guardrail rules automatically. First, connect an API key in Guardrails → Detection tab — either OpenAI or Anthropic (Claude) is supported. Then click the \"AI Generate\" button on the Policies tab. Describe what sensitive data you want to protect in plain English (e.g., \"Block our internal project names: Falcon, Titan, and Aurora\"). The AI will generate one or more rules with appropriate patterns, categories, and severity levels. Review the generated rules, select the ones you want, and click Create to add them. If you haven't connected an API key yet, the modal will prompt you to set one up in Detection settings.",
         keywords: ["ai generate", "ai rules", "generate rules", "openai", "anthropic", "claude", "automatic", "detection settings", "api key"],
       },
+      {
+        q: "What is the AI Tool Policy?",
+        a: "The AI Tool Policy lets admins control which AI tools your team is allowed to use. Go to Guardrails → AI Tools to see all 18+ supported AI tools. Toggle the policy on to restrict access to approved tools only.\n\nThe policy enforces at two levels:\n\n• **Browser Extension** — Blocks interactions with unapproved tools when users try to use them.\n• **Cloudflare Gateway** (optional) — Blocks unapproved tool domains at the DNS level, covering all devices on your network including native apps, mobile, and CLI tools.\n\nWhen you approve or block a tool, the change syncs automatically to both enforcement layers. Policy changes are logged in the audit trail.",
+        keywords: ["ai tool policy", "approved tools", "blocked tools", "tool restriction", "cloudflare", "dns blocking"],
+      },
+      {
+        q: "How does the Cloudflare Gateway integration work?",
+        a: "Cloudflare Gateway provides network-level AI tool blocking. When connected, TeamPrompt syncs your approved/blocked tool list to Cloudflare's DNS filtering. Any device on your corporate network (using Cloudflare WARP or your DNS settings) will be unable to access blocked AI tools — this covers browsers, native apps, mobile devices, and CLI tools.\n\nTo set up:\n1. Go to Settings → Integrations → Cloudflare Gateway\n2. Enter your Cloudflare Account ID and an API token with Gateway:Edit permission\n3. Click Connect\n4. Go to Guardrails → AI Tools to manage which tools are approved or blocked\n\nBlocked tools show a Cloudflare block page explaining that the tool is not approved. The free Cloudflare Zero Trust tier supports up to 50 users.",
+        keywords: ["cloudflare", "gateway", "dns", "network", "integration", "warp", "zero trust"],
+      },
     ],
   },
   {

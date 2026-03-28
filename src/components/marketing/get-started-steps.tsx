@@ -1,69 +1,66 @@
-import { Globe, Shield, ShieldCheck } from "lucide-react";
+import { Download, SlidersHorizontal, ShieldCheck } from "lucide-react";
 
 export function GetStartedSteps({ dark = false }: { dark?: boolean }) {
   const steps = [
     {
       step: "1",
-      title: "Integrate TeamPrompt",
-      desc: "Install the browser extension or use the built-in secure AI chat. Works with Chrome, Edge, and Firefox.",
-      icon: Globe,
+      title: "Install",
+      desc: "Add the browser extension to Chrome, Edge, or Firefox — or use the built-in AI chat. No proxy or VPN needed.",
+      icon: Download,
     },
     {
       step: "2",
-      title: "Assess your risk",
-      desc: "Get immediate visibility into AI interactions across your team. See what data is being shared and where.",
-      icon: Shield,
+      title: "Configure",
+      desc: "Enable the compliance packs for your industry, set DLP rules, and add your team's prompts to the shared library.",
+      icon: SlidersHorizontal,
     },
     {
       step: "3",
-      title: "Enforce AI policy",
-      desc: "Define DLP rules, enable compliance packs, and apply real-time guardrails across all AI usage.",
+      title: "Protected",
+      desc: "Every AI interaction is scanned in real time. Sensitive data is blocked before it leaves the browser. Your team has a full audit trail.",
       icon: ShieldCheck,
     },
   ];
 
   return (
-    <section className={dark ? "py-20 sm:py-28 bg-zinc-950 text-white" : "py-20 sm:py-28"}>
+    <section
+      className={dark ? "py-24 sm:py-32 bg-zinc-950 text-white" : "py-24 sm:py-32"}
+      style={dark ? undefined : { background: "linear-gradient(180deg, #fff 0%, #F6F2FF 50%, #fff 100%)" }}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-16">
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-            Set up in{" "}
-            <span className={dark ? "text-blue-400" : "text-primary"}>
-              under two minutes.
-            </span>
+          <h2 className="text-3xl sm:text-4xl font-medium tracking-tight">
+            How it works
           </h2>
           <p className={`mt-4 text-lg ${dark ? "text-zinc-400" : "text-muted-foreground"} max-w-2xl mx-auto`}>
-            No proxy, no VPN, no IT ticket. Install and your team is protected.
+            Three steps from install to full AI security coverage.
           </p>
         </div>
 
-        <div className="grid gap-8 sm:grid-cols-3 max-w-4xl mx-auto relative">
-          {/* Connecting line */}
-          <div
-            className={`hidden sm:block absolute top-12 left-[20%] right-[20%] h-px ${
-              dark ? "bg-blue-500/30" : "bg-primary/20"
-            }`}
-          />
-
+        <div className="grid gap-12 sm:grid-cols-3 max-w-4xl mx-auto">
           {steps.map((item) => (
-            <div key={item.step} className="relative text-center">
-              <div
-                className={`inline-flex h-16 w-16 items-center justify-center rounded-2xl mb-5 ${
-                  dark
-                    ? "bg-blue-500/10 border border-blue-500/20"
-                    : "bg-primary/10 border border-primary/20"
-                }`}
-              >
-                <item.icon
-                  className={`h-7 w-7 ${dark ? "text-blue-400" : "text-primary"}`}
-                />
-              </div>
-              <div
-                className={`absolute -top-1 left-1/2 -translate-x-1/2 -translate-y-full text-xs font-bold tracking-widest ${
-                  dark ? "text-blue-400/60" : "text-primary/60"
-                }`}
-              >
-                {item.step}
+            <div key={item.step} className="text-center">
+              <div className="relative inline-block mb-6">
+                <div
+                  className={`flex h-14 w-14 items-center justify-center rounded-[16px] ${
+                    dark
+                      ? "bg-white/10"
+                      : "bg-foreground/[0.04] border border-foreground/[0.06]"
+                  }`}
+                >
+                  <item.icon
+                    className={`h-6 w-6 ${dark ? "text-white/70" : "text-foreground/50"}`}
+                  />
+                </div>
+                <span
+                  className={`absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold ${
+                    dark
+                      ? "bg-white text-zinc-900"
+                      : "bg-primary text-primary-foreground"
+                  }`}
+                >
+                  {item.step}
+                </span>
               </div>
               <h3 className="text-lg font-semibold">{item.title}</h3>
               <p

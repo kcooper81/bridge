@@ -826,7 +826,26 @@ function CloudflareCard() {
             </Button>
           </div>
         ) : showSetup ? (
-          <div className="space-y-3">
+          <div className="space-y-4">
+            {/* Setup instructions */}
+            <div className="rounded-lg bg-muted/50 p-3 space-y-2">
+              <p className="text-xs font-semibold">Before you start, create an API token in Cloudflare:</p>
+              <ol className="text-[11px] text-muted-foreground space-y-1.5 list-decimal list-inside">
+                <li>Log in to <a href="https://dash.cloudflare.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">dash.cloudflare.com</a> (Google/GitHub SSO works fine)</li>
+                <li>Click your profile icon (top-right) → <strong>My Profile</strong></li>
+                <li>Go to the <strong>API Tokens</strong> tab → <strong>Create Token</strong></li>
+                <li>Scroll down and click <strong>&ldquo;Create Custom Token&rdquo;</strong></li>
+                <li>Give it a name like <strong>&ldquo;TeamPrompt&rdquo;</strong></li>
+                <li>Under Permissions, add: <strong>Account → Zero Trust → Edit</strong></li>
+                <li>Under Account Resources, select: <strong>Include → Your account</strong></li>
+                <li>Click <strong>Continue to Summary</strong> → <strong>Create Token</strong></li>
+                <li>Copy the token (you won&apos;t see it again)</li>
+              </ol>
+              <p className="text-[11px] text-muted-foreground">
+                Your <strong>Account ID</strong> is on the Cloudflare dashboard home page (right side, under &ldquo;Account ID&rdquo;).
+              </p>
+            </div>
+
             <div>
               <label className="text-xs font-medium text-muted-foreground">Account ID</label>
               <input
@@ -843,12 +862,9 @@ function CloudflareCard() {
                 type="password"
                 value={apiToken}
                 onChange={(e) => setApiToken(e.target.value)}
-                placeholder="Cloudflare API token"
+                placeholder="Paste your Cloudflare API token"
                 className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
               />
-              <p className="text-[10px] text-muted-foreground mt-1">
-                Create a token at Cloudflare Dashboard → My Profile → API Tokens with Gateway:Edit permission.
-              </p>
             </div>
             <div className="flex gap-2">
               <Button size="sm" className="flex-1" onClick={handleConnect} disabled={connecting}>

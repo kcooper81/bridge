@@ -282,9 +282,12 @@ export function createMcpServer(orgId: string, scopes: string[]): McpServer {
       async ({ prompt_id, ai_tool, action: logAction }) => {
         const { error } = await db.from("conversation_logs").insert({
           org_id: orgId,
+          user_id: null,
           prompt_id: prompt_id || null,
           ai_tool,
           action: logAction || "used",
+          prompt_text: "",
+          risk_score: 0,
           source: "mcp",
         });
 

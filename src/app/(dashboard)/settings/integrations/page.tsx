@@ -321,15 +321,27 @@ export default function IntegrationsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div>
         <h2 className="text-lg font-semibold">Integrations</h2>
         <p className="text-sm text-muted-foreground">
-          Connect third-party services, directory providers, and AI tools to your workspace
+          Connect third-party services, directory providers, and security tools to your workspace.
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {/* ── Security & Governance ── */}
+      <div>
+        <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-3">Security & Governance</h3>
+        <div className="grid gap-4 sm:grid-cols-2">
+          {/* Cloudflare Gateway — featured */}
+          <CloudflareCard />
+        </div>
+      </div>
+
+      {/* ── Directory & Team Management ── */}
+      <div>
+        <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-3">Directory & Team Management</h3>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {/* Google Workspace */}
         <Card className="relative overflow-hidden">
           <CardContent className="p-6">
@@ -534,6 +546,13 @@ export default function IntegrationsPage() {
           </CardContent>
         </Card>
 
+        </div>
+      </div>
+
+      {/* ── Developer Tools ── */}
+      <div>
+        <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-3">Developer Tools</h3>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {/* MCP Server */}
         <Card className="relative overflow-hidden">
           <CardContent className="p-6">
@@ -558,9 +577,6 @@ export default function IntegrationsPage() {
           </CardContent>
         </Card>
 
-        {/* Cloudflare Gateway */}
-        <CloudflareCard />
-
         {/* SCIM 2.0 */}
         <Card className="relative overflow-hidden">
           <CardContent className="p-6">
@@ -581,6 +597,7 @@ export default function IntegrationsPage() {
             </Button>
           </CardContent>
         </Card>
+        </div>
       </div>
 
       {/* Bulk Import Modal — used for sync results */}

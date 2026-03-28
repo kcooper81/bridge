@@ -51,7 +51,7 @@ export function SetupChecklist() {
     },
     {
       id: "extension",
-      label: "Install extension",
+      label: "Install browser extension",
       done: extensionDetected,
       href: store.url,
       actionLabel: "Install",
@@ -63,6 +63,13 @@ export function SetupChecklist() {
       done: members.length > 1,
       href: "/team",
       actionLabel: "Invite",
+    },
+    {
+      id: "cloudflare",
+      label: "Connect Cloudflare Gateway (optional)",
+      done: false, // We don't check this dynamically — it's always shown as a suggestion
+      href: "/settings/integrations",
+      actionLabel: "Connect",
     },
   ];
 

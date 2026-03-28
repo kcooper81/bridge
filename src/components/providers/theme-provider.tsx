@@ -17,7 +17,7 @@ const STORAGE_KEY = "teamprompt-theme";
 
 // Only apply dark theme on dashboard app routes
 const DASHBOARD_ROUTES = ["/vault", "/chat", "/templates", "/approvals",
-  "/guidelines", "/team", "/guardrails", "/activity", "/analytics",
+  "/guidelines", "/team", "/guardrails", "/activity", "/analytics", "/audit",
   "/settings", "/home", "/import-export", "/testing-guide", "/notifications"];
 
 function isDashboardRoute(): boolean {

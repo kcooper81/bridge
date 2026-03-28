@@ -481,13 +481,13 @@ export function VaultTemplatePacks() {
             My Packs
           </h2>
           {loadingCustom ? (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="grid gap-3">
               {[1, 2].map((i) => (
                 <div key={i} className="h-48 rounded-lg bg-muted animate-pulse" />
               ))}
             </div>
           ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="grid gap-3">
               {customPacks.map((pack) => {
                 const IconComponent = ICON_MAP[pack.icon] || FolderOpen;
                 const pCount = pack.prompts.length;
@@ -607,7 +607,7 @@ export function VaultTemplatePacks() {
             Built-in Packs
           </h2>
         )}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid gap-3">
           {LIBRARY_PACKS.map((pack) => {
             const IconComponent = ICON_MAP[pack.icon] || Code2;
             const isInstalled = installedPacks.has(pack.id);

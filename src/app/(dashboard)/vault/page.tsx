@@ -1074,7 +1074,7 @@ export default function VaultPage() {
 
       {/* Browse Packs Sheet */}
       <Sheet open={packsOpen} onOpenChange={setPacksOpen}>
-        <SheetContent className="sm:max-w-lg overflow-y-auto">
+        <SheetContent className="sm:max-w-xl lg:max-w-2xl overflow-y-auto">
           <SheetHeader>
             <SheetTitle>Template Packs</SheetTitle>
           </SheetHeader>

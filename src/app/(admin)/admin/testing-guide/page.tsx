@@ -1431,6 +1431,122 @@ const sections: Section[] = [
       },
     ],
   },
+  {
+    id: "cloudflare-tools",
+    title: "AI Tool Policy & Cloudflare Gateway (v1.12.0+)",
+    icon: Shield,
+    description:
+      "Test the unified AI Tool Policy system, Cloudflare Gateway integration, dashboard restructuring, and audit page.",
+    preconditions: [
+      "Logged in as Admin role",
+      "A Cloudflare Zero Trust account (free tier works — up to 50 users)",
+      "A Cloudflare API token with Gateway:Edit permission",
+      "Extension installed to test tool blocking",
+    ],
+    steps: [
+      // ── Sidebar restructure ──
+      {
+        action: "Check the sidebar navigation",
+        expected:
+          "Top section: AI Chat, Prompt Library. Security section: Guardrails, Activity, Audit. Manage section: Team, Approvals. Template Packs, Guidelines, and Analytics are NO LONGER separate sidebar items.",
+        priority: "P0",
+      },
+      {
+        action: "Navigate to /vault — check Prompts/Guidelines tabs",
+        expected:
+          "Two tabs at top: 'Prompts' (default) and 'Guidelines'. Click Guidelines — shows full guidelines management. Click 'Browse Packs' button in header — right-side Sheet opens with template packs.",
+        priority: "P0",
+      },
+      {
+        action: "Navigate to /templates or /guidelines directly",
+        expected:
+          "Both redirect to /vault (after auth).",
+        priority: "P1",
+      },
+      // ── Audit page ──
+      {
+        action: "Navigate to /audit",
+        expected:
+          "Audit & Compliance page loads with: 4 hero stat cards, Sankey flow diagram (teams→tools), violation trend area chart with 30d/90d toggle, heatmap (day×hour), donut chart (categories), bar histogram (risk scores), policy coverage grid, top triggered rules, daily usage chart, top prompts. Export CSV button in header.",
+        priority: "P0",
+      },
+      {
+        action: "Click the 30d/90d toggle on the violation trend chart",
+        expected:
+          "Chart updates to show 30 or 90 days of data. X-axis labels adjust.",
+        priority: "P1",
+      },
+      {
+        action: "Click Export CSV on the Audit page",
+        expected:
+          "Downloads a file named audit-report-YYYY-MM-DD.csv with metrics, rules, categories, risk buckets, and compliance coverage.",
+        priority: "P1",
+      },
+      {
+        action: "Log in as a Member role and navigate to /audit",
+        expected:
+          "Shows 'This page is only available to admins and managers.' message.",
+        priority: "P0",
+      },
+      // ── AI Tool Policy ──
+      {
+        action: "Go to Guardrails page → click 'AI Tools' tab",
+        expected:
+          "Shows AI Tool Restriction Policy toggle (off by default). Two enforcement info cards: Browser Extension (Monitor Only) and Cloudflare Gateway (Not connected). When policy is off, no tool list is shown.",
+        priority: "P0",
+      },
+      {
+        action: "Enable the AI Tool Restriction Policy toggle",
+        expected:
+          "Toggle switches on. Badge shows 'Active'. List of 18 AI tools appears with per-tool approve/block switches. All tools default to approved. Toast: 'Policy saved'.",
+        priority: "P0",
+      },
+      {
+        action: "Block a tool (e.g. toggle off 'Poe' or 'Character.AI')",
+        expected:
+          "Tool shows 'Blocked' badge and red text. Toast: 'Policy saved'. If Cloudflare is connected, toast includes 'X blocked at DNS'.",
+        priority: "P0",
+      },
+      {
+        action: "Re-approve a blocked tool (toggle it back on)",
+        expected:
+          "Tool shows 'Approved' badge and green indicator. Toast: 'Policy saved'.",
+        priority: "P1",
+      },
+      // ── Cloudflare Gateway ──
+      {
+        action: "Go to Settings → Integrations. Look for Cloudflare Gateway card.",
+        expected:
+          "Card appears under 'Security & Governance' section (top of page). Shows 'Not Connected' badge and 'Connect Cloudflare' button.",
+        priority: "P0",
+      },
+      {
+        action: "Click 'Connect Cloudflare'. Enter Account ID and API Token. Click Connect.",
+        expected:
+          "With valid credentials: badge changes to green 'Connected'. With invalid: error toast 'Invalid credentials'.",
+        priority: "P0",
+      },
+      {
+        action: "After connecting, go to Guardrails → AI Tools and block a tool",
+        expected:
+          "Toast shows 'Policy saved. 1 blocked at DNS.' Cloudflare Gateway card shows 'Synced' badge. The tool's DNS is now blocked for all devices on the Cloudflare network.",
+        priority: "P0",
+      },
+      {
+        action: "Disconnect Cloudflare (click Disconnect on the integrations card)",
+        expected:
+          "Confirm dialog. After confirming, badge reverts to 'Not Connected'. Note: existing DNS rules in Cloudflare are NOT auto-deleted.",
+        priority: "P1",
+      },
+      // ── Onboarding ──
+      {
+        action: "Create a new org or reset the setup checklist (clear localStorage). Check the dashboard home.",
+        expected:
+          "Setup checklist shows 4 items: Choose industry, Install browser extension, Invite a teammate, Connect Cloudflare Gateway (optional).",
+        priority: "P1",
+      },
+    ],
+  },
 ];
 
 /* ── Storage key ────────────────────────────────── */

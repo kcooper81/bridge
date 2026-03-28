@@ -520,7 +520,56 @@ export default function FeaturesPage() {
       </div>
     </section>
 
-    <div className="py-20 sm:py-28">
+    {/* ── How it works — numbered steps ── */}
+    <section className="py-24 sm:py-32">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6">
+        <div className="text-center mb-16">
+          <p className="text-sm font-semibold tracking-wider text-primary mb-2">How It Works</p>
+          <h2 className="text-3xl sm:text-4xl font-medium tracking-tight">
+            Three layers of AI governance
+          </h2>
+        </div>
+
+        <div className="space-y-8">
+          {[
+            {
+              step: "1",
+              title: "Control which AI tools are used",
+              subtitle: "Network-Level Enforcement",
+              desc: "Approve trusted AI tools and block everything else at the DNS level via Cloudflare Gateway. Covers all devices — browser, native apps, mobile, CLI. Users on unapproved tools see a clear block page.",
+              color: "bg-blue-500",
+            },
+            {
+              step: "2",
+              title: "Scan what gets sent to AI",
+              subtitle: "Content-Level DLP",
+              desc: "On approved tools, the browser extension scans every outbound prompt in real time. 40+ detection rules catch SSNs, credit cards, API keys, patient data, and more. Block, warn, or auto-redact before it leaves the browser.",
+              color: "bg-emerald-500",
+            },
+            {
+              step: "3",
+              title: "Audit everything",
+              subtitle: "Compliance & Reporting",
+              desc: "Every AI interaction is logged with user, tool, action, and risk score. Sankey flow diagrams show team→tool usage. Heatmaps show when violations occur. 19 compliance packs cover HIPAA, SOC 2, PCI-DSS, GDPR, and more. Export CSV for auditors.",
+              color: "bg-violet-500",
+            },
+          ].map((item) => (
+            <div key={item.step} className="flex gap-6 items-start">
+              <div className={cn("flex h-10 w-10 items-center justify-center rounded-full text-white font-bold text-sm shrink-0", item.color)}>
+                {item.step}
+              </div>
+              <div className="flex-1 pb-8 border-b border-border last:border-0">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">{item.subtitle}</p>
+                <h3 className="text-xl font-semibold mb-2">{item.title}</h3>
+                <p className="text-muted-foreground leading-relaxed">{item.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <div className="py-20 sm:py-28 border-t border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
 
         {/* ── Primary Features ── */}
@@ -566,15 +615,15 @@ export default function FeaturesPage() {
         {/* ── Governance & Security ── */}
         <div className="mt-32">
           <div className="text-center mb-12">
-            <SectionLabel>Governance & Security</SectionLabel>
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
-              Visibility, enforcement, and accountability
+            <p className="text-xs font-semibold uppercase tracking-wider text-primary mb-2">Layer 1 + 2</p>
+            <h2 className="text-2xl sm:text-3xl font-medium tracking-tight">
+              Detection, enforcement, and accountability
             </h2>
-            <p className="mt-4 text-muted-foreground max-w-xl mx-auto">
-              40+ detection rules, AI-powered scanning, violation tracking, network-level tool blocking, and audit dashboards with Sankey diagrams and heatmaps.
+            <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
+              From network-level DNS blocking to content-level DLP scanning — every tool your team touches is monitored, every violation is logged, and every audit is one click away.
             </p>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {governanceFeatures.map((feature) => (
               <FeatureCard
                 key={feature.title}
@@ -589,12 +638,12 @@ export default function FeaturesPage() {
         {/* ── Platform Capabilities ── */}
         <div className="mt-32">
           <div className="text-center mb-12">
-            <SectionLabel>Platform</SectionLabel>
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
-              Everything your team needs to use AI productively
+            <p className="text-xs font-semibold uppercase tracking-wider text-primary mb-2">Layer 3</p>
+            <h2 className="text-2xl sm:text-3xl font-medium tracking-tight">
+              Prompt management and team productivity
             </h2>
-            <p className="mt-4 text-muted-foreground max-w-xl mx-auto">
-              Multi-model AI chat, team management, approval workflows, template packs, MCP integration, and more.
+            <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
+              Beyond security — TeamPrompt gives your team a shared prompt library, multi-model AI chat, approval workflows, and template packs to standardize AI usage.
             </p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

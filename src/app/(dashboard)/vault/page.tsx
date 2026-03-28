@@ -405,17 +405,17 @@ export default function VaultPage() {
       />
 
       {/* Top-level Tabs */}
-      <Tabs defaultValue="prompts" className="mb-6">
-        <TabsList>
+      <Tabs defaultValue="prompts">
+        <TabsList className="mb-6">
           <TabsTrigger value="prompts">Prompts</TabsTrigger>
           <TabsTrigger value="guidelines">Guidelines</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="guidelines" className="mt-6">
+        <TabsContent value="guidelines">
           <VaultGuidelines />
         </TabsContent>
 
-        <TabsContent value="prompts" className="mt-0">
+        <TabsContent value="prompts">
 
       {!checkLimit("create_prompt", prompts.length) && (
         <UpgradePrompt feature="create_prompt" current={prompts.length} max={planLimits.max_prompts} className="mb-6" />

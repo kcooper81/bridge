@@ -80,9 +80,11 @@ export function BarChart({
             fontSize: "12px",
             boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
           }}
+          labelStyle={{ color: "hsl(var(--foreground))" }}
+          itemStyle={{ color: "hsl(var(--foreground))" }}
         />
         {showLegend && (
-          <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 12, paddingTop: 8 }} />
+          <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 12, paddingTop: 8, color: "hsl(var(--foreground))" }} />
         )}
         {bars.map((bar) => (
           <Bar

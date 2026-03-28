@@ -55,6 +55,8 @@ export function DonutChart({
             fontSize: "12px",
             boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
           }}
+          labelStyle={{ color: "hsl(var(--foreground))" }}
+          itemStyle={{ color: "hsl(var(--foreground))" }}
         />
         {showLegend && (
           <Legend

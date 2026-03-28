@@ -356,6 +356,126 @@ export function DetectionSettings({ orgId, canEdit, hasPremiumAccess }: Detectio
           )}
         </CardContent>
       </Card>
+      {/* ── Sensitive Topics (LLM Classification) ── */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Brain className="h-5 w-5 text-primary" />
+            Topic-Based Classification
+          </CardTitle>
+          <CardDescription>
+            Define sensitive topics in plain language. When AI detection is enabled, prompts are classified against these topics using your configured AI provider.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {settings.ai_detection_enabled && settings.ai_api_key ? (
+            <SensitiveTopicsEditor orgId={orgId} canEdit={canEdit} />
+          ) : (
+            <div className="flex items-start gap-2 p-3 rounded-lg bg-muted/50">
+              <Info className="h-4 w-4 text-muted-foreground mt-0.5" />
+              <p className="text-xs text-muted-foreground">
+                Enable AI-Powered Detection above and configure an API key to use topic-based classification.
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+/* ── Sensitive Topics Editor ── */
+
+function SensitiveTopicsEditor({ orgId, canEdit }: { orgId: string; canEdit: boolean }) {
+  const [topics, setTopics] = useState<string[]>([]);
+  const [newTopic, setNewTopic] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const { createClient } = await import("@/lib/supabase/client");
+        const db = createClient();
+        const { data: { user } } = await db.auth.getUser();
+        if (!user) return;
+        const { data: profile } = await db.from("profiles").select("org_id").eq("id", user.id).single();
+        if (!profile?.org_id) return;
+        const { data: org } = await db.from("organizations").select("settings").eq("id", profile.org_id).single();
+        const settings = (org?.settings || {}) as Record<string, unknown>;
+        setTopics((settings.sensitive_topics as string[]) || []);
+      } catch { /* */ } finally { setLoading(false); }
+    }
+    load();
+  }, [orgId]);
+
+  async function save(updatedTopics: string[]) {
+    setSaving(true);
+    try {
+      const { createClient } = await import("@/lib/supabase/client");
+      const db = createClient();
+      const { data: { user } } = await db.auth.getUser();
+      if (!user) return;
+      const { data: profile } = await db.from("profiles").select("org_id").eq("id", user.id).single();
+      if (!profile?.org_id) return;
+      const { data: org } = await db.from("organizations").select("settings").eq("id", profile.org_id).single();
+      const currentSettings = (org?.settings || {}) as Record<string, unknown>;
+      await db.from("organizations").update({ settings: { ...currentSettings, sensitive_topics: updatedTopics } }).eq("id", profile.org_id);
+      setTopics(updatedTopics);
+      toast.success("Topics updated");
+    } catch { toast.error("Failed to save"); } finally { setSaving(false); }
+  }
+
+  function addTopic() {
+    if (!newTopic.trim()) return;
+    const updated = [...topics, newTopic.trim()];
+    setNewTopic("");
+    save(updated);
+  }
+
+  function removeTopic(index: number) {
+    const updated = topics.filter((_, i) => i !== index);
+    save(updated);
+  }
+
+  if (loading) return <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />;
+
+  return (
+    <div className="space-y-3">
+      <p className="text-xs text-muted-foreground">
+        Describe topics in natural language. The AI will classify prompts against each topic.
+      </p>
+      <div className="space-y-2">
+        {topics.map((topic, i) => (
+          <div key={i} className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
+            <span className="text-sm">{topic}</span>
+            {canEdit && (
+              <button onClick={() => removeTopic(i)} className="text-xs text-destructive hover:underline" disabled={saving}>
+                Remove
+              </button>
+            )}
+          </div>
+        ))}
+      </div>
+      {canEdit && (
+        <div className="flex gap-2">
+          <Input
+            value={newTopic}
+            onChange={(e) => setNewTopic(e.target.value)}
+            placeholder='e.g. "Customer financial data" or "Patient health information"'
+            className="text-sm"
+            onKeyDown={(e) => e.key === "Enter" && addTopic()}
+          />
+          <Button size="sm" onClick={addTopic} disabled={saving || !newTopic.trim()}>
+            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Add"}
+          </Button>
+        </div>
+      )}
+      {topics.length === 0 && (
+        <p className="text-xs text-muted-foreground italic">
+          No topics defined. Add topics like &quot;customer financial data&quot;, &quot;employee salary information&quot;, or &quot;unreleased product details&quot;.
+        </p>
+      )}
     </div>
   );
 }

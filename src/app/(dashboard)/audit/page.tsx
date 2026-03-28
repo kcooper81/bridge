@@ -138,10 +138,16 @@ export default function AuditPage() {
         title="Audit & Compliance"
         description="Security insights, violation analytics, and compliance reporting"
         actions={
-          <Button variant="outline" size="sm" onClick={() => exportAuditCSV(data)}>
-            <Download className="mr-2 h-4 w-4" />
-            Export CSV
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={() => exportAuditCSV(data)}>
+              <Download className="mr-2 h-4 w-4" />
+              CSV
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => exportAuditPDF()}>
+              <Download className="mr-2 h-4 w-4" />
+              PDF
+            </Button>
+          </div>
         }
       />
 
@@ -469,4 +475,12 @@ function exportAuditCSV(data: AuditData) {
   a.download = `audit-report-${new Date().toISOString().split("T")[0]}.csv`;
   a.click();
   URL.revokeObjectURL(url);
+}
+
+// ── PDF Export (print-based) ──
+
+function exportAuditPDF() {
+  // Add a temporary print-specific class and trigger browser print dialog
+  document.title = `TeamPrompt Audit Report — ${new Date().toISOString().split("T")[0]}`;
+  window.print();
 }

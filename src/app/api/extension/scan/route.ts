@@ -8,6 +8,8 @@ import { SMART_DETECTION_RULES } from "@/lib/security/default-rules";
 import type { DetectionType } from "@/lib/types";
 import { calculateRiskScore } from "@/lib/security/risk-score";
 import { notifyDlpViolation } from "@/lib/slack/notify";
+import { classifyTopics } from "@/lib/security/topic-classifier";
+import type { SecuritySettings } from "@/lib/types";
 
 const MAX_CONTENT_LENGTH = 50_000; // 50 KB max scan payload
 const REGEX_TIMEOUT_MS = 500; // Per-rule regex execution limit
@@ -230,6 +232,43 @@ export async function POST(request: NextRequest) {
           detection_type: "entropy",
         });
         if (entropyViolationErr) console.error("Failed to log entropy violation:", entropyViolationErr.message);
+      }
+    }
+
+    // ── 5. LLM-based topic classification (if enabled + topics defined) ──
+    const sensitiveTopics = (orgSettings.sensitive_topics as string[]) || [];
+    if (securitySettings.ai_detection_enabled && sensitiveTopics.length > 0) {
+      try {
+        const topicMatches = await classifyTopics(
+          content,
+          sensitiveTopics,
+          securitySettings as SecuritySettings
+        );
+
+        for (const match of topicMatches) {
+          violations.push({
+            ruleId: null,
+            ruleName: `Topic: ${match.topic}`,
+            category: "custom",
+            severity: match.severity,
+            matchedText: match.explanation,
+            detectionType: "ai",
+          });
+
+          await db.from("security_violations").insert({
+            org_id: profile.org_id,
+            rule_id: null,
+            matched_text: `[AI] ${match.topic}: ${match.explanation} (${Math.round(match.confidence * 100)}%)`,
+            user_id: user.id,
+            action_taken: match.severity === "block" ? "blocked" : "overridden",
+            detection_type: "ai",
+          }).then(({ error }) => {
+            if (error) console.error("Failed to log AI violation:", error.message);
+          });
+        }
+      } catch (err) {
+        console.error("Topic classification failed:", err);
+        // Non-fatal — continue with other detections
       }
     }
 

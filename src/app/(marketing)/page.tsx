@@ -102,9 +102,9 @@ export default function LandingPage() {
               </p>
             </div>
 
-            {/* Hero image with UI overlays */}
+            {/* Hero image with UI overlays that offset beyond the image */}
             <div className="relative hidden lg:block">
-              <div className="relative overflow-hidden rounded-[20px] shadow-2xl shadow-black/10">
+              <div className="overflow-hidden rounded-[20px] shadow-2xl shadow-black/10">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src="https://images.unsplash.com/photo-1531482615713-2afd69097998?w=900&q=80&auto=format&fit=crop"
@@ -112,39 +112,39 @@ export default function LandingPage() {
                   className="w-full h-[480px] object-cover"
                 />
                 <div
-                  className="absolute inset-0 pointer-events-none"
+                  className="absolute inset-0 pointer-events-none rounded-[20px]"
                   style={{ background: "radial-gradient(circle at 100% 100%, rgba(0,0,0,0.35), transparent 65%)" }}
                 />
+              </div>
 
-                {/* Overlay — DLP Block */}
-                <div className="absolute top-5 left-5 flex items-center gap-3 rounded-xl bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl px-4 py-3 shadow-lg border border-white/50">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-500/10">
-                    <ShieldCheck className="h-5 w-5 text-red-500" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-foreground">SSN Blocked</p>
-                    <p className="text-xs text-muted-foreground">Sensitive data detected in ChatGPT</p>
-                  </div>
+              {/* Overlay — DLP Block (offset top-left) */}
+              <div className="absolute -top-4 -left-6 flex items-center gap-3 rounded-xl bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl px-4 py-3 shadow-lg border border-white/50 z-10">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-500/10">
+                  <ShieldCheck className="h-5 w-5 text-red-500" />
                 </div>
-
-                {/* Overlay — Prompt shared */}
-                <div className="absolute bottom-5 left-5 flex items-center gap-3 rounded-xl bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl px-4 py-3 shadow-lg border border-white/50">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/10">
-                    <ClipboardList className="h-5 w-5 text-emerald-500" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-foreground">Prompt Shared</p>
-                    <p className="text-xs text-muted-foreground">Customer Onboarding — 142 uses</p>
-                  </div>
+                <div>
+                  <p className="text-sm font-semibold text-foreground">SSN Blocked</p>
+                  <p className="text-xs text-muted-foreground">Sensitive data detected in ChatGPT</p>
                 </div>
+              </div>
 
-                {/* Overlay — Compliance score */}
-                <div className="absolute bottom-5 right-5 flex items-center gap-2.5 rounded-xl bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl px-4 py-3 shadow-lg border border-white/50">
-                  <ShieldCheck className="h-5 w-5 text-emerald-500" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">Compliance</p>
-                    <p className="text-xl font-bold text-foreground leading-none">98%</p>
-                  </div>
+              {/* Overlay — Prompt shared (offset bottom-left) */}
+              <div className="absolute -bottom-4 -left-4 flex items-center gap-3 rounded-xl bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl px-4 py-3 shadow-lg border border-white/50 z-10">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/10">
+                  <ClipboardList className="h-5 w-5 text-emerald-500" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-foreground">Prompt Shared</p>
+                  <p className="text-xs text-muted-foreground">Customer Onboarding — 142 uses</p>
+                </div>
+              </div>
+
+              {/* Overlay — Compliance score (offset bottom-right) */}
+              <div className="absolute -bottom-5 -right-5 flex items-center gap-2.5 rounded-xl bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl px-4 py-3 shadow-lg border border-white/50 z-10">
+                <ShieldCheck className="h-5 w-5 text-emerald-500" />
+                <div>
+                  <p className="text-xs text-muted-foreground">Compliance</p>
+                  <p className="text-xl font-bold text-foreground leading-none">98%</p>
                 </div>
               </div>
             </div>

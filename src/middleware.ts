@@ -24,6 +24,8 @@ const PUBLIC_ROUTES = [
   "/lp",
   "/compare",
   "/compliance",
+  "/glossary",
+  "/case-studies",
 ];
 
 function isPublicRoute(pathname: string) {

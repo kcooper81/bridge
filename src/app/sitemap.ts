@@ -69,15 +69,30 @@ const TOP_SOLUTION_SLUGS = [
   "ai-dlp",
   "ai-governance",
   "prompt-templates",
-  "ai-compliance-reporting",
-  "for-marketers",
-  "for-educators",
+  "ai-prompt-library-software",
+  "prompt-management-101",
   "chatgpt-team-prompts",
   "claude",
-  "ai-prompt-library-software",
-  "ai-prompt-templates-guide",
-  "prompt-management-101",
+  "chatgpt-dlp-scanning",
+  "ai-compliance-reporting",
+  "ai-compliance-frameworks",
+  "for-marketers",
+  "for-educators",
+  "for-cisos",
+  "for-security-teams",
+  "for-it-admins",
+  "dlp-for-ai-tools",
+  "ai-governance-guide",
+  "what-is-prompt-analytics",
+  "what-is-agentic-ai",
+  "what-is-data-loss-prevention",
+  "what-is-ai-governance",
+  "what-is-shadow-ai",
+  "what-is-prompt-management",
 ];
+
+const COMPARE_SLUGS = ["nightfall", "purview", "chatgpt-teams", "notion", "best-ai-dlp-tools"];
+const COMPLIANCE_SLUGS = ["hipaa", "soc2", "gdpr", "pci-dss", "eu-ai-act"];
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl =
@@ -144,7 +159,30 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.5,
   }));
 
-  // Total: ~80 pages instead of 630
+  // Tier 7: Comparison pages (high-intent bottom-of-funnel)
+  const comparePages: MetadataRoute.Sitemap = [
+    { url: `${baseUrl}/compare`, lastModified: today, changeFrequency: "monthly", priority: 0.8 },
+    ...COMPARE_SLUGS.map((slug) => ({
+      url: `${baseUrl}/compare/${slug}`,
+      lastModified: today,
+      changeFrequency: "monthly" as const,
+      priority: 0.7,
+    })),
+  ];
+
+  // Tier 8: Compliance landing pages (buyer-intent)
+  const compliancePages: MetadataRoute.Sitemap = COMPLIANCE_SLUGS.map((slug) => ({
+    url: `${baseUrl}/compliance/${slug}`,
+    lastModified: today,
+    changeFrequency: "monthly",
+    priority: 0.7,
+  }));
+
+  // Tier 9: Glossary hub
+  const glossaryPages: MetadataRoute.Sitemap = [
+    { url: `${baseUrl}/glossary`, lastModified: today, changeFrequency: "monthly", priority: 0.7 },
+  ];
+
   const all = [
     ...corePages,
     ...landingPages,
@@ -152,6 +190,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...blogPages,
     ...topSolutionPages,
     ...helpCategoryPages,
+    ...comparePages,
+    ...compliancePages,
+    ...glossaryPages,
   ];
 
   // Deduplicate by URL

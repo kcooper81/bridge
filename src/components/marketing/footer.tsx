@@ -23,9 +23,9 @@ const footerLinks = {
   ],
   Solutions: [
     { label: "All Solutions", href: "/solutions" },
-    { label: "Shadow AI Analysis", href: "/security" },
-    { label: "Leakage Prevention", href: "/security" },
-    { label: "Compliance", href: "/features#compliance-policy-packs" },
+    { label: "Compliance", href: "/compliance/hipaa" },
+    { label: "Compare", href: "/compare" },
+    { label: "Glossary", href: "/glossary" },
     { label: "Prompt Library", href: "/features#prompt-library" },
   ],
   Resources: [
@@ -33,7 +33,7 @@ const footerLinks = {
     { label: "Help & Support", href: "/help" },
     { label: "Contact", href: "/contact" },
     { label: "Changelog", href: "/changelog" },
-    { label: "Media Kit", href: "/media" },
+    { label: "Case Studies", href: "/case-studies" },
   ],
 };
 

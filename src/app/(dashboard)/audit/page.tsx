@@ -175,6 +175,25 @@ export default function AuditPage() {
         />
       </div>
 
+      {/* ━━━ Tool Policy Status ━━━ */}
+      {data.toolPolicy.enabled && (
+        <Card className="p-5 mb-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Shield className="h-5 w-5 text-primary" />
+              <div>
+                <p className="text-sm font-semibold">AI Tool Restriction Policy</p>
+                <p className="text-xs text-muted-foreground">
+                  {data.toolPolicy.approvedCount} approved, {data.toolPolicy.blockedCount} blocked
+                  {data.toolPolicy.cloudflareConnected ? " · Cloudflare Gateway synced" : " · Extension enforcement only"}
+                </p>
+              </div>
+            </div>
+            <Badge className="bg-emerald-500/10 text-emerald-600 border-0">Active</Badge>
+          </div>
+        </Card>
+      )}
+
       {/* ━━━ Sankey: Teams → AI Tools ━━━ */}
       <ChartCard
         title="Interaction Flow"

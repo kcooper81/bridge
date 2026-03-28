@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/client";
 import { COMPLIANCE_TEMPLATES } from "@/lib/security/compliance-templates";
+import { AI_TOOL_DOMAINS } from "@/lib/cloudflare-gateway";
 
 function supabase() {
   return createClient();
@@ -51,6 +52,14 @@ export interface AuditData {
 
   // Top triggered rules
   topTriggeredRules: { name: string; count: number; severity: string; category: string }[];
+
+  // Tool policy
+  toolPolicy: {
+    enabled: boolean;
+    approvedCount: number;
+    blockedCount: number;
+    cloudflareConnected: boolean;
+  };
 
   // Usage overview (migrated from analytics)
   dailyUsage: { date: string; count: number }[];
@@ -323,6 +332,17 @@ export async function getAuditData(): Promise<AuditData | null> {
     usageCount: p.usage_count || 0,
   }));
 
+  // Tool policy data (from same org settings)
+  const { data: orgForPolicy } = await db
+    .from("organizations")
+    .select("settings")
+    .eq("id", orgId)
+    .single();
+  const orgSettings = (orgForPolicy?.settings || {}) as Record<string, unknown>;
+  const approvedAiTools = (orgSettings.approved_ai_tools as string[]) || ["chatgpt", "claude", "gemini", "copilot", "perplexity"];
+  const toolPolicyEnabled = orgSettings.allow_external_ai_tools === false;
+  const cfConnected = !!(orgSettings.cloudflare_account_id && orgSettings.cloudflare_api_token);
+
   return {
     totalInteractions,
     totalViolationsBlocked,
@@ -339,5 +359,11 @@ export async function getAuditData(): Promise<AuditData | null> {
     topTriggeredRules,
     dailyUsage,
     topPrompts,
+    toolPolicy: {
+      enabled: toolPolicyEnabled,
+      approvedCount: approvedAiTools.length,
+      blockedCount: AI_TOOL_DOMAINS.length - approvedAiTools.length,
+      cloudflareConnected: cfConnected,
+    },
   };
 }

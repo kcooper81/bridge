@@ -66,9 +66,9 @@ export default function LandingPage() {
             <div>
               <p className="text-sm font-semibold tracking-widest text-primary mb-4">AI WorkOS</p>
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-medium tracking-tight leading-[1.1]">
-                Your team uses AI.{" "}
+                AI Data Loss Prevention{" "}
                 <span className="text-primary">
-                  Now make it safe.
+                  & Prompt Management for Teams
                 </span>
               </h1>
 

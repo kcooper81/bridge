@@ -250,6 +250,84 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ━━━ DASHBOARD PREVIEW ━━━ */}
+      <section className="py-24 sm:py-32 border-t border-border" style={{ background: "linear-gradient(180deg, #fff 0%, #F1F8FF 40%, #fff 100%)" }}>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl sm:text-4xl font-medium tracking-tight">
+              See everything in one dashboard
+            </h2>
+            <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
+              Violations blocked, prompts shared, compliance score, and team activity — all at a glance.
+            </p>
+          </div>
+
+          <div className="rounded-[20px] border border-border bg-card shadow-xl shadow-black/5 overflow-hidden">
+            {/* Window chrome */}
+            <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-muted/30">
+              <div className="flex gap-1.5">
+                <div className="w-3 h-3 rounded-full bg-red-400/60" />
+                <div className="w-3 h-3 rounded-full bg-yellow-400/60" />
+                <div className="w-3 h-3 rounded-full bg-green-400/60" />
+              </div>
+              <div className="flex-1 flex justify-center">
+                <div className="px-4 py-1 rounded-md bg-background border border-border text-xs text-muted-foreground">
+                  app.teamprompt.app/audit
+                </div>
+              </div>
+            </div>
+
+            {/* Dashboard content */}
+            <div className="p-6 sm:p-8 bg-background">
+              <div className="grid grid-cols-4 gap-4 mb-6">
+                {[
+                  { label: "Violations Blocked", value: "847", change: "+12%", color: "text-red-500" },
+                  { label: "Prompts Shared", value: "1,234", change: "+8%", color: "text-blue-500" },
+                  { label: "AI Interactions", value: "15.2K", change: "+24%", color: "text-violet-500" },
+                  { label: "Compliance Score", value: "98%", change: "+2%", color: "text-emerald-500" },
+                ].map((stat) => (
+                  <div key={stat.label} className="rounded-xl border border-border p-4 bg-card">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className={cn("text-xs font-medium", stat.color)}>{stat.change}</span>
+                    </div>
+                    <p className="text-2xl font-bold tracking-tight">{stat.value}</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">{stat.label}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="rounded-xl border border-border overflow-hidden">
+                <div className="px-4 py-2.5 bg-muted/30 border-b border-border">
+                  <p className="text-xs font-semibold text-foreground">Recent Security Activity</p>
+                </div>
+                {[
+                  { event: "SSN detected in ChatGPT prompt", action: "Blocked", user: "sarah.chen@acme.com", time: "2 min ago", severity: "block" },
+                  { event: "Credit card number in Claude", action: "Redacted", user: "mike.ross@acme.com", time: "8 min ago", severity: "warn" },
+                  { event: "API key pattern detected", action: "Blocked", user: "dev-team@acme.com", time: "15 min ago", severity: "block" },
+                  { event: "Patient name flagged (HIPAA)", action: "Warned", user: "dr.lee@acme.com", time: "22 min ago", severity: "warn" },
+                ].map((row) => (
+                  <div key={row.event} className="flex items-center gap-4 px-4 py-3 border-b border-border/50 last:border-0 text-sm">
+                    <div className={cn(
+                      "w-2 h-2 rounded-full shrink-0",
+                      row.severity === "block" ? "bg-red-500" : "bg-amber-500"
+                    )} />
+                    <span className="flex-1 text-xs text-foreground truncate">{row.event}</span>
+                    <span className="text-xs text-muted-foreground hidden sm:block">{row.user}</span>
+                    <span className={cn(
+                      "text-[10px] font-bold uppercase shrink-0",
+                      row.severity === "block" ? "text-red-500" : "text-amber-500"
+                    )}>
+                      {row.action}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground shrink-0 w-16 text-right">{row.time}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ━━━ 4. LIFESTYLE FEATURE SECTIONS ━━━ */}
       <section className="py-24 sm:py-32 bg-zinc-950 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">

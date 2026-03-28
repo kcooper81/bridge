@@ -253,40 +253,56 @@ function NavDropdown({
       {open && (
         <div className="absolute top-full left-1/2 -translate-x-1/2 pt-3 z-50">
           <div className={cn(
-            "rounded-xl border border-border bg-card shadow-xl shadow-black/10 p-3",
-            wide ? "w-[480px]" : "w-72"
+            "rounded-xl border border-border bg-card shadow-xl shadow-black/10 overflow-hidden",
+            showPromo
+              ? wide ? "w-[620px]" : "w-[440px]"
+              : wide ? "w-[480px] p-3" : "w-72 p-3"
           )}>
-            <div className={wide ? "grid grid-cols-2 gap-1" : "space-y-1"}>
-              {items.map((item) => (
-                <Link
-                  key={item.href + item.label}
-                  href={item.href}
-                  onClick={() => setOpen(false)}
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-foreground/80 hover:text-foreground hover:bg-muted/50 transition-colors"
-                >
-                  <item.icon className="h-5 w-5 text-foreground/50 shrink-0" />
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium">{item.label}</p>
-                    <p className="text-xs text-muted-foreground truncate">{item.desc}</p>
-                  </div>
-                </Link>
-              ))}
-            </div>
-            {showPromo && (
-              <div className="mt-2 pt-2 border-t border-border">
-                <Link
-                  href="/signup"
-                  onClick={() => setOpen(false)}
-                  className="flex items-center justify-between rounded-lg bg-primary/5 hover:bg-primary/10 px-4 py-3 transition-colors"
-                >
-                  <div>
-                    <p className="text-sm font-semibold text-foreground">Get started free</p>
-                    <p className="text-xs text-muted-foreground">No credit card required</p>
-                  </div>
-                  <ArrowRight className="h-4 w-4 text-primary shrink-0" />
-                </Link>
+            <div className={showPromo ? "flex" : ""}>
+              {/* Nav links */}
+              <div className={cn(
+                showPromo ? "flex-1 p-3" : "",
+                wide ? "grid grid-cols-2 gap-1" : "space-y-1"
+              )}>
+                {items.map((item) => (
+                  <Link
+                    key={item.href + item.label}
+                    href={item.href}
+                    onClick={() => setOpen(false)}
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-foreground/80 hover:text-foreground hover:bg-muted/50 transition-colors"
+                  >
+                    <item.icon className="h-5 w-5 text-foreground/50 shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium">{item.label}</p>
+                      <p className="text-xs text-muted-foreground truncate">{item.desc}</p>
+                    </div>
+                  </Link>
+                ))}
               </div>
-            )}
+
+              {/* Promo column */}
+              {showPromo && (
+                <div className="w-[200px] border-l border-border p-4 flex flex-col justify-between" style={{ background: "linear-gradient(180deg, #F6F2FF 0%, #F1F8FF 100%)" }}>
+                  <div>
+                    <p className="text-xs font-semibold tracking-wider text-primary mb-1">AI WorkOS</p>
+                    <p className="text-sm font-semibold text-foreground leading-snug">
+                      Two layers of AI protection for your team
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
+                      Network-level tool control + content-level DLP scanning. Free to start.
+                    </p>
+                  </div>
+                  <Link
+                    href="/signup"
+                    onClick={() => setOpen(false)}
+                    className="mt-4 flex items-center justify-center gap-1.5 rounded-lg bg-primary text-primary-foreground px-4 py-2 text-sm font-semibold hover:bg-primary/90 transition-colors"
+                  >
+                    Get Started
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

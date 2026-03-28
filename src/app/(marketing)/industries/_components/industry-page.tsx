@@ -121,7 +121,7 @@ export function IndustryPage({ data }: { data: IndustryPageData }) {
       />
 
       {/* ━━━ HERO ━━━ Light, centered */}
-      <section className="bg-[#FAFBFC] border-b border-border">
+      <section className="border-b border-border" style={{ background: "linear-gradient(180deg, #fff 0%, #F6F2FF 50%, #fff 100%)" }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-32 pb-20 sm:pt-40 sm:pb-28 text-center">
           {/* Compliance badges */}
           <div className="flex flex-wrap gap-2 mb-8 justify-center">

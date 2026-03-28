@@ -87,9 +87,9 @@ export default function SecurityPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbs) }}
       />
     {/* Hero — Light, Lumia-inspired */}
-    <section className="bg-[#FAFBFC] border-b border-border">
+    <section className="border-b border-border" style={{ background: "linear-gradient(180deg, #fff 0%, #F1F8FF 50%, #fff 100%)" }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-32 pb-20 sm:pt-40 sm:pb-28 text-center">
-        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-tight max-w-4xl mx-auto">
+        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-medium tracking-tight leading-tight max-w-4xl mx-auto">
           Stop sensitive data{" "}
           <span className="text-primary">before it reaches AI.</span>
         </h1>

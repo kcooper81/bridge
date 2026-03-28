@@ -186,7 +186,7 @@ export default function EnterprisePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
       {/* ━━━ HERO ━━━ Light, Lumia-inspired */}
-      <section className="bg-[#FAFBFC] border-b border-border">
+      <section className="border-b border-border" style={{ background: "linear-gradient(180deg, #fff 0%, #F6F2FF 50%, #fff 100%)" }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-32 pb-20 sm:pt-40 sm:pb-28 text-center">
           <div className="flex flex-wrap gap-2 mb-8 justify-center">
             {capabilityBadges.map((badge) => (
@@ -200,7 +200,7 @@ export default function EnterprisePage() {
             ))}
           </div>
 
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.08] max-w-4xl mx-auto">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-medium tracking-tight leading-[1.08] max-w-4xl mx-auto">
             Your employees paste customer data into AI every day
           </h1>
 

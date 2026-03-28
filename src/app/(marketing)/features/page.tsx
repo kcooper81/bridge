@@ -492,10 +492,13 @@ export default function FeaturesPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbs) }}
       />
-    {/* ── Hero ── Light, Lumia-inspired */}
-    <section className="bg-[#FAFBFC] border-b border-border pt-32 pb-20 sm:pt-40 sm:pb-28">
+    {/* ── Hero ── Circle-inspired with gradient */}
+    <section
+      className="border-b border-border pt-32 pb-20 sm:pt-40 sm:pb-28"
+      style={{ background: "linear-gradient(180deg, #fff 0%, #F1F8FF 50%, #fff 100%)" }}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center">
-        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-tight">
+        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-medium tracking-tight leading-tight">
           AI Usage Control.{" "}
           <span className="text-primary">One Platform.</span>
         </h1>

@@ -64,9 +64,9 @@ export default function PricingPage() {
         }}
       />
     {/* Hero — Light, Lumia-inspired */}
-    <section className="bg-[#FAFBFC] border-b border-border">
+    <section className="border-b border-border" style={{ background: "linear-gradient(180deg, #fff 0%, #F1F8FF 50%, #fff 100%)" }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-32 pb-20 sm:pt-40 sm:pb-28 text-center">
-        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight">
+        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-medium tracking-tight">
           Start free.{" "}
           <span className="text-primary">Upgrade when your team grows.</span>
         </h1>

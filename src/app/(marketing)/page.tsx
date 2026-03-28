@@ -9,18 +9,17 @@ import {
 } from "@/lib/seo/schemas";
 import { GetStartedSteps } from "@/components/marketing/get-started-steps";
 import { LeadCaptureForm } from "@/components/marketing/lead-capture-form";
+import { LifestyleImage } from "@/components/marketing/lifestyle-image";
+import { FeatureCard } from "@/components/marketing/feature-card";
 import {
   ArrowRight,
   ClipboardList,
   Eye,
   FileSearch,
-  Globe,
   Quote,
   ShieldAlert,
   ShieldCheck,
-  EyeOff,
   Lock,
-  Activity,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -58,120 +57,71 @@ export default function LandingPage() {
         }}
       />
 
-      {/* ━━━ 1. HERO ━━━ Light, clean, Lumia-inspired */}
-      <section className="relative overflow-hidden bg-[#FAFBFC] border-b border-border">
+      {/* ━━━ 1. HERO ━━━ Circle-inspired with lifestyle image */}
+      <section
+        className="relative overflow-hidden"
+        style={{ background: "linear-gradient(180deg, #fff 0%, #F6F2FF 50%, #fff 100%)" }}
+      >
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-32 pb-20 sm:pt-40 sm:pb-28">
-          <div className="text-center max-w-4xl mx-auto">
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.05] text-foreground">
-              Your team uses AI.{" "}
-              <span className="text-primary">
-                Now make it safe.
-              </span>
-            </h1>
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            {/* Text */}
+            <div>
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-medium tracking-tight leading-[1.1]">
+                Your team uses AI.{" "}
+                <span className="text-primary">
+                  Now make it safe.
+                </span>
+              </h1>
 
-            <p className="mt-6 text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              See and control how your team uses AI. Block sensitive data, share prompts securely, and enforce compliance — all from one platform.
-            </p>
+              <p className="mt-6 text-lg text-muted-foreground max-w-xl leading-relaxed">
+                See and control how your team uses AI. Block sensitive data, share prompts securely, and enforce compliance — all from one platform.
+              </p>
 
-            <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link href="/signup">
-                <Button
-                  size="lg"
-                  className="text-base px-8 h-12 rounded-full font-semibold"
-                >
-                  Get Started
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
-              <Link href="/features">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="text-base px-8 h-12 rounded-full font-semibold"
-                >
-                  See How It Works
-                </Button>
-              </Link>
-            </div>
-
-            <p className="mt-4 text-sm text-muted-foreground">
-              No credit card required. Free for up to 3 members.
-            </p>
-          </div>
-
-          {/* Dashboard visual — clean card mockup */}
-          <div className="mt-16 max-w-5xl mx-auto">
-            <div className="rounded-2xl border border-border bg-card shadow-xl shadow-black/5 overflow-hidden">
-              {/* Window chrome */}
-              <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-muted/30">
-                <div className="flex gap-1.5">
-                  <div className="w-3 h-3 rounded-full bg-red-400/60" />
-                  <div className="w-3 h-3 rounded-full bg-yellow-400/60" />
-                  <div className="w-3 h-3 rounded-full bg-green-400/60" />
-                </div>
-                <div className="flex-1 flex justify-center">
-                  <div className="px-4 py-1 rounded-md bg-background border border-border text-xs text-muted-foreground">
-                    app.teamprompt.app/dashboard
-                  </div>
-                </div>
+              <div className="mt-10 flex flex-col sm:flex-row gap-4">
+                <Link href="/signup">
+                  <Button
+                    size="lg"
+                    className="text-base px-8 h-12 rounded-lg font-bold"
+                  >
+                    Get Started
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+                <Link href="/features">
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="text-base px-8 h-12 rounded-lg font-bold"
+                  >
+                    See How It Works
+                  </Button>
+                </Link>
               </div>
 
-              {/* Dashboard content */}
-              <div className="p-6 sm:p-8 bg-background">
-                <div className="grid grid-cols-4 gap-4 mb-6">
-                  {[
-                    { label: "Violations Blocked", value: "847", change: "+12%", icon: ShieldAlert, color: "text-red-500" },
-                    { label: "Prompts Shared", value: "1,234", change: "+8%", icon: ClipboardList, color: "text-blue-500" },
-                    { label: "AI Interactions", value: "15.2K", change: "+24%", icon: Activity, color: "text-violet-500" },
-                    { label: "Compliance Score", value: "98%", change: "+2%", icon: ShieldCheck, color: "text-emerald-500" },
-                  ].map((stat) => (
-                    <div key={stat.label} className="rounded-xl border border-border p-4 bg-card">
-                      <div className="flex items-center justify-between mb-2">
-                        <stat.icon className={cn("h-4 w-4", stat.color)} />
-                        <span className="text-[10px] font-medium text-emerald-500">{stat.change}</span>
-                      </div>
-                      <p className="text-2xl font-bold tracking-tight">{stat.value}</p>
-                      <p className="text-[11px] text-muted-foreground mt-0.5">{stat.label}</p>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Recent activity rows */}
-                <div className="rounded-xl border border-border overflow-hidden">
-                  <div className="px-4 py-2.5 bg-muted/30 border-b border-border">
-                    <p className="text-xs font-semibold text-foreground">Recent Security Activity</p>
-                  </div>
-                  {[
-                    { event: "SSN detected in ChatGPT prompt", action: "Blocked", user: "sarah.chen@acme.com", time: "2 min ago", severity: "block" },
-                    { event: "Credit card number in Claude", action: "Redacted", user: "mike.ross@acme.com", time: "8 min ago", severity: "warn" },
-                    { event: "API key pattern detected", action: "Blocked", user: "dev-team@acme.com", time: "15 min ago", severity: "block" },
-                    { event: "Patient name flagged (HIPAA)", action: "Warned", user: "dr.lee@acme.com", time: "22 min ago", severity: "warn" },
-                  ].map((row) => (
-                    <div key={row.event} className="flex items-center gap-4 px-4 py-3 border-b border-border/50 last:border-0 text-sm">
-                      <div className={cn(
-                        "w-2 h-2 rounded-full shrink-0",
-                        row.severity === "block" ? "bg-red-500" : "bg-amber-500"
-                      )} />
-                      <span className="flex-1 text-xs text-foreground truncate">{row.event}</span>
-                      <span className="text-xs text-muted-foreground hidden sm:block">{row.user}</span>
-                      <span className={cn(
-                        "text-[10px] font-bold uppercase shrink-0",
-                        row.severity === "block" ? "text-red-500" : "text-amber-500"
-                      )}>
-                        {row.action}
-                      </span>
-                      <span className="text-[10px] text-muted-foreground shrink-0 w-16 text-right">{row.time}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <p className="mt-4 text-sm text-muted-foreground">
+                No credit card required. Free for up to 3 members.
+              </p>
             </div>
+
+            {/* Lifestyle image with overlay cards */}
+            <LifestyleImage
+              src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=800&q=80&auto=format&fit=crop"
+              alt="Professional reviewing AI tool on laptop"
+              aspectRatio="4/3"
+              gradientFrom="bottom-left"
+              priority
+              overlayCards={[
+                { icon: ShieldAlert, label: "SSN Blocked", value: "Real-time", position: "top-left" },
+                { icon: ClipboardList, label: "Prompts Shared", value: "1,234", position: "top-right" },
+                { icon: ShieldCheck, label: "Compliance Score", value: "98%", position: "bottom-right" },
+              ]}
+            />
           </div>
         </div>
       </section>
 
       {/* ━━━ 2. TRUST / LOGO BAR ━━━ */}
-      <section className="border-b border-border bg-card/50">
+      <section className="border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-10">
             <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground shrink-0">
@@ -211,39 +161,11 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ━━━ 3. PLATFORM CONTROL ━━━ Lumia-style positioning */}
-      <section className="py-20 sm:py-28">
+      {/* ━━━ 3. PLATFORM — 4-card grid with monochrome icons ━━━ */}
+      <section className="py-24 sm:py-32">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-6">
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-              Control AI usage. Protect your team. Govern compliance.
-            </h2>
-          </div>
-
-          <div className="flex items-center justify-center gap-3 mb-14">
-            <Link href="/features">
-              <Button variant="outline" className="rounded-full px-6 font-medium">
-                For Teams
-              </Button>
-            </Link>
-            <Link href="/enterprise">
-              <Button variant="outline" className="rounded-full px-6 font-medium">
-                For Enterprise
-              </Button>
-            </Link>
-          </div>
-
-          <p className="text-center text-lg text-muted-foreground max-w-3xl mx-auto mb-14">
-            TeamPrompt works inside the AI tools your team already uses — scanning every interaction in real time to detect risk and enforce policy. Powered by 19 compliance frameworks and real-time DLP rules.
-          </p>
-        </div>
-      </section>
-
-      {/* ━━━ 4. COMPREHENSIVE PLATFORM — 4-CARD GRID ━━━ */}
-      <section className="py-20 sm:py-28 border-t border-border bg-[#FAFBFC]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-14">
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-medium tracking-tight">
               Everything you need to{" "}
               <span className="text-primary">secure AI across your org.</span>
             </h2>
@@ -253,60 +175,100 @@ export default function LandingPage() {
           </div>
 
           <div className="grid gap-6 sm:grid-cols-2 max-w-5xl mx-auto">
+            <FeatureCard
+              icon={Eye}
+              title="Shadow AI Analysis"
+              description="Go beyond discovery to understand how AI is actually used across your organization. See which tools, which teams, and what data is being shared."
+              href="/security"
+              mono
+            />
+            <FeatureCard
+              icon={Lock}
+              title="Leakage & Oversharing Prevention"
+              description="Detect and block sensitive information before it reaches AI tools. SSNs, credit cards, API keys, patient records — stopped in real time."
+              href="/security"
+              mono
+            />
+            <FeatureCard
+              icon={FileSearch}
+              title="Maintaining Compliance"
+              description="Ensure AI usage stays aligned with organizational policies, security frameworks, and evolving regulatory requirements. 19 pre-built compliance packs."
+              href="/features#compliance-policy-packs"
+              mono
+            />
+            <FeatureCard
+              icon={ClipboardList}
+              title="Prompt Governance"
+              description="One searchable library of approved prompts with templates, approval workflows, quality guidelines, and usage analytics across your team."
+              href="/features#prompt-library"
+              mono
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* ━━━ 4. LIFESTYLE FEATURE SECTIONS ━━━ */}
+      <section className="py-24 sm:py-32 bg-zinc-950 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-medium tracking-tight">
+              Built for the way your team works
+            </h2>
+            <p className="mt-4 text-lg text-zinc-400 max-w-2xl mx-auto">
+              From the browser extension to the admin dashboard, every feature is designed to protect without slowing anyone down.
+            </p>
+          </div>
+
+          <div className="grid gap-8 sm:grid-cols-3">
             {[
               {
-                icon: Eye,
-                title: "Shadow AI Analysis",
-                desc: "Go beyond discovery to understand how AI is actually used across your organization. See which tools, which teams, and what data is being shared.",
-                href: "/security",
-                color: "bg-violet-500/10",
+                src: "https://images.unsplash.com/photo-1553877522-43269d4ea984?w=600&q=80&auto=format&fit=crop",
+                alt: "Team collaborating around laptop",
+                title: "Real-Time DLP Scanning",
+                desc: "Every prompt is scanned before it leaves the browser. Detect PII, credentials, and confidential data across ChatGPT, Claude, Gemini, and more.",
               },
               {
-                icon: Lock,
-                title: "Leakage & Oversharing Prevention",
-                desc: "Detect and block sensitive information before it reaches AI tools. SSNs, credit cards, API keys, patient records — stopped in real time.",
-                href: "/security",
-                color: "bg-red-500/10",
+                src: "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=600&q=80&auto=format&fit=crop",
+                alt: "Professional at desk with monitor",
+                title: "Shared Prompt Library",
+                desc: "One searchable library of vetted prompts. Templates with variables, approval workflows, quality guidelines, and usage tracking.",
               },
               {
-                icon: FileSearch,
-                title: "Maintaining Compliance",
-                desc: "Ensure AI usage stays aligned with organizational policies, security frameworks, and evolving regulatory requirements. 19 pre-built compliance packs.",
-                href: "/features#compliance-policy-packs",
-                color: "bg-emerald-500/10",
+                src: "https://images.unsplash.com/photo-1551434678-e076c223a692?w=600&q=80&auto=format&fit=crop",
+                alt: "Team reviewing dashboard on screen",
+                title: "Compliance & Audit Trail",
+                desc: "19 compliance packs for HIPAA, SOC 2, PCI-DSS, GDPR, and more. Full activity log with exportable reports for auditors.",
               },
-              {
-                icon: ClipboardList,
-                title: "Prompt Governance",
-                desc: "One searchable library of approved prompts with templates, approval workflows, quality guidelines, and usage analytics across your team.",
-                href: "/features#prompt-library",
-                color: "bg-blue-500/10",
-              },
-            ].map((card) => (
-              <Link
-                key={card.title}
-                href={card.href}
-                className="group rounded-2xl border border-border bg-card p-8 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300"
-              >
-                <div className={cn("inline-flex h-12 w-12 items-center justify-center rounded-xl mb-5", card.color)}>
-                  <card.icon className="h-6 w-6 text-foreground/70" />
+            ].map((feature) => (
+              <div key={feature.title}>
+                <div className="relative overflow-hidden rounded-[20px] aspect-square mb-5">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={feature.src}
+                    alt={feature.alt}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                  <div
+                    className="absolute inset-0 pointer-events-none"
+                    style={{ background: "radial-gradient(circle at 0% 100%, rgba(0,0,0,0.4), transparent 70%)" }}
+                  />
                 </div>
-                <h3 className="text-xl font-semibold mb-2">{card.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{card.desc}</p>
-                <span className="inline-flex items-center gap-1 text-sm font-medium text-primary mt-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                  Learn more <ArrowRight className="h-3.5 w-3.5" />
-                </span>
-              </Link>
+                <h3 className="text-lg font-semibold">{feature.title}</h3>
+                <p className="mt-2 text-sm text-zinc-400 leading-relaxed">
+                  {feature.desc}
+                </p>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ━━━ 5. TESTIMONIAL ━━━ Lumia-style single prominent quote */}
-      <section className="py-20 sm:py-28 border-t border-border">
+      {/* ━━━ 5. TESTIMONIAL ━━━ */}
+      <section className="py-24 sm:py-32">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
           <Quote className="h-10 w-10 text-primary/20 mx-auto mb-6" />
-          <blockquote className="text-2xl sm:text-3xl font-semibold tracking-tight leading-snug">
+          <blockquote className="text-2xl sm:text-3xl font-medium tracking-tight leading-snug">
             &ldquo;TeamPrompt gives us visibility and control over AI usage that we simply didn&apos;t have before. The DLP scanning alone has prevented dozens of data exposure incidents.&rdquo;
           </blockquote>
           <div className="mt-8">
@@ -317,23 +279,21 @@ export default function LandingPage() {
       </section>
 
       {/* ━━━ 6. STATS ROW ━━━ */}
-      <section className="py-16 border-t border-b border-border bg-[#FAFBFC]">
+      <section
+        className="py-20 border-t border-b border-border"
+        style={{ background: "linear-gradient(90deg, #F6F2FF, #F1F8FF)" }}
+      >
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-8">
             {[
-              { icon: ShieldAlert, value: "Real-time", label: "PII detection" },
-              { icon: FileSearch, value: "19", label: "Compliance frameworks" },
-              { icon: Globe, value: "<5 min", label: "Setup time" },
-              { icon: EyeOff, value: "3 modes", label: "Block, Warn, or Redact" },
+              { value: "Real-time", label: "PII detection" },
+              { value: "19", label: "Compliance frameworks" },
+              { value: "<5 min", label: "Setup time" },
+              { value: "3 modes", label: "Block, Warn, or Redact" },
             ].map((stat) => (
               <div key={stat.label} className="text-center">
-                <div className="flex items-center justify-center mb-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                    <stat.icon className="h-5 w-5 text-primary" />
-                  </div>
-                </div>
-                <p className="text-2xl sm:text-3xl font-bold tracking-tight">{stat.value}</p>
-                <p className="mt-1 text-sm text-muted-foreground">{stat.label}</p>
+                <p className="text-3xl sm:text-4xl font-medium tracking-tight">{stat.value}</p>
+                <p className="mt-2 text-sm text-muted-foreground">{stat.label}</p>
               </div>
             ))}
           </div>
@@ -341,10 +301,10 @@ export default function LandingPage() {
       </section>
 
       {/* ━━━ 7. BLOG / RESOURCES PREVIEW ━━━ */}
-      <section className="py-20 sm:py-28">
+      <section className="py-24 sm:py-32">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-14">
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-medium tracking-tight">
               From the TeamPrompt blog
             </h2>
             <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -373,7 +333,7 @@ export default function LandingPage() {
               <Link
                 key={post.title}
                 href="/blog"
-                className="group rounded-2xl border border-border bg-card p-6 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300"
+                className="group rounded-[20px] border border-border bg-card p-6 hover:border-foreground/10 hover:shadow-lg hover:shadow-black/[0.03] transition-all duration-300"
               >
                 <span className="text-xs font-semibold uppercase tracking-widest text-primary">
                   {post.category}
@@ -393,7 +353,7 @@ export default function LandingPage() {
 
           <div className="text-center mt-10">
             <Link href="/blog">
-              <Button variant="outline" className="rounded-full px-8 font-medium">
+              <Button variant="outline" className="rounded-lg px-8 font-bold">
                 Read the Blog
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>

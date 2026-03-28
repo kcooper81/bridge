@@ -261,9 +261,7 @@ function NavDropdown({
                   onClick={() => setOpen(false)}
                   className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-foreground/80 hover:text-foreground hover:bg-muted/50 transition-colors"
                 >
-                  <span className={cn("flex h-8 w-8 items-center justify-center rounded-lg shrink-0", item.bg)}>
-                    <item.icon className="h-4 w-4 text-foreground/70" />
-                  </span>
+                  <item.icon className="h-5 w-5 text-foreground/50 shrink-0" />
                   <div className="min-w-0">
                     <p className="text-sm font-medium">{item.label}</p>
                     <p className="text-xs text-muted-foreground truncate">{item.desc}</p>
@@ -326,9 +324,7 @@ function MobileAccordion({
               onClick={onNavigate}
               className="flex items-center gap-2 text-sm text-foreground/80 hover:text-foreground transition-colors"
             >
-              <span className={cn("flex h-6 w-6 items-center justify-center rounded-md shrink-0", item.bg)}>
-                <item.icon className="h-3.5 w-3.5 text-foreground/70" />
-              </span>
+              <item.icon className="h-4 w-4 text-foreground/50 shrink-0" />
               <div className="min-w-0">
                 <p className="text-sm font-medium">{item.label}</p>
               </div>

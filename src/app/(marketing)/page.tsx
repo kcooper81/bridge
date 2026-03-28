@@ -9,7 +9,6 @@ import {
 } from "@/lib/seo/schemas";
 import { GetStartedSteps } from "@/components/marketing/get-started-steps";
 import { LeadCaptureForm } from "@/components/marketing/lead-capture-form";
-import { LifestyleImage } from "@/components/marketing/lifestyle-image";
 import { FeatureCard } from "@/components/marketing/feature-card";
 import {
   ArrowRight,
@@ -102,19 +101,64 @@ export default function LandingPage() {
               </p>
             </div>
 
-            {/* Lifestyle image with overlay cards */}
-            <LifestyleImage
-              src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=800&q=80&auto=format&fit=crop"
-              alt="Professional reviewing AI tool on laptop"
-              aspectRatio="4/3"
-              gradientFrom="bottom-left"
-              priority
-              overlayCards={[
-                { icon: "ShieldAlert", label: "SSN Blocked", value: "Real-time", position: "top-left" },
-                { icon: "ClipboardList", label: "Prompts Shared", value: "1,234", position: "top-right" },
-                { icon: "ShieldCheck", label: "Compliance Score", value: "98%", position: "bottom-right" },
-              ]}
-            />
+            {/* Hero visual — stacked images with UI overlays (Circle-style) */}
+            <div className="relative hidden lg:block">
+              {/* Top image — person using AI with "Blocked" overlay */}
+              <div className="relative overflow-hidden rounded-[20px] shadow-xl shadow-black/10">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="https://images.unsplash.com/photo-1551434678-e076c223a692?w=700&q=80&auto=format&fit=crop"
+                  alt="Team working with AI tools at desk"
+                  className="w-full h-[280px] object-cover"
+                />
+                <div
+                  className="absolute inset-0 pointer-events-none"
+                  style={{ background: "radial-gradient(circle at 100% 100%, rgba(0,0,0,0.3), transparent 70%)" }}
+                />
+                {/* UI overlay — DLP Block notification */}
+                <div className="absolute bottom-4 right-4 flex items-center gap-3 rounded-xl bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl px-4 py-3 shadow-lg border border-white/50">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-500/10">
+                    <ShieldCheck className="h-5 w-5 text-red-500" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">SSN Blocked</p>
+                    <p className="text-xs text-muted-foreground">Sensitive data detected in ChatGPT</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bottom image — offset, overlapping — with "Shared" overlay */}
+              <div className="relative overflow-hidden rounded-[20px] shadow-xl shadow-black/10 -mt-8 ml-12 mr-0">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=700&q=80&auto=format&fit=crop"
+                  alt="Professional reviewing compliance dashboard"
+                  className="w-full h-[220px] object-cover"
+                />
+                <div
+                  className="absolute inset-0 pointer-events-none"
+                  style={{ background: "radial-gradient(circle at 0% 100%, rgba(0,0,0,0.25), transparent 70%)" }}
+                />
+                {/* UI overlay — Prompt shared */}
+                <div className="absolute bottom-4 left-4 flex items-center gap-3 rounded-xl bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl px-4 py-3 shadow-lg border border-white/50">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/10">
+                    <ClipboardList className="h-5 w-5 text-emerald-500" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">Prompt Shared</p>
+                    <p className="text-xs text-muted-foreground">Customer Onboarding — 142 uses</p>
+                  </div>
+                </div>
+                {/* UI overlay — Compliance score */}
+                <div className="absolute top-4 right-4 flex items-center gap-2.5 rounded-xl bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl px-4 py-2.5 shadow-lg border border-white/50">
+                  <ShieldCheck className="h-4 w-4 text-emerald-500" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">Compliance</p>
+                    <p className="text-lg font-bold text-foreground leading-none">98%</p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>

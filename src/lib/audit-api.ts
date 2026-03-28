@@ -151,7 +151,10 @@ export async function getAuditData(): Promise<AuditData | null> {
   const logs = (logsRes.data as { id: string; ai_tool: string; user_id: string; action: string; risk_score: number; created_at: string }[]) || [];
   const rules = (rulesRes.data as { id: string; name: string; severity: string; category: string; is_active: boolean; source_pack: string | null }[]) || [];
   const teams = (teamsRes.data as { id: string; name: string }[]) || [];
-  const teamMembers = (teamMembersRes.data as { user_id: string; team_id: string }[]) || [];
+  const allTeamMembers = (teamMembersRes.data as { user_id: string; team_id: string }[]) || [];
+  // Filter to only this org's teams to prevent cross-org data leakage
+  const orgTeamIds = new Set(teams.map((t) => t.id));
+  const teamMembers = allTeamMembers.filter((m) => orgTeamIds.has(m.team_id));
   const prompts = (promptsRes.data as { title: string; usage_count: number }[]) || [];
   const events = (eventsRes.data as { created_at: string }[]) || [];
 

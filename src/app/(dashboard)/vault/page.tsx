@@ -390,7 +390,7 @@ export default function VaultPage() {
               </Button>
             ) : (
               <Button variant="outline" size="sm" asChild>
-                <a href="/import-export">
+                <a href="/settings/billing">
                   <Import className="mr-2 h-4 w-4" />
                   Import / Export
                 </a>

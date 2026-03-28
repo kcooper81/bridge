@@ -441,7 +441,8 @@ function exportAuditCSV(data: AuditData) {
     ...data.policyCoverage.map((p) => [p.name, p.installedRules.toString(), p.totalRules.toString(), p.enabled ? "Yes" : "No"]),
   ];
 
-  const csv = rows.map((row) => (row as string[]).join(",")).join("\n");
+  const escapeField = (f: string) => f.includes(",") || f.includes('"') || f.includes("\n") ? `"${f.replace(/"/g, '""')}"` : f;
+  const csv = rows.map((row) => (row as string[]).map(escapeField).join(",")).join("\n");
   const blob = new Blob([csv], { type: "text/csv" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");

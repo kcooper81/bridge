@@ -909,15 +909,26 @@ function showBlockOverlay(violations: ScanResult["violations"], sanitizedContent
   const overlay = document.createElement("div");
   overlay.id = "tp-block-overlay";
   overlay.className = "tp-block-overlay";
+  // Build violation details with educational context
+  const violationHtml = violations.map((v) => {
+    const edu = (v as Record<string, unknown>).education as { why?: string; fix?: string } | undefined;
+    return `
+      <div class="tp-violation-item">
+        <div class="tp-violation-header"><strong>${escapeHtml(v.ruleName)}</strong><span class="tp-violation-match">${escapeHtml(v.matchedText)}</span></div>
+        ${edu?.why ? `<p class="tp-violation-why"><strong>Why this matters:</strong> ${escapeHtml(edu.why)}</p>` : ""}
+        ${edu?.fix ? `<p class="tp-violation-fix"><strong>What to do:</strong> ${escapeHtml(edu.fix)}</p>` : ""}
+      </div>
+    `;
+  }).join("");
+
   overlay.innerHTML = `
     <div class="tp-block-card">
       <div class="tp-block-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg></div>
-      <h3>Message Blocked by TeamPrompt</h3>
-      <p>Sensitive data was detected in your message:</p>
-      <ul>
-        ${violations.map((v) => `<li><strong>${escapeHtml(v.ruleName)}</strong>: ${escapeHtml(v.matchedText)}</li>`).join("")}
-      </ul>
-      <p class="tp-block-hint">Remove the flagged content and try again.</p>
+      <h3>Message Blocked</h3>
+      <p>${violations.length} sensitive item${violations.length !== 1 ? "s" : ""} detected in your message:</p>
+      <div class="tp-violations-list">
+        ${violationHtml}
+      </div>
       <div class="tp-block-actions">
         <button id="tp-block-dismiss" class="tp-block-btn">Got it</button>
         ${hasSanitized ? `<button id="tp-block-sanitize" class="tp-block-btn tp-block-btn-sanitize">Send Sanitized Version</button>` : ""}
@@ -954,8 +965,10 @@ function showWarningBanner(violations: ScanResult["violations"]) {
   const banner = document.createElement("div");
   banner.id = "tp-warning-banner";
   banner.className = "tp-warning-banner";
+  const firstEdu = (violations[0] as Record<string, unknown>)?.education as { fix?: string } | undefined;
+  const fixHint = firstEdu?.fix ? ` · ${escapeHtml(firstEdu.fix)}` : "";
   banner.innerHTML = `
-    <span><svg class="tp-warning-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> TeamPrompt: ${violations.length} warning(s) — ${violations.map((v) => escapeHtml(v.ruleName)).join(", ")}</span>
+    <span><svg class="tp-warning-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> ${violations.map((v) => escapeHtml(v.ruleName)).join(", ")}${fixHint}</span>
     <button id="tp-warning-dismiss">Dismiss</button>
   `;
   document.body.appendChild(banner);

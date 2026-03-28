@@ -9,6 +9,7 @@ import type { DetectionType } from "@/lib/types";
 import { calculateRiskScore } from "@/lib/security/risk-score";
 import { notifyDlpViolation } from "@/lib/slack/notify";
 import { classifyTopics } from "@/lib/security/topic-classifier";
+import { getEducationMessage } from "@/lib/security/education-messages";
 import type { SecuritySettings } from "@/lib/types";
 
 const MAX_CONTENT_LENGTH = 50_000; // 50 KB max scan payload
@@ -400,9 +401,21 @@ export async function POST(request: NextRequest) {
       }).catch(() => {}); // fire-and-forget
     }
 
+    // Add educational context to each violation
+    const educatedViolations = violations.map((v) => {
+      const edu = getEducationMessage(v.category);
+      return {
+        ...v,
+        education: {
+          why: edu.why,
+          fix: edu.fix,
+        },
+      };
+    });
+
     return withCors(NextResponse.json({
       passed: action !== "block",
-      violations,
+      violations: educatedViolations,
       action,
       risk_score,
       allow_override: !overrideDisabled,

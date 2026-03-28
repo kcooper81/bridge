@@ -7,9 +7,25 @@ export interface ReleaseNote {
   badge?: "new" | "fix" | "improvement";
 }
 
-export const APP_VERSION = "1.14.1";
+export const APP_VERSION = "1.15.0";
 
 export const RELEASE_NOTES: ReleaseNote[] = [
+  {
+    version: "1.15.0",
+    date: "2026-03-28",
+    title: "Network-Level AI Control, LLM Classification & Audit Dashboard",
+    highlights: [
+      "Cloudflare Gateway integration — block unapproved AI tools at the DNS level, covering all devices (browser, native apps, mobile, CLI). Connect in Settings → Integrations.",
+      "AI Tool Policy — new tab on Guardrails page lets admins approve/block 18 AI tools. Syncs to Cloudflare Gateway when connected, enforces via extension when not.",
+      "LLM topic classification — define sensitive topics in plain language (e.g. 'customer financial data'). AI classifies prompts against your topics using OpenAI or Anthropic.",
+      "User education on block — when the extension blocks a message, it now explains WHY it matters and WHAT to do instead, with per-category guidance for PII, credentials, API keys, health data, and more.",
+      "Audit & Compliance page — new /audit dashboard with Sankey flow diagrams (team→tool), violation heatmaps, risk score histograms, donut charts, compliance framework coverage, and CSV/PDF export.",
+      "Dashboard restructured — sidebar simplified to 7 items (was 9). Template Packs and Guidelines merged into Prompt Library (tabs + Browse Packs sheet). Analytics replaced by Audit.",
+      "Integrations reorganized — Security & Governance, Directory & Team Management, and Developer Tools sections.",
+      "Onboarding — setup checklist now includes optional Cloudflare Gateway step.",
+    ],
+    badge: "new",
+  },
   {
     version: "1.14.1",
     date: "2026-03-24",

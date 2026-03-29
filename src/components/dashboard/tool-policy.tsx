@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useOrg } from "@/components/providers/org-provider";
 import { Card } from "@/components/ui/card";
@@ -98,19 +98,33 @@ export function ToolPolicy() {
     }
   }
 
+  // Debounce saves to prevent rapid-fire API calls
+  const saveTimeoutRef = useRef<NodeJS.Timeout>();
+  const pendingToolsRef = useRef<ToolInfo[]>(tools);
+  const pendingPolicyRef = useRef(policyEnabled);
+
+  function debouncedSave(updatedTools: ToolInfo[], enabled: boolean) {
+    pendingToolsRef.current = updatedTools;
+    pendingPolicyRef.current = enabled;
+    if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+    saveTimeoutRef.current = setTimeout(() => {
+      savePolicy(pendingToolsRef.current, pendingPolicyRef.current);
+    }, 800);
+  }
+
   function toggleTool(toolId: string) {
     if (!isAdmin) return;
     const updated = tools.map((t) =>
       t.id === toolId ? { ...t, approved: !t.approved } : t
     );
     setTools(updated);
-    savePolicy(updated, policyEnabled);
+    debouncedSave(updated, policyEnabled);
   }
 
   function togglePolicy(enabled: boolean) {
     if (!isAdmin) return;
     setPolicyEnabled(enabled);
-    savePolicy(tools, enabled);
+    debouncedSave(tools, enabled);
   }
 
   if (loading) {

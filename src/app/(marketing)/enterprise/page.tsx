@@ -22,7 +22,6 @@ import {
   Server,
   FileText,
   FileCheck,
-  ExternalLink,
 } from "lucide-react";
 
 export const metadata = generatePageMetadata({
@@ -71,63 +70,68 @@ const deploymentMethods = [
 
 const platformFeatures = [
   {
-    icon: Shield,
-    title: "Company-Wide Security Rules",
+    icon: Globe,
+    title: "Cloudflare Gateway Integration",
     description:
-      "Admins set data protection rules that apply to every employee. Block sensitive data — patient records, financials, passwords, and secrets — from reaching any AI tool.",
+      "Block unapproved AI tools at the DNS level via Cloudflare Gateway. Covers all devices — browser, native apps, mobile, and CLI. Approve trusted tools, block everything else.",
+  },
+  {
+    icon: Shield,
+    title: "40+ DLP Detection Rules",
+    description:
+      "Real-time DLP scanning catches SSNs, credit cards, API keys, patient data, passwords, and more. Three modes: block, warn, or auto-redact with safe placeholders.",
   },
   {
     icon: Users,
-    title: "Team-Based Access Control",
+    title: "Team-Based Policies",
     description:
-      "Create teams with separate prompt libraries and security policies. Legal gets privilege detection rules, engineering gets API key blocking, finance gets payment card protections.",
+      "Create teams with separate security policies. Legal gets privilege detection, engineering gets API key blocking, finance gets payment card protections. All managed from one dashboard.",
   },
   {
     icon: BarChart3,
-    title: "Full Activity Log",
+    title: "Audit Dashboard",
     description:
-      "Every AI interaction is logged — who sent what, when, to which tool, and whether a security rule was triggered. Export logs for compliance reviews.",
-  },
-  {
-    icon: Key,
-    title: "Single Sign-On (Coming Soon)",
-    description:
-      "We're building single sign-on and automatic user provisioning so employees get the right access on day one. Contact sales to join the early access program.",
+      "Sankey flow diagrams, violation heatmaps, risk score histograms, and compliance framework coverage. Filter by date range, action, and category. Export CSV or PDF.",
   },
   {
     icon: FileCheck,
-    title: "Compliance Rule Packs",
+    title: "19 Compliance Packs",
     description:
-      "Pre-built security rules for regulated industries — healthcare (HIPAA), EU privacy (GDPR), payment cards (PCI-DSS), California privacy (CCPA), and more. Install with one click.",
+      "One-click install for HIPAA, SOC 2, PCI-DSS, GDPR, CCPA, FERPA, FedRAMP, and 12 more. Pre-configured detection rules for each regulatory framework.",
+  },
+  {
+    icon: Key,
+    title: "LLM Topic Classification",
+    description:
+      "Define sensitive topics in plain language — 'customer financial data', 'patient records'. AI classifies prompts against your topics using OpenAI or Anthropic.",
   },
   {
     icon: Lock,
-    title: "Secure by Default",
+    title: "AI Tool Policy",
     description:
-      "All data encrypted at rest and in transit. Security scanning happens server-side — your prompt content is never shared with third-party AI providers.",
-    link: { href: "/security", label: "Learn about our data protection" },
+      "Approve 18 AI tools individually. Blocked tools are enforced at browser level (extension) and network level (Cloudflare DNS). Policy changes logged for audit.",
   },
   {
     icon: FileText,
-    title: "Activity & Violation Reports",
+    title: "User Education on Block",
     description:
-      "See which teams use AI most, how many violations were blocked, and your organization's risk posture at a glance. Export reports for internal compliance reviews.",
+      "When a violation is blocked, users see a contextual explanation of WHY it matters and WHAT to do instead. Per-category guidance turns blocks into learning moments.",
   },
 ];
 
 const stats = [
-  { value: "100%", label: "Browser coverage" },
-  { value: "<5min", label: "IT deployment time" },
-  { value: "0", label: "User setup steps" },
-  { value: "5", label: "AI tools monitored" },
+  { value: "2", label: "Protection layers (network + browser)" },
+  { value: "40+", label: "Detection rules" },
+  { value: "19", label: "Compliance frameworks" },
+  { value: "18", label: "AI tools managed" },
 ];
 
 const capabilityBadges = [
-  "Block Sensitive Data",
-  "Full Activity Log",
-  "Team-Level Control",
+  "Network-Level AI Tool Blocking",
+  "Content-Level DLP Scanning",
+  "Cloudflare Gateway Integration",
+  "19 Compliance Frameworks",
   "Auto-Install on Every Browser",
-  "Scans Before Sending",
 ];
 
 const faqs = [
@@ -154,7 +158,12 @@ const faqs = [
   {
     question: "What happens if an employee bypasses the extension?",
     answer:
-      "With auto-install, employees cannot disable or uninstall the extension. If they use an unmanaged browser, the activity log shows a gap — making unauthorized AI usage visible. For maximum coverage, pair the extension with network-level controls that route AI tool traffic through your proxy.",
+      "With auto-install, employees cannot disable or uninstall the extension. For maximum coverage, connect Cloudflare Gateway to block unapproved AI tools at the DNS level — this covers all devices including native apps, mobile, and CLI tools. Even if someone uses an unmanaged browser, the network-level blocking prevents access to unapproved tools.",
+  },
+  {
+    question: "How does the Cloudflare Gateway integration work?",
+    answer:
+      "TeamPrompt integrates with Cloudflare Zero Trust Gateway to block unapproved AI tools at the DNS level. When you approve or block a tool in TeamPrompt, the change syncs to Cloudflare automatically. Any device on your corporate network (using Cloudflare WARP) can't access blocked AI tools. The free Cloudflare tier supports up to 50 users.",
   },
   {
     question: "Do you support regulated industries like healthcare and finance?",
@@ -205,9 +214,7 @@ export default function EnterprisePage() {
           </h1>
 
           <p className="mt-6 text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            Auto-install TeamPrompt on every company browser. Employees
-            get data protection, a shared prompt library, and activity
-            logging from day one — with zero setup on their end.
+            Two layers of AI protection: block unapproved tools at the network level with Cloudflare Gateway, and scan every prompt for sensitive data with the browser extension. Auto-install across your organization.
           </p>
 
           <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
@@ -362,15 +369,6 @@ export default function EnterprisePage() {
                 <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
                   {feature.description}
                 </p>
-                {"link" in feature && feature.link && (
-                  <Link
-                    href={(feature.link as { href: string; label: string }).href}
-                    className="inline-flex items-center gap-1.5 mt-3 text-sm font-medium text-primary hover:underline"
-                  >
-                    {(feature.link as { href: string; label: string }).label}
-                    <ExternalLink className="h-3.5 w-3.5" />
-                  </Link>
-                )}
               </div>
             ))}
           </div>

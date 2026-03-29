@@ -34,7 +34,7 @@ export const AI_TOOL_DOMAINS: {
   {
     id: "copilot",
     name: "Microsoft Copilot",
-    domains: ["copilot.microsoft.com", "www.bing.com/chat", "sydney.bing.com"],
+    domains: ["copilot.microsoft.com", "sydney.bing.com"],
     category: "chat",
   },
   {
@@ -158,6 +158,13 @@ async function cfFetch(
       ...(options?.headers || {}),
     },
   });
+  if (!res.ok) {
+    try {
+      return await res.json();
+    } catch {
+      return { success: false, errors: [{ message: `HTTP ${res.status}: ${res.statusText}` }] };
+    }
+  }
   return res.json();
 }
 

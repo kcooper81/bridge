@@ -839,111 +839,154 @@ function CloudflareCard() {
         ) : showSetup ? (
           <div className="space-y-4">
             {/* Wizard progress */}
-            <div className="flex items-center gap-2 mb-2">
-              {[1, 2, 3].map((s) => (
-                <div key={s} className="flex items-center gap-2 flex-1">
+            <div className="flex items-center gap-1 mb-2">
+              {[
+                { n: 1, label: "Get Token" },
+                { n: 2, label: "Paste Credentials" },
+                { n: 3, label: "Done" },
+              ].map(({ n, label }) => (
+                <div key={n} className="flex items-center gap-1.5 flex-1">
                   <div className={cn(
                     "flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold shrink-0",
-                    wizardStep > s ? "bg-emerald-500 text-white" : wizardStep === s ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                    wizardStep > n ? "bg-emerald-500 text-white" : wizardStep === n ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
                   )}>
-                    {wizardStep > s ? <CheckCircle2 className="h-3.5 w-3.5" /> : s}
+                    {wizardStep > n ? <CheckCircle2 className="h-3.5 w-3.5" /> : n}
                   </div>
-                  <span className={cn("text-[10px] font-medium", wizardStep >= s ? "text-foreground" : "text-muted-foreground")}>
-                    {s === 1 ? "Create Token" : s === 2 ? "Connect" : "Configure"}
-                  </span>
-                  {s < 3 && <div className={cn("flex-1 h-px", wizardStep > s ? "bg-emerald-500" : "bg-border")} />}
+                  <span className={cn("text-[10px] font-medium hidden sm:inline", wizardStep >= n ? "text-foreground" : "text-muted-foreground")}>{label}</span>
+                  {n < 3 && <div className={cn("flex-1 h-px", wizardStep > n ? "bg-emerald-500" : "bg-border")} />}
                 </div>
               ))}
             </div>
 
-            {/* Step 1: Create Token Instructions */}
+            {/* Step 1: Get Token */}
             {wizardStep === 1 && (
               <div className="space-y-3">
-                <p className="text-sm font-semibold">Create an API token in Cloudflare</p>
-                <p className="text-xs text-muted-foreground">You&apos;ll need a Cloudflare account (free). SSO login (Google, GitHub, Apple) works fine.</p>
-                <div className="rounded-lg border border-border p-3 space-y-2">
-                  <ol className="text-[11px] text-muted-foreground space-y-2 list-none">
-                    {[
-                      <>Log in to <a href="https://dash.cloudflare.com/profile/api-tokens" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">dash.cloudflare.com/profile/api-tokens</a></>,
-                      <>Click <strong className="text-foreground">Create Token</strong></>,
-                      <>Scroll down, click <strong className="text-foreground">&ldquo;Create Custom Token&rdquo;</strong> (at the bottom)</>,
-                      <>Token name: <strong className="text-foreground">TeamPrompt</strong></>,
-                      <>Permissions: <strong className="text-foreground">Account → Zero Trust → Edit</strong></>,
-                      <>Account Resources: <strong className="text-foreground">Include → All accounts</strong> (or select your account)</>,
-                      <>Click <strong className="text-foreground">Continue to Summary → Create Token</strong></>,
-                      <><strong className="text-foreground">Copy the token</strong> — you won&apos;t see it again</>,
-                    ].map((step, i) => (
-                      <li key={i} className="flex gap-2.5">
-                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-primary text-[9px] font-bold shrink-0">{i + 1}</span>
-                        <span className="pt-0.5">{step}</span>
-                      </li>
-                    ))}
-                  </ol>
+                <div className="rounded-lg bg-blue-500/5 border border-blue-500/20 p-3">
+                  <p className="text-xs font-semibold text-blue-600 mb-1">Don&apos;t have a Cloudflare account?</p>
+                  <p className="text-[11px] text-muted-foreground">Sign up free at <a href="https://dash.cloudflare.com/sign-up" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">dash.cloudflare.com/sign-up</a>. You can use Google, GitHub, or Apple to sign in. The free plan covers up to 50 users.</p>
                 </div>
-                <p className="text-[11px] text-muted-foreground">
-                  Your <strong>Account ID</strong> is on the <a href="https://dash.cloudflare.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Cloudflare dashboard</a> home page (right sidebar).
-                </p>
+
+                <p className="text-sm font-semibold">Step 1: Create an API token</p>
+
+                <div className="rounded-lg border border-border divide-y divide-border">
+                  {[
+                    { text: <>Open <a href="https://dash.cloudflare.com/profile/api-tokens" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">Cloudflare API Tokens page</a> (opens in new tab)</>, detail: "Log in with your Cloudflare account. Google/GitHub/Apple SSO works." },
+                    { text: <>Click the blue <strong className="text-foreground">&ldquo;Create Token&rdquo;</strong> button</>, detail: null },
+                    { text: <>Scroll to the bottom and click <strong className="text-foreground">&ldquo;Get started&rdquo;</strong> next to &ldquo;Create Custom Token&rdquo;</>, detail: "Don't use the pre-built templates — they don't have the right permissions." },
+                    { text: <>Set <strong className="text-foreground">Token name</strong> to <code className="bg-muted px-1.5 py-0.5 rounded text-[10px]">TeamPrompt</code></>, detail: null },
+                    { text: <>Under <strong className="text-foreground">Permissions</strong>, set the 3 dropdowns to: <code className="bg-muted px-1.5 py-0.5 rounded text-[10px]">Account</code> → <code className="bg-muted px-1.5 py-0.5 rounded text-[10px]">Zero Trust</code> → <code className="bg-muted px-1.5 py-0.5 rounded text-[10px]">Edit</code></>, detail: "Click the first dropdown → Account. Second → Zero Trust. Third → Edit." },
+                    { text: <>Under <strong className="text-foreground">Account Resources</strong>, select <code className="bg-muted px-1.5 py-0.5 rounded text-[10px]">Include</code> → <code className="bg-muted px-1.5 py-0.5 rounded text-[10px]">All accounts</code></>, detail: null },
+                    { text: <>Click <strong className="text-foreground">&ldquo;Continue to summary&rdquo;</strong> then <strong className="text-foreground">&ldquo;Create Token&rdquo;</strong></>, detail: null },
+                    { text: <>Click the <strong className="text-foreground">copy button</strong> next to the token value</>, detail: "Important: you won't see this token again after leaving the page. Paste it somewhere safe." },
+                  ].map((step, i) => (
+                    <div key={i} className="px-3 py-2.5">
+                      <div className="flex gap-2.5">
+                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-primary text-[9px] font-bold shrink-0 mt-0.5">{i + 1}</span>
+                        <div>
+                          <p className="text-[11px]">{step.text}</p>
+                          {step.detail && <p className="text-[10px] text-muted-foreground mt-0.5">{step.detail}</p>}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="rounded-lg bg-amber-500/5 border border-amber-500/20 p-3">
+                  <p className="text-xs font-semibold text-amber-600 mb-1">Where is my Account ID?</p>
+                  <p className="text-[11px] text-muted-foreground">Go to <a href="https://dash.cloudflare.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">dash.cloudflare.com</a>. Your Account ID is on the right side of the main page — a long string like <code className="bg-muted px-1 py-0.5 rounded text-[10px]">a1b2c3d4e5f6g7h8...</code>. Click it to copy.</p>
+                </div>
+
                 <div className="flex gap-2">
                   <Button size="sm" className="flex-1" onClick={() => setWizardStep(2)}>
-                    I have my token → Next
+                    I have my Account ID and Token
                   </Button>
-                  <Button variant="outline" size="sm" onClick={() => { setShowSetup(false); setWizardStep(1); }}>
+                  <Button variant="ghost" size="sm" onClick={() => { setShowSetup(false); setWizardStep(1); }}>
                     Cancel
                   </Button>
                 </div>
               </div>
             )}
 
-            {/* Step 2: Enter Credentials */}
+            {/* Step 2: Paste Credentials */}
             {wizardStep === 2 && (
               <div className="space-y-3">
-                <p className="text-sm font-semibold">Enter your Cloudflare credentials</p>
+                <p className="text-sm font-semibold">Step 2: Paste your credentials</p>
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground">Account ID</label>
+                  <label className="text-xs font-medium">Account ID</label>
                   <input
                     type="text"
                     value={accountId}
                     onChange={(e) => setAccountId(e.target.value)}
-                    placeholder="e.g. a1b2c3d4e5f6..."
-                    className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+                    placeholder="Paste your Account ID here"
+                    className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm font-mono"
                     autoFocus
                   />
-                  <p className="text-[10px] text-muted-foreground mt-1">Found on your Cloudflare dashboard home page, right sidebar.</p>
+                  <p className="text-[10px] text-muted-foreground mt-1">A 32-character hex string from your Cloudflare dashboard.</p>
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground">API Token</label>
+                  <label className="text-xs font-medium">API Token</label>
                   <input
                     type="password"
                     value={apiToken}
                     onChange={(e) => setApiToken(e.target.value)}
                     placeholder="Paste your API token here"
-                    className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+                    className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm font-mono"
                   />
+                  <p className="text-[10px] text-muted-foreground mt-1">The token you copied in Step 1. Starts with a long string of letters and numbers.</p>
                 </div>
+
+                <div className="rounded-lg bg-muted/50 p-2.5">
+                  <p className="text-[10px] text-muted-foreground"><strong>Common issues:</strong></p>
+                  <ul className="text-[10px] text-muted-foreground mt-1 space-y-0.5 list-disc list-inside">
+                    <li><strong>&ldquo;Invalid credentials&rdquo;</strong> — make sure you selected &ldquo;Zero Trust → Edit&rdquo; permission, not just &ldquo;Read&rdquo;</li>
+                    <li><strong>Token not working</strong> — tokens can only be copied once. If you lost it, create a new one</li>
+                    <li><strong>Account ID wrong</strong> — it&apos;s 32 characters, found on the Cloudflare dashboard home page</li>
+                  </ul>
+                </div>
+
                 <div className="flex gap-2">
                   <Button variant="outline" size="sm" onClick={() => setWizardStep(1)}>
-                    Back
+                    ← Back
                   </Button>
                   <Button size="sm" className="flex-1" onClick={handleConnect} disabled={connecting || !accountId.trim() || !apiToken.trim()}>
-                    {connecting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Verifying...</> : "Connect & Verify"}
+                    {connecting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Verifying connection...</> : "Connect to Cloudflare"}
                   </Button>
                 </div>
               </div>
             )}
 
-            {/* Step 3: Configure (shown briefly, then card switches to connected state) */}
+            {/* Step 3: Success */}
             {wizardStep === 3 && (
-              <div className="space-y-3 text-center py-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10 mx-auto">
-                  <CheckCircle2 className="h-6 w-6 text-emerald-500" />
+              <div className="space-y-4 text-center py-4">
+                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/10 mx-auto">
+                  <CheckCircle2 className="h-7 w-7 text-emerald-500" />
                 </div>
-                <p className="text-sm font-semibold">Connected successfully!</p>
-                <p className="text-xs text-muted-foreground">
-                  Head to <strong>Guardrails → AI Tools</strong> to approve or block specific AI tools. Blocked tools will be enforced at the DNS level across all devices.
-                </p>
+                <div>
+                  <p className="text-sm font-semibold">Connected to Cloudflare Gateway!</p>
+                  <p className="text-xs text-muted-foreground mt-1">Network-level AI tool blocking is now available.</p>
+                </div>
+
+                <div className="rounded-lg bg-muted/50 p-3 text-left space-y-2">
+                  <p className="text-xs font-semibold">What to do next:</p>
+                  <div className="space-y-1.5">
+                    <div className="flex gap-2 text-[11px] text-muted-foreground">
+                      <span className="text-primary font-bold">1.</span>
+                      <span>Go to <a href="/guardrails" className="text-primary hover:underline font-medium">Guardrails → AI Tools</a> to approve or block specific AI tools</span>
+                    </div>
+                    <div className="flex gap-2 text-[11px] text-muted-foreground">
+                      <span className="text-primary font-bold">2.</span>
+                      <span>Install <a href="https://developers.cloudflare.com/cloudflare-one/connections/connect-devices/warp/download-warp/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">Cloudflare WARP</a> on team devices to enforce DNS policies</span>
+                    </div>
+                    <div className="flex gap-2 text-[11px] text-muted-foreground">
+                      <span className="text-primary font-bold">3.</span>
+                      <span>Blocked tools will show a Cloudflare block page explaining which tools are approved</span>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="flex gap-2 justify-center">
                   <Button size="sm" asChild>
-                    <a href="/guardrails">Configure AI Tool Policy</a>
+                    <a href="/guardrails">Set Up AI Tool Policy</a>
                   </Button>
                   <Button variant="outline" size="sm" onClick={() => { setShowSetup(false); setWizardStep(1); }}>
                     Done

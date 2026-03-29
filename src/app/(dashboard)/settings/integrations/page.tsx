@@ -984,33 +984,65 @@ function CloudflareCard() {
                 </div>
 
                 <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-3">
-                  <p className="text-xs font-semibold text-amber-600 mb-1">Why this step matters</p>
+                  <p className="text-xs font-semibold text-amber-600 mb-1">Without this step, nothing is blocked</p>
                   <p className="text-[11px] text-muted-foreground">
-                    The DNS rules you just created only work on devices running <strong>Cloudflare WARP</strong>. Without WARP, your team&apos;s devices use normal DNS and bypass the blocks entirely.
+                    The DNS rules only work on devices running <strong>Cloudflare WARP</strong>. Each team member&apos;s device needs WARP installed and enrolled in your Zero Trust org.
                   </p>
                 </div>
 
+                {/* Admin prerequisite */}
+                <div className="rounded-lg border border-border p-3">
+                  <p className="text-xs font-semibold mb-2">Admin: Complete Zero Trust setup first</p>
+                  <p className="text-[11px] text-muted-foreground mb-2">Before your team can enroll, you need to finish Cloudflare&apos;s device setup:</p>
+                  <ol className="text-[11px] text-muted-foreground space-y-1.5 list-none">
+                    <li className="flex gap-2">
+                      <span className="flex h-4 w-4 items-center justify-center rounded-full bg-primary/10 text-primary text-[8px] font-bold shrink-0 mt-0.5">1</span>
+                      <span>Open <a href="https://one.dash.cloudflare.com/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Cloudflare Zero Trust dashboard</a></span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="flex h-4 w-4 items-center justify-center rounded-full bg-primary/10 text-primary text-[8px] font-bold shrink-0 mt-0.5">2</span>
+                      <span>Complete the <strong>device setup wizard</strong> if prompted (select &ldquo;Both Traffic and DNS&rdquo;, install CA, leave split tunnels as default)</span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="flex h-4 w-4 items-center justify-center rounded-full bg-primary/10 text-primary text-[8px] font-bold shrink-0 mt-0.5">3</span>
+                      <span>Set up <strong>enrollment policy</strong>: Settings → WARP Client → Device enrollment → Add rule → &ldquo;Emails ending in&rdquo; → <code className="bg-muted px-1 py-0.5 rounded text-[10px]">@yourcompany.com</code> → Allow</span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="flex h-4 w-4 items-center justify-center rounded-full bg-primary/10 text-primary text-[8px] font-bold shrink-0 mt-0.5">4</span>
+                      <span>Note your <strong>team name</strong> (Settings → General → Team domain) — your team needs this to enroll</span>
+                    </li>
+                  </ol>
+                </div>
+
+                {/* Deployment options */}
                 <div className="rounded-lg border border-border divide-y divide-border">
                   <div className="p-3">
-                    <p className="text-xs font-semibold mb-1">Option A: Send install link to your team</p>
-                    <p className="text-[11px] text-muted-foreground">Share this link with your team. They install WARP and connect to your Zero Trust org.</p>
-                    <div className="flex gap-2 mt-2">
-                      <Button size="sm" variant="outline" className="h-7 text-xs" asChild>
-                        <a href="https://one.one.one.one/" target="_blank" rel="noopener noreferrer">Download WARP (all platforms) →</a>
-                      </Button>
-                    </div>
+                    <p className="text-xs font-semibold mb-1">Option A: Have each person install WARP</p>
+                    <p className="text-[11px] text-muted-foreground">Send your team these instructions:</p>
+                    <ol className="text-[10px] text-muted-foreground mt-1.5 space-y-1 list-none">
+                      <li>1. Download WARP from <a href="https://one.one.one.one/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">one.one.one.one</a></li>
+                      <li>2. Open WARP → Settings → Account → &ldquo;Login to Cloudflare Zero Trust&rdquo;</li>
+                      <li>3. Enter team name: <strong>[your team name]</strong></li>
+                      <li>4. Authenticate with company email</li>
+                    </ol>
                   </div>
                   <div className="p-3">
                     <p className="text-xs font-semibold mb-1">Option B: Push via MDM (managed devices)</p>
-                    <p className="text-[11px] text-muted-foreground">For Intune, JAMF, or Google Admin Console — deploy WARP silently with auto-enrollment.</p>
+                    <p className="text-[11px] text-muted-foreground">For Intune, JAMF, or Google Admin — deploy silently with auto-enrollment.</p>
                     <Button size="sm" variant="outline" className="mt-2 h-7 text-xs" asChild>
                       <a href="https://developers.cloudflare.com/cloudflare-one/connections/connect-devices/warp/deployment/mdm-deployment/" target="_blank" rel="noopener noreferrer">MDM setup guide →</a>
                     </Button>
                   </div>
                   <div className="p-3">
-                    <p className="text-xs font-semibold mb-1">Option C: Office network only (no install)</p>
-                    <p className="text-[11px] text-muted-foreground">Set your office router&apos;s DNS to your Cloudflare Gateway IP. Covers everyone on the network — but not remote workers.</p>
+                    <p className="text-xs font-semibold mb-1">Option C: Office network DNS (no install needed)</p>
+                    <p className="text-[11px] text-muted-foreground">Set your office router DNS to your Cloudflare Gateway IP. Protects everyone on the network. Remote workers need WARP.</p>
                   </div>
+                </div>
+
+                <div className="rounded-lg bg-muted/50 p-2.5">
+                  <p className="text-[10px] text-muted-foreground">
+                    <strong>Need help?</strong> See our <a href="/help/security-rules#how-do-i-set-up-cloudflare-gateway-complete-guide" className="text-primary hover:underline">complete Cloudflare setup guide</a> or <a href="https://developers.cloudflare.com/cloudflare-one/connections/connect-devices/warp/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Cloudflare&apos;s WARP docs</a>.
+                  </p>
                 </div>
 
                 <Button size="sm" className="w-full" onClick={() => { setShowSetup(false); setWizardStep(1); fetchStatus(); }}>

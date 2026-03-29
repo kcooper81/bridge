@@ -789,46 +789,7 @@ function CloudflareCard() {
           Block unapproved AI tools at the DNS level. Covers browser, native apps, and mobile — network-wide enforcement.
         </p>
 
-        {connected ? (
-          <div className="space-y-3">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Block unapproved AI tools at DNS</p>
-            <div className="max-h-48 overflow-y-auto space-y-1.5">
-              {tools.map((tool) => (
-                <label
-                  key={tool.id}
-                  className="flex items-center justify-between rounded-lg border border-border px-3 py-2 cursor-pointer hover:bg-muted/50 transition-colors"
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium">{tool.name}</span>
-                    <span className="text-[10px] text-muted-foreground capitalize">{tool.category}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {tool.blocked && (
-                      <span className="text-[10px] font-bold text-red-500 uppercase">Blocked</span>
-                    )}
-                    <input
-                      type="checkbox"
-                      checked={tool.blocked}
-                      onChange={() => toggleTool(tool.id)}
-                      disabled={syncing}
-                      className="rounded"
-                    />
-                  </div>
-                </label>
-              ))}
-            </div>
-            {syncing && (
-              <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-                <Loader2 className="h-3 w-3 animate-spin" />
-                Syncing with Cloudflare...
-              </p>
-            )}
-            <Button variant="outline" size="sm" className="w-full text-destructive hover:text-destructive" onClick={handleDisconnect}>
-              <Unplug className="mr-2 h-4 w-4" />
-              Disconnect
-            </Button>
-          </div>
-        ) : showSetup ? (
+        {showSetup ? (
           <div className="space-y-4">
             {/* Wizard progress */}
             <div className="flex items-center gap-1 mb-2">
@@ -1057,6 +1018,45 @@ function CloudflareCard() {
                 </Button>
               </div>
             )}
+          </div>
+        ) : connected ? (
+          <div className="space-y-3">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Block unapproved AI tools at DNS</p>
+            <div className="max-h-48 overflow-y-auto space-y-1.5">
+              {tools.map((tool) => (
+                <label
+                  key={tool.id}
+                  className="flex items-center justify-between rounded-lg border border-border px-3 py-2 cursor-pointer hover:bg-muted/50 transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium">{tool.name}</span>
+                    <span className="text-[10px] text-muted-foreground capitalize">{tool.category}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {tool.blocked && (
+                      <span className="text-[10px] font-bold text-red-500 uppercase">Blocked</span>
+                    )}
+                    <input
+                      type="checkbox"
+                      checked={tool.blocked}
+                      onChange={() => toggleTool(tool.id)}
+                      disabled={syncing}
+                      className="rounded"
+                    />
+                  </div>
+                </label>
+              ))}
+            </div>
+            {syncing && (
+              <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                <Loader2 className="h-3 w-3 animate-spin" />
+                Syncing with Cloudflare...
+              </p>
+            )}
+            <Button variant="outline" size="sm" className="w-full text-destructive hover:text-destructive" onClick={handleDisconnect}>
+              <Unplug className="mr-2 h-4 w-4" />
+              Disconnect
+            </Button>
           </div>
         ) : (
           <Button variant="outline" size="sm" className="w-full" onClick={() => setShowSetup(true)}>

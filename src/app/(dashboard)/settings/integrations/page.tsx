@@ -788,6 +788,15 @@ function CloudflareCard() {
 
         {connected ? (
           <div className="space-y-3">
+            {/* Next steps guidance */}
+            <div className="rounded-lg bg-emerald-500/5 border border-emerald-500/20 p-3 space-y-1.5">
+              <p className="text-xs font-semibold text-emerald-600">Connected! Next steps:</p>
+              <ol className="text-[11px] text-muted-foreground space-y-1 list-decimal list-inside">
+                <li>Check the boxes below to block unapproved AI tools at the DNS level</li>
+                <li>Go to <a href="/guardrails" className="text-primary hover:underline">Guardrails → AI Tools</a> tab for unified policy management</li>
+                <li>Deploy <a href="https://developers.cloudflare.com/cloudflare-one/connections/connect-devices/warp/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Cloudflare WARP</a> on team devices for network-wide enforcement</li>
+              </ol>
+            </div>
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">AI Tools</p>
             <div className="max-h-48 overflow-y-auto space-y-1.5">
               {tools.map((tool) => (

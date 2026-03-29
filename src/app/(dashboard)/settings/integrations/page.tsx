@@ -683,7 +683,7 @@ function CloudflareCard() {
       if (res.ok) {
         toast.success("Cloudflare Gateway connected");
         setWizardStep(3);
-        fetchStatus();
+        // Don't fetchStatus here — it would set connected=true and skip wizard step 3
       } else {
         const data = await res.json();
         toast.error(data.error || "Failed to connect");
@@ -790,16 +790,7 @@ function CloudflareCard() {
 
         {connected ? (
           <div className="space-y-3">
-            {/* Next steps guidance */}
-            <div className="rounded-lg bg-emerald-500/5 border border-emerald-500/20 p-3 space-y-1.5">
-              <p className="text-xs font-semibold text-emerald-600">Connected! Next steps:</p>
-              <ol className="text-[11px] text-muted-foreground space-y-1 list-decimal list-inside">
-                <li>Check the boxes below to block unapproved AI tools at the DNS level</li>
-                <li>Go to <a href="/guardrails" className="text-primary hover:underline">Guardrails → AI Tools</a> tab for unified policy management</li>
-                <li>Deploy <a href="https://developers.cloudflare.com/cloudflare-one/connections/connect-devices/warp/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Cloudflare WARP</a> on team devices for network-wide enforcement</li>
-              </ol>
-            </div>
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">AI Tools</p>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Block unapproved AI tools at DNS</p>
             <div className="max-h-48 overflow-y-auto space-y-1.5">
               {tools.map((tool) => (
                 <label
@@ -1008,7 +999,7 @@ function CloudflareCard() {
                   </div>
                 </div>
 
-                <Button variant="outline" size="sm" className="w-full" onClick={() => { setShowSetup(false); setWizardStep(1); }}>
+                <Button variant="outline" size="sm" className="w-full" onClick={() => { setShowSetup(false); setWizardStep(1); fetchStatus(); }}>
                   I&apos;ll finish setup later
                 </Button>
               </div>

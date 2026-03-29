@@ -15,7 +15,7 @@ import {
   ShieldAlert,
   ShieldCheck,
 } from "lucide-react";
-import { getAuditData, type AuditData } from "@/lib/audit-api";
+import { getAuditData, type AuditData, type AuditFilters } from "@/lib/audit-api";
 import { ChartCard } from "@/components/charts/chart-card";
 import { AreaChart } from "@/components/charts/area-chart";
 import { DonutChart } from "@/components/charts/donut-chart";
@@ -57,10 +57,25 @@ export default function AuditPage() {
   const [loading, setLoading] = useState(true);
   const [trendRange, setTrendRange] = useState<"30d" | "90d">("30d");
 
-  const refresh = useCallback(async () => {
+  // Filters
+  const [dateRange, setDateRange] = useState<AuditFilters["dateRange"]>("30d");
+  const [customFrom, setCustomFrom] = useState("");
+  const [customTo, setCustomTo] = useState("");
+  const [filterAction, setFilterAction] = useState<string>("all");
+  const [filterCategory, setFilterCategory] = useState<string>("all");
+
+  const filters: AuditFilters = {
+    dateRange,
+    dateFrom: dateRange === "custom" ? customFrom : undefined,
+    dateTo: dateRange === "custom" ? customTo : undefined,
+    action: filterAction as AuditFilters["action"],
+    category: filterCategory === "all" ? undefined : filterCategory,
+  };
+
+  const refresh = useCallback(async (f?: AuditFilters) => {
     setLoading(true);
     try {
-      const result = await getAuditData();
+      const result = await getAuditData(f);
       setData(result);
     } catch {
       // Non-critical
@@ -71,8 +86,9 @@ export default function AuditPage() {
 
   useEffect(() => {
     if (!org || noOrg) return;
-    refresh();
-  }, [org, noOrg, refresh]);
+    refresh(filters);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [org, noOrg, dateRange, customFrom, customTo, filterAction, filterCategory]);
 
   // Role gate
   const isAdminOrManager = currentUserRole === "admin" || currentUserRole === "manager";
@@ -139,7 +155,7 @@ export default function AuditPage() {
         description="Security insights, violation analytics, and compliance reporting"
         actions={
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => exportAuditCSV(data)}>
+            <Button variant="outline" size="sm" onClick={() => exportAuditCSV(data, dateRange)}>
               <Download className="mr-2 h-4 w-4" />
               CSV
             </Button>
@@ -150,6 +166,105 @@ export default function AuditPage() {
           </div>
         }
       />
+
+      {/* ━━━ Filter Toolbar ━━━ */}
+      <Card className="p-4 mb-6">
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Date range */}
+          <div className="flex items-center gap-1 rounded-lg border border-border p-0.5">
+            {(["7d", "30d", "90d"] as const).map((r) => (
+              <button
+                key={r}
+                onClick={() => setDateRange(r)}
+                className={cn(
+                  "px-3 py-1.5 text-xs font-medium rounded-md transition-colors",
+                  dateRange === r ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {r === "7d" ? "7 days" : r === "30d" ? "30 days" : "90 days"}
+              </button>
+            ))}
+            <button
+              onClick={() => setDateRange("custom")}
+              className={cn(
+                "px-3 py-1.5 text-xs font-medium rounded-md transition-colors",
+                dateRange === "custom" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              Custom
+            </button>
+          </div>
+
+          {/* Custom date inputs */}
+          {dateRange === "custom" && (
+            <div className="flex items-center gap-2">
+              <input
+                type="date"
+                value={customFrom}
+                onChange={(e) => setCustomFrom(e.target.value)}
+                className="rounded-md border border-border bg-background px-2 py-1.5 text-xs"
+              />
+              <span className="text-xs text-muted-foreground">to</span>
+              <input
+                type="date"
+                value={customTo}
+                onChange={(e) => setCustomTo(e.target.value)}
+                className="rounded-md border border-border bg-background px-2 py-1.5 text-xs"
+              />
+            </div>
+          )}
+
+          <div className="w-px h-6 bg-border hidden sm:block" />
+
+          {/* Action filter */}
+          <select
+            value={filterAction}
+            onChange={(e) => setFilterAction(e.target.value)}
+            className="rounded-md border border-border bg-background px-2 py-1.5 text-xs"
+          >
+            <option value="all">All actions</option>
+            <option value="blocked">Blocked only</option>
+            <option value="warned">Warned only</option>
+            <option value="auto_redacted">Auto-redacted</option>
+          </select>
+
+          {/* Category filter */}
+          <select
+            value={filterCategory}
+            onChange={(e) => setFilterCategory(e.target.value)}
+            className="rounded-md border border-border bg-background px-2 py-1.5 text-xs"
+          >
+            <option value="all">All categories</option>
+            <option value="pii">PII</option>
+            <option value="credentials">Credentials</option>
+            <option value="api_keys">API Keys</option>
+            <option value="secrets">Secrets</option>
+            <option value="health">Health / PHI</option>
+            <option value="financial">Financial</option>
+            <option value="internal">Internal</option>
+            <option value="custom">Custom</option>
+          </select>
+
+          {/* Clear */}
+          {(dateRange !== "30d" || filterAction !== "all" || filterCategory !== "all") && (
+            <button
+              onClick={() => { setDateRange("30d"); setFilterAction("all"); setFilterCategory("all"); setCustomFrom(""); setCustomTo(""); }}
+              className="text-xs text-primary hover:underline"
+            >
+              Clear filters
+            </button>
+          )}
+
+          <div className="flex-1" />
+
+          {/* Active filter count */}
+          {(dateRange !== "30d" || filterAction !== "all" || filterCategory !== "all") && (
+            <Badge variant="secondary" className="text-[10px]">
+              {[dateRange !== "30d", filterAction !== "all", filterCategory !== "all"].filter(Boolean).length} filter{[dateRange !== "30d", filterAction !== "all", filterCategory !== "all"].filter(Boolean).length !== 1 ? "s" : ""} active
+            </Badge>
+          )}
+        </div>
+      </Card>
 
       {/* ━━━ Hero Stats ━━━ */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
@@ -444,8 +559,10 @@ function StatCard({
 
 // ── Export ──
 
-function exportAuditCSV(data: AuditData) {
+function exportAuditCSV(data: AuditData, period: string = "30d") {
   const rows = [
+    ["TeamPrompt Audit Report", new Date().toISOString().split("T")[0], `Period: ${period}`],
+    [],
     ["Metric", "Value"],
     ["Total Interactions", data.totalInteractions.toString()],
     ["Violations Blocked", data.totalViolationsBlocked.toString()],

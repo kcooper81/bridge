@@ -79,14 +79,37 @@ const CATEGORY_COLORS: Record<string, string> = {
   other: "#6b7280",
 };
 
+export interface AuditFilters {
+  dateRange: "7d" | "30d" | "90d" | "custom";
+  dateFrom?: string;
+  dateTo?: string;
+  search?: string;
+  source?: "all" | "extension" | "cloudflare";
+  action?: "all" | "blocked" | "warned" | "auto_redacted";
+  aiTool?: string;
+  category?: string;
+}
+
 // ── Main Query ──
 
-export async function getAuditData(): Promise<AuditData | null> {
+export async function getAuditData(filters?: AuditFilters): Promise<AuditData | null> {
   const orgId = await getOrgId();
   if (!orgId) return null;
 
   const db = supabase();
-  const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
+
+  // Calculate date range from filters
+  const range = filters?.dateRange || "90d";
+  let dateFrom: string;
+  if (range === "custom" && filters?.dateFrom) {
+    dateFrom = new Date(filters.dateFrom).toISOString();
+  } else {
+    const days = range === "7d" ? 7 : range === "30d" ? 30 : 90;
+    dateFrom = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+  }
+  const dateTo = range === "custom" && filters?.dateTo
+    ? new Date(filters.dateTo + "T23:59:59").toISOString()
+    : new Date().toISOString();
 
   // Parallel queries — each wrapped in try/catch for tables that may not exist
   type QResult = { data: unknown[] | null; error: unknown };
@@ -107,7 +130,7 @@ export async function getAuditData(): Promise<AuditData | null> {
         .from("security_violations")
         .select("id, action_taken, created_at, user_id, rule_id, detection_type")
         .eq("org_id", orgId)
-        .gte("created_at", ninetyDaysAgo)
+        .gte("created_at", dateFrom).lte("created_at", dateTo)
         .order("created_at", { ascending: false })
         .limit(5000)
     ),
@@ -116,7 +139,7 @@ export async function getAuditData(): Promise<AuditData | null> {
         .from("conversation_logs")
         .select("id, ai_tool, user_id, action, risk_score, created_at")
         .eq("org_id", orgId)
-        .gte("created_at", ninetyDaysAgo)
+        .gte("created_at", dateFrom).lte("created_at", dateTo)
         .order("created_at", { ascending: false })
         .limit(5000)
     ),
@@ -150,7 +173,7 @@ export async function getAuditData(): Promise<AuditData | null> {
         .from("usage_events")
         .select("created_at")
         .eq("org_id", orgId)
-        .gte("created_at", ninetyDaysAgo)
+        .gte("created_at", dateFrom).lte("created_at", dateTo)
         .order("created_at", { ascending: false })
         .limit(5000)
     ),

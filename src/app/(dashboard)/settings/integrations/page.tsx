@@ -955,43 +955,62 @@ function CloudflareCard() {
               </div>
             )}
 
-            {/* Step 3: Success */}
+            {/* Step 3: Setup Complete — Required Next Steps */}
             {wizardStep === 3 && (
-              <div className="space-y-4 text-center py-4">
-                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/10 mx-auto">
-                  <CheckCircle2 className="h-7 w-7 text-emerald-500" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold">Connected to Cloudflare Gateway!</p>
-                  <p className="text-xs text-muted-foreground mt-1">Network-level AI tool blocking is now available.</p>
+              <div className="space-y-4">
+                <div className="text-center py-2">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10 mx-auto mb-2">
+                    <CheckCircle2 className="h-6 w-6 text-emerald-500" />
+                  </div>
+                  <p className="text-sm font-semibold">API connected! Now finish setup:</p>
                 </div>
 
-                <div className="rounded-lg bg-muted/50 p-3 text-left space-y-2">
-                  <p className="text-xs font-semibold">What to do next:</p>
-                  <div className="space-y-1.5">
-                    <div className="flex gap-2 text-[11px] text-muted-foreground">
-                      <span className="text-primary font-bold">1.</span>
-                      <span>Go to <a href="/guardrails" className="text-primary hover:underline font-medium">Guardrails → AI Tools</a> to approve or block specific AI tools</span>
+                <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-3">
+                  <p className="text-xs font-semibold text-amber-600 mb-2">Important: Two more steps required for blocking to work</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    Connecting the API alone doesn&apos;t block anything yet. You need to (1) choose which tools to block, and (2) install Cloudflare WARP on your team&apos;s devices.
+                  </p>
+                </div>
+
+                <div className="rounded-lg border border-border divide-y divide-border">
+                  <div className="p-3">
+                    <div className="flex gap-2.5">
+                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-bold shrink-0">1</span>
+                      <div>
+                        <p className="text-xs font-semibold">Set up your AI Tool Policy</p>
+                        <p className="text-[11px] text-muted-foreground mt-0.5">Choose which AI tools to approve and which to block. Blocked tools will be enforced at the DNS level.</p>
+                        <Button size="sm" className="mt-2 h-7 text-xs" asChild>
+                          <a href="/guardrails">Go to Guardrails → AI Tools</a>
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex gap-2 text-[11px] text-muted-foreground">
-                      <span className="text-primary font-bold">2.</span>
-                      <span>Install <a href="https://developers.cloudflare.com/cloudflare-one/connections/connect-devices/warp/download-warp/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">Cloudflare WARP</a> on team devices to enforce DNS policies</span>
+                  </div>
+                  <div className="p-3">
+                    <div className="flex gap-2.5">
+                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-bold shrink-0">2</span>
+                      <div>
+                        <p className="text-xs font-semibold">Install Cloudflare WARP on team devices</p>
+                        <p className="text-[11px] text-muted-foreground mt-0.5">WARP routes your team&apos;s DNS through Cloudflare Gateway. Without it, the DNS rules won&apos;t be enforced. Download for Windows, macOS, iOS, Android, and Linux.</p>
+                        <Button size="sm" variant="outline" className="mt-2 h-7 text-xs" asChild>
+                          <a href="https://developers.cloudflare.com/cloudflare-one/connections/connect-devices/warp/download-warp/" target="_blank" rel="noopener noreferrer">Download WARP →</a>
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex gap-2 text-[11px] text-muted-foreground">
-                      <span className="text-primary font-bold">3.</span>
-                      <span>Blocked tools will show a Cloudflare block page explaining which tools are approved</span>
+                  </div>
+                  <div className="p-3">
+                    <div className="flex gap-2.5">
+                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-muted text-muted-foreground text-[10px] font-bold shrink-0">3</span>
+                      <div>
+                        <p className="text-xs font-semibold">Enroll devices in your Zero Trust org</p>
+                        <p className="text-[11px] text-muted-foreground mt-0.5">After installing WARP, team members open the app and connect to your Cloudflare Zero Trust organization. For managed devices, use <a href="https://developers.cloudflare.com/cloudflare-one/connections/connect-devices/warp/deployment/mdm-deployment/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">MDM deployment</a> for automatic enrollment.</p>
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                <div className="flex gap-2 justify-center">
-                  <Button size="sm" asChild>
-                    <a href="/guardrails">Set Up AI Tool Policy</a>
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => { setShowSetup(false); setWizardStep(1); }}>
-                    Done
-                  </Button>
-                </div>
+                <Button variant="outline" size="sm" className="w-full" onClick={() => { setShowSetup(false); setWizardStep(1); }}>
+                  I&apos;ll finish setup later
+                </Button>
               </div>
             )}
           </div>

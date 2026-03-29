@@ -41,7 +41,7 @@ export const dataProtectionPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "15", label: "Built-in DLP rules" },
+      { value: "40+", label: "Detection rules" },
       { value: "5", label: "AI tools supported" },
       { value: "< 2 min", label: "Setup time" },
     ],
@@ -150,7 +150,7 @@ export const dataProtectionPages: SeoPageData[] = [
     },
     stats: [
       { value: "31", label: "Total available detection rules" },
-      { value: "6", label: "One-click compliance packs" },
+      { value: "19", label: "Compliance frameworks" },
       { value: "5", label: "AI tools supported" },
     ],
     faqs: [
@@ -203,8 +203,8 @@ export const dataProtectionPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "6", label: "One-click compliance packs" },
-      { value: "15", label: "Built-in DLP rules" },
+      { value: "19", label: "Compliance frameworks" },
+      { value: "40+", label: "Detection rules" },
       { value: "< 2 min", label: "Setup time" },
     ],
     faqs: [
@@ -367,9 +367,9 @@ export const dataProtectionPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "15", label: "Built-in DLP rules" },
+      { value: "40+", label: "Detection rules" },
       { value: "5", label: "AI tools supported" },
-      { value: "6", label: "One-click compliance packs" },
+      { value: "19", label: "Compliance frameworks" },
     ],
     faqs: [
       { question: "Can developers still use AI for generic coding help?", answer: "Absolutely. TeamPrompt only blocks prompts that contain proprietary code. Developers can freely ask AI tools about public libraries, general programming concepts, and open-source code." },
@@ -475,8 +475,8 @@ export const dataProtectionPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "6", label: "One-click compliance packs" },
-      { value: "15", label: "Built-in DLP rules" },
+      { value: "19", label: "Compliance frameworks" },
+      { value: "40+", label: "Detection rules" },
       { value: "5", label: "AI tools supported" },
     ],
     faqs: [
@@ -530,7 +530,7 @@ export const dataProtectionPages: SeoPageData[] = [
     },
     stats: [
       { value: "31", label: "Total available detection rules" },
-      { value: "6", label: "One-click compliance packs" },
+      { value: "19", label: "Compliance frameworks" },
       { value: "< 2 min", label: "Setup time" },
     ],
     faqs: [
@@ -637,9 +637,9 @@ export const dataProtectionPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "15", label: "Built-in DLP rules" },
+      { value: "40+", label: "Detection rules" },
       { value: "31", label: "Total available detection rules" },
-      { value: "6", label: "One-click compliance packs" },
+      { value: "19", label: "Compliance frameworks" },
     ],
     faqs: [
       { question: "Can AI disclosure destroy trade secret protection?", answer: "Yes. Under the Defend Trade Secrets Act and similar laws, a trade secret loses legal protection if the owner fails to take reasonable measures to maintain secrecy. Submitting trade secrets to AI tools could be considered a failure to protect." },
@@ -746,7 +746,7 @@ export const dataProtectionPages: SeoPageData[] = [
     },
     stats: [
       { value: "31", label: "Total available detection rules" },
-      { value: "6", label: "One-click compliance packs" },
+      { value: "19", label: "Compliance frameworks" },
       { value: "$9/mo", label: "Starting price" },
     ],
     faqs: [
@@ -799,7 +799,7 @@ export const dataProtectionPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "15", label: "Built-in DLP rules" },
+      { value: "40+", label: "Detection rules" },
       { value: "16", label: "Smart detection patterns" },
       { value: "< 2 min", label: "Setup time" },
     ],
@@ -909,8 +909,8 @@ export const dataProtectionPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "6", label: "One-click compliance packs" },
-      { value: "15", label: "Built-in DLP rules" },
+      { value: "19", label: "Compliance frameworks" },
+      { value: "40+", label: "Detection rules" },
       { value: "16", label: "Smart detection patterns" },
     ],
     faqs: [
@@ -1017,7 +1017,7 @@ export const dataProtectionPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "6", label: "One-click compliance packs" },
+      { value: "19", label: "Compliance frameworks" },
       { value: "31", label: "Total available detection rules" },
       { value: "5", label: "AI tools supported" },
     ],
@@ -1071,7 +1071,7 @@ export const dataProtectionPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "15", label: "Built-in DLP rules" },
+      { value: "40+", label: "Detection rules" },
       { value: "< 2 min", label: "Setup time" },
       { value: "16", label: "Smart detection patterns" },
     ],
@@ -1126,7 +1126,7 @@ export const dataProtectionPages: SeoPageData[] = [
     },
     stats: [
       { value: "31", label: "Total available detection rules" },
-      { value: "6", label: "One-click compliance packs" },
+      { value: "19", label: "Compliance frameworks" },
       { value: "2-click", label: "From sidebar to AI tool" },
     ],
     faqs: [
@@ -1181,7 +1181,7 @@ export const dataProtectionPages: SeoPageData[] = [
     stats: [
       { value: "< 2 min", label: "Setup time" },
       { value: "5", label: "AI tools supported" },
-      { value: "15", label: "Built-in DLP rules" },
+      { value: "40+", label: "Detection rules" },
     ],
     faqs: [
       { question: "Why is browser-level DLP better than network-based DLP?", answer: "Network-based DLP cannot inspect encrypted HTTPS traffic without SSL interception, which breaks many applications. Browser-level DLP scans content before encryption, at the point of entry, catching data that network tools miss entirely." },
@@ -1287,8 +1287,8 @@ export const dataProtectionPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "6", label: "One-click compliance packs" },
-      { value: "15", label: "Built-in DLP rules" },
+      { value: "19", label: "Compliance frameworks" },
+      { value: "40+", label: "Detection rules" },
       { value: "25", label: "Free prompts/month" },
     ],
     faqs: [

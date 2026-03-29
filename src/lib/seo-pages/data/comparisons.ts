@@ -40,22 +40,25 @@ export const comparisonPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "15", label: "Built-in DLP rules" },
+      { value: "40+", label: "Detection rules" },
+      { value: "19", label: "Compliance frameworks" },
       { value: "5", label: "AI tools supported" },
-      { value: "2-click", label: "From sidebar to AI tool" },
     ],
     sections: [
       {
         type: "comparison-table",
         heading: "Feature-by-feature comparison",
         content: {
-          headers: ["Feature", "TeamPrompt", "Notion"],
+          headers: ["TeamPrompt", "Notion"],
           rows: [
-            { label: "DLP scanning", values: ["15 built-in rules + 16 smart patterns", "Not available"] },
-            { label: "Compliance packs", values: ["6 one-click packs (HIPAA, GDPR, etc.)", "Not available"] },
+            { label: "DLP scanning", values: ["40+ rules + LLM classification", "Not available"] },
+            { label: "Compliance packs", values: ["19 frameworks (HIPAA, SOC 2, GDPR, etc.)", "Not available"] },
+            { label: "Network-level blocking", values: ["Cloudflare Gateway DNS blocking", "Not available"] },
             { label: "Browser extension", values: ["Inserts prompts into 5 AI tools", "Not available"] },
-            { label: "Audit trail", values: ["Full prompt insertion logging", "Page view history only"] },
+            { label: "Audit trail", values: ["Full activity log + Sankey diagrams + CSV/PDF export", "Page view history only"] },
             { label: "AI tool integration", values: ["ChatGPT, Claude, Gemini, Copilot, Perplexity", "Notion AI only"] },
+            { label: "Auto-redaction", values: ["Replace sensitive data with [PLACEHOLDERS]", "Not available"] },
+            { label: "Approval workflows", values: ["Manager review before team use", "Not available"] },
           ],
         },
       },
@@ -219,7 +222,7 @@ export const comparisonPages: SeoPageData[] = [
     },
     stats: [
       { value: "5", label: "AI tools supported" },
-      { value: "6", label: "One-click compliance packs" },
+      { value: "19", label: "Compliance frameworks" },
       { value: "31", label: "Total available detection rules" },
     ],
     sections: [
@@ -288,7 +291,7 @@ For teams that need cross-platform flexibility, data protection, and visibility 
     },
     stats: [
       { value: "6", label: "Compliance packs" },
-      { value: "15", label: "Built-in DLP rules" },
+      { value: "40+", label: "Detection rules" },
       { value: "< 2 min", label: "Setup time" },
     ],
     sections: [
@@ -489,7 +492,7 @@ For teams that need cross-platform flexibility, data protection, and visibility 
     },
     stats: [
       { value: "< 2 min", label: "Setup time" },
-      { value: "15", label: "Built-in DLP rules" },
+      { value: "40+", label: "Detection rules" },
       { value: "5", label: "AI tools supported" },
     ],
     faqs: [
@@ -924,7 +927,7 @@ For teams that need cross-platform flexibility, data protection, and visibility 
     stats: [
       { value: "2-click", label: "From sidebar to AI tool" },
       { value: "31", label: "Total available detection rules" },
-      { value: "6", label: "One-click compliance packs" },
+      { value: "19", label: "Compliance frameworks" },
     ],
     faqs: [
       { question: "Can I migrate prompts from Slite to TeamPrompt?", answer: "Yes. Copy your prompt text from Slite and paste it into TeamPrompt. Each prompt becomes a searchable, insertable entry with template variable support and DLP scanning." },
@@ -1078,7 +1081,7 @@ For teams that need cross-platform flexibility, data protection, and visibility 
       ],
     },
     stats: [
-      { value: "15", label: "Built-in DLP rules" },
+      { value: "40+", label: "Detection rules" },
       { value: "< 2 min", label: "Setup time" },
       { value: "25", label: "Free prompts/month" },
     ],
@@ -1182,7 +1185,7 @@ For teams that need cross-platform flexibility, data protection, and visibility 
       ],
     },
     stats: [
-      { value: "6", label: "One-click compliance packs" },
+      { value: "19", label: "Compliance frameworks" },
       { value: "16", label: "Smart detection patterns" },
       { value: "< 2 min", label: "Setup time" },
     ],
@@ -2486,7 +2489,7 @@ For teams that need cross-platform flexibility, data protection, and visibility 
       ],
     },
     stats: [
-      { value: "15", label: "Built-in DLP rules" },
+      { value: "40+", label: "Detection rules" },
       { value: "5", label: "AI tools supported" },
       { value: "$9/mo", label: "Starting price" },
     ],
@@ -2539,7 +2542,7 @@ For teams that need cross-platform flexibility, data protection, and visibility 
     },
     stats: [
       { value: "31", label: "Total available detection rules" },
-      { value: "6", label: "One-click compliance packs" },
+      { value: "19", label: "Compliance frameworks" },
       { value: "25", label: "Free prompts/month" },
     ],
     faqs: [

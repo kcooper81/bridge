@@ -134,8 +134,8 @@ export const useCasePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "15", label: "Built-in DLP rules" },
-      { value: "6", label: "One-click compliance packs" },
+      { value: "40+", label: "Detection rules" },
+      { value: "19", label: "Compliance frameworks" },
       { value: "< 2 min", label: "Setup time" },
     ],
     sections: [
@@ -191,7 +191,7 @@ export const useCasePages: SeoPageData[] = [
     },
     stats: [
       { value: "31", label: "Total available detection rules" },
-      { value: "6", label: "One-click compliance packs" },
+      { value: "19", label: "Compliance frameworks" },
       { value: "$9/mo", label: "Starting price" },
     ],
     sections: [
@@ -201,7 +201,7 @@ export const useCasePages: SeoPageData[] = [
         content: {
           persona: "Nina, CISO",
           setup: "The board asks Nina for evidence that AI tools aren't leaking sensitive company data. Employees across every department use ChatGPT, Claude, and Gemini daily — but there's no record of what data goes in.",
-          trigger: "Nina installs TeamPrompt and activates all 6 compliance packs (HIPAA, GDPR, PCI-DSS, CCPA, SOC 2, and PII). Every AI interaction is now scanned against 31 detection rules before data reaches any AI tool.",
+          trigger: "Nina installs TeamPrompt and activates all 19 compliance packs (HIPAA, GDPR, PCI-DSS, CCPA, SOC 2, and PII). Every AI interaction is now scanned against 31 detection rules before data reaches any AI tool.",
           resolution: "Nina generates an audit report showing every AI interaction across the organization with DLP status — blocked, sanitized, or clean. She presents the report to the board as evidence of AI governance.",
         },
       },
@@ -279,7 +279,7 @@ export const useCasePages: SeoPageData[] = [
       headline: "AI data loss prevention that works in real-time",
       subtitle:
         "Scan every outbound prompt for sensitive data. Auto-sanitize with safe placeholders. Deploy compliance packs for HIPAA, GDPR, PCI-DSS, CCPA, SOC 2, and PII.",
-      badges: ["Real-time scanning", "Auto-sanitization", "6 compliance packs"],
+      badges: ["Real-time scanning", "Auto-sanitization", "19 compliance packs"],
     },
     features: {
       sectionLabel: "DLP",
@@ -305,7 +305,7 @@ export const useCasePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "6", label: "One-click compliance packs" },
+      { value: "19", label: "Compliance frameworks" },
       { value: "16", label: "Smart detection patterns" },
       { value: "5", label: "AI tools supported" },
     ],
@@ -634,7 +634,7 @@ export const useCasePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "15", label: "Built-in DLP rules" },
+      { value: "40+", label: "Detection rules" },
       { value: "25", label: "Free prompts/month" },
       { value: "5", label: "AI tools supported" },
     ],
@@ -743,7 +743,7 @@ export const useCasePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "6", label: "One-click compliance packs" },
+      { value: "19", label: "Compliance frameworks" },
       { value: "31", label: "Total available detection rules" },
       { value: "$9/mo", label: "Starting price" },
     ],

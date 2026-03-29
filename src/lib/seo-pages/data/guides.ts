@@ -40,7 +40,7 @@ export const guidePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "15", label: "Built-in DLP rules" },
+      { value: "40+", label: "Detection rules" },
       { value: "5", label: "AI tools supported" },
       { value: "< 2 min", label: "Setup time" },
     ],
@@ -206,8 +206,8 @@ export const guidePages: SeoPageData[] = [
     },
     stats: [
       { value: "31", label: "Total available detection rules" },
-      { value: "6", label: "One-click compliance packs" },
-      { value: "15", label: "Built-in DLP rules" },
+      { value: "19", label: "Compliance frameworks" },
+      { value: "40+", label: "Detection rules" },
     ],
     faqs: [
       { question: "Where should we start with AI governance?", answer: "Start with three things: an acceptable use policy, a DLP guardrail on your most-used AI tools, and basic usage logging. TeamPrompt provides all three out of the box, so you can be operational in a single afternoon." },
@@ -261,8 +261,8 @@ export const guidePages: SeoPageData[] = [
     },
     stats: [
       { value: "16", label: "Smart detection patterns" },
-      { value: "15", label: "Built-in DLP rules" },
-      { value: "6", label: "One-click compliance packs" },
+      { value: "40+", label: "Detection rules" },
+      { value: "19", label: "Compliance frameworks" },
     ],
     faqs: [
       { question: "What types of data should we scan for?", answer: "At minimum, scan for Social Security numbers, credit card numbers, API keys, and personal health information. TeamPrompt's compliance packs add framework-specific patterns for HIPAA, GDPR, PCI-DSS, and more." },
@@ -426,7 +426,7 @@ export const guidePages: SeoPageData[] = [
     stats: [
       { value: "31", label: "Total available detection rules" },
       { value: "2-click", label: "From sidebar to AI tool" },
-      { value: "6", label: "One-click compliance packs" },
+      { value: "19", label: "Compliance frameworks" },
     ],
     faqs: [
       { question: "How is prompt version control different from document history?", answer: "Document history stores snapshots. Prompt version control adds side-by-side diffs, author attribution, rollback, and integration with usage analytics — purpose-built for the iterative nature of prompt development." },
@@ -480,8 +480,8 @@ export const guidePages: SeoPageData[] = [
     },
     stats: [
       { value: "16", label: "Smart detection patterns" },
-      { value: "6", label: "One-click compliance packs" },
-      { value: "15", label: "Built-in DLP rules" },
+      { value: "19", label: "Compliance frameworks" },
+      { value: "40+", label: "Detection rules" },
     ],
     faqs: [
       { question: "What is the biggest AI security risk for teams?", answer: "Unintentional data exposure. Employees paste sensitive data into AI tools without realizing it leaves their organization's control. Automated DLP scanning catches these incidents before they become breaches." },
@@ -589,7 +589,7 @@ export const guidePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "6", label: "One-click compliance packs" },
+      { value: "19", label: "Compliance frameworks" },
       { value: "31", label: "Total available detection rules" },
       { value: "16", label: "Smart detection patterns" },
     ],
@@ -700,7 +700,7 @@ export const guidePages: SeoPageData[] = [
     },
     stats: [
       { value: "< 2 min", label: "Setup time" },
-      { value: "6", label: "One-click compliance packs" },
+      { value: "19", label: "Compliance frameworks" },
       { value: "5", label: "AI tools supported" },
     ],
     faqs: [
@@ -755,7 +755,7 @@ export const guidePages: SeoPageData[] = [
     },
     stats: [
       { value: "31", label: "Total available detection rules" },
-      { value: "15", label: "Built-in DLP rules" },
+      { value: "40+", label: "Detection rules" },
       { value: "16", label: "Smart detection patterns" },
     ],
     faqs: [

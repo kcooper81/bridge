@@ -119,7 +119,7 @@ export const integrationPages: SeoPageData[] = [
     },
     stats: [
       { value: "2-click", label: "From sidebar to AI tool" },
-      { value: "6", label: "One-click compliance packs" },
+      { value: "19", label: "Compliance frameworks" },
       { value: "16", label: "Smart detection patterns" },
     ],
     sections: [
@@ -195,7 +195,7 @@ export const integrationPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "15", label: "Built-in DLP rules" },
+      { value: "40+", label: "Detection rules" },
       { value: "25", label: "Free prompts/month" },
       { value: "$9/mo", label: "Starting price" },
     ],
@@ -272,7 +272,7 @@ export const integrationPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "6", label: "One-click compliance packs" },
+      { value: "19", label: "Compliance frameworks" },
       { value: "< 2 min", label: "Setup time" },
       { value: "31", label: "Total available detection rules" },
     ],
@@ -327,7 +327,7 @@ export const integrationPages: SeoPageData[] = [
     stats: [
       { value: "$9/mo", label: "Starting price" },
       { value: "5", label: "AI tools supported" },
-      { value: "15", label: "Built-in DLP rules" },
+      { value: "40+", label: "Detection rules" },
     ],
     faqs: [
       { question: "Does this work with Perplexity Pro?", answer: "Yes. The extension works with both Perplexity Free and Pro plans, including all available models and search modes." },
@@ -380,7 +380,7 @@ export const integrationPages: SeoPageData[] = [
     stats: [
       { value: "16", label: "Smart detection patterns" },
       { value: "2-click", label: "From sidebar to AI tool" },
-      { value: "6", label: "One-click compliance packs" },
+      { value: "19", label: "Compliance frameworks" },
     ],
     faqs: [
       { question: "How is this different from the basic Perplexity integration?", answer: "The basic integration provides one-click prompt insertion. This advanced integration adds multi-step research workflows, curated research collections, governance policies, and research-specific analytics designed for teams that rely heavily on Perplexity for systematic research." },
@@ -433,7 +433,7 @@ export const integrationPages: SeoPageData[] = [
     },
     stats: [
       { value: "31", label: "Total available detection rules" },
-      { value: "6", label: "One-click compliance packs" },
+      { value: "19", label: "Compliance frameworks" },
       { value: "5", label: "AI tools supported" },
     ],
     faqs: [
@@ -488,7 +488,7 @@ export const integrationPages: SeoPageData[] = [
     },
     stats: [
       { value: "< 2 min", label: "Setup time" },
-      { value: "15", label: "Built-in DLP rules" },
+      { value: "40+", label: "Detection rules" },
       { value: "2-click", label: "From sidebar to AI tool" },
     ],
     faqs: [
@@ -595,7 +595,7 @@ export const integrationPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "6", label: "One-click compliance packs" },
+      { value: "19", label: "Compliance frameworks" },
       { value: "31", label: "Total available detection rules" },
       { value: "< 2 min", label: "Setup time" },
     ],
@@ -650,7 +650,7 @@ export const integrationPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "15", label: "Built-in DLP rules" },
+      { value: "40+", label: "Detection rules" },
       { value: "$9/mo", label: "Starting price" },
       { value: "16", label: "Smart detection patterns" },
     ],
@@ -760,7 +760,7 @@ export const integrationPages: SeoPageData[] = [
     stats: [
       { value: "2-click", label: "From sidebar to AI tool" },
       { value: "< 2 min", label: "Setup time" },
-      { value: "15", label: "Built-in DLP rules" },
+      { value: "40+", label: "Detection rules" },
     ],
     faqs: [
       { question: "Does TeamPrompt work with Grok's web interface?", answer: "Yes. TeamPrompt integrates with Grok's web-based chat interface, allowing your team to insert managed prompts, enforce DLP policies, and log interactions directly from the browser." },
@@ -813,7 +813,7 @@ export const integrationPages: SeoPageData[] = [
     },
     stats: [
       { value: "16", label: "Smart detection patterns" },
-      { value: "6", label: "One-click compliance packs" },
+      { value: "19", label: "Compliance frameworks" },
       { value: "$9/mo", label: "Starting price" },
     ],
     faqs: [
@@ -923,9 +923,9 @@ export const integrationPages: SeoPageData[] = [
     ] },
     benefits: { heading: "Why ChatGPT DLP scanning is essential", items: ["Catch sensitive data that employees accidentally paste into ChatGPT", "Prevent PII from reaching OpenAI's servers", "Protect API keys and credentials from leaking through prompts", "Meet compliance requirements for data protection", "Enable safe ChatGPT usage without blocking it entirely", "Maintain audit trails of all DLP detections"] },
     stats: [
-      { value: "15", label: "Built-in DLP rules" },
+      { value: "40+", label: "Detection rules" },
       { value: "16", label: "Smart detection patterns" },
-      { value: "6", label: "One-click compliance packs" },
+      { value: "19", label: "Compliance frameworks" },
     ],
     faqs: [
       { question: "Does DLP scanning slow down ChatGPT?", answer: "No. Scanning happens in milliseconds before the prompt is sent. Users experience no noticeable delay." },
@@ -975,7 +975,7 @@ export const integrationPages: SeoPageData[] = [
     ] },
     benefits: { heading: "Why enterprises need ChatGPT data protection", items: ["Prevent the most common AI data leak — sensitive data in ChatGPT prompts", "Maintain SOC 2 and compliance posture for ChatGPT usage", "Enable productive ChatGPT usage without security blind spots", "Demonstrate AI governance to auditors and leadership", "Scale protection across hundreds or thousands of ChatGPT users", "Add a security layer that OpenAI's platform does not provide"] },
     stats: [
-      { value: "6", label: "One-click compliance packs" },
+      { value: "19", label: "Compliance frameworks" },
       { value: "31", label: "Total available detection rules" },
       { value: "$9/mo", label: "Starting price" },
     ],
@@ -1053,9 +1053,9 @@ export const integrationPages: SeoPageData[] = [
     ] },
     benefits: { heading: "Why Claude data protection matters", items: ["Prevent sensitive data from reaching Anthropic's systems", "Meet compliance requirements for AI data protection", "Enable Claude usage without creating security blind spots", "Protect PII, credentials, and confidential information", "Maintain audit trails of all DLP detections", "Scale protection across your entire Claude-using team"] },
     stats: [
-      { value: "15", label: "Built-in DLP rules" },
+      { value: "40+", label: "Detection rules" },
       { value: "31", label: "Total available detection rules" },
-      { value: "6", label: "One-click compliance packs" },
+      { value: "19", label: "Compliance frameworks" },
     ],
     faqs: [
       { question: "Does Anthropic train on my data?", answer: "Anthropic's data policies vary by plan. Regardless, DLP scanning prevents sensitive data from being sent in the first place — the strongest protection regardless of provider policy." },
@@ -1132,8 +1132,8 @@ export const integrationPages: SeoPageData[] = [
     benefits: { heading: "Why enterprises need Gemini security", items: ["Prevent sensitive data from reaching Google through Gemini prompts", "Maintain compliance posture for Gemini usage", "Enable productive Gemini usage with security guardrails", "Audit Gemini interactions for compliance and security", "Scale security across all Gemini users consistently", "Complement Google Workspace security with browser-level DLP"] },
     stats: [
       { value: "31", label: "Total available detection rules" },
-      { value: "6", label: "One-click compliance packs" },
-      { value: "15", label: "Built-in DLP rules" },
+      { value: "19", label: "Compliance frameworks" },
+      { value: "40+", label: "Detection rules" },
     ],
     faqs: [
       { question: "Does this complement Google Workspace security?", answer: "Yes. TeamPrompt adds DLP scanning at the browser level, catching sensitive data before it reaches Google. This complements Workspace-level security controls." },
@@ -1184,8 +1184,8 @@ export const integrationPages: SeoPageData[] = [
     benefits: { heading: "Why teams use Copilot prompt templates", items: ["Standardize Copilot usage with proven templates", "Share best practices across Copilot users", "Protect data with DLP scanning on every Copilot prompt", "Reduce time writing Copilot prompts from scratch", "Track which Copilot templates produce the best results", "Works alongside ChatGPT and Claude template management"] },
     stats: [
       { value: "< 2 min", label: "Setup time" },
-      { value: "15", label: "Built-in DLP rules" },
-      { value: "6", label: "One-click compliance packs" },
+      { value: "40+", label: "Detection rules" },
+      { value: "19", label: "Compliance frameworks" },
     ],
     faqs: [
       { question: "Does this work with Microsoft 365 Copilot?", answer: "TeamPrompt works with the web-based Copilot interface through the browser extension. For Microsoft 365 Copilot within desktop apps, prompts can be prepared in TeamPrompt and used manually." },
@@ -1211,7 +1211,7 @@ export const integrationPages: SeoPageData[] = [
     stats: [
       { value: "16", label: "Smart detection patterns" },
       { value: "31", label: "Total available detection rules" },
-      { value: "6", label: "One-click compliance packs" },
+      { value: "19", label: "Compliance frameworks" },
     ],
     faqs: [
       { question: "Does Microsoft's own DLP cover Copilot?", answer: "Microsoft Purview provides some DLP capabilities. TeamPrompt adds browser-level scanning that catches data before it is submitted, providing an additional protection layer." },
@@ -1263,7 +1263,7 @@ export const integrationPages: SeoPageData[] = [
     stats: [
       { value: "< 2 min", label: "Setup time" },
       { value: "25", label: "Free prompts/month" },
-      { value: "15", label: "Built-in DLP rules" },
+      { value: "40+", label: "Detection rules" },
     ],
     faqs: [
       { question: "Does TeamPrompt work with Perplexity?", answer: "Yes. The browser extension works with Perplexity AI, allowing prompt insertion, team sharing, and DLP scanning." },
@@ -1289,7 +1289,7 @@ export const integrationPages: SeoPageData[] = [
     stats: [
       { value: "31", label: "Total available detection rules" },
       { value: "16", label: "Smart detection patterns" },
-      { value: "6", label: "One-click compliance packs" },
+      { value: "19", label: "Compliance frameworks" },
     ],
     faqs: [
       { question: "Why does Perplexity need DLP?", answer: "Research queries can inadvertently include sensitive data like customer names, internal metrics, or confidential project details. DLP catches these before they reach Perplexity." },
@@ -1365,7 +1365,7 @@ export const integrationPages: SeoPageData[] = [
     ] },
     benefits: { heading: "Why Teams organizations need prompt management", items: ["Organize AI prompts that are currently scattered in Teams chats", "Complement Microsoft 365 security with browser-level DLP", "Share proven prompts across the organization with proper governance", "Track AI adoption and usage across Teams-based teams", "Enable AI productivity with security guardrails", "Works alongside Microsoft Copilot and all other AI tools"] },
     stats: [
-      { value: "6", label: "One-click compliance packs" },
+      { value: "19", label: "Compliance frameworks" },
       { value: "< 2 min", label: "Setup time" },
       { value: "31", label: "Total available detection rules" },
     ],
@@ -1418,7 +1418,7 @@ export const integrationPages: SeoPageData[] = [
     benefits: { heading: "Why multi-model management matters", items: ["Eliminate separate prompt collections for each AI tool", "Apply consistent security across ChatGPT, Claude, Gemini, and all tools", "Share prompts once, use them everywhere", "Avoid vendor lock-in with portable prompt libraries", "Track AI usage across all models in one dashboard", "Simplify governance with unified controls"] },
     stats: [
       { value: "5", label: "AI tools supported" },
-      { value: "15", label: "Built-in DLP rules" },
+      { value: "40+", label: "Detection rules" },
       { value: "25", label: "Free prompts/month" },
     ],
     faqs: [
@@ -1495,7 +1495,7 @@ export const integrationPages: SeoPageData[] = [
     ] },
     benefits: { heading: "Why enterprises choose TeamPrompt", items: ["Scale AI governance from hundreds to thousands of users", "Deploy and manage centrally through enterprise IT tools", "Meet compliance requirements with built-in governance features", "Protect enterprise data across every AI tool with unified DLP", "Track AI adoption and ROI across the entire organization", "Enable safe AI innovation with enterprise-grade guardrails"] },
     stats: [
-      { value: "6", label: "One-click compliance packs" },
+      { value: "19", label: "Compliance frameworks" },
       { value: "31", label: "Total available detection rules" },
       { value: "5", label: "AI tools supported" },
     ],
@@ -1521,7 +1521,7 @@ export const integrationPages: SeoPageData[] = [
     ] },
     benefits: { heading: "Why development teams need API prompt management", items: ["Integrate prompt management into existing development workflows", "Automate prompt testing and deployment through CI/CD pipelines", "Manage prompts as versioned assets alongside code", "Apply consistent DLP scanning to programmatic AI interactions", "Unified analytics across API and browser extension usage", "Enable both technical and non-technical users with one platform"] },
     stats: [
-      { value: "15", label: "Built-in DLP rules" },
+      { value: "40+", label: "Detection rules" },
       { value: "16", label: "Smart detection patterns" },
       { value: "$9/mo", label: "Starting price" },
     ],

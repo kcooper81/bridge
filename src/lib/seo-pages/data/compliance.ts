@@ -634,7 +634,7 @@ export const compliancePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "6", label: "One-click compliance packs" },
+      { value: "19", label: "Compliance frameworks" },
       { value: "Role-based", label: "Access policies" },
       { value: "FERPA", label: "Compliant reporting" },
     ],
@@ -688,7 +688,7 @@ export const compliancePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "15", label: "Built-in DLP rules" },
+      { value: "40+", label: "Detection rules" },
       { value: "Safeguards", label: "Rule compliant" },
       { value: "Examiner", label: "Ready reports" },
     ],
@@ -1068,7 +1068,7 @@ export const compliancePages: SeoPageData[] = [
     stats: [
       { value: "2-click", label: "From sidebar to AI tool" },
       { value: "Canadian", label: "Format support" },
-      { value: "6", label: "One-click compliance packs" },
+      { value: "19", label: "Compliance frameworks" },
     ],
     faqs: [
       { question: "Does PIPEDA apply to AI tool usage?", answer: "Yes. Submitting personal information to an AI provider constitutes a use and potential disclosure of personal information under PIPEDA. Organizations must ensure this use is consistent with their stated purposes and consent processes." },

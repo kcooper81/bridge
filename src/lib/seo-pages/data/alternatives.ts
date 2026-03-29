@@ -35,7 +35,7 @@ export const alternativePages: SeoPageData[] = [
         content: {
           persona: "Lisa, team lead at a 40-person marketing agency",
           setup: "Lisa's team stored all their AI prompts in a shared Notion workspace. It worked at first, but as the team scaled to 40 people and five AI tools, she noticed prompts were being copy-pasted with client names, project codes, and sometimes even API keys left in the text. Notion had no way to catch this before the data reached ChatGPT or Claude.",
-          trigger: "TeamPrompt's built-in DLP scans every prompt for sensitive data like PII, credentials, and API keys before it leaves the browser. Lisa set up 6 compliance packs in a single click and the browser extension gave her team one-click insertion into all 5 AI tools they use.",
+          trigger: "TeamPrompt's built-in DLP scans every prompt for sensitive data like PII, credentials, and API keys before it leaves the browser. Lisa set up 19 compliance packs in a single click and the browser extension gave her team one-click insertion into all 5 AI tools they use.",
           resolution: "Within a week, the team fully migrated their prompt library from Notion to TeamPrompt. Lisa now has usage analytics showing which prompts drive results, DLP scanning catches sensitive data automatically, and her team inserts prompts in two clicks instead of switching tabs to copy from Notion pages.",
         },
       },
@@ -100,8 +100,8 @@ export const alternativePages: SeoPageData[] = [
     ],
     stats: [
       { value: "2-click", label: "From sidebar to AI tool" },
-      { value: "15", label: "Built-in DLP rules" },
-      { value: "6", label: "One-click compliance packs" },
+      { value: "40+", label: "Detection rules" },
+      { value: "19", label: "Compliance frameworks" },
     ],
     faqs: [
       { question: "Can I import prompts from Google Docs?", answer: "Yes. Copy your prompts from any Google Doc and paste them directly into TeamPrompt, or export to CSV and use the bulk import wizard. Most teams complete their migration in a single session." },
@@ -148,7 +148,7 @@ export const alternativePages: SeoPageData[] = [
         content: {
           persona: "Tom, IT admin at a 200-person financial services firm",
           setup: "Tom's company published AI usage policies on SharePoint and stored approved prompts in a document library. But SharePoint had no way to enforce those policies when employees actually used AI tools. People bookmarked the policy page, then went to ChatGPT and typed whatever they wanted — including client account numbers and internal financial data.",
-          trigger: "TeamPrompt's browser extension runs 16 smart detection patterns in real-time as prompts are submitted. It scans for PII, financial data, API keys, and credentials before anything reaches the AI model. Tom deployed 6 compliance packs covering PCI-DSS and SOC 2 in a single click.",
+          trigger: "TeamPrompt's browser extension runs 16 smart detection patterns in real-time as prompts are submitted. It scans for PII, financial data, API keys, and credentials before anything reaches the AI model. Tom deployed 19 compliance packs covering PCI-DSS and SOC 2 in a single click.",
           resolution: "Tom rolled out TeamPrompt's extension via Chrome Enterprise policies in an afternoon — no SharePoint site provisioning, no IT tickets, no waiting. Employees now use approved prompts from the sidebar with built-in DLP scanning, and Tom has a full audit trail of every prompt submission across all 5 supported AI tools.",
         },
       },
@@ -210,7 +210,7 @@ export const alternativePages: SeoPageData[] = [
     stats: [
       { value: "25", label: "Free prompts/month" },
       { value: "5", label: "AI tools supported" },
-      { value: "6", label: "One-click compliance packs" },
+      { value: "19", label: "Compliance frameworks" },
     ],
     faqs: [
       { question: "Can I import my Airtable prompt base?", answer: "Yes. Export your Airtable base as CSV and import it into TeamPrompt using the bulk import wizard. Column mapping handles different field names automatically, so migration is straightforward." },
@@ -318,7 +318,7 @@ export const alternativePages: SeoPageData[] = [
     },
     stats: [
       { value: "5", label: "AI tools supported" },
-      { value: "6", label: "One-click compliance packs" },
+      { value: "19", label: "Compliance frameworks" },
       { value: "$9/mo", label: "Starting price" },
     ],
     faqs: [
@@ -587,8 +587,8 @@ export const alternativePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "15", label: "Built-in DLP rules" },
-      { value: "6", label: "One-click compliance packs" },
+      { value: "40+", label: "Detection rules" },
+      { value: "19", label: "Compliance frameworks" },
       { value: "< 2 min", label: "Setup time" },
     ],
     faqs: [
@@ -1427,7 +1427,7 @@ export const alternativePages: SeoPageData[] = [
     },
     stats: [
       { value: "< 2 min", label: "Setup time" },
-      { value: "15", label: "Built-in DLP rules" },
+      { value: "40+", label: "Detection rules" },
       { value: "$9/mo", label: "Starting price" },
     ],
     faqs: [
@@ -1479,7 +1479,7 @@ export const alternativePages: SeoPageData[] = [
     },
     stats: [
       { value: "16", label: "Smart detection patterns" },
-      { value: "6", label: "One-click compliance packs" },
+      { value: "19", label: "Compliance frameworks" },
       { value: "25", label: "Free prompts/month" },
     ],
     faqs: [
@@ -1687,7 +1687,7 @@ export const alternativePages: SeoPageData[] = [
     },
     stats: [
       { value: "2-click", label: "From sidebar to AI tool" },
-      { value: "15", label: "Built-in DLP rules" },
+      { value: "40+", label: "Detection rules" },
       { value: "$9/mo", label: "Starting price" },
     ],
     faqs: [
@@ -1792,7 +1792,7 @@ export const alternativePages: SeoPageData[] = [
     stats: [
       { value: "< 2 min", label: "Setup time" },
       { value: "31", label: "Total available detection rules" },
-      { value: "6", label: "One-click compliance packs" },
+      { value: "19", label: "Compliance frameworks" },
     ],
     faqs: [
       { question: "Can I keep Monday.com for work management?", answer: "Yes. Use Monday.com for work management. Use TeamPrompt for prompt management." },
@@ -1894,7 +1894,7 @@ export const alternativePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "15", label: "Built-in DLP rules" },
+      { value: "40+", label: "Detection rules" },
       { value: "$9/mo", label: "Starting price" },
       { value: "2-click", label: "From sidebar to AI tool" },
     ],
@@ -1946,7 +1946,7 @@ export const alternativePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "6", label: "One-click compliance packs" },
+      { value: "19", label: "Compliance frameworks" },
       { value: "31", label: "Total available detection rules" },
       { value: "< 2 min", label: "Setup time" },
     ],

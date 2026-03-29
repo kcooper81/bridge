@@ -41,7 +41,7 @@ export const templatePages: SeoPageData[] = [
     },
     stats: [
       { value: "5", label: "AI tools supported" },
-      { value: "15", label: "Built-in DLP rules" },
+      { value: "40+", label: "Detection rules" },
       { value: "$9/mo", label: "Starting price" },
     ],
     faqs: [
@@ -205,7 +205,7 @@ export const templatePages: SeoPageData[] = [
     },
     stats: [
       { value: "16", label: "Smart detection patterns" },
-      { value: "6", label: "One-click compliance packs" },
+      { value: "19", label: "Compliance frameworks" },
       { value: "< 2 min", label: "Setup time" },
     ],
     faqs: [
@@ -260,7 +260,7 @@ export const templatePages: SeoPageData[] = [
     },
     stats: [
       { value: "2-click", label: "From sidebar to AI tool" },
-      { value: "6", label: "One-click compliance packs" },
+      { value: "19", label: "Compliance frameworks" },
       { value: "5", label: "AI tools supported" },
     ],
     faqs: [
@@ -314,7 +314,7 @@ export const templatePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "15", label: "Built-in DLP rules" },
+      { value: "40+", label: "Detection rules" },
       { value: "31", label: "Total available detection rules" },
       { value: "< 2 min", label: "Setup time" },
     ],
@@ -424,7 +424,7 @@ export const templatePages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "6", label: "One-click compliance packs" },
+      { value: "19", label: "Compliance frameworks" },
       { value: "5", label: "AI tools supported" },
       { value: "25", label: "Free prompts/month" },
     ],
@@ -480,7 +480,7 @@ export const templatePages: SeoPageData[] = [
     },
     stats: [
       { value: "2-click", label: "From sidebar to AI tool" },
-      { value: "15", label: "Built-in DLP rules" },
+      { value: "40+", label: "Detection rules" },
       { value: "$9/mo", label: "Starting price" },
     ],
     faqs: [

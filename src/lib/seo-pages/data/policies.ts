@@ -256,7 +256,7 @@ export const policyPages: SeoPageData[] = [
       ],
     },
     stats: [
-      { value: "6", label: "One-click compliance packs" },
+      { value: "19", label: "Compliance frameworks" },
       { value: "Annual", label: "Recertification" },
       { value: "Role-based", label: "Training paths" },
     ],

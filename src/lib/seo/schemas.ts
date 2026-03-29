@@ -9,7 +9,7 @@ export function generateSoftwareApplicationSchema() {
     applicationCategory: "BusinessApplication",
     operatingSystem: "Web, Chrome Extension",
     description:
-      "Prompt management for teams that use AI. Manage, share, and secure your team's AI prompts.",
+      "AI data loss prevention and prompt management for teams. Two layers of protection: network-level AI tool control via Cloudflare Gateway and content-level DLP scanning via browser extension. 19 compliance packs, shared prompt library, and audit dashboards.",
     url: SITE_URL,
     offers: [
       {
@@ -70,7 +70,7 @@ export function generateOrganizationSchema() {
     url: SITE_URL,
     logo: `${SITE_URL}/brand/logo-icon-blue.svg`,
     description:
-      "AI prompt management platform for teams. Shared libraries, quality standards, DLP security, and usage analytics.",
+      "AI WorkOS platform providing network-level AI tool control and content-level DLP scanning for teams using ChatGPT, Claude, Gemini, Copilot, and Perplexity.",
     email: "support@teamprompt.app",
     sameAs: [
       "https://x.com/teampromptapp",

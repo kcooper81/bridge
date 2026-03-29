@@ -1,42 +1,68 @@
 # TeamPrompt
 
-> TeamPrompt is an AI prompt management platform with built-in data loss prevention (DLP) for teams using ChatGPT, Claude, Gemini, Copilot, and Perplexity. It provides shared prompt libraries, quality guidelines, security scanning, and usage analytics through a browser extension and web dashboard.
+> TeamPrompt is an AI WorkOS platform that provides two layers of AI protection for teams: network-level AI tool control (via Cloudflare Gateway DNS blocking) and content-level data loss prevention (via browser extension DLP scanning). It also includes a shared prompt library, compliance frameworks, audit dashboards, and LLM-based topic classification.
 
-TeamPrompt helps organizations manage how their teams use AI tools. It combines a centralized prompt library with enterprise-grade security features including real-time DLP scanning, audit logging, and compliance controls for healthcare, legal, finance, government, and technology teams.
+## What TeamPrompt Does
 
-## Product
-- [Features](https://teamprompt.app/features): Core product features and capabilities
-- [Pricing](https://teamprompt.app/pricing): Plans — Free, Pro ($9/mo), Team ($7/user/mo), Business ($12/user/mo)
-- [Security](https://teamprompt.app/security): Data protection, DLP scanning, and compliance
-- [Enterprise](https://teamprompt.app/enterprise): Enterprise features, SSO, and deployment
-- [Integrations](https://teamprompt.app/integrations): Supported AI tools — ChatGPT, Claude, Gemini, Copilot, Perplexity
-- [Extensions](https://teamprompt.app/extensions): Browser extension for Chrome, Edge, and Firefox
+TeamPrompt helps organizations control and secure how their teams use AI tools like ChatGPT, Claude, Gemini, Copilot, and Perplexity.
+
+**Layer 1 — Network-Level Control:** Approve trusted AI tools and block everything else at the DNS level via Cloudflare Gateway integration. Covers all devices: browser, native apps, mobile, and CLI tools.
+
+**Layer 2 — Content-Level DLP:** A browser extension scans every outbound prompt in real time for sensitive data. 40+ detection rules catch PII, credentials, API keys, patient data, and more. Three enforcement modes: Block, Warn, or Auto-Redact.
+
+**Additional capabilities:** Shared prompt library with approval workflows, 19 compliance framework packs (HIPAA, SOC 2, PCI-DSS, GDPR, etc.), LLM-based topic classification, risk scoring (0-100 per prompt), Sankey flow audit dashboards, and CSV/PDF export for compliance reporting.
+
+## Key Facts
+- Free tier: up to 3 members, 25 prompts
+- Pro: $9/user/month (unlimited prompts, 12 members)
+- Team: $7/user/month (50 members, full audit trail, custom rules)
+- Business: $12/user/month (500 members, unlimited everything)
+- Browser extension: Chrome, Firefox, Edge
+- AI tools supported: ChatGPT, Claude, Gemini, Copilot, Perplexity
+- Compliance packs: 19 frameworks (HIPAA, SOC 2, PCI-DSS, GDPR, CCPA, FERPA, GLBA, NIST, FedRAMP, and more)
+- Detection rules: 40+ built-in (SSN, credit cards, API keys, passwords, patient data, etc.)
+- Setup time: under 5 minutes, no proxy or VPN needed
+
+## Product Pages
+- [Features](https://teamprompt.app/features): Three layers of AI governance — network control, content DLP, audit & compliance
+- [Pricing](https://teamprompt.app/pricing): Free, Pro, Team, and Business plans
+- [Security](https://teamprompt.app/security): DLP scanning, detection rules, compliance packs
+- [Enterprise](https://teamprompt.app/enterprise): Auto-install browser extension, team-based policies
+- [Extensions](https://teamprompt.app/extensions): Browser extension for Chrome, Firefox, Edge
+- [Integrations](https://teamprompt.app/integrations): ChatGPT, Claude, Gemini, Copilot, Perplexity, Slack, MCP
+
+## Compliance
+- [HIPAA Compliance](https://teamprompt.app/compliance/hipaa): Protect PHI in AI tools
+- [SOC 2 Compliance](https://teamprompt.app/compliance/soc2): Audit trails and access controls
+- [GDPR Compliance](https://teamprompt.app/compliance/gdpr): EU personal data protection
+- [PCI-DSS Compliance](https://teamprompt.app/compliance/pci-dss): Payment card data blocking
+- [EU AI Act](https://teamprompt.app/compliance/eu-ai-act): AI governance and transparency
+
+## Comparisons
+- [TeamPrompt vs Nightfall AI](https://teamprompt.app/compare/nightfall): Browser DLP vs API-based enterprise DLP
+- [TeamPrompt vs Microsoft Purview](https://teamprompt.app/compare/purview): Cross-platform vs Microsoft-only
+- [TeamPrompt vs ChatGPT Teams](https://teamprompt.app/compare/chatgpt-teams): What OpenAI's team plan is missing
+- [TeamPrompt vs Notion](https://teamprompt.app/compare/notion): Purpose-built prompt management vs general docs
+- [Best AI DLP Tools 2026](https://teamprompt.app/compare/best-ai-dlp-tools): Complete market comparison
 
 ## Industries
-- [Healthcare](https://teamprompt.app/industries/healthcare): HIPAA-ready AI prompt management
-- [Legal](https://teamprompt.app/industries/legal): Client data protection for law firms
-- [Technology](https://teamprompt.app/industries/technology): Source code and API key protection
-- [Finance](https://teamprompt.app/industries/finance): Financial data compliance
-- [Government](https://teamprompt.app/industries/government): CUI and FedRAMP-aligned controls
-- [Education](https://teamprompt.app/industries/education): FERPA-ready student data protection
-- [Insurance](https://teamprompt.app/industries/insurance): Claims and PII protection
+- [Healthcare](https://teamprompt.app/industries/healthcare): HIPAA-ready AI workflows
+- [Legal](https://teamprompt.app/industries/legal): Client privilege and data protection
+- [Technology](https://teamprompt.app/industries/technology): API key and source code protection
+- [Finance](https://teamprompt.app/industries/finance): PCI-DSS and SOX compliance
+- [Government](https://teamprompt.app/industries/government): CUI and FedRAMP alignment
+- [Education](https://teamprompt.app/industries/education): FERPA student data protection
+- [Insurance](https://teamprompt.app/industries/insurance): Claims and policyholder PII
 
-## Documentation
-- [Help Center](https://teamprompt.app/help): Getting started guides and documentation
-- [Getting Started](https://teamprompt.app/help/getting-started): Create workspace, invite team, install extension
-- [Prompt Library](https://teamprompt.app/help/prompt-library): Create, edit, share, and version prompts
-- [Security Rules](https://teamprompt.app/help/security-rules): DLP scanning, custom rules, compliance packs
-- [Team Management](https://teamprompt.app/help/team-management): Roles, permissions, directory sync
-
-## Solutions
-- [Solutions Hub](https://teamprompt.app/solutions): Use cases, comparisons, guides, and templates
-- [AI Governance](https://teamprompt.app/solutions/ai-governance): Enterprise AI governance platform
-- [DLP for AI](https://teamprompt.app/solutions/dlp-for-ai-tools): Data loss prevention for AI tools
-- [Prompt Management](https://teamprompt.app/solutions/prompt-management-101): Guide to prompt management
+## Resources
+- [Glossary](https://teamprompt.app/glossary): 50+ AI security and prompt management terms
+- [Case Studies](https://teamprompt.app/case-studies): Healthcare, fintech, and marketing team examples
+- [Blog](https://teamprompt.app/blog): Guides on AI DLP, governance, and prompt management
+- [Help Center](https://teamprompt.app/help): Documentation and getting started guides
+- [Contact](https://teamprompt.app/contact): Support and sales
 
 ## Optional
-- [Changelog](https://teamprompt.app/changelog): Release history and product updates
-- [Media Kit](https://teamprompt.app/media): Brand assets, logos, and press resources
-- [Contact](https://teamprompt.app/contact): Support and sales inquiries
-- [Privacy Policy](https://teamprompt.app/privacy): Privacy policy
-- [Terms of Service](https://teamprompt.app/terms): Terms of service
+- [Changelog](https://teamprompt.app/changelog): Release notes
+- [Media Kit](https://teamprompt.app/media): Logos and brand assets
+- [Privacy Policy](https://teamprompt.app/privacy)
+- [Terms of Service](https://teamprompt.app/terms)

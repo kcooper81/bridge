@@ -37,6 +37,11 @@ const BLOG_SLUGS = [
   "prompt-injection-attacks-how-they-work-and-how-to-defend",
   "soc-2-and-ai-meeting-compliance-requirements",
   "why-your-dlp-strategy-needs-to-cover-ai-tools",
+  "how-to-prevent-data-leaks-to-chatgpt",
+  "ai-acceptable-use-policy-template-2026",
+  "chatgpt-vs-claude-security-comparison",
+  "what-is-shadow-ai-how-to-detect-and-control",
+  "hipaa-and-ai-complete-guide-for-healthcare-teams",
 ];
 
 const HELP_CATEGORIES = [

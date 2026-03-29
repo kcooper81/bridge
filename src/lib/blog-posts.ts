@@ -47,6 +47,434 @@ const TEAM_AUTHOR: BlogAuthor = {
 // ─── Posts ───
 
 const _POSTS: BlogPost[] = [
+  // ── New SEO-targeted posts (2026-03-28) ──
+  {
+    slug: "how-to-prevent-data-leaks-to-chatgpt",
+    title: "How to Prevent Data Leaks to ChatGPT: A Complete Guide for Teams",
+    description: "Your employees are pasting sensitive data into ChatGPT right now. Here's how to detect, block, and prevent data leaks to AI tools without killing productivity.",
+    publishedAt: "2026-03-28",
+    author: TEAM_AUTHOR,
+    category: "guide",
+    tags: ["ChatGPT", "data leaks", "DLP", "AI security", "sensitive data"],
+    readingTime: "8 min read",
+    coverImage: "/images/hero-data-breach.jpg",
+    coverImageAlt: "Data breach alert on laptop screen",
+    relatedSlugs: ["ai-dlp-preventing-data-leaks-to-chatgpt-and-claude", "what-is-ai-data-loss-prevention-dlp"],
+    content: `
+## The Problem Is Bigger Than You Think
+
+According to a 2025 study by Cyberhaven, **11% of data employees paste into ChatGPT is confidential**. That includes source code, customer data, financial records, and internal documents.
+
+Most teams have no idea this is happening. There's no visibility, no controls, and no audit trail. By the time you discover a leak, the data has already been processed by an AI model.
+
+## Why Traditional DLP Doesn't Work for AI
+
+Traditional data loss prevention (DLP) tools were built for email, file sharing, and cloud storage. They monitor data leaving your network through known channels. But AI tools create a new, unmonitored channel:
+
+- **AI prompts bypass traditional DLP** — text typed into ChatGPT isn't an email attachment or a file upload to Dropbox
+- **No endpoint agent catches it** — the data goes through a normal HTTPS connection to api.openai.com
+- **URL blocking is too blunt** — blocking ChatGPT entirely kills productivity
+
+You need DLP that understands AI-specific workflows — scanning the content of prompts, not just the destination.
+
+## The Two-Layer Approach
+
+The most effective protection combines two layers:
+
+### Layer 1: Control Which AI Tools Are Used
+
+Before you can protect what goes into AI, you need to control which AI tools your team uses. This means:
+
+- **Approve trusted tools** — ChatGPT, Claude, Gemini (your vetted list)
+- **Block everything else** — Poe, Character.AI, random AI chat apps
+- **DNS-level blocking** — covers all devices, not just the browser
+
+TeamPrompt integrates with Cloudflare Gateway to block unapproved AI tools at the DNS level. When someone tries to access a blocked tool, they see a clear message explaining which tools are approved.
+
+### Layer 2: Scan What Gets Sent
+
+On the approved tools, you need real-time content scanning:
+
+- **Pattern detection** — regex rules for SSNs, credit cards, API keys
+- **Compliance packs** — one-click install for HIPAA, SOC 2, PCI-DSS, GDPR (19 frameworks)
+- **LLM classification** — define sensitive topics in plain English, let AI classify prompts
+- **Auto-redaction** — replace sensitive data with safe [PLACEHOLDER] tokens
+
+## Setting Up Protection in Under 5 Minutes
+
+1. **Install the browser extension** — Chrome, Firefox, or Edge. Takes 30 seconds.
+2. **Enable compliance packs** — Go to Guardrails → Policies → install the packs for your industry
+3. **Connect Cloudflare Gateway** (optional) — Settings → Integrations → Cloudflare for network-level blocking
+4. **Define your AI Tool Policy** — Guardrails → AI Tools → approve/block tools
+
+That's it. Every prompt is now scanned in real time. Violations are blocked, logged, and reported.
+
+## What Gets Detected
+
+TeamPrompt's 40+ built-in detection rules catch:
+
+- **PII**: Social Security numbers, dates of birth, email addresses, phone numbers, physical addresses
+- **Financial**: Credit card numbers (with Luhn validation), CVVs, bank account numbers
+- **Credentials**: API keys (AWS, GitHub, Stripe, OpenAI), passwords, connection strings, JWT tokens, PEM keys
+- **Healthcare**: Patient names, medical record numbers, diagnosis codes, insurance IDs
+- **Internal**: IP addresses, internal hostnames, project code names
+
+## Building a Culture of Safe AI Usage
+
+Blocking isn't enough. You need to educate your team on WHY data protection matters. TeamPrompt shows contextual explanations when a violation is caught:
+
+- **"Why this matters"** — explains the specific risk (e.g., "API keys grant direct access to your cloud infrastructure")
+- **"What to do"** — gives actionable advice (e.g., "Use [API_KEY] as a placeholder in your prompt")
+
+This turns every blocked message into a learning moment, reducing repeat violations over time.
+
+## The Bottom Line
+
+Data leaks to AI tools are the new shadow IT problem. You can't stop your team from using AI — and you shouldn't. But you can ensure they use it safely with the right controls in place.
+
+**Start free with TeamPrompt** — protect up to 3 users with real-time DLP scanning, no credit card required.
+    `,
+  },
+  {
+    slug: "ai-acceptable-use-policy-template-2026",
+    title: "AI Acceptable Use Policy Template (2026): What Every Company Needs",
+    description: "A practical, copy-and-customize AI acceptable use policy template covering approved tools, data handling, compliance requirements, and enforcement.",
+    publishedAt: "2026-03-28",
+    author: TEAM_AUTHOR,
+    category: "guide",
+    tags: ["AI policy", "acceptable use", "governance", "compliance", "template"],
+    readingTime: "10 min read",
+    coverImage: "/images/hero-ai-governance.webp",
+    coverImageAlt: "Professional reviewing AI governance documents",
+    relatedSlugs: ["how-to-create-an-ai-acceptable-use-policy", "ai-governance-framework-practical-guide-for-teams"],
+    content: `
+## Why You Need an AI Acceptable Use Policy
+
+If your company doesn't have a formal AI acceptable use policy, your employees are making their own rules. Some are careful. Many aren't. And when a data breach happens through an AI tool, "we didn't have a policy" is the worst possible answer for auditors, lawyers, and regulators.
+
+An AI acceptable use policy defines:
+- Which AI tools are approved for use
+- What data can and cannot be shared with AI
+- Who is responsible for enforcement
+- What happens when violations occur
+
+## The Template
+
+Here's a practical, battle-tested template. Customize it for your organization.
+
+### 1. Purpose and Scope
+
+*"This policy governs the use of artificial intelligence tools by all employees, contractors, and third parties who access company systems. It applies to all AI tools including but not limited to ChatGPT, Claude, Gemini, Microsoft Copilot, Perplexity, and any AI features embedded in other software."*
+
+### 2. Approved AI Tools
+
+Maintain a list of approved tools. Be specific:
+
+| Tool | Approved For | Restrictions |
+|------|-------------|-------------|
+| ChatGPT (Team plan) | Content drafting, research, coding assistance | No customer data, no financial data |
+| Claude | Technical writing, code review | No confidential projects |
+| Gemini | Research, summarization | No PII |
+| GitHub Copilot | Code completion | No proprietary algorithms |
+
+All other AI tools require IT approval before use.
+
+### 3. Prohibited Data
+
+The following data types must NEVER be entered into any AI tool:
+
+- **Personal Identifiable Information (PII)**: Names, SSNs, dates of birth, addresses, phone numbers
+- **Protected Health Information (PHI)**: Patient records, diagnosis codes, treatment plans
+- **Financial data**: Credit card numbers, bank accounts, transaction records
+- **Credentials**: Passwords, API keys, tokens, connection strings, private keys
+- **Confidential business data**: M&A plans, unreleased financial results, board materials
+- **Client/customer data**: Any data received from clients under NDA or contractual obligation
+
+### 4. Enforcement
+
+*"This policy is enforced through TeamPrompt's DLP scanning, which automatically detects and blocks prohibited data types before they reach AI tools. All AI interactions are logged for audit purposes."*
+
+Enforcement tiers:
+1. **Auto-block**: Highest-risk data (credentials, SSNs, credit cards) is blocked automatically
+2. **Warning**: Medium-risk data (email addresses, internal terms) triggers a warning the user can override
+3. **Auto-redact**: Sensitive data is replaced with safe placeholders before the prompt is sent
+4. **Log-only**: All interactions are logged for review, even when no violation is detected
+
+### 5. Compliance Requirements
+
+List the regulatory frameworks that apply to your organization:
+
+- **HIPAA** (healthcare): No PHI in AI prompts
+- **SOC 2** (tech companies): Audit trail required for all AI interactions
+- **GDPR** (EU customers): No EU personal data transferred to US AI providers without safeguards
+- **PCI-DSS** (payment processing): No cardholder data in AI prompts
+
+### 6. Roles and Responsibilities
+
+- **IT/Security**: Maintain approved tools list, configure DLP rules, review audit logs
+- **Managers**: Ensure team compliance, review violation reports, approve prompt templates
+- **Employees**: Follow this policy, report concerns, use approved templates when available
+- **Compliance**: Conduct periodic audits, update policy as regulations evolve
+
+### 7. Incident Response
+
+When a violation is detected:
+1. The prompt is blocked (or redacted) immediately
+2. The violation is logged with timestamp, user, tool, and matched rule
+3. The user sees an explanation of why it was blocked and what to do instead
+4. Repeat violations are escalated to the user's manager
+5. Serious violations (bulk data exposure) trigger the incident response plan
+
+### 8. Review Cadence
+
+This policy should be reviewed:
+- **Quarterly** for approved tools list (new tools emerge constantly)
+- **Annually** for the full policy
+- **Immediately** when new regulations take effect
+
+## How to Enforce This Policy with TeamPrompt
+
+A policy without enforcement is just a document. TeamPrompt makes enforcement automatic:
+
+1. **AI Tool Policy** — approve/block tools, sync to Cloudflare Gateway for DNS-level enforcement
+2. **DLP Scanning** — 40+ rules + 19 compliance packs scan every prompt in real time
+3. **User Education** — contextual explanations when blocks occur
+4. **Audit Trail** — every interaction logged, exportable for auditors
+
+**Start free** — set up your AI acceptable use policy with enforcement in under 5 minutes.
+    `,
+  },
+  {
+    slug: "chatgpt-vs-claude-security-comparison",
+    title: "ChatGPT vs Claude: Which Is More Secure for Enterprise Teams?",
+    description: "A security-focused comparison of ChatGPT and Claude for enterprise use. Data handling, privacy policies, admin controls, and what both are missing.",
+    publishedAt: "2026-03-28",
+    author: TEAM_AUTHOR,
+    category: "comparison",
+    tags: ["ChatGPT", "Claude", "security", "enterprise", "comparison"],
+    readingTime: "7 min read",
+    coverImage: "/images/hero-office-collab.jpg",
+    coverImageAlt: "Two professionals collaborating at laptop",
+    relatedSlugs: ["ai-dlp-preventing-data-leaks-to-chatgpt-and-claude", "complete-guide-to-ai-security-for-enterprise"],
+    content: `
+## Enterprise Teams Use Both — But Which Is Safer?
+
+Most enterprise teams don't choose one AI tool. They use ChatGPT for some tasks, Claude for others, Gemini for research. The real question isn't which is "more secure" — it's whether either is secure enough on its own.
+
+The short answer: **neither provides sufficient security controls for regulated industries**. Both need an additional governance layer.
+
+## Data Handling Comparison
+
+### ChatGPT (OpenAI)
+- **Data retention**: ChatGPT Team/Enterprise plans don't use conversations for training
+- **Encryption**: Data encrypted in transit (TLS) and at rest (AES-256)
+- **SOC 2**: Type II certified
+- **Data residency**: US-based processing, EU data processing available on Enterprise
+- **Admin controls**: Workspace management, usage analytics (Enterprise only)
+- **DLP**: None built-in
+
+### Claude (Anthropic)
+- **Data retention**: No training on user inputs (Team/Enterprise plans)
+- **Encryption**: TLS in transit, encrypted at rest
+- **SOC 2**: Type II certified
+- **Data residency**: US-based, with options for select regions
+- **Admin controls**: Team management, usage limits
+- **DLP**: None built-in
+
+## What Both Are Missing
+
+Neither ChatGPT nor Claude offers:
+
+1. **Pre-send DLP scanning** — no way to detect sensitive data before it's submitted
+2. **Compliance framework packs** — no HIPAA, PCI-DSS, or GDPR-specific detection
+3. **Cross-tool governance** — each tool is a silo with no unified view
+4. **Prompt library** — no shared, approved templates with version control
+5. **Network-level controls** — no ability to block other AI tools employees might use
+6. **Auto-redaction** — no automatic replacement of sensitive data with placeholders
+
+## The Third Layer: TeamPrompt
+
+TeamPrompt sits between your team and their AI tools — regardless of which tool they're using. It provides the security controls that ChatGPT and Claude don't:
+
+- **Works across both** (and Gemini, Copilot, Perplexity)
+- **Real-time DLP** before any data reaches the AI
+- **19 compliance packs** for regulated industries
+- **Unified audit trail** across all AI tools
+- **Network-level tool policy** via Cloudflare Gateway
+
+## The Verdict
+
+Use both ChatGPT and Claude — each has strengths. But add TeamPrompt as the security and governance layer on top. You get the best of both AI tools with consistent protection across everything.
+
+**Start free with TeamPrompt** — secure your team's AI usage in under 5 minutes.
+    `,
+  },
+  {
+    slug: "what-is-shadow-ai-how-to-detect-and-control",
+    title: "What Is Shadow AI? How to Detect and Control Unauthorized AI Usage",
+    description: "Shadow AI is the new shadow IT. Learn what it is, why it's a growing risk, and how to discover, monitor, and control AI tool usage across your organization.",
+    publishedAt: "2026-03-28",
+    author: TEAM_AUTHOR,
+    category: "insight",
+    tags: ["shadow AI", "AI governance", "security", "enterprise", "detection"],
+    readingTime: "7 min read",
+    coverImage: "/images/hero-tech-workers.jpg",
+    coverImageAlt: "Tech workers in modern office at night",
+    relatedSlugs: ["what-is-shadow-ai-and-how-to-control-it", "ai-governance-framework-practical-guide-for-teams"],
+    content: `
+## What Is Shadow AI?
+
+Shadow AI is the use of artificial intelligence tools by employees without IT approval, oversight, or governance. It's the AI equivalent of shadow IT — and it's happening in every organization.
+
+A 2025 survey found that **73% of employees use AI tools at work**, but only **38% of organizations have formal AI usage policies**. That gap is shadow AI.
+
+## Why Shadow AI Is Dangerous
+
+### 1. Data Exposure
+Employees paste sensitive data into AI tools daily — customer records, financial data, source code, patient information. Once data is submitted to an AI provider, you lose control over it.
+
+### 2. Compliance Violations
+HIPAA, GDPR, SOC 2, and PCI-DSS all have requirements about data handling. Using unapproved AI tools with no controls is a compliance violation waiting to be found.
+
+### 3. No Audit Trail
+When an incident occurs, you need to know: who used which tool, when, and what data was shared. Shadow AI gives you zero visibility.
+
+### 4. Inconsistent Output Quality
+Without shared prompts and standards, every employee writes prompts differently. Output quality varies wildly.
+
+## How to Detect Shadow AI
+
+### Step 1: Network Monitoring
+Use DNS-level monitoring (via Cloudflare Gateway or similar) to see which AI domains your devices are connecting to. You'll likely discover tools you didn't know about.
+
+### Step 2: Browser Extension
+Deploy a browser extension that tracks AI tool usage. TeamPrompt's extension logs which AI tools each user interacts with, how often, and what actions are taken.
+
+### Step 3: Employee Survey
+Ask your team directly: "Which AI tools do you use for work?" The answers will surprise you.
+
+## How to Control Shadow AI
+
+### Approve, Don't Block Everything
+Blocking all AI is counterproductive. Instead:
+1. **Create an approved tools list** — ChatGPT, Claude, Gemini (your vetted choices)
+2. **Block unapproved tools at DNS** — Cloudflare Gateway makes this easy
+3. **Add content-level DLP** — scan what goes into approved tools
+
+### Deploy in Layers
+
+**Layer 1 — Network (Cloudflare Gateway):**
+- Block unapproved AI domains at DNS
+- Covers all devices: browser, apps, mobile
+- Users see a block page explaining which tools are approved
+
+**Layer 2 — Browser (TeamPrompt Extension):**
+- Scan every prompt for sensitive data
+- 40+ detection rules + 19 compliance packs
+- Auto-redact, warn, or block
+
+**Layer 3 — Governance (TeamPrompt Dashboard):**
+- Shared prompt library with approval workflows
+- Audit trail of all AI interactions
+- Compliance reporting with Sankey diagrams and heatmaps
+
+## From Shadow AI to Governed AI
+
+The goal isn't to eliminate AI usage — it's to make it visible, controlled, and compliant. Teams that embrace AI with proper governance outperform those that either block it entirely or ignore the risks.
+
+**Start free with TeamPrompt** — discover and control shadow AI in your organization.
+    `,
+  },
+  {
+    slug: "hipaa-and-ai-complete-guide-for-healthcare-teams",
+    title: "HIPAA and AI: The Complete Guide for Healthcare Teams Using ChatGPT",
+    description: "Can healthcare teams use ChatGPT without violating HIPAA? Yes — with the right controls. Here's how to protect PHI, maintain compliance, and use AI safely.",
+    publishedAt: "2026-03-28",
+    author: TEAM_AUTHOR,
+    category: "guide",
+    tags: ["HIPAA", "healthcare", "AI", "ChatGPT", "PHI", "compliance"],
+    readingTime: "9 min read",
+    coverImage: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1200&q=80&auto=format&fit=crop",
+    coverImageAlt: "Healthcare professional reviewing patient information",
+    relatedSlugs: ["hipaa-compliance-and-ai-what-healthcare-teams-must-know", "ai-governance-for-regulated-industries"],
+    content: `
+## The HIPAA + AI Dilemma
+
+Healthcare professionals see massive potential in AI. ChatGPT can summarize patient notes, draft referral letters, research treatment options, and assist with documentation. But every one of these use cases involves Protected Health Information (PHI).
+
+Under HIPAA, sharing PHI with an unauthorized third party — including an AI provider — is a potential violation. Penalties range from $100 to $50,000 per violation, with annual maximums of $1.5 million per violation category.
+
+## Can Healthcare Teams Use AI Legally?
+
+**Yes — with the right controls.** The key requirements are:
+
+1. **No PHI in prompts** — or PHI must be de-identified before submission
+2. **Business Associate Agreement (BAA)** — if PHI will be processed, the AI provider must sign a BAA
+3. **Audit trail** — document all AI interactions involving clinical workflows
+4. **Access controls** — restrict which staff can use AI and for what purposes
+5. **Incident response** — have a plan for when PHI is inadvertently shared
+
+## The De-Identification Approach (Safest)
+
+The safest approach is to **never send real PHI to AI tools**. Instead:
+
+1. **Detect PHI in real-time** — scan every prompt before it's sent
+2. **Auto-redact** — replace patient names with [PATIENT], MRNs with [MRN], diagnoses with [DIAGNOSIS]
+3. **Send the redacted version** — the AI gets the clinical context without the actual PHI
+4. **Log everything** — maintain an audit trail showing PHI was protected
+
+This is exactly what TeamPrompt's HIPAA compliance pack does.
+
+## What TeamPrompt's HIPAA Pack Detects
+
+The one-click HIPAA compliance pack includes detection rules for:
+
+- **Patient names** in clinical context
+- **Medical Record Numbers** (MRN patterns)
+- **Health Insurance IDs** (member/policy ID patterns)
+- **ICD-10 diagnosis codes** (e.g., J45.20)
+- **Drug/prescription names** with dosage
+- **Facility names** in patient context
+
+Each rule has appropriate severity:
+- **Block**: Patient names, MRNs, insurance IDs (high risk)
+- **Warn**: Diagnosis codes, drug names, facility names (context-dependent)
+
+## Setting Up HIPAA Protection
+
+1. **Install TeamPrompt** on clinical workstations (Chrome, Firefox, or Edge extension)
+2. **Install the HIPAA compliance pack** — Guardrails → Policies → Install HIPAA pack (one click)
+3. **Enable auto-redaction** — Settings → Security → turn on auto-redact
+4. **Enable metadata-only logging** — protects prompt text from being stored while still maintaining an audit trail
+5. **Set up the AI Tool Policy** — approve ChatGPT/Claude, block everything else
+
+## What Auditors Want to See
+
+When HIPAA auditors ask about AI usage, you need to show:
+
+- **Policy documentation** — your AI acceptable use policy
+- **Technical controls** — DLP scanning is active and blocking PHI
+- **Audit trail** — logs of AI interactions with actions taken
+- **Incident tracking** — violations that were caught and remediated
+- **Training evidence** — that staff understand the policy
+
+TeamPrompt's Audit dashboard provides all of this in one view — with CSV/PDF export for audit evidence packages.
+
+## The ROI of Getting This Right
+
+Healthcare organizations that implement proper AI governance:
+- **Avoid HIPAA fines** ($100-$50,000 per violation)
+- **Enable productivity** — clinicians use AI safely instead of being blocked entirely
+- **Build patient trust** — demonstrate that data protection is a priority
+- **Pass audits** — comprehensive evidence of controls and compliance
+
+## Start Protecting PHI in AI Today
+
+TeamPrompt's HIPAA compliance pack is available on all paid plans. Start free with up to 3 users to evaluate.
+
+**Install in under 5 minutes** — no proxy, no VPN, no IT ticket. Just install the extension and enable the HIPAA pack.
+    `,
+  },
   // ── MCP Integration Blog Post ──
   {
     slug: "connect-ai-coding-tools-to-your-prompt-library-with-mcp",

@@ -61,8 +61,11 @@ export async function POST(req: NextRequest) {
 
   // ── Check enterprise DLP status ──
   if (action === "status") {
-    const profiles = await listDlpProfiles(config);
-    const tpProfile = profiles.find((p) => p.name === "TeamPrompt DLP");
+    const listResult = await listDlpProfiles(config);
+    if (!listResult.success) {
+      return NextResponse.json({ error: `Failed to check DLP status: ${listResult.error}` }, { status: 502 });
+    }
+    const tpProfile = listResult.profiles.find((p) => p.name === "TeamPrompt DLP");
     return NextResponse.json({
       configured: !!tpProfile,
       profileId: tpProfile?.id || null,
@@ -98,9 +101,12 @@ export async function POST(req: NextRequest) {
     }
 
     // Clean up existing profiles
-    const existing = await listDlpProfiles(config);
+    const existingResult = await listDlpProfiles(config);
+    if (!existingResult.success) {
+      return NextResponse.json({ error: `Failed to check existing DLP profiles: ${existingResult.error}` }, { status: 502 });
+    }
     for (const profileName of ["TeamPrompt DLP", "TeamPrompt DLP (Warn)"]) {
-      const existingProfile = existing.find((p) => p.name === profileName);
+      const existingProfile = existingResult.profiles.find((p) => p.name === profileName);
       if (existingProfile) {
         const deleteResult = await deleteDlpProfile(config, existingProfile.id);
         if (!deleteResult.success) {
@@ -146,10 +152,12 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Save enterprise status to org settings
+    // Only mark enterprise enabled if at least one profile was successfully created
+    const fullyConfigured = profileIds.length > 0 && warnings.length === 0;
+    const partiallyConfigured = profileIds.length > 0;
     const updatedSettings = {
       ...settings,
-      cloudflare_enterprise_enabled: true,
+      cloudflare_enterprise_enabled: partiallyConfigured,
       cloudflare_dlp_profile_id: profileIds[0] || null,
     };
     await db.from("organizations").update({ settings: updatedSettings }).eq("id", profile.org_id);
@@ -164,6 +172,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
+      fullyConfigured,
       profileIds,
       rulesSynced: blockSynced + warnSynced,
       blockSynced,
@@ -171,7 +180,7 @@ export async function POST(req: NextRequest) {
       redactSkipped: redactCount,
       totalRules: rules.length,
       warnings: warnings.length > 0 ? warnings : undefined,
-      message: `${parts.join("; ")}. ${skippedParts.length > 0 ? `Skipped: ${skippedParts.join(", ")}.` : ""}`,
+      message: `${parts.join("; ")}.${skippedParts.length > 0 ? ` Skipped: ${skippedParts.join(", ")}.` : ""}${!fullyConfigured && partiallyConfigured ? " Some policies had issues — check warnings." : ""}`,
     });
   }
 
@@ -186,9 +195,12 @@ export async function POST(req: NextRequest) {
     }
 
     // Delete DLP profiles (both block and warn)
-    const profiles = await listDlpProfiles(config);
+    const profilesResult = await listDlpProfiles(config);
+    if (!profilesResult.success) {
+      errors.push(`Failed to list DLP profiles for cleanup: ${profilesResult.error}`);
+    }
     for (const profileName of ["TeamPrompt DLP", "TeamPrompt DLP (Warn)"]) {
-      const tpProfile = profiles.find((p) => p.name === profileName);
+      const tpProfile = profilesResult.profiles.find((p) => p.name === profileName);
       if (tpProfile) {
         const delResult = await deleteDlpProfile(config, tpProfile.id);
         if (!delResult.success) {

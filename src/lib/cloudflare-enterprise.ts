@@ -188,11 +188,17 @@ export async function createHttpDlpPolicy(
 /**
  * List existing DLP profiles to check if TeamPrompt profile already exists.
  */
-export async function listDlpProfiles(config: CloudflareConfig): Promise<{ id: string; name: string }[]> {
-  const data = await cfFetch(config, "/dlp/profiles");
-  if (!data.success) return [];
-  const results = data.result as { id: string; name: string }[] | undefined;
-  return (results || []).map((p) => ({ id: p.id, name: p.name }));
+export async function listDlpProfiles(config: CloudflareConfig): Promise<{ success: boolean; profiles: { id: string; name: string }[]; error?: string }> {
+  try {
+    const data = await cfFetch(config, "/dlp/profiles");
+    if (!data.success) {
+      return { success: false, profiles: [], error: data.errors?.[0]?.message || "Failed to list DLP profiles" };
+    }
+    const results = data.result as { id: string; name: string }[] | undefined;
+    return { success: true, profiles: (results || []).map((p) => ({ id: p.id, name: p.name })) };
+  } catch (err) {
+    return { success: false, profiles: [], error: err instanceof Error ? err.message : "Failed to connect to Cloudflare API" };
+  }
 }
 
 /**

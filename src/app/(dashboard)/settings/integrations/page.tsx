@@ -778,6 +778,8 @@ function CloudflareCard() {
         setApiToken("");
         setDlpConfigured(false);
         setDlpLoading(false);
+        setDlpSyncing(false);
+        setDlpRemoving(false);
         setWizardTools({});
         setTools((prev) => prev.map((t) => ({ ...t, blocked: false })));
       } else {

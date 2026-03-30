@@ -232,6 +232,7 @@ function generateJamfConfig(
 function generateGpoConfig(
   level: EnforcementLevel,
   blockedUrls: string[],
+  allowedUrls: string[],
 ) {
   // GPO uses registry keys
   const keys: { path: string; name: string; type: string; value: string; description: string }[] = [
@@ -267,6 +268,23 @@ function generateGpoConfig(
         type: "REG_SZ",
         value: url,
         description: i === 0 ? "Block unapproved AI tool domains (Edge)" : "",
+      });
+    });
+    // URL allowlist for both browsers
+    allowedUrls.forEach((url, i) => {
+      keys.push({
+        path: "HKLM\\SOFTWARE\\Policies\\Google\\Chrome\\URLAllowlist",
+        name: `${i + 1}`,
+        type: "REG_SZ",
+        value: url,
+        description: i === 0 ? "Allow approved AI tools + TeamPrompt (Chrome)" : "",
+      });
+      keys.push({
+        path: "HKLM\\SOFTWARE\\Policies\\Microsoft\\Edge\\URLAllowlist",
+        name: `${i + 1}`,
+        type: "REG_SZ",
+        value: url,
+        description: i === 0 ? "Allow approved AI tools + TeamPrompt (Edge)" : "",
       });
     });
   }
@@ -474,7 +492,7 @@ export function DeploymentTab() {
       case "jamf":
         return JSON.stringify(generateJamfConfig(level, blockedUrls, allowedUrls), null, 2);
       case "gpo": {
-        let keys = generateGpoConfig(level, blockedUrls);
+        let keys = generateGpoConfig(level, blockedUrls, allowedUrls);
         if (!includeEdge) keys = keys.filter((k) => !k.path.includes("Microsoft\\Edge"));
         // Show .reg format for GPO (not JSON)
         return generateRegFile(keys);
@@ -483,10 +501,17 @@ export function DeploymentTab() {
   })();
 
   function handleCopy() {
-    navigator.clipboard.writeText(configOutput);
-    setCopied(true);
-    toast.success("Config copied to clipboard");
-    setTimeout(() => setCopied(false), 2000);
+    if (!navigator.clipboard) {
+      toast.error("Clipboard not available. Use Download instead.");
+      return;
+    }
+    navigator.clipboard.writeText(configOutput).then(() => {
+      setCopied(true);
+      toast.success("Config copied to clipboard");
+      setTimeout(() => setCopied(false), 2000);
+    }).catch(() => {
+      toast.error("Failed to copy. Use Download instead.");
+    });
   }
 
   function handleDownload() {

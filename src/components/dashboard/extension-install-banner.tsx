@@ -64,6 +64,7 @@ export function ExtensionInstallBanner() {
         <p className="text-sm font-medium">Install the TeamPrompt Extension</p>
         <p className="text-xs text-muted-foreground">
           Use your team&apos;s prompts directly in ChatGPT, Claude, Gemini, and more. DLP scanning keeps sensitive data safe.
+          Admins: <a href="/settings/deployment" className="text-primary hover:underline">deploy via MDM</a> for auto-install.
         </p>
       </div>
       <Button asChild size="sm" className="shrink-0">

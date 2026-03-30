@@ -51,7 +51,7 @@ export function SetupChecklist() {
     },
     {
       id: "extension",
-      label: "Install browser extension",
+      label: "Install browser extension (or deploy via MDM)",
       done: extensionDetected,
       href: store.url,
       actionLabel: "Install",

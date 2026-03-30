@@ -39,9 +39,9 @@ const deploymentMethods = [
     description:
       "Auto-install the Chrome extension on every managed Chromebook and browser in your org. Employees get data protection on day one — no opt-in required.",
     steps: [
-      "Upload extension to Chrome Web Store (private or unlisted)",
-      "Add extension ID to auto-install policy in Admin Console",
-      "Extension deploys silently to all managed browsers",
+      "Go to Settings \u2192 Deployment and select Google Admin Console",
+      "Download the generated policy config",
+      "Import in Admin Console \u2014 extension deploys silently to all managed browsers",
     ],
   },
   {
@@ -50,20 +50,20 @@ const deploymentMethods = [
     description:
       "Push the extension via Intune, JAMF, or any device management tool that manages Chrome policies. Works on Windows, macOS, and Linux.",
     steps: [
-      "Configure Chrome extension install policy",
-      "Deploy via Intune configuration profile or Group Policy",
-      "Extension installs automatically on next sync",
+      "Go to Settings \u2192 Deployment and choose your platform",
+      "Choose enforcement level: Monitor, Restrict, or Full Lockdown",
+      "Download the config and apply via Intune, JAMF, or GPO",
     ],
   },
   {
     icon: Server,
-    name: "Self-Managed Policy",
+    name: "Self-Managed / GPO",
     description:
-      "For restricted or air-gapped environments, host and deploy the extension internally using Group Policy or Chrome admin templates.",
+      "For domain-joined Windows PCs or air-gapped environments, deploy via Group Policy with a downloadable .reg file or ADMX templates.",
     steps: [
-      "Download extension package for internal hosting",
-      "Point the update URL to your internal server",
-      "Push via Group Policy or configuration management tool",
+      "Go to Settings \u2192 Deployment and select Windows GPO",
+      "Download the .reg file (ready to import) or configure via ADMX templates",
+      "Push via Group Policy or import directly on each machine",
     ],
   },
 ];
@@ -138,7 +138,7 @@ const faqs = [
   {
     question: "How does auto-install work?",
     answer:
-      "When you add TeamPrompt's extension ID to your Chrome policy (via Google Admin Console, Intune, or Group Policy), the extension installs silently on all managed browsers. Users cannot disable or remove it. Data protection activates immediately — no login or configuration needed on the employee's end.",
+      "Go to Settings \u2192 Deployment, pick your MDM (Google Admin, Intune, JAMF, or GPO), choose an enforcement level, and download the config. Import it into your MDM tool and the extension deploys silently to all managed browsers. Users cannot disable or remove it. The extension auto-updates from Chrome Web Store \u2014 no redeployment needed for updates.",
   },
   {
     question: "Does TeamPrompt see the content of our AI conversations?",
@@ -158,7 +158,7 @@ const faqs = [
   {
     question: "What happens if an employee bypasses the extension?",
     answer:
-      "With auto-install, employees cannot disable or uninstall the extension. For maximum coverage, connect Cloudflare Gateway to block unapproved AI tools at the DNS level — this covers all devices including native apps, mobile, and CLI tools. Even if someone uses an unmanaged browser, the network-level blocking prevents access to unapproved tools.",
+      "With managed deployment, employees cannot disable or uninstall the extension. Full Lockdown mode also disables incognito, developer tools, and guest mode. For maximum coverage, connect Cloudflare Gateway to block unapproved AI tools at the DNS level \u2014 this covers all devices including native apps, mobile, and CLI tools. Even if someone uses an unmanaged browser, the network-level blocking prevents access to unapproved tools.",
   },
   {
     question: "How does the Cloudflare Gateway integration work?",

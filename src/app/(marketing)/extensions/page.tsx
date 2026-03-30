@@ -61,7 +61,7 @@ const howItWorks = [
   {
     step: 1,
     title: "Install the extension",
-    description: "Add TeamPrompt to your browser from your browser's extension store.",
+    description: "Add TeamPrompt from the Chrome Web Store, Firefox Add-ons, or Edge. IT admins can deploy it silently via MDM — no user action needed.",
   },
   {
     step: 2,
@@ -108,6 +108,16 @@ const faqs = [
     question: "Can I use the extension without the web dashboard?",
     answer:
       "The extension works alongside the web dashboard. Admins manage prompts and settings on the dashboard, and team members access them through the extension in their browser.",
+  },
+  {
+    question: "Can I deploy the extension without users installing it?",
+    answer:
+      "Yes. Admins can push the extension to all managed browsers using Google Admin Console, Microsoft Intune, JAMF Pro, or Windows Group Policy. The extension installs silently, can't be uninstalled, and auto-updates. Go to Settings \u2192 Deployment to generate your MDM config.",
+  },
+  {
+    question: "Does the managed deployment need to be updated when the extension updates?",
+    answer:
+      "No. The deployment config tells the browser which extension to install. Updates to the extension itself are delivered automatically via the Chrome Web Store. You only need to re-deploy the config if you change your AI tool approval policy (blocked/allowed tools).",
   },
 ];
 
@@ -211,8 +221,57 @@ export default function ExtensionsPage() {
         </div>
       </section>
 
-      {/* Features */}
+      {/* Managed Deployment */}
       <section className="py-20 sm:py-28 bg-muted/30 border-y border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="max-w-3xl mx-auto text-center mb-14">
+            <SectionLabel className="text-center">Enterprise Deployment</SectionLabel>
+            <h2 className="text-3xl sm:text-4xl font-medium tracking-tight">
+              Deploy to your entire team automatically
+            </h2>
+            <p className="mt-4 text-lg text-muted-foreground">
+              Skip the manual install. Push TeamPrompt to every managed browser in your organization using your existing MDM. Users can&apos;t uninstall or disable it.
+            </p>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 max-w-4xl mx-auto">
+            {[
+              { name: "Google Admin", desc: "Chrome Enterprise via Workspace" },
+              { name: "Microsoft Intune", desc: "Edge & Chrome via Endpoint Manager" },
+              { name: "JAMF Pro", desc: "Chrome & Edge on macOS" },
+              { name: "Windows GPO", desc: "Group Policy for domain-joined PCs" },
+            ].map((p) => (
+              <div key={p.name} className="rounded-xl border border-border bg-card p-4 text-center">
+                <p className="text-sm font-semibold">{p.name}</p>
+                <p className="text-xs text-muted-foreground mt-1">{p.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-10 max-w-2xl mx-auto text-center space-y-4">
+            <div className="grid gap-3 sm:grid-cols-3 text-left">
+              <div className="rounded-lg bg-card border border-border p-3">
+                <p className="text-sm font-semibold">Auto-install</p>
+                <p className="text-xs text-muted-foreground">Extension appears on every managed device. No user action.</p>
+              </div>
+              <div className="rounded-lg bg-card border border-border p-3">
+                <p className="text-sm font-semibold">Tamper-proof</p>
+                <p className="text-xs text-muted-foreground">Users can&apos;t uninstall, disable, or bypass via incognito.</p>
+              </div>
+              <div className="rounded-lg bg-card border border-border p-3">
+                <p className="text-sm font-semibold">Auto-updates</p>
+                <p className="text-xs text-muted-foreground">Extension updates from Chrome Web Store automatically. No redeployment.</p>
+              </div>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Generate your MDM config in <a href="/settings/deployment" className="text-primary hover:underline font-medium">Settings &rarr; Deployment</a> — ready to import in minutes.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Features */}
+      <section className="py-20 sm:py-28">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-14">
             <SectionLabel className="text-center">Features</SectionLabel>

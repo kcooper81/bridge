@@ -5,7 +5,7 @@ export function GetStartedSteps({ dark = false }: { dark?: boolean }) {
     {
       step: "1",
       title: "Install",
-      desc: "Add the browser extension to Chrome, Edge, or Firefox — or use the built-in AI chat. No proxy or VPN needed.",
+      desc: "Add the browser extension to Chrome, Edge, or Firefox — or deploy it to your whole team via MDM. No proxy or VPN needed.",
       icon: Download,
     },
     {

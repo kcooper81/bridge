@@ -99,18 +99,20 @@ export async function POST(req: NextRequest) {
 
     if (!profile?.org_id) return NextResponse.json({ error: "No organization" }, { status: 400 });
 
-    const body = await req.json();
-    const {
-      forceInstalled,
-      incognitoBlocked,
-      devToolsBlocked,
-      extensionVersion,
-      browserName,
-      browserVersion,
-      managedBy,
-    } = body;
+    const body = await req.json().catch(() => null);
+    if (!body || typeof body !== "object") {
+      return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+    }
 
-    // Store compliance report (upsert by user_id)
+    const forceInstalled = typeof body.forceInstalled === "boolean" ? body.forceInstalled : null;
+    const incognitoBlocked = typeof body.incognitoBlocked === "boolean" ? body.incognitoBlocked : null;
+    const devToolsBlocked = typeof body.devToolsBlocked === "boolean" ? body.devToolsBlocked : null;
+    const extensionVersion = typeof body.extensionVersion === "string" ? body.extensionVersion : null;
+    const browserName = typeof body.browserName === "string" ? body.browserName : null;
+    const browserVersion = typeof body.browserVersion === "string" ? body.browserVersion : null;
+    const managedBy = typeof body.managedBy === "string" ? body.managedBy : null;
+
+    // Store compliance report
     // Using conversation_logs as a lightweight store — could be a dedicated table later
     try {
       await db.from("conversation_logs").insert({

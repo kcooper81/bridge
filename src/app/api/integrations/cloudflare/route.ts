@@ -141,7 +141,7 @@ export async function POST(req: NextRequest) {
       const result = await syncBlockedTools(config, blockedToolIds);
 
       if (!result.success) {
-        return NextResponse.json({ error: result.errors[0] || "Failed to sync with Cloudflare" }, { status: 502 });
+        return NextResponse.json({ error: result.errors?.[0] || "Failed to sync with Cloudflare" }, { status: 502 });
       }
 
       await updateOrgSettings(auth.db, auth.orgId, {

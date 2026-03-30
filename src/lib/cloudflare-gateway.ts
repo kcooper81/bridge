@@ -199,7 +199,7 @@ export async function createBlockRule(
   toolName: string,
   domains: string[]
 ): Promise<{ success: boolean; ruleId?: string; error?: string }> {
-  const domainList = domains.map((d) => `"${d}"`).join(" ");
+  const domainList = domains.map((d) => `"${d}"`).join(", ");
   const traffic = `any(dns.domains[*] in {${domainList}})`;
 
   const data = await cfFetch(config, "/gateway/rules", {

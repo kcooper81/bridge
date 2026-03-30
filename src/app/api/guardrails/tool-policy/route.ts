@@ -138,7 +138,7 @@ export async function POST(req: NextRequest) {
             .update({ settings: { ...updatedSettings, cloudflare_blocked_tools: blockedToolIds } })
             .eq("id", profile.org_id);
         } else {
-          cloudflareError = syncResult.errors[0] || "Failed to sync rules to Cloudflare";
+          cloudflareError = syncResult.errors?.[0] || "Failed to sync rules to Cloudflare";
         }
       } else {
         cloudflareError = `Cloudflare connection failed: ${verification.error || "credentials may be expired"}`;

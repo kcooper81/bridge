@@ -651,7 +651,7 @@ export default function GuardrailsPage() {
                 try {
                   const supabase = (await import("@/lib/supabase/client")).createClient();
                   const { data: { session } } = await supabase.auth.getSession();
-                  if (!session) return;
+                  if (!session) { toast.error("Session expired. Please sign in again."); return; }
                   const res = await fetch("/api/guardrails/export?format=json", {
                     headers: { Authorization: `Bearer ${session.access_token}` },
                   });

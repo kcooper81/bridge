@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
     }
 
     const validFormats = ["json", "csv", "regex-list", "suricata"];
-    const formatParam = req.nextUrl.searchParams.get("format") || "json";
+    const formatParam = (req.nextUrl.searchParams.get("format") || "json").toLowerCase();
     if (!validFormats.includes(formatParam)) {
       return NextResponse.json({ error: `Invalid format. Use: ${validFormats.join(", ")}` }, { status: 400 });
     }

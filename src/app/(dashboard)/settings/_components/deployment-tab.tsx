@@ -53,7 +53,7 @@ const EDGE_UPDATE_URL = "https://edge.microsoft.com/extensionwebstorebase/v1/crx
 const PLATFORMS: { id: MdmPlatform; name: string; icon: string; description: string }[] = [
   { id: "google-admin", name: "Google Admin Console", icon: "G", description: "Chrome Enterprise via Google Workspace" },
   { id: "intune", name: "Microsoft Intune", icon: "M", description: "Edge & Chrome via Endpoint Manager" },
-  { id: "jamf", name: "JAMF Pro", icon: "J", description: "Chrome & Edge on macOS" },
+  { id: "jamf", name: "JAMF Pro", icon: "J", description: "Chrome on macOS (managed profiles)" },
   { id: "gpo", name: "Windows GPO", icon: "W", description: "Group Policy for domain-joined PCs" },
 ];
 
@@ -258,32 +258,63 @@ function generateGpoConfig(
         name: `${i + 1}`,
         type: "REG_SZ",
         value: url,
-        description: i === 0 ? "Block unapproved AI tool domains" : "",
+        description: i === 0 ? "Block unapproved AI tool domains (Chrome)" : "",
+      });
+      // Edge URL blocklist
+      keys.push({
+        path: "HKLM\\SOFTWARE\\Policies\\Microsoft\\Edge\\URLBlocklist",
+        name: `${i + 1}`,
+        type: "REG_SZ",
+        value: url,
+        description: i === 0 ? "Block unapproved AI tool domains (Edge)" : "",
       });
     });
   }
 
   if (level === "lockdown") {
+    // Chrome lockdown policies
     keys.push({
       path: "HKLM\\SOFTWARE\\Policies\\Google\\Chrome",
       name: "IncognitoModeAvailability",
       type: "REG_DWORD",
       value: "1",
-      description: "Disable incognito mode",
+      description: "Disable incognito mode (Chrome)",
     });
     keys.push({
       path: "HKLM\\SOFTWARE\\Policies\\Google\\Chrome",
       name: "DeveloperToolsAvailability",
       type: "REG_DWORD",
       value: "2",
-      description: "Disable developer tools",
+      description: "Disable developer tools (Chrome)",
     });
     keys.push({
       path: "HKLM\\SOFTWARE\\Policies\\Google\\Chrome",
       name: "BrowserGuestModeEnabled",
       type: "REG_DWORD",
       value: "0",
-      description: "Disable guest mode",
+      description: "Disable guest mode (Chrome)",
+    });
+    // Edge lockdown policies
+    keys.push({
+      path: "HKLM\\SOFTWARE\\Policies\\Microsoft\\Edge",
+      name: "InPrivateModeAvailability",
+      type: "REG_DWORD",
+      value: "1",
+      description: "Disable InPrivate mode (Edge)",
+    });
+    keys.push({
+      path: "HKLM\\SOFTWARE\\Policies\\Microsoft\\Edge",
+      name: "DeveloperToolsAvailability",
+      type: "REG_DWORD",
+      value: "2",
+      description: "Disable developer tools (Edge)",
+    });
+    keys.push({
+      path: "HKLM\\SOFTWARE\\Policies\\Microsoft\\Edge",
+      name: "BrowserGuestModeEnabled",
+      type: "REG_DWORD",
+      value: "0",
+      description: "Disable guest mode (Edge)",
     });
   }
 
@@ -303,7 +334,9 @@ function generateRegFile(keys: ReturnType<typeof generateGpoConfig>): string {
     lines.push(`[${path}]`);
     for (const entry of entries) {
       if (entry.type === "REG_DWORD") {
-        lines.push(`"${entry.name}"=dword:${parseInt(entry.value).toString(16).padStart(8, "0")}`);
+        const num = parseInt(entry.value, 10);
+        const hex = isNaN(num) ? "00000000" : num.toString(16).padStart(8, "0");
+        lines.push(`"${entry.name}"=dword:${hex}`);
       } else {
         lines.push(`"${entry.name}"="${entry.value.replace(/\\/g, "\\\\")}"`);
       }

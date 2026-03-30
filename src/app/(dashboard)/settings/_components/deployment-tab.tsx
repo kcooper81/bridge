@@ -58,25 +58,46 @@ const PLATFORMS: { id: MdmPlatform; name: string; icon: string; description: str
   { id: "gpo", name: "Windows GPO", icon: "W", description: "Group Policy for domain-joined PCs" },
 ];
 
-const ENFORCEMENT_LEVELS: { id: EnforcementLevel; name: string; description: string; badge: string; badgeClass: string }[] = [
+const ENFORCEMENT_LEVELS: { id: EnforcementLevel; name: string; description: string; details: string[]; badge: string; badgeClass: string }[] = [
   {
     id: "monitor",
     name: "Monitor Only",
-    description: "Force-install the extension but don't block any domains. Users can still access all AI tools — the extension just logs and scans.",
+    description: "Best for rolling out gradually. See how your team uses AI before adding restrictions.",
+    details: [
+      "Extension installs silently — users see it in their toolbar",
+      "DLP scanning runs on every prompt (blocks/warns/redacts per your guardrail rules)",
+      "All AI tool usage is logged to your audit trail",
+      "Users can still visit any AI tool — no domains are blocked",
+      "Users cannot remove or disable the extension",
+    ],
     badge: "Low",
     badgeClass: "bg-blue-500/10 text-blue-600 border-0",
   },
   {
     id: "restrict",
     name: "Restrict Unapproved Tools",
-    description: "Force-install the extension and block unapproved AI tool domains in the browser. Users can only reach approved tools.",
+    description: "Block unapproved AI tools in the browser while allowing approved ones through.",
+    details: [
+      "Everything in Monitor, plus:",
+      "Unapproved AI tool domains are blocked — users see \"blocked by your organization\"",
+      "Approved tools (ChatGPT, Claude, etc.) work normally with DLP scanning active",
+      "Users can still use incognito mode (extension runs there too)",
+      "URL rules update when you change your tool policy and re-download the config",
+    ],
     badge: "Medium",
     badgeClass: "bg-amber-500/10 text-amber-600 border-0",
   },
   {
     id: "lockdown",
     name: "Full Lockdown",
-    description: "Force-install extension, block unapproved tools, disable incognito mode, prevent extension removal, and disable developer tools.",
+    description: "Maximum enforcement. No workarounds possible within the managed browser.",
+    details: [
+      "Everything in Restrict, plus:",
+      "Incognito / InPrivate mode is completely disabled",
+      "Developer tools are disabled (no console access to bypass)",
+      "All other browser extensions are blocked (only TeamPrompt allowed)",
+      "Guest mode is disabled — users must use their managed profile",
+    ],
     badge: "High",
     badgeClass: "bg-red-500/10 text-red-600 border-0",
   },
@@ -743,6 +764,31 @@ export function DeploymentTab() {
                 </button>
               ))}
             </div>
+
+            {/* What this level does */}
+            {(() => {
+              const selected = ENFORCEMENT_LEVELS.find((l) => l.id === level);
+              if (!selected) return null;
+              return (
+                <div className="rounded-xl border border-primary/20 bg-primary/[0.02] p-3">
+                  <p className="text-xs font-semibold mb-2">What your users will experience:</p>
+                  <ul className="space-y-1.5">
+                    {selected.details.map((d, i) => (
+                      <li key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
+                        {d.endsWith(":") ? (
+                          <span className="font-medium text-foreground/70">{d}</span>
+                        ) : (
+                          <>
+                            <CheckCircle2 className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
+                            <span>{d}</span>
+                          </>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })()}
 
             {/* Policy status */}
             {(level === "restrict" || level === "lockdown") && !policy?.policyEnabled && (

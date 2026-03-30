@@ -850,6 +850,9 @@ function CloudflareCard() {
                   <p className="text-[11px] text-muted-foreground">Go to <a href="https://dash.cloudflare.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">dash.cloudflare.com</a>. Your Account ID is on the right side of the main page — a long string like <code className="bg-muted px-1 py-0.5 rounded text-[10px]">a1b2c3d4e5f6g7h8...</code>. Click it to copy.</p>
                 </div>
 
+                <p className="text-[10px] text-muted-foreground">
+                  Need more detail? See our <a href="/help/security-rules#how-do-i-set-up-cloudflare-gateway-complete-guide" className="text-primary hover:underline">complete setup guide</a>.
+                </p>
                 <div className="flex gap-2">
                   <Button size="sm" className="flex-1" onClick={() => setWizardStep(2)}>
                     I have my Account ID and Token

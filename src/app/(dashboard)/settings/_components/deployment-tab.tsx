@@ -11,9 +11,10 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import {
   AlertTriangle,
+  ArrowLeft,
+  ArrowRight,
   Check,
   CheckCircle2,
-  ChevronDown,
   ChevronRight,
   ClipboardCopy,
   Download,
@@ -428,14 +429,21 @@ const DEPLOYMENT_GUIDES: Record<MdmPlatform, { title: string; steps: { text: str
 
 // ── Component ──
 
+const WIZARD_STEPS = [
+  { id: 1, label: "Platform", short: "MDM" },
+  { id: 2, label: "Enforcement", short: "Level" },
+  { id: 3, label: "Config", short: "Config" },
+  { id: 4, label: "Deploy", short: "Deploy" },
+];
+
 export function DeploymentTab() {
   const { currentUserRole } = useOrg();
+  const [step, setStep] = useState(1);
   const [platform, setPlatform] = useState<MdmPlatform>("google-admin");
   const [level, setLevel] = useState<EnforcementLevel>("restrict");
   const [policy, setPolicy] = useState<PolicyState | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [expandedGuide, setExpandedGuide] = useState(false);
   const [copied, setCopied] = useState(false);
   const [includeEdge, setIncludeEdge] = useState(true);
 
@@ -586,6 +594,10 @@ export function DeploymentTab() {
 
   const blockedCount = policy?.tools.filter((t) => !t.approved).length || 0;
   const approvedCount = policy?.tools.filter((t) => t.approved).length || 0;
+  const platformName = PLATFORMS.find((p) => p.id === platform)?.name || "";
+  const levelName = ENFORCEMENT_LEVELS.find((l) => l.id === level)?.name || "";
+  const guide = DEPLOYMENT_GUIDES[platform];
+  const showEdgeToggle = platform === "intune" || platform === "gpo";
 
   return (
     <div className="space-y-6">
@@ -596,254 +608,296 @@ export function DeploymentTab() {
           Managed Browser Deployment
         </h2>
         <p className="text-sm text-muted-foreground mt-1">
-          Generate browser policies that force-install the TeamPrompt extension and enforce your AI tool policy — no manual install needed. Users can&apos;t remove the extension or bypass restrictions.
+          Push TeamPrompt to every managed browser — users can&apos;t remove or disable it.
         </p>
       </div>
 
-      {/* Policy sync status */}
-      {policy?.policyEnabled ? (
-        <Card className="border-emerald-500/20 bg-emerald-500/[0.02]">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/10">
-                <ShieldCheck className="h-5 w-5 text-emerald-500" />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium">Tool Policy Active</p>
-                <p className="text-xs text-muted-foreground">
-                  {approvedCount} approved, {blockedCount} blocked. Browser config will enforce these restrictions.
-                </p>
-              </div>
-              <Button variant="outline" size="sm" className="text-xs" asChild>
-                <a href="/guardrails">Edit Policy</a>
-              </Button>
+      {/* Progress bar */}
+      <div className="flex items-center gap-1">
+        {WIZARD_STEPS.map((s, i) => (
+          <div key={s.id} className="flex items-center flex-1">
+            <button
+              onClick={() => setStep(s.id)}
+              className={cn(
+                "flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium transition-all w-full",
+                step === s.id
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : s.id < step
+                    ? "bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20"
+                    : "bg-muted/50 text-muted-foreground hover:bg-muted"
+              )}
+            >
+              <span className={cn(
+                "flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold shrink-0",
+                step === s.id
+                  ? "bg-primary-foreground/20 text-primary-foreground"
+                  : s.id < step
+                    ? "bg-emerald-500/20 text-emerald-600"
+                    : "bg-muted-foreground/10 text-muted-foreground"
+              )}>
+                {s.id < step ? <Check className="h-3 w-3" /> : s.id}
+              </span>
+              <span className="hidden sm:inline">{s.label}</span>
+              <span className="sm:hidden">{s.short}</span>
+            </button>
+            {i < WIZARD_STEPS.length - 1 && (
+              <ChevronRight className={cn("h-3.5 w-3.5 shrink-0 mx-0.5", s.id < step ? "text-emerald-400" : "text-muted-foreground/30")} />
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* ── Step 1: Platform ── */}
+      {step === 1 && (
+        <Card>
+          <CardContent className="p-5 space-y-4">
+            <div>
+              <p className="text-sm font-semibold">Which MDM does your organization use?</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                This determines the config format. If you&apos;re not sure, ask your IT team.
+              </p>
             </div>
+
+            <div className="grid gap-2 sm:grid-cols-2">
+              {PLATFORMS.map((p) => (
+                <button
+                  key={p.id}
+                  onClick={() => setPlatform(p.id)}
+                  className={cn(
+                    "flex items-center gap-3 rounded-xl border px-4 py-3 text-left transition-all",
+                    platform === p.id
+                      ? "border-primary bg-primary/5 shadow-sm"
+                      : "border-border hover:border-primary/30 hover:bg-muted/30"
+                  )}
+                >
+                  <div className={cn(
+                    "flex h-9 w-9 items-center justify-center rounded-lg text-sm font-bold shrink-0",
+                    platform === p.id ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                  )}>
+                    {p.icon}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium">{p.name}</p>
+                    <p className="text-[10px] text-muted-foreground">{p.description}</p>
+                  </div>
+                  {platform === p.id && <Check className="h-4 w-4 text-primary shrink-0 ml-auto" />}
+                </button>
+              ))}
+            </div>
+
+            {/* Edge toggle for Intune/GPO */}
+            {showEdgeToggle && (
+              <div className="flex items-center gap-3 rounded-lg border border-border px-4 py-2.5">
+                <Switch checked={includeEdge} onCheckedChange={setIncludeEdge} />
+                <div>
+                  <p className="text-xs font-medium">Include Microsoft Edge policies</p>
+                  <p className="text-[10px] text-muted-foreground">Apply the same rules to Edge alongside Chrome</p>
+                </div>
+              </div>
+            )}
+
+            <Button className="w-full" onClick={() => setStep(2)}>
+              Continue
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
           </CardContent>
         </Card>
-      ) : (
-        <Card className="border-amber-500/20 bg-amber-500/[0.02]">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500/10">
-                <AlertTriangle className="h-5 w-5 text-amber-500" />
+      )}
+
+      {/* ── Step 2: Enforcement level ── */}
+      {step === 2 && (
+        <Card>
+          <CardContent className="p-5 space-y-4">
+            <div>
+              <p className="text-sm font-semibold">How strict should the policy be?</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                You can change this later by re-downloading the config.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              {ENFORCEMENT_LEVELS.map((l) => (
+                <button
+                  key={l.id}
+                  onClick={() => setLevel(l.id)}
+                  className={cn(
+                    "flex items-start gap-3 w-full rounded-xl border px-4 py-3 text-left transition-all",
+                    level === l.id
+                      ? "border-primary bg-primary/5 shadow-sm"
+                      : "border-border hover:border-primary/30 hover:bg-muted/30"
+                  )}
+                >
+                  <div className={cn(
+                    "flex h-5 w-5 items-center justify-center rounded-full border-2 shrink-0 mt-0.5",
+                    level === l.id ? "border-primary bg-primary" : "border-muted-foreground/30"
+                  )}>
+                    {level === l.id && <Check className="h-3 w-3 text-primary-foreground" />}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-medium">{l.name}</p>
+                      <Badge className={cn("text-[10px]", l.badgeClass)}>{l.badge}</Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5">{l.description}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            {/* Policy status */}
+            {(level === "restrict" || level === "lockdown") && !policy?.policyEnabled && (
+              <div className="flex items-center gap-3 rounded-lg border border-amber-500/20 bg-amber-500/5 px-4 py-3">
+                <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0" />
+                <div className="flex-1">
+                  <p className="text-xs font-medium text-amber-600">No tool policy set</p>
+                  <p className="text-[10px] text-muted-foreground">URL blocking requires an active tool policy. The config will still force-install the extension.</p>
+                </div>
+                <Button variant="outline" size="sm" className="text-xs shrink-0" asChild>
+                  <a href="/guardrails">Set Up</a>
+                </Button>
               </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium">No Tool Policy Set</p>
+            )}
+
+            {(level === "restrict" || level === "lockdown") && policy?.policyEnabled && (
+              <div className="flex items-center gap-3 rounded-lg border border-emerald-500/20 bg-emerald-500/5 px-4 py-2.5">
+                <ShieldCheck className="h-4 w-4 text-emerald-500 shrink-0" />
                 <p className="text-xs text-muted-foreground">
-                  Enable an AI tool restriction policy first to generate URL block/allow rules. Without it, the browser config will only force-install the extension.
+                  <strong className="text-emerald-600">{approvedCount} approved</strong>, <strong className="text-red-500">{blockedCount} blocked</strong> tools will be enforced in the browser.
                 </p>
               </div>
-              <Button variant="outline" size="sm" className="text-xs" asChild>
-                <a href="/guardrails">Set Up Policy</a>
+            )}
+
+            <div className="flex gap-2">
+              <Button variant="outline" className="flex-1" onClick={() => setStep(1)}>
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back
+              </Button>
+              <Button className="flex-1" onClick={() => setStep(3)}>
+                Continue
+                <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </div>
           </CardContent>
         </Card>
       )}
 
-      {/* Step 1: Choose platform */}
-      <div>
-        <p className="text-sm font-semibold mb-3 flex items-center gap-2">
-          <Badge variant="outline" className="h-5 w-5 flex items-center justify-center p-0 text-[10px]">1</Badge>
-          Choose your MDM platform
-        </p>
-        <div className="grid gap-2 sm:grid-cols-2">
-          {PLATFORMS.map((p) => (
-            <button
-              key={p.id}
-              onClick={() => setPlatform(p.id)}
-              className={cn(
-                "flex items-center gap-3 rounded-xl border px-4 py-3 text-left transition-all",
-                platform === p.id
-                  ? "border-primary bg-primary/5 shadow-sm"
-                  : "border-border hover:border-primary/30 hover:bg-muted/30"
-              )}
-            >
-              <div className={cn(
-                "flex h-9 w-9 items-center justify-center rounded-lg text-sm font-bold shrink-0",
-                platform === p.id ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
-              )}>
-                {p.icon}
-              </div>
-              <div className="min-w-0">
-                <p className="text-sm font-medium">{p.name}</p>
-                <p className="text-[10px] text-muted-foreground">{p.description}</p>
-              </div>
-              {platform === p.id && <Check className="h-4 w-4 text-primary shrink-0 ml-auto" />}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Step 2: Enforcement level */}
-      <div>
-        <p className="text-sm font-semibold mb-3 flex items-center gap-2">
-          <Badge variant="outline" className="h-5 w-5 flex items-center justify-center p-0 text-[10px]">2</Badge>
-          Choose enforcement level
-        </p>
-        <div className="space-y-2">
-          {ENFORCEMENT_LEVELS.map((l) => (
-            <button
-              key={l.id}
-              onClick={() => setLevel(l.id)}
-              className={cn(
-                "flex items-start gap-3 w-full rounded-xl border px-4 py-3 text-left transition-all",
-                level === l.id
-                  ? "border-primary bg-primary/5 shadow-sm"
-                  : "border-border hover:border-primary/30 hover:bg-muted/30"
-              )}
-            >
-              <div className={cn(
-                "flex h-5 w-5 items-center justify-center rounded-full border-2 shrink-0 mt-0.5",
-                level === l.id ? "border-primary bg-primary" : "border-muted-foreground/30"
-              )}>
-                {level === l.id && <Check className="h-3 w-3 text-primary-foreground" />}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <p className="text-sm font-medium">{l.name}</p>
-                  <Badge className={cn("text-[10px]", l.badgeClass)}>{l.badge}</Badge>
-                </div>
-                <p className="text-xs text-muted-foreground mt-0.5">{l.description}</p>
-              </div>
-            </button>
-          ))}
-        </div>
-
-        {/* Edge toggle */}
-        {(platform === "intune" || platform === "gpo") && (
-          <div className="flex items-center gap-3 mt-3 rounded-lg border border-border px-4 py-2.5">
-            <Switch checked={includeEdge} onCheckedChange={setIncludeEdge} />
-            <div>
-              <p className="text-xs font-medium">Include Microsoft Edge policies</p>
-              <p className="text-[10px] text-muted-foreground">Apply the same rules to Edge alongside Chrome</p>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Step 3: Config output */}
-      <div>
-        <p className="text-sm font-semibold mb-3 flex items-center gap-2">
-          <Badge variant="outline" className="h-5 w-5 flex items-center justify-center p-0 text-[10px]">3</Badge>
-          Your browser policy config
-        </p>
-
-        {/* What's included summary */}
-        <div className="rounded-xl border border-border p-3 mb-3">
-          <p className="text-xs font-semibold mb-2">This config will:</p>
-          <div className="grid gap-1.5 sm:grid-cols-2">
-            <div className="flex items-center gap-2 text-xs">
-              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
-              <span>Force-install TeamPrompt extension</span>
-            </div>
-            <div className="flex items-center gap-2 text-xs">
-              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
-              <span>Pin extension to toolbar</span>
-            </div>
-            {(level === "restrict" || level === "lockdown") && policy?.policyEnabled && (
-              <>
-                <div className="flex items-center gap-2 text-xs">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
-                  <span>Block {blockedCount} unapproved AI tool domains</span>
-                </div>
-                <div className="flex items-center gap-2 text-xs">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
-                  <span>Allow {approvedCount} approved tools + teamprompt.app</span>
-                </div>
-              </>
-            )}
-            {(level === "restrict" || level === "lockdown") && !policy?.policyEnabled && (
-              <div className="flex items-center gap-2 text-xs text-amber-600">
-                <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
-                <span>No URL rules — enable tool policy first</span>
-              </div>
-            )}
-            {level === "lockdown" && (
-              <>
-                <div className="flex items-center gap-2 text-xs">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
-                  <span>Disable incognito / InPrivate mode</span>
-                </div>
-                <div className="flex items-center gap-2 text-xs">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
-                  <span>Disable developer tools</span>
-                </div>
-                <div className="flex items-center gap-2 text-xs">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
-                  <span>Block all other extensions</span>
-                </div>
-                <div className="flex items-center gap-2 text-xs">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
-                  <span>Disable guest mode</span>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* Config preview */}
-        <Card className="overflow-hidden">
-          <div className="flex items-center justify-between border-b border-border px-4 py-2 bg-muted/30">
-            <p className="text-xs font-medium text-muted-foreground">
-              {platform === "gpo" ? "Windows Registry (.reg)" : `${PLATFORMS.find((p) => p.id === platform)?.name} config`}
-            </p>
-            <div className="flex gap-1.5">
-              <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={handleCopy}>
-                {copied ? <Check className="mr-1.5 h-3 w-3" /> : <ClipboardCopy className="mr-1.5 h-3 w-3" />}
-                {copied ? "Copied" : "Copy"}
-              </Button>
-              <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={handleDownload}>
-                <Download className="mr-1.5 h-3 w-3" />
-                {platform === "gpo" ? "Download .reg" : "Download"}
-              </Button>
-            </div>
-          </div>
-          <pre className="p-4 text-[11px] leading-relaxed overflow-x-auto max-h-80 overflow-y-auto bg-background">
-            {configOutput}
-          </pre>
-        </Card>
-      </div>
-
-      {/* Step 4: Deployment guide */}
-      <div>
-        <p className="text-sm font-semibold mb-3 flex items-center gap-2">
-          <Badge variant="outline" className="h-5 w-5 flex items-center justify-center p-0 text-[10px]">4</Badge>
-          Deploy to your organization
-        </p>
-
+      {/* ── Step 3: Config output ── */}
+      {step === 3 && (
         <Card>
-          <button
-            className="w-full flex items-center justify-between px-4 py-3 text-left"
-            onClick={() => setExpandedGuide(!expandedGuide)}
-          >
-            <div className="flex items-center gap-2">
-              {expandedGuide ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-              <p className="text-sm font-medium">{DEPLOYMENT_GUIDES[platform].title}</p>
+          <CardContent className="p-5 space-y-4">
+            <div>
+              <p className="text-sm font-semibold">Your {platformName} config is ready</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Copy or download, then import into {platformName}.
+              </p>
             </div>
-            <Badge variant="outline" className="text-[10px]">{DEPLOYMENT_GUIDES[platform].steps.length} steps</Badge>
-          </button>
 
-          {expandedGuide && (
-            <CardContent className="pt-0 pb-4">
+            {/* What's included */}
+            <div className="rounded-xl border border-border p-3">
+              <p className="text-xs font-semibold mb-2">This config will:</p>
+              <div className="grid gap-1.5 sm:grid-cols-2">
+                <div className="flex items-center gap-2 text-xs">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                  <span>Force-install TeamPrompt extension</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                  <span>Pin extension to toolbar</span>
+                </div>
+                {(level === "restrict" || level === "lockdown") && policy?.policyEnabled && (
+                  <>
+                    <div className="flex items-center gap-2 text-xs">
+                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                      <span>Block {blockedCount} unapproved domains</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs">
+                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                      <span>Allow {approvedCount} approved tools</span>
+                    </div>
+                  </>
+                )}
+                {level === "lockdown" && (
+                  <>
+                    <div className="flex items-center gap-2 text-xs">
+                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                      <span>Disable incognito{showEdgeToggle ? " / InPrivate" : ""}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs">
+                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                      <span>Disable dev tools + guest mode</span>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Config preview */}
+            <div className="rounded-xl border border-border overflow-hidden">
+              <div className="flex items-center justify-between border-b border-border px-4 py-2 bg-muted/30">
+                <p className="text-xs font-medium text-muted-foreground">
+                  {platform === "gpo" ? "Windows Registry (.reg)" : `${platformName} config`}
+                </p>
+                <div className="flex gap-1.5">
+                  <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={handleCopy}>
+                    {copied ? <Check className="mr-1.5 h-3 w-3" /> : <ClipboardCopy className="mr-1.5 h-3 w-3" />}
+                    {copied ? "Copied" : "Copy"}
+                  </Button>
+                  <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={handleDownload}>
+                    <Download className="mr-1.5 h-3 w-3" />
+                    {platform === "gpo" ? ".reg file" : "Download"}
+                  </Button>
+                </div>
+              </div>
+              <pre className="p-4 text-[11px] leading-relaxed overflow-x-auto max-h-64 overflow-y-auto bg-background">
+                {configOutput}
+              </pre>
+            </div>
+
+            <div className="flex gap-2">
+              <Button variant="outline" className="flex-1" onClick={() => setStep(2)}>
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back
+              </Button>
+              <Button className="flex-1" onClick={() => setStep(4)}>
+                I&apos;ve downloaded the config
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* ── Step 4: Deploy + Verify ── */}
+      {step === 4 && (
+        <div className="space-y-4">
+          {/* Deployment guide */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm">{guide.title}</CardTitle>
+              <p className="text-xs text-muted-foreground">
+                Using: <strong>{platformName}</strong> &middot; <strong>{levelName}</strong>
+                {showEdgeToggle && <> &middot; Edge: <strong>{includeEdge ? "Yes" : "No"}</strong></>}
+              </p>
+            </CardHeader>
+            <CardContent className="pt-0">
               <ol className="space-y-3">
-                {DEPLOYMENT_GUIDES[platform].steps.map((step, i) => (
+                {guide.steps.map((s, i) => (
                   <li key={i} className="flex gap-3">
                     <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary text-[10px] font-bold shrink-0 mt-0.5">
                       {i + 1}
                     </span>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm">
-                        {step.text}
-                        {step.link && (
-                          <a href={step.link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-0.5 ml-1 text-primary hover:underline">
+                        {s.text}
+                        {s.link && (
+                          <a href={s.link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-0.5 ml-1 text-primary hover:underline">
                             <ExternalLink className="h-3 w-3" />
                           </a>
                         )}
                       </p>
-                      {step.detail && (
+                      {s.detail && (
                         <p className="text-xs text-muted-foreground mt-1 rounded-md bg-muted/50 px-2.5 py-1.5 font-mono break-all">
-                          {step.detail}
+                          {s.detail}
                         </p>
                       )}
                     </div>
@@ -851,72 +905,84 @@ export function DeploymentTab() {
                 ))}
               </ol>
             </CardContent>
-          )}
-        </Card>
-      </div>
+          </Card>
 
-      {/* Verification */}
-      <Card className="bg-muted/30 border-border/50">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm flex items-center gap-2">
-            <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-            Verify Deployment
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="text-xs text-muted-foreground space-y-2">
-          <p>After deploying the policy, verify it&apos;s working on a test device:</p>
-          <ol className="space-y-1.5 list-decimal list-inside">
-            <li>Open {platform === "intune" || platform === "gpo" ? "Chrome or Edge" : "Chrome"} on a managed device</li>
-            <li>Check <code className="bg-muted px-1.5 py-0.5 rounded text-[10px]">{platform === "intune" || platform === "gpo" ? "chrome://extensions (or edge://extensions)" : "chrome://extensions"}</code> — TeamPrompt should appear with &ldquo;Installed by your organization&rdquo; and no remove button</li>
-            <li>Check <code className="bg-muted px-1.5 py-0.5 rounded text-[10px]">{platform === "intune" || platform === "gpo" ? "chrome://policy (or edge://policy)" : "chrome://policy"}</code> — your policies should be listed</li>
-            {(level === "restrict" || level === "lockdown") && policy?.policyEnabled && (
-              <li>Try visiting a blocked AI tool domain — should show a &ldquo;blocked by your organization&rdquo; error page</li>
-            )}
-            {level === "lockdown" && (
-              <>
-                <li>Try opening an incognito{platform === "intune" || platform === "gpo" ? "/InPrivate" : ""} window — should be greyed out or show &ldquo;disabled by your organization&rdquo;</li>
-                <li>Try pressing F12 for dev tools — should not open</li>
-              </>
-            )}
-            <li>Visit an approved AI tool and type something — the TeamPrompt extension overlay should appear, confirming DLP scanning is active</li>
-          </ol>
-        </CardContent>
-      </Card>
+          {/* Verification checklist */}
+          <Card className="bg-muted/30 border-border/50">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                Verify it&apos;s working
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-xs text-muted-foreground space-y-2">
+              <p>After deploying, check a managed device:</p>
+              <ol className="space-y-1.5 list-decimal list-inside">
+                <li>Open {showEdgeToggle ? "Chrome or Edge" : "Chrome"} on a managed device</li>
+                <li>Go to <code className="bg-muted px-1.5 py-0.5 rounded text-[10px]">{showEdgeToggle ? "chrome://extensions (or edge://extensions)" : "chrome://extensions"}</code> — TeamPrompt shows &ldquo;Installed by your organization&rdquo;</li>
+                <li>Go to <code className="bg-muted px-1.5 py-0.5 rounded text-[10px]">{showEdgeToggle ? "chrome://policy (or edge://policy)" : "chrome://policy"}</code> — your policies are listed</li>
+                {(level === "restrict" || level === "lockdown") && policy?.policyEnabled && (
+                  <li>Visit a blocked AI tool — should show &ldquo;blocked by your organization&rdquo;</li>
+                )}
+                {level === "lockdown" && (
+                  <>
+                    <li>Try incognito{showEdgeToggle ? "/InPrivate" : ""} — should be disabled</li>
+                    <li>Try F12 for dev tools — should not open</li>
+                  </>
+                )}
+                <li>Visit an approved AI tool and type — the TeamPrompt overlay should appear</li>
+              </ol>
+            </CardContent>
+          </Card>
 
-      {/* FAQ */}
-      <div className="space-y-2">
-        <p className="text-sm font-semibold">Common Questions</p>
-        {[
-          {
-            q: "Does this work on personal (BYOD) devices?",
-            a: "Chrome policies apply to managed Chrome profiles, not the entire browser. If your org uses Google Workspace, policies apply when the user signs into their work Chrome profile — even on a personal laptop. Intune/JAMF require device enrollment.",
-          },
-          {
-            q: "What happens if a user uses Firefox or Safari?",
-            a: "Chrome/Edge policies only apply to Chrome and Edge. For Firefox, you'd need a separate deployment via Firefox Enterprise policies (similar format). Safari doesn't support managed extensions. For full coverage, combine browser policies with Cloudflare DNS blocking.",
-          },
-          {
-            q: "How often should I re-generate the config?",
-            a: "Re-download whenever you change your AI tool approval policy (add/remove approved tools). The extension itself auto-updates from the Chrome Web Store — no redeployment needed for extension updates.",
-          },
-          {
-            q: "Can users bypass URL blocking with a VPN?",
-            a: "Browser-level URL blocking happens before the network request, so VPNs don't bypass it. However, users could use a non-managed browser. For airtight enforcement, combine with Cloudflare DNS blocking (covers all browsers and apps on the network).",
-          },
-          {
-            q: "What's the difference between this and Cloudflare?",
-            a: "Browser policies enforce rules in Chrome/Edge specifically (extension install + URL blocking). Cloudflare enforces at the DNS/network level (covers all apps, all browsers). Use both for defense-in-depth, or browser policies alone if you don't need network-level enforcement. Set up Cloudflare in Settings → Integrations.",
-          },
-        ].map((faq, i) => (
-          <details key={i} className="group rounded-lg border border-border">
-            <summary className="flex cursor-pointer items-center justify-between px-4 py-2.5 text-sm font-medium">
-              {faq.q}
-              <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-open:rotate-90" />
-            </summary>
-            <p className="px-4 pb-3 text-xs text-muted-foreground leading-relaxed">{faq.a}</p>
-          </details>
-        ))}
-      </div>
+          {/* Navigation */}
+          <div className="flex gap-2">
+            <Button variant="outline" className="flex-1" onClick={() => setStep(3)}>
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to config
+            </Button>
+            <Button variant="outline" className="flex-1" onClick={handleDownload}>
+              <Download className="mr-2 h-4 w-4" />
+              Download config again
+            </Button>
+          </div>
+
+          {/* FAQ */}
+          <div className="space-y-2 pt-2">
+            <p className="text-sm font-semibold">Common Questions</p>
+            {[
+              {
+                q: "Does this work on personal (BYOD) devices?",
+                a: "Chrome policies apply to managed Chrome profiles, not the entire browser. If your org uses Google Workspace, policies apply when the user signs into their work Chrome profile — even on a personal laptop. Intune/JAMF require device enrollment.",
+              },
+              {
+                q: "What happens if a user uses Firefox or Safari?",
+                a: "Chrome/Edge policies only apply to Chrome and Edge. For Firefox, you'd need a separate deployment via Firefox Enterprise policies (similar format). Safari doesn't support managed extensions. For full coverage, combine browser policies with Cloudflare DNS blocking.",
+              },
+              {
+                q: "How often should I re-generate the config?",
+                a: "Re-download whenever you change your AI tool approval policy (add/remove approved tools). The extension itself auto-updates from the Chrome Web Store — no redeployment needed for extension updates.",
+              },
+              {
+                q: "Can users bypass URL blocking with a VPN?",
+                a: "Browser-level URL blocking happens before the network request, so VPNs don't bypass it. However, users could use a non-managed browser. For airtight enforcement, combine with Cloudflare DNS blocking (covers all browsers and apps on the network).",
+              },
+              {
+                q: "What's the difference between this and Cloudflare?",
+                a: "Browser policies enforce rules in Chrome/Edge specifically (extension install + URL blocking). Cloudflare enforces at the DNS/network level (covers all apps, all browsers). Use both for defense-in-depth, or browser policies alone if you don't need network-level enforcement. Set up Cloudflare in Settings \u2192 Integrations.",
+              },
+            ].map((faq, i) => (
+              <details key={i} className="group rounded-lg border border-border">
+                <summary className="flex cursor-pointer items-center justify-between px-4 py-2.5 text-sm font-medium">
+                  {faq.q}
+                  <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-open:rotate-90" />
+                </summary>
+                <p className="px-4 pb-3 text-xs text-muted-foreground leading-relaxed">{faq.a}</p>
+              </details>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

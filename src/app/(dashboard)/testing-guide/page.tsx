@@ -26,6 +26,10 @@ import {
   ArrowRight,
   Eye,
   Zap,
+  Cloud,
+  Download,
+  ShieldAlert,
+  Wrench,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -1031,8 +1035,17 @@ export default function TestingGuidePage() {
         { title: "Super Admin Bypass", prefix: "SA", icon: <Shield className="h-4 w-4" /> },
         { title: "Paid Plan Users", prefix: "PP", icon: <CheckCircle2 className="h-4 w-4" /> },
         { title: "Edge Cases", prefix: "EC", icon: <AlertTriangle className="h-4 w-4" /> },
+        { title: "Guardrails — Tool Policy", prefix: "TOOL", icon: <ShieldAlert className="h-4 w-4" /> },
+        { title: "Guardrails — Policy Export", prefix: "EXPORT", icon: <Download className="h-4 w-4" /> },
+        { title: "Cloudflare Gateway — Connection & DNS Blocking", prefix: "CF-W", icon: <Cloud className="h-4 w-4" /> },
+        { title: "Cloudflare Gateway — Basic", prefix: "CF-", exact: ["CF-1", "CF-2"], icon: <Cloud className="h-4 w-4" /> },
+        { title: "Cloudflare — Enterprise DLP (Network Content Scanning)", prefix: "CF-DLP", icon: <Shield className="h-4 w-4" /> },
+        { title: "Cloudflare — Error Handling & Fallbacks", prefix: "CF-ERR", icon: <AlertTriangle className="h-4 w-4" /> },
       ].map((group) => {
-        const steps = TEST_STEPS.filter((s) => s.id.startsWith(group.prefix));
+        const g = group as { title: string; prefix: string; icon: React.ReactNode; exact?: string[] };
+        const steps = g.exact
+          ? TEST_STEPS.filter((s) => g.exact!.includes(s.id))
+          : TEST_STEPS.filter((s) => s.id.startsWith(g.prefix));
         if (steps.length === 0) return null;
         return (
           <div key={group.prefix} className="mb-6">
@@ -1082,7 +1095,200 @@ export default function TestingGuidePage() {
         );
       })}
 
-      {/* Section 5: Config source of truth */}
+      {/* Section 5: Cloudflare Testing Setup Guide */}
+      <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
+        <Wrench className="h-5 w-5" />
+        Cloudflare Integration Testing Guide
+      </h2>
+      <p className="text-sm text-muted-foreground mb-4">
+        Three levels of testing, from easiest to most thorough. Start at Level 1 and work up.
+      </p>
+
+      {/* Level 1: UI only */}
+      <Card className="mb-4 border-emerald-500/20">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <Badge className="bg-emerald-500/10 text-emerald-600 border-0">Level 1</Badge>
+            UI-Only Testing (no Cloudflare account needed)
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="text-sm space-y-3">
+          <p className="text-muted-foreground">
+            Tests wizard flow, error states, DLP section visibility, toasts, and feature gates without touching Cloudflare.
+          </p>
+          <div className="rounded-lg bg-muted/50 p-3 space-y-2">
+            <p className="font-medium text-xs">Steps:</p>
+            <ol className="text-xs text-muted-foreground space-y-1.5 list-decimal list-inside">
+              <li>Go to <Link href="/settings/integrations" className="text-primary hover:underline">Settings → Integrations</Link></li>
+              <li>Click &ldquo;Connect Cloudflare&rdquo; → walk through wizard steps (enter garbage credentials to test error toasts)</li>
+              <li>Verify the DLP section appears only on Pro+ plans (switch to Free plan to confirm it&apos;s hidden)</li>
+              <li>Go to <Link href="/guardrails" className="text-primary hover:underline">Guardrails</Link> → test export button with no rules (should be hidden) and with rules (should download)</li>
+              <li>On the Tool Policy tab, toggle tools with Cloudflare disconnected → verify &ldquo;Policy saved&rdquo; toast (no Cloudflare mention)</li>
+            </ol>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Level 2: DNS blocking */}
+      <Card className="mb-4 border-blue-500/20">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <Badge className="bg-blue-500/10 text-blue-600 border-0">Level 2</Badge>
+            DNS Blocking (free Cloudflare account, ~10 min setup)
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="text-sm space-y-3">
+          <p className="text-muted-foreground">
+            Tests real DNS-level blocking of AI tool domains. This is the most common use case.
+          </p>
+          <div className="rounded-lg bg-muted/50 p-3 space-y-2">
+            <p className="font-medium text-xs">Setup:</p>
+            <ol className="text-xs text-muted-foreground space-y-1.5 list-decimal list-inside">
+              <li>Sign up at <span className="text-primary">dash.cloudflare.com</span> (free tier works)</li>
+              <li>Navigate to <strong>Zero Trust</strong> in the left sidebar</li>
+              <li>Go to <strong>Profile → API Tokens → Create Custom Token</strong></li>
+              <li>Permissions: select <strong>Account → Zero Trust → Edit</strong></li>
+              <li>Copy the token and your <strong>Account ID</strong> (visible on the Zero Trust overview page)</li>
+              <li>In TeamPrompt: <Link href="/settings/integrations" className="text-primary hover:underline">Settings → Integrations</Link> → Connect Cloudflare → enter credentials</li>
+              <li>Block a tool in the wizard (e.g. Poe, Character.AI)</li>
+            </ol>
+            <p className="font-medium text-xs mt-3">Testing DNS blocking:</p>
+            <ol className="text-xs text-muted-foreground space-y-1.5 list-decimal list-inside">
+              <li>Download + install <strong>Cloudflare WARP</strong> on your device (<span className="text-primary">one.one.one.one</span>)</li>
+              <li>Open WARP → Settings → Account → Login with organization → enter your Zero Trust team name</li>
+              <li>Visit the blocked domain (e.g. poe.com) → should show a Cloudflare block page</li>
+              <li>Unblock the tool in TeamPrompt → refresh → domain should load again</li>
+            </ol>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Level 3: DLP content scanning */}
+      <Card className="mb-4 border-amber-500/20">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <Badge className="bg-amber-500/10 text-amber-600 border-0">Level 3</Badge>
+            DLP Content Scanning (requires proxy mode + TLS decryption)
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="text-sm space-y-3">
+          <p className="text-muted-foreground">
+            Tests HTTP-level content inspection. This is the enterprise feature. Use a test machine or VM — TLS decryption can break some apps.
+          </p>
+          <div className="rounded-lg bg-muted/50 p-3 space-y-2">
+            <p className="font-medium text-xs">Cloudflare Setup:</p>
+            <ol className="text-xs text-muted-foreground space-y-1.5 list-decimal list-inside">
+              <li>In Cloudflare Zero Trust: <strong>Settings → Network → Proxy</strong> → toggle ON</li>
+              <li><strong>Settings → Network → TLS Decryption</strong> → toggle ON</li>
+              <li>Download Cloudflare root CA certificate from <strong>Settings → Network → Certificates → Download</strong></li>
+              <li>Install the root CA on your test machine:
+                <ul className="ml-4 mt-1 list-disc">
+                  <li><strong>Windows:</strong> double-click .crt → Install Certificate → Local Machine → Trusted Root</li>
+                  <li><strong>macOS:</strong> double-click .pem → add to Keychain → mark &ldquo;Always Trust&rdquo;</li>
+                  <li><strong>Linux:</strong> copy to /usr/local/share/ca-certificates/ → run sudo update-ca-certificates</li>
+                </ul>
+              </li>
+              <li>Ensure WARP is connected and enrolled in your Zero Trust org</li>
+            </ol>
+            <p className="font-medium text-xs mt-3">TeamPrompt Setup:</p>
+            <ol className="text-xs text-muted-foreground space-y-1.5 list-decimal list-inside">
+              <li>Create security rules in <Link href="/guardrails" className="text-primary hover:underline">Guardrails</Link> with different severities:
+                <ul className="ml-4 mt-1 list-disc">
+                  <li><strong>Block severity:</strong> e.g. &ldquo;SSN Pattern&rdquo; with regex <code className="bg-muted px-1 rounded">\d&#123;3&#125;-\d&#123;2&#125;-\d&#123;4&#125;</code></li>
+                  <li><strong>Warn severity:</strong> e.g. &ldquo;Email Address&rdquo; with regex <code className="bg-muted px-1 rounded">[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+</code></li>
+                  <li><strong>Redact severity:</strong> e.g. &ldquo;Credit Card&rdquo; — this should NOT sync to Cloudflare</li>
+                </ul>
+              </li>
+              <li>Go to <Link href="/settings/integrations" className="text-primary hover:underline">Settings → Integrations</Link> → Cloudflare card → click &ldquo;Enable Network DLP&rdquo;</li>
+              <li>Verify toast shows: &ldquo;X block rules → Cloudflare block policy; Y warn rules → Cloudflare audit policy&rdquo;</li>
+              <li>Verify redact rules show info toast about being skipped</li>
+            </ol>
+            <p className="font-medium text-xs mt-3">Testing DLP enforcement:</p>
+            <ol className="text-xs text-muted-foreground space-y-1.5 list-decimal list-inside">
+              <li>Open an approved AI tool (e.g. ChatGPT) in your browser (with WARP connected)</li>
+              <li>Paste a fake SSN like <code className="bg-muted px-1 rounded">123-45-6789</code> into the prompt</li>
+              <li>The request should be blocked by Cloudflare with a block page explaining the DLP policy violation</li>
+              <li>Try an email address → should NOT be blocked (warn rules create audit-only policies)</li>
+              <li>Check Cloudflare Zero Trust → <strong>Logs → Gateway → HTTP</strong> to see audit entries for warn-level matches</li>
+            </ol>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* API Verification */}
+      <Card className="mb-8 border-purple-500/20">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <Badge className="bg-purple-500/10 text-purple-600 border-0">API Check</Badge>
+            Verify Cloudflare API State (no device setup needed)
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="text-sm space-y-3">
+          <p className="text-muted-foreground">
+            After connecting and syncing, verify TeamPrompt actually wrote data to Cloudflare by checking the API directly.
+            Replace <code className="bg-muted px-1 rounded">YOUR_TOKEN</code> and <code className="bg-muted px-1 rounded">YOUR_ACCOUNT_ID</code> with your Cloudflare credentials.
+          </p>
+          <div className="rounded-lg bg-muted/50 p-3 space-y-3">
+            <div>
+              <p className="font-medium text-xs mb-1">Check DNS block rules:</p>
+              <pre className="text-[11px] bg-background rounded-md p-2 overflow-x-auto border border-border">
+{`curl -s -H "Authorization: Bearer YOUR_TOKEN" \\
+  "https://api.cloudflare.com/client/v4/accounts/YOUR_ACCOUNT_ID/gateway/rules" \\
+  | jq '.result[] | select(.name | startswith("TeamPrompt")) | {name, enabled, action}'`}
+              </pre>
+              <p className="text-[10px] text-muted-foreground mt-1">
+                Should show &ldquo;TeamPrompt: Block Poe&rdquo; etc. for each blocked tool, plus &ldquo;TeamPrompt: DLP Content Scan&rdquo; and/or &ldquo;TeamPrompt: DLP Warn Audit&rdquo; if DLP is synced.
+              </p>
+            </div>
+            <div>
+              <p className="font-medium text-xs mb-1">Check DLP profiles:</p>
+              <pre className="text-[11px] bg-background rounded-md p-2 overflow-x-auto border border-border">
+{`curl -s -H "Authorization: Bearer YOUR_TOKEN" \\
+  "https://api.cloudflare.com/client/v4/accounts/YOUR_ACCOUNT_ID/dlp/profiles" \\
+  | jq '.result[] | select(.name | startswith("TeamPrompt")) | {name, id, entries: (.entries | length)}'`}
+              </pre>
+              <p className="text-[10px] text-muted-foreground mt-1">
+                Should show &ldquo;TeamPrompt DLP&rdquo; (block rules) and optionally &ldquo;TeamPrompt DLP (Warn)&rdquo; with entry counts matching your synced rule count.
+              </p>
+            </div>
+            <div>
+              <p className="font-medium text-xs mb-1">Check specific DLP profile entries:</p>
+              <pre className="text-[11px] bg-background rounded-md p-2 overflow-x-auto border border-border">
+{`curl -s -H "Authorization: Bearer YOUR_TOKEN" \\
+  "https://api.cloudflare.com/client/v4/accounts/YOUR_ACCOUNT_ID/dlp/profiles" \\
+  | jq '.result[] | select(.name == "TeamPrompt DLP") | .entries[] | {name, enabled, pattern: .pattern.regex}'`}
+              </pre>
+              <p className="text-[10px] text-muted-foreground mt-1">
+                Shows each individual DLP entry with its regex pattern. Verify patterns match your security rules.
+              </p>
+            </div>
+            <div>
+              <p className="font-medium text-xs mb-1">Quick cleanup (delete all TeamPrompt rules from Cloudflare):</p>
+              <pre className="text-[11px] bg-background rounded-md p-2 overflow-x-auto border border-border">
+{`# Just use the "Remove" button in the DLP section + "Disconnect" in the Cloudflare card.
+# Or to clean up manually via API:
+curl -s -H "Authorization: Bearer YOUR_TOKEN" \\
+  "https://api.cloudflare.com/client/v4/accounts/YOUR_ACCOUNT_ID/gateway/rules" \\
+  | jq -r '.result[] | select(.name | startswith("TeamPrompt")) | .id' \\
+  | while read id; do
+      curl -s -X DELETE -H "Authorization: Bearer YOUR_TOKEN" \\
+        "https://api.cloudflare.com/client/v4/accounts/YOUR_ACCOUNT_ID/gateway/rules/$id"
+    done`}
+              </pre>
+            </div>
+          </div>
+          <div className="rounded-lg border border-border/50 bg-muted/30 p-2.5 mt-2">
+            <p className="text-xs text-muted-foreground">
+              <strong className="text-foreground">Severity mapping reference:</strong>{" "}
+              <span className="text-red-500 font-medium">Block</span> → Cloudflare <code className="bg-muted px-1 rounded text-[10px]">action: &ldquo;block&rdquo;</code> (request denied){" · "}
+              <span className="text-amber-500 font-medium">Warn</span> → Cloudflare <code className="bg-muted px-1 rounded text-[10px]">action: &ldquo;audit&rdquo;</code> (logged only){" · "}
+              <span className="text-blue-500 font-medium">Redact</span> → Not synced (handled client-side by extension before data reaches the network)
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Section 6: Config source of truth */}
       <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
         <FileText className="h-5 w-5" />
         Paygate Config Source Files

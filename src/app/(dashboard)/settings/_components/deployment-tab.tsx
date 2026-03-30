@@ -168,6 +168,18 @@ function generateIntuneConfig(
       value: `<enabled/>\n${blockedUrls.map((u, i) => `<data id="URLBlocklistDesc" value="${i + 1}&#xF000;${u}"/>`).join("\n")}`,
       description: "Blocks unapproved AI tool domains in Edge",
     });
+    settings.push({
+      name: "URL Allowlist (Chrome)",
+      omaUri: "./Device/Vendor/MSFT/Policy/Config/Chrome~Policy~googlechrome/URLAllowlist",
+      value: `<enabled/>\n${allowedUrls.map((u, i) => `<data id="URLAllowlistDesc" value="${i + 1}&#xF000;${u}"/>`).join("\n")}`,
+      description: "Allows approved AI tool domains in Chrome",
+    });
+    settings.push({
+      name: "URL Allowlist (Edge)",
+      omaUri: "./Device/Vendor/MSFT/Policy/Config/Microsoft Edge~Policy~microsoft_edge/URLAllowlist",
+      value: `<enabled/>\n${allowedUrls.map((u, i) => `<data id="URLAllowlistDesc" value="${i + 1}&#xF000;${u}"/>`).join("\n")}`,
+      description: "Allows approved AI tool domains in Edge",
+    });
   }
 
   if (level === "lockdown") {

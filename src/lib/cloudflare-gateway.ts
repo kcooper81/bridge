@@ -241,7 +241,12 @@ export async function toggleRule(
   if (!getResult.success || !getResult.result) {
     return { success: false, error: getResult.errors?.[0]?.message || "Failed to fetch rule for update" };
   }
-  const existingRule = getResult.result as Record<string, unknown>;
+  const existingRule = { ...(getResult.result as Record<string, unknown>) };
+  // Strip read-only fields that Cloudflare rejects on PUT
+  delete existingRule.id;
+  delete existingRule.created_at;
+  delete existingRule.updated_at;
+  delete existingRule.version;
   const data = await cfFetch(config, `/gateway/rules/${ruleId}`, {
     method: "PUT",
     body: JSON.stringify({ ...existingRule, enabled }),

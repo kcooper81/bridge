@@ -777,6 +777,8 @@ function CloudflareCard() {
         setAccountId("");
         setApiToken("");
         setDlpConfigured(false);
+        setDlpLoading(false);
+        setWizardTools({});
         setTools((prev) => prev.map((t) => ({ ...t, blocked: false })));
       } else {
         const data = await res.json().catch(() => ({}));

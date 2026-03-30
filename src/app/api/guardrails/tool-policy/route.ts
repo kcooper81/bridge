@@ -152,7 +152,7 @@ export async function POST(req: NextRequest) {
         user_id: user.id,
         ai_tool: "system",
         action: "sent",
-        prompt_text: `Tool policy updated: ${policyEnabled ? "enabled" : "disabled"}. Approved tools: ${approvedToolIds.join(", ")}${cloudflareSynced ? ". Synced to Cloudflare Gateway." : cloudflareError ? `. Cloudflare sync failed: ${cloudflareError}` : ""}`,
+        prompt_text: `Tool policy updated: ${policyEnabled ? "enabled" : "disabled"}. ${approvedToolIds.length} tools approved.${cloudflareSynced ? " Synced to Cloudflare." : cloudflareError ? ` CF sync failed: ${cloudflareError}`.slice(0, 200) : ""}`,
         risk_score: 0,
         metadata: { type: "tool_policy_change", approvedToolIds, policyEnabled, cloudflareSynced, cloudflareError },
       });

@@ -426,7 +426,7 @@ function SearchResultsView({
                 {article.q}
               </p>
               <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
-                {article.a}
+                {article.a.replace(/\*\*([^*]+)\*\*/g, "$1").replace(/\n/g, " ").slice(0, 150)}
               </p>
             </div>
             <Badge variant="outline" className="text-[10px] shrink-0 mt-0.5">

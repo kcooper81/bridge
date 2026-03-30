@@ -126,7 +126,7 @@ function CategorySection({
       </button>
 
       {expanded && (
-        <div className="ml-5 border-l border-border pl-2 space-y-0.5 mt-0.5 mb-1">
+        <div className="ml-5 border-l border-border pl-2 space-y-1 mt-1 mb-2">
           {category.articles.map((article) => {
             const isCurrentArticle =
               isActive && article.slug === currentArticleSlug;
@@ -136,7 +136,7 @@ function CategorySection({
                 href={`/help/${category.id}/${article.slug}`}
                 onClick={onNavigate}
                 className={cn(
-                  "block rounded-md px-2.5 py-1.5 text-xs transition-colors hover:bg-muted line-clamp-1",
+                  "block rounded-md px-2.5 py-2 text-xs leading-relaxed transition-colors hover:bg-muted",
                   isCurrentArticle
                     ? "bg-primary/10 text-primary font-medium"
                     : "text-muted-foreground",

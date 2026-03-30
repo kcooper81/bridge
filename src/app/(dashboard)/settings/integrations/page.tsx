@@ -1001,7 +1001,7 @@ function CloudflareCard() {
                     </li>
                     <li className="flex gap-2">
                       <span className="flex h-4 w-4 items-center justify-center rounded-full bg-primary/10 text-primary text-[8px] font-bold shrink-0 mt-0.5">2</span>
-                      <span>Complete the <strong>device setup wizard</strong> if prompted (select &ldquo;Both Traffic and DNS&rdquo;, install CA, leave split tunnels as default)</span>
+                      <span>Complete the <strong>device setup wizard</strong> if prompted. When asked for service mode, select <strong>&ldquo;DNS only&rdquo;</strong> (not &ldquo;Traffic and DNS&rdquo; — that requires certificate installation and can break some apps)</span>
                     </li>
                     <li className="flex gap-2">
                       <span className="flex h-4 w-4 items-center justify-center rounded-full bg-primary/10 text-primary text-[8px] font-bold shrink-0 mt-0.5">3</span>

@@ -28,7 +28,7 @@ export default function HelpLayout({ children }: { children: React.ReactNode }) 
       <div className="flex gap-8 py-10 sm:py-16">
         {/* Desktop sidebar */}
         <aside className="hidden lg:block w-[280px] shrink-0">
-          <div className="sticky top-24 max-h-[calc(100vh-8rem)] overflow-hidden rounded-xl border border-border bg-card">
+          <div className="sticky top-24 h-[calc(100vh-8rem)] flex flex-col rounded-xl border border-border bg-card overflow-hidden">
             <HelpSidebar />
           </div>
         </aside>

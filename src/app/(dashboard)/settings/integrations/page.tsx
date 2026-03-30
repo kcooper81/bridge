@@ -1194,12 +1194,12 @@ function CloudflareCard() {
 
             {/* Enterprise DLP section */}
             {canAccess("custom_security") && (
-              <div className="rounded-xl border border-border p-3 space-y-2">
+              <div className="rounded-xl border border-border p-3 space-y-2.5">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-xs font-semibold">Content Scanning (DLP)</p>
+                    <p className="text-xs font-semibold">Network-Level Content Scanning</p>
                     <p className="text-[10px] text-muted-foreground">
-                      Inspect HTTP traffic to AI tools for sensitive data. Requires TLS decryption.
+                      Second layer of defense — inspect HTTP traffic at the network level using Cloudflare DLP.
                     </p>
                   </div>
                   {dlpLoading ? (
@@ -1210,6 +1210,64 @@ function CloudflareCard() {
                     <Badge variant="outline" className="text-[10px]">Not configured</Badge>
                   )}
                 </div>
+
+                {/* How it works */}
+                <div className="rounded-lg bg-muted/50 p-2.5 space-y-1.5">
+                  <p className="text-[10px] font-semibold text-foreground/80">How it works</p>
+                  <p className="text-[10px] text-muted-foreground leading-relaxed">
+                    Your browser extension scans prompts <strong>before</strong> they leave the browser (Layer 1). Network DLP catches anything that bypasses the extension — native apps, API calls, unsupported browsers (Layer 2).
+                  </p>
+                  <div className="flex gap-3 mt-1">
+                    <div className="flex-1 rounded-md border border-emerald-500/20 bg-emerald-500/5 px-2 py-1.5">
+                      <p className="text-[9px] font-bold text-emerald-600 uppercase">Layer 1 — Extension</p>
+                      <p className="text-[9px] text-muted-foreground">Block, warn, or redact in the browser. Works immediately.</p>
+                    </div>
+                    <div className="flex-1 rounded-md border border-blue-500/20 bg-blue-500/5 px-2 py-1.5">
+                      <p className="text-[9px] font-bold text-blue-600 uppercase">Layer 2 — Network</p>
+                      <p className="text-[9px] text-muted-foreground">Block or audit at HTTP level. Catches everything on the network.</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Prerequisites */}
+                {!dlpConfigured && (
+                  <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-2.5">
+                    <p className="text-[10px] font-semibold text-amber-600 mb-1">Prerequisites for network scanning</p>
+                    <p className="text-[10px] text-muted-foreground mb-1.5">
+                      This requires your Cloudflare Zero Trust to be in <strong>proxy mode</strong> with TLS decryption enabled. Most orgs already have this if they use Cloudflare for web filtering.
+                    </p>
+                    <ol className="text-[10px] text-muted-foreground space-y-1 list-none">
+                      <li className="flex gap-1.5">
+                        <span className="text-amber-600 font-bold shrink-0">1.</span>
+                        <span>Gateway service mode set to <strong>&ldquo;Proxy&rdquo;</strong> (Settings → Network → Proxy)</span>
+                      </li>
+                      <li className="flex gap-1.5">
+                        <span className="text-amber-600 font-bold shrink-0">2.</span>
+                        <span>TLS decryption enabled (Settings → Network → TLS Decryption → ON)</span>
+                      </li>
+                      <li className="flex gap-1.5">
+                        <span className="text-amber-600 font-bold shrink-0">3.</span>
+                        <span>Cloudflare root CA installed on managed devices (<a href="https://developers.cloudflare.com/cloudflare-one/connections/connect-devices/warp/user-side-certificates/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">install guide</a>)</span>
+                      </li>
+                    </ol>
+                    <p className="text-[10px] text-muted-foreground mt-1.5">
+                      <strong>Don&apos;t have this?</strong> That&apos;s fine — DNS blocking and your browser extension already cover most use cases. Network DLP is an additional layer for orgs with managed devices.
+                    </p>
+                  </div>
+                )}
+
+                {/* Severity explanation */}
+                {!dlpConfigured && (
+                  <div className="rounded-lg bg-muted/30 p-2.5">
+                    <p className="text-[10px] font-semibold text-foreground/80 mb-1">What gets synced?</p>
+                    <div className="space-y-0.5">
+                      <p className="text-[10px] text-muted-foreground"><strong className="text-red-500">Block</strong> rules → Cloudflare blocks the request</p>
+                      <p className="text-[10px] text-muted-foreground"><strong className="text-amber-500">Warn</strong> rules → Cloudflare logs the match (audit only, no block)</p>
+                      <p className="text-[10px] text-muted-foreground"><strong className="text-blue-500">Redact</strong> rules → Not synced (redaction happens in the browser before data reaches the network)</p>
+                    </div>
+                  </div>
+                )}
+
                 <div className="flex gap-2">
                   <Button
                     variant={dlpConfigured ? "outline" : "default"}
@@ -1219,7 +1277,7 @@ function CloudflareCard() {
                     disabled={dlpSyncing || dlpRemoving}
                   >
                     {dlpSyncing ? <><Loader2 className="mr-1.5 h-3 w-3 animate-spin" />{dlpConfigured ? "Re-syncing..." : "Syncing..."}</> : (
-                      <>{dlpConfigured ? <><RefreshCw className="mr-1.5 h-3 w-3" />Re-sync Rules</> : "Enable DLP Scanning"}</>
+                      <>{dlpConfigured ? <><RefreshCw className="mr-1.5 h-3 w-3" />Re-sync Rules</> : "Enable Network DLP"}</>
                     )}
                   </Button>
                   {dlpConfigured && (
@@ -1234,6 +1292,12 @@ function CloudflareCard() {
                     </Button>
                   )}
                 </div>
+
+                {dlpConfigured && (
+                  <p className="text-[10px] text-muted-foreground">
+                    Rules are synced to Cloudflare. Re-sync after adding or changing guardrail rules to keep policies in sync.
+                  </p>
+                )}
               </div>
             )}
 

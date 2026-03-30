@@ -1641,6 +1641,133 @@ const sections: Section[] = [
       },
     ],
   },
+  // ─── Managed Browser Deployment ───────────────────────
+  {
+    id: "deployment",
+    title: "Managed Browser Deployment (MDM Config Generator)",
+    icon: Shield,
+    description:
+      "Test the 4-step wizard for generating browser policies that force-install the extension via MDM. Covers Google Admin, Intune, JAMF, and GPO.",
+    preconditions: [
+      "Logged in as Admin role",
+      "At least one AI tool blocked in Guardrails → AI Tools (for URL blocking tests)",
+    ],
+    steps: [
+      // ── Wizard flow ──
+      {
+        action: "Navigate to Settings → Deployment.",
+        expected:
+          "4-step wizard with progress bar: Platform → Enforcement → Config → Deploy. Step 1 (Platform) is shown by default. Header says 'Managed Browser Deployment'.",
+        priority: "P0",
+      },
+      {
+        action: "Step 1: Click each platform card (Google Admin, Intune, JAMF, GPO).",
+        expected:
+          "Selected card highlights with primary border + checkmark. JAMF says 'Chrome on macOS'. Intune/GPO show 'Include Microsoft Edge' toggle. Google Admin/JAMF do not show Edge toggle.",
+        priority: "P0",
+      },
+      {
+        action: "Select Intune. Toggle Edge OFF, then back ON.",
+        expected:
+          "Edge toggle switches. No immediate config change visible (config is generated in Step 3). Click Continue to go to Step 2.",
+        priority: "P1",
+      },
+      {
+        action: "Step 2: Click each enforcement level (Monitor, Restrict, Lockdown).",
+        expected:
+          "Selected level highlights with radio button. 'What your users will experience' panel updates immediately with bullet points for the selected level. Monitor shows 5 bullets (DLP scans, no domains blocked). Restrict shows 5 bullets (adds domain blocking). Lockdown shows 5 bullets (adds incognito/devtools disabled).",
+        priority: "P0",
+      },
+      {
+        action: "Step 2: Select 'Restrict' with tool policy active (at least one tool blocked).",
+        expected:
+          "Green policy status: 'X approved, Y blocked tools will be enforced'. Click Continue.",
+        priority: "P0",
+      },
+      {
+        action: "Step 2: Select 'Restrict' with tool policy DISABLED.",
+        expected:
+          "Amber warning: 'No tool policy set. URL blocking requires an active tool policy.' Link to 'Set Up' goes to /guardrails.",
+        priority: "P0",
+      },
+      {
+        action: "Step 3: Review the generated config.",
+        expected:
+          "'Your [Platform] config is ready' heading. 'What this config will' checklist matches the enforcement level. Config preview shows formatted JSON (or .reg for GPO). Copy and Download buttons in the header.",
+        priority: "P0",
+      },
+      {
+        action: "Step 3: Click 'Copy'.",
+        expected:
+          "Toast: 'Config copied to clipboard'. Button briefly shows 'Copied' with checkmark. Paste into a text editor to verify content matches the preview.",
+        priority: "P0",
+      },
+      {
+        action: "Step 3: Click Download (or '.reg file' for GPO).",
+        expected:
+          "File downloads. Google Admin/Intune/JAMF: .json file. GPO: .reg file. Open in text editor — contents match the preview.",
+        priority: "P0",
+      },
+      {
+        action: "Step 3: Click 'I've downloaded the config' to go to Step 4.",
+        expected:
+          "Step 4 shows platform-specific deployment guide with numbered steps. Shows 'Using: [Platform] · [Level]' summary. Each step has external links where relevant (opens in new tab).",
+        priority: "P0",
+      },
+      // ── Config correctness ──
+      {
+        action: "Go back to Step 1, select GPO + Lockdown. Go to Step 3 and download the .reg file.",
+        expected:
+          "File starts with 'Windows Registry Editor Version 5.00'. Contains: Chrome + Edge ExtensionInstallForcelist, Chrome + Edge URLBlocklist, Chrome + Edge URLAllowlist, IncognitoModeAvailability=dword:00000001, DeveloperToolsAvailability=dword:00000002, BrowserGuestModeEnabled=dword:00000000 for both Chrome and Edge.",
+        priority: "P0",
+      },
+      {
+        action: "Select GPO, toggle Edge OFF, go to Step 3.",
+        expected:
+          "Config only contains Google\\Chrome paths. No Microsoft\\Edge paths. Toggle Edge back ON: Edge paths reappear.",
+        priority: "P1",
+      },
+      {
+        action: "Select Monitor level. Go to Step 3.",
+        expected:
+          "Config only contains ExtensionInstallForcelist and ExtensionSettings. No URLBlocklist, no IncognitoModeAvailability, no DeveloperToolsAvailability.",
+        priority: "P1",
+      },
+      // ── Verification ──
+      {
+        action: "Step 4: Check the verification checklist.",
+        expected:
+          "Adapts to platform (mentions chrome:// for Google Admin/JAMF, chrome:// + edge:// for Intune/GPO). Adapts to level (blocked domain test only for Restrict/Lockdown, incognito/devtools test only for Lockdown).",
+        priority: "P1",
+      },
+      // ── Edge cases ──
+      {
+        action: "Navigate to Settings → Deployment as a non-admin (member role).",
+        expected:
+          "Shows 'Only admins can manage browser deployment policies.' with shield icon. No wizard visible.",
+        priority: "P0",
+      },
+      {
+        action: "Simulate API failure (throttle network in DevTools), reload the deployment page.",
+        expected:
+          "Shows error card: 'Couldn't load deployment settings' with error message and 'Retry' button. Clicking Retry re-fetches.",
+        priority: "P1",
+      },
+      // ── Compliance API ──
+      {
+        action: "Call GET /api/deployment/compliance with a valid Bearer token (e.g. via DevTools fetch).",
+        expected:
+          "Returns JSON: { policyEnabled, deploymentLevel, approvedTools, blockedDomains, allowedDomains, extensionId }. extensionId matches the Chrome Web Store ID. Domains match your current tool policy.",
+        priority: "P1",
+      },
+      {
+        action: "Call POST /api/deployment/compliance with { forceInstalled: true, incognitoBlocked: true, browserName: 'Chrome' }.",
+        expected:
+          "Returns { success: true }. Invalid body types (e.g. forceInstalled: 'yes') are coerced to null, not rejected.",
+        priority: "P2",
+      },
+    ],
+  },
 ];
 
 /* ── Storage key ────────────────────────────────── */

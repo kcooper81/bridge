@@ -1558,6 +1558,74 @@ const sections: Section[] = [
           "CSV format: proper headers (Name, Description, Pattern, etc.). Regex list: plain text with comments. Each downloads with correct filename extension.",
         priority: "P2",
       },
+      // ── Enterprise DLP (Content Scanning) ──
+      {
+        action: "Connect Cloudflare, then look for 'Content Scanning (DLP)' section inside the Cloudflare card (requires custom_security feature gate).",
+        expected:
+          "Shows 'Content Scanning (DLP)' with description about HTTP traffic inspection. Badge shows 'Not configured'. 'Enable DLP Scanning' button visible.",
+        priority: "P0",
+      },
+      {
+        action: "Create at least one security rule with severity 'block' and one with severity 'redact'. Click 'Enable DLP Scanning'.",
+        expected:
+          "Toast shows breakdown: 'X block rules → Cloudflare block policy'. Info toast: 'Y redact rules skipped — redaction is handled by the browser extension before data reaches the network.' Badge changes to 'Active'.",
+        priority: "P0",
+      },
+      {
+        action: "Create a security rule with severity 'warn' and click 'Re-sync Rules'.",
+        expected:
+          "Toast shows: 'X block rules → Cloudflare block policy; Y warn rules → Cloudflare audit policy'. Warn rules are logged in Cloudflare Gateway but do NOT block traffic.",
+        priority: "P0",
+      },
+      {
+        action: "Click 'Remove' on the DLP section. Confirm the dialog.",
+        expected:
+          "Both Cloudflare DLP profiles (block + warn) AND both HTTP policies (block + audit) are deleted. Badge reverts to 'Not configured'. If cleanup partially fails, warning toast explains which resources need manual deletion.",
+        priority: "P0",
+      },
+      {
+        action: "With only 'redact' severity rules active (no block or warn rules), click 'Enable DLP Scanning'.",
+        expected:
+          "Error toast: 'No rules eligible for Cloudflare sync. X are redact-severity (handled client-side by the extension, not at network level).'",
+        priority: "P1",
+      },
+      // ── Error Handling & Fallbacks ──
+      {
+        action: "Connect Cloudflare with valid credentials. Then revoke or change the API token in Cloudflare dashboard. Try to sync a tool policy.",
+        expected:
+          "Policy saves locally. Warning toast: 'Cloudflare out of sync: Cloudflare connection failed: credentials may be expired'. Policy is enforced by extension but NOT at DNS level.",
+        priority: "P0",
+      },
+      {
+        action: "With Cloudflare connected, simulate a network failure (disconnect internet) and click 'Sync' on the Cloudflare card.",
+        expected:
+          "Error toast: 'Sync failed' (or specific network error). Policy state does NOT change locally. No duplicate rules created in Cloudflare.",
+        priority: "P1",
+      },
+      {
+        action: "Click 'Export Rules' on the Guardrails Policies tab when no active rules exist.",
+        expected:
+          "Export button should not appear (hidden when rules.length === 0). If manually hitting the API: returns 404 'No active rules to export'.",
+        priority: "P1",
+      },
+      {
+        action: "Click 'Export Rules' and simulate a network error (e.g. throttle network in DevTools).",
+        expected:
+          "Error toast: 'Failed to export rules' instead of silent failure.",
+        priority: "P2",
+      },
+      {
+        action: "Test export with all 4 formats: ?format=json, csv, regex-list, suricata. Also test an invalid format like ?format=xml.",
+        expected:
+          "JSON: structured with metadata + rules. CSV: headers + rows. Regex-list: raw patterns with comments. Suricata: IDS/IPS rule syntax. Invalid format: 400 error 'Invalid format. Use: json, csv, regex-list, suricata'.",
+        priority: "P1",
+      },
+      {
+        action: "Disconnect Cloudflare and confirm the dialog.",
+        expected:
+          "Server responds OK before UI clears state. If disconnect fails server-side, error toast appears and UI remains in 'Connected' state. On success: badge reverts, wizard state resets, all tool blocked badges clear.",
+        priority: "P1",
+      },
       // ── Cloudflare Wizard Flow ──
       {
         action: "Disconnect Cloudflare if connected. Click 'Connect Cloudflare'. Walk through all 4 wizard steps.",

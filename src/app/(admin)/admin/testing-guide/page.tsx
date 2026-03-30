@@ -1545,6 +1545,32 @@ const sections: Section[] = [
           "Setup checklist shows 4 items: Choose industry, Install browser extension, Invite a teammate, Connect Cloudflare Gateway (optional).",
         priority: "P1",
       },
+      // ── Policy Export ──
+      {
+        action: "Go to Guardrails → Policies tab. Click 'Export Rules' button (only shows if rules exist).",
+        expected:
+          "Downloads a file named teamprompt-dlp-rules.json containing all active DLP rules with patterns, categories, and severities plus AI tool domain list.",
+        priority: "P1",
+      },
+      {
+        action: "Test export API with different formats: /api/guardrails/export?format=csv and ?format=regex-list",
+        expected:
+          "CSV format: proper headers (Name, Description, Pattern, etc.). Regex list: plain text with comments. Each downloads with correct filename extension.",
+        priority: "P2",
+      },
+      // ── Cloudflare Wizard Flow ──
+      {
+        action: "Disconnect Cloudflare if connected. Click 'Connect Cloudflare'. Walk through all 4 wizard steps.",
+        expected:
+          "Step 1: token instructions with numbered steps and links. Step 2: Account ID + Token fields. Step 3: inline AI tool selection with approve/block toggles. Step 4: WARP deployment options with admin prerequisites (DNS only mode, enrollment policy, team name).",
+        priority: "P0",
+      },
+      {
+        action: "In wizard step 3, block a tool (e.g. Poe), then click 'Save & Continue'.",
+        expected:
+          "Toast shows sync result. Step 4 appears (not the connected view). Progress bar shows step 4 active. Only clicking 'Finish Setup' closes the wizard.",
+        priority: "P0",
+      },
     ],
   },
 ];

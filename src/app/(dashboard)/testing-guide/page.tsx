@@ -653,6 +653,50 @@ const TEST_STEPS: TestStep[] = [
     trigger: "Click 'Disconnect' on the Cloudflare card. Confirm the dialog.",
     expected: "Badge reverts to 'Not Connected'. Note: existing Cloudflare Gateway rules are NOT auto-deleted.",
   },
+
+  // ── Policy Export ──────────────────────────────────────────────
+  {
+    id: "EXPORT-1",
+    page: "Guardrails → Policies",
+    path: "/guardrails",
+    plan: "Any (admin/manager)",
+    component: "Export button",
+    what: "Export DLP rules for external firewall",
+    trigger: "With at least one active rule, click 'Export Rules' on the Policies tab",
+    expected: "Downloads teamprompt-dlp-rules.json with all active rules, patterns, categories, and AI tool domain list.",
+  },
+  {
+    id: "EXPORT-2",
+    page: "API",
+    path: "/api/guardrails/export",
+    plan: "Any (admin/manager)",
+    component: "Export API",
+    what: "Export in different formats",
+    trigger: "Call GET /api/guardrails/export?format=csv (also try regex-list, suricata, and an invalid format like xml)",
+    expected: "CSV/regex-list/suricata: correct format downloaded. Invalid format: 400 error 'Invalid format'.",
+  },
+
+  // ── Cloudflare Wizard Flow ────────────────────────────────────
+  {
+    id: "CF-WIZARD-1",
+    page: "Settings → Integrations",
+    path: "/settings/integrations",
+    plan: "Any (admin)",
+    component: "Cloudflare wizard",
+    what: "4-step wizard flow",
+    trigger: "Click 'Connect Cloudflare'. Walk through all 4 steps: Get Token → Connect → Choose Tools → Deploy WARP.",
+    expected: "Step 1: instructions + links. Step 2: credential fields. Step 3: inline tool toggles (no page navigation). Step 4: WARP deployment with admin prerequisites (DNS only mode, enrollment policy). Finish Setup closes wizard.",
+  },
+  {
+    id: "CF-WIZARD-2",
+    page: "Settings → Integrations",
+    path: "/settings/integrations",
+    plan: "Any (admin)",
+    component: "Cloudflare wizard step 3",
+    what: "Tool selection stays in wizard",
+    trigger: "After connecting in step 2, block a tool in step 3, click Save & Continue",
+    expected: "Wizard advances to step 4 (WARP deploy), NOT to the connected card view. Progress bar shows step 4 active.",
+  },
 ];
 
 // ─── Helper to render boolean cell ──────────────────────────────

@@ -84,7 +84,10 @@ export async function POST(req: NextRequest) {
     const existing = await listDlpProfiles(config);
     const existingProfile = existing.find((p) => p.name === "TeamPrompt DLP");
     if (existingProfile) {
-      await deleteDlpProfile(config, existingProfile.id);
+      const deleteResult = await deleteDlpProfile(config, existingProfile.id);
+      if (!deleteResult.success) {
+        return NextResponse.json({ error: "Failed to remove existing DLP profile. Try again or delete it manually in Cloudflare." }, { status: 500 });
+      }
     }
 
     // Create new DLP profile with current rules
@@ -114,7 +117,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       profileId: profileResult.profileId,
-      rulessynced: regexCount,
+      rulesSynced: regexCount,
       totalRules: rules.length,
       skipped: rules.length - regexCount,
       message: `${regexCount} regex rules synced to Cloudflare DLP. ${rules.length - regexCount} non-regex rules skipped (Cloudflare DLP only supports regex).`,

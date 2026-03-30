@@ -291,6 +291,16 @@ const _RAW_CATEGORIES: RawCategory[] = [
         keywords: ["team name", "zero trust", "cloudflare access", "enrollment", "team domain"],
       },
       {
+        q: "What is Enterprise DLP (network content scanning)?",
+        a: "Enterprise DLP extends TeamPrompt's protection to the network level. Instead of just blocking AI tool domains (DNS), it inspects the actual content of prompts at the network level.\n\nHow it works:\n1. TeamPrompt pushes your DLP rules to Cloudflare as a DLP Profile\n2. Cloudflare creates an HTTP policy that scans traffic to AI tool domains\n3. If a prompt matches a DLP rule, the entire request is blocked before reaching the AI tool\n4. This covers native apps, CLI tools, and API calls — not just the browser\n\nRequirements:\n• Cloudflare in Traffic+DNS mode (not DNS only)\n• Root CA certificate installed on managed devices\n• Enterprise IT team to manage certificates and device enrollment\n\nTo enable: call POST /api/integrations/cloudflare/enterprise with action 'sync-dlp'. This is an API-only feature for now — UI coming soon.\n\nNote: Enterprise DLP can block but cannot redact. Only the browser extension can auto-replace sensitive data with placeholders. For the best protection, use both.",
+        keywords: ["enterprise", "dlp", "network", "content scanning", "http policy", "tls", "proxy"],
+      },
+      {
+        q: "How do I export DLP rules for my own firewall or VPN?",
+        a: "If your company already has a firewall, proxy, or VPN, you can export TeamPrompt's DLP rules and import them into your existing infrastructure.\n\nGo to Guardrails → Policies tab → click 'Export Rules'. The default format is JSON.\n\nAvailable formats:\n• **JSON** — Full rule objects with AI tool domain list. Import into any system that accepts JSON.\n• **CSV** — Spreadsheet format for manual review or import into tools that accept CSV.\n• **Regex list** — Plain text patterns with comments. Paste into any regex-capable firewall.\n• **Suricata** — IDS/IPS rule format for network detection appliances (Suricata, Snort).\n\nAPI endpoint: GET /api/guardrails/export?format=json (or csv, regex-list, suricata)\n\nThis lets you use TeamPrompt for rule management and your existing infrastructure for enforcement — without needing Cloudflare.",
+        keywords: ["export", "firewall", "vpn", "proxy", "suricata", "rules", "csv", "json"],
+      },
+      {
         q: "WARP enrollment says 'request is invalid' — how to fix?",
         a: "This means Cloudflare doesn't have an enrollment policy that allows your device. The admin needs to create one:\n\n1. Go to dash.cloudflare.com → Zero Trust\n2. Settings → WARP Client (or Devices → Device enrollment)\n3. Click 'Manage' under Device enrollment permissions\n4. Add a rule: Selector = 'Emails ending in', Value = '@yourcompany.com', Action = Allow\n5. Save\n\nThen try enrolling in WARP again. If you're using one-time PIN authentication, make sure the email you're authenticating with matches the rule you created.",
         keywords: ["warp", "enrollment", "invalid", "error", "troubleshoot", "device enrollment", "policy"],

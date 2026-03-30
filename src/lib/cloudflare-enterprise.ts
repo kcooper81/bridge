@@ -113,8 +113,18 @@ export async function createHttpDlpPolicy(
     return { success: false, error: "No approved tool domains to scan" };
   }
 
-  const domainFilter = domains.map((d) => `"${d}"`).join(" ");
-  const traffic = `any(http.request.domains[*] in {${domainFilter}}) and dlp.profiles[*] in {"${dlpProfileId}"}`;
+  const domainFilter = domains.map((d) => `"${d}"`).join(", ");
+  const traffic = `any(http.request.domains[*] in {${domainFilter}})`;
+
+  // First, delete any existing TeamPrompt HTTP DLP policy to avoid duplicates
+  const existingRules = await cfFetch(config, "/gateway/rules");
+  if (existingRules.success && Array.isArray(existingRules.result)) {
+    for (const rule of existingRules.result as { id: string; name: string }[]) {
+      if (rule.name === "TeamPrompt: DLP Content Scan") {
+        await cfFetch(config, `/gateway/rules/${rule.id}`, { method: "DELETE" });
+      }
+    }
+  }
 
   const data = await cfFetch(config, "/gateway/rules", {
     method: "POST",
@@ -128,6 +138,9 @@ export async function createHttpDlpPolicy(
       rule_settings: {
         block_page_enabled: true,
         block_reason: "This message was blocked by your organization's AI data loss prevention policy. Sensitive data was detected in your prompt. Please remove the sensitive information and try again.",
+        biso_admin_controls: {
+          dlp: { enabled: true, profile_id: dlpProfileId },
+        },
       },
     }),
   });
@@ -228,7 +241,9 @@ export function exportRulesForFirewall(rules: DlpRuleForExport[], format: Policy
         .filter((r) => r.pattern_type === "regex")
         .map((r, i) => {
           const sid = 9000000 + i;
-          return `alert http any any -> any any (msg:"TeamPrompt DLP: ${r.name}"; content:"${r.pattern.slice(0, 100)}"; sid:${sid}; rev:1;)`;
+          const safeName = r.name.replace(/"/g, '\\"').replace(/;/g, "\\;");
+          const safePattern = r.pattern.replace(/"/g, '\\"').replace(/;/g, "\\;");
+          return `alert http any any -> any any (msg:"TeamPrompt DLP: ${safeName}"; pcre:"/${safePattern}/i"; sid:${sid}; rev:1;)`;
         })
         .join("\n");
 

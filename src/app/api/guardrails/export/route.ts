@@ -41,7 +41,12 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "No active rules to export" }, { status: 404 });
   }
 
-  const format = (req.nextUrl.searchParams.get("format") || "json") as "json" | "csv" | "regex-list" | "suricata";
+  const validFormats = ["json", "csv", "regex-list", "suricata"];
+  const formatParam = req.nextUrl.searchParams.get("format") || "json";
+  if (!validFormats.includes(formatParam)) {
+    return NextResponse.json({ error: `Invalid format. Use: ${validFormats.join(", ")}` }, { status: 400 });
+  }
+  const format = formatParam as "json" | "csv" | "regex-list" | "suricata";
   const exported = exportRulesForFirewall(rules as DlpRuleForExport[], format);
 
   const contentTypes: Record<string, string> = {

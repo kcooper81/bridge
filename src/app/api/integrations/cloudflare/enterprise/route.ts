@@ -5,6 +5,7 @@ import {
   createHttpDlpPolicy,
   listDlpProfiles,
   deleteDlpProfile,
+  deleteHttpDlpPolicy,
   type DlpRuleForExport,
 } from "@/lib/cloudflare-enterprise";
 import type { CloudflareConfig } from "@/lib/cloudflare-gateway";
@@ -18,6 +19,7 @@ import type { CloudflareConfig } from "@/lib/cloudflare-gateway";
  * - action: "remove" — Remove TeamPrompt DLP profile from Cloudflare
  */
 export async function POST(req: NextRequest) {
+  try {
   const authHeader = req.headers.get("authorization");
   if (!authHeader?.startsWith("Bearer ")) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -69,7 +71,7 @@ export async function POST(req: NextRequest) {
 
   // ── Sync DLP rules to Cloudflare ──
   if (action === "sync-dlp") {
-    // Fetch all active regex rules
+    // Fetch all active rules
     const { data: rules } = await db
       .from("security_rules")
       .select("name, description, pattern, pattern_type, category, severity")
@@ -80,63 +82,132 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "No active rules to sync" }, { status: 400 });
     }
 
-    // Check if profile already exists and delete it
+    const typedRules = rules as DlpRuleForExport[];
+    const redactCount = typedRules.filter((r) => r.severity === "redact").length;
+    const nonRegexCount = typedRules.filter((r) => r.pattern_type !== "regex").length;
+    const blockRules = typedRules.filter((r) => r.severity === "block" && r.pattern_type === "regex");
+    const warnRules = typedRules.filter((r) => r.severity === "warn" && r.pattern_type === "regex");
+
+    if (blockRules.length === 0 && warnRules.length === 0) {
+      const reasons = [];
+      if (redactCount > 0) reasons.push(`${redactCount} are redact-severity (handled client-side by the extension, not at network level)`);
+      if (nonRegexCount > 0) reasons.push(`${nonRegexCount} are non-regex (Cloudflare DLP only supports regex)`);
+      return NextResponse.json({
+        error: `No rules eligible for Cloudflare sync. ${reasons.join("; ")}.`,
+      }, { status: 400 });
+    }
+
+    // Clean up existing profiles
     const existing = await listDlpProfiles(config);
-    const existingProfile = existing.find((p) => p.name === "TeamPrompt DLP");
-    if (existingProfile) {
-      const deleteResult = await deleteDlpProfile(config, existingProfile.id);
-      if (!deleteResult.success) {
-        return NextResponse.json({ error: "Failed to remove existing DLP profile. Try again or delete it manually in Cloudflare." }, { status: 500 });
+    for (const profileName of ["TeamPrompt DLP", "TeamPrompt DLP (Warn)"]) {
+      const existingProfile = existing.find((p) => p.name === profileName);
+      if (existingProfile) {
+        const deleteResult = await deleteDlpProfile(config, existingProfile.id);
+        if (!deleteResult.success) {
+          return NextResponse.json({ error: `Failed to remove existing profile "${profileName}". Try again or delete it manually in Cloudflare.` }, { status: 500 });
+        }
       }
     }
 
-    // Create new DLP profile with current rules
-    const profileResult = await createDlpProfile(config, "TeamPrompt DLP", rules as DlpRuleForExport[]);
-    if (!profileResult.success || !profileResult.profileId) {
-      return NextResponse.json({ error: profileResult.error || "Failed to create DLP profile" }, { status: 500 });
+    const approvedTools = (settings.approved_ai_tools as string[]) || ["chatgpt", "claude", "gemini", "copilot", "perplexity"];
+    const profileIds: string[] = [];
+    let blockSynced = 0;
+    let warnSynced = 0;
+    const warnings: string[] = [];
+
+    // ── Block-severity rules → Cloudflare "block" action ──
+    if (blockRules.length > 0) {
+      const profileResult = await createDlpProfile(config, "TeamPrompt DLP", typedRules, "block");
+      if (!profileResult.success || !profileResult.profileId) {
+        return NextResponse.json({ error: profileResult.error || "Failed to create block DLP profile" }, { status: 500 });
+      }
+      profileIds.push(profileResult.profileId);
+      blockSynced = profileResult.entryCount || 0;
+
+      const policyResult = await createHttpDlpPolicy(config, profileResult.profileId, approvedTools, "block", "TeamPrompt: DLP Content Scan");
+      if (!policyResult.success) {
+        warnings.push(`Block DLP profile created but HTTP block policy failed: ${policyResult.error}. You may need to create it manually in Cloudflare.`);
+      }
     }
 
-    // Get approved tools for HTTP policy scope
-    const approvedTools = (settings.approved_ai_tools as string[]) || ["chatgpt", "claude", "gemini", "copilot", "perplexity"];
+    // ── Warn-severity rules → Cloudflare "audit" action (log only, no block) ──
+    if (warnRules.length > 0) {
+      const profileResult = await createDlpProfile(config, "TeamPrompt DLP (Warn)", typedRules, "warn");
+      if (!profileResult.success || !profileResult.profileId) {
+        warnings.push(`Failed to create warn DLP profile: ${profileResult.error}. Warn rules will not be audited at the network level.`);
+      } else {
+        profileIds.push(profileResult.profileId);
+        warnSynced = profileResult.entryCount || 0;
 
-    // Create HTTP policy using the DLP profile
-    const policyResult = await createHttpDlpPolicy(config, profileResult.profileId, approvedTools);
-    if (!policyResult.success) {
-      return NextResponse.json({
-        warning: "DLP profile created but HTTP policy failed. You may need to create the HTTP policy manually in Cloudflare.",
-        profileId: profileResult.profileId,
-        error: policyResult.error,
-      });
+        const policyResult = await createHttpDlpPolicy(config, profileResult.profileId, approvedTools, "audit", "TeamPrompt: DLP Warn Audit");
+        if (!policyResult.success) {
+          warnings.push(`Warn DLP profile created but HTTP audit policy failed: ${policyResult.error}. You may need to create it manually in Cloudflare.`);
+        }
+      }
     }
 
     // Save enterprise status to org settings
-    const updatedSettings = { ...settings, cloudflare_enterprise_enabled: true, cloudflare_dlp_profile_id: profileResult.profileId };
+    const updatedSettings = {
+      ...settings,
+      cloudflare_enterprise_enabled: true,
+      cloudflare_dlp_profile_id: profileIds[0] || null,
+    };
     await db.from("organizations").update({ settings: updatedSettings }).eq("id", profile.org_id);
 
-    const regexCount = (rules as DlpRuleForExport[]).filter((r) => r.pattern_type === "regex").length;
+    // Build summary message
+    const parts = [];
+    if (blockSynced > 0) parts.push(`${blockSynced} block rules → Cloudflare block policy`);
+    if (warnSynced > 0) parts.push(`${warnSynced} warn rules → Cloudflare audit policy`);
+    const skippedParts = [];
+    if (redactCount > 0) skippedParts.push(`${redactCount} redact rules (client-side only)`);
+    if (nonRegexCount > 0) skippedParts.push(`${nonRegexCount} non-regex rules`);
+
     return NextResponse.json({
       success: true,
-      profileId: profileResult.profileId,
-      rulesSynced: regexCount,
+      profileIds,
+      rulesSynced: blockSynced + warnSynced,
+      blockSynced,
+      warnSynced,
+      redactSkipped: redactCount,
       totalRules: rules.length,
-      skipped: rules.length - regexCount,
-      message: `${regexCount} regex rules synced to Cloudflare DLP. ${rules.length - regexCount} non-regex rules skipped (Cloudflare DLP only supports regex).`,
+      warnings: warnings.length > 0 ? warnings : undefined,
+      message: `${parts.join("; ")}. ${skippedParts.length > 0 ? `Skipped: ${skippedParts.join(", ")}.` : ""}`,
     });
   }
 
   // ── Remove enterprise DLP ──
   if (action === "remove") {
+    const errors: string[] = [];
+
+    // Delete HTTP policy first (it references the DLP profile)
+    const httpResult = await deleteHttpDlpPolicy(config);
+    if (!httpResult.success) {
+      errors.push(`Failed to remove HTTP policy: ${httpResult.error}`);
+    }
+
+    // Delete DLP profiles (both block and warn)
     const profiles = await listDlpProfiles(config);
-    const tpProfile = profiles.find((p) => p.name === "TeamPrompt DLP");
-    if (tpProfile) {
-      await deleteDlpProfile(config, tpProfile.id);
+    for (const profileName of ["TeamPrompt DLP", "TeamPrompt DLP (Warn)"]) {
+      const tpProfile = profiles.find((p) => p.name === profileName);
+      if (tpProfile) {
+        const delResult = await deleteDlpProfile(config, tpProfile.id);
+        if (!delResult.success) {
+          errors.push(`Failed to remove DLP profile "${profileName}": ${delResult.error}`);
+        }
+      }
     }
 
     const updatedSettings = { ...settings, cloudflare_enterprise_enabled: false, cloudflare_dlp_profile_id: null };
     await db.from("organizations").update({ settings: updatedSettings }).eq("id", profile.org_id);
 
+    if (errors.length > 0) {
+      return NextResponse.json({ success: true, warnings: errors, message: "Removed from TeamPrompt but some Cloudflare resources may need manual cleanup." });
+    }
     return NextResponse.json({ success: true });
   }
 
   return NextResponse.json({ error: "Invalid action" }, { status: 400 });
+  } catch (err) {
+    return NextResponse.json({ error: err instanceof Error ? err.message : "Internal server error" }, { status: 500 });
+  }
 }

@@ -52,79 +52,17 @@ async function updateOrgSettings(db: ReturnType<typeof createServiceClient>, org
 
 /** GET — Get Cloudflare connection status + current rules */
 export async function GET(req: NextRequest) {
-  const auth = await getOrgAdmin(req);
-  if ("error" in auth) return NextResponse.json({ error: auth.error }, { status: auth.status });
-
-  const settings = await getOrgSettings(auth.db, auth.orgId);
-
-  if (!settings.cloudflare_account_id || !settings.cloudflare_api_token) {
-    return NextResponse.json({
-      connected: false,
-      tools: AI_TOOL_DOMAINS.map((t) => ({ ...t, blocked: false })),
-    });
-  }
-
-  const config: CloudflareConfig = {
-    account_id: settings.cloudflare_account_id as string,
-    api_token: settings.cloudflare_api_token as string,
-  };
-
-  const verification = await verifyConnection(config);
-  const blockedTools = (settings.cloudflare_blocked_tools as string[]) || [];
-
-  return NextResponse.json({
-    connected: verification.success,
-    accountId: settings.cloudflare_account_id,
-    blockedTools,
-    tools: AI_TOOL_DOMAINS.map((t) => ({
-      ...t,
-      blocked: blockedTools.includes(t.id),
-    })),
-  });
-}
-
-/** POST — Connect Cloudflare account or sync tools */
-export async function POST(req: NextRequest) {
-  const auth = await getOrgAdmin(req);
-  if ("error" in auth) return NextResponse.json({ error: auth.error }, { status: auth.status });
-
-  const body = await req.json();
-  const { action } = body;
-
-  // ── Connect account ──
-  if (action === "connect") {
-    const { account_id, api_token } = body;
-    if (!account_id || !api_token) {
-      return NextResponse.json({ error: "Account ID and API token are required" }, { status: 400 });
-    }
-
-    const config: CloudflareConfig = { account_id, api_token };
-    const result = await verifyConnection(config);
-
-    if (!result.success) {
-      return NextResponse.json({ error: result.error || "Invalid credentials" }, { status: 400 });
-    }
-
-    await updateOrgSettings(auth.db, auth.orgId, {
-      cloudflare_account_id: account_id,
-      cloudflare_api_token: api_token,
-      cloudflare_connected_at: new Date().toISOString(),
-    });
-
-    return NextResponse.json({ success: true });
-  }
-
-  // ── Sync blocked tools ──
-  if (action === "sync") {
-    const { blockedToolIds } = body;
-    if (!Array.isArray(blockedToolIds)) {
-      return NextResponse.json({ error: "blockedToolIds must be an array" }, { status: 400 });
-    }
+  try {
+    const auth = await getOrgAdmin(req);
+    if ("error" in auth) return NextResponse.json({ error: auth.error }, { status: auth.status });
 
     const settings = await getOrgSettings(auth.db, auth.orgId);
 
     if (!settings.cloudflare_account_id || !settings.cloudflare_api_token) {
-      return NextResponse.json({ error: "Cloudflare not connected" }, { status: 400 });
+      return NextResponse.json({
+        connected: false,
+        tools: AI_TOOL_DOMAINS.map((t) => ({ ...t, blocked: false })),
+      });
     }
 
     const config: CloudflareConfig = {
@@ -132,31 +70,106 @@ export async function POST(req: NextRequest) {
       api_token: settings.cloudflare_api_token as string,
     };
 
-    const result = await syncBlockedTools(config, blockedToolIds);
-
-    await updateOrgSettings(auth.db, auth.orgId, {
-      cloudflare_blocked_tools: blockedToolIds,
-    });
+    const verification = await verifyConnection(config);
+    const blockedTools = (settings.cloudflare_blocked_tools as string[]) || [];
 
     return NextResponse.json({
-      success: true,
-      created: result.created,
-      deleted: result.deleted,
-      errors: result.errors,
+      connected: verification.success,
+      connectionError: verification.success ? undefined : verification.error,
+      accountId: settings.cloudflare_account_id,
+      blockedTools,
+      tools: AI_TOOL_DOMAINS.map((t) => ({
+        ...t,
+        blocked: blockedTools.includes(t.id),
+      })),
     });
+  } catch (err) {
+    return NextResponse.json({ error: err instanceof Error ? err.message : "Internal server error" }, { status: 500 });
   }
+}
 
-  // ── Disconnect ──
-  if (action === "disconnect") {
-    await updateOrgSettings(auth.db, auth.orgId, {
-      cloudflare_account_id: null,
-      cloudflare_api_token: null,
-      cloudflare_blocked_tools: null,
-      cloudflare_connected_at: null,
-    });
+/** POST — Connect Cloudflare account or sync tools */
+export async function POST(req: NextRequest) {
+  try {
+    const auth = await getOrgAdmin(req);
+    if ("error" in auth) return NextResponse.json({ error: auth.error }, { status: auth.status });
 
-    return NextResponse.json({ success: true });
+    const body = await req.json();
+    const { action } = body;
+
+    // ── Connect account ──
+    if (action === "connect") {
+      const { account_id, api_token } = body;
+      if (!account_id || !api_token) {
+        return NextResponse.json({ error: "Account ID and API token are required" }, { status: 400 });
+      }
+
+      const config: CloudflareConfig = { account_id, api_token };
+      const result = await verifyConnection(config);
+
+      if (!result.success) {
+        return NextResponse.json({ error: result.error || "Invalid credentials" }, { status: 400 });
+      }
+
+      await updateOrgSettings(auth.db, auth.orgId, {
+        cloudflare_account_id: account_id,
+        cloudflare_api_token: api_token,
+        cloudflare_connected_at: new Date().toISOString(),
+      });
+
+      return NextResponse.json({ success: true });
+    }
+
+    // ── Sync blocked tools ──
+    if (action === "sync") {
+      const { blockedToolIds } = body;
+      if (!Array.isArray(blockedToolIds)) {
+        return NextResponse.json({ error: "blockedToolIds must be an array" }, { status: 400 });
+      }
+
+      const settings = await getOrgSettings(auth.db, auth.orgId);
+
+      if (!settings.cloudflare_account_id || !settings.cloudflare_api_token) {
+        return NextResponse.json({ error: "Cloudflare not connected" }, { status: 400 });
+      }
+
+      const config: CloudflareConfig = {
+        account_id: settings.cloudflare_account_id as string,
+        api_token: settings.cloudflare_api_token as string,
+      };
+
+      const result = await syncBlockedTools(config, blockedToolIds);
+
+      if (!result.success) {
+        return NextResponse.json({ error: result.errors[0] || "Failed to sync with Cloudflare" }, { status: 502 });
+      }
+
+      await updateOrgSettings(auth.db, auth.orgId, {
+        cloudflare_blocked_tools: blockedToolIds,
+      });
+
+      return NextResponse.json({
+        success: true,
+        created: result.created,
+        deleted: result.deleted,
+        errors: result.errors,
+      });
+    }
+
+    // ── Disconnect ──
+    if (action === "disconnect") {
+      await updateOrgSettings(auth.db, auth.orgId, {
+        cloudflare_account_id: null,
+        cloudflare_api_token: null,
+        cloudflare_blocked_tools: null,
+        cloudflare_connected_at: null,
+      });
+
+      return NextResponse.json({ success: true });
+    }
+
+    return NextResponse.json({ error: "Invalid action" }, { status: 400 });
+  } catch (err) {
+    return NextResponse.json({ error: err instanceof Error ? err.message : "Internal server error" }, { status: 500 });
   }
-
-  return NextResponse.json({ error: "Invalid action" }, { status: 400 });
 }

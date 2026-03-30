@@ -180,10 +180,16 @@ export async function verifyConnection(config: CloudflareConfig): Promise<{ succ
 }
 
 /** List all Gateway rules */
-export async function listRules(config: CloudflareConfig): Promise<GatewayRule[]> {
-  const data = await cfFetch(config, "/gateway/rules");
-  if (!data.success) return [];
-  return (data.result as GatewayRule[]) || [];
+export async function listRules(config: CloudflareConfig): Promise<{ success: boolean; rules: GatewayRule[]; error?: string }> {
+  try {
+    const data = await cfFetch(config, "/gateway/rules");
+    if (!data.success) {
+      return { success: false, rules: [], error: data.errors?.[0]?.message || "Failed to list Gateway rules" };
+    }
+    return { success: true, rules: (data.result as GatewayRule[]) || [] };
+  } catch (err) {
+    return { success: false, rules: [], error: err instanceof Error ? err.message : "Failed to connect to Cloudflare API" };
+  }
 }
 
 /** Create a DNS block rule for specific AI tool domains */
@@ -229,12 +235,18 @@ export async function toggleRule(
   config: CloudflareConfig,
   ruleId: string,
   enabled: boolean
-): Promise<{ success: boolean }> {
+): Promise<{ success: boolean; error?: string }> {
+  // Cloudflare PUT requires the full rule body — fetch existing rule first
+  const getResult = await cfFetch(config, `/gateway/rules/${ruleId}`);
+  if (!getResult.success || !getResult.result) {
+    return { success: false, error: getResult.errors?.[0]?.message || "Failed to fetch rule for update" };
+  }
+  const existingRule = getResult.result as Record<string, unknown>;
   const data = await cfFetch(config, `/gateway/rules/${ruleId}`, {
     method: "PUT",
-    body: JSON.stringify({ enabled }),
+    body: JSON.stringify({ ...existingRule, enabled }),
   });
-  return { success: data.success };
+  return { success: data.success, error: data.errors?.[0]?.message };
 }
 
 /**
@@ -244,10 +256,18 @@ export async function toggleRule(
 export async function syncBlockedTools(
   config: CloudflareConfig,
   blockedToolIds: string[]
-): Promise<{ created: number; deleted: number; errors: string[] }> {
-  const existingRules = await listRules(config);
-  const tpRules = existingRules.filter((r) => r.name.startsWith("TeamPrompt: Block "));
+): Promise<{ success: boolean; created: number; deleted: number; errors: string[] }> {
+  const listResult = await listRules(config);
+  if (!listResult.success) {
+    return {
+      success: false,
+      created: 0,
+      deleted: 0,
+      errors: [`Cannot sync: failed to read existing rules — ${listResult.error}`],
+    };
+  }
 
+  const tpRules = listResult.rules.filter((r) => r.name.startsWith("TeamPrompt: Block "));
   const errors: string[] = [];
   let created = 0;
   let deleted = 0;
@@ -274,5 +294,5 @@ export async function syncBlockedTools(
     }
   }
 
-  return { created, deleted, errors };
+  return { success: true, created, deleted, errors };
 }

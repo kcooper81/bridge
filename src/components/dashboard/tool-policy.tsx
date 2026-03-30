@@ -86,6 +86,10 @@ export function ToolPolicy() {
           if (r?.deleted > 0) parts.push(`${r.deleted} unblocked at DNS`);
         }
         toast.success(parts.length > 0 ? `Policy saved. ${parts.join(", ")}.` : "Policy saved");
+        // Warn if Cloudflare sync failed (policy saved locally but not synced)
+        if (data.cloudflareError) {
+          toast.warning(`Cloudflare out of sync: ${data.cloudflareError}`, { duration: 8000 });
+        }
         fetchPolicy();
       } else {
         const data = await res.json();

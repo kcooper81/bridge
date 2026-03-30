@@ -648,20 +648,27 @@ export default function GuardrailsPage() {
             )}
             {rules.length > 0 && (
               <Button variant="outline" size="sm" onClick={async () => {
-                const supabase = (await import("@/lib/supabase/client")).createClient();
-                const { data: { session } } = await supabase.auth.getSession();
-                if (!session) return;
-                const res = await fetch("/api/guardrails/export?format=json", {
-                  headers: { Authorization: `Bearer ${session.access_token}` },
-                });
-                if (res.ok) {
-                  const blob = await res.blob();
-                  const url = URL.createObjectURL(blob);
-                  const a = document.createElement("a");
-                  a.href = url;
-                  a.download = "teamprompt-dlp-rules.json";
-                  a.click();
-                  URL.revokeObjectURL(url);
+                try {
+                  const supabase = (await import("@/lib/supabase/client")).createClient();
+                  const { data: { session } } = await supabase.auth.getSession();
+                  if (!session) return;
+                  const res = await fetch("/api/guardrails/export?format=json", {
+                    headers: { Authorization: `Bearer ${session.access_token}` },
+                  });
+                  if (res.ok) {
+                    const blob = await res.blob();
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = "teamprompt-dlp-rules.json";
+                    a.click();
+                    URL.revokeObjectURL(url);
+                  } else {
+                    const data = await res.json().catch(() => ({}));
+                    toast.error(data.error || "Failed to export rules");
+                  }
+                } catch {
+                  toast.error("Failed to export rules");
                 }
               }}>
                 <Download className="mr-2 h-4 w-4" />

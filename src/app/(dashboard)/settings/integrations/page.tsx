@@ -630,6 +630,7 @@ function CloudflareIcon() {
 }
 
 function CloudflareCard() {
+  const { canAccess } = useSubscription();
   const [connected, setConnected] = useState(false);
   const [loading, setLoading] = useState(true);
   const [accountId, setAccountId] = useState("");
@@ -640,6 +641,12 @@ function CloudflareCard() {
   const [showSetup, setShowSetup] = useState(false);
   const [wizardStep, setWizardStep] = useState(1);
   const [wizardTools, setWizardTools] = useState<Record<string, boolean>>({});
+
+  // Enterprise DLP state
+  const [dlpConfigured, setDlpConfigured] = useState(false);
+  const [dlpLoading, setDlpLoading] = useState(false);
+  const [dlpSyncing, setDlpSyncing] = useState(false);
+  const [dlpRemoving, setDlpRemoving] = useState(false);
 
   const fetchStatus = useCallback(async () => {
     try {
@@ -654,6 +661,26 @@ function CloudflareCard() {
         const data = await res.json();
         setConnected(data.connected);
         setTools(data.tools || []);
+
+        // Check enterprise DLP status if connected
+        if (data.connected) {
+          try {
+            setDlpLoading(true);
+            const dlpRes = await fetch("/api/integrations/cloudflare/enterprise", {
+              method: "POST",
+              headers: { Authorization: `Bearer ${session.access_token}`, "Content-Type": "application/json" },
+              body: JSON.stringify({ action: "status" }),
+            });
+            if (dlpRes.ok) {
+              const dlpData = await dlpRes.json();
+              setDlpConfigured(dlpData.configured);
+            }
+          } catch {
+            // Non-critical
+          } finally {
+            setDlpLoading(false);
+          }
+        }
       }
     } catch {
       // Non-critical
@@ -715,9 +742,12 @@ function CloudflareCard() {
         if (data.created > 0) parts.push(`${data.created} blocked`);
         if (data.deleted > 0) parts.push(`${data.deleted} unblocked`);
         toast.success(parts.length > 0 ? `Synced: ${parts.join(", ")}` : "Already in sync");
+        if (data.errors?.length > 0) {
+          toast.warning(`Some rules had issues: ${data.errors.join("; ")}`, { duration: 8000 });
+        }
         fetchStatus();
       } else {
-        const data = await res.json();
+        const data = await res.json().catch(() => ({}));
         toast.error(data.error || "Sync failed");
       }
     } catch {
@@ -734,14 +764,23 @@ function CloudflareCard() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
 
-      await fetch("/api/integrations/cloudflare", {
+      const res = await fetch("/api/integrations/cloudflare", {
         method: "POST",
         headers: { Authorization: `Bearer ${session.access_token}`, "Content-Type": "application/json" },
         body: JSON.stringify({ action: "disconnect" }),
       });
-      toast.success("Disconnected");
-      setConnected(false);
-      setTools((prev) => prev.map((t) => ({ ...t, blocked: false })));
+      if (res.ok) {
+        toast.success("Disconnected");
+        setConnected(false);
+        setShowSetup(false);
+        setWizardStep(1);
+        setAccountId("");
+        setApiToken("");
+        setTools((prev) => prev.map((t) => ({ ...t, blocked: false })));
+      } else {
+        const data = await res.json().catch(() => ({}));
+        toast.error(data.error || "Failed to disconnect");
+      }
     } catch {
       toast.error("Failed to disconnect");
     }
@@ -753,6 +792,70 @@ function CloudflareCard() {
     );
     setTools(updated);
     handleSync(updated.filter((t) => t.blocked).map((t) => t.id));
+  }
+
+  async function handleDlpSync() {
+    setDlpSyncing(true);
+    try {
+      const supabase = (await import("@/lib/supabase/client")).createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const res = await fetch("/api/integrations/cloudflare/enterprise", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${session.access_token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "sync-dlp" }),
+      });
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        toast.success(data.message || `${data.rulesSynced} DLP rules synced to Cloudflare`);
+        if (data.warnings?.length > 0) {
+          data.warnings.forEach((w: string) => toast.warning(w, { duration: 8000 }));
+        }
+        if (data.redactSkipped > 0) {
+          toast.info(`${data.redactSkipped} redact rules skipped — redaction is handled by the browser extension before data reaches the network.`, { duration: 6000 });
+        }
+        setDlpConfigured(true);
+      } else {
+        toast.error(data.error || "Failed to sync DLP rules");
+      }
+    } catch {
+      toast.error("Failed to sync DLP rules");
+    } finally {
+      setDlpSyncing(false);
+    }
+  }
+
+  async function handleDlpRemove() {
+    if (!confirm("Remove DLP content scanning from Cloudflare? DNS-level blocking will continue to work.")) return;
+    setDlpRemoving(true);
+    try {
+      const supabase = (await import("@/lib/supabase/client")).createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const res = await fetch("/api/integrations/cloudflare/enterprise", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${session.access_token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "remove" }),
+      });
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        toast.success("DLP content scanning removed");
+        if (data.warnings?.length > 0) {
+          toast.warning(data.message || data.warnings.join("; "), { duration: 8000 });
+        }
+        setDlpConfigured(false);
+      } else {
+        toast.error(data.error || "Failed to remove DLP");
+      }
+    } catch {
+      toast.error("Failed to remove DLP");
+    } finally {
+      setDlpRemoving(false);
+    }
   }
 
   if (loading) {
@@ -1088,6 +1191,52 @@ function CloudflareCard() {
                 Syncing with Cloudflare...
               </p>
             )}
+
+            {/* Enterprise DLP section */}
+            {canAccess("custom_security") && (
+              <div className="rounded-xl border border-border p-3 space-y-2">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-semibold">Content Scanning (DLP)</p>
+                    <p className="text-[10px] text-muted-foreground">
+                      Inspect HTTP traffic to AI tools for sensitive data. Requires TLS decryption.
+                    </p>
+                  </div>
+                  {dlpLoading ? (
+                    <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+                  ) : dlpConfigured ? (
+                    <Badge className="bg-emerald-500/10 text-emerald-600 border-0 text-[10px]">Active</Badge>
+                  ) : (
+                    <Badge variant="outline" className="text-[10px]">Not configured</Badge>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant={dlpConfigured ? "outline" : "default"}
+                    size="sm"
+                    className="flex-1 h-7 text-xs"
+                    onClick={handleDlpSync}
+                    disabled={dlpSyncing || dlpRemoving}
+                  >
+                    {dlpSyncing ? <><Loader2 className="mr-1.5 h-3 w-3 animate-spin" />{dlpConfigured ? "Re-syncing..." : "Syncing..."}</> : (
+                      <>{dlpConfigured ? <><RefreshCw className="mr-1.5 h-3 w-3" />Re-sync Rules</> : "Enable DLP Scanning"}</>
+                    )}
+                  </Button>
+                  {dlpConfigured && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 text-xs text-destructive hover:text-destructive"
+                      onClick={handleDlpRemove}
+                      disabled={dlpSyncing || dlpRemoving}
+                    >
+                      {dlpRemoving ? <Loader2 className="h-3 w-3 animate-spin" /> : "Remove"}
+                    </Button>
+                  )}
+                </div>
+              </div>
+            )}
+
             <Button variant="outline" size="sm" className="w-full text-destructive hover:text-destructive" onClick={handleDisconnect}>
               <Unplug className="mr-2 h-4 w-4" />
               Disconnect

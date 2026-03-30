@@ -422,13 +422,17 @@ export function DeploymentTab() {
         return JSON.stringify(generateGoogleAdminConfig(level, blockedUrls, allowedUrls), null, 2);
       case "intune": {
         const settings = generateIntuneConfig(level, blockedUrls, allowedUrls);
-        return JSON.stringify(settings, null, 2);
+        // Filter out Edge entries if toggle is off
+        const filtered = includeEdge ? settings : settings.filter((s) => !s.name.includes("(Edge)"));
+        return JSON.stringify(filtered, null, 2);
       }
       case "jamf":
         return JSON.stringify(generateJamfConfig(level, blockedUrls, allowedUrls), null, 2);
       case "gpo": {
-        const keys = generateGpoConfig(level, blockedUrls);
-        return JSON.stringify(keys, null, 2);
+        let keys = generateGpoConfig(level, blockedUrls);
+        if (!includeEdge) keys = keys.filter((k) => !k.path.includes("Microsoft\\Edge"));
+        // Show .reg format for GPO (not JSON)
+        return generateRegFile(keys);
       }
     }
   })();
@@ -460,7 +464,7 @@ export function DeploymentTab() {
         break;
       case "gpo":
         filename = "teamprompt-browser-policy.reg";
-        content = generateRegFile(generateGpoConfig(level, blockedUrls));
+        content = configOutput; // Already in .reg format
         mimeType = "text/plain";
         break;
     }
@@ -712,7 +716,7 @@ export function DeploymentTab() {
         <Card className="overflow-hidden">
           <div className="flex items-center justify-between border-b border-border px-4 py-2 bg-muted/30">
             <p className="text-xs font-medium text-muted-foreground">
-              {platform === "gpo" ? "Registry keys (JSON preview)" : `${PLATFORMS.find((p) => p.id === platform)?.name} config`}
+              {platform === "gpo" ? "Windows Registry (.reg)" : `${PLATFORMS.find((p) => p.id === platform)?.name} config`}
             </p>
             <div className="flex gap-1.5">
               <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={handleCopy}>
@@ -792,15 +796,15 @@ export function DeploymentTab() {
         <CardContent className="text-xs text-muted-foreground space-y-2">
           <p>After deploying the policy, verify it&apos;s working on a test device:</p>
           <ol className="space-y-1.5 list-decimal list-inside">
-            <li>Open Chrome or Edge on a managed device</li>
-            <li>Check <code className="bg-muted px-1.5 py-0.5 rounded text-[10px]">chrome://extensions</code> — TeamPrompt should appear with &ldquo;Installed by your organization&rdquo; and no remove button</li>
-            <li>Check <code className="bg-muted px-1.5 py-0.5 rounded text-[10px]">chrome://policy</code> — your policies should be listed under Chrome Policies</li>
+            <li>Open {platform === "intune" || platform === "gpo" ? "Chrome or Edge" : "Chrome"} on a managed device</li>
+            <li>Check <code className="bg-muted px-1.5 py-0.5 rounded text-[10px]">{platform === "intune" || platform === "gpo" ? "chrome://extensions (or edge://extensions)" : "chrome://extensions"}</code> — TeamPrompt should appear with &ldquo;Installed by your organization&rdquo; and no remove button</li>
+            <li>Check <code className="bg-muted px-1.5 py-0.5 rounded text-[10px]">{platform === "intune" || platform === "gpo" ? "chrome://policy (or edge://policy)" : "chrome://policy"}</code> — your policies should be listed</li>
             {(level === "restrict" || level === "lockdown") && policy?.policyEnabled && (
-              <li>Try visiting a blocked AI tool domain — should show a Chrome &ldquo;blocked by administrator&rdquo; error page</li>
+              <li>Try visiting a blocked AI tool domain — should show a &ldquo;blocked by your organization&rdquo; error page</li>
             )}
             {level === "lockdown" && (
               <>
-                <li>Try opening an incognito/InPrivate window — should be greyed out or show &ldquo;disabled by your organization&rdquo;</li>
+                <li>Try opening an incognito{platform === "intune" || platform === "gpo" ? "/InPrivate" : ""} window — should be greyed out or show &ldquo;disabled by your organization&rdquo;</li>
                 <li>Try pressing F12 for dev tools — should not open</li>
               </>
             )}
@@ -831,7 +835,7 @@ export function DeploymentTab() {
           },
           {
             q: "What's the difference between this and Cloudflare?",
-            a: "Browser policies enforce rules in Chrome/Edge specifically (extension install + URL blocking). Cloudflare enforces at the DNS/network level (covers all apps, all browsers). Use both for defense-in-depth, or browser policies alone if you don't need network-level enforcement.",
+            a: "Browser policies enforce rules in Chrome/Edge specifically (extension install + URL blocking). Cloudflare enforces at the DNS/network level (covers all apps, all browsers). Use both for defense-in-depth, or browser policies alone if you don't need network-level enforcement. Set up Cloudflare in Settings → Integrations.",
           },
         ].map((faq, i) => (
           <details key={i} className="group rounded-lg border border-border">

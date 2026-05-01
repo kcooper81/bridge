@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback, useEffect } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useOrg } from "@/components/providers/org-provider";
 import { useSubscription } from "@/components/providers/subscription-provider";
@@ -175,7 +175,14 @@ export default function VaultPage() {
       );
     }
 
-    if (filterFolder) result = result.filter((p) => p.folder_id === filterFolder);
+    if (filterFolder) {
+      // Selecting a parent category includes prompts in any of its sub-categories.
+      const matchIds = new Set<string>([filterFolder]);
+      for (const f of folders) {
+        if (f.parent_id === filterFolder) matchIds.add(f.id);
+      }
+      result = result.filter((p) => p.folder_id && matchIds.has(p.folder_id));
+    }
     if (filterTeam) result = result.filter((p) => p.department_id === filterTeam);
 
     switch (sort) {
@@ -200,7 +207,7 @@ export default function VaultPage() {
     }
 
     return result;
-  }, [visiblePrompts, search, filterFolder, filterTeam, sort, statusFilter]);
+  }, [visiblePrompts, search, filterFolder, filterTeam, sort, statusFilter, folders]);
 
   const pageCount = Math.ceil(filtered.length / vaultPageSize);
   const pageItems = filtered.slice(
@@ -532,24 +539,60 @@ export default function VaultPage() {
             setPage(0);
           }}
         >
-          <SelectTrigger className="w-full sm:w-[160px]">
+          <SelectTrigger className="w-full sm:w-[180px]">
             <SelectValue placeholder="All Categories" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="__all__">All Categories</SelectItem>
-            {folders.map((f) => (
-              <SelectItem key={f.id} value={f.id}>
-                <span className="flex items-center gap-2">
-                  {f.color && (
-                    <span
-                      className="h-2.5 w-2.5 rounded-full shrink-0"
-                      style={{ backgroundColor: f.color }}
-                    />
-                  )}
-                  {f.name}
-                </span>
-              </SelectItem>
-            ))}
+            {(() => {
+              const roots = folders
+                .filter((f) => !f.parent_id)
+                .sort((a, b) => a.name.localeCompare(b.name));
+              const childrenByParent = new Map<string, typeof folders>();
+              for (const f of folders) {
+                if (f.parent_id) {
+                  const arr = childrenByParent.get(f.parent_id) || [];
+                  arr.push(f);
+                  childrenByParent.set(f.parent_id, arr);
+                }
+              }
+              const items: React.ReactNode[] = [];
+              for (const root of roots) {
+                items.push(
+                  <SelectItem key={root.id} value={root.id}>
+                    <span className="flex items-center gap-2">
+                      {root.color && (
+                        <span
+                          className="h-2.5 w-2.5 rounded-full shrink-0"
+                          style={{ backgroundColor: root.color }}
+                        />
+                      )}
+                      {root.name}
+                    </span>
+                  </SelectItem>
+                );
+                const kids = (childrenByParent.get(root.id) || []).sort((a, b) =>
+                  a.name.localeCompare(b.name)
+                );
+                for (const child of kids) {
+                  items.push(
+                    <SelectItem key={child.id} value={child.id}>
+                      <span className="flex items-center gap-2 pl-4">
+                        <span className="text-muted-foreground">↳</span>
+                        {child.color && (
+                          <span
+                            className="h-2.5 w-2.5 rounded-full shrink-0"
+                            style={{ backgroundColor: child.color }}
+                          />
+                        )}
+                        {child.name}
+                      </span>
+                    </SelectItem>
+                  );
+                }
+              }
+              return items;
+            })()}
           </SelectContent>
         </Select>
         {canApprove && (

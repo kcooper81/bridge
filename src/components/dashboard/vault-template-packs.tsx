@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useOrg } from "@/components/providers/org-provider";
 import { createClient } from "@/lib/supabase/client";
 import { PageSkeleton } from "@/components/dashboard/skeleton-loader";
@@ -765,9 +765,28 @@ export function VaultTemplatePacks() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="__none__">No category</SelectItem>
-                  {folders.map((f) => (
-                    <SelectItem key={f.id} value={f.id}>{f.name}</SelectItem>
-                  ))}
+                  {(() => {
+                    const roots = folders
+                      .filter((f) => !f.parent_id)
+                      .sort((a, b) => a.name.localeCompare(b.name));
+                    const items: React.ReactNode[] = [];
+                    for (const root of roots) {
+                      items.push(
+                        <SelectItem key={root.id} value={root.id}>{root.name}</SelectItem>
+                      );
+                      const kids = folders
+                        .filter((f) => f.parent_id === root.id)
+                        .sort((a, b) => a.name.localeCompare(b.name));
+                      for (const child of kids) {
+                        items.push(
+                          <SelectItem key={child.id} value={child.id}>
+                            {root.name} / {child.name}
+                          </SelectItem>
+                        );
+                      }
+                    }
+                    return items;
+                  })()}
                 </SelectContent>
               </Select>
             </div>

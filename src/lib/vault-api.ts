@@ -311,9 +311,11 @@ export async function saveFolderApi(folder: Partial<Folder>): Promise<Folder | n
   if (!orgId || !userId) return null;
 
   if (folder.id) {
+    const update: Record<string, unknown> = { name: folder.name, icon: folder.icon, color: folder.color };
+    if ("parent_id" in folder) update.parent_id = folder.parent_id ?? null;
     const { data } = await supabase()
       .from("folders")
-      .update({ name: folder.name, icon: folder.icon, color: folder.color })
+      .update(update)
       .eq("id", folder.id)
       .select()
       .single();
@@ -322,7 +324,14 @@ export async function saveFolderApi(folder: Partial<Folder>): Promise<Folder | n
 
   const { data } = await supabase()
     .from("folders")
-    .insert({ org_id: orgId, name: folder.name || "", icon: folder.icon, color: folder.color, created_by: userId })
+    .insert({
+      org_id: orgId,
+      name: folder.name || "",
+      icon: folder.icon,
+      color: folder.color,
+      parent_id: folder.parent_id ?? null,
+      created_by: userId,
+    })
     .select()
     .single();
   return data;

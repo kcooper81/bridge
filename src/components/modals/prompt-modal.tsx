@@ -516,7 +516,40 @@ export function PromptModal({
               <SelectWithQuickAdd
                 value={folderId}
                 onValueChange={setFolderId}
-                items={folders.map((f) => ({ id: f.id, name: f.name, color: f.color }))}
+                items={(() => {
+                  // Render hierarchically: roots first, each followed by its children with " / " prefix.
+                  const folderById = new Map(folders.map((f) => [f.id, f]));
+                  const roots = folders
+                    .filter((f) => !f.parent_id)
+                    .sort((a, b) => a.name.localeCompare(b.name));
+                  const out: { id: string; name: string; color: string | null }[] = [];
+                  for (const root of roots) {
+                    out.push({ id: root.id, name: root.name, color: root.color });
+                    const kids = folders
+                      .filter((f) => f.parent_id === root.id)
+                      .sort((a, b) => a.name.localeCompare(b.name));
+                    for (const child of kids) {
+                      out.push({
+                        id: child.id,
+                        name: `${root.name} / ${child.name}`,
+                        color: child.color || root.color,
+                      });
+                    }
+                  }
+                  // Surface any orphan children (parent missing) at the bottom so they remain selectable.
+                  const placedIds = new Set(out.map((i) => i.id));
+                  for (const f of folders) {
+                    if (!placedIds.has(f.id)) {
+                      const parent = f.parent_id ? folderById.get(f.parent_id) : null;
+                      out.push({
+                        id: f.id,
+                        name: parent ? `${parent.name} / ${f.name}` : f.name,
+                        color: f.color,
+                      });
+                    }
+                  }
+                  return out;
+                })()}
                 onQuickCreate={async (name) => {
                   const folder = await saveFolderApi({ name });
                   if (folder) {

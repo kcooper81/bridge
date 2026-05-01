@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
     // Fetch folders for this org
     const { data: folders, error: foldersError } = await db
       .from("folders")
-      .select("id, name, icon, color")
+      .select("id, name, icon, color, parent_id")
       .eq("org_id", profile.org_id)
       .order("name", { ascending: true });
 
@@ -102,6 +102,7 @@ export async function GET(request: NextRequest) {
       name: f.name,
       icon: f.icon,
       color: f.color,
+      parent_id: f.parent_id ?? null,
       prompt_count: folderCounts[f.id] || 0,
     }));
 

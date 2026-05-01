@@ -85,6 +85,17 @@ export async function GET(request: NextRequest) {
         authDebug.error("callback", "org check failed, defaulting to /home");
       }
 
+      // Forward Supabase's Set-Cookie headers verbatim onto the new redirect
+      // response. We MUST copy raw header strings here — `cookies.getAll()`
+      // returns only {name, value} and silently drops Path/HttpOnly/Secure/
+      // SameSite/Max-Age, which would turn the auth cookies into in-memory
+      // session cookies and sign users out when they close the browser.
+      const forwardAuthCookies = (target: NextResponse) => {
+        for (const setCookie of supabaseResponse.headers.getSetCookie()) {
+          target.headers.append("Set-Cookie", setCookie);
+        }
+      };
+
       // Pass auth tracking params to the destination so the client can fire GA4/LinkedIn events
       const authEvent = searchParams.get("auth_event");
       const authMethod = searchParams.get("auth_method");
@@ -93,10 +104,7 @@ export async function GET(request: NextRequest) {
         redirectUrl.searchParams.set("auth_event", authEvent);
         redirectUrl.searchParams.set("auth_method", authMethod);
         const trackingResponse = NextResponse.redirect(redirectUrl.toString());
-        // Copy cookies from the supabase response
-        supabaseResponse.cookies.getAll().forEach(({ name: n, value: v }) => {
-          trackingResponse.cookies.set(n, v);
-        });
+        forwardAuthCookies(trackingResponse);
         authDebug.log("callback", "code exchange success with tracking, redirecting to", redirectUrl.toString());
         authDebug.attachToResponse(trackingResponse); // AUTH-DEBUG
         return trackingResponse;
@@ -104,9 +112,7 @@ export async function GET(request: NextRequest) {
 
       if (finalNext !== next) {
         const onboardingResponse = NextResponse.redirect(`${origin}${finalNext}`);
-        supabaseResponse.cookies.getAll().forEach(({ name: n, value: v }) => {
-          onboardingResponse.cookies.set(n, v);
-        });
+        forwardAuthCookies(onboardingResponse);
         authDebug.log("callback", "redirecting fresh account to", finalNext);
         authDebug.attachToResponse(onboardingResponse);
         return onboardingResponse;

@@ -5,10 +5,51 @@ import { limiters, checkRateLimit } from "@/lib/rate-limit";
 import { notifyAdminsOfNewSubscription } from "@/lib/notify-admins";
 import { logServiceError } from "@/lib/log-error";
 
+// Pin to the latest version supported by stripe@^17 (the SDK only types
+// "2025-02-24.acacia"). Stripe maintains backward-compatible payload shapes,
+// so newer events the dashboard delivers still parse correctly here. Bump
+// this string in lockstep when you upgrade the stripe package.
 function getStripe() {
   return new Stripe(process.env.STRIPE_SECRET_KEY!, {
     apiVersion: "2025-02-24.acacia",
   });
+}
+
+// Stripe migrated `subscription.current_period_end` (and a few other top-level
+// fields) onto `subscription.items[].current_period_end` in API version
+// 2025-04-30. The webhook endpoint delivers events at a newer version than
+// stripe@^17 types, so the legacy fields can be undefined at runtime and the
+// raw `new Date(undefined * 1000).toISOString()` call would throw
+// "Invalid time value". These helpers do the safe lookup + conversion.
+function isoFromUnix(seconds: number | null | undefined): string | null {
+  if (seconds == null || !Number.isFinite(seconds)) return null;
+  return new Date(seconds * 1000).toISOString();
+}
+
+function subPeriodEndIso(sub: Stripe.Subscription): string | null {
+  // Prefer the new per-item field, fall back to the deprecated top-level one.
+  const item = sub.items?.data?.[0] as
+    | (Stripe.SubscriptionItem & { current_period_end?: number })
+    | undefined;
+  return (
+    isoFromUnix(item?.current_period_end) ??
+    isoFromUnix((sub as Stripe.Subscription & { current_period_end?: number }).current_period_end)
+  );
+}
+
+function invoiceSubscriptionId(invoice: Stripe.Invoice): string | null {
+  // Same migration: `invoice.subscription` was deprecated in favour of
+  // `invoice.parent.subscription_details.subscription`.
+  type ParentShape = {
+    subscription_details?: { subscription?: string | { id?: string } | null };
+  };
+  const parent = (invoice as Stripe.Invoice & { parent?: ParentShape }).parent;
+  const fromParent = parent?.subscription_details?.subscription;
+  const newId =
+    typeof fromParent === "string" ? fromParent : fromParent?.id ?? null;
+  if (newId) return newId;
+  const legacy = (invoice as Stripe.Invoice & { subscription?: string | { id?: string } | null }).subscription;
+  return typeof legacy === "string" ? legacy : legacy?.id ?? null;
 }
 
 function getPlanFromPriceId(priceId: string): string {
@@ -41,14 +82,10 @@ async function upsertSubscription(
       plan,
       status: sub.status,
       seats,
-      current_period_end: new Date(sub.current_period_end * 1000).toISOString(),
-      trial_ends_at: sub.trial_end
-        ? new Date(sub.trial_end * 1000).toISOString()
-        : null,
+      current_period_end: subPeriodEndIso(sub),
+      trial_ends_at: isoFromUnix(sub.trial_end),
       cancel_at_period_end: sub.cancel_at_period_end,
-      canceled_at: sub.canceled_at
-        ? new Date(sub.canceled_at * 1000).toISOString()
-        : null,
+      canceled_at: isoFromUnix(sub.canceled_at),
       updated_at: new Date().toISOString(),
     },
     { onConflict: "org_id" }
@@ -161,9 +198,7 @@ export async function POST(request: NextRequest) {
           .update({
             status: "canceled",
             plan: "free",
-            canceled_at: sub.canceled_at
-              ? new Date(sub.canceled_at * 1000).toISOString()
-              : new Date().toISOString(),
+            canceled_at: isoFromUnix(sub.canceled_at) ?? new Date().toISOString(),
             updated_at: new Date().toISOString(),
           })
           .eq("org_id", orgId);
@@ -187,7 +222,7 @@ export async function POST(request: NextRequest) {
 
       case "invoice.paid": {
         const invoice = event.data.object as Stripe.Invoice;
-        const subId = invoice.subscription as string;
+        const subId = invoiceSubscriptionId(invoice);
         if (!subId) break;
 
         const { error: invoicePaidError } = await db
@@ -208,7 +243,7 @@ export async function POST(request: NextRequest) {
 
       case "invoice.payment_failed": {
         const invoice = event.data.object as Stripe.Invoice;
-        const subId = invoice.subscription as string;
+        const subId = invoiceSubscriptionId(invoice);
         if (!subId) break;
 
         const { error: paymentFailedError } = await db
@@ -235,9 +270,7 @@ export async function POST(request: NextRequest) {
         const { error: trialEndError } = await db
           .from("subscriptions")
           .update({
-            trial_ends_at: sub.trial_end
-              ? new Date(sub.trial_end * 1000).toISOString()
-              : null,
+            trial_ends_at: isoFromUnix(sub.trial_end),
             updated_at: new Date().toISOString(),
           })
           .eq("org_id", orgId);
@@ -298,7 +331,7 @@ export async function POST(request: NextRequest) {
         const invoice = charge.invoice
           ? await stripe.invoices.retrieve(charge.invoice as string)
           : null;
-        const subId = invoice?.subscription as string;
+        const subId = invoice ? invoiceSubscriptionId(invoice) : null;
         if (!subId) break;
 
         const { error: disputeUpdateError } = await db
@@ -324,7 +357,7 @@ export async function POST(request: NextRequest) {
         const invoice = charge.invoice
           ? await stripe.invoices.retrieve(charge.invoice as string)
           : null;
-        const subId = invoice?.subscription as string;
+        const subId = invoice ? invoiceSubscriptionId(invoice) : null;
         if (!subId) break;
 
         const { error: disputeCloseError } = await db
@@ -339,6 +372,87 @@ export async function POST(request: NextRequest) {
           console.error("Webhook charge.dispute.closed: failed to update subscription dispute status", { subId, error: disputeCloseError });
           return NextResponse.json({ error: "Database error", received: true }, { status: 200 });
         }
+        break;
+      }
+
+      case "invoice.payment_action_required": {
+        // Customer needs to complete authentication (e.g. 3DS) for the invoice
+        // to clear. Stripe already emails the customer with a hosted-invoice
+        // link; we just mark the sub as past_due so the UI can prompt them.
+        const invoice = event.data.object as Stripe.Invoice;
+        const subId = invoiceSubscriptionId(invoice);
+        if (!subId) break;
+        const { error } = await db
+          .from("subscriptions")
+          .update({
+            status: "past_due",
+            payment_failed_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          })
+          .eq("stripe_subscription_id", subId);
+        if (error) {
+          console.error("Webhook invoice.payment_action_required: failed to update subscription", { subId, error });
+          return NextResponse.json({ error: "Database error", received: true }, { status: 200 });
+        }
+        break;
+      }
+
+      case "charge.refunded": {
+        // Surface refunds in the service log so they show up in the admin
+        // errors/activity panels alongside dispute and payment events.
+        const charge = event.data.object as Stripe.Charge;
+        logServiceError("stripe", new Error("charge refunded"), {
+          url: "/api/stripe/webhook",
+          metadata: {
+            chargeId: charge.id,
+            amountRefunded: charge.amount_refunded,
+            currency: charge.currency,
+            customer: typeof charge.customer === "string" ? charge.customer : charge.customer?.id ?? null,
+          },
+        });
+        break;
+      }
+
+      case "customer.updated": {
+        // No-op for now — we don't mirror Stripe customer fields locally.
+        // Explicit case keeps this event out of the catch-all default and
+        // documents the intentional choice.
+        break;
+      }
+
+      case "customer.deleted": {
+        // Stripe customer was deleted (e.g. by an admin in the Stripe UI).
+        // Drop the now-dangling references on the org and downgrade to free.
+        const customer = event.data.object as Stripe.Customer;
+        const { data: subRow } = await db
+          .from("subscriptions")
+          .select("org_id")
+          .eq("stripe_customer_id", customer.id)
+          .maybeSingle();
+
+        if (!subRow?.org_id) {
+          console.warn("Webhook customer.deleted: no subscription found", { customerId: customer.id });
+          break;
+        }
+
+        const { error: subError } = await db
+          .from("subscriptions")
+          .update({
+            status: "canceled",
+            plan: "free",
+            stripe_customer_id: null,
+            stripe_subscription_id: null,
+            canceled_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          })
+          .eq("org_id", subRow.org_id);
+
+        if (subError) {
+          console.error("Webhook customer.deleted: failed to clear subscription", { customerId: customer.id, error: subError });
+          return NextResponse.json({ error: "Database error", received: true }, { status: 200 });
+        }
+
+        await db.from("organizations").update({ plan: "free" }).eq("id", subRow.org_id);
         break;
       }
     }

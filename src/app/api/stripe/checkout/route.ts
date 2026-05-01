@@ -141,8 +141,24 @@ export async function POST(request: NextRequest) {
           plan: subPlan,
           status: activeSub.status,
           seats: activeSub.items.data[0]?.quantity || 1,
-          current_period_end: new Date(activeSub.current_period_end * 1000).toISOString(),
-          trial_ends_at: activeSub.trial_end ? new Date(activeSub.trial_end * 1000).toISOString() : null,
+          // `current_period_end` moved onto the subscription item in newer
+          // Stripe API versions; read it from there with a fallback so we
+          // don't crash on `new Date(undefined * 1000).toISOString()`.
+          current_period_end: (() => {
+            const item = activeSub.items?.data?.[0] as
+              | { current_period_end?: number }
+              | undefined;
+            const seconds =
+              item?.current_period_end ??
+              (activeSub as { current_period_end?: number }).current_period_end;
+            return seconds && Number.isFinite(seconds)
+              ? new Date(seconds * 1000).toISOString()
+              : null;
+          })(),
+          trial_ends_at:
+            activeSub.trial_end && Number.isFinite(activeSub.trial_end)
+              ? new Date(activeSub.trial_end * 1000).toISOString()
+              : null,
           updated_at: new Date().toISOString(),
         }, { onConflict: "org_id" });
         await db.from("organizations").update({ plan: subPlan }).eq("id", orgId);

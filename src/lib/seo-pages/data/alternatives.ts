@@ -1134,7 +1134,7 @@ export const alternativePages: SeoPageData[] = [
     category: "alternative",
     meta: {
       title: "Best Nightfall Alternative for AI Prompt DLP | TeamPrompt",
-      description: "Looking for a Nightfall alternative with prompt management built in? TeamPrompt combines DLP scanning with prompt management, one-click insertion, and analytics.",
+      description: "A Nightfall alternative with prompt management built in. TeamPrompt combines DLP scanning, shared prompts, one-click insertion, and analytics.",
       keywords: ["Nightfall alternative", "Nightfall AI replacement", "AI prompt DLP", "prompt security tool"],
     },
     hero: {

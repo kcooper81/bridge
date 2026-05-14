@@ -1368,8 +1368,8 @@ export const glossaryPages: SeoPageData[] = [
     slug: "what-is-shadow-ai",
     category: "glossary",
     meta: {
-      title: "What Is Shadow AI? Definition & Prevention Guide | TeamPrompt",
-      description: "Learn what shadow AI is, why it is a growing risk for organizations, and how TeamPrompt helps teams prevent and manage unauthorized AI tool usage.",
+      title: "What Is Shadow AI? | TeamPrompt",
+      description: "Shadow AI is unauthorized AI tool usage inside an organization. Learn why it's a growing risk and how TeamPrompt detects and controls it.",
       keywords: ["shadow AI definition", "what is shadow AI", "unauthorized AI usage", "shadow IT AI", "unmanaged AI tools"],
     },
     hero: {

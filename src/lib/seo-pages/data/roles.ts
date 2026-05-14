@@ -988,7 +988,7 @@ export const rolePages: SeoPageData[] = [
     meta: {
       title: "TeamPrompt for Educators | AI Prompt Management",
       description:
-        "Transform teaching with shared AI prompts for curriculum design, assignment creation, grading rubrics, and student feedback. TeamPrompt helps educators and institutions leverage AI responsibly and effectively.",
+        "Shared AI prompts for curriculum design, assignments, grading rubrics, and student feedback — built for educators and institutions.",
       keywords: [
         "educator AI prompts",
         "curriculum design AI",

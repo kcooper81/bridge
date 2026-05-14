@@ -1675,7 +1675,7 @@ For teams that need cross-platform flexibility, data protection, and visibility 
     category: "comparison",
     meta: {
       title: "TeamPrompt vs Nightfall AI for Prompt Security",
-      description: "Compare TeamPrompt and Nightfall AI for securing AI prompts. See how TeamPrompt combines prompt management with built-in DLP while Nightfall is a standalone DLP tool.",
+      description: "Compare TeamPrompt and Nightfall AI for securing AI prompts. TeamPrompt combines prompt management with built-in DLP; Nightfall is standalone DLP.",
       keywords: ["TeamPrompt vs Nightfall AI", "Nightfall alternative", "AI prompt DLP"],
     },
     hero: {

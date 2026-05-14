@@ -5,9 +5,9 @@ export const compliancePages: SeoPageData[] = [
     slug: "hipaa-ai-compliance",
     category: "compliance",
     meta: {
-      title: "HIPAA AI Compliance — Protect PHI in AI Tools | TeamPrompt",
+      title: "HIPAA AI Compliance | TeamPrompt",
       description:
-        "Ensure HIPAA compliance when healthcare teams use AI tools. TeamPrompt provides PHI detection, audit logging, and technical safeguards required by the HIPAA Security Rule.",
+        "HIPAA compliance for healthcare teams using AI. PHI detection, audit logging, and technical safeguards required by the HIPAA Security Rule.",
       keywords: ["HIPAA AI compliance", "HIPAA AI tools", "PHI protection AI", "healthcare AI compliance", "HIPAA Security Rule AI"],
     },
     hero: {
@@ -59,9 +59,9 @@ export const compliancePages: SeoPageData[] = [
     slug: "soc2-ai-compliance",
     category: "compliance",
     meta: {
-      title: "SOC 2 AI Compliance — Secure AI Tool Usage | TeamPrompt",
+      title: "SOC 2 AI Compliance | TeamPrompt",
       description:
-        "Meet SOC 2 Trust Service Criteria for AI tool usage. TeamPrompt provides security controls, monitoring, and audit evidence for SOC 2 Type I and Type II examinations.",
+        "Meet SOC 2 Trust Service Criteria for AI tool usage. Security controls, monitoring, and audit evidence for SOC 2 Type I and Type II.",
       keywords: ["SOC 2 AI compliance", "SOC 2 AI tools", "SOC 2 Trust Service Criteria", "SOC 2 audit AI", "SOC 2 Type II AI"],
     },
     hero: {

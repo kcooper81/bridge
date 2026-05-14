@@ -54,6 +54,53 @@ TeamPrompt helps organizations control and secure how their teams use AI tools l
 - [Education](https://teamprompt.app/industries/education): FERPA student data protection
 - [Insurance](https://teamprompt.app/industries/insurance): Claims and policyholder PII
 
+## Solutions (high-intent landing pages)
+- [Prompt Management Platform](https://teamprompt.app/solutions/prompt-management): Centralized vault, version control, approval workflows
+- [AI DLP](https://teamprompt.app/solutions/ai-dlp): Real-time scanning to stop sensitive data leaking into AI tools
+- [AI Governance Platform](https://teamprompt.app/solutions/ai-governance): Policies, guardrails, audit, and analytics for team AI use
+- [AI Prompt Templates](https://teamprompt.app/solutions/prompt-templates): Reusable templates with variables
+- [AI Prompt Library Software](https://teamprompt.app/solutions/ai-prompt-library-software): Shared organizational prompt library
+- [Prompt Management 101](https://teamprompt.app/solutions/prompt-management-101): Primer for teams getting started
+
+## Solutions — Integrations
+- [ChatGPT Team Prompts](https://teamprompt.app/solutions/chatgpt-team-prompts): Share prompts inside ChatGPT
+- [Claude](https://teamprompt.app/solutions/claude): TeamPrompt for Anthropic Claude
+- [Claude Data Protection](https://teamprompt.app/solutions/claude-data-protection): DLP scanning for Claude
+- [ChatGPT DLP Scanning](https://teamprompt.app/solutions/chatgpt-dlp-scanning): DLP for ChatGPT specifically
+- [ChatGPT Data Protection](https://teamprompt.app/solutions/chatgpt-data-protection): Data protection for ChatGPT
+- [Gemini Enterprise Security](https://teamprompt.app/solutions/gemini-enterprise-security): Security for Google Gemini
+
+## Solutions — Compliance
+- [HIPAA AI Compliance](https://teamprompt.app/solutions/hipaa-ai-compliance): PHI protection in AI tools
+- [SOC 2 AI Compliance](https://teamprompt.app/solutions/soc2-ai-compliance): Trust Service Criteria for AI
+- [GDPR AI Compliance](https://teamprompt.app/solutions/gdpr-ai-compliance): Personal data protection in AI
+- [AI Compliance Reporting](https://teamprompt.app/solutions/ai-compliance-reporting): Audit/compliance reports via AI
+- [AI Compliance Frameworks](https://teamprompt.app/solutions/ai-compliance-frameworks): 19 framework packs
+
+## Solutions — Roles
+- [For Marketers](https://teamprompt.app/solutions/for-marketers)
+- [For Educators](https://teamprompt.app/solutions/for-educators)
+- [For CISOs](https://teamprompt.app/solutions/for-cisos)
+- [For Security Teams](https://teamprompt.app/solutions/for-security-teams)
+- [For IT Admins](https://teamprompt.app/solutions/for-it-admins)
+- [For Compliance Officers](https://teamprompt.app/solutions/for-compliance-officers)
+
+## Solutions — Guides
+- [AI Prompt Templates Guide](https://teamprompt.app/solutions/ai-prompt-templates-guide)
+- [DLP for AI Tools Guide](https://teamprompt.app/solutions/dlp-for-ai-tools)
+- [AI Security Best Practices](https://teamprompt.app/solutions/ai-security-best-practices)
+- [AI Governance Guide](https://teamprompt.app/solutions/ai-governance-guide)
+- [How to Prevent Data Leaks to ChatGPT](https://teamprompt.app/solutions/how-to-prevent-data-leaks-chatgpt)
+- [How to Set Up DLP for AI](https://teamprompt.app/solutions/how-to-set-up-dlp-for-ai)
+
+## Solutions — Glossary
+- [What Is Prompt Analytics](https://teamprompt.app/solutions/what-is-prompt-analytics)
+- [What Is Agentic AI](https://teamprompt.app/solutions/what-is-agentic-ai)
+- [What Is Data Loss Prevention (DLP)](https://teamprompt.app/solutions/what-is-data-loss-prevention)
+- [What Is AI Governance](https://teamprompt.app/solutions/what-is-ai-governance)
+- [What Is Prompt Management](https://teamprompt.app/solutions/what-is-prompt-management)
+- [What Is Shadow AI](https://teamprompt.app/solutions/what-is-shadow-ai)
+
 ## Resources
 - [Glossary](https://teamprompt.app/glossary): 50+ AI security and prompt management terms
 - [Case Studies](https://teamprompt.app/case-studies): Healthcare, fintech, and marketing team examples

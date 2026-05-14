@@ -937,7 +937,7 @@ export const integrationPages: SeoPageData[] = [
   {
     slug: "chatgpt-team-prompts",
     category: "integration",
-    meta: { title: "ChatGPT Team Prompts — Share Prompts Across Teams | TeamPrompt", description: "Share and manage AI prompts across your team directly inside ChatGPT. Categories, permissions, and one-click access.", keywords: ["ChatGPT team prompts", "share ChatGPT prompts", "team ChatGPT templates", "ChatGPT collaboration", "ChatGPT shared library"] },
+    meta: { title: "ChatGPT Team Prompts | TeamPrompt", description: "Share and manage AI prompts across your team inside ChatGPT. Categories, role-based permissions, version history, one-click insertion.", keywords: ["ChatGPT team prompts", "share ChatGPT prompts", "team ChatGPT templates", "ChatGPT collaboration", "ChatGPT shared library"] },
     hero: { headline: "Share team prompts directly inside ChatGPT", subtitle: "Your team's best ChatGPT prompts should be accessible to everyone. TeamPrompt puts your shared prompt library inside ChatGPT with categories, permissions, and one-click insertion.", badges: ["Team sharing", "ChatGPT", "Collaboration"] },
     features: { sectionLabel: "Team Prompts", heading: "How team prompt sharing works in ChatGPT", items: [
       { icon: "Users", title: "Shared categories", description: "Organize team prompts by department, use case, or workflow. Everyone sees relevant prompts in their ChatGPT sidebar." },
@@ -1041,7 +1041,7 @@ export const integrationPages: SeoPageData[] = [
   {
     slug: "claude-data-protection",
     category: "integration",
-    meta: { title: "Claude Data Protection — DLP Scanning for Claude | TeamPrompt", description: "Protect sensitive data from reaching Anthropic's Claude with real-time DLP scanning. PII detection, credential scanning, and compliance controls.", keywords: ["Claude data protection", "Claude DLP scanning", "Claude security", "protect data Claude", "Claude compliance"] },
+    meta: { title: "Claude Data Protection | TeamPrompt", description: "Real-time DLP scanning for Anthropic's Claude. PII and credential detection, configurable enforcement, audit trails, and compliance controls.", keywords: ["Claude data protection", "Claude DLP scanning", "Claude security", "protect data Claude", "Claude compliance"] },
     hero: { headline: "Data protection for every Claude interaction", subtitle: "TeamPrompt scans every prompt before it reaches Claude, catching PII, credentials, and confidential data in real time. Protect your organization's data while enabling productive Claude usage.", badges: ["DLP", "Claude", "Data protection"] },
     features: { sectionLabel: "Claude DLP", heading: "Protecting data in Claude", items: [
       { icon: "Shield", title: "Real-time scanning", description: "Every prompt scanned before it reaches Anthropic's servers. Millisecond detection with zero workflow disruption." },
@@ -1119,7 +1119,7 @@ export const integrationPages: SeoPageData[] = [
   {
     slug: "gemini-enterprise-security",
     category: "integration",
-    meta: { title: "Gemini Enterprise Security — DLP for Google Gemini | TeamPrompt", description: "Enterprise security controls for Google Gemini usage. DLP scanning, access controls, and audit trails for Gemini in the enterprise.", keywords: ["Gemini enterprise security", "Gemini DLP", "Google Gemini security", "Gemini data protection", "secure Gemini enterprise"] },
+    meta: { title: "Gemini Enterprise Security | TeamPrompt", description: "Enterprise security controls for Google Gemini usage. DLP scanning, access controls, and audit trails for Gemini in the enterprise.", keywords: ["Gemini enterprise security", "Gemini DLP", "Google Gemini security", "Gemini data protection", "secure Gemini enterprise"] },
     hero: { headline: "Enterprise security for Google Gemini", subtitle: "Add DLP scanning, access controls, and audit trails to your organization's Gemini usage. TeamPrompt provides the enterprise security layer that Gemini needs.", badges: ["Enterprise", "Gemini", "Security"] },
     features: { sectionLabel: "Gemini Security", heading: "Securing Gemini for enterprises", items: [
       { icon: "Shield", title: "DLP scanning", description: "Scan every Gemini prompt for sensitive data before it reaches Google's servers." },

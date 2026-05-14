@@ -116,7 +116,7 @@ export const workflowPages: SeoPageData[] = [
     meta: {
       title: "Content Creation with AI Prompt Workflows | TeamPrompt",
       description:
-        "Build a complete content pipeline with AI prompt templates for ideation, drafting, editing, SEO optimization, and publishing. Keep your content team aligned and producing at scale.",
+        "Build a content pipeline with AI prompts for ideation, drafting, editing, SEO, and publishing — keeping your content team aligned at scale.",
       keywords: [
         "content creation AI workflow",
         "AI content pipeline",

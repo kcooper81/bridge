@@ -172,7 +172,7 @@ export const guidePages: SeoPageData[] = [
     meta: {
       title: "AI Governance Guide for Enterprises | TeamPrompt",
       description:
-        "A comprehensive guide to AI governance for enterprises. Learn how to establish policies, oversight structures, and compliance frameworks for responsible AI usage across your organization.",
+        "How enterprises establish AI governance policies, oversight structures, and compliance frameworks for responsible AI tool usage at scale.",
       keywords: ["AI governance guide", "enterprise AI governance", "AI policy", "AI oversight", "responsible AI", "AI compliance"],
     },
     hero: {
@@ -225,9 +225,9 @@ export const guidePages: SeoPageData[] = [
     slug: "dlp-for-ai-tools",
     category: "guide",
     meta: {
-      title: "DLP for AI Tools — Data Loss Prevention Guide | TeamPrompt",
+      title: "DLP for AI Tools: A Practical Guide | TeamPrompt",
       description:
-        "A complete guide to data loss prevention for AI tools. Learn why DLP matters, what to scan for, and how to implement automated protection across ChatGPT, Claude, Gemini, and more.",
+        "Why DLP matters for AI tools, what to scan for, and how to implement automated protection across ChatGPT, Claude, Gemini, and Copilot.",
       keywords: ["DLP for AI", "data loss prevention AI tools", "AI DLP guide", "prevent data leaks AI", "AI security DLP"],
     },
     hero: {
@@ -282,7 +282,7 @@ export const guidePages: SeoPageData[] = [
     meta: {
       title: "Creating Effective AI Prompt Templates | TeamPrompt",
       description:
-        "Learn how to design reusable AI prompt templates with dynamic variables. Best practices for template structure, variable naming, and scaling templates across your team.",
+        "How to design reusable AI prompt templates with dynamic variables. Best practices for structure, variable naming, and team-scale rollout.",
       keywords: ["AI prompt templates", "prompt template guide", "reusable prompts", "prompt variables", "template design", "prompt template best practices"],
     },
     hero: {
@@ -446,7 +446,7 @@ export const guidePages: SeoPageData[] = [
     meta: {
       title: "AI Security Best Practices for Teams | TeamPrompt",
       description:
-        "A comprehensive guide to securing AI tool usage across your team. Covers DLP, audit trails, access control, compliance frameworks, and practical implementation steps.",
+        "Practical guide to securing AI tool usage across your team: DLP, audit trails, access control, compliance frameworks, and rollout steps.",
       keywords: ["AI security best practices", "secure AI usage", "AI data security", "AI tool security", "enterprise AI security"],
     },
     hero: {

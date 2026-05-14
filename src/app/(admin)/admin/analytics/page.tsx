@@ -180,7 +180,7 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Period Totals */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
             <div className="rounded-lg p-2 bg-blue-100">

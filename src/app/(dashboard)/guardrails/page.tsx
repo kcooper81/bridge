@@ -552,7 +552,7 @@ export default function GuardrailsPage() {
     return (
       <>
         <PageHeader title="AI Guardrails" description="Protect sensitive data from leaking into AI prompts" />
-        <div className="mb-6 grid grid-cols-3 gap-4">
+        <div className="mb-6 grid grid-cols-2 sm:grid-cols-3 gap-4">
           {[1, 2, 3].map((i) => (
             <div key={i} className="h-24 rounded-lg bg-muted animate-pulse" />
           ))}
@@ -570,7 +570,7 @@ export default function GuardrailsPage() {
           title="AI Guardrails"
           description="Your organization's data protection rules — avoid including this data in AI prompts"
         />
-        <div className="mb-6 grid grid-cols-3 gap-4">
+        <div className="mb-6 grid grid-cols-2 sm:grid-cols-3 gap-4">
           <StatCard label="Active Policies" value={activeRules} icon={<ShieldCheck className="h-5 w-5" />} />
           <StatCard label="Violations (7d)" value={weekViolations} icon={<ShieldAlert className="h-5 w-5" />} />
           <StatCard label="Block Rate" value={`${blockRate}%`} icon={<Shield className="h-5 w-5" />} />

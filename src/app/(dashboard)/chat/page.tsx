@@ -2481,7 +2481,7 @@ export default function ChatPage() {
       {showNewCollection && (
         <>
           <div className="fixed inset-0 z-40 bg-black/20" onClick={() => setShowNewCollection(false)} />
-          <div className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-popover border rounded-xl shadow-2xl p-5 w-[340px]">
+          <div className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-popover border rounded-xl shadow-2xl p-5 w-[95vw] sm:w-[340px]">
             <h3 className="text-base font-semibold mb-4">New Collection</h3>
             <input
               className="w-full h-10 rounded-lg border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-primary mb-3"
@@ -2514,7 +2514,7 @@ export default function ChatPage() {
       {editingCollection && (
         <>
           <div className="fixed inset-0 z-40 bg-black/20" onClick={() => setEditingCollection(null)} />
-          <div className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-popover border rounded-xl shadow-2xl p-5 w-[340px]">
+          <div className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-popover border rounded-xl shadow-2xl p-5 w-[95vw] sm:w-[340px]">
             <h3 className="text-base font-semibold mb-4">Rename Collection</h3>
             <input
               className="w-full h-10 rounded-lg border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-primary"
@@ -2627,7 +2627,7 @@ export default function ChatPage() {
       {memoryDialogOpen && (
         <>
           <div className="fixed inset-0 z-40 bg-black/40" onClick={() => { setMemoryDialogOpen(false); setEditingMemoryId(null); }} />
-          <div className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-popover border rounded-xl shadow-2xl p-6 w-[480px] max-h-[85vh] flex flex-col">
+          <div className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-popover border rounded-xl shadow-2xl p-6 w-[95vw] sm:w-[480px] max-h-[85vh] flex flex-col">
             <h3 className="text-base font-semibold mb-1">Memory</h3>
             <p className="text-xs text-muted-foreground mb-4">Facts remembered from your conversations. These are automatically injected as context.</p>
 

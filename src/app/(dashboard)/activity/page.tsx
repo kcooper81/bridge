@@ -486,7 +486,7 @@ export default function ActivityPage() {
         const critical = logs.filter((l) => (l.risk_score ?? 0) >= 70).length;
         if (avg === 0 && high === 0) return null;
         return (
-          <div className="grid grid-cols-3 gap-3 mb-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
             <Card>
               <CardContent className="p-3 text-center">
                 <p className={`text-2xl font-bold ${getRiskColor(avg)}`}>{avg}</p>

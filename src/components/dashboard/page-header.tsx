@@ -33,13 +33,14 @@ export function PageHeader({ title, description, actions, breadcrumbs }: PageHea
         </nav>
       )}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
+        <div className="min-w-0">
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{title}</h1>
           {description && (
             <p className="mt-1.5 text-sm text-muted-foreground">{description}</p>
           )}
         </div>
-        {actions && <div className="flex items-center gap-3">{actions}</div>}
+        {/* Wrap on mobile so 3+ buttons don't overflow the viewport. */}
+        {actions && <div className="flex flex-wrap items-center gap-2 sm:gap-3">{actions}</div>}
       </div>
     </div>
   );

@@ -109,25 +109,25 @@ export default function PricingPage() {
             Even on team plans at $25-30/user/mo, AI tools don&apos;t include DLP, shared prompts, or audit trails. TeamPrompt adds what they&apos;re missing.
           </p>
           <div className="rounded-2xl border border-border bg-card overflow-hidden">
-            <div className="grid grid-cols-3 text-sm">
+            <div className="grid grid-cols-3 text-xs sm:text-sm">
               {/* Header */}
-              <div className="px-5 py-3 border-b border-border bg-muted/40 font-semibold" />
-              <div className="px-5 py-3 border-b border-border bg-muted/40 text-center font-semibold">
+              <div className="px-2 sm:px-5 py-3 border-b border-border bg-muted/40 font-semibold" />
+              <div className="px-2 sm:px-5 py-3 border-b border-border bg-muted/40 text-center font-semibold">
                 AI Team Plans
-                <span className="block text-xs font-normal text-muted-foreground">ChatGPT, Claude, Gemini</span>
+                <span className="block text-[10px] sm:text-xs font-normal text-muted-foreground">ChatGPT, Claude, Gemini</span>
               </div>
-              <div className="px-5 py-3 border-b border-border bg-primary/5 text-center font-semibold text-primary">
+              <div className="px-2 sm:px-5 py-3 border-b border-border bg-primary/5 text-center font-semibold text-primary">
                 + TeamPrompt
-                <span className="block text-xs font-normal text-muted-foreground">Add for $8/user/mo</span>
+                <span className="block text-[10px] sm:text-xs font-normal text-muted-foreground">Add for $8/user/mo</span>
               </div>
               {/* Price */}
-              <div className="px-5 py-3 border-b border-border text-muted-foreground">
+              <div className="px-2 sm:px-5 py-3 border-b border-border text-muted-foreground">
                 Price
               </div>
-              <div className="px-5 py-3 border-b border-border text-center">
+              <div className="px-2 sm:px-5 py-3 border-b border-border text-center">
                 $25-30/user/mo
               </div>
-              <div className="px-5 py-3 border-b border-border bg-primary/5 text-center font-semibold text-primary">
+              <div className="px-2 sm:px-5 py-3 border-b border-border bg-primary/5 text-center font-semibold text-primary">
                 $8/user/mo
               </div>
               {/* Rows */}
@@ -139,19 +139,19 @@ export default function PricingPage() {
                 { feature: "Multi-model AI chat", chatgpt: false, tp: true },
               ].map((row) => (
                 <div key={row.feature} className="contents">
-                  <div className="px-5 py-2.5 border-b border-border text-muted-foreground">
+                  <div className="px-2 sm:px-5 py-2.5 border-b border-border text-muted-foreground">
                     {row.feature}
                   </div>
-                  <div className="px-5 py-2.5 border-b border-border flex justify-center">
+                  <div className="px-2 sm:px-5 py-2.5 border-b border-border flex justify-center">
                     {row.chatgpt ? (
                       <CheckCircle2 className="h-4 w-4 text-emerald-500" />
                     ) : (
                       <X className="h-4 w-4 text-muted-foreground/40" />
                     )}
                   </div>
-                  <div className="px-5 py-2.5 border-b border-border bg-primary/5 flex justify-center items-center gap-1.5">
+                  <div className="px-2 sm:px-5 py-2.5 border-b border-border bg-primary/5 flex justify-center items-center gap-1.5">
                     {typeof row.tp === "string" ? (
-                      <span className="text-xs font-medium text-primary">{row.tp}</span>
+                      <span className="text-[10px] sm:text-xs font-medium text-primary text-center">{row.tp}</span>
                     ) : (
                       <CheckCircle2 className="h-4 w-4 text-emerald-500" />
                     )}

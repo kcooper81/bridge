@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import { Inter } from "next/font/google";
 import { Suspense } from "react";
@@ -46,6 +46,17 @@ export const metadata: Metadata = {
   },
 };
 
+// Explicit viewport export — Next.js 14+ moved this out of `metadata`.
+// `width=device-width, initial-scale=1` is the mobile-responsive baseline;
+// `maximumScale=5` keeps pinch-zoom enabled (a11y).
+// `themeColor` matches the brand and powers the mobile chrome color bar.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: "#2563EB",
+};
+
 export default function RootLayout({
   children,
 }: {
@@ -56,7 +67,6 @@ export default function RootLayout({
       <head>
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="apple-touch-icon" href="/brand/logo-icon-white-bg.svg" />
-        <meta name="theme-color" content="#2563EB" />
         {process.env.NEXT_PUBLIC_SLACK_APP_ID && (
           <meta name="slack-app-id" content={process.env.NEXT_PUBLIC_SLACK_APP_ID} />
         )}

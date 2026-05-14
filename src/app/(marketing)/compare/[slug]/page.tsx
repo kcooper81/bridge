@@ -63,24 +63,24 @@ export default function ComparisonDetailPage({ params }: { params: { slug: strin
 
           <div className="rounded-[20px] border border-border overflow-hidden">
             {/* Header */}
-            <div className="grid grid-cols-3 text-sm bg-muted/30">
-              <div className="px-5 py-4 font-semibold border-b border-border">Feature</div>
-              <div className="px-5 py-4 font-semibold border-b border-border text-center text-primary">TeamPrompt</div>
-              <div className="px-5 py-4 font-semibold border-b border-border text-center">
+            <div className="grid grid-cols-3 text-xs sm:text-sm bg-muted/30">
+              <div className="px-2 sm:px-5 py-4 font-semibold border-b border-border">Feature</div>
+              <div className="px-2 sm:px-5 py-4 font-semibold border-b border-border text-center text-primary">TeamPrompt</div>
+              <div className="px-2 sm:px-5 py-4 font-semibold border-b border-border text-center">
                 {isListicle ? "Others" : page.competitor}
               </div>
             </div>
 
             {/* Rows */}
             {page.features.map((row, i) => (
-              <div key={row.feature} className={cn("grid grid-cols-3 text-sm", i % 2 === 0 ? "" : "bg-muted/10")}>
-                <div className="px-5 py-3 border-b border-border/50 text-muted-foreground">
+              <div key={row.feature} className={cn("grid grid-cols-3 text-xs sm:text-sm", i % 2 === 0 ? "" : "bg-muted/10")}>
+                <div className="px-2 sm:px-5 py-3 border-b border-border/50 text-muted-foreground">
                   {row.feature}
                 </div>
-                <div className="px-5 py-3 border-b border-border/50 text-center bg-primary/[0.02]">
+                <div className="px-2 sm:px-5 py-3 border-b border-border/50 text-center bg-primary/[0.02]">
                   <CellValue value={row.teamPrompt} positive />
                 </div>
-                <div className="px-5 py-3 border-b border-border/50 text-center">
+                <div className="px-2 sm:px-5 py-3 border-b border-border/50 text-center">
                   <CellValue value={row.competitor} />
                 </div>
               </div>

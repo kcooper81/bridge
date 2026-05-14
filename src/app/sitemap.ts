@@ -1,21 +1,24 @@
 import { MetadataRoute } from "next";
+import { INDEXED_SOLUTION_SLUGS } from "@/lib/seo-pages/data";
 
 /**
- * SITEMAP STRATEGY (2026-03-22):
+ * SITEMAP STRATEGY (2026-03-22, updated 2026-05-13):
  *
  * Google marked 600 pages as "Duplicate without user-selected canonical"
- * after 1 month. Only 39 of 630 pages were indexed. The 527 programmatic
- * /solutions/* pages are seen as thin/duplicate content and are dragging
+ * after 1 month. The 527 programmatic /solutions/* pages were dragging
  * down crawl budget.
  *
- * Strategy: Submit only high-quality, unique pages (~80) in the sitemap.
- * The /solutions/* pages remain accessible via URL but are excluded from
- * the sitemap until domain authority grows. This tells Google to focus
- * on our real content.
+ * Strategy: submit only the indexable subset; non-indexable /solutions/*
+ * pages stay accessible via URL but are excluded from the sitemap and
+ * marked `noindex, follow` so Google can still crawl through them and
+ * pass link equity to indexed siblings.
  *
- * The /solutions/* pages still exist and are linked from the /solutions
- * index page — Google can discover them organically through internal links
- * if it chooses to crawl them.
+ * The list of indexable /solutions/* slugs lives in
+ * `INDEXED_SOLUTION_SLUGS` (imported above) — single source of truth used
+ * by both this sitemap and the per-page `noindex` tag in
+ * `/solutions/[slug]/page.tsx`. Previously these two lists were
+ * hand-maintained in separate files and had drifted (24 vs 41 slugs),
+ * leaving 17 pages indexable but missing from the sitemap.
  */
 
 const BLOG_SLUGS = [
@@ -66,34 +69,6 @@ const INDUSTRY_SLUGS = [
   "government",
   "education",
   "insurance",
-];
-
-// Only the highest-value /solutions/* pages — hand-picked for indexing
-const TOP_SOLUTION_SLUGS = [
-  "prompt-management",
-  "ai-dlp",
-  "ai-governance",
-  "prompt-templates",
-  "ai-prompt-library-software",
-  "prompt-management-101",
-  "chatgpt-team-prompts",
-  "claude",
-  "chatgpt-dlp-scanning",
-  "ai-compliance-reporting",
-  "ai-compliance-frameworks",
-  "for-marketers",
-  "for-educators",
-  "for-cisos",
-  "for-security-teams",
-  "for-it-admins",
-  "dlp-for-ai-tools",
-  "ai-governance-guide",
-  "what-is-prompt-analytics",
-  "what-is-agentic-ai",
-  "what-is-data-loss-prevention",
-  "what-is-ai-governance",
-  "what-is-shadow-ai",
-  "what-is-prompt-management",
 ];
 
 const COMPARE_SLUGS = ["nightfall", "purview", "chatgpt-teams", "notion", "best-ai-dlp-tools"];
@@ -148,8 +123,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
-  // Tier 5: Top solution pages only (12 hand-picked, not all 527)
-  const topSolutionPages: MetadataRoute.Sitemap = TOP_SOLUTION_SLUGS.map((slug) => ({
+  // Tier 5: Indexable solution pages (subset of the 524 — see
+  // INDEXED_SOLUTION_SLUGS for the full list and rationale)
+  const topSolutionPages: MetadataRoute.Sitemap = Array.from(INDEXED_SOLUTION_SLUGS).map((slug) => ({
     url: `${baseUrl}/solutions/${slug}`,
     lastModified: today,
     changeFrequency: "monthly",

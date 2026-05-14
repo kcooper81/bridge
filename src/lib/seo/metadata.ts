@@ -63,7 +63,11 @@ export function generatePageMetadata({
       canonical: url,
     },
     robots: noIndex
-      ? { index: false, follow: false }
+      // `follow: true` even when noindex — Google should still crawl through
+      // these pages and pass link equity to indexed siblings. `nofollow` here
+      // would dead-end the ~480 thin /solutions/* pages and cut PageRank flow
+      // to the core indexed pages.
+      ? { index: false, follow: true }
       : {
           index: true,
           follow: true,

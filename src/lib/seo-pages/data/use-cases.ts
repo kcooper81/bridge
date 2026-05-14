@@ -270,9 +270,9 @@ export const useCasePages: SeoPageData[] = [
     slug: "ai-dlp",
     category: "use-case",
     meta: {
-      title: "AI Data Loss Prevention — Stop Sensitive Data Leaking into AI Tools",
+      title: "AI Data Loss Prevention (DLP) | TeamPrompt",
       description:
-        "Real-time DLP scanning, auto-sanitization, and compliance policy packs protect your organization's sensitive data from leaking into ChatGPT, Claude, Gemini, and more.",
+        "Real-time DLP scanning, auto-sanitization, and compliance policy packs that stop sensitive data from leaking into ChatGPT, Claude, and other AI tools.'s sensitive data from leaking into ChatGPT, Claude, Gemini, and more.",
       keywords: ["AI DLP", "data loss prevention AI", "AI data protection", "sensitive data AI tools"],
     },
     hero: {

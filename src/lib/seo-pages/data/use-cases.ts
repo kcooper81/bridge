@@ -325,9 +325,9 @@ export const useCasePages: SeoPageData[] = [
     slug: "prompt-management",
     category: "use-case",
     meta: {
-      title: "AI Prompt Management Platform — Centralize, Version, and Govern Prompts",
+      title: "AI Prompt Management Platform | TeamPrompt",
       description:
-        "Centralized prompt vault with version history, diff view, approval workflows, template variables, and guardrails. The complete prompt management platform for teams.",
+        "Centralized prompt vault with version history, diff view, approval workflows, template variables, and DLP guardrails — built for teams.",
       keywords: ["prompt management", "prompt management platform", "manage AI prompts", "prompt version control"],
     },
     hero: {
@@ -708,9 +708,9 @@ export const useCasePages: SeoPageData[] = [
     slug: "ai-compliance-reporting",
     category: "use-case",
     meta: {
-      title: "AI Compliance Reporting — Compliance & Audit Report Prompts | TeamPrompt",
+      title: "AI Compliance Reporting | TeamPrompt",
       description:
-        "Shared prompt templates for generating compliance reports, audit documentation, regulatory filings, and internal control assessments. Standardize compliance workflows across your organization with AI.",
+        "Shared prompt templates for compliance reports, audit documentation, regulatory filings, and internal control assessments — standardized across your team.",
       keywords: ["AI compliance reporting", "compliance prompts", "audit report AI", "regulatory reporting", "compliance documentation AI"],
     },
     hero: {

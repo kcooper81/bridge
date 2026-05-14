@@ -113,9 +113,9 @@ export const compliancePages: SeoPageData[] = [
     slug: "gdpr-ai-compliance",
     category: "compliance",
     meta: {
-      title: "GDPR AI Compliance — Protect Personal Data in AI Tools | TeamPrompt",
+      title: "GDPR AI Compliance | TeamPrompt",
       description:
-        "Ensure GDPR compliance when teams use AI tools. TeamPrompt prevents personal data from reaching AI providers, supporting data minimization, purpose limitation, and DPIA requirements.",
+        "Keep teams GDPR-compliant when using AI tools. TeamPrompt blocks personal data from reaching providers, supports data minimization and DPIA requirements.",
       keywords: ["GDPR AI compliance", "GDPR AI tools", "personal data AI protection", "GDPR data minimization AI", "DPIA AI tools"],
     },
     hero: {

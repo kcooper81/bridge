@@ -710,8 +710,8 @@ export const glossaryPages: SeoPageData[] = [
     slug: "what-is-data-loss-prevention",
     category: "glossary",
     meta: {
-      title: "What Is Data Loss Prevention (DLP)? Definition for AI | TeamPrompt",
-      description: "Learn what data loss prevention is in the context of AI tools, how DLP protects sensitive data from reaching AI models, and how TeamPrompt implements DLP scanning.",
+      title: "What Is Data Loss Prevention (DLP)? | TeamPrompt",
+      description: "Data loss prevention (DLP) detects and blocks sensitive data from reaching AI tools. Learn how DLP works and how TeamPrompt implements it.",
       keywords: ["data loss prevention definition", "what is DLP", "DLP for AI", "data protection AI", "prevent data leaks AI"],
     },
     hero: {

@@ -5,7 +5,7 @@ export const policyPages: SeoPageData[] = [
     slug: "ai-acceptable-use-policy-template",
     category: "policy",
     meta: {
-      title: "AI Acceptable Use Policy Template | TeamPrompt",
+      title: "AI Acceptable Use Policy Template",
       description:
         "Download a ready-to-use AI acceptable use policy template. Define what employees can and cannot do with AI tools, with enforcement through TeamPrompt's DLP and governance controls.",
       keywords: ["AI acceptable use policy", "AI use policy template", "employee AI policy", "AI acceptable use", "AI workplace policy"],
@@ -59,7 +59,7 @@ export const policyPages: SeoPageData[] = [
     slug: "ai-data-handling-policy-template",
     category: "policy",
     meta: {
-      title: "AI Data Handling Policy Template | TeamPrompt",
+      title: "AI Data Handling Policy Template",
       description:
         "Define how your organization handles data in AI workflows. This template covers data classification, DLP rules, retention, and incident response for AI tool usage.",
       keywords: ["AI data handling policy", "AI data policy template", "data classification AI", "AI data governance", "AI data protection policy"],
@@ -113,7 +113,7 @@ export const policyPages: SeoPageData[] = [
     slug: "ai-vendor-assessment-template",
     category: "policy",
     meta: {
-      title: "AI Vendor Assessment Template | TeamPrompt",
+      title: "AI Vendor Assessment Template",
       description:
         "Evaluate AI tool vendors with this comprehensive assessment template. Cover security, privacy, data handling, compliance, and risk scoring for every AI vendor in your stack.",
       keywords: ["AI vendor assessment", "AI vendor evaluation", "AI tool assessment template", "AI vendor security review", "AI vendor risk assessment"],
@@ -167,7 +167,7 @@ export const policyPages: SeoPageData[] = [
     slug: "ai-incident-response-policy",
     category: "policy",
     meta: {
-      title: "AI Incident Response Policy Template | TeamPrompt",
+      title: "AI Incident Response Policy Template",
       description:
         "Prepare for AI-related security incidents. This template covers detection, containment, eradication, recovery, and lessons learned for AI data exposure and misuse events.",
       keywords: ["AI incident response", "AI security incident policy", "AI data breach response", "AI incident management", "AI security event response"],
@@ -221,7 +221,7 @@ export const policyPages: SeoPageData[] = [
     slug: "ai-employee-training-policy",
     category: "policy",
     meta: {
-      title: "AI Employee Training Policy Template | TeamPrompt",
+      title: "AI Employee Training Policy Template",
       description:
         "Build an AI training program for your workforce. This template covers training requirements, curriculum, certification, and ongoing education for safe AI tool usage.",
       keywords: ["AI employee training policy", "AI training program", "AI workforce training", "employee AI education", "AI safety training"],
@@ -275,7 +275,7 @@ export const policyPages: SeoPageData[] = [
     slug: "enterprise-ai-governance-framework",
     category: "policy",
     meta: {
-      title: "Enterprise AI Governance Framework Template | TeamPrompt",
+      title: "Enterprise AI Governance Framework Template",
       description:
         "Establish comprehensive AI governance for your enterprise. This framework covers strategy, risk management, policies, oversight, and measurement for responsible AI adoption.",
       keywords: ["AI governance framework", "enterprise AI governance", "AI governance template", "responsible AI framework", "AI governance strategy"],
@@ -329,7 +329,7 @@ export const policyPages: SeoPageData[] = [
     slug: "ai-procurement-checklist",
     category: "policy",
     meta: {
-      title: "AI Procurement Checklist & Evaluation Guide | TeamPrompt",
+      title: "AI Procurement Checklist & Evaluation Guide",
       description:
         "Evaluate and procure AI tools with confidence. This checklist covers security, privacy, compliance, integration, and total cost of ownership for AI tool procurement.",
       keywords: ["AI procurement checklist", "AI tool evaluation", "AI procurement guide", "buy AI tools checklist", "AI tool selection criteria"],
@@ -383,7 +383,7 @@ export const policyPages: SeoPageData[] = [
     slug: "ai-risk-assessment-template",
     category: "policy",
     meta: {
-      title: "AI Risk Assessment Template | TeamPrompt",
+      title: "AI Risk Assessment Template",
       description:
         "Assess AI-related risks systematically. This template provides a structured methodology for identifying, analyzing, and treating risks from AI tool usage across your organization.",
       keywords: ["AI risk assessment", "AI risk assessment template", "AI risk analysis", "AI risk management", "AI risk evaluation"],
@@ -437,7 +437,7 @@ export const policyPages: SeoPageData[] = [
     slug: "ai-model-evaluation-framework",
     category: "policy",
     meta: {
-      title: "AI Model Evaluation Framework | TeamPrompt",
+      title: "AI Model Evaluation Framework",
       description:
         "Evaluate AI models for enterprise use with this structured framework. Assess accuracy, safety, bias, security, and operational readiness before deploying any AI model.",
       keywords: ["AI model evaluation", "AI model assessment", "AI model framework", "evaluate AI models", "AI model selection"],
@@ -491,7 +491,7 @@ export const policyPages: SeoPageData[] = [
     slug: "ai-ethics-policy-template",
     category: "policy",
     meta: {
-      title: "AI Ethics Policy Template | TeamPrompt",
+      title: "AI Ethics Policy Template",
       description:
         "Establish ethical AI guidelines for your organization. This template covers fairness, transparency, accountability, privacy, and human oversight principles for responsible AI use.",
       keywords: ["AI ethics policy", "AI ethics template", "responsible AI policy", "ethical AI guidelines", "AI ethics framework"],

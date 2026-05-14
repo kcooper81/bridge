@@ -83,7 +83,7 @@ export const integrationPages: SeoPageData[] = [
     slug: "claude",
     category: "integration",
     meta: {
-      title: "Claude Prompt Manager — Browser Extension for Anthropic's Claude",
+      title: "Claude Prompt Manager Extension",
       description:
         "Manage and insert team prompts directly into Claude.ai. Browse your shared library, use templates, and scan for sensitive data inside Claude.",
       keywords: ["Claude extension", "Claude prompt manager", "Anthropic Claude extension", "Claude AI prompts"],
@@ -885,7 +885,7 @@ export const integrationPages: SeoPageData[] = [
   {
     slug: "chatgpt-prompt-manager",
     category: "integration",
-    meta: { title: "ChatGPT Prompt Manager for Teams | TeamPrompt", description: "Manage, organize, and share ChatGPT prompts across your team. One-click insertion, version control, and DLP scanning for ChatGPT.", keywords: ["ChatGPT prompt manager", "manage ChatGPT prompts", "ChatGPT team prompts", "ChatGPT prompt organizer", "ChatGPT prompt tool"] },
+    meta: { title: "ChatGPT Prompt Manager for Teams", description: "Manage, organize, and share ChatGPT prompts across your team. One-click insertion, version control, and DLP scanning for ChatGPT.", keywords: ["ChatGPT prompt manager", "manage ChatGPT prompts", "ChatGPT team prompts", "ChatGPT prompt organizer", "ChatGPT prompt tool"] },
     hero: { headline: "The prompt manager built for ChatGPT teams", subtitle: "Stop losing great ChatGPT prompts in bookmarks and documents. TeamPrompt organizes your team's ChatGPT prompts into a searchable library with one-click insertion, version control, and DLP protection.", badges: ["ChatGPT", "Prompt manager", "Teams"] },
     features: { sectionLabel: "ChatGPT Manager", heading: "Managing ChatGPT prompts for teams", items: [
       { icon: "Archive", title: "Organized prompt library", description: "Store all your ChatGPT prompts in searchable categories instead of scattered documents and bookmarks." },
@@ -911,7 +911,7 @@ export const integrationPages: SeoPageData[] = [
   {
     slug: "chatgpt-dlp-scanning",
     category: "integration",
-    meta: { title: "ChatGPT DLP Scanning — Protect Data in ChatGPT | TeamPrompt", description: "Prevent sensitive data from reaching ChatGPT with real-time DLP scanning. Detect PII, credentials, and confidential data before prompts are sent.", keywords: ["ChatGPT DLP", "ChatGPT data protection", "ChatGPT sensitive data", "ChatGPT security scanning", "prevent data leaks ChatGPT"] },
+    meta: { title: "ChatGPT DLP Scanning — Protect Data in ChatGPT", description: "Prevent sensitive data from reaching ChatGPT with real-time DLP scanning. Detect PII, credentials, and confidential data before prompts are sent.", keywords: ["ChatGPT DLP", "ChatGPT data protection", "ChatGPT sensitive data", "ChatGPT security scanning", "prevent data leaks ChatGPT"] },
     hero: { headline: "DLP scanning for every ChatGPT prompt", subtitle: "Your team pastes sensitive data into ChatGPT more often than you think. TeamPrompt scans every prompt in real time, catching PII, credentials, and confidential information before it reaches OpenAI.", badges: ["DLP", "ChatGPT", "Security"] },
     features: { sectionLabel: "DLP for ChatGPT", heading: "How DLP protects your ChatGPT usage", items: [
       { icon: "Shield", title: "Real-time scanning", description: "Every prompt is scanned before it leaves your browser. Detection happens in milliseconds with no workflow disruption." },
@@ -937,7 +937,7 @@ export const integrationPages: SeoPageData[] = [
   {
     slug: "chatgpt-team-prompts",
     category: "integration",
-    meta: { title: "ChatGPT Team Prompts | TeamPrompt", description: "Share and manage AI prompts across your team inside ChatGPT. Categories, role-based permissions, version history, one-click insertion.", keywords: ["ChatGPT team prompts", "share ChatGPT prompts", "team ChatGPT templates", "ChatGPT collaboration", "ChatGPT shared library"] },
+    meta: { title: "ChatGPT Team Prompts", description: "Share and manage AI prompts across your team inside ChatGPT. Categories, role-based permissions, version history, one-click insertion.", keywords: ["ChatGPT team prompts", "share ChatGPT prompts", "team ChatGPT templates", "ChatGPT collaboration", "ChatGPT shared library"] },
     hero: { headline: "Share team prompts directly inside ChatGPT", subtitle: "Your team's best ChatGPT prompts should be accessible to everyone. TeamPrompt puts your shared prompt library inside ChatGPT with categories, permissions, and one-click insertion.", badges: ["Team sharing", "ChatGPT", "Collaboration"] },
     features: { sectionLabel: "Team Prompts", heading: "How team prompt sharing works in ChatGPT", items: [
       { icon: "Users", title: "Shared categories", description: "Organize team prompts by department, use case, or workflow. Everyone sees relevant prompts in their ChatGPT sidebar." },
@@ -963,7 +963,7 @@ export const integrationPages: SeoPageData[] = [
   {
     slug: "chatgpt-data-protection",
     category: "integration",
-    meta: { title: "ChatGPT Data Protection for Enterprise | TeamPrompt", description: "Enterprise data protection for ChatGPT usage. DLP scanning, access controls, and audit trails to secure your organization's ChatGPT interactions.", keywords: ["ChatGPT data protection", "ChatGPT enterprise security", "secure ChatGPT usage", "ChatGPT compliance", "ChatGPT data security"] },
+    meta: { title: "ChatGPT Data Protection for Enterprise", description: "Enterprise data protection for ChatGPT usage. DLP scanning, access controls, and audit trails to secure your organization's ChatGPT interactions.", keywords: ["ChatGPT data protection", "ChatGPT enterprise security", "secure ChatGPT usage", "ChatGPT compliance", "ChatGPT data security"] },
     hero: { headline: "Enterprise data protection for ChatGPT", subtitle: "ChatGPT is your team's most-used AI tool — and your biggest data exposure risk. TeamPrompt adds enterprise-grade DLP scanning, access controls, and audit trails to every ChatGPT interaction.", badges: ["Enterprise", "Data protection", "ChatGPT"] },
     features: { sectionLabel: "Data Protection", heading: "Protecting data in ChatGPT", items: [
       { icon: "Shield", title: "DLP scanning layer", description: "Real-time scanning of every prompt for PII, credentials, and confidential data before it reaches OpenAI." },
@@ -989,7 +989,7 @@ export const integrationPages: SeoPageData[] = [
   {
     slug: "chatgpt-usage-analytics",
     category: "integration",
-    meta: { title: "ChatGPT Usage Analytics for Teams | TeamPrompt", description: "Track how your team uses ChatGPT with prompt analytics, adoption metrics, and usage insights. Data-driven AI management.", keywords: ["ChatGPT usage analytics", "ChatGPT team analytics", "track ChatGPT usage", "ChatGPT adoption metrics", "ChatGPT usage data"] },
+    meta: { title: "ChatGPT Usage Analytics for Teams", description: "Track how your team uses ChatGPT with prompt analytics, adoption metrics, and usage insights. Data-driven AI management.", keywords: ["ChatGPT usage analytics", "ChatGPT team analytics", "track ChatGPT usage", "ChatGPT adoption metrics", "ChatGPT usage data"] },
     hero: { headline: "Analytics for your team's ChatGPT usage", subtitle: "Understand how your team uses ChatGPT with prompt analytics, adoption tracking, and usage insights. TeamPrompt gives you the data to optimize AI productivity and demonstrate ROI.", badges: ["Analytics", "ChatGPT", "Insights"] },
     features: { sectionLabel: "ChatGPT Analytics", heading: "Understanding ChatGPT usage", items: [
       { icon: "BarChart3", title: "Usage dashboards", description: "See prompt frequency, active users, top prompts, and usage trends across your ChatGPT-using team." },
@@ -1015,7 +1015,7 @@ export const integrationPages: SeoPageData[] = [
   {
     slug: "claude-prompt-library",
     category: "integration",
-    meta: { title: "Claude Prompt Library — Organize Prompts for Claude | TeamPrompt", description: "Build and manage a shared prompt library for Anthropic's Claude. One-click insertion, templates, and DLP scanning inside Claude.", keywords: ["Claude prompt library", "Claude prompts organized", "Claude AI templates", "Claude prompt manager", "Anthropic Claude prompts"] },
+    meta: { title: "Claude Prompt Library — Organize Prompts for Claude", description: "Build and manage a shared prompt library for Anthropic's Claude. One-click insertion, templates, and DLP scanning inside Claude.", keywords: ["Claude prompt library", "Claude prompts organized", "Claude AI templates", "Claude prompt manager", "Anthropic Claude prompts"] },
     hero: { headline: "Your team's prompt library, inside Claude", subtitle: "Organize and share your best Claude prompts in a searchable library. Insert them with one click, use template variables, and scan for sensitive data — all without leaving Claude.", badges: ["Claude", "Library", "Templates"] },
     features: { sectionLabel: "Claude Library", heading: "A prompt library built for Claude", items: [
       { icon: "Archive", title: "Searchable library", description: "Find any Claude prompt instantly with search and category filters instead of scrolling through documents." },
@@ -1041,7 +1041,7 @@ export const integrationPages: SeoPageData[] = [
   {
     slug: "claude-data-protection",
     category: "integration",
-    meta: { title: "Claude Data Protection | TeamPrompt", description: "Real-time DLP scanning for Anthropic's Claude. PII and credential detection, configurable enforcement, audit trails, and compliance controls.", keywords: ["Claude data protection", "Claude DLP scanning", "Claude security", "protect data Claude", "Claude compliance"] },
+    meta: { title: "Claude Data Protection", description: "Real-time DLP scanning for Anthropic's Claude. PII and credential detection, configurable enforcement, audit trails, and compliance controls.", keywords: ["Claude data protection", "Claude DLP scanning", "Claude security", "protect data Claude", "Claude compliance"] },
     hero: { headline: "Data protection for every Claude interaction", subtitle: "TeamPrompt scans every prompt before it reaches Claude, catching PII, credentials, and confidential data in real time. Protect your organization's data while enabling productive Claude usage.", badges: ["DLP", "Claude", "Data protection"] },
     features: { sectionLabel: "Claude DLP", heading: "Protecting data in Claude", items: [
       { icon: "Shield", title: "Real-time scanning", description: "Every prompt scanned before it reaches Anthropic's servers. Millisecond detection with zero workflow disruption." },
@@ -1067,7 +1067,7 @@ export const integrationPages: SeoPageData[] = [
   {
     slug: "claude-team-prompts",
     category: "integration",
-    meta: { title: "Claude Team Prompts — Share Prompts for Claude | TeamPrompt", description: "Share and manage team prompts directly inside Anthropic's Claude. Categories, one-click access, and automatic DLP scanning.", keywords: ["Claude team prompts", "share Claude prompts", "Claude team templates", "Claude collaboration", "Claude shared prompts"] },
+    meta: { title: "Claude Team Prompts — Share Prompts for Claude", description: "Share and manage team prompts directly inside Anthropic's Claude. Categories, one-click access, and automatic DLP scanning.", keywords: ["Claude team prompts", "share Claude prompts", "Claude team templates", "Claude collaboration", "Claude shared prompts"] },
     hero: { headline: "Share team prompts inside Claude", subtitle: "Put your team's best Claude prompts one click away from every team member. Shared categories, permissions, and automatic version updates keep everyone aligned.", badges: ["Team sharing", "Claude", "Collaboration"] },
     features: { sectionLabel: "Claude Teams", heading: "Team prompt sharing for Claude", items: [
       { icon: "Users", title: "Shared categories", description: "Organize Claude prompts by team and use case. Everyone sees relevant prompts in their Claude sidebar." },
@@ -1093,7 +1093,7 @@ export const integrationPages: SeoPageData[] = [
   {
     slug: "gemini-prompt-management",
     category: "integration",
-    meta: { title: "Gemini Prompt Management — Organize Google Gemini Prompts | TeamPrompt", description: "Manage and organize your team's Google Gemini prompts with a shared library, templates, and DLP scanning inside Gemini.", keywords: ["Gemini prompt management", "manage Gemini prompts", "Google Gemini prompts", "Gemini prompt library", "Gemini AI templates"] },
+    meta: { title: "Gemini Prompt Management — Organize Google Gemini Prompts", description: "Manage and organize your team's Google Gemini prompts with a shared library, templates, and DLP scanning inside Gemini.", keywords: ["Gemini prompt management", "manage Gemini prompts", "Google Gemini prompts", "Gemini prompt library", "Gemini AI templates"] },
     hero: { headline: "Prompt management for Google Gemini", subtitle: "Organize your team's Gemini prompts in a shared library with search, categories, and one-click insertion. DLP scanning protects every prompt before it reaches Google.", badges: ["Gemini", "Management", "Teams"] },
     features: { sectionLabel: "Gemini Management", heading: "Managing Gemini prompts", items: [
       { icon: "Archive", title: "Organized library", description: "Store and search all Gemini prompts in categories instead of scattered documents." },
@@ -1119,7 +1119,7 @@ export const integrationPages: SeoPageData[] = [
   {
     slug: "gemini-enterprise-security",
     category: "integration",
-    meta: { title: "Gemini Enterprise Security | TeamPrompt", description: "Enterprise security controls for Google Gemini usage. DLP scanning, access controls, and audit trails for Gemini in the enterprise.", keywords: ["Gemini enterprise security", "Gemini DLP", "Google Gemini security", "Gemini data protection", "secure Gemini enterprise"] },
+    meta: { title: "Gemini Enterprise Security", description: "Enterprise security controls for Google Gemini usage. DLP scanning, access controls, and audit trails for Gemini in the enterprise.", keywords: ["Gemini enterprise security", "Gemini DLP", "Google Gemini security", "Gemini data protection", "secure Gemini enterprise"] },
     hero: { headline: "Enterprise security for Google Gemini", subtitle: "Add DLP scanning, access controls, and audit trails to your organization's Gemini usage. TeamPrompt provides the enterprise security layer that Gemini needs.", badges: ["Enterprise", "Gemini", "Security"] },
     features: { sectionLabel: "Gemini Security", heading: "Securing Gemini for enterprises", items: [
       { icon: "Shield", title: "DLP scanning", description: "Scan every Gemini prompt for sensitive data before it reaches Google's servers." },
@@ -1145,7 +1145,7 @@ export const integrationPages: SeoPageData[] = [
   {
     slug: "gemini-team-prompts",
     category: "integration",
-    meta: { title: "Gemini Team Prompts — Share Google Gemini Prompts | TeamPrompt", description: "Share and manage team prompts directly inside Google Gemini. Shared categories, one-click access, and DLP scanning.", keywords: ["Gemini team prompts", "share Gemini prompts", "Google Gemini team", "Gemini collaboration", "Gemini shared library"] },
+    meta: { title: "Gemini Team Prompts — Share Google Gemini Prompts", description: "Share and manage team prompts directly inside Google Gemini. Shared categories, one-click access, and DLP scanning.", keywords: ["Gemini team prompts", "share Gemini prompts", "Google Gemini team", "Gemini collaboration", "Gemini shared library"] },
     hero: { headline: "Team prompt sharing for Google Gemini", subtitle: "Share your team's best Gemini prompts with one-click access, shared categories, and automatic DLP protection inside Google Gemini.", badges: ["Team sharing", "Gemini", "Collaboration"] },
     features: { sectionLabel: "Gemini Teams", heading: "Sharing prompts in Gemini", items: [
       { icon: "Users", title: "Shared library", description: "Team prompts organized in categories, accessible inside Gemini." },
@@ -1171,7 +1171,7 @@ export const integrationPages: SeoPageData[] = [
   {
     slug: "copilot-prompt-templates",
     category: "integration",
-    meta: { title: "Copilot Prompt Templates — Manage Microsoft Copilot Prompts | TeamPrompt", description: "Create and manage prompt templates for Microsoft Copilot. Shared library, variables, and DLP scanning for your Copilot usage.", keywords: ["Copilot prompt templates", "Microsoft Copilot prompts", "Copilot templates", "manage Copilot prompts", "Copilot AI templates"] },
+    meta: { title: "Copilot Prompt Templates — Manage Microsoft Copilot Prompts", description: "Create and manage prompt templates for Microsoft Copilot. Shared library, variables, and DLP scanning for your Copilot usage.", keywords: ["Copilot prompt templates", "Microsoft Copilot prompts", "Copilot templates", "manage Copilot prompts", "Copilot AI templates"] },
     hero: { headline: "Prompt templates for Microsoft Copilot", subtitle: "Build a library of Copilot prompt templates with variables, team sharing, and DLP scanning. Access your templates directly inside Copilot through the browser extension.", badges: ["Copilot", "Templates", "Management"] },
     features: { sectionLabel: "Copilot Templates", heading: "Templates for Copilot", items: [
       { icon: "FileText", title: "Template library", description: "Build and manage Copilot-optimized templates with dynamic variables for reuse." },
@@ -1197,7 +1197,7 @@ export const integrationPages: SeoPageData[] = [
   {
     slug: "copilot-dlp-compliance",
     category: "integration",
-    meta: { title: "Copilot DLP & Compliance — Secure Microsoft Copilot | TeamPrompt", description: "DLP scanning and compliance controls for Microsoft Copilot usage. Protect sensitive data and meet regulatory requirements.", keywords: ["Copilot DLP", "Microsoft Copilot security", "Copilot compliance", "Copilot data protection", "secure Copilot"] },
+    meta: { title: "Copilot DLP & Compliance — Secure Microsoft Copilot", description: "DLP scanning and compliance controls for Microsoft Copilot usage. Protect sensitive data and meet regulatory requirements.", keywords: ["Copilot DLP", "Microsoft Copilot security", "Copilot compliance", "Copilot data protection", "secure Copilot"] },
     hero: { headline: "DLP and compliance for Microsoft Copilot", subtitle: "Add DLP scanning, access controls, and compliance reporting to your organization's Copilot usage. Protect data and meet regulatory requirements.", badges: ["DLP", "Copilot", "Compliance"] },
     features: { sectionLabel: "Copilot Compliance", heading: "Securing Copilot usage", items: [
       { icon: "Shield", title: "DLP scanning", description: "Scan every Copilot prompt for sensitive data before it reaches Microsoft." },
@@ -1223,7 +1223,7 @@ export const integrationPages: SeoPageData[] = [
   {
     slug: "copilot-team-prompts",
     category: "integration",
-    meta: { title: "Copilot Team Prompts — Share Microsoft Copilot Prompts | TeamPrompt", description: "Share and manage team prompts for Microsoft Copilot. Shared categories, one-click access, and DLP scanning.", keywords: ["Copilot team prompts", "share Copilot prompts", "Microsoft Copilot team", "Copilot shared library", "Copilot collaboration"] },
+    meta: { title: "Copilot Team Prompts — Share Microsoft Copilot Prompts", description: "Share and manage team prompts for Microsoft Copilot. Shared categories, one-click access, and DLP scanning.", keywords: ["Copilot team prompts", "share Copilot prompts", "Microsoft Copilot team", "Copilot shared library", "Copilot collaboration"] },
     hero: { headline: "Team prompts for Microsoft Copilot", subtitle: "Share your team's best Copilot prompts with one-click access and automatic DLP protection directly inside Microsoft Copilot.", badges: ["Team sharing", "Copilot", "Collaboration"] },
     features: { sectionLabel: "Copilot Teams", heading: "Sharing Copilot prompts", items: [
       { icon: "Users", title: "Shared categories", description: "Organize team Copilot prompts in shared categories with permissions." },
@@ -1249,7 +1249,7 @@ export const integrationPages: SeoPageData[] = [
   {
     slug: "perplexity-prompt-library",
     category: "integration",
-    meta: { title: "Perplexity Prompt Library — Manage Perplexity AI Prompts | TeamPrompt", description: "Build a shared prompt library for Perplexity AI. Organize, share, and protect your team's Perplexity research prompts.", keywords: ["Perplexity prompt library", "Perplexity AI prompts", "manage Perplexity prompts", "Perplexity templates", "Perplexity prompt manager"] },
+    meta: { title: "Perplexity Prompt Library — Manage Perplexity AI Prompts", description: "Build a shared prompt library for Perplexity AI. Organize, share, and protect your team's Perplexity research prompts.", keywords: ["Perplexity prompt library", "Perplexity AI prompts", "manage Perplexity prompts", "Perplexity templates", "Perplexity prompt manager"] },
     hero: { headline: "A prompt library for Perplexity AI", subtitle: "Organize your team's Perplexity research prompts in a shared library with search, categories, and one-click insertion. DLP scanning protects every query.", badges: ["Perplexity", "Library", "Research"] },
     features: { sectionLabel: "Perplexity Library", heading: "Managing Perplexity prompts", items: [
       { icon: "Archive", title: "Research prompt library", description: "Store and organize Perplexity research prompts in searchable categories." },
@@ -1275,7 +1275,7 @@ export const integrationPages: SeoPageData[] = [
   {
     slug: "perplexity-data-protection",
     category: "integration",
-    meta: { title: "Perplexity Data Protection — DLP for Perplexity AI | TeamPrompt", description: "Protect sensitive data from reaching Perplexity AI with real-time DLP scanning. Compliance and security for Perplexity usage.", keywords: ["Perplexity data protection", "Perplexity DLP", "Perplexity security", "protect data Perplexity", "Perplexity compliance"] },
+    meta: { title: "Perplexity Data Protection — DLP for Perplexity AI", description: "Protect sensitive data from reaching Perplexity AI with real-time DLP scanning. Compliance and security for Perplexity usage.", keywords: ["Perplexity data protection", "Perplexity DLP", "Perplexity security", "protect data Perplexity", "Perplexity compliance"] },
     hero: { headline: "Data protection for Perplexity AI", subtitle: "Scan every Perplexity query for sensitive data before it is sent. DLP protection ensures research and analysis prompts do not expose confidential information.", badges: ["DLP", "Perplexity", "Protection"] },
     features: { sectionLabel: "Perplexity DLP", heading: "Protecting Perplexity queries", items: [
       { icon: "Shield", title: "Query scanning", description: "Scan every Perplexity query for sensitive data in real time." },
@@ -1301,7 +1301,7 @@ export const integrationPages: SeoPageData[] = [
   {
     slug: "perplexity-team-prompts",
     category: "integration",
-    meta: { title: "Perplexity Team Prompts — Share Research Prompts | TeamPrompt", description: "Share research prompts across your team directly inside Perplexity AI. Categories, one-click access, and DLP protection.", keywords: ["Perplexity team prompts", "share Perplexity prompts", "Perplexity research team", "Perplexity collaboration", "Perplexity shared prompts"] },
+    meta: { title: "Perplexity Team Prompts — Share Research Prompts", description: "Share research prompts across your team directly inside Perplexity AI. Categories, one-click access, and DLP protection.", keywords: ["Perplexity team prompts", "share Perplexity prompts", "Perplexity research team", "Perplexity collaboration", "Perplexity shared prompts"] },
     hero: { headline: "Share research prompts in Perplexity", subtitle: "Your team's best Perplexity research prompts, shared and accessible with one click. Categories, permissions, and DLP protection built in.", badges: ["Team sharing", "Perplexity", "Research"] },
     features: { sectionLabel: "Perplexity Teams", heading: "Team research prompts", items: [
       { icon: "Users", title: "Shared research library", description: "Research prompts organized by category and accessible to the team." },
@@ -1327,7 +1327,7 @@ export const integrationPages: SeoPageData[] = [
   {
     slug: "slack-ai-prompts",
     category: "integration",
-    meta: { title: "Slack AI Prompts — Manage AI Prompts for Slack Teams | TeamPrompt", description: "Organize AI prompts for teams that collaborate in Slack. Share prompt libraries and AI best practices alongside your Slack workflows.", keywords: ["Slack AI prompts", "AI prompts for Slack teams", "Slack AI integration", "Slack prompt sharing", "AI tools Slack"] },
+    meta: { title: "Slack AI Prompts — Manage AI Prompts for Slack Teams", description: "Organize AI prompts for teams that collaborate in Slack. Share prompt libraries and AI best practices alongside your Slack workflows.", keywords: ["Slack AI prompts", "AI prompts for Slack teams", "Slack AI integration", "Slack prompt sharing", "AI tools Slack"] },
     hero: { headline: "AI prompts for Slack-powered teams", subtitle: "Your team collaborates in Slack but their AI prompts are scattered everywhere else. TeamPrompt gives Slack teams a shared prompt library accessible inside every AI tool, replacing prompt sharing through Slack messages.", badges: ["Slack teams", "Collaboration", "Organized"] },
     features: { sectionLabel: "Slack Teams", heading: "Prompt management for Slack-based teams", items: [
       { icon: "Archive", title: "Replace Slack prompt sharing", description: "Move from sharing prompts in Slack channels to an organized, searchable, version-controlled library." },
@@ -1353,7 +1353,7 @@ export const integrationPages: SeoPageData[] = [
   {
     slug: "teams-ai-prompts",
     category: "integration",
-    meta: { title: "Microsoft Teams AI Prompts — Prompt Management for Teams Users | TeamPrompt", description: "Organize AI prompts for Microsoft Teams users. Shared prompt library, templates, and DLP scanning for Teams-based organizations.", keywords: ["Microsoft Teams AI prompts", "Teams AI integration", "Teams prompt sharing", "AI prompts Microsoft Teams", "Teams AI management"] },
+    meta: { title: "Microsoft Teams AI Prompts — Prompt Management for Teams Users", description: "Organize AI prompts for Microsoft Teams users. Shared prompt library, templates, and DLP scanning for Teams-based organizations.", keywords: ["Microsoft Teams AI prompts", "Teams AI integration", "Teams prompt sharing", "AI prompts Microsoft Teams", "Teams AI management"] },
     hero: { headline: "AI prompts for Microsoft Teams organizations", subtitle: "Your organization runs on Microsoft Teams but AI prompts are scattered across chats and documents. TeamPrompt provides a proper prompt library for Teams-based organizations.", badges: ["Microsoft Teams", "Organization", "Prompts"] },
     features: { sectionLabel: "Teams Organizations", heading: "Prompt management for Teams users", items: [
       { icon: "Archive", title: "Structured prompt library", description: "Replace Teams chat prompt sharing with an organized, searchable library." },
@@ -1379,7 +1379,7 @@ export const integrationPages: SeoPageData[] = [
   {
     slug: "chrome-extension-prompts",
     category: "integration",
-    meta: { title: "Chrome Extension for AI Prompts — Browser Prompt Manager | TeamPrompt", description: "A Chrome extension that brings your prompt library into every AI tool. Insert prompts, scan for data, and share across teams.", keywords: ["Chrome extension AI prompts", "browser prompt manager", "Chrome AI extension", "prompt browser extension", "AI Chrome tool"] },
+    meta: { title: "Chrome Extension for AI Prompts — Browser Prompt Manager", description: "A Chrome extension that brings your prompt library into every AI tool. Insert prompts, scan for data, and share across teams.", keywords: ["Chrome extension AI prompts", "browser prompt manager", "Chrome AI extension", "prompt browser extension", "AI Chrome tool"] },
     hero: { headline: "Your prompt library in every AI tool via Chrome", subtitle: "The TeamPrompt Chrome extension puts your shared prompt library inside ChatGPT, Claude, Gemini, Copilot, and every major AI tool. One-click insertion, DLP scanning, and team sharing — all from your browser.", badges: ["Chrome extension", "All AI tools", "Browser"] },
     features: { sectionLabel: "Chrome Extension", heading: "What the Chrome extension provides", items: [
       { icon: "Globe", title: "Works everywhere", description: "Access your prompt library inside ChatGPT, Claude, Gemini, Copilot, Perplexity, and more from one extension." },
@@ -1405,7 +1405,7 @@ export const integrationPages: SeoPageData[] = [
   {
     slug: "multi-model-management",
     category: "integration",
-    meta: { title: "Multi-Model AI Management — One Library for Every Model | TeamPrompt", description: "Manage prompts across ChatGPT, Claude, Gemini, Copilot, and more from a single library. Multi-model prompt management.", keywords: ["multi-model AI management", "manage multiple AI models", "one prompt library all models", "AI model management", "cross-model prompts"] },
+    meta: { title: "Multi-Model AI Management — One Library for Every Model", description: "Manage prompts across ChatGPT, Claude, Gemini, Copilot, and more from a single library. Multi-model prompt management.", keywords: ["multi-model AI management", "manage multiple AI models", "one prompt library all models", "AI model management", "cross-model prompts"] },
     hero: { headline: "One prompt library for every AI model", subtitle: "Your team uses ChatGPT, Claude, Gemini, and Copilot. TeamPrompt gives you a single shared library that works across all of them — same prompts, same DLP scanning, same governance.", badges: ["Multi-model", "Unified", "All tools"] },
     features: { sectionLabel: "Multi-Model", heading: "Managing prompts across AI models", items: [
       { icon: "Globe", title: "Universal library", description: "One prompt library accessible from ChatGPT, Claude, Gemini, Copilot, Perplexity, and all supported tools." },
@@ -1431,7 +1431,7 @@ export const integrationPages: SeoPageData[] = [
   {
     slug: "ai-tool-consolidation",
     category: "integration",
-    meta: { title: "AI Tool Consolidation — Unify Your AI Prompt Management | TeamPrompt", description: "Consolidate AI prompt management across multiple tools. One library, one security layer, one governance framework for all AI.", keywords: ["AI tool consolidation", "unify AI tools", "consolidate AI management", "AI tool management", "centralize AI governance"] },
+    meta: { title: "AI Tool Consolidation — Unify Your AI Prompt Management", description: "Consolidate AI prompt management across multiple tools. One library, one security layer, one governance framework for all AI.", keywords: ["AI tool consolidation", "unify AI tools", "consolidate AI management", "AI tool management", "centralize AI governance"] },
     hero: { headline: "Consolidate AI management across every tool", subtitle: "Your team uses five or more AI tools. Instead of managing each separately, TeamPrompt consolidates prompt management, security, and governance into one platform that works across all of them.", badges: ["Consolidation", "Unified", "Governance"] },
     features: { sectionLabel: "Consolidation", heading: "How AI tool consolidation works", items: [
       { icon: "Archive", title: "One prompt library", description: "Replace scattered prompt collections with a single, organized library accessible from every AI tool." },
@@ -1457,7 +1457,7 @@ export const integrationPages: SeoPageData[] = [
   {
     slug: "ai-browser-extension-guide",
     category: "integration",
-    meta: { title: "AI Browser Extension Guide — Using TeamPrompt in Your Browser | TeamPrompt", description: "Complete guide to using the TeamPrompt browser extension for AI prompt management. Installation, setup, and usage across all AI tools.", keywords: ["AI browser extension", "browser extension guide", "TeamPrompt extension", "AI extension setup", "browser AI tool"] },
+    meta: { title: "AI Browser Extension Guide — Using TeamPrompt in Your Browser", description: "Complete guide to using the TeamPrompt browser extension for AI prompt management. Installation, setup, and usage across all AI tools.", keywords: ["AI browser extension", "browser extension guide", "TeamPrompt extension", "AI extension setup", "browser AI tool"] },
     hero: { headline: "The complete guide to the TeamPrompt browser extension", subtitle: "The TeamPrompt browser extension is how your team accesses prompts, DLP scanning, and sharing inside every AI tool. This guide covers everything from installation to advanced features.", badges: ["Extension guide", "Setup", "Features"] },
     features: { sectionLabel: "Extension Guide", heading: "What the extension provides", items: [
       { icon: "Chrome", title: "Easy installation", description: "Install from the Chrome Web Store in one click. Enterprise admins can deploy through Chrome policies." },
@@ -1483,7 +1483,7 @@ export const integrationPages: SeoPageData[] = [
   {
     slug: "enterprise-ai-integration",
     category: "integration",
-    meta: { title: "Enterprise AI Integration — TeamPrompt for Large Organizations | TeamPrompt", description: "Enterprise-grade AI prompt management with DLP, governance, and deployment features for large organizations using multiple AI tools.", keywords: ["enterprise AI integration", "enterprise AI management", "large organization AI", "enterprise AI governance", "AI enterprise deployment"] },
+    meta: { title: "Enterprise AI Integration — TeamPrompt for Large Organizations", description: "Enterprise-grade AI prompt management with DLP, governance, and deployment features for large organizations using multiple AI tools.", keywords: ["enterprise AI integration", "enterprise AI management", "large organization AI", "enterprise AI governance", "AI enterprise deployment"] },
     hero: { headline: "Enterprise AI integration and governance", subtitle: "Large organizations need AI management that scales. TeamPrompt provides enterprise-grade deployment, DLP scanning, governance, and analytics across every AI tool your organization uses.", badges: ["Enterprise", "Scale", "Governance"] },
     features: { sectionLabel: "Enterprise", heading: "Enterprise AI management features", items: [
       { icon: "Building2", title: "Enterprise deployment", description: "Deploy through Chrome policies, MDM, and group policy for organization-wide rollout with central configuration." },
@@ -1509,7 +1509,7 @@ export const integrationPages: SeoPageData[] = [
   {
     slug: "api-prompt-management",
     category: "integration",
-    meta: { title: "API Prompt Management — Manage Prompts Programmatically | TeamPrompt", description: "Manage AI prompts through APIs for integration with your existing tools and workflows. Programmatic prompt management for development teams.", keywords: ["API prompt management", "prompt management API", "programmatic prompts", "AI prompt API", "prompt integration API"] },
+    meta: { title: "API Prompt Management — Manage Prompts Programmatically", description: "Manage AI prompts through APIs for integration with your existing tools and workflows. Programmatic prompt management for development teams.", keywords: ["API prompt management", "prompt management API", "programmatic prompts", "AI prompt API", "prompt integration API"] },
     hero: { headline: "Programmatic prompt management via API", subtitle: "Integrate prompt management into your existing tools and workflows. TeamPrompt's approach lets development teams manage prompts programmatically alongside the browser extension for non-technical users.", badges: ["API", "Development", "Integration"] },
     features: { sectionLabel: "API Integration", heading: "Programmatic prompt management", items: [
       { icon: "Key", title: "API access", description: "Manage prompts, categories, and templates programmatically for integration with your existing tools." },

@@ -5,7 +5,7 @@ export const glossaryPages: SeoPageData[] = [
     slug: "what-is-prompt-management",
     category: "glossary",
     meta: {
-      title: "What Is Prompt Management? Definition & Guide | TeamPrompt",
+      title: "What Is Prompt Management? Definition & Guide",
       description: "Learn what prompt management is, why it matters for teams using AI, and how TeamPrompt helps you organize, share, and govern prompts at scale.",
       keywords: ["prompt management definition", "what is prompt management", "prompt management explained", "AI prompt organization", "prompt management tool"],
     },
@@ -52,7 +52,7 @@ export const glossaryPages: SeoPageData[] = [
     slug: "what-is-prompt-engineering",
     category: "glossary",
     meta: {
-      title: "What Is Prompt Engineering? Definition & Guide | TeamPrompt",
+      title: "What Is Prompt Engineering? Definition & Guide",
       description: "Learn what prompt engineering is, techniques for writing effective AI prompts, and how TeamPrompt helps teams scale prompt engineering practices.",
       keywords: ["prompt engineering definition", "what is prompt engineering", "prompt engineering explained", "AI prompt writing", "prompt engineering techniques"],
     },
@@ -99,7 +99,7 @@ export const glossaryPages: SeoPageData[] = [
     slug: "what-is-prompt-templates",
     category: "glossary",
     meta: {
-      title: "What Are Prompt Templates? Definition & Guide | TeamPrompt",
+      title: "What Are Prompt Templates? Definition & Guide",
       description: "Learn what prompt templates are, how they improve consistency and efficiency, and how TeamPrompt helps teams create and manage reusable prompt templates.",
       keywords: ["prompt templates definition", "what are prompt templates", "AI prompt templates", "reusable prompts", "prompt template variables"],
     },
@@ -146,7 +146,7 @@ export const glossaryPages: SeoPageData[] = [
     slug: "what-is-prompt-library",
     category: "glossary",
     meta: {
-      title: "What Is a Prompt Library? Definition & Guide | TeamPrompt",
+      title: "What Is a Prompt Library? Definition & Guide",
       description: "Learn what a prompt library is, why every AI-using team needs one, and how TeamPrompt helps you build and manage a shared prompt library.",
       keywords: ["prompt library definition", "what is a prompt library", "AI prompt library", "shared prompt repository", "team prompt library"],
     },
@@ -193,7 +193,7 @@ export const glossaryPages: SeoPageData[] = [
     slug: "what-is-prompt-chaining",
     category: "glossary",
     meta: {
-      title: "What Is Prompt Chaining? Definition & Guide | TeamPrompt",
+      title: "What Is Prompt Chaining? Definition & Guide",
       description: "Learn what prompt chaining is, how it breaks complex tasks into sequential steps, and how TeamPrompt helps teams build and manage prompt chains.",
       keywords: ["prompt chaining definition", "what is prompt chaining", "sequential prompts", "multi-step prompts", "AI prompt chains"],
     },
@@ -240,7 +240,7 @@ export const glossaryPages: SeoPageData[] = [
     slug: "what-is-system-prompts",
     category: "glossary",
     meta: {
-      title: "What Are System Prompts? Definition & Guide | TeamPrompt",
+      title: "What Are System Prompts? Definition & Guide",
       description: "Learn what system prompts are, how they control AI behavior, and how TeamPrompt helps teams manage and standardize system prompts across AI tools.",
       keywords: ["system prompts definition", "what are system prompts", "AI system instructions", "system message AI", "system prompt management"],
     },
@@ -287,7 +287,7 @@ export const glossaryPages: SeoPageData[] = [
     slug: "what-is-few-shot-prompting",
     category: "glossary",
     meta: {
-      title: "What Is Few-Shot Prompting? Definition & Guide | TeamPrompt",
+      title: "What Is Few-Shot Prompting? Definition & Guide",
       description: "Learn what few-shot prompting is, how providing examples improves AI output quality, and how TeamPrompt helps teams share few-shot prompt templates.",
       keywords: ["few-shot prompting definition", "what is few-shot prompting", "few-shot learning", "prompt examples", "in-context learning"],
     },
@@ -334,7 +334,7 @@ export const glossaryPages: SeoPageData[] = [
     slug: "what-is-zero-shot-prompting",
     category: "glossary",
     meta: {
-      title: "What Is Zero-Shot Prompting? Definition & Guide | TeamPrompt",
+      title: "What Is Zero-Shot Prompting? Definition & Guide",
       description: "Learn what zero-shot prompting is, when to use it vs. few-shot, and how TeamPrompt helps teams build effective zero-shot prompt templates.",
       keywords: ["zero-shot prompting definition", "what is zero-shot prompting", "zero-shot learning", "prompt without examples", "zero-shot AI"],
     },
@@ -381,7 +381,7 @@ export const glossaryPages: SeoPageData[] = [
     slug: "what-is-prompt-injection",
     category: "glossary",
     meta: {
-      title: "What Is Prompt Injection? Definition & Security Guide | TeamPrompt",
+      title: "What Is Prompt Injection? Definition & Security Guide",
       description: "Learn what prompt injection is, how attackers exploit AI systems, and how TeamPrompt helps teams defend against prompt injection attacks.",
       keywords: ["prompt injection definition", "what is prompt injection", "AI security attack", "prompt injection prevention", "LLM security"],
     },
@@ -428,7 +428,7 @@ export const glossaryPages: SeoPageData[] = [
     slug: "what-is-prompt-variables",
     category: "glossary",
     meta: {
-      title: "What Are Prompt Variables? Definition & Guide | TeamPrompt",
+      title: "What Are Prompt Variables? Definition & Guide",
       description: "Learn what prompt variables are, how they make templates reusable, and how TeamPrompt helps teams create and manage dynamic prompt templates with variables.",
       keywords: ["prompt variables definition", "what are prompt variables", "dynamic prompts", "template variables", "prompt placeholders"],
     },
@@ -475,7 +475,7 @@ export const glossaryPages: SeoPageData[] = [
     slug: "what-is-prompt-versioning",
     category: "glossary",
     meta: {
-      title: "What Is Prompt Versioning? Definition & Guide | TeamPrompt",
+      title: "What Is Prompt Versioning? Definition & Guide",
       description: "Learn what prompt versioning is, why tracking prompt changes matters, and how TeamPrompt provides full version control for your team's AI prompts.",
       keywords: ["prompt versioning definition", "what is prompt versioning", "prompt version control", "prompt history", "prompt change tracking"],
     },
@@ -522,7 +522,7 @@ export const glossaryPages: SeoPageData[] = [
     slug: "what-is-prompt-analytics",
     category: "glossary",
     meta: {
-      title: "What Is Prompt Analytics? Definition & Guide | TeamPrompt",
+      title: "What Is Prompt Analytics? Definition & Guide",
       description: "Learn what prompt analytics is, what metrics matter, and how TeamPrompt helps teams measure and optimize their AI prompt performance.",
       keywords: ["prompt analytics definition", "what is prompt analytics", "prompt usage metrics", "AI analytics", "prompt performance tracking"],
     },
@@ -569,7 +569,7 @@ export const glossaryPages: SeoPageData[] = [
     slug: "what-is-prompt-governance",
     category: "glossary",
     meta: {
-      title: "What Is Prompt Governance? Definition & Guide | TeamPrompt",
+      title: "What Is Prompt Governance? Definition & Guide",
       description: "Learn what prompt governance is, why organizations need it, and how TeamPrompt helps enforce prompt policies, approvals, and compliance standards.",
       keywords: ["prompt governance definition", "what is prompt governance", "AI governance prompts", "prompt policy", "prompt compliance"],
     },
@@ -616,7 +616,7 @@ export const glossaryPages: SeoPageData[] = [
     slug: "what-is-prompt-optimization",
     category: "glossary",
     meta: {
-      title: "What Is Prompt Optimization? Definition & Guide | TeamPrompt",
+      title: "What Is Prompt Optimization? Definition & Guide",
       description: "Learn what prompt optimization is, techniques for improving prompt performance, and how TeamPrompt helps teams systematically optimize their AI prompts.",
       keywords: ["prompt optimization definition", "what is prompt optimization", "improve AI prompts", "prompt performance", "optimize prompts"],
     },
@@ -663,7 +663,7 @@ export const glossaryPages: SeoPageData[] = [
     slug: "what-is-prompt-testing",
     category: "glossary",
     meta: {
-      title: "What Is Prompt Testing? Definition & Guide | TeamPrompt",
+      title: "What Is Prompt Testing? Definition & Guide",
       description: "Learn what prompt testing is, methods for evaluating prompt quality, and how TeamPrompt helps teams test and validate prompts before sharing them.",
       keywords: ["prompt testing definition", "what is prompt testing", "prompt evaluation", "prompt quality assurance", "test AI prompts"],
     },
@@ -710,7 +710,7 @@ export const glossaryPages: SeoPageData[] = [
     slug: "what-is-data-loss-prevention",
     category: "glossary",
     meta: {
-      title: "What Is Data Loss Prevention (DLP)? | TeamPrompt",
+      title: "What Is Data Loss Prevention (DLP)?",
       description: "Data loss prevention (DLP) detects and blocks sensitive data from reaching AI tools. Learn how DLP works and how TeamPrompt implements it.",
       keywords: ["data loss prevention definition", "what is DLP", "DLP for AI", "data protection AI", "prevent data leaks AI"],
     },
@@ -757,7 +757,7 @@ export const glossaryPages: SeoPageData[] = [
     slug: "what-is-ai-governance",
     category: "glossary",
     meta: {
-      title: "What Is AI Governance? Definition & Framework | TeamPrompt",
+      title: "What Is AI Governance? Definition & Framework",
       description: "Learn what AI governance is, why organizations need it, and how TeamPrompt helps implement AI governance policies for team AI usage.",
       keywords: ["AI governance definition", "what is AI governance", "AI governance framework", "AI oversight", "responsible AI governance"],
     },
@@ -804,7 +804,7 @@ export const glossaryPages: SeoPageData[] = [
     slug: "what-is-ai-compliance",
     category: "glossary",
     meta: {
-      title: "What Is AI Compliance? Definition & Guide | TeamPrompt",
+      title: "What Is AI Compliance? Definition & Guide",
       description: "Learn what AI compliance means, which regulations apply to AI usage, and how TeamPrompt helps organizations meet AI compliance requirements.",
       keywords: ["AI compliance definition", "what is AI compliance", "AI regulatory compliance", "AI compliance requirements", "AI regulations"],
     },
@@ -851,7 +851,7 @@ export const glossaryPages: SeoPageData[] = [
     slug: "what-is-llm-security",
     category: "glossary",
     meta: {
-      title: "What Is LLM Security? Definition & Guide | TeamPrompt",
+      title: "What Is LLM Security? Definition & Guide",
       description: "Learn what LLM security is, the key threats to large language models, and how TeamPrompt helps organizations secure their LLM usage.",
       keywords: ["LLM security definition", "what is LLM security", "large language model security", "AI model security", "LLM threats"],
     },
@@ -898,7 +898,7 @@ export const glossaryPages: SeoPageData[] = [
     slug: "what-is-ai-acceptable-use-policy",
     category: "glossary",
     meta: {
-      title: "What Is an AI Acceptable Use Policy? Definition & Guide | TeamPrompt",
+      title: "What Is an AI Acceptable Use Policy? Definition & Guide",
       description: "Learn what an AI acceptable use policy is, what it should include, and how TeamPrompt helps organizations enforce AI usage policies.",
       keywords: ["AI acceptable use policy", "what is AI AUP", "AI usage policy", "acceptable use AI", "AI policy definition"],
     },
@@ -945,7 +945,7 @@ export const glossaryPages: SeoPageData[] = [
     slug: "what-is-data-exfiltration",
     category: "glossary",
     meta: {
-      title: "What Is Data Exfiltration via AI? Definition & Prevention | TeamPrompt",
+      title: "What Is Data Exfiltration via AI? Definition & Prevention",
       description: "Learn what data exfiltration through AI tools means, how it happens, and how TeamPrompt prevents sensitive data from leaving your organization via prompts.",
       keywords: ["data exfiltration AI", "what is data exfiltration", "AI data leak", "prevent data exfiltration", "data loss AI tools"],
     },
@@ -992,7 +992,7 @@ export const glossaryPages: SeoPageData[] = [
     slug: "what-is-pii-detection",
     category: "glossary",
     meta: {
-      title: "What Is PII Detection for AI? Definition & Guide | TeamPrompt",
+      title: "What Is PII Detection for AI? Definition & Guide",
       description: "Learn what PII detection is in the context of AI tools, how it works, and how TeamPrompt automatically detects and blocks PII in prompts.",
       keywords: ["PII detection definition", "what is PII detection", "personally identifiable information AI", "PII scanning", "detect PII in prompts"],
     },
@@ -1039,7 +1039,7 @@ export const glossaryPages: SeoPageData[] = [
     slug: "what-is-sensitive-data-scanning",
     category: "glossary",
     meta: {
-      title: "What Is Sensitive Data Scanning for AI? Definition | TeamPrompt",
+      title: "What Is Sensitive Data Scanning for AI? Definition",
       description: "Learn what sensitive data scanning is, how it protects organizations using AI tools, and how TeamPrompt scans prompts for sensitive data in real time.",
       keywords: ["sensitive data scanning", "what is data scanning AI", "scan prompts for sensitive data", "AI data protection", "sensitive data detection"],
     },
@@ -1086,7 +1086,7 @@ export const glossaryPages: SeoPageData[] = [
     slug: "what-is-ai-audit-trail",
     category: "glossary",
     meta: {
-      title: "What Is an AI Audit Trail? Definition & Guide | TeamPrompt",
+      title: "What Is an AI Audit Trail? Definition & Guide",
       description: "Learn what an AI audit trail is, why it matters for compliance, and how TeamPrompt maintains comprehensive audit trails for all AI prompt activity.",
       keywords: ["AI audit trail definition", "what is AI audit trail", "AI activity logging", "AI compliance audit", "prompt audit log"],
     },
@@ -1133,7 +1133,7 @@ export const glossaryPages: SeoPageData[] = [
     slug: "what-is-ai-access-controls",
     category: "glossary",
     meta: {
-      title: "What Are AI Access Controls? Definition & Guide | TeamPrompt",
+      title: "What Are AI Access Controls? Definition & Guide",
       description: "Learn what AI access controls are, why they matter for security, and how TeamPrompt implements role-based access controls for AI prompt management.",
       keywords: ["AI access controls definition", "what are AI access controls", "AI permissions", "role-based access AI", "AI authorization"],
     },
@@ -1180,7 +1180,7 @@ export const glossaryPages: SeoPageData[] = [
     slug: "what-is-model-poisoning",
     category: "glossary",
     meta: {
-      title: "What Is Model Poisoning? Definition & AI Security Guide | TeamPrompt",
+      title: "What Is Model Poisoning? Definition & AI Security Guide",
       description: "Learn what model poisoning is, how it threatens AI systems, and how TeamPrompt helps organizations protect against model manipulation risks.",
       keywords: ["model poisoning definition", "what is model poisoning", "AI model attacks", "training data poisoning", "adversarial AI"],
     },
@@ -1227,7 +1227,7 @@ export const glossaryPages: SeoPageData[] = [
     slug: "what-is-ai-risk-management",
     category: "glossary",
     meta: {
-      title: "What Is AI Risk Management? Definition & Framework | TeamPrompt",
+      title: "What Is AI Risk Management? Definition & Framework",
       description: "Learn what AI risk management is, key risk categories, and how TeamPrompt helps organizations identify and mitigate AI-related risks.",
       keywords: ["AI risk management definition", "what is AI risk management", "AI risk framework", "manage AI risks", "AI risk assessment"],
     },
@@ -1274,7 +1274,7 @@ export const glossaryPages: SeoPageData[] = [
     slug: "what-is-ai-data-residency",
     category: "glossary",
     meta: {
-      title: "What Is AI Data Residency? Definition & Guide | TeamPrompt",
+      title: "What Is AI Data Residency? Definition & Guide",
       description: "Learn what AI data residency means, why it matters for compliance, and how TeamPrompt helps organizations manage data residency for AI usage.",
       keywords: ["AI data residency definition", "what is AI data residency", "data sovereignty AI", "AI data location", "data residency compliance"],
     },
@@ -1321,7 +1321,7 @@ export const glossaryPages: SeoPageData[] = [
     slug: "what-is-token-logging",
     category: "glossary",
     meta: {
-      title: "What Is Token Logging for AI? Definition & Guide | TeamPrompt",
+      title: "What Is Token Logging for AI? Definition & Guide",
       description: "Learn what token logging is, why tracking AI token usage matters, and how TeamPrompt helps teams monitor and manage AI token consumption.",
       keywords: ["token logging definition", "what is token logging", "AI token tracking", "LLM token usage", "token monitoring"],
     },
@@ -1368,7 +1368,7 @@ export const glossaryPages: SeoPageData[] = [
     slug: "what-is-shadow-ai",
     category: "glossary",
     meta: {
-      title: "What Is Shadow AI? | TeamPrompt",
+      title: "What Is Shadow AI?",
       description: "Shadow AI is unauthorized AI tool usage inside an organization. Learn why it's a growing risk and how TeamPrompt detects and controls it.",
       keywords: ["shadow AI definition", "what is shadow AI", "unauthorized AI usage", "shadow IT AI", "unmanaged AI tools"],
     },
@@ -1415,7 +1415,7 @@ export const glossaryPages: SeoPageData[] = [
     slug: "what-is-hipaa-ai",
     category: "glossary",
     meta: {
-      title: "What Is HIPAA for AI? Healthcare AI Compliance Guide | TeamPrompt",
+      title: "What Is HIPAA for AI? Healthcare AI Compliance Guide",
       description: "Learn what HIPAA means for AI usage in healthcare, how to keep AI interactions compliant, and how TeamPrompt protects PHI from reaching AI models.",
       keywords: ["HIPAA AI compliance", "what is HIPAA AI", "healthcare AI compliance", "PHI protection AI", "HIPAA compliant AI tools"],
     },
@@ -1462,7 +1462,7 @@ export const glossaryPages: SeoPageData[] = [
     slug: "what-is-soc2-ai",
     category: "glossary",
     meta: {
-      title: "What Is SOC 2 for AI? Compliance Guide | TeamPrompt",
+      title: "What Is SOC 2 for AI? Compliance Guide",
       description: "Learn what SOC 2 means for AI tool usage, how to maintain SOC 2 compliance while using AI, and how TeamPrompt supports SOC 2 requirements.",
       keywords: ["SOC 2 AI compliance", "what is SOC 2 AI", "SOC 2 and AI tools", "AI security audit", "SOC 2 compliant AI"],
     },
@@ -1509,7 +1509,7 @@ export const glossaryPages: SeoPageData[] = [
     slug: "what-is-gdpr-ai",
     category: "glossary",
     meta: {
-      title: "What Is GDPR for AI? EU Data Protection Guide | TeamPrompt",
+      title: "What Is GDPR for AI? EU Data Protection Guide",
       description: "Learn what GDPR means for AI usage, how to handle personal data in AI prompts, and how TeamPrompt helps organizations meet GDPR requirements.",
       keywords: ["GDPR AI compliance", "what is GDPR AI", "AI data protection EU", "GDPR compliant AI", "personal data AI"],
     },
@@ -1556,7 +1556,7 @@ export const glossaryPages: SeoPageData[] = [
     slug: "what-is-nist-ai-rmf",
     category: "glossary",
     meta: {
-      title: "What Is the NIST AI RMF? Framework Guide | TeamPrompt",
+      title: "What Is the NIST AI RMF? Framework Guide",
       description: "Learn what the NIST AI Risk Management Framework is, its core functions, and how TeamPrompt supports NIST AI RMF implementation.",
       keywords: ["NIST AI RMF definition", "what is NIST AI RMF", "AI risk management framework", "NIST AI framework", "AI risk assessment NIST"],
     },
@@ -1603,7 +1603,7 @@ export const glossaryPages: SeoPageData[] = [
     slug: "what-is-eu-ai-act",
     category: "glossary",
     meta: {
-      title: "What Is the EU AI Act? Regulation Guide | TeamPrompt",
+      title: "What Is the EU AI Act? Regulation Guide",
       description: "Learn what the EU AI Act is, how it classifies AI systems by risk, and how TeamPrompt helps organizations prepare for EU AI Act compliance.",
       keywords: ["EU AI Act definition", "what is EU AI Act", "EU AI regulation", "AI Act compliance", "European AI law"],
     },
@@ -1650,7 +1650,7 @@ export const glossaryPages: SeoPageData[] = [
     slug: "what-is-iso-42001",
     category: "glossary",
     meta: {
-      title: "What Is ISO 42001? AI Management System Standard | TeamPrompt",
+      title: "What Is ISO 42001? AI Management System Standard",
       description: "Learn what ISO 42001 is, how it defines AI management system requirements, and how TeamPrompt supports ISO 42001 implementation.",
       keywords: ["ISO 42001 definition", "what is ISO 42001", "AI management system", "ISO AI standard", "AI management certification"],
     },
@@ -1697,7 +1697,7 @@ export const glossaryPages: SeoPageData[] = [
     slug: "what-is-ccpa-ai",
     category: "glossary",
     meta: {
-      title: "What Is CCPA for AI? California Privacy Compliance | TeamPrompt",
+      title: "What Is CCPA for AI? California Privacy Compliance",
       description: "Learn what CCPA means for AI usage, how California privacy law applies to AI tools, and how TeamPrompt helps protect consumer data in AI interactions.",
       keywords: ["CCPA AI compliance", "what is CCPA AI", "California privacy AI", "CCPA and AI tools", "consumer data AI protection"],
     },
@@ -1744,7 +1744,7 @@ export const glossaryPages: SeoPageData[] = [
     slug: "what-is-fedramp-ai",
     category: "glossary",
     meta: {
-      title: "What Is FedRAMP for AI? Government Cloud Compliance | TeamPrompt",
+      title: "What Is FedRAMP for AI? Government Cloud Compliance",
       description: "Learn what FedRAMP means for AI tools, how federal cloud security standards apply to AI services, and how TeamPrompt supports government AI compliance.",
       keywords: ["FedRAMP AI compliance", "what is FedRAMP AI", "federal AI security", "government AI tools", "FedRAMP authorized AI"],
     },
@@ -1791,7 +1791,7 @@ export const glossaryPages: SeoPageData[] = [
     slug: "what-is-pci-dss-ai",
     category: "glossary",
     meta: {
-      title: "What Is PCI DSS for AI? Payment Data Compliance | TeamPrompt",
+      title: "What Is PCI DSS for AI? Payment Data Compliance",
       description: "Learn what PCI DSS means for AI tool usage, how to protect cardholder data in AI interactions, and how TeamPrompt prevents payment data from reaching AI models.",
       keywords: ["PCI DSS AI compliance", "what is PCI DSS AI", "payment data AI", "cardholder data AI protection", "PCI compliant AI"],
     },
@@ -1838,7 +1838,7 @@ export const glossaryPages: SeoPageData[] = [
     slug: "what-is-cmmc-ai",
     category: "glossary",
     meta: {
-      title: "What Is CMMC for AI? Defense Contractor Compliance | TeamPrompt",
+      title: "What Is CMMC for AI? Defense Contractor Compliance",
       description: "Learn what CMMC means for AI tool usage by defense contractors, how to protect CUI in AI interactions, and how TeamPrompt supports CMMC compliance.",
       keywords: ["CMMC AI compliance", "what is CMMC AI", "defense contractor AI", "CUI protection AI", "CMMC compliant AI tools"],
     },
@@ -1885,7 +1885,7 @@ export const glossaryPages: SeoPageData[] = [
     slug: "what-is-rag",
     category: "glossary",
     meta: {
-      title: "What Is RAG (Retrieval-Augmented Generation)? Definition | TeamPrompt",
+      title: "What Is RAG (Retrieval-Augmented Generation)? Definition",
       description: "Learn what retrieval-augmented generation is, how RAG improves AI accuracy, and how TeamPrompt helps teams build effective prompts for RAG workflows.",
       keywords: ["RAG definition", "what is RAG", "retrieval-augmented generation", "RAG AI", "RAG prompting"],
     },
@@ -1932,7 +1932,7 @@ export const glossaryPages: SeoPageData[] = [
     slug: "what-is-fine-tuning",
     category: "glossary",
     meta: {
-      title: "What Is Fine-Tuning? AI Model Customization Guide | TeamPrompt",
+      title: "What Is Fine-Tuning? AI Model Customization Guide",
       description: "Learn what fine-tuning is, when to use it vs. prompt engineering, and how TeamPrompt helps teams optimize prompts before and after fine-tuning.",
       keywords: ["fine-tuning definition", "what is fine-tuning", "AI model fine-tuning", "custom AI models", "fine-tune LLM"],
     },
@@ -1979,7 +1979,7 @@ export const glossaryPages: SeoPageData[] = [
     slug: "what-is-embeddings",
     category: "glossary",
     meta: {
-      title: "What Are Embeddings? AI Vector Representations Guide | TeamPrompt",
+      title: "What Are Embeddings? AI Vector Representations Guide",
       description: "Learn what embeddings are, how AI uses vector representations, and how embeddings relate to prompt management and AI search.",
       keywords: ["embeddings definition", "what are embeddings", "AI embeddings", "vector embeddings", "embedding models"],
     },
@@ -2026,7 +2026,7 @@ export const glossaryPages: SeoPageData[] = [
     slug: "what-is-context-window",
     category: "glossary",
     meta: {
-      title: "What Is a Context Window? AI Token Limits Guide | TeamPrompt",
+      title: "What Is a Context Window? AI Token Limits Guide",
       description: "Learn what context windows are, how they affect AI interactions, and how TeamPrompt helps teams optimize prompts for context window limitations.",
       keywords: ["context window definition", "what is context window", "AI token limit", "LLM context length", "context window size"],
     },
@@ -2073,7 +2073,7 @@ export const glossaryPages: SeoPageData[] = [
     slug: "what-is-temperature-llm",
     category: "glossary",
     meta: {
-      title: "What Is Temperature in AI? LLM Sampling Guide | TeamPrompt",
+      title: "What Is Temperature in AI? LLM Sampling Guide",
       description: "Learn what temperature means in AI language models, how it controls output randomness, and how to choose the right temperature for your prompts.",
       keywords: ["temperature LLM definition", "what is temperature AI", "AI temperature setting", "LLM sampling temperature", "AI randomness control"],
     },
@@ -2120,7 +2120,7 @@ export const glossaryPages: SeoPageData[] = [
     slug: "what-is-tokens-ai",
     category: "glossary",
     meta: {
-      title: "What Are Tokens in AI? Understanding LLM Tokens | TeamPrompt",
+      title: "What Are Tokens in AI? Understanding LLM Tokens",
       description: "Learn what tokens are in AI, how they affect pricing and performance, and how TeamPrompt helps teams write token-efficient prompts.",
       keywords: ["tokens AI definition", "what are tokens AI", "LLM tokens", "AI token pricing", "tokenization explained"],
     },
@@ -2167,7 +2167,7 @@ export const glossaryPages: SeoPageData[] = [
     slug: "what-is-hallucination-ai",
     category: "glossary",
     meta: {
-      title: "What Is AI Hallucination? Definition & Prevention | TeamPrompt",
+      title: "What Is AI Hallucination? Definition & Prevention",
       description: "Learn what AI hallucinations are, why AI models generate false information, and how TeamPrompt helps teams reduce hallucinations through better prompts.",
       keywords: ["AI hallucination definition", "what is AI hallucination", "LLM hallucination", "AI false information", "reduce AI hallucinations"],
     },
@@ -2214,7 +2214,7 @@ export const glossaryPages: SeoPageData[] = [
     slug: "what-is-grounding-ai",
     category: "glossary",
     meta: {
-      title: "What Is AI Grounding? Definition & Guide | TeamPrompt",
+      title: "What Is AI Grounding? Definition & Guide",
       description: "Learn what grounding means in AI, how it improves accuracy, and how TeamPrompt helps teams build grounded prompts that produce reliable outputs.",
       keywords: ["AI grounding definition", "what is AI grounding", "grounded AI responses", "AI accuracy", "grounding techniques"],
     },
@@ -2261,7 +2261,7 @@ export const glossaryPages: SeoPageData[] = [
     slug: "what-is-multi-modal-ai",
     category: "glossary",
     meta: {
-      title: "What Is Multi-Modal AI? Definition & Guide | TeamPrompt",
+      title: "What Is Multi-Modal AI? Definition & Guide",
       description: "Learn what multi-modal AI is, how it processes different data types, and how TeamPrompt helps teams manage prompts across multi-modal AI tools.",
       keywords: ["multi-modal AI definition", "what is multi-modal AI", "multimodal AI", "AI vision and text", "multi-modal prompts"],
     },
@@ -2308,7 +2308,7 @@ export const glossaryPages: SeoPageData[] = [
     slug: "what-is-agentic-ai",
     category: "glossary",
     meta: {
-      title: "What Is Agentic AI? Definition & Guide | TeamPrompt",
+      title: "What Is Agentic AI? Definition & Guide",
       description: "Learn what agentic AI is, how autonomous AI agents work, and how TeamPrompt helps teams manage prompts in agentic AI workflows.",
       keywords: ["agentic AI definition", "what is agentic AI", "AI agents", "autonomous AI", "agentic workflows"],
     },

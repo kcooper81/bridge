@@ -61,7 +61,7 @@ export const useCasePages: SeoPageData[] = [
     slug: "prompt-templates",
     category: "use-case",
     meta: {
-      title: "AI Prompt Templates — Reusable Templates with Variables",
+      title: "AI Prompt Templates with Variables",
       description:
         "Create reusable AI prompt templates with dynamic variables. Fill in fields like {{client_name}} and insert into ChatGPT, Claude, and more.",
       keywords: ["prompt templates", "AI templates", "reusable prompts", "prompt variables"],
@@ -110,7 +110,7 @@ export const useCasePages: SeoPageData[] = [
     slug: "ai-governance",
     category: "use-case",
     meta: {
-      title: "AI Governance Platform — Manage How Your Team Uses AI",
+      title: "AI Governance Platform for Teams",
       description:
         "Govern your organization's AI usage with prompt libraries, quality guidelines, DLP guardrails, and usage analytics. Built for compliance-first teams.",
       keywords: ["AI governance", "AI policy", "AI usage management", "AI oversight"],
@@ -270,7 +270,7 @@ export const useCasePages: SeoPageData[] = [
     slug: "ai-dlp",
     category: "use-case",
     meta: {
-      title: "AI Data Loss Prevention (DLP) | TeamPrompt",
+      title: "AI Data Loss Prevention (DLP)",
       description:
         "Real-time DLP scanning, auto-sanitization, and compliance policy packs that stop sensitive data from leaking into ChatGPT, Claude, and other AI tools.'s sensitive data from leaking into ChatGPT, Claude, Gemini, and more.",
       keywords: ["AI DLP", "data loss prevention AI", "AI data protection", "sensitive data AI tools"],
@@ -325,7 +325,7 @@ export const useCasePages: SeoPageData[] = [
     slug: "prompt-management",
     category: "use-case",
     meta: {
-      title: "AI Prompt Management Platform | TeamPrompt",
+      title: "AI Prompt Management Platform",
       description:
         "Centralized prompt vault with version history, diff view, approval workflows, template variables, and DLP guardrails — built for teams.",
       keywords: ["prompt management", "prompt management platform", "manage AI prompts", "prompt version control"],
@@ -435,7 +435,7 @@ export const useCasePages: SeoPageData[] = [
     slug: "ai-code-review-prompts",
     category: "use-case",
     meta: {
-      title: "AI Code Review Prompts — Standardize Code Reviews | TeamPrompt",
+      title: "AI Code Review Prompts — Standardize Code Reviews",
       description:
         "Standardize your team's code reviews with shared AI prompt templates for security analysis, performance audits, readability checks, and best-practice enforcement. Deliver consistent, thorough code reviews every time.",
       keywords: ["AI code review", "code review prompts", "automated code review", "code review templates", "code quality AI"],
@@ -490,7 +490,7 @@ export const useCasePages: SeoPageData[] = [
     slug: "ai-onboarding-playbooks",
     category: "use-case",
     meta: {
-      title: "AI Onboarding Playbooks — Onboard New Hires with AI | TeamPrompt",
+      title: "AI Onboarding Playbooks — Onboard New Hires with AI",
       description:
         "Accelerate new hire onboarding with AI-powered playbooks. Shared prompt templates guide new team members through tools, processes, and codebase exploration — reducing ramp-up time dramatically.",
       keywords: ["AI onboarding", "onboarding playbooks", "new hire AI", "employee onboarding prompts", "AI ramp-up"],
@@ -544,7 +544,7 @@ export const useCasePages: SeoPageData[] = [
     slug: "ai-meeting-summaries",
     category: "use-case",
     meta: {
-      title: "AI Meeting Summary Prompts — Meeting Summary Workflows | TeamPrompt",
+      title: "AI Meeting Summary Prompts — Meeting Summary Workflows",
       description:
         "Transform raw meeting notes into structured summaries, action items, and follow-up emails with shared AI prompt templates. Ensure every meeting has clear outcomes and accountability.",
       keywords: ["AI meeting summary", "meeting notes AI", "meeting action items", "meeting summary prompts", "meeting follow-up AI"],
@@ -599,7 +599,7 @@ export const useCasePages: SeoPageData[] = [
     slug: "ai-data-analysis",
     category: "use-case",
     meta: {
-      title: "AI Data Analysis Prompts — Data Analysis Prompt Libraries | TeamPrompt",
+      title: "AI Data Analysis Prompts — Data Analysis Prompt Libraries",
       description:
         "Shared prompt libraries for data analysis, visualization, statistical interpretation, and reporting. Standardize how your team uses AI to explore, analyze, and present data.",
       keywords: ["AI data analysis", "data analysis prompts", "AI data visualization", "data interpretation AI", "analytics prompts"],
@@ -654,7 +654,7 @@ export const useCasePages: SeoPageData[] = [
     slug: "ai-content-localization",
     category: "use-case",
     meta: {
-      title: "AI Content Localization — Translation & Localization Prompts | TeamPrompt",
+      title: "AI Content Localization — Translation & Localization Prompts",
       description:
         "Shared prompt templates for AI-powered translation, localization, and cultural adaptation. Ensure consistent brand voice across every language and market your team operates in.",
       keywords: ["AI localization", "AI translation prompts", "content localization", "cultural adaptation AI", "multilingual prompts"],
@@ -708,7 +708,7 @@ export const useCasePages: SeoPageData[] = [
     slug: "ai-compliance-reporting",
     category: "use-case",
     meta: {
-      title: "AI Compliance Reporting | TeamPrompt",
+      title: "AI Compliance Reporting",
       description:
         "Shared prompt templates for compliance reports, audit documentation, regulatory filings, and internal control assessments — standardized across your team.",
       keywords: ["AI compliance reporting", "compliance prompts", "audit report AI", "regulatory reporting", "compliance documentation AI"],
@@ -763,7 +763,7 @@ export const useCasePages: SeoPageData[] = [
     slug: "ai-incident-response",
     category: "use-case",
     meta: {
-      title: "AI Incident Response — Incident Response Prompts | TeamPrompt",
+      title: "AI Incident Response — Incident Response Prompts",
       description:
         "Shared prompt templates for incident triage, root cause analysis, post-mortem writing, and stakeholder communication. Respond to incidents faster and document them more thoroughly with AI.",
       keywords: ["AI incident response", "incident response prompts", "post-mortem AI", "root cause analysis prompts", "incident triage AI"],

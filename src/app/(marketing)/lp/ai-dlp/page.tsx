@@ -30,7 +30,7 @@ const SITE_URL =
 
 export function generateMetadata(): Metadata {
   return {
-    title: "AI DLP — Prevent Data Leaks to ChatGPT & AI Tools | TeamPrompt",
+    title: "AI DLP — Prevent Data Leaks to ChatGPT & AI Tools",
     description:
       "Stop sensitive data from reaching AI tools. TeamPrompt scans every message for PII, secrets, and source code before it leaves your browser. HIPAA & SOC 2 ready.",
     keywords: [

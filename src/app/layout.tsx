@@ -40,10 +40,10 @@ export const metadata: Metadata = {
     site: "@teampromptapp",
     creator: "@teampromptapp",
   },
-  robots: {
-    index: true,
-    follow: true,
-  },
+  // No `robots:` at the root level — Google's default is index+follow anyway,
+  // and Next.js doesn't deep-merge metadata.robots between layouts and pages
+  // (it emits both tags). Leaving this off means page-level `generatePageMetadata`
+  // is the single source of truth for the robots directive.
 };
 
 // Explicit viewport export — Next.js 14+ moved this out of `metadata`.

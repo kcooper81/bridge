@@ -5,7 +5,7 @@ export const alternativePages: SeoPageData[] = [
     slug: "notion-alternative",
     category: "alternative",
     meta: {
-      title: "Best Notion Alternative for Prompt Management | TeamPrompt",
+      title: "Best Notion Alternative for Prompt Management",
       description:
         "Looking for a Notion alternative built for AI prompt management? TeamPrompt offers one-click insertion, DLP scanning, template variables, and usage analytics that Notion can't match.",
       keywords: ["Notion alternative", "Notion alternative for prompts", "prompt management tool", "AI prompt organization"],
@@ -61,7 +61,7 @@ export const alternativePages: SeoPageData[] = [
     slug: "google-docs-alternative",
     category: "alternative",
     meta: {
-      title: "Google Docs Alternative for AI Teams | TeamPrompt",
+      title: "Google Docs Alternative for AI Teams",
       description:
         "Replace Google Docs for AI prompt management. TeamPrompt gives AI teams one-click insertion, DLP scanning, template variables, and analytics that Google Docs cannot provide.",
       keywords: ["Google Docs alternative", "Google Docs AI prompts", "prompt management for AI teams", "AI team tools"],
@@ -118,7 +118,7 @@ export const alternativePages: SeoPageData[] = [
     slug: "sharepoint-alternative",
     category: "alternative",
     meta: {
-      title: "SharePoint Alternative for AI Prompt Management | TeamPrompt",
+      title: "SharePoint Alternative for AI Prompt Management",
       description:
         "Replace SharePoint for prompt management. TeamPrompt is lightweight, fast, and purpose-built for AI prompts with one-click insertion, DLP, and analytics.",
       keywords: ["SharePoint alternative", "SharePoint prompt management", "AI prompt management tool", "SharePoint replacement for prompts"],
@@ -173,7 +173,7 @@ export const alternativePages: SeoPageData[] = [
     slug: "airtable-alternative",
     category: "alternative",
     meta: {
-      title: "Airtable Alternative for Prompt Libraries | TeamPrompt",
+      title: "Airtable Alternative for Prompt Libraries",
       description:
         "Replace Airtable for your prompt library. TeamPrompt offers direct AI tool integration, DLP scanning, and team analytics without complex database setup.",
       keywords: ["Airtable alternative", "Airtable prompt library", "prompt library tool", "AI prompt database alternative"],
@@ -227,7 +227,7 @@ export const alternativePages: SeoPageData[] = [
     slug: "textexpander-alternative",
     category: "alternative",
     meta: {
-      title: "TextExpander Alternative for AI Prompts | TeamPrompt",
+      title: "TextExpander Alternative for AI Prompts",
       description:
         "Replace TextExpander for AI prompt management. TeamPrompt offers team prompt libraries, DLP scanning, usage analytics, and AI tool awareness that TextExpander lacks.",
       keywords: ["TextExpander alternative", "TextExpander for AI", "AI prompt expansion", "prompt snippet tool"],
@@ -282,7 +282,7 @@ export const alternativePages: SeoPageData[] = [
     slug: "prompt-management-tools",
     category: "alternative",
     meta: {
-      title: "Best Prompt Management Tools 2026 | TeamPrompt",
+      title: "Best Prompt Management Tools 2026",
       description:
         "Compare the best prompt management tools in 2026. See why TeamPrompt leads with one-click insertion, DLP scanning, team analytics, and cross-platform AI tool support.",
       keywords: ["prompt management tools", "best prompt management", "prompt management software 2026", "AI prompt tools comparison"],
@@ -336,7 +336,7 @@ export const alternativePages: SeoPageData[] = [
     slug: "ai-prompt-library-software",
     category: "alternative",
     meta: {
-      title: "AI Prompt Library Software for Teams | TeamPrompt",
+      title: "AI Prompt Library Software for Teams",
       description:
         "Find the right AI prompt library software for your team. TeamPrompt offers centralized storage, one-click insertion, DLP, and team analytics in one platform.",
       keywords: ["AI prompt library software", "prompt library tool", "team prompt library", "AI prompt software"],
@@ -390,7 +390,7 @@ export const alternativePages: SeoPageData[] = [
     slug: "enterprise-prompt-manager",
     category: "alternative",
     meta: {
-      title: "Enterprise Prompt Management Platform | TeamPrompt",
+      title: "Enterprise Prompt Management Platform",
       description:
         "Enterprise-grade prompt management with SSO, audit trails, compliance packs, MDM deployment, and role-based access. Built for organizations that need governance at scale.",
       keywords: ["enterprise prompt management", "enterprise AI governance", "prompt management platform", "enterprise AI tools"],
@@ -445,7 +445,7 @@ export const alternativePages: SeoPageData[] = [
     slug: "team-ai-toolkit",
     category: "alternative",
     meta: {
-      title: "Best Team AI Toolkit 2026 | TeamPrompt",
+      title: "Best Team AI Toolkit 2026",
       description:
         "The complete AI toolkit for teams: prompt library, templates, guardrails, compliance packs, and analytics. Everything your team needs to use AI productively and safely.",
       keywords: ["team AI toolkit", "AI toolkit for teams", "AI team tools 2026", "team AI platform"],
@@ -499,7 +499,7 @@ export const alternativePages: SeoPageData[] = [
     slug: "prompt-engineering-platform",
     category: "alternative",
     meta: {
-      title: "Prompt Engineering Platform for Teams | TeamPrompt",
+      title: "Prompt Engineering Platform for Teams",
       description:
         "Go beyond prompt storage with a platform for prompt engineering teams. Version control, diff views, collaboration, testing workflows, and analytics for prompt engineers.",
       keywords: ["prompt engineering platform", "prompt engineering tools", "prompt version control", "AI prompt engineering"],
@@ -554,7 +554,7 @@ export const alternativePages: SeoPageData[] = [
     slug: "confluence-alternative",
     category: "alternative",
     meta: {
-      title: "Best Confluence Alternative for Prompt Management | TeamPrompt",
+      title: "Best Confluence Alternative for Prompt Management",
       description: "Looking for a Confluence alternative for AI prompt management? TeamPrompt offers one-click insertion, DLP scanning, template variables, and usage analytics that Confluence can't match.",
       keywords: ["Confluence alternative", "Confluence alternative for prompts", "prompt management tool", "AI prompt wiki"],
     },
@@ -606,7 +606,7 @@ export const alternativePages: SeoPageData[] = [
     slug: "slack-alternative",
     category: "alternative",
     meta: {
-      title: "Best Slack Alternative for Prompt Sharing | TeamPrompt",
+      title: "Best Slack Alternative for Prompt Sharing",
       description: "Stop sharing AI prompts in Slack channels where they get buried. TeamPrompt provides a searchable prompt library with one-click insertion, DLP scanning, and usage analytics.",
       keywords: ["Slack alternative for prompts", "prompt sharing tool", "AI prompt management", "Slack prompt library"],
     },
@@ -656,7 +656,7 @@ export const alternativePages: SeoPageData[] = [
     slug: "spreadsheet-alternative",
     category: "alternative",
     meta: {
-      title: "Best Spreadsheet Alternative for Prompt Management | TeamPrompt",
+      title: "Best Spreadsheet Alternative for Prompt Management",
       description: "Stop managing AI prompts in spreadsheets. TeamPrompt provides one-click insertion, DLP scanning, template variables, and usage analytics purpose-built for prompt workflows.",
       keywords: ["spreadsheet alternative for prompts", "Excel prompt management", "Google Sheets prompts", "AI prompt tool"],
     },
@@ -717,7 +717,7 @@ export const alternativePages: SeoPageData[] = [
     slug: "aiprm-alternative",
     category: "alternative",
     meta: {
-      title: "Best AIPRM Alternative for Team Prompt Management | TeamPrompt",
+      title: "Best AIPRM Alternative for Team Prompt Management",
       description: "Looking for an AIPRM alternative with private prompt libraries, DLP scanning, and multi-AI support? TeamPrompt is built for teams that need security and governance.",
       keywords: ["AIPRM alternative", "AIPRM replacement", "private prompt library", "team prompt management"],
     },
@@ -769,7 +769,7 @@ export const alternativePages: SeoPageData[] = [
     slug: "chatgpt-teams-alternative",
     category: "alternative",
     meta: {
-      title: "Best ChatGPT Teams Alternative for Prompt Management | TeamPrompt",
+      title: "Best ChatGPT Teams Alternative for Prompt Management",
       description: "Looking for a ChatGPT Teams alternative? TeamPrompt works across all AI tools with DLP scanning, template variables, and prompt governance.",
       keywords: ["ChatGPT Teams alternative", "ChatGPT for business alternative", "AI prompt management", "multi-AI prompt tool"],
     },
@@ -821,7 +821,7 @@ export const alternativePages: SeoPageData[] = [
     slug: "team-gpt-alternative",
     category: "alternative",
     meta: {
-      title: "Best Team-GPT Alternative for Prompt Management | TeamPrompt",
+      title: "Best Team-GPT Alternative for Prompt Management",
       description: "Looking for a Team-GPT alternative with DLP scanning, multi-AI support, and browser extension insertion? TeamPrompt is built for secure team prompt management.",
       keywords: ["Team-GPT alternative", "Team-GPT replacement", "team prompt management", "AI prompt security"],
     },
@@ -873,7 +873,7 @@ export const alternativePages: SeoPageData[] = [
     slug: "promptbase-alternative",
     category: "alternative",
     meta: {
-      title: "Best PromptBase Alternative for Team Prompt Management | TeamPrompt",
+      title: "Best PromptBase Alternative for Team Prompt Management",
       description: "Looking for a PromptBase alternative with private libraries, DLP scanning, and team governance? TeamPrompt is built for teams, not a marketplace.",
       keywords: ["PromptBase alternative", "PromptBase replacement", "private prompt library", "team prompt tool"],
     },
@@ -925,7 +925,7 @@ export const alternativePages: SeoPageData[] = [
     slug: "flowgpt-alternative",
     category: "alternative",
     meta: {
-      title: "Best FlowGPT Alternative for Team Prompt Management | TeamPrompt",
+      title: "Best FlowGPT Alternative for Team Prompt Management",
       description: "Looking for a FlowGPT alternative with private libraries and DLP scanning? TeamPrompt is built for enterprise teams that need prompt security and governance.",
       keywords: ["FlowGPT alternative", "FlowGPT replacement", "private prompt management", "enterprise prompt tool"],
     },
@@ -977,7 +977,7 @@ export const alternativePages: SeoPageData[] = [
     slug: "prompthero-alternative",
     category: "alternative",
     meta: {
-      title: "Best PromptHero Alternative for Team Prompt Management | TeamPrompt",
+      title: "Best PromptHero Alternative for Team Prompt Management",
       description: "Looking for a PromptHero alternative with private libraries and DLP? TeamPrompt is built for teams that need secure, governed prompt management.",
       keywords: ["PromptHero alternative", "PromptHero replacement", "private prompt library", "team prompt management"],
     },
@@ -1029,7 +1029,7 @@ export const alternativePages: SeoPageData[] = [
     slug: "prompthub-alternative",
     category: "alternative",
     meta: {
-      title: "Best PromptHub Alternative for Team Prompt Management | TeamPrompt",
+      title: "Best PromptHub Alternative for Team Prompt Management",
       description: "Looking for a PromptHub alternative with browser extension insertion, DLP scanning, and non-technical team access? TeamPrompt is built for everyone.",
       keywords: ["PromptHub alternative", "PromptHub replacement", "prompt management tool", "team prompt platform"],
     },
@@ -1081,7 +1081,7 @@ export const alternativePages: SeoPageData[] = [
     slug: "promptlayer-alternative",
     category: "alternative",
     meta: {
-      title: "Best PromptLayer Alternative for Team Prompt Management | TeamPrompt",
+      title: "Best PromptLayer Alternative for Team Prompt Management",
       description: "Looking for a PromptLayer alternative that non-technical teams can use? TeamPrompt provides browser extension insertion, DLP scanning, and team governance.",
       keywords: ["PromptLayer alternative", "PromptLayer replacement", "prompt management tool", "non-technical prompt tool"],
     },
@@ -1133,7 +1133,7 @@ export const alternativePages: SeoPageData[] = [
     slug: "nightfall-alternative",
     category: "alternative",
     meta: {
-      title: "Best Nightfall Alternative for AI Prompt DLP | TeamPrompt",
+      title: "Best Nightfall Alternative for AI Prompt DLP",
       description: "A Nightfall alternative with prompt management built in. TeamPrompt combines DLP scanning, shared prompts, one-click insertion, and analytics.",
       keywords: ["Nightfall alternative", "Nightfall AI replacement", "AI prompt DLP", "prompt security tool"],
     },
@@ -1185,7 +1185,7 @@ export const alternativePages: SeoPageData[] = [
     slug: "harmonic-alternative",
     category: "alternative",
     meta: {
-      title: "Best Harmonic Security Alternative for AI Prompt Management | TeamPrompt",
+      title: "Best Harmonic Security Alternative for AI Prompt Management",
       description: "Looking for a Harmonic Security alternative? TeamPrompt manages and secures AI prompts proactively with DLP scanning, one-click insertion, and governance.",
       keywords: ["Harmonic Security alternative", "AI security alternative", "prompt management security", "proactive AI DLP"],
     },
@@ -1237,7 +1237,7 @@ export const alternativePages: SeoPageData[] = [
     slug: "cyberhaven-alternative",
     category: "alternative",
     meta: {
-      title: "Best Cyberhaven Alternative for AI Prompt Security | TeamPrompt",
+      title: "Best Cyberhaven Alternative for AI Prompt Security",
       description: "Looking for a Cyberhaven alternative for AI prompt security? TeamPrompt combines prompt management with DLP scanning in a tool that deploys in minutes.",
       keywords: ["Cyberhaven alternative", "data lineage alternative", "AI prompt DLP", "prompt security tool"],
     },
@@ -1289,7 +1289,7 @@ export const alternativePages: SeoPageData[] = [
     slug: "strac-alternative",
     category: "alternative",
     meta: {
-      title: "Best Strac Alternative for AI Prompt Security | TeamPrompt",
+      title: "Best Strac Alternative for AI Prompt Security",
       description: "Looking for a Strac alternative with prompt management built in? TeamPrompt combines DLP scanning with a prompt library, one-click insertion, and analytics.",
       keywords: ["Strac alternative", "Strac replacement", "AI prompt DLP", "prompt management security"],
     },
@@ -1341,7 +1341,7 @@ export const alternativePages: SeoPageData[] = [
     slug: "obsidian-alternative",
     category: "alternative",
     meta: {
-      title: "Best Obsidian Alternative for Prompt Management | TeamPrompt",
+      title: "Best Obsidian Alternative for Prompt Management",
       description: "Looking for an Obsidian alternative for AI prompt management? TeamPrompt offers one-click insertion, DLP scanning, team collaboration, and usage analytics.",
       keywords: ["Obsidian alternative", "Obsidian alternative for prompts", "team prompt management", "AI prompt tool"],
     },
@@ -1393,7 +1393,7 @@ export const alternativePages: SeoPageData[] = [
     slug: "coda-alternative",
     category: "alternative",
     meta: {
-      title: "Best Coda Alternative for Prompt Management | TeamPrompt",
+      title: "Best Coda Alternative for Prompt Management",
       description: "Looking for a Coda alternative for AI prompt management? TeamPrompt provides one-click insertion, DLP scanning, template variables, and analytics purpose-built for prompts.",
       keywords: ["Coda alternative", "Coda alternative for prompts", "prompt management tool", "AI prompt platform"],
     },
@@ -1445,7 +1445,7 @@ export const alternativePages: SeoPageData[] = [
     slug: "slite-alternative",
     category: "alternative",
     meta: {
-      title: "Best Slite Alternative for Prompt Management | TeamPrompt",
+      title: "Best Slite Alternative for Prompt Management",
       description: "Looking for a Slite alternative for AI prompt management? TeamPrompt provides one-click insertion, DLP scanning, and prompt-specific analytics.",
       keywords: ["Slite alternative", "Slite alternative for prompts", "prompt management tool", "team AI prompts"],
     },
@@ -1497,7 +1497,7 @@ export const alternativePages: SeoPageData[] = [
     slug: "roam-alternative",
     category: "alternative",
     meta: {
-      title: "Best Roam Research Alternative for Prompt Management | TeamPrompt",
+      title: "Best Roam Research Alternative for Prompt Management",
       description: "Looking for a Roam alternative for AI prompt management? TeamPrompt provides team collaboration, one-click insertion, DLP scanning, and usage analytics.",
       keywords: ["Roam Research alternative", "Roam alternative for prompts", "team prompt management", "AI prompt tool"],
     },
@@ -1549,7 +1549,7 @@ export const alternativePages: SeoPageData[] = [
     slug: "craft-alternative",
     category: "alternative",
     meta: {
-      title: "Best Craft Alternative for Prompt Management | TeamPrompt",
+      title: "Best Craft Alternative for Prompt Management",
       description: "Looking for a Craft alternative for AI prompt management? TeamPrompt provides one-click insertion, DLP scanning, and cross-platform access.",
       keywords: ["Craft alternative", "Craft alternative for prompts", "prompt management tool", "cross-platform prompt library"],
     },
@@ -1601,7 +1601,7 @@ export const alternativePages: SeoPageData[] = [
     slug: "gitbook-alternative",
     category: "alternative",
     meta: {
-      title: "Best GitBook Alternative for Prompt Management | TeamPrompt",
+      title: "Best GitBook Alternative for Prompt Management",
       description: "Looking for a GitBook alternative for AI prompt management? TeamPrompt provides one-click insertion, DLP scanning, and prompt-specific analytics.",
       keywords: ["GitBook alternative", "GitBook alternative for prompts", "prompt management tool", "AI prompt library"],
     },
@@ -1653,7 +1653,7 @@ export const alternativePages: SeoPageData[] = [
     slug: "slab-alternative",
     category: "alternative",
     meta: {
-      title: "Best Slab Alternative for Prompt Management | TeamPrompt",
+      title: "Best Slab Alternative for Prompt Management",
       description: "Looking for a Slab alternative for AI prompt management? TeamPrompt provides one-click insertion, DLP scanning, and prompt-specific analytics.",
       keywords: ["Slab alternative", "Slab alternative for prompts", "prompt management tool", "AI prompt platform"],
     },
@@ -1705,7 +1705,7 @@ export const alternativePages: SeoPageData[] = [
     slug: "linear-alternative",
     category: "alternative",
     meta: {
-      title: "Best Linear Alternative for Prompt Management | TeamPrompt",
+      title: "Best Linear Alternative for Prompt Management",
       description: "Stop storing prompts in Linear issues. TeamPrompt provides a purpose-built prompt library with one-click insertion, DLP scanning, and analytics.",
       keywords: ["Linear alternative for prompts", "prompt management tool", "AI prompt library", "issue tracker alternative"],
     },
@@ -1757,7 +1757,7 @@ export const alternativePages: SeoPageData[] = [
     slug: "monday-alternative",
     category: "alternative",
     meta: {
-      title: "Best Monday.com Alternative for Prompt Management | TeamPrompt",
+      title: "Best Monday.com Alternative for Prompt Management",
       description: "Stop storing prompts in Monday.com boards. TeamPrompt provides a purpose-built prompt library with one-click insertion, DLP scanning, and analytics.",
       keywords: ["Monday.com alternative for prompts", "prompt management tool", "AI prompt library", "work management alternative"],
     },
@@ -1809,7 +1809,7 @@ export const alternativePages: SeoPageData[] = [
     slug: "asana-alternative",
     category: "alternative",
     meta: {
-      title: "Best Asana Alternative for Prompt Management | TeamPrompt",
+      title: "Best Asana Alternative for Prompt Management",
       description: "Stop storing prompts as Asana tasks. TeamPrompt provides a purpose-built prompt library with one-click insertion, DLP scanning, and analytics.",
       keywords: ["Asana alternative for prompts", "prompt management tool", "AI prompt library", "project management alternative"],
     },
@@ -1861,7 +1861,7 @@ export const alternativePages: SeoPageData[] = [
     slug: "trello-alternative",
     category: "alternative",
     meta: {
-      title: "Best Trello Alternative for Prompt Management | TeamPrompt",
+      title: "Best Trello Alternative for Prompt Management",
       description: "Stop managing prompts on Trello boards. TeamPrompt provides a purpose-built prompt library with one-click insertion, DLP scanning, and analytics.",
       keywords: ["Trello alternative for prompts", "prompt management tool", "AI prompt library", "kanban board alternative"],
     },
@@ -1913,7 +1913,7 @@ export const alternativePages: SeoPageData[] = [
     slug: "clickup-alternative",
     category: "alternative",
     meta: {
-      title: "Best ClickUp Alternative for Prompt Management | TeamPrompt",
+      title: "Best ClickUp Alternative for Prompt Management",
       description: "Stop managing prompts in ClickUp. TeamPrompt provides a purpose-built prompt library with one-click insertion, DLP scanning, and analytics.",
       keywords: ["ClickUp alternative for prompts", "prompt management tool", "AI prompt library", "productivity tool alternative"],
     },

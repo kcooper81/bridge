@@ -5,7 +5,7 @@ export const rolePages: SeoPageData[] = [
     slug: "for-engineering-teams",
     category: "role",
     meta: {
-      title: "TeamPrompt for Engineering Teams | AI Prompt Management",
+      title: "TeamPrompt for Engineering Teams",
       description:
         "Supercharge your engineering team's AI workflow with shared code review prompts, debugging templates, architecture discussion starters, and CI/CD integration patterns. TeamPrompt keeps your best technical prompts organized, version-controlled, and one click away.",
       keywords: [
@@ -114,7 +114,7 @@ export const rolePages: SeoPageData[] = [
     slug: "for-product-managers",
     category: "role",
     meta: {
-      title: "TeamPrompt for Product Managers | AI Prompt Management",
+      title: "TeamPrompt for Product Managers",
       description:
         "Accelerate product management with shared AI prompts for PRD writing, user story generation, competitive analysis, and feature prioritization. TeamPrompt helps PMs leverage AI consistently and efficiently.",
       keywords: [
@@ -223,7 +223,7 @@ export const rolePages: SeoPageData[] = [
     slug: "for-marketers",
     category: "role",
     meta: {
-      title: "TeamPrompt for Marketing Teams | AI Prompt Management",
+      title: "TeamPrompt for Marketing Teams",
       description:
         "Elevate your marketing with shared AI prompts for content creation, campaign briefs, SEO optimization, and social media. TeamPrompt keeps your marketing team's best prompts organized, consistent, and always accessible.",
       keywords: [
@@ -332,7 +332,7 @@ export const rolePages: SeoPageData[] = [
     slug: "for-customer-success",
     category: "role",
     meta: {
-      title: "TeamPrompt for Customer Success Teams | AI Prompt Management",
+      title: "TeamPrompt for Customer Success Teams",
       description:
         "Empower your customer success team with AI prompts for customer communication, onboarding playbooks, renewal strategies, and health score analysis. TeamPrompt keeps your CS team aligned and efficient.",
       keywords: [
@@ -441,7 +441,7 @@ export const rolePages: SeoPageData[] = [
     slug: "for-sales-teams",
     category: "role",
     meta: {
-      title: "TeamPrompt for Sales Teams | AI Prompt Management",
+      title: "TeamPrompt for Sales Teams",
       description:
         "Close more deals with shared AI prompts for prospecting, email outreach, proposal writing, and objection handling. TeamPrompt gives your sales team a competitive edge with organized, proven prompt templates.",
       keywords: [
@@ -550,7 +550,7 @@ export const rolePages: SeoPageData[] = [
     slug: "for-hr-teams",
     category: "role",
     meta: {
-      title: "TeamPrompt for HR Teams | AI Prompt Management",
+      title: "TeamPrompt for HR Teams",
       description:
         "Streamline HR workflows with shared AI prompts for job descriptions, interview guides, policy writing, and employee communications. TeamPrompt helps HR teams work faster while protecting sensitive employee data.",
       keywords: [
@@ -659,7 +659,7 @@ export const rolePages: SeoPageData[] = [
     slug: "for-designers",
     category: "role",
     meta: {
-      title: "TeamPrompt for Designers | AI Prompt Management",
+      title: "TeamPrompt for Designers",
       description:
         "Enhance your design workflow with shared AI prompts for design briefs, UX research, accessibility reviews, and design system documentation. TeamPrompt helps design teams leverage AI consistently and creatively.",
       keywords: [
@@ -768,7 +768,7 @@ export const rolePages: SeoPageData[] = [
     slug: "for-executives",
     category: "role",
     meta: {
-      title: "TeamPrompt for Executives & Leadership | AI Prompt Management",
+      title: "TeamPrompt for Executives & Leadership",
       description:
         "Lead AI adoption with confidence. TeamPrompt gives executives strategic planning prompts, board presentation templates, team communication frameworks, and full AI governance oversight across the organization.",
       keywords: [
@@ -877,7 +877,7 @@ export const rolePages: SeoPageData[] = [
     slug: "for-consultants",
     category: "role",
     meta: {
-      title: "TeamPrompt for Consultants | AI Prompt Management",
+      title: "TeamPrompt for Consultants",
       description:
         "Deliver higher-quality client work faster with shared AI prompts for analysis frameworks, client deliverables, proposal templates, and knowledge management. TeamPrompt helps consultants and consulting firms scale expertise.",
       keywords: [
@@ -986,7 +986,7 @@ export const rolePages: SeoPageData[] = [
     slug: "for-educators",
     category: "role",
     meta: {
-      title: "TeamPrompt for Educators | AI Prompt Management",
+      title: "TeamPrompt for Educators",
       description:
         "Shared AI prompts for curriculum design, assignments, grading rubrics, and student feedback — built for educators and institutions.",
       keywords: [
@@ -1094,7 +1094,7 @@ export const rolePages: SeoPageData[] = [
   {
     slug: "for-marketing-teams",
     category: "role",
-    meta: { title: "TeamPrompt for Marketing Teams | AI Prompt Management", description: "Accelerate marketing with shared AI prompts for content creation, campaign strategy, SEO, social media, and brand messaging. TeamPrompt keeps your marketing team aligned.", keywords: ["marketing team AI prompts", "marketing AI tools", "content creation prompts", "marketing prompt templates", "AI for marketing teams"] },
+    meta: { title: "TeamPrompt for Marketing Teams", description: "Accelerate marketing with shared AI prompts for content creation, campaign strategy, SEO, social media, and brand messaging. TeamPrompt keeps your marketing team aligned.", keywords: ["marketing team AI prompts", "marketing AI tools", "content creation prompts", "marketing prompt templates", "AI for marketing teams"] },
     hero: { headline: "AI prompts built for marketing teams", subtitle: "Your marketing team uses AI for content, campaigns, social media, and analysis every day. TeamPrompt organizes those prompts into a shared library with brand voice templates, DLP scanning, and one-click access inside every AI tool.", badges: ["Content creation", "Campaign strategy", "Brand voice"] },
     features: { sectionLabel: "Marketing", heading: "Built for marketing workflows", items: [
       { icon: "FileText", title: "Content creation templates", description: "Blog posts, social media, email campaigns, ad copy — standardized templates that maintain brand voice across all content." },
@@ -1115,7 +1115,7 @@ export const rolePages: SeoPageData[] = [
   {
     slug: "for-software-engineers",
     category: "role",
-    meta: { title: "TeamPrompt for Software Engineers | AI Prompt Management", description: "Boost your development workflow with shared AI prompts for code generation, debugging, documentation, and architecture. TeamPrompt for individual developers and engineering teams.", keywords: ["software engineer AI prompts", "developer AI tools", "coding prompts", "programming AI templates", "AI for developers"] },
+    meta: { title: "TeamPrompt for Software Engineers", description: "Boost your development workflow with shared AI prompts for code generation, debugging, documentation, and architecture. TeamPrompt for individual developers and engineering teams.", keywords: ["software engineer AI prompts", "developer AI tools", "coding prompts", "programming AI templates", "AI for developers"] },
     hero: { headline: "AI prompts designed for software engineers", subtitle: "From code generation to debugging to documentation, software engineers rely on AI daily. TeamPrompt gives you a personal and team library of proven prompts accessible inside every AI tool you use.", badges: ["Code generation", "Debugging", "Documentation"] },
     features: { sectionLabel: "Engineering", heading: "Built for developer workflows", items: [
       { icon: "FileText", title: "Code generation templates", description: "Standardized prompts for generating code with proper context, language specifications, and coding standards." },
@@ -1136,7 +1136,7 @@ export const rolePages: SeoPageData[] = [
   {
     slug: "for-legal-teams",
     category: "role",
-    meta: { title: "TeamPrompt for Legal Teams | AI Prompt Management", description: "Streamline legal work with shared AI prompts for contract review, research, compliance analysis, and document drafting. Secure and governed.", keywords: ["legal team AI prompts", "legal AI tools", "contract review AI", "legal prompt templates", "AI for lawyers"] },
+    meta: { title: "TeamPrompt for Legal Teams", description: "Streamline legal work with shared AI prompts for contract review, research, compliance analysis, and document drafting. Secure and governed.", keywords: ["legal team AI prompts", "legal AI tools", "contract review AI", "legal prompt templates", "AI for lawyers"] },
     hero: { headline: "AI prompts built for legal professionals", subtitle: "Legal teams need AI tools with the highest security and governance standards. TeamPrompt provides DLP-scanned, version-controlled prompts for contract review, research, and document drafting with the controls legal departments require.", badges: ["Contract review", "Legal research", "Compliance"] },
     features: { sectionLabel: "Legal", heading: "Built for legal workflows", items: [
       { icon: "FileText", title: "Contract analysis templates", description: "Structured prompts for reviewing contracts, identifying risk clauses, and comparing terms across agreements." },
@@ -1157,7 +1157,7 @@ export const rolePages: SeoPageData[] = [
   {
     slug: "for-data-analysts",
     category: "role",
-    meta: { title: "TeamPrompt for Data Analysts | AI Prompt Management", description: "Supercharge data analysis with shared AI prompts for SQL generation, data interpretation, visualization recommendations, and report writing.", keywords: ["data analyst AI prompts", "data analysis AI tools", "SQL AI prompts", "analytics prompt templates", "AI for data analysts"] },
+    meta: { title: "TeamPrompt for Data Analysts", description: "Supercharge data analysis with shared AI prompts for SQL generation, data interpretation, visualization recommendations, and report writing.", keywords: ["data analyst AI prompts", "data analysis AI tools", "SQL AI prompts", "analytics prompt templates", "AI for data analysts"] },
     hero: { headline: "AI prompts built for data analysts", subtitle: "Data analysts use AI for SQL generation, data interpretation, visualization, and reporting. TeamPrompt organizes your analytical prompts into a shared library that produces consistent, accurate results across your analytics team.", badges: ["SQL generation", "Data interpretation", "Reporting"] },
     features: { sectionLabel: "Analytics", heading: "Built for data workflows", items: [
       { icon: "BarChart3", title: "SQL generation templates", description: "Prompts that generate accurate SQL queries with proper table context, join logic, and performance considerations." },
@@ -1178,7 +1178,7 @@ export const rolePages: SeoPageData[] = [
   {
     slug: "for-ctos",
     category: "role",
-    meta: { title: "TeamPrompt for CTOs | AI Strategy & Governance", description: "Manage AI adoption across your engineering organization. Governance, security, and productivity tools for CTOs overseeing AI-powered teams.", keywords: ["CTO AI tools", "CTO AI governance", "AI strategy CTO", "engineering AI management", "CTO prompt management"] },
+    meta: { title: "TeamPrompt for CTOs", description: "Manage AI adoption across your engineering organization. Governance, security, and productivity tools for CTOs overseeing AI-powered teams.", keywords: ["CTO AI tools", "CTO AI governance", "AI strategy CTO", "engineering AI management", "CTO prompt management"] },
     hero: { headline: "AI governance and productivity for CTOs", subtitle: "As CTO, you need to enable AI productivity while managing security risks. TeamPrompt gives you the governance, DLP scanning, and analytics to scale AI adoption safely across your engineering organization.", badges: ["AI governance", "Engineering scale", "Security"] },
     features: { sectionLabel: "CTO Tools", heading: "What CTOs need for AI governance", items: [
       { icon: "Shield", title: "DLP across all AI tools", description: "One security layer that scans prompts across ChatGPT, Claude, Gemini, and every AI tool your team uses." },
@@ -1199,7 +1199,7 @@ export const rolePages: SeoPageData[] = [
   {
     slug: "for-cisos",
     category: "role",
-    meta: { title: "TeamPrompt for CISOs | AI Security & DLP", description: "Protect your organization from AI data leakage with DLP scanning, access controls, and audit trails. Security-first AI governance for CISOs.", keywords: ["CISO AI security", "AI DLP CISO", "AI security tools", "CISO AI governance", "AI data protection security"] },
+    meta: { title: "TeamPrompt for CISOs", description: "Protect your organization from AI data leakage with DLP scanning, access controls, and audit trails. Security-first AI governance for CISOs.", keywords: ["CISO AI security", "AI DLP CISO", "AI security tools", "CISO AI governance", "AI data protection security"] },
     hero: { headline: "AI security controls CISOs can trust", subtitle: "AI tools are the newest data exfiltration vector. TeamPrompt gives CISOs the DLP scanning, access controls, and audit trails needed to secure AI usage across the organization without blocking productivity.", badges: ["DLP", "Audit trails", "Access controls"] },
     features: { sectionLabel: "Security", heading: "Security controls for AI usage", items: [
       { icon: "Shield", title: "Real-time DLP scanning", description: "Every prompt scanned for PII, credentials, API keys, and custom patterns before reaching any AI model." },
@@ -1220,7 +1220,7 @@ export const rolePages: SeoPageData[] = [
   {
     slug: "for-compliance-officers",
     category: "role",
-    meta: { title: "TeamPrompt for Compliance Officers | AI Compliance", description: "Ensure AI tool usage meets regulatory requirements. DLP scanning, audit trails, and governance controls for compliance officers managing AI risk.", keywords: ["compliance officer AI", "AI compliance tools", "regulatory AI compliance", "AI audit compliance", "compliance AI governance"] },
+    meta: { title: "TeamPrompt for Compliance Officers", description: "Ensure AI tool usage meets regulatory requirements. DLP scanning, audit trails, and governance controls for compliance officers managing AI risk.", keywords: ["compliance officer AI", "AI compliance tools", "regulatory AI compliance", "AI audit compliance", "compliance AI governance"] },
     hero: { headline: "AI compliance tools for compliance officers", subtitle: "Compliance officers need to ensure AI usage meets regulatory requirements without slowing business innovation. TeamPrompt provides the controls, audit trails, and reporting you need for AI compliance.", badges: ["Audit trails", "Regulatory", "Governance"] },
     features: { sectionLabel: "Compliance", heading: "Compliance controls for AI usage", items: [
       { icon: "Scale", title: "Regulatory alignment", description: "Controls that map to GDPR, HIPAA, SOC 2, CCPA, and other frameworks your organization operates under." },
@@ -1241,7 +1241,7 @@ export const rolePages: SeoPageData[] = [
   {
     slug: "for-security-teams",
     category: "role",
-    meta: { title: "TeamPrompt for Security Teams | AI Security Operations", description: "Security operations tools for managing AI risk. DLP scanning, threat detection, incident response, and security monitoring for AI tool usage.", keywords: ["security team AI tools", "AI security operations", "AI DLP security team", "security AI monitoring", "AI threat management"] },
+    meta: { title: "TeamPrompt for Security Teams", description: "Security operations tools for managing AI risk. DLP scanning, threat detection, incident response, and security monitoring for AI tool usage.", keywords: ["security team AI tools", "AI security operations", "AI DLP security team", "security AI monitoring", "AI threat management"] },
     hero: { headline: "AI security operations for security teams", subtitle: "Security teams need to protect the organization from AI-related risks without becoming a blocker. TeamPrompt provides DLP scanning, monitoring, and incident response tools that integrate into your security operations.", badges: ["DLP operations", "Monitoring", "Incident response"] },
     features: { sectionLabel: "Security Ops", heading: "Security operations for AI", items: [
       { icon: "Shield", title: "DLP scanning engine", description: "Real-time scanning of all AI prompts with configurable detection rules, custom patterns, and enforcement modes." },
@@ -1262,7 +1262,7 @@ export const rolePages: SeoPageData[] = [
   {
     slug: "for-it-admins",
     category: "role",
-    meta: { title: "TeamPrompt for IT Admins | AI Tool Management", description: "Manage AI tool deployment, user provisioning, and security policies across your organization. Enterprise administration for AI prompt management.", keywords: ["IT admin AI tools", "AI administration", "manage AI deployment", "IT AI governance", "AI tool management"] },
+    meta: { title: "TeamPrompt for IT Admins", description: "Manage AI tool deployment, user provisioning, and security policies across your organization. Enterprise administration for AI prompt management.", keywords: ["IT admin AI tools", "AI administration", "manage AI deployment", "IT AI governance", "AI tool management"] },
     hero: { headline: "AI tool management for IT administrators", subtitle: "IT admins need to deploy, manage, and secure AI tools across the organization. TeamPrompt provides centralized administration, user management, and security controls that fit into your existing IT workflows.", badges: ["Deployment", "User management", "Administration"] },
     features: { sectionLabel: "IT Admin", heading: "Administration tools for AI management", items: [
       { icon: "Users", title: "User provisioning", description: "Add, remove, and manage users with role-based access controls. Support for team-level and organization-level management." },
@@ -1283,7 +1283,7 @@ export const rolePages: SeoPageData[] = [
   {
     slug: "for-researchers",
     category: "role",
-    meta: { title: "TeamPrompt for Researchers | AI Prompt Management", description: "Accelerate research with shared AI prompts for literature review, data analysis, hypothesis generation, and academic writing. Secure and collaborative.", keywords: ["researcher AI prompts", "academic AI tools", "research prompt templates", "AI for researchers", "literature review AI"] },
+    meta: { title: "TeamPrompt for Researchers", description: "Accelerate research with shared AI prompts for literature review, data analysis, hypothesis generation, and academic writing. Secure and collaborative.", keywords: ["researcher AI prompts", "academic AI tools", "research prompt templates", "AI for researchers", "literature review AI"] },
     hero: { headline: "AI prompts built for researchers", subtitle: "Researchers use AI for literature review, data analysis, hypothesis generation, and writing. TeamPrompt organizes your research prompts into a shared library with version control and DLP protection for sensitive research data.", badges: ["Literature review", "Data analysis", "Writing"] },
     features: { sectionLabel: "Research", heading: "Built for research workflows", items: [
       { icon: "BookOpen", title: "Literature review prompts", description: "Templates for systematic reviews, paper summarization, citation analysis, and research gap identification." },
@@ -1304,7 +1304,7 @@ export const rolePages: SeoPageData[] = [
   {
     slug: "for-procurement",
     category: "role",
-    meta: { title: "TeamPrompt for Procurement Teams | AI Prompt Management", description: "Streamline procurement with shared AI prompts for RFP analysis, vendor evaluation, contract review, and cost optimization.", keywords: ["procurement AI prompts", "procurement AI tools", "RFP analysis AI", "vendor evaluation prompts", "AI for procurement"] },
+    meta: { title: "TeamPrompt for Procurement Teams", description: "Streamline procurement with shared AI prompts for RFP analysis, vendor evaluation, contract review, and cost optimization.", keywords: ["procurement AI prompts", "procurement AI tools", "RFP analysis AI", "vendor evaluation prompts", "AI for procurement"] },
     hero: { headline: "AI prompts built for procurement teams", subtitle: "Procurement teams use AI for RFP analysis, vendor evaluation, contract review, and market research. TeamPrompt provides secure, shared templates that standardize procurement processes across your team.", badges: ["RFP analysis", "Vendor evaluation", "Cost optimization"] },
     features: { sectionLabel: "Procurement", heading: "Built for procurement workflows", items: [
       { icon: "FileText", title: "RFP analysis templates", description: "Structured prompts for analyzing RFP responses, comparing vendor proposals, and scoring submissions consistently." },
@@ -1325,7 +1325,7 @@ export const rolePages: SeoPageData[] = [
   {
     slug: "for-operations",
     category: "role",
-    meta: { title: "TeamPrompt for Operations Teams | AI Prompt Management", description: "Optimize operations with shared AI prompts for process documentation, workflow analysis, reporting, and continuous improvement.", keywords: ["operations AI prompts", "operations AI tools", "process AI templates", "AI for operations", "workflow optimization AI"] },
+    meta: { title: "TeamPrompt for Operations Teams", description: "Optimize operations with shared AI prompts for process documentation, workflow analysis, reporting, and continuous improvement.", keywords: ["operations AI prompts", "operations AI tools", "process AI templates", "AI for operations", "workflow optimization AI"] },
     hero: { headline: "AI prompts built for operations teams", subtitle: "Operations teams use AI for process documentation, workflow optimization, reporting, and analysis. TeamPrompt gives your ops team a shared library of templates that standardize these workflows across the organization.", badges: ["Process docs", "Workflow analysis", "Reporting"] },
     features: { sectionLabel: "Operations", heading: "Built for operations workflows", items: [
       { icon: "ClipboardList", title: "Process documentation", description: "Templates for creating SOPs, runbooks, and process documentation from operational knowledge." },
@@ -1346,7 +1346,7 @@ export const rolePages: SeoPageData[] = [
   {
     slug: "for-project-managers",
     category: "role",
-    meta: { title: "TeamPrompt for Project Managers | AI Prompt Management", description: "Boost project management with shared AI prompts for status reports, risk analysis, stakeholder communication, and project planning.", keywords: ["project manager AI prompts", "PM AI tools", "project management AI", "status report prompts", "AI for project managers"] },
+    meta: { title: "TeamPrompt for Project Managers", description: "Boost project management with shared AI prompts for status reports, risk analysis, stakeholder communication, and project planning.", keywords: ["project manager AI prompts", "PM AI tools", "project management AI", "status report prompts", "AI for project managers"] },
     hero: { headline: "AI prompts built for project managers", subtitle: "Project managers use AI for status reports, risk assessments, stakeholder communications, and planning. TeamPrompt organizes your PM prompts into templates that save hours every week.", badges: ["Status reports", "Risk analysis", "Planning"] },
     features: { sectionLabel: "Project Management", heading: "Built for PM workflows", items: [
       { icon: "FileText", title: "Status report templates", description: "Generate consistent status reports with templates that capture progress, risks, blockers, and next steps." },
@@ -1367,7 +1367,7 @@ export const rolePages: SeoPageData[] = [
   {
     slug: "for-content-teams",
     category: "role",
-    meta: { title: "TeamPrompt for Content Teams | AI Prompt Management", description: "Scale content production with shared AI prompts for writing, editing, SEO optimization, and content strategy. Brand-consistent templates.", keywords: ["content team AI prompts", "content creation AI", "writing AI templates", "SEO content prompts", "AI for content teams"] },
+    meta: { title: "TeamPrompt for Content Teams", description: "Scale content production with shared AI prompts for writing, editing, SEO optimization, and content strategy. Brand-consistent templates.", keywords: ["content team AI prompts", "content creation AI", "writing AI templates", "SEO content prompts", "AI for content teams"] },
     hero: { headline: "AI prompts built for content teams", subtitle: "Content teams need to produce high-quality content at scale while maintaining brand voice. TeamPrompt provides shared templates for writing, editing, SEO, and content strategy that keep your entire content operation aligned.", badges: ["Content creation", "SEO", "Brand voice"] },
     features: { sectionLabel: "Content", heading: "Built for content workflows", items: [
       { icon: "FileText", title: "Writing templates", description: "Blog posts, landing pages, email sequences, white papers — standardized templates that maintain voice and quality." },
@@ -1388,7 +1388,7 @@ export const rolePages: SeoPageData[] = [
   {
     slug: "for-growth-teams",
     category: "role",
-    meta: { title: "TeamPrompt for Growth Teams | AI Prompt Management", description: "Accelerate growth experiments with shared AI prompts for A/B testing, conversion analysis, user research, and growth strategy.", keywords: ["growth team AI prompts", "growth hacking AI", "conversion optimization AI", "growth strategy prompts", "AI for growth teams"] },
+    meta: { title: "TeamPrompt for Growth Teams", description: "Accelerate growth experiments with shared AI prompts for A/B testing, conversion analysis, user research, and growth strategy.", keywords: ["growth team AI prompts", "growth hacking AI", "conversion optimization AI", "growth strategy prompts", "AI for growth teams"] },
     hero: { headline: "AI prompts built for growth teams", subtitle: "Growth teams move fast across experiments, analysis, and optimization. TeamPrompt provides shared templates for A/B testing, conversion analysis, user research, and growth strategy that keep your growth engine running efficiently.", badges: ["Experiments", "Conversion", "Analysis"] },
     features: { sectionLabel: "Growth", heading: "Built for growth workflows", items: [
       { icon: "BarChart3", title: "Experiment design prompts", description: "Templates for designing A/B tests, defining hypotheses, and planning experiment parameters systematically." },
@@ -1409,7 +1409,7 @@ export const rolePages: SeoPageData[] = [
   {
     slug: "for-business-analysts",
     category: "role",
-    meta: { title: "TeamPrompt for Business Analysts | AI Prompt Management", description: "Enhance business analysis with shared AI prompts for requirements gathering, process modeling, stakeholder communication, and data analysis.", keywords: ["business analyst AI prompts", "BA AI tools", "requirements AI templates", "business analysis AI", "AI for business analysts"] },
+    meta: { title: "TeamPrompt for Business Analysts", description: "Enhance business analysis with shared AI prompts for requirements gathering, process modeling, stakeholder communication, and data analysis.", keywords: ["business analyst AI prompts", "BA AI tools", "requirements AI templates", "business analysis AI", "AI for business analysts"] },
     hero: { headline: "AI prompts built for business analysts", subtitle: "Business analysts bridge the gap between business needs and technical solutions. TeamPrompt provides shared templates for requirements documentation, process analysis, and stakeholder communication that standardize BA workflows.", badges: ["Requirements", "Process analysis", "Stakeholder comms"] },
     features: { sectionLabel: "Business Analysis", heading: "Built for BA workflows", items: [
       { icon: "ClipboardList", title: "Requirements templates", description: "Structured prompts for gathering, documenting, and refining business requirements with consistent format and detail." },
@@ -1430,7 +1430,7 @@ export const rolePages: SeoPageData[] = [
   {
     slug: "for-solutions-architects",
     category: "role",
-    meta: { title: "TeamPrompt for Solutions Architects | AI Prompt Management", description: "Design better solutions with shared AI prompts for architecture design, technical proposals, integration planning, and documentation.", keywords: ["solutions architect AI prompts", "architecture AI tools", "technical design AI", "SA prompt templates", "AI for solutions architects"] },
+    meta: { title: "TeamPrompt for Solutions Architects", description: "Design better solutions with shared AI prompts for architecture design, technical proposals, integration planning, and documentation.", keywords: ["solutions architect AI prompts", "architecture AI tools", "technical design AI", "SA prompt templates", "AI for solutions architects"] },
     hero: { headline: "AI prompts built for solutions architects", subtitle: "Solutions architects design complex systems, write technical proposals, and bridge business requirements with technical implementation. TeamPrompt provides templates that standardize your architectural workflows.", badges: ["Architecture design", "Technical proposals", "Integration"] },
     features: { sectionLabel: "Architecture", heading: "Built for SA workflows", items: [
       { icon: "Building2", title: "Architecture design prompts", description: "Templates for designing system architectures, evaluating trade-offs, and documenting design decisions." },
@@ -1451,7 +1451,7 @@ export const rolePages: SeoPageData[] = [
   {
     slug: "for-customer-support",
     category: "role",
-    meta: { title: "TeamPrompt for Customer Support Teams | AI Prompt Management", description: "Improve customer support with shared AI prompts for response drafting, ticket analysis, knowledge base creation, and escalation handling.", keywords: ["customer support AI prompts", "support team AI", "ticket response AI", "help desk AI templates", "AI for customer support"] },
+    meta: { title: "TeamPrompt for Customer Support Teams", description: "Improve customer support with shared AI prompts for response drafting, ticket analysis, knowledge base creation, and escalation handling.", keywords: ["customer support AI prompts", "support team AI", "ticket response AI", "help desk AI templates", "AI for customer support"] },
     hero: { headline: "AI prompts built for customer support teams", subtitle: "Support teams handle hundreds of conversations daily. TeamPrompt provides shared response templates, ticket analysis prompts, and knowledge base tools that help your team respond faster and more consistently.", badges: ["Response drafts", "Ticket analysis", "Knowledge base"] },
     features: { sectionLabel: "Support", heading: "Built for support workflows", items: [
       { icon: "Zap", title: "Response templates", description: "Pre-built prompts for common support scenarios that generate professional, empathetic responses in seconds." },
@@ -1472,7 +1472,7 @@ export const rolePages: SeoPageData[] = [
   {
     slug: "for-revenue-operations",
     category: "role",
-    meta: { title: "TeamPrompt for Revenue Operations | AI Prompt Management", description: "Optimize revenue operations with shared AI prompts for pipeline analysis, forecasting, process optimization, and cross-functional alignment.", keywords: ["RevOps AI prompts", "revenue operations AI", "pipeline analysis AI", "forecasting AI prompts", "AI for RevOps"] },
+    meta: { title: "TeamPrompt for Revenue Operations", description: "Optimize revenue operations with shared AI prompts for pipeline analysis, forecasting, process optimization, and cross-functional alignment.", keywords: ["RevOps AI prompts", "revenue operations AI", "pipeline analysis AI", "forecasting AI prompts", "AI for RevOps"] },
     hero: { headline: "AI prompts built for revenue operations", subtitle: "RevOps teams drive alignment across sales, marketing, and customer success. TeamPrompt provides shared templates for pipeline analysis, forecasting, process optimization, and cross-functional reporting.", badges: ["Pipeline analysis", "Forecasting", "Alignment"] },
     features: { sectionLabel: "RevOps", heading: "Built for revenue operations", items: [
       { icon: "BarChart3", title: "Pipeline analysis prompts", description: "Templates for analyzing pipeline health, conversion rates, velocity metrics, and deal progression patterns." },

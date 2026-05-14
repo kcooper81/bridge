@@ -6,7 +6,7 @@ export const dataProtectionPages: SeoPageData[] = [
     slug: "prevent-data-leaks-chatgpt",
     category: "data-protection",
     meta: {
-      title: "Prevent Data Leaks in ChatGPT | TeamPrompt DLP",
+      title: "Prevent Data Leaks in ChatGPT",
       description:
         "Stop sensitive data from reaching ChatGPT. TeamPrompt scans every prompt for PII, API keys, source code, and credentials before submission — keeping your organization safe without slowing anyone down.",
       keywords: ["ChatGPT data leak prevention", "ChatGPT DLP", "prevent data leaks ChatGPT", "ChatGPT security", "ChatGPT sensitive data"],
@@ -60,7 +60,7 @@ export const dataProtectionPages: SeoPageData[] = [
     slug: "prevent-data-leaks-claude",
     category: "data-protection",
     meta: {
-      title: "Prevent Data Leaks in Claude | TeamPrompt DLP",
+      title: "Prevent Data Leaks in Claude",
       description:
         "Protect sensitive data when your team uses Anthropic Claude. TeamPrompt scans every prompt for PII, secrets, and regulated data before it reaches Claude — real-time DLP without blocking productivity.",
       keywords: ["Claude data leak prevention", "Claude DLP", "Anthropic Claude security", "prevent data leaks Claude", "Claude sensitive data"],
@@ -114,7 +114,7 @@ export const dataProtectionPages: SeoPageData[] = [
     slug: "prevent-data-leaks-gemini",
     category: "data-protection",
     meta: {
-      title: "Prevent Data Leaks in Google Gemini | TeamPrompt DLP",
+      title: "Prevent Data Leaks in Google Gemini",
       description:
         "Stop sensitive data from reaching Google Gemini. TeamPrompt provides real-time DLP scanning for every Gemini prompt, protecting PII, credentials, and proprietary information.",
       keywords: ["Gemini data leak prevention", "Google Gemini DLP", "Gemini security", "prevent data leaks Gemini", "Gemini sensitive data protection"],
@@ -168,7 +168,7 @@ export const dataProtectionPages: SeoPageData[] = [
     slug: "prevent-data-leaks-copilot",
     category: "data-protection",
     meta: {
-      title: "Prevent Data Leaks in Microsoft Copilot | TeamPrompt DLP",
+      title: "Prevent Data Leaks in Microsoft Copilot",
       description:
         "Protect sensitive data when your team uses Microsoft Copilot. TeamPrompt scans every prompt for PII, source code, and credentials before submission — real-time DLP for Copilot.",
       keywords: ["Copilot data leak prevention", "Microsoft Copilot DLP", "Copilot security", "prevent data leaks Copilot", "Copilot data protection"],
@@ -222,7 +222,7 @@ export const dataProtectionPages: SeoPageData[] = [
     slug: "prevent-data-leaks-perplexity",
     category: "data-protection",
     meta: {
-      title: "Prevent Data Leaks in Perplexity AI | TeamPrompt DLP",
+      title: "Prevent Data Leaks in Perplexity AI",
       description:
         "Stop sensitive data from reaching Perplexity AI. TeamPrompt scans every query for PII, credentials, and proprietary information before submission — protecting your data without blocking research.",
       keywords: ["Perplexity data leak prevention", "Perplexity DLP", "Perplexity AI security", "prevent data leaks Perplexity", "Perplexity data protection"],
@@ -278,7 +278,7 @@ export const dataProtectionPages: SeoPageData[] = [
     slug: "prevent-leaks-api-keys",
     category: "data-protection",
     meta: {
-      title: "Prevent API Key Leaks to AI Tools | TeamPrompt DLP",
+      title: "Prevent API Key Leaks to AI Tools",
       description:
         "Stop API keys and secrets from being pasted into ChatGPT, Claude, and other AI tools. TeamPrompt detects and blocks credentials in real time before they leave your browser.",
       keywords: ["API key leak prevention", "prevent API key exposure AI", "API key DLP", "secret scanning AI tools", "credential leak prevention"],
@@ -332,7 +332,7 @@ export const dataProtectionPages: SeoPageData[] = [
     slug: "prevent-leaks-source-code",
     category: "data-protection",
     meta: {
-      title: "Prevent Source Code Leaks to AI Tools | TeamPrompt DLP",
+      title: "Prevent Source Code Leaks to AI Tools",
       description:
         "Protect proprietary source code from being pasted into ChatGPT, Claude, and Copilot. TeamPrompt detects and blocks code submissions that could expose your intellectual property.",
       keywords: ["source code leak prevention", "prevent code leaks AI", "source code DLP", "code protection AI tools", "intellectual property AI"],
@@ -386,7 +386,7 @@ export const dataProtectionPages: SeoPageData[] = [
     slug: "prevent-leaks-pii",
     category: "data-protection",
     meta: {
-      title: "Prevent PII Leaks to AI Tools | TeamPrompt DLP",
+      title: "Prevent PII Leaks to AI Tools",
       description:
         "Stop personally identifiable information from reaching AI tools. TeamPrompt detects names, emails, SSNs, addresses, and phone numbers in every prompt before submission.",
       keywords: ["PII leak prevention", "prevent PII exposure AI", "PII DLP AI tools", "personal data protection AI", "PII scanning"],
@@ -440,7 +440,7 @@ export const dataProtectionPages: SeoPageData[] = [
     slug: "prevent-leaks-phi",
     category: "data-protection",
     meta: {
-      title: "Prevent PHI Leaks to AI Tools | HIPAA-Ready DLP | TeamPrompt",
+      title: "Prevent PHI Leaks to AI Tools | HIPAA-Ready DLP",
       description:
         "Protect patient health information from reaching AI tools. TeamPrompt detects PHI in every prompt — medical records, diagnoses, prescriptions, and patient identifiers — before submission.",
       keywords: ["PHI leak prevention", "prevent PHI exposure AI", "HIPAA DLP", "protected health information AI", "healthcare data protection AI"],
@@ -494,7 +494,7 @@ export const dataProtectionPages: SeoPageData[] = [
     slug: "prevent-leaks-financial-data",
     category: "data-protection",
     meta: {
-      title: "Prevent Financial Data Leaks to AI Tools | TeamPrompt DLP",
+      title: "Prevent Financial Data Leaks to AI Tools",
       description:
         "Stop financial data from reaching AI tools. TeamPrompt detects revenue figures, account numbers, financial projections, and transaction details before they are submitted to any AI model.",
       keywords: ["financial data leak prevention", "prevent financial data exposure AI", "financial DLP", "financial data protection AI tools", "SOX compliance AI"],
@@ -548,7 +548,7 @@ export const dataProtectionPages: SeoPageData[] = [
     slug: "prevent-leaks-customer-data",
     category: "data-protection",
     meta: {
-      title: "Prevent Customer Data Leaks to AI Tools | TeamPrompt DLP",
+      title: "Prevent Customer Data Leaks to AI Tools",
       description:
         "Stop customer data from being pasted into AI tools. TeamPrompt detects customer names, account details, support tickets, and CRM data before prompts are submitted.",
       keywords: ["customer data leak prevention", "prevent customer data exposure AI", "customer data DLP", "CRM data protection AI", "customer privacy AI"],
@@ -602,7 +602,7 @@ export const dataProtectionPages: SeoPageData[] = [
     slug: "prevent-leaks-trade-secrets",
     category: "data-protection",
     meta: {
-      title: "Prevent Trade Secret Leaks to AI Tools | TeamPrompt DLP",
+      title: "Prevent Trade Secret Leaks to AI Tools",
       description:
         "Protect trade secrets and proprietary information from reaching AI tools. TeamPrompt detects confidential business data, formulas, processes, and strategies before they are submitted.",
       keywords: ["trade secret protection AI", "prevent trade secret leaks", "proprietary information DLP", "trade secret AI tools", "confidential business data AI"],
@@ -656,7 +656,7 @@ export const dataProtectionPages: SeoPageData[] = [
     slug: "prevent-leaks-credentials",
     category: "data-protection",
     meta: {
-      title: "Prevent Credential Leaks to AI Tools | TeamPrompt DLP",
+      title: "Prevent Credential Leaks to AI Tools",
       description:
         "Stop passwords, tokens, and credentials from being pasted into AI tools. TeamPrompt detects authentication secrets in real time and blocks submission before credentials are exposed.",
       keywords: ["credential leak prevention AI", "prevent password leaks AI", "credential DLP", "authentication token protection", "password exposure AI tools"],
@@ -710,7 +710,7 @@ export const dataProtectionPages: SeoPageData[] = [
     slug: "prevent-leaks-ssn-credit-cards",
     category: "data-protection",
     meta: {
-      title: "Prevent SSN & Credit Card Leaks to AI Tools | TeamPrompt DLP",
+      title: "Prevent SSN & Credit Card Leaks to AI Tools",
       description:
         "Stop Social Security numbers and credit card data from reaching AI tools. TeamPrompt detects SSNs, credit card numbers, CVVs, and banking details in real time.",
       keywords: ["SSN leak prevention AI", "credit card data protection AI", "prevent SSN exposure", "credit card DLP", "PCI DSS AI compliance"],
@@ -764,7 +764,7 @@ export const dataProtectionPages: SeoPageData[] = [
     slug: "prevent-leaks-intellectual-property",
     category: "data-protection",
     meta: {
-      title: "Prevent Intellectual Property Leaks to AI Tools | TeamPrompt DLP",
+      title: "Prevent Intellectual Property Leaks to AI Tools",
       description:
         "Protect intellectual property from AI tool exposure. TeamPrompt detects patents, proprietary designs, research data, and trade secrets before they reach any AI model.",
       keywords: ["intellectual property protection AI", "IP leak prevention", "prevent IP leaks AI tools", "patent protection AI", "proprietary data DLP"],
@@ -820,7 +820,7 @@ export const dataProtectionPages: SeoPageData[] = [
     slug: "prevent-leaks-remote-teams",
     category: "data-protection",
     meta: {
-      title: "Prevent Data Leaks for Remote Teams Using AI | TeamPrompt",
+      title: "Prevent Data Leaks for Remote Teams Using AI",
       description:
         "Protect distributed and remote teams from AI data leaks. TeamPrompt provides browser-level DLP that works anywhere your team works — no VPN or network controls required.",
       keywords: ["remote team data protection", "remote work DLP", "distributed team AI security", "remote team AI leaks", "WFH data protection"],
@@ -874,7 +874,7 @@ export const dataProtectionPages: SeoPageData[] = [
     slug: "prevent-leaks-enterprise",
     category: "data-protection",
     meta: {
-      title: "Enterprise AI Data Leak Prevention | TeamPrompt DLP",
+      title: "Enterprise AI Data Leak Prevention",
       description:
         "Enterprise-grade DLP for AI tools. TeamPrompt protects thousands of users with centralized policies, granular controls, audit logging, and compliance reporting.",
       keywords: ["enterprise DLP AI", "enterprise data leak prevention", "enterprise AI security", "corporate AI data protection", "enterprise AI governance"],
@@ -928,7 +928,7 @@ export const dataProtectionPages: SeoPageData[] = [
     slug: "prevent-leaks-startups",
     category: "data-protection",
     meta: {
-      title: "AI Data Leak Prevention for Startups | TeamPrompt",
+      title: "AI Data Leak Prevention for Startups",
       description:
         "Protect your startup's IP, code, and customer data from AI tool leaks. TeamPrompt gives fast-moving teams DLP protection without slowing innovation.",
       keywords: ["startup data protection AI", "startup DLP", "startup AI security", "protect startup IP AI", "startup data leak prevention"],
@@ -982,7 +982,7 @@ export const dataProtectionPages: SeoPageData[] = [
     slug: "prevent-leaks-regulated-industries",
     category: "data-protection",
     meta: {
-      title: "AI Data Leak Prevention for Regulated Industries | TeamPrompt",
+      title: "AI Data Leak Prevention for Regulated Industries",
       description:
         "DLP for healthcare, finance, legal, and government teams using AI. TeamPrompt provides compliance-ready data protection that satisfies HIPAA, SOC 2, PCI DSS, and more.",
       keywords: ["regulated industry DLP", "healthcare AI DLP", "financial services AI security", "legal AI data protection", "government AI compliance"],
@@ -1036,7 +1036,7 @@ export const dataProtectionPages: SeoPageData[] = [
     slug: "prevent-leaks-contractors",
     category: "data-protection",
     meta: {
-      title: "Prevent Data Leaks from Contractors Using AI | TeamPrompt",
+      title: "Prevent Data Leaks from Contractors Using AI",
       description:
         "Protect sensitive data when contractors and freelancers use AI tools. TeamPrompt applies DLP policies to external team members without requiring device management.",
       keywords: ["contractor data protection AI", "freelancer DLP", "contractor AI security", "external team data leaks", "third party AI risk"],
@@ -1090,7 +1090,7 @@ export const dataProtectionPages: SeoPageData[] = [
     slug: "prevent-leaks-onboarding",
     category: "data-protection",
     meta: {
-      title: "AI Data Protection During Employee Onboarding | TeamPrompt",
+      title: "AI Data Protection During Employee Onboarding",
       description:
         "Set up DLP for AI tools as part of employee onboarding. TeamPrompt ensures new hires are protected from day one with automatic policy enforcement and guided setup.",
       keywords: ["employee onboarding DLP", "new hire AI security", "onboarding data protection", "AI policy onboarding", "new employee AI tools"],
@@ -1144,7 +1144,7 @@ export const dataProtectionPages: SeoPageData[] = [
     slug: "prevent-leaks-browser-extension",
     category: "data-protection",
     meta: {
-      title: "Browser Extension DLP for AI Tools | TeamPrompt",
+      title: "Browser Extension DLP for AI Tools",
       description:
         "Deploy data leak prevention through a lightweight browser extension. TeamPrompt scans every AI prompt at the browser level — no proxy, VPN, or network changes required.",
       keywords: ["browser extension DLP", "browser-level data protection", "Chrome extension DLP", "AI tool browser security", "lightweight DLP"],
@@ -1198,7 +1198,7 @@ export const dataProtectionPages: SeoPageData[] = [
     slug: "prevent-leaks-slack",
     category: "data-protection",
     meta: {
-      title: "Prevent Data Leaks from Slack to AI Tools | TeamPrompt",
+      title: "Prevent Data Leaks from Slack to AI Tools",
       description:
         "Stop sensitive Slack messages from being pasted into AI tools. TeamPrompt detects confidential conversations, customer data, and credentials copied from Slack channels.",
       keywords: ["Slack data leak prevention", "Slack AI security", "prevent Slack data exposure", "Slack DLP AI tools", "Slack copy paste AI"],
@@ -1252,7 +1252,7 @@ export const dataProtectionPages: SeoPageData[] = [
     slug: "prevent-leaks-email",
     category: "data-protection",
     meta: {
-      title: "Prevent Email Data Leaks to AI Tools | TeamPrompt DLP",
+      title: "Prevent Email Data Leaks to AI Tools",
       description:
         "Stop sensitive email content from being pasted into AI tools. TeamPrompt detects confidential email threads, attachments, and customer communications before they reach any AI model.",
       keywords: ["email data leak prevention AI", "email DLP AI tools", "prevent email data exposure", "email content AI security", "email paste AI protection"],
@@ -1306,7 +1306,7 @@ export const dataProtectionPages: SeoPageData[] = [
     slug: "prevent-leaks-code-editors",
     category: "data-protection",
     meta: {
-      title: "Prevent Data Leaks from Code Editors to AI | TeamPrompt DLP",
+      title: "Prevent Data Leaks from Code Editors to AI",
       description:
         "Stop sensitive code and data from leaking through AI-powered code editors. TeamPrompt protects against data exposure in AI coding assistants and browser-based IDEs.",
       keywords: ["code editor DLP", "AI coding assistant security", "prevent code leaks AI", "IDE data protection", "code editor data leak prevention"],

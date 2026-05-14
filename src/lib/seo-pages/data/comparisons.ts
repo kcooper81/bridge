@@ -88,7 +88,7 @@ export const comparisonPages: SeoPageData[] = [
     slug: "vs-shared-docs",
     category: "comparison",
     meta: {
-      title: "TeamPrompt vs Google Docs & Shared Documents for Prompts",
+      title: "TeamPrompt vs Google Docs for Prompts",
       description:
         "Compare TeamPrompt and shared docs (Google Docs, Confluence, SharePoint) for managing AI prompts. See why dedicated beats general-purpose.",
       keywords: ["prompt management vs Google Docs", "AI prompts shared docs", "prompt management tool"],

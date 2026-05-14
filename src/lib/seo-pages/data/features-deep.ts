@@ -5,7 +5,7 @@ export const featureDeepPages: SeoPageData[] = [
     slug: "feature-dlp-scanning",
     category: "feature",
     meta: {
-      title: "DLP Scanning for AI Prompts | TeamPrompt",
+      title: "DLP Scanning for AI Prompts",
       description: "TeamPrompt's built-in DLP scanning automatically detects and blocks sensitive data like PII, API keys, and credentials before prompts reach AI tools.",
       keywords: ["DLP scanning", "AI prompt security", "data loss prevention", "prompt DLP", "sensitive data detection"],
     },
@@ -57,7 +57,7 @@ export const featureDeepPages: SeoPageData[] = [
     slug: "feature-prompt-variables",
     category: "feature",
     meta: {
-      title: "Template Variables for AI Prompts | TeamPrompt",
+      title: "Template Variables for AI Prompts",
       description: "TeamPrompt's template variables let you create dynamic prompts with fillable fields. Users customize prompts at insertion time without editing the master copy.",
       keywords: ["template variables", "prompt variables", "dynamic prompts", "prompt templates", "fillable prompt fields"],
     },
@@ -109,7 +109,7 @@ export const featureDeepPages: SeoPageData[] = [
     slug: "feature-usage-analytics",
     category: "feature",
     meta: {
-      title: "Prompt Usage Analytics | TeamPrompt",
+      title: "Prompt Usage Analytics",
       description: "TeamPrompt's usage analytics show which prompts are used, by whom, and in which AI tools. Track adoption, measure ROI, and optimize your prompt library.",
       keywords: ["prompt analytics", "usage tracking", "prompt ROI", "AI tool analytics", "prompt adoption metrics"],
     },
@@ -161,7 +161,7 @@ export const featureDeepPages: SeoPageData[] = [
     slug: "feature-team-folders",
     category: "feature",
     meta: {
-      title: "Team Folders for Prompt Organization | TeamPrompt",
+      title: "Team Folders for Prompt Organization",
       description: "TeamPrompt's team folders let you organize prompts by department, project, or workflow. Share folders with specific teams and control access with permissions.",
       keywords: ["team folders", "prompt organization", "shared prompt folders", "team prompt library", "prompt management"],
     },
@@ -213,7 +213,7 @@ export const featureDeepPages: SeoPageData[] = [
     slug: "feature-role-permissions",
     category: "feature",
     meta: {
-      title: "Role-Based Permissions for Prompt Management | TeamPrompt",
+      title: "Role-Based Permissions for Prompt Management",
       description: "TeamPrompt's role-based permissions control who can create, edit, approve, and use prompts. Secure your prompt library with granular access control.",
       keywords: ["role-based permissions", "prompt access control", "RBAC", "team permissions", "prompt security"],
     },
@@ -265,7 +265,7 @@ export const featureDeepPages: SeoPageData[] = [
     slug: "feature-custom-categories",
     category: "feature",
     meta: {
-      title: "Custom Categories for Prompt Organization | TeamPrompt",
+      title: "Custom Categories for Prompt Organization",
       description: "TeamPrompt's custom categories let you organize prompts with labels that match your workflow. Combine with tags and folders for powerful multi-dimensional organization.",
       keywords: ["custom categories", "prompt organization", "prompt labels", "prompt taxonomy", "prompt management"],
     },
@@ -317,7 +317,7 @@ export const featureDeepPages: SeoPageData[] = [
     slug: "feature-browser-extension",
     category: "feature",
     meta: {
-      title: "Browser Extension for AI Prompt Insertion | TeamPrompt",
+      title: "Browser Extension for AI Prompt Insertion",
       description: "TeamPrompt's Chrome browser extension lets you insert prompts into ChatGPT, Claude, Gemini, Copilot, and Perplexity with one click. No tab switching.",
       keywords: ["browser extension", "Chrome extension", "prompt insertion", "AI tool extension", "one-click prompt"],
     },
@@ -369,7 +369,7 @@ export const featureDeepPages: SeoPageData[] = [
     slug: "feature-prompt-versioning",
     category: "feature",
     meta: {
-      title: "Prompt Version History | TeamPrompt",
+      title: "Prompt Version History",
       description: "TeamPrompt tracks every edit to every prompt with full version history and visual diffs. Compare versions, restore previous iterations, and track prompt evolution.",
       keywords: ["prompt versioning", "version history", "prompt diff", "prompt tracking", "prompt evolution"],
     },
@@ -421,7 +421,7 @@ export const featureDeepPages: SeoPageData[] = [
     slug: "feature-audit-log",
     category: "feature",
     meta: {
-      title: "Audit Log for AI Prompt Management | TeamPrompt",
+      title: "Audit Log for AI Prompt Management",
       description: "TeamPrompt's audit log tracks every prompt action — creation, edits, insertions, DLP flags, and permission changes. Complete visibility for compliance.",
       keywords: ["audit log", "prompt audit trail", "compliance logging", "activity tracking", "prompt security audit"],
     },
@@ -473,7 +473,7 @@ export const featureDeepPages: SeoPageData[] = [
     slug: "feature-sso-integration",
     category: "feature",
     meta: {
-      title: "SSO Integration for Prompt Management | TeamPrompt",
+      title: "SSO Integration for Prompt Management",
       description: "TeamPrompt supports Single Sign-On (SSO) integration so your team can access prompts with their existing corporate credentials. SAML and OAuth supported.",
       keywords: ["SSO integration", "single sign-on", "SAML", "OAuth", "enterprise authentication", "corporate login"],
     },
@@ -525,7 +525,7 @@ export const featureDeepPages: SeoPageData[] = [
     slug: "feature-custom-dlp-rules",
     category: "feature",
     meta: {
-      title: "Custom DLP Rules for AI Prompts | TeamPrompt",
+      title: "Custom DLP Rules for AI Prompts",
       description: "Create custom DLP scanning rules in TeamPrompt to detect your organization's specific sensitive data patterns in AI prompts. Regex-based rules with descriptions.",
       keywords: ["custom DLP rules", "DLP configuration", "sensitive data patterns", "regex DLP", "prompt scanning rules"],
     },
@@ -577,7 +577,7 @@ export const featureDeepPages: SeoPageData[] = [
     slug: "feature-prompt-approval-workflow",
     category: "feature",
     meta: {
-      title: "Prompt Approval Workflows | TeamPrompt",
+      title: "Prompt Approval Workflows",
       description: "TeamPrompt's approval workflows route new and edited prompts through review before they go live. Ensure quality and compliance across your team's prompt library.",
       keywords: ["prompt approval workflow", "prompt review", "prompt governance", "content approval", "prompt quality control"],
     },
@@ -629,7 +629,7 @@ export const featureDeepPages: SeoPageData[] = [
     slug: "feature-api-access",
     category: "feature",
     meta: {
-      title: "API Access for Prompt Management | TeamPrompt",
+      title: "API Access for Prompt Management",
       description: "TeamPrompt's API lets you programmatically access your prompt library, manage prompts, and integrate with your existing development and automation workflows.",
       keywords: ["prompt API", "API access", "programmatic prompts", "prompt integration", "developer API"],
     },
@@ -681,7 +681,7 @@ export const featureDeepPages: SeoPageData[] = [
     slug: "feature-bulk-import-export",
     category: "feature",
     meta: {
-      title: "Bulk Import & Export for Prompts | TeamPrompt",
+      title: "Bulk Import & Export for Prompts",
       description: "TeamPrompt supports bulk import and export of prompts. Migrate from spreadsheets, other tools, or back up your entire prompt library in standard formats.",
       keywords: ["bulk import", "bulk export", "prompt migration", "prompt backup", "CSV import", "prompt transfer"],
     },
@@ -733,7 +733,7 @@ export const featureDeepPages: SeoPageData[] = [
     slug: "feature-admin-dashboard",
     category: "feature",
     meta: {
-      title: "Admin Dashboard for Prompt Management | TeamPrompt",
+      title: "Admin Dashboard for Prompt Management",
       description: "TeamPrompt's admin dashboard gives you complete control over your team's prompt library — user management, DLP settings, analytics, and governance in one place.",
       keywords: ["admin dashboard", "prompt management dashboard", "team administration", "prompt governance", "admin controls"],
     },

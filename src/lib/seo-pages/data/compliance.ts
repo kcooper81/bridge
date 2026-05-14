@@ -5,7 +5,7 @@ export const compliancePages: SeoPageData[] = [
     slug: "hipaa-ai-compliance",
     category: "compliance",
     meta: {
-      title: "HIPAA AI Compliance | TeamPrompt",
+      title: "HIPAA AI Compliance",
       description:
         "HIPAA compliance for healthcare teams using AI. PHI detection, audit logging, and technical safeguards required by the HIPAA Security Rule.",
       keywords: ["HIPAA AI compliance", "HIPAA AI tools", "PHI protection AI", "healthcare AI compliance", "HIPAA Security Rule AI"],
@@ -59,7 +59,7 @@ export const compliancePages: SeoPageData[] = [
     slug: "soc2-ai-compliance",
     category: "compliance",
     meta: {
-      title: "SOC 2 AI Compliance | TeamPrompt",
+      title: "SOC 2 AI Compliance",
       description:
         "Meet SOC 2 Trust Service Criteria for AI tool usage. Security controls, monitoring, and audit evidence for SOC 2 Type I and Type II.",
       keywords: ["SOC 2 AI compliance", "SOC 2 AI tools", "SOC 2 Trust Service Criteria", "SOC 2 audit AI", "SOC 2 Type II AI"],
@@ -113,7 +113,7 @@ export const compliancePages: SeoPageData[] = [
     slug: "gdpr-ai-compliance",
     category: "compliance",
     meta: {
-      title: "GDPR AI Compliance | TeamPrompt",
+      title: "GDPR AI Compliance",
       description:
         "Keep teams GDPR-compliant when using AI tools. TeamPrompt blocks personal data from reaching providers, supports data minimization and DPIA requirements.",
       keywords: ["GDPR AI compliance", "GDPR AI tools", "personal data AI protection", "GDPR data minimization AI", "DPIA AI tools"],
@@ -167,7 +167,7 @@ export const compliancePages: SeoPageData[] = [
     slug: "ccpa-ai-compliance",
     category: "compliance",
     meta: {
-      title: "CCPA AI Compliance — Protect Consumer Data in AI Tools | TeamPrompt",
+      title: "CCPA AI Compliance — Protect Consumer Data in AI Tools",
       description:
         "Ensure CCPA and CPRA compliance when teams use AI tools. TeamPrompt prevents California consumer personal information from reaching AI providers.",
       keywords: ["CCPA AI compliance", "CPRA AI tools", "California privacy AI", "consumer data protection AI", "CCPA personal information AI"],
@@ -221,7 +221,7 @@ export const compliancePages: SeoPageData[] = [
     slug: "nist-ai-framework",
     category: "compliance",
     meta: {
-      title: "NIST AI Risk Management Framework Compliance | TeamPrompt",
+      title: "NIST AI Risk Management Framework Compliance",
       description:
         "Align AI tool usage with the NIST AI Risk Management Framework. TeamPrompt provides governance, risk measurement, and monitoring controls for responsible AI adoption.",
       keywords: ["NIST AI RMF", "NIST AI framework", "AI risk management", "NIST AI compliance", "responsible AI governance"],
@@ -275,7 +275,7 @@ export const compliancePages: SeoPageData[] = [
     slug: "eu-ai-act-compliance",
     category: "compliance",
     meta: {
-      title: "EU AI Act Compliance — AI Governance Controls | TeamPrompt",
+      title: "EU AI Act Compliance — AI Governance Controls",
       description:
         "Prepare for EU AI Act requirements with TeamPrompt. Implement risk management, transparency, human oversight, and data governance controls for AI tool usage.",
       keywords: ["EU AI Act compliance", "EU AI Act requirements", "AI Act governance", "EU AI regulation", "AI Act risk management"],
@@ -329,7 +329,7 @@ export const compliancePages: SeoPageData[] = [
     slug: "iso-42001-compliance",
     category: "compliance",
     meta: {
-      title: "ISO 42001 AI Management System Compliance | TeamPrompt",
+      title: "ISO 42001 AI Management System Compliance",
       description:
         "Implement ISO 42001 AI management system controls with TeamPrompt. Establish AI governance, risk treatment, and operational controls for responsible AI use.",
       keywords: ["ISO 42001 compliance", "AI management system", "ISO 42001 AI", "AI governance ISO", "responsible AI ISO"],
@@ -383,7 +383,7 @@ export const compliancePages: SeoPageData[] = [
     slug: "iso-27001-ai",
     category: "compliance",
     meta: {
-      title: "ISO 27001 AI Security Controls | TeamPrompt",
+      title: "ISO 27001 AI Security Controls",
       description:
         "Extend your ISO 27001 ISMS to cover AI tool usage. TeamPrompt provides information security controls for AI-related data processing, access management, and monitoring.",
       keywords: ["ISO 27001 AI", "ISMS AI controls", "ISO 27001 AI security", "information security AI tools", "ISO 27001 Annex A AI"],
@@ -437,7 +437,7 @@ export const compliancePages: SeoPageData[] = [
     slug: "fedramp-ai-compliance",
     category: "compliance",
     meta: {
-      title: "FedRAMP AI Compliance — Federal AI Tool Security | TeamPrompt",
+      title: "FedRAMP AI Compliance — Federal AI Tool Security",
       description:
         "Support FedRAMP compliance for AI tool usage in federal agencies. TeamPrompt provides NIST 800-53 aligned controls for data protection, access management, and continuous monitoring.",
       keywords: ["FedRAMP AI compliance", "federal AI security", "NIST 800-53 AI", "government AI tools", "FedRAMP authorized AI"],
@@ -491,7 +491,7 @@ export const compliancePages: SeoPageData[] = [
     slug: "pci-dss-ai-compliance",
     category: "compliance",
     meta: {
-      title: "PCI DSS AI Compliance — Protect Cardholder Data in AI | TeamPrompt",
+      title: "PCI DSS AI Compliance — Protect Cardholder Data in AI",
       description:
         "Maintain PCI DSS compliance when teams use AI tools. TeamPrompt detects and blocks credit card numbers, account data, and cardholder information before they reach AI providers.",
       keywords: ["PCI DSS AI compliance", "PCI compliance AI tools", "cardholder data AI protection", "PCI DSS AI security", "payment card data AI"],
@@ -545,7 +545,7 @@ export const compliancePages: SeoPageData[] = [
     slug: "cmmc-ai-compliance",
     category: "compliance",
     meta: {
-      title: "CMMC AI Compliance — Defense Contractor AI Security | TeamPrompt",
+      title: "CMMC AI Compliance — Defense Contractor AI Security",
       description:
         "Support CMMC compliance for defense contractors using AI tools. TeamPrompt provides CUI protection, access controls, and audit logging aligned with CMMC practices.",
       keywords: ["CMMC AI compliance", "defense contractor AI", "CUI protection AI tools", "CMMC Level 2 AI", "DoD AI security"],
@@ -599,7 +599,7 @@ export const compliancePages: SeoPageData[] = [
     slug: "ferpa-ai-compliance",
     category: "compliance",
     meta: {
-      title: "FERPA AI Compliance — Protect Student Records in AI | TeamPrompt",
+      title: "FERPA AI Compliance — Protect Student Records in AI",
       description:
         "Ensure FERPA compliance when education teams use AI tools. TeamPrompt prevents student education records and personally identifiable information from reaching AI providers.",
       keywords: ["FERPA AI compliance", "student data AI protection", "education AI security", "FERPA AI tools", "student records AI"],
@@ -653,7 +653,7 @@ export const compliancePages: SeoPageData[] = [
     slug: "glba-ai-compliance",
     category: "compliance",
     meta: {
-      title: "GLBA AI Compliance — Protect Financial Consumer Data | TeamPrompt",
+      title: "GLBA AI Compliance — Protect Financial Consumer Data",
       description:
         "Ensure GLBA compliance when financial institutions use AI tools. TeamPrompt prevents nonpublic personal information from reaching AI providers.",
       keywords: ["GLBA AI compliance", "Gramm-Leach-Bliley AI", "financial privacy AI", "NPI protection AI tools", "GLBA Safeguards Rule AI"],
@@ -707,7 +707,7 @@ export const compliancePages: SeoPageData[] = [
     slug: "sec-ai-regulations",
     category: "compliance",
     meta: {
-      title: "SEC AI Regulations Compliance | TeamPrompt",
+      title: "SEC AI Regulations Compliance",
       description:
         "Meet SEC requirements for AI tool governance in financial firms. TeamPrompt prevents MNPI, trading data, and client information from reaching AI providers.",
       keywords: ["SEC AI regulations", "SEC AI compliance", "MNPI protection AI", "securities AI governance", "SEC AI risk management"],
@@ -761,7 +761,7 @@ export const compliancePages: SeoPageData[] = [
     slug: "finra-ai-compliance",
     category: "compliance",
     meta: {
-      title: "FINRA AI Compliance — Broker-Dealer AI Governance | TeamPrompt",
+      title: "FINRA AI Compliance — Broker-Dealer AI Governance",
       description:
         "Meet FINRA requirements for AI tool usage in broker-dealer firms. TeamPrompt provides supervisory controls, data protection, and record-keeping for AI interactions.",
       keywords: ["FINRA AI compliance", "broker-dealer AI", "FINRA AI governance", "FINRA supervisory controls AI", "securities firm AI"],
@@ -815,7 +815,7 @@ export const compliancePages: SeoPageData[] = [
     slug: "itar-ai-compliance",
     category: "compliance",
     meta: {
-      title: "ITAR AI Compliance — Protect Defense Data in AI Tools | TeamPrompt",
+      title: "ITAR AI Compliance — Protect Defense Data in AI Tools",
       description:
         "Prevent ITAR-controlled technical data from reaching AI tools. TeamPrompt detects defense-related information and blocks unauthorized exports through AI providers.",
       keywords: ["ITAR AI compliance", "defense data AI protection", "ITAR technical data AI", "export control AI tools", "ITAR compliance AI"],
@@ -869,7 +869,7 @@ export const compliancePages: SeoPageData[] = [
     slug: "cjis-ai-compliance",
     category: "compliance",
     meta: {
-      title: "CJIS AI Compliance — Protect Criminal Justice Data | TeamPrompt",
+      title: "CJIS AI Compliance — Protect Criminal Justice Data",
       description:
         "Ensure CJIS Security Policy compliance when law enforcement uses AI tools. TeamPrompt prevents criminal justice information from reaching unauthorized AI services.",
       keywords: ["CJIS AI compliance", "criminal justice data AI", "CJIS Security Policy AI", "law enforcement AI tools", "CJI protection AI"],
@@ -923,7 +923,7 @@ export const compliancePages: SeoPageData[] = [
     slug: "stateramp-ai-compliance",
     category: "compliance",
     meta: {
-      title: "StateRAMP AI Compliance — State Government AI Security | TeamPrompt",
+      title: "StateRAMP AI Compliance — State Government AI Security",
       description:
         "Support StateRAMP compliance for AI tool usage in state and local government. TeamPrompt provides data protection and monitoring controls aligned with StateRAMP requirements.",
       keywords: ["StateRAMP AI compliance", "state government AI security", "StateRAMP AI tools", "local government AI", "state cloud security AI"],
@@ -977,7 +977,7 @@ export const compliancePages: SeoPageData[] = [
     slug: "hitrust-ai-compliance",
     category: "compliance",
     meta: {
-      title: "HITRUST AI Compliance — Healthcare AI Certification | TeamPrompt",
+      title: "HITRUST AI Compliance — Healthcare AI Certification",
       description:
         "Support HITRUST CSF certification for AI tool usage. TeamPrompt provides controls aligned with HITRUST's Common Security Framework for healthcare organizations using AI.",
       keywords: ["HITRUST AI compliance", "HITRUST CSF AI", "healthcare AI certification", "HITRUST AI tools", "HITRUST security controls AI"],
@@ -1031,7 +1031,7 @@ export const compliancePages: SeoPageData[] = [
     slug: "pipeda-ai-compliance",
     category: "compliance",
     meta: {
-      title: "PIPEDA AI Compliance — Canadian Privacy Law for AI | TeamPrompt",
+      title: "PIPEDA AI Compliance — Canadian Privacy Law for AI",
       description:
         "Ensure PIPEDA compliance when Canadian teams use AI tools. TeamPrompt prevents personal information from reaching AI providers, supporting Canada's privacy requirements.",
       keywords: ["PIPEDA AI compliance", "Canadian privacy AI", "PIPEDA AI tools", "Canada personal information AI", "PIPEDA data protection AI"],

@@ -5,7 +5,7 @@ export const workflowPages: SeoPageData[] = [
     slug: "customer-support-ai-workflow",
     category: "workflow",
     meta: {
-      title: "AI-Powered Customer Support Workflow | TeamPrompt",
+      title: "AI-Powered Customer Support Workflow",
       description:
         "Standardize your customer support with AI prompt workflows for ticket triage, response drafting, escalation handling, and quality assurance. Faster resolution times, consistent quality.",
       keywords: [
@@ -114,7 +114,7 @@ export const workflowPages: SeoPageData[] = [
     slug: "content-creation-workflow",
     category: "workflow",
     meta: {
-      title: "Content Creation with AI Prompt Workflows | TeamPrompt",
+      title: "Content Creation with AI Prompt Workflows",
       description:
         "Build a content pipeline with AI prompts for ideation, drafting, editing, SEO, and publishing — keeping your content team aligned at scale.",
       keywords: [
@@ -223,7 +223,7 @@ export const workflowPages: SeoPageData[] = [
     slug: "sales-enablement-workflow",
     category: "workflow",
     meta: {
-      title: "AI Sales Enablement Workflow | TeamPrompt",
+      title: "AI Sales Enablement Workflow",
       description:
         "Equip your sales team with AI prompt workflows for prospecting, outreach personalization, proposal drafting, and follow-up sequences. Close more deals with standardized AI assistance.",
       keywords: [
@@ -327,7 +327,7 @@ export const workflowPages: SeoPageData[] = [
     slug: "hr-recruiting-workflow",
     category: "workflow",
     meta: {
-      title: "HR and Recruiting AI Workflow | TeamPrompt",
+      title: "HR and Recruiting AI Workflow",
       description:
         "Streamline HR and recruiting with AI prompt workflows for job descriptions, candidate screening, interview preparation, and employee onboarding. Consistent processes, faster hiring.",
       keywords: [
@@ -436,7 +436,7 @@ export const workflowPages: SeoPageData[] = [
     slug: "product-development-workflow",
     category: "workflow",
     meta: {
-      title: "Product Development AI Workflow | TeamPrompt",
+      title: "Product Development AI Workflow",
       description:
         "Accelerate product development with AI prompt workflows for PRDs, user stories, sprint planning, technical specs, and retrospectives. Consistent documentation, faster delivery.",
       keywords: [
@@ -545,7 +545,7 @@ export const workflowPages: SeoPageData[] = [
     slug: "marketing-campaign-workflow",
     category: "workflow",
     meta: {
-      title: "Marketing Campaign AI Workflow | TeamPrompt",
+      title: "Marketing Campaign AI Workflow",
       description:
         "Run marketing campaigns with AI prompt workflows for campaign strategy, ad copy, social media content, email sequences, and performance analysis. Consistent brand voice at scale.",
       keywords: [
@@ -654,7 +654,7 @@ export const workflowPages: SeoPageData[] = [
     slug: "legal-review-workflow",
     category: "workflow",
     meta: {
-      title: "Legal Document Review AI Workflow | TeamPrompt",
+      title: "Legal Document Review AI Workflow",
       description:
         "Streamline legal workflows with AI prompts for contract review, compliance checks, document summarization, clause extraction, and risk analysis. Consistent review processes with DLP protection.",
       keywords: [
@@ -763,7 +763,7 @@ export const workflowPages: SeoPageData[] = [
     slug: "financial-analysis-workflow",
     category: "workflow",
     meta: {
-      title: "Financial Analysis AI Workflow | TeamPrompt",
+      title: "Financial Analysis AI Workflow",
       description:
         "Power financial workflows with AI prompts for analysis, reporting, forecasting, audit preparation, and executive summaries. Consistent analysis frameworks with DLP protection for financial data.",
       keywords: [
@@ -872,7 +872,7 @@ export const workflowPages: SeoPageData[] = [
     slug: "research-synthesis-workflow",
     category: "workflow",
     meta: {
-      title: "Research Synthesis AI Workflow | TeamPrompt",
+      title: "Research Synthesis AI Workflow",
       description:
         "Accelerate research with AI prompt workflows for literature review, data synthesis, methodology design, findings summarization, and report generation. Rigorous, reproducible research processes.",
       keywords: [
@@ -981,7 +981,7 @@ export const workflowPages: SeoPageData[] = [
     slug: "qa-testing-workflow",
     category: "workflow",
     meta: {
-      title: "QA Testing with AI Workflow | TeamPrompt",
+      title: "QA Testing with AI Workflow",
       description:
         "Enhance QA workflows with AI prompts for test case generation, bug reporting, regression test planning, test data creation, and quality metrics analysis. Consistent testing standards across your entire team.",
       keywords: [
@@ -1089,7 +1089,7 @@ export const workflowPages: SeoPageData[] = [
   {
     slug: "incident-response-ai-workflow",
     category: "workflow",
-    meta: { title: "AI-Powered Incident Response Workflow | TeamPrompt", description: "Standardize incident response with AI prompt workflows for triage, investigation, communication, and post-mortems. Faster resolution, better documentation.", keywords: ["incident response AI workflow", "AI incident management", "incident triage prompts"] },
+    meta: { title: "AI-Powered Incident Response Workflow", description: "Standardize incident response with AI prompt workflows for triage, investigation, communication, and post-mortems. Faster resolution, better documentation.", keywords: ["incident response AI workflow", "AI incident management", "incident triage prompts"] },
     hero: { headline: "Incident response workflows powered by AI", subtitle: "Standardize how your team handles incidents — from initial triage and investigation to stakeholder communication and post-mortems. Every responder follows proven prompts.", badges: ["Triage automation", "Investigation prompts", "Post-mortem templates"] },
     features: { sectionLabel: "Workflow", heading: "End-to-end incident response workflow", items: [
       { icon: "ShieldAlert", title: "Incident triage prompts", description: "Classify severity, identify affected systems, and route to the right team with structured triage prompts." },
@@ -1110,7 +1110,7 @@ export const workflowPages: SeoPageData[] = [
   {
     slug: "employee-onboarding-ai-workflow",
     category: "workflow",
-    meta: { title: "AI-Powered Employee Onboarding Workflow | TeamPrompt", description: "Standardize employee onboarding with AI prompt workflows for welcome materials, training plans, and check-in schedules. Better first days, faster productivity.", keywords: ["employee onboarding AI workflow", "AI HR onboarding", "new hire workflow prompts"] },
+    meta: { title: "AI-Powered Employee Onboarding Workflow", description: "Standardize employee onboarding with AI prompt workflows for welcome materials, training plans, and check-in schedules. Better first days, faster productivity.", keywords: ["employee onboarding AI workflow", "AI HR onboarding", "new hire workflow prompts"] },
     hero: { headline: "Employee onboarding workflows powered by AI", subtitle: "Standardize how your organization onboards new hires — from welcome materials and 30-60-90 plans to buddy programs and check-in cadences.", badges: ["Welcome materials", "Training plans", "Check-in schedules"] },
     features: { sectionLabel: "Workflow", heading: "End-to-end onboarding workflow", items: [
       { icon: "BookOpen", title: "Welcome material prompts", description: "Generate personalized welcome emails, orientation guides, and team introductions for each new hire." },
@@ -1131,7 +1131,7 @@ export const workflowPages: SeoPageData[] = [
   {
     slug: "quarterly-reporting-ai-workflow",
     category: "workflow",
-    meta: { title: "AI-Powered Quarterly Reporting Workflow | TeamPrompt", description: "Standardize quarterly reporting with AI prompt workflows for data collection, analysis, executive summaries, and board presentations. Better reports, less time.", keywords: ["quarterly reporting AI workflow", "AI business reporting", "QBR workflow prompts"] },
+    meta: { title: "AI-Powered Quarterly Reporting Workflow", description: "Standardize quarterly reporting with AI prompt workflows for data collection, analysis, executive summaries, and board presentations. Better reports, less time.", keywords: ["quarterly reporting AI workflow", "AI business reporting", "QBR workflow prompts"] },
     hero: { headline: "Quarterly reporting workflows powered by AI", subtitle: "Standardize how your team produces quarterly reports — from data collection and analysis to executive summaries and board presentations.", badges: ["Data collection", "Executive summaries", "Board presentations"] },
     features: { sectionLabel: "Workflow", heading: "End-to-end quarterly reporting workflow", items: [
       { icon: "BarChart3", title: "Data collection prompts", description: "Structured prompts for gathering metrics, KPIs, and qualitative data from across departments." },
@@ -1152,7 +1152,7 @@ export const workflowPages: SeoPageData[] = [
   {
     slug: "contract-review-ai-workflow",
     category: "workflow",
-    meta: { title: "AI-Powered Contract Review Workflow | TeamPrompt", description: "Standardize contract review with AI prompt workflows for clause analysis, risk identification, and redline suggestions. Faster reviews, fewer surprises.", keywords: ["contract review AI workflow", "AI legal review", "contract analysis workflow"] },
+    meta: { title: "AI-Powered Contract Review Workflow", description: "Standardize contract review with AI prompt workflows for clause analysis, risk identification, and redline suggestions. Faster reviews, fewer surprises.", keywords: ["contract review AI workflow", "AI legal review", "contract analysis workflow"] },
     hero: { headline: "Contract review workflows powered by AI", subtitle: "Standardize how your legal team reviews contracts — from initial clause analysis and risk identification to redline suggestions and approval workflows.", badges: ["Clause analysis", "Risk identification", "Redline suggestions"] },
     features: { sectionLabel: "Workflow", heading: "End-to-end contract review workflow", items: [
       { icon: "FileText", title: "Clause extraction prompts", description: "Structured prompts that identify and categorize key clauses, obligations, and rights in any contract." },
@@ -1173,7 +1173,7 @@ export const workflowPages: SeoPageData[] = [
   {
     slug: "seo-content-ai-workflow",
     category: "workflow",
-    meta: { title: "AI-Powered SEO Content Workflow | TeamPrompt", description: "Standardize SEO content creation with AI prompt workflows for keyword research, content briefs, writing, and optimization. Better rankings, consistent quality.", keywords: ["SEO content AI workflow", "AI content marketing", "SEO writing workflow"] },
+    meta: { title: "AI-Powered SEO Content Workflow", description: "Standardize SEO content creation with AI prompt workflows for keyword research, content briefs, writing, and optimization. Better rankings, consistent quality.", keywords: ["SEO content AI workflow", "AI content marketing", "SEO writing workflow"] },
     hero: { headline: "SEO content workflows powered by AI", subtitle: "Standardize how your team produces SEO content — from keyword research and content briefs to writing, optimization, and performance tracking.", badges: ["Keyword research", "Content briefs", "SEO optimization"] },
     features: { sectionLabel: "Workflow", heading: "End-to-end SEO content workflow", items: [
       { icon: "Globe", title: "Keyword research prompts", description: "Structured prompts for identifying target keywords, search intent, and competitive gaps." },
@@ -1194,7 +1194,7 @@ export const workflowPages: SeoPageData[] = [
   {
     slug: "data-analysis-ai-workflow",
     category: "workflow",
-    meta: { title: "AI-Powered Data Analysis Workflow | TeamPrompt", description: "Standardize data analysis with AI prompt workflows for data cleaning, exploration, visualization, and insight reporting. Better insights, faster decisions.", keywords: ["data analysis AI workflow", "AI analytics workflow", "data science prompts"] },
+    meta: { title: "AI-Powered Data Analysis Workflow", description: "Standardize data analysis with AI prompt workflows for data cleaning, exploration, visualization, and insight reporting. Better insights, faster decisions.", keywords: ["data analysis AI workflow", "AI analytics workflow", "data science prompts"] },
     hero: { headline: "Data analysis workflows powered by AI", subtitle: "Standardize how your team analyzes data — from cleaning and exploration to visualization and insight reporting. Consistent methodology, actionable insights.", badges: ["Data cleaning", "Exploration", "Insight reporting"] },
     features: { sectionLabel: "Workflow", heading: "End-to-end data analysis workflow", items: [
       { icon: "BookOpen", title: "Data cleaning prompts", description: "Structured prompts for identifying missing values, outliers, duplicates, and data quality issues." },
@@ -1215,7 +1215,7 @@ export const workflowPages: SeoPageData[] = [
   {
     slug: "hiring-ai-workflow",
     category: "workflow",
-    meta: { title: "AI-Powered Hiring Workflow | TeamPrompt", description: "Standardize hiring with AI prompt workflows for job descriptions, screening, interviews, and decision-making. Better hires, less bias.", keywords: ["hiring AI workflow", "AI recruitment", "hiring process prompts"] },
+    meta: { title: "AI-Powered Hiring Workflow", description: "Standardize hiring with AI prompt workflows for job descriptions, screening, interviews, and decision-making. Better hires, less bias.", keywords: ["hiring AI workflow", "AI recruitment", "hiring process prompts"] },
     hero: { headline: "Hiring workflows powered by AI", subtitle: "Standardize your entire hiring process — from job descriptions and candidate screening to structured interviews and data-driven hiring decisions.", badges: ["Job descriptions", "Structured interviews", "Fair decisions"] },
     features: { sectionLabel: "Workflow", heading: "End-to-end hiring workflow", items: [
       { icon: "BookOpen", title: "Job description prompts", description: "Generate inclusive, compelling job descriptions with clear requirements and growth opportunities." },
@@ -1236,7 +1236,7 @@ export const workflowPages: SeoPageData[] = [
   {
     slug: "product-research-ai-workflow",
     category: "workflow",
-    meta: { title: "AI-Powered Product Research Workflow | TeamPrompt", description: "Standardize product research with AI prompt workflows for user interviews, competitive analysis, and feature prioritization. Build what users need.", keywords: ["product research AI workflow", "AI product management", "user research prompts"] },
+    meta: { title: "AI-Powered Product Research Workflow", description: "Standardize product research with AI prompt workflows for user interviews, competitive analysis, and feature prioritization. Build what users need.", keywords: ["product research AI workflow", "AI product management", "user research prompts"] },
     hero: { headline: "Product research workflows powered by AI", subtitle: "Standardize how your product team conducts research — from user interviews and competitive analysis to feature prioritization and roadmap planning.", badges: ["User interviews", "Competitive analysis", "Feature prioritization"] },
     features: { sectionLabel: "Workflow", heading: "End-to-end product research workflow", items: [
       { icon: "Users", title: "User interview prompts", description: "Structured interview guides with probing questions, follow-ups, and note-taking templates." },
@@ -1257,7 +1257,7 @@ export const workflowPages: SeoPageData[] = [
   {
     slug: "compliance-audit-ai-workflow",
     category: "workflow",
-    meta: { title: "AI-Powered Compliance Audit Workflow | TeamPrompt", description: "Standardize compliance audits with AI prompt workflows for control testing, evidence collection, and finding remediation. Audit efficiently, stay compliant.", keywords: ["compliance audit AI workflow", "AI audit management", "compliance testing prompts"] },
+    meta: { title: "AI-Powered Compliance Audit Workflow", description: "Standardize compliance audits with AI prompt workflows for control testing, evidence collection, and finding remediation. Audit efficiently, stay compliant.", keywords: ["compliance audit AI workflow", "AI audit management", "compliance testing prompts"] },
     hero: { headline: "Compliance audit workflows powered by AI", subtitle: "Standardize how your team conducts compliance audits — from control testing and evidence collection to finding documentation and remediation tracking.", badges: ["Control testing", "Evidence collection", "Remediation tracking"] },
     features: { sectionLabel: "Workflow", heading: "End-to-end compliance audit workflow", items: [
       { icon: "Scale", title: "Control testing prompts", description: "Structured prompts for testing controls against SOC 2, ISO 27001, HIPAA, and other framework requirements." },
@@ -1278,7 +1278,7 @@ export const workflowPages: SeoPageData[] = [
   {
     slug: "bug-triage-ai-workflow",
     category: "workflow",
-    meta: { title: "AI-Powered Bug Triage Workflow | TeamPrompt", description: "Standardize bug triage with AI prompt workflows for severity assessment, reproduction steps, and fix prioritization. Resolve bugs faster, ship better software.", keywords: ["bug triage AI workflow", "AI bug management", "defect triage prompts"] },
+    meta: { title: "AI-Powered Bug Triage Workflow", description: "Standardize bug triage with AI prompt workflows for severity assessment, reproduction steps, and fix prioritization. Resolve bugs faster, ship better software.", keywords: ["bug triage AI workflow", "AI bug management", "defect triage prompts"] },
     hero: { headline: "Bug triage workflows powered by AI", subtitle: "Standardize how your team triages bugs — from severity assessment and reproduction to root cause analysis and fix prioritization.", badges: ["Severity assessment", "Reproduction steps", "Fix prioritization"] },
     features: { sectionLabel: "Workflow", heading: "End-to-end bug triage workflow", items: [
       { icon: "ShieldAlert", title: "Severity assessment prompts", description: "Structured prompts for consistent bug severity and priority classification based on impact and scope." },
@@ -1299,7 +1299,7 @@ export const workflowPages: SeoPageData[] = [
   {
     slug: "design-review-ai-workflow",
     category: "workflow",
-    meta: { title: "AI-Powered Design Review Workflow | TeamPrompt", description: "Standardize design reviews with AI prompt workflows for usability assessment, accessibility checks, and design system compliance. Better designs, consistent feedback.", keywords: ["design review AI workflow", "AI design feedback", "UX review prompts"] },
+    meta: { title: "AI-Powered Design Review Workflow", description: "Standardize design reviews with AI prompt workflows for usability assessment, accessibility checks, and design system compliance. Better designs, consistent feedback.", keywords: ["design review AI workflow", "AI design feedback", "UX review prompts"] },
     hero: { headline: "Design review workflows powered by AI", subtitle: "Standardize how your team reviews designs — from usability assessment and accessibility checks to design system compliance and feedback delivery.", badges: ["Usability assessment", "Accessibility checks", "Design system compliance"] },
     features: { sectionLabel: "Workflow", heading: "End-to-end design review workflow", items: [
       { icon: "Eye", title: "Usability assessment prompts", description: "Structured prompts for evaluating user flows, information architecture, and interaction patterns." },
@@ -1320,7 +1320,7 @@ export const workflowPages: SeoPageData[] = [
   {
     slug: "investor-reporting-ai-workflow",
     category: "workflow",
-    meta: { title: "AI-Powered Investor Reporting Workflow | TeamPrompt", description: "Standardize investor reporting with AI prompt workflows for metrics compilation, narrative drafting, and board deck creation. Professional updates, less effort.", keywords: ["investor reporting AI workflow", "AI board reporting", "investor update prompts"] },
+    meta: { title: "AI-Powered Investor Reporting Workflow", description: "Standardize investor reporting with AI prompt workflows for metrics compilation, narrative drafting, and board deck creation. Professional updates, less effort.", keywords: ["investor reporting AI workflow", "AI board reporting", "investor update prompts"] },
     hero: { headline: "Investor reporting workflows powered by AI", subtitle: "Standardize how your team produces investor updates — from metrics compilation and narrative drafting to board deck creation and LP communications.", badges: ["Metrics compilation", "Narrative drafting", "Board decks"] },
     features: { sectionLabel: "Workflow", heading: "End-to-end investor reporting workflow", items: [
       { icon: "BarChart3", title: "Metrics compilation prompts", description: "Templates for collecting and formatting MRR, burn rate, runway, and other key investor metrics." },
@@ -1341,7 +1341,7 @@ export const workflowPages: SeoPageData[] = [
   {
     slug: "vendor-evaluation-ai-workflow",
     category: "workflow",
-    meta: { title: "AI-Powered Vendor Evaluation Workflow | TeamPrompt", description: "Standardize vendor evaluation with AI prompt workflows for requirements gathering, scorecard creation, and decision documentation. Choose better vendors, faster.", keywords: ["vendor evaluation AI workflow", "AI procurement", "vendor selection prompts"] },
+    meta: { title: "AI-Powered Vendor Evaluation Workflow", description: "Standardize vendor evaluation with AI prompt workflows for requirements gathering, scorecard creation, and decision documentation. Choose better vendors, faster.", keywords: ["vendor evaluation AI workflow", "AI procurement", "vendor selection prompts"] },
     hero: { headline: "Vendor evaluation workflows powered by AI", subtitle: "Standardize how your team evaluates vendors — from requirements gathering and RFP creation to scorecard evaluation and decision documentation.", badges: ["Requirements gathering", "Scorecard evaluation", "Decision documentation"] },
     features: { sectionLabel: "Workflow", heading: "End-to-end vendor evaluation workflow", items: [
       { icon: "BookOpen", title: "Requirements gathering prompts", description: "Structured prompts for defining functional, technical, and business requirements from stakeholders." },
@@ -1362,7 +1362,7 @@ export const workflowPages: SeoPageData[] = [
   {
     slug: "customer-feedback-ai-workflow",
     category: "workflow",
-    meta: { title: "AI-Powered Customer Feedback Workflow | TeamPrompt", description: "Standardize customer feedback with AI prompt workflows for collection, analysis, and action planning. Turn feedback into product improvements.", keywords: ["customer feedback AI workflow", "AI voice of customer", "feedback analysis prompts"] },
+    meta: { title: "AI-Powered Customer Feedback Workflow", description: "Standardize customer feedback with AI prompt workflows for collection, analysis, and action planning. Turn feedback into product improvements.", keywords: ["customer feedback AI workflow", "AI voice of customer", "feedback analysis prompts"] },
     hero: { headline: "Customer feedback workflows powered by AI", subtitle: "Standardize how your team collects, analyzes, and acts on customer feedback — from survey design and sentiment analysis to prioritized action plans.", badges: ["Feedback collection", "Sentiment analysis", "Action planning"] },
     features: { sectionLabel: "Workflow", heading: "End-to-end customer feedback workflow", items: [
       { icon: "Users", title: "Survey design prompts", description: "Templates for NPS, CSAT, and product feedback surveys with targeted, unbiased question design." },
@@ -1383,7 +1383,7 @@ export const workflowPages: SeoPageData[] = [
   {
     slug: "documentation-ai-workflow",
     category: "workflow",
-    meta: { title: "AI-Powered Documentation Workflow | TeamPrompt", description: "Standardize documentation with AI prompt workflows for planning, writing, reviewing, and maintaining docs. Better docs, less effort.", keywords: ["documentation AI workflow", "AI technical writing", "docs workflow prompts"] },
+    meta: { title: "AI-Powered Documentation Workflow", description: "Standardize documentation with AI prompt workflows for planning, writing, reviewing, and maintaining docs. Better docs, less effort.", keywords: ["documentation AI workflow", "AI technical writing", "docs workflow prompts"] },
     hero: { headline: "Documentation workflows powered by AI", subtitle: "Standardize how your team produces documentation — from planning and outlining to writing, reviewing, and keeping docs up to date.", badges: ["Planning", "Writing", "Maintenance"] },
     features: { sectionLabel: "Workflow", heading: "End-to-end documentation workflow", items: [
       { icon: "BookOpen", title: "Documentation planning prompts", description: "Templates for identifying what needs documentation, prioritizing, and creating content calendars." },
@@ -1404,7 +1404,7 @@ export const workflowPages: SeoPageData[] = [
   {
     slug: "market-analysis-ai-workflow",
     category: "workflow",
-    meta: { title: "AI-Powered Market Analysis Workflow | TeamPrompt", description: "Standardize market analysis with AI prompt workflows for industry research, competitive intelligence, and trend identification. Better strategy, faster decisions.", keywords: ["market analysis AI workflow", "AI market research", "competitive intelligence prompts"] },
+    meta: { title: "AI-Powered Market Analysis Workflow", description: "Standardize market analysis with AI prompt workflows for industry research, competitive intelligence, and trend identification. Better strategy, faster decisions.", keywords: ["market analysis AI workflow", "AI market research", "competitive intelligence prompts"] },
     hero: { headline: "Market analysis workflows powered by AI", subtitle: "Standardize how your team conducts market analysis — from industry research and competitive intelligence to trend identification and strategic recommendations.", badges: ["Industry research", "Competitive intelligence", "Trend identification"] },
     features: { sectionLabel: "Workflow", heading: "End-to-end market analysis workflow", items: [
       { icon: "Globe", title: "Industry research prompts", description: "Structured prompts for analyzing market size, growth rates, key players, and industry dynamics." },
@@ -1425,7 +1425,7 @@ export const workflowPages: SeoPageData[] = [
   {
     slug: "security-review-ai-workflow",
     category: "workflow",
-    meta: { title: "AI-Powered Security Review Workflow | TeamPrompt", description: "Standardize security reviews with AI prompt workflows for threat modeling, vulnerability assessment, and remediation planning. Secure systems, consistent reviews.", keywords: ["security review AI workflow", "AI threat modeling", "security assessment prompts"] },
+    meta: { title: "AI-Powered Security Review Workflow", description: "Standardize security reviews with AI prompt workflows for threat modeling, vulnerability assessment, and remediation planning. Secure systems, consistent reviews.", keywords: ["security review AI workflow", "AI threat modeling", "security assessment prompts"] },
     hero: { headline: "Security review workflows powered by AI", subtitle: "Standardize how your team conducts security reviews — from threat modeling and vulnerability assessment to penetration test scoping and remediation planning.", badges: ["Threat modeling", "Vulnerability assessment", "Remediation planning"] },
     features: { sectionLabel: "Workflow", heading: "End-to-end security review workflow", items: [
       { icon: "ShieldCheck", title: "Threat modeling prompts", description: "Structured prompts for STRIDE threat modeling with asset identification, threat enumeration, and mitigation planning." },
@@ -1446,7 +1446,7 @@ export const workflowPages: SeoPageData[] = [
   {
     slug: "sprint-planning-ai-workflow",
     category: "workflow",
-    meta: { title: "AI-Powered Sprint Planning Workflow | TeamPrompt", description: "Standardize sprint planning with AI prompt workflows for backlog grooming, story writing, estimation, and capacity planning. Better sprints, consistent delivery.", keywords: ["sprint planning AI workflow", "AI agile workflow", "scrum planning prompts"] },
+    meta: { title: "AI-Powered Sprint Planning Workflow", description: "Standardize sprint planning with AI prompt workflows for backlog grooming, story writing, estimation, and capacity planning. Better sprints, consistent delivery.", keywords: ["sprint planning AI workflow", "AI agile workflow", "scrum planning prompts"] },
     hero: { headline: "Sprint planning workflows powered by AI", subtitle: "Standardize how your team plans sprints — from backlog grooming and story writing to estimation, capacity planning, and retrospectives.", badges: ["Backlog grooming", "Story writing", "Capacity planning"] },
     features: { sectionLabel: "Workflow", heading: "End-to-end sprint planning workflow", items: [
       { icon: "BookOpen", title: "Backlog grooming prompts", description: "Templates for refining backlog items with acceptance criteria, technical requirements, and priority assessment." },
@@ -1467,7 +1467,7 @@ export const workflowPages: SeoPageData[] = [
   {
     slug: "knowledge-base-ai-workflow",
     category: "workflow",
-    meta: { title: "AI-Powered Knowledge Base Workflow | TeamPrompt", description: "Standardize knowledge base creation with AI prompt workflows for article writing, categorization, and maintenance. Better self-service, fewer tickets.", keywords: ["knowledge base AI workflow", "AI help center", "KB article prompts"] },
+    meta: { title: "AI-Powered Knowledge Base Workflow", description: "Standardize knowledge base creation with AI prompt workflows for article writing, categorization, and maintenance. Better self-service, fewer tickets.", keywords: ["knowledge base AI workflow", "AI help center", "KB article prompts"] },
     hero: { headline: "Knowledge base workflows powered by AI", subtitle: "Standardize how your team builds and maintains knowledge bases — from article planning and writing to categorization, review, and freshness tracking.", badges: ["Article writing", "Categorization", "Maintenance"] },
     features: { sectionLabel: "Workflow", heading: "End-to-end knowledge base workflow", items: [
       { icon: "BookOpen", title: "Article planning prompts", description: "Templates for identifying knowledge gaps from support tickets, search queries, and user feedback." },
@@ -1488,7 +1488,7 @@ export const workflowPages: SeoPageData[] = [
   {
     slug: "quality-assurance-ai-workflow",
     category: "workflow",
-    meta: { title: "AI-Powered Quality Assurance Workflow | TeamPrompt", description: "Standardize quality assurance with AI prompt workflows for test planning, execution, bug reporting, and release readiness. Ship quality software consistently.", keywords: ["quality assurance AI workflow", "AI QA testing", "test management prompts"] },
+    meta: { title: "AI-Powered Quality Assurance Workflow", description: "Standardize quality assurance with AI prompt workflows for test planning, execution, bug reporting, and release readiness. Ship quality software consistently.", keywords: ["quality assurance AI workflow", "AI QA testing", "test management prompts"] },
     hero: { headline: "Quality assurance workflows powered by AI", subtitle: "Standardize how your QA team works — from test planning and case writing to execution, bug reporting, and release readiness assessment.", badges: ["Test planning", "Bug reporting", "Release readiness"] },
     features: { sectionLabel: "Workflow", heading: "End-to-end quality assurance workflow", items: [
       { icon: "BookOpen", title: "Test planning prompts", description: "Templates for test strategy, scope definition, and risk-based test prioritization for each release." },

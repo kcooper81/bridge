@@ -5,7 +5,7 @@ export const templatePages: SeoPageData[] = [
     slug: "email-prompt-templates",
     category: "template",
     meta: {
-      title: "Email Writing Prompt Templates | TeamPrompt",
+      title: "Email Writing Prompt Templates",
       description:
         "Ready-to-use email prompt templates for professional, sales, support, and internal communications. Dynamic {{variables}} let your team personalize every message while maintaining brand consistency.",
       keywords: ["email prompt templates", "AI email templates", "email writing prompts", "professional email templates", "sales email AI"],
@@ -60,7 +60,7 @@ export const templatePages: SeoPageData[] = [
     slug: "code-review-templates",
     category: "template",
     meta: {
-      title: "Code Review Prompt Templates | TeamPrompt",
+      title: "Code Review Prompt Templates",
       description:
         "AI-powered code review prompt templates for security, performance, and readability. Standardize reviews with dynamic {{variables}} and share across your engineering team.",
       keywords: ["code review templates", "AI code review prompts", "code review checklist", "engineering prompt templates", "code quality AI"],
@@ -115,7 +115,7 @@ export const templatePages: SeoPageData[] = [
     slug: "meeting-notes-templates",
     category: "template",
     meta: {
-      title: "Meeting Notes Prompt Templates | TeamPrompt",
+      title: "Meeting Notes Prompt Templates",
       description:
         "Prompt templates for summarizing meetings, extracting action items, and writing follow-up emails. Turn raw notes into structured summaries with {{variables}}.",
       keywords: ["meeting notes templates", "AI meeting summary", "action items extraction", "meeting follow-up templates", "meeting recap AI"],
@@ -169,7 +169,7 @@ export const templatePages: SeoPageData[] = [
     slug: "report-writing-templates",
     category: "template",
     meta: {
-      title: "Report Writing Prompt Templates | TeamPrompt",
+      title: "Report Writing Prompt Templates",
       description:
         "AI prompt templates for generating status updates, executive summaries, and analysis reports. Dynamic {{variables}} ensure consistent structure across your entire organization.",
       keywords: ["report writing templates", "AI report generator", "status update templates", "executive summary prompts", "analysis report AI"],
@@ -224,7 +224,7 @@ export const templatePages: SeoPageData[] = [
     slug: "social-media-templates",
     category: "template",
     meta: {
-      title: "Social Media Prompt Templates | TeamPrompt",
+      title: "Social Media Prompt Templates",
       description:
         "AI prompt templates for creating LinkedIn posts, Twitter/X threads, Instagram captions, and social content. Dynamic {{variables}} keep your brand voice consistent across platforms.",
       keywords: ["social media templates", "AI social media prompts", "LinkedIn post templates", "Twitter prompt templates", "social content AI"],
@@ -279,7 +279,7 @@ export const templatePages: SeoPageData[] = [
     slug: "customer-response-templates",
     category: "template",
     meta: {
-      title: "Customer Response Prompt Templates | TeamPrompt",
+      title: "Customer Response Prompt Templates",
       description:
         "AI prompt templates for customer support replies — tickets, complaints, feature requests, and escalations. Dynamic {{variables}} personalize every response while maintaining quality.",
       keywords: ["customer response templates", "support reply templates", "AI customer service prompts", "complaint response templates", "ticket reply AI"],
@@ -334,7 +334,7 @@ export const templatePages: SeoPageData[] = [
     slug: "data-analysis-templates",
     category: "template",
     meta: {
-      title: "Data Analysis Prompt Templates | TeamPrompt",
+      title: "Data Analysis Prompt Templates",
       description:
         "AI prompt templates for data analysis — SQL query generation, data interpretation, visualization suggestions, and insight extraction. Dynamic {{variables}} for any dataset.",
       keywords: ["data analysis templates", "AI SQL templates", "data interpretation prompts", "data visualization AI", "analytics prompt templates"],
@@ -389,7 +389,7 @@ export const templatePages: SeoPageData[] = [
     slug: "project-planning-templates",
     category: "template",
     meta: {
-      title: "Project Planning Prompt Templates | TeamPrompt",
+      title: "Project Planning Prompt Templates",
       description:
         "AI prompt templates for project plans, timelines, risk assessments, and stakeholder communications. Dynamic {{variables}} adapt to any project scope and methodology.",
       keywords: ["project planning templates", "AI project management prompts", "project timeline templates", "risk assessment prompts", "stakeholder communication templates"],
@@ -444,7 +444,7 @@ export const templatePages: SeoPageData[] = [
     slug: "interview-prep-templates",
     category: "template",
     meta: {
-      title: "Interview Prep Prompt Templates | TeamPrompt",
+      title: "Interview Prep Prompt Templates",
       description:
         "AI prompt templates for interview questions, evaluation criteria, candidate scoring rubrics, and debrief summaries. Standardize your hiring process with dynamic {{variables}}.",
       keywords: ["interview prep templates", "AI interview questions", "candidate evaluation templates", "hiring prompt templates", "interview scoring rubric"],
@@ -499,7 +499,7 @@ export const templatePages: SeoPageData[] = [
     slug: "documentation-templates",
     category: "template",
     meta: {
-      title: "Documentation Prompt Templates | TeamPrompt",
+      title: "Documentation Prompt Templates",
       description:
         "AI prompt templates for technical documentation, API docs, user guides, and READMEs. Dynamic {{variables}} adapt to any project, language, or framework.",
       keywords: ["documentation templates", "AI documentation prompts", "API documentation templates", "technical writing prompts", "README generator AI"],
@@ -554,7 +554,7 @@ export const templatePages: SeoPageData[] = [
     slug: "cold-email-prompt-template",
     category: "template",
     meta: {
-      title: "Cold Email Prompt Template | TeamPrompt",
+      title: "Cold Email Prompt Template",
       description: "Generate high-converting cold emails with AI prompt templates. Use dynamic variables for prospect name, company, and value proposition to personalize outreach at scale.",
       keywords: ["cold email prompt template", "AI cold email", "outreach prompt template"],
     },
@@ -601,7 +601,7 @@ export const templatePages: SeoPageData[] = [
     slug: "blog-post-prompt-template",
     category: "template",
     meta: {
-      title: "Blog Post Prompt Template | TeamPrompt",
+      title: "Blog Post Prompt Template",
       description: "AI prompt templates for blog posts — outlines, drafts, introductions, and SEO optimization. Dynamic variables adapt to any topic, audience, and tone.",
       keywords: ["blog post prompt template", "AI blog writing", "content creation template"],
     },
@@ -648,7 +648,7 @@ export const templatePages: SeoPageData[] = [
     slug: "social-media-prompt-template",
     category: "template",
     meta: {
-      title: "Social Media Prompt Template | TeamPrompt",
+      title: "Social Media Prompt Template",
       description: "AI prompt templates for social media posts across LinkedIn, Twitter/X, Instagram, and more. Keep brand voice consistent with dynamic variables.",
       keywords: ["social media prompt template", "AI social posts", "social content template"],
     },
@@ -695,7 +695,7 @@ export const templatePages: SeoPageData[] = [
     slug: "ad-copy-prompt-template",
     category: "template",
     meta: {
-      title: "Ad Copy Prompt Template | TeamPrompt",
+      title: "Ad Copy Prompt Template",
       description: "AI prompt templates for ad copy — Google Ads, Facebook Ads, LinkedIn Ads, and display banners. Dynamic variables for audience targeting and value propositions.",
       keywords: ["ad copy prompt template", "AI ad writing", "advertising template"],
     },
@@ -742,7 +742,7 @@ export const templatePages: SeoPageData[] = [
     slug: "seo-meta-prompt-template",
     category: "template",
     meta: {
-      title: "SEO Meta Prompt Template | TeamPrompt",
+      title: "SEO Meta Prompt Template",
       description: "AI prompt templates for SEO meta titles, descriptions, header tags, and schema markup. Optimize every page with dynamic keyword variables.",
       keywords: ["SEO meta prompt template", "AI SEO writing", "meta description template"],
     },
@@ -789,7 +789,7 @@ export const templatePages: SeoPageData[] = [
     slug: "product-description-prompt-template",
     category: "template",
     meta: {
-      title: "Product Description Prompt Template | TeamPrompt",
+      title: "Product Description Prompt Template",
       description: "AI prompt templates for product descriptions — e-commerce listings, feature pages, and catalog copy. Dynamic variables for product details and audience targeting.",
       keywords: ["product description prompt template", "AI product copy", "e-commerce description template"],
     },
@@ -836,7 +836,7 @@ export const templatePages: SeoPageData[] = [
     slug: "press-release-prompt-template",
     category: "template",
     meta: {
-      title: "Press Release Prompt Template | TeamPrompt",
+      title: "Press Release Prompt Template",
       description: "AI prompt templates for press releases — product launches, company news, partnerships, and milestones. Professional AP-style formatting with dynamic variables.",
       keywords: ["press release prompt template", "AI press release", "PR writing template"],
     },
@@ -883,7 +883,7 @@ export const templatePages: SeoPageData[] = [
     slug: "newsletter-prompt-template",
     category: "template",
     meta: {
-      title: "Newsletter Prompt Template | TeamPrompt",
+      title: "Newsletter Prompt Template",
       description: "AI prompt templates for email newsletters — weekly digests, product updates, company announcements, and industry roundups. Dynamic variables for consistent formatting.",
       keywords: ["newsletter prompt template", "AI newsletter writing", "email newsletter template"],
     },
@@ -930,7 +930,7 @@ export const templatePages: SeoPageData[] = [
     slug: "landing-page-prompt-template",
     category: "template",
     meta: {
-      title: "Landing Page Prompt Template | TeamPrompt",
+      title: "Landing Page Prompt Template",
       description: "AI prompt templates for landing page copy — headlines, subheadlines, feature sections, testimonials, and CTAs. Convert more visitors with proven copy frameworks.",
       keywords: ["landing page prompt template", "AI landing page copy", "conversion copy template"],
     },
@@ -977,7 +977,7 @@ export const templatePages: SeoPageData[] = [
     slug: "video-script-prompt-template",
     category: "template",
     meta: {
-      title: "Video Script Prompt Template | TeamPrompt",
+      title: "Video Script Prompt Template",
       description: "AI prompt templates for video scripts — YouTube, product demos, tutorials, and social video. Structure your scripts with dynamic variables for consistent production.",
       keywords: ["video script prompt template", "AI video writing", "script template"],
     },
@@ -1024,7 +1024,7 @@ export const templatePages: SeoPageData[] = [
     slug: "podcast-outline-prompt-template",
     category: "template",
     meta: {
-      title: "Podcast Outline Prompt Template | TeamPrompt",
+      title: "Podcast Outline Prompt Template",
       description: "AI prompt templates for podcast outlines — episode structures, interview questions, show notes, and segment transitions. Plan better episodes faster.",
       keywords: ["podcast outline prompt template", "AI podcast planning", "episode outline template"],
     },
@@ -1071,7 +1071,7 @@ export const templatePages: SeoPageData[] = [
     slug: "case-study-prompt-template",
     category: "template",
     meta: {
-      title: "Case Study Prompt Template | TeamPrompt",
+      title: "Case Study Prompt Template",
       description: "AI prompt templates for case studies — customer stories, results highlights, and challenge-solution-result frameworks. Turn customer wins into compelling content.",
       keywords: ["case study prompt template", "AI case study writing", "customer story template"],
     },
@@ -1118,7 +1118,7 @@ export const templatePages: SeoPageData[] = [
     slug: "whitepaper-prompt-template",
     category: "template",
     meta: {
-      title: "Whitepaper Prompt Template | TeamPrompt",
+      title: "Whitepaper Prompt Template",
       description: "AI prompt templates for whitepapers — research summaries, thought leadership pieces, and technical deep dives. Structure complex content with dynamic variables.",
       keywords: ["whitepaper prompt template", "AI whitepaper writing", "thought leadership template"],
     },
@@ -1165,7 +1165,7 @@ export const templatePages: SeoPageData[] = [
     slug: "webinar-prompt-template",
     category: "template",
     meta: {
-      title: "Webinar Prompt Template | TeamPrompt",
+      title: "Webinar Prompt Template",
       description: "AI prompt templates for webinar planning — presentation outlines, speaker notes, Q&A prep, and follow-up emails. Run better webinars with structured prompts.",
       keywords: ["webinar prompt template", "AI webinar planning", "presentation template"],
     },
@@ -1212,7 +1212,7 @@ export const templatePages: SeoPageData[] = [
     slug: "brand-voice-prompt-template",
     category: "template",
     meta: {
-      title: "Brand Voice Prompt Template | TeamPrompt",
+      title: "Brand Voice Prompt Template",
       description: "AI prompt templates for maintaining brand voice — style guides, tone instructions, and voice calibration. Ensure every piece of content sounds like your brand.",
       keywords: ["brand voice prompt template", "AI brand consistency", "tone of voice template"],
     },
@@ -1259,7 +1259,7 @@ export const templatePages: SeoPageData[] = [
     slug: "ab-test-copy-prompt-template",
     category: "template",
     meta: {
-      title: "A/B Test Copy Prompt Template | TeamPrompt",
+      title: "A/B Test Copy Prompt Template",
       description: "AI prompt templates for generating A/B test copy variations — headlines, CTAs, emails, and landing pages. Systematic testing with dynamic variables.",
       keywords: ["A/B test copy prompt template", "AI copy testing", "variation generator template"],
     },
@@ -1306,7 +1306,7 @@ export const templatePages: SeoPageData[] = [
     slug: "customer-testimonial-prompt-template",
     category: "template",
     meta: {
-      title: "Customer Testimonial Prompt Template | TeamPrompt",
+      title: "Customer Testimonial Prompt Template",
       description: "AI prompt templates for customer testimonials — interview questions, quote formatting, and testimonial page copy. Turn customer feedback into marketing gold.",
       keywords: ["customer testimonial prompt template", "AI testimonial writing", "social proof template"],
     },
@@ -1353,7 +1353,7 @@ export const templatePages: SeoPageData[] = [
     slug: "event-invitation-prompt-template",
     category: "template",
     meta: {
-      title: "Event Invitation Prompt Template | TeamPrompt",
+      title: "Event Invitation Prompt Template",
       description: "AI prompt templates for event invitations — conferences, webinars, product launches, and corporate events. Dynamic variables for audience and event details.",
       keywords: ["event invitation prompt template", "AI event copy", "invitation template"],
     },
@@ -1400,7 +1400,7 @@ export const templatePages: SeoPageData[] = [
     slug: "competitive-analysis-prompt-template",
     category: "template",
     meta: {
-      title: "Competitive Analysis Prompt Template | TeamPrompt",
+      title: "Competitive Analysis Prompt Template",
       description: "AI prompt templates for competitive analysis — feature comparisons, SWOT analysis, positioning maps, and battle cards. Stay ahead with structured competitor intelligence.",
       keywords: ["competitive analysis prompt template", "AI competitor research", "battle card template"],
     },
@@ -1447,7 +1447,7 @@ export const templatePages: SeoPageData[] = [
     slug: "content-calendar-prompt-template",
     category: "template",
     meta: {
-      title: "Content Calendar Prompt Template | TeamPrompt",
+      title: "Content Calendar Prompt Template",
       description: "AI prompt templates for content calendars — monthly plans, editorial schedules, campaign timelines, and content themes. Organize your content strategy with structured prompts.",
       keywords: ["content calendar prompt template", "AI editorial planning", "content schedule template"],
     },
@@ -1494,7 +1494,7 @@ export const templatePages: SeoPageData[] = [
     slug: "email-sequence-prompt-template",
     category: "template",
     meta: {
-      title: "Email Sequence Prompt Template | TeamPrompt",
+      title: "Email Sequence Prompt Template",
       description: "AI prompt templates for email sequences — drip campaigns, onboarding flows, nurture series, and re-engagement campaigns. Build automated sequences with dynamic variables.",
       keywords: ["email sequence prompt template", "AI drip campaign", "nurture sequence template"],
     },
@@ -1541,7 +1541,7 @@ export const templatePages: SeoPageData[] = [
     slug: "influencer-outreach-prompt-template",
     category: "template",
     meta: {
-      title: "Influencer Outreach Prompt Template | TeamPrompt",
+      title: "Influencer Outreach Prompt Template",
       description: "AI prompt templates for influencer outreach — partnership proposals, collaboration briefs, and follow-up sequences. Scale creator partnerships with structured prompts.",
       keywords: ["influencer outreach prompt template", "AI influencer marketing", "creator partnership template"],
     },
@@ -1588,7 +1588,7 @@ export const templatePages: SeoPageData[] = [
     slug: "market-research-prompt-template",
     category: "template",
     meta: {
-      title: "Market Research Prompt Template | TeamPrompt",
+      title: "Market Research Prompt Template",
       description: "AI prompt templates for market research — industry analysis, customer segmentation, trend reports, and TAM calculations. Structure your research with dynamic variables.",
       keywords: ["market research prompt template", "AI market analysis", "industry research template"],
     },
@@ -1635,7 +1635,7 @@ export const templatePages: SeoPageData[] = [
     slug: "brand-positioning-prompt-template",
     category: "template",
     meta: {
-      title: "Brand Positioning Prompt Template | TeamPrompt",
+      title: "Brand Positioning Prompt Template",
       description: "AI prompt templates for brand positioning — positioning statements, value propositions, messaging frameworks, and competitive differentiation. Define your brand with structured prompts.",
       keywords: ["brand positioning prompt template", "AI brand strategy", "positioning statement template"],
     },
@@ -1682,7 +1682,7 @@ export const templatePages: SeoPageData[] = [
     slug: "customer-survey-prompt-template",
     category: "template",
     meta: {
-      title: "Customer Survey Prompt Template | TeamPrompt",
+      title: "Customer Survey Prompt Template",
       description: "AI prompt templates for customer surveys — NPS surveys, satisfaction questionnaires, product feedback forms, and churn analysis. Design better surveys with dynamic variables.",
       keywords: ["customer survey prompt template", "AI survey design", "feedback questionnaire template"],
     },
@@ -1729,7 +1729,7 @@ export const templatePages: SeoPageData[] = [
     slug: "code-review-prompt-template",
     category: "template",
     meta: {
-      title: "Code Review Prompt Template | TeamPrompt",
+      title: "Code Review Prompt Template",
       description: "AI prompt templates for structured code reviews — security checks, performance analysis, and readability feedback. Standardize engineering quality with dynamic variables.",
       keywords: ["code review prompt template", "AI code review", "engineering review template"],
     },
@@ -1776,7 +1776,7 @@ export const templatePages: SeoPageData[] = [
     slug: "debugging-prompt-template",
     category: "template",
     meta: {
-      title: "Debugging Prompt Template | TeamPrompt",
+      title: "Debugging Prompt Template",
       description: "AI prompt templates for debugging — error analysis, root cause identification, and fix suggestions. Solve bugs faster with structured debugging prompts.",
       keywords: ["debugging prompt template", "AI debugging", "error analysis template"],
     },
@@ -1823,7 +1823,7 @@ export const templatePages: SeoPageData[] = [
     slug: "architecture-doc-prompt-template",
     category: "template",
     meta: {
-      title: "Architecture Doc Prompt Template | TeamPrompt",
+      title: "Architecture Doc Prompt Template",
       description: "AI prompt templates for architecture documentation — system design docs, component diagrams, decision records, and technical specifications. Document your systems clearly.",
       keywords: ["architecture doc prompt template", "AI system design", "technical architecture template"],
     },
@@ -1870,7 +1870,7 @@ export const templatePages: SeoPageData[] = [
     slug: "api-documentation-prompt-template",
     category: "template",
     meta: {
-      title: "API Documentation Prompt Template | TeamPrompt",
+      title: "API Documentation Prompt Template",
       description: "AI prompt templates for API documentation — endpoint references, request/response examples, authentication guides, and SDK quickstarts. Document APIs developers love.",
       keywords: ["API documentation prompt template", "AI API docs", "endpoint reference template"],
     },
@@ -1917,7 +1917,7 @@ export const templatePages: SeoPageData[] = [
     slug: "test-cases-prompt-template",
     category: "template",
     meta: {
-      title: "Test Cases Prompt Template | TeamPrompt",
+      title: "Test Cases Prompt Template",
       description: "AI prompt templates for test cases — unit tests, integration tests, edge cases, and test plans. Generate comprehensive test coverage with dynamic variables.",
       keywords: ["test cases prompt template", "AI test generation", "test plan template"],
     },
@@ -1964,7 +1964,7 @@ export const templatePages: SeoPageData[] = [
     slug: "sql-query-prompt-template",
     category: "template",
     meta: {
-      title: "SQL Query Prompt Template | TeamPrompt",
+      title: "SQL Query Prompt Template",
       description: "AI prompt templates for SQL queries — SELECT statements, JOINs, aggregations, and optimization. Generate correct SQL from natural language with dynamic variables.",
       keywords: ["SQL query prompt template", "AI SQL generation", "database query template"],
     },
@@ -2011,7 +2011,7 @@ export const templatePages: SeoPageData[] = [
     slug: "regex-pattern-prompt-template",
     category: "template",
     meta: {
-      title: "Regex Pattern Prompt Template | TeamPrompt",
+      title: "Regex Pattern Prompt Template",
       description: "AI prompt templates for regex patterns — validation, extraction, replacement, and parsing. Generate correct regular expressions with dynamic variables.",
       keywords: ["regex prompt template", "AI regex generation", "pattern matching template"],
     },
@@ -2058,7 +2058,7 @@ export const templatePages: SeoPageData[] = [
     slug: "git-commit-prompt-template",
     category: "template",
     meta: {
-      title: "Git Commit Prompt Template | TeamPrompt",
+      title: "Git Commit Prompt Template",
       description: "AI prompt templates for git commit messages — conventional commits, changelogs, and release notes. Write consistent, meaningful commit messages with dynamic variables.",
       keywords: ["git commit prompt template", "AI commit messages", "conventional commits template"],
     },
@@ -2105,7 +2105,7 @@ export const templatePages: SeoPageData[] = [
     slug: "pr-description-prompt-template",
     category: "template",
     meta: {
-      title: "PR Description Prompt Template | TeamPrompt",
+      title: "PR Description Prompt Template",
       description: "AI prompt templates for pull request descriptions — summaries, test plans, screenshots, and reviewer guidance. Make every PR easy to review with structured prompts.",
       keywords: ["PR description prompt template", "AI pull request", "code review description template"],
     },
@@ -2152,7 +2152,7 @@ export const templatePages: SeoPageData[] = [
     slug: "infrastructure-doc-prompt-template",
     category: "template",
     meta: {
-      title: "Infrastructure Doc Prompt Template | TeamPrompt",
+      title: "Infrastructure Doc Prompt Template",
       description: "AI prompt templates for infrastructure documentation — runbooks, deployment guides, monitoring setup, and disaster recovery plans. Document your infra clearly.",
       keywords: ["infrastructure doc prompt template", "AI runbook writing", "deployment guide template"],
     },
@@ -2199,7 +2199,7 @@ export const templatePages: SeoPageData[] = [
     slug: "code-explanation-prompt-template",
     category: "template",
     meta: {
-      title: "Code Explanation Prompt Template | TeamPrompt",
+      title: "Code Explanation Prompt Template",
       description: "AI prompt templates for code explanations — function walkthroughs, algorithm breakdowns, and codebase onboarding. Make complex code understandable with structured prompts.",
       keywords: ["code explanation prompt template", "AI code walkthrough", "code documentation template"],
     },
@@ -2246,7 +2246,7 @@ export const templatePages: SeoPageData[] = [
     slug: "refactoring-plan-prompt-template",
     category: "template",
     meta: {
-      title: "Refactoring Plan Prompt Template | TeamPrompt",
+      title: "Refactoring Plan Prompt Template",
       description: "AI prompt templates for refactoring plans — code smell identification, migration strategies, and incremental improvement roadmaps. Plan refactors with structured prompts.",
       keywords: ["refactoring plan prompt template", "AI code refactoring", "technical debt template"],
     },
@@ -2293,7 +2293,7 @@ export const templatePages: SeoPageData[] = [
     slug: "migration-guide-prompt-template",
     category: "template",
     meta: {
-      title: "Migration Guide Prompt Template | TeamPrompt",
+      title: "Migration Guide Prompt Template",
       description: "AI prompt templates for migration guides — database migrations, API versioning, framework upgrades, and platform transitions. Plan safe migrations with structured prompts.",
       keywords: ["migration guide prompt template", "AI migration planning", "upgrade guide template"],
     },
@@ -2340,7 +2340,7 @@ export const templatePages: SeoPageData[] = [
     slug: "deployment-checklist-prompt-template",
     category: "template",
     meta: {
-      title: "Deployment Checklist Prompt Template | TeamPrompt",
+      title: "Deployment Checklist Prompt Template",
       description: "AI prompt templates for deployment checklists — pre-deploy checks, rollout procedures, and post-deploy verification. Ship safely with structured deployment prompts.",
       keywords: ["deployment checklist prompt template", "AI deployment", "release checklist template"],
     },
@@ -2387,7 +2387,7 @@ export const templatePages: SeoPageData[] = [
     slug: "security-audit-prompt-template",
     category: "template",
     meta: {
-      title: "Security Audit Prompt Template | TeamPrompt",
+      title: "Security Audit Prompt Template",
       description: "AI prompt templates for security audits — vulnerability assessments, penetration test scoping, and compliance checks. Audit systematically with structured prompts.",
       keywords: ["security audit prompt template", "AI security review", "vulnerability assessment template"],
     },
@@ -2434,7 +2434,7 @@ export const templatePages: SeoPageData[] = [
     slug: "performance-optimization-prompt-template",
     category: "template",
     meta: {
-      title: "Performance Optimization Prompt Template | TeamPrompt",
+      title: "Performance Optimization Prompt Template",
       description: "AI prompt templates for performance optimization — profiling analysis, bottleneck identification, and optimization strategies. Speed up your applications with structured prompts.",
       keywords: ["performance optimization prompt template", "AI performance tuning", "bottleneck analysis template"],
     },
@@ -2481,7 +2481,7 @@ export const templatePages: SeoPageData[] = [
     slug: "technical-spec-prompt-template",
     category: "template",
     meta: {
-      title: "Technical Spec Prompt Template | TeamPrompt",
+      title: "Technical Spec Prompt Template",
       description: "AI prompt templates for technical specifications — feature specs, design documents, RFC templates, and technical proposals. Write specs that align teams.",
       keywords: ["technical spec prompt template", "AI design document", "RFC template"],
     },
@@ -2528,7 +2528,7 @@ export const templatePages: SeoPageData[] = [
     slug: "error-handling-prompt-template",
     category: "template",
     meta: {
-      title: "Error Handling Prompt Template | TeamPrompt",
+      title: "Error Handling Prompt Template",
       description: "AI prompt templates for error handling — error message design, exception hierarchies, and user-facing error pages. Build robust error handling with structured prompts.",
       keywords: ["error handling prompt template", "AI error design", "exception handling template"],
     },
@@ -2575,7 +2575,7 @@ export const templatePages: SeoPageData[] = [
     slug: "database-schema-prompt-template",
     category: "template",
     meta: {
-      title: "Database Schema Prompt Template | TeamPrompt",
+      title: "Database Schema Prompt Template",
       description: "AI prompt templates for database schema design — table definitions, relationships, indexes, and migration scripts. Design data models with structured prompts.",
       keywords: ["database schema prompt template", "AI database design", "data model template"],
     },
@@ -2622,7 +2622,7 @@ export const templatePages: SeoPageData[] = [
     slug: "code-comment-prompt-template",
     category: "template",
     meta: {
-      title: "Code Comment Prompt Template | TeamPrompt",
+      title: "Code Comment Prompt Template",
       description: "AI prompt templates for code comments — function documentation, inline explanations, and JSDoc/docstring generation. Document code with structured prompts.",
       keywords: ["code comment prompt template", "AI code documentation", "docstring generator template"],
     },
@@ -2668,7 +2668,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "cold-outreach-prompt-template",
     category: "template",
-    meta: { title: "Cold Outreach Prompt Template | TeamPrompt", description: "AI prompt templates for cold outreach — prospecting emails, LinkedIn messages, and call scripts. Personalize every touchpoint with dynamic variables.", keywords: ["cold outreach prompt template", "AI prospecting", "sales outreach template"] },
+    meta: { title: "Cold Outreach Prompt Template", description: "AI prompt templates for cold outreach — prospecting emails, LinkedIn messages, and call scripts. Personalize every touchpoint with dynamic variables.", keywords: ["cold outreach prompt template", "AI prospecting", "sales outreach template"] },
     hero: { headline: "Cold outreach that opens doors", subtitle: "Prompt templates for prospecting emails, LinkedIn messages, and call scripts. Use {{prospect}}, {{company}}, and {{trigger_event}} variables to personalize at scale.", badges: ["Prospecting emails", "LinkedIn messages", "Call scripts"] },
     features: { sectionLabel: "Templates", heading: "Outreach templates for every channel", items: [
       { icon: "Zap", title: "Multi-channel templates", description: "Templates for email, LinkedIn, phone, and video outreach with {{channel}} and {{prospect}} variables." },
@@ -2689,7 +2689,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "objection-handling-prompt-template",
     category: "template",
-    meta: { title: "Objection Handling Prompt Template | TeamPrompt", description: "AI prompt templates for sales objection handling — price objections, competitor comparisons, and timing concerns. Arm your team with proven responses.", keywords: ["objection handling prompt template", "AI sales objections", "sales response template"] },
+    meta: { title: "Objection Handling Prompt Template", description: "AI prompt templates for sales objection handling — price objections, competitor comparisons, and timing concerns. Arm your team with proven responses.", keywords: ["objection handling prompt template", "AI sales objections", "sales response template"] },
     hero: { headline: "Handle every objection with confidence", subtitle: "Prompt templates for price, competitor, and timing objections. Use {{objection}}, {{context}}, and {{value_prop}} variables for confident, consistent responses.", badges: ["Price objections", "Competitor concerns", "Timing pushback"] },
     features: { sectionLabel: "Templates", heading: "Objection handling templates for every scenario", items: [
       { icon: "Shield", title: "Price objection templates", description: "Templates that reframe pricing conversations with {{price_concern}}, {{value_delivered}}, and {{roi_data}} variables." },
@@ -2710,7 +2710,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "proposal-prompt-template",
     category: "template",
-    meta: { title: "Proposal Prompt Template | TeamPrompt", description: "AI prompt templates for sales proposals — executive summaries, scope definitions, pricing tables, and ROI projections. Win more deals with professional proposals.", keywords: ["proposal prompt template", "AI sales proposal", "business proposal template"] },
+    meta: { title: "Proposal Prompt Template", description: "AI prompt templates for sales proposals — executive summaries, scope definitions, pricing tables, and ROI projections. Win more deals with professional proposals.", keywords: ["proposal prompt template", "AI sales proposal", "business proposal template"] },
     hero: { headline: "Proposals that win business", subtitle: "Prompt templates for executive summaries, scope definitions, and pricing justification. Use {{prospect}}, {{solution}}, and {{pricing}} variables for professional proposals.", badges: ["Executive summaries", "Scope definition", "ROI projection"] },
     features: { sectionLabel: "Templates", heading: "Proposal templates for every deal", items: [
       { icon: "BookOpen", title: "Executive summary templates", description: "Templates that open proposals with {{prospect_challenges}}, {{proposed_solution}}, and {{expected_outcomes}} variables." },
@@ -2731,7 +2731,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "sales-competitive-analysis-prompt-template",
     category: "template",
-    meta: { title: "Sales Competitive Analysis Prompt Template | TeamPrompt", description: "AI prompt templates for sales competitive analysis — battle cards, feature comparisons, and win/loss insights. Arm your sales team with competitive intelligence.", keywords: ["sales competitive analysis template", "AI battle cards", "competitive selling template"] },
+    meta: { title: "Sales Competitive Analysis Prompt Template", description: "AI prompt templates for sales competitive analysis — battle cards, feature comparisons, and win/loss insights. Arm your sales team with competitive intelligence.", keywords: ["sales competitive analysis template", "AI battle cards", "competitive selling template"] },
     hero: { headline: "Win against any competitor", subtitle: "Prompt templates for battle cards, feature comparisons, and competitive positioning. Use {{competitor}}, {{deal_context}}, and {{differentiators}} for real-time competitive intelligence.", badges: ["Battle cards", "Feature comparisons", "Win strategies"] },
     features: { sectionLabel: "Templates", heading: "Competitive analysis templates for sales", items: [
       { icon: "Eye", title: "Battle card templates", description: "Quick-reference cards with {{competitor}}, {{strengths}}, {{weaknesses}}, and {{talk_tracks}} for live deal conversations." },
@@ -2752,7 +2752,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "pricing-justification-prompt-template",
     category: "template",
-    meta: { title: "Pricing Justification Prompt Template | TeamPrompt", description: "AI prompt templates for pricing justification — value framing, ROI calculations, and cost comparison. Help sales teams defend pricing with confidence.", keywords: ["pricing justification template", "AI pricing defense", "value selling template"] },
+    meta: { title: "Pricing Justification Prompt Template", description: "AI prompt templates for pricing justification — value framing, ROI calculations, and cost comparison. Help sales teams defend pricing with confidence.", keywords: ["pricing justification template", "AI pricing defense", "value selling template"] },
     hero: { headline: "Justify your pricing with data", subtitle: "Prompt templates for value framing, ROI calculations, and total cost comparisons. Use {{price}}, {{value_delivered}}, and {{alternatives}} variables for confident pricing conversations.", badges: ["Value framing", "ROI calculations", "Cost comparisons"] },
     features: { sectionLabel: "Templates", heading: "Pricing justification templates for every conversation", items: [
       { icon: "BarChart3", title: "ROI calculation templates", description: "Templates that quantify value with {{current_cost}}, {{time_savings}}, and {{revenue_impact}} variables." },
@@ -2773,7 +2773,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "discovery-call-prompt-template",
     category: "template",
-    meta: { title: "Discovery Call Prompt Template | TeamPrompt", description: "AI prompt templates for discovery calls — question frameworks, qualification criteria, and call summaries. Run better discovery with structured prompts.", keywords: ["discovery call prompt template", "AI sales discovery", "qualification template"] },
+    meta: { title: "Discovery Call Prompt Template", description: "AI prompt templates for discovery calls — question frameworks, qualification criteria, and call summaries. Run better discovery with structured prompts.", keywords: ["discovery call prompt template", "AI sales discovery", "qualification template"] },
     hero: { headline: "Discovery calls that qualify and convert", subtitle: "Prompt templates for discovery questions, qualification criteria, and call summaries. Use {{prospect}}, {{industry}}, and {{use_case}} variables for structured discovery.", badges: ["Question frameworks", "Qualification", "Call summaries"] },
     features: { sectionLabel: "Templates", heading: "Discovery call templates for every stage", items: [
       { icon: "BookOpen", title: "Question framework templates", description: "Templates using BANT, MEDDIC, or SPIN frameworks with {{prospect}} and {{product}} variables." },
@@ -2794,7 +2794,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "follow-up-email-prompt-template",
     category: "template",
-    meta: { title: "Follow-Up Email Prompt Template | TeamPrompt", description: "AI prompt templates for sales follow-up emails — post-meeting, post-demo, and post-proposal follow-ups. Never drop the ball with structured follow-up prompts.", keywords: ["follow-up email prompt template", "AI follow-up", "sales follow-up template"] },
+    meta: { title: "Follow-Up Email Prompt Template", description: "AI prompt templates for sales follow-up emails — post-meeting, post-demo, and post-proposal follow-ups. Never drop the ball with structured follow-up prompts.", keywords: ["follow-up email prompt template", "AI follow-up", "sales follow-up template"] },
     hero: { headline: "Follow-ups that keep deals moving", subtitle: "Prompt templates for post-meeting, post-demo, and post-proposal follow-ups. Use {{meeting_context}}, {{next_steps}}, and {{value_recap}} for timely, relevant follow-ups.", badges: ["Post-meeting", "Post-demo", "Post-proposal"] },
     features: { sectionLabel: "Templates", heading: "Follow-up templates for every touchpoint", items: [
       { icon: "Zap", title: "Post-meeting follow-ups", description: "Templates that summarize {{meeting_notes}} and confirm {{next_steps}} within minutes of the meeting ending." },
@@ -2815,7 +2815,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "quarterly-review-prompt-template",
     category: "template",
-    meta: { title: "Quarterly Review Prompt Template | TeamPrompt", description: "AI prompt templates for quarterly business reviews — QBR presentations, account health summaries, and renewal planning. Run better QBRs with structured prompts.", keywords: ["quarterly review prompt template", "AI QBR", "business review template"] },
+    meta: { title: "Quarterly Review Prompt Template", description: "AI prompt templates for quarterly business reviews — QBR presentations, account health summaries, and renewal planning. Run better QBRs with structured prompts.", keywords: ["quarterly review prompt template", "AI QBR", "business review template"] },
     hero: { headline: "QBRs that strengthen relationships", subtitle: "Prompt templates for QBR presentations, account health summaries, and renewal planning. Use {{account}}, {{metrics}}, and {{goals}} variables for impactful quarterly reviews.", badges: ["QBR presentations", "Account health", "Renewal planning"] },
     features: { sectionLabel: "Templates", heading: "Quarterly review templates for every account", items: [
       { icon: "BarChart3", title: "QBR presentation templates", description: "Templates for structured QBR decks with {{metrics}}, {{achievements}}, and {{next_quarter_goals}} variables." },
@@ -2836,7 +2836,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "pipeline-summary-prompt-template",
     category: "template",
-    meta: { title: "Pipeline Summary Prompt Template | TeamPrompt", description: "AI prompt templates for pipeline summaries — forecast reports, deal stage analysis, and pipeline health metrics. Get pipeline visibility with structured prompts.", keywords: ["pipeline summary prompt template", "AI sales forecast", "deal pipeline template"] },
+    meta: { title: "Pipeline Summary Prompt Template", description: "AI prompt templates for pipeline summaries — forecast reports, deal stage analysis, and pipeline health metrics. Get pipeline visibility with structured prompts.", keywords: ["pipeline summary prompt template", "AI sales forecast", "deal pipeline template"] },
     hero: { headline: "Pipeline visibility in seconds", subtitle: "Prompt templates for forecast reports, deal stage analysis, and pipeline health. Use {{pipeline_data}}, {{period}}, and {{targets}} variables for instant pipeline summaries.", badges: ["Forecast reports", "Stage analysis", "Health metrics"] },
     features: { sectionLabel: "Templates", heading: "Pipeline templates for every review", items: [
       { icon: "BarChart3", title: "Forecast report templates", description: "Templates that produce forecast summaries with {{committed}}, {{best_case}}, and {{pipeline}} variables." },
@@ -2857,7 +2857,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "territory-plan-prompt-template",
     category: "template",
-    meta: { title: "Territory Plan Prompt Template | TeamPrompt", description: "AI prompt templates for territory plans — account prioritization, market segmentation, and coverage strategies. Plan territories with structured prompts.", keywords: ["territory plan prompt template", "AI territory planning", "account prioritization template"] },
+    meta: { title: "Territory Plan Prompt Template", description: "AI prompt templates for territory plans — account prioritization, market segmentation, and coverage strategies. Plan territories with structured prompts.", keywords: ["territory plan prompt template", "AI territory planning", "account prioritization template"] },
     hero: { headline: "Territory plans that maximize coverage", subtitle: "Prompt templates for account prioritization, market segmentation, and coverage strategies. Use {{territory}}, {{accounts}}, and {{targets}} variables for strategic territory planning.", badges: ["Account prioritization", "Market segmentation", "Coverage strategy"] },
     features: { sectionLabel: "Templates", heading: "Territory plan templates for every strategy", items: [
       { icon: "BarChart3", title: "Account prioritization templates", description: "Templates that rank accounts by {{revenue_potential}}, {{fit_score}}, and {{engagement_level}} variables." },
@@ -2878,7 +2878,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "demo-script-prompt-template",
     category: "template",
-    meta: { title: "Demo Script Prompt Template | TeamPrompt", description: "AI prompt templates for product demo scripts — discovery recaps, feature walkthroughs, and closing sequences. Deliver demos that convert with structured prompts.", keywords: ["demo script prompt template", "AI demo planning", "product demo template"] },
+    meta: { title: "Demo Script Prompt Template", description: "AI prompt templates for product demo scripts — discovery recaps, feature walkthroughs, and closing sequences. Deliver demos that convert with structured prompts.", keywords: ["demo script prompt template", "AI demo planning", "product demo template"] },
     hero: { headline: "Demos that close deals", subtitle: "Prompt templates for demo scripts with discovery recaps, feature walkthroughs, and closing sequences. Use {{prospect}}, {{pain_points}}, and {{features}} variables for tailored demos.", badges: ["Discovery recaps", "Feature walkthroughs", "Closing sequences"] },
     features: { sectionLabel: "Templates", heading: "Demo script templates for every presentation", items: [
       { icon: "Eye", title: "Discovery recap templates", description: "Templates that open demos by summarizing {{prospect_challenges}} and {{desired_outcomes}} from discovery." },
@@ -2899,7 +2899,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "rfp-response-prompt-template",
     category: "template",
-    meta: { title: "RFP Response Prompt Template | TeamPrompt", description: "AI prompt templates for RFP responses — requirement matching, compliance matrices, and executive summaries. Win more RFPs with structured response prompts.", keywords: ["RFP response prompt template", "AI RFP writing", "proposal response template"] },
+    meta: { title: "RFP Response Prompt Template", description: "AI prompt templates for RFP responses — requirement matching, compliance matrices, and executive summaries. Win more RFPs with structured response prompts.", keywords: ["RFP response prompt template", "AI RFP writing", "proposal response template"] },
     hero: { headline: "RFP responses that win", subtitle: "Prompt templates for requirement matching, compliance matrices, and executive summaries. Use {{requirements}}, {{capabilities}}, and {{differentiators}} for winning RFP responses.", badges: ["Requirement matching", "Compliance matrices", "Executive summaries"] },
     features: { sectionLabel: "Templates", heading: "RFP response templates for every section", items: [
       { icon: "BookOpen", title: "Requirement response templates", description: "Templates that match {{requirements}} to {{capabilities}} with compliant/partial/roadmap status indicators." },
@@ -2920,7 +2920,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "account-strategy-prompt-template",
     category: "template",
-    meta: { title: "Account Strategy Prompt Template | TeamPrompt", description: "AI prompt templates for account strategies — account plans, stakeholder mapping, and expansion playbooks. Grow strategic accounts with structured prompts.", keywords: ["account strategy prompt template", "AI account planning", "strategic account template"] },
+    meta: { title: "Account Strategy Prompt Template", description: "AI prompt templates for account strategies — account plans, stakeholder mapping, and expansion playbooks. Grow strategic accounts with structured prompts.", keywords: ["account strategy prompt template", "AI account planning", "strategic account template"] },
     hero: { headline: "Account strategies that drive growth", subtitle: "Prompt templates for account plans, stakeholder mapping, and expansion playbooks. Use {{account}}, {{stakeholders}}, and {{opportunities}} variables for strategic account growth.", badges: ["Account plans", "Stakeholder mapping", "Expansion playbooks"] },
     features: { sectionLabel: "Templates", heading: "Account strategy templates for every plan", items: [
       { icon: "Users", title: "Stakeholder mapping templates", description: "Templates that map {{stakeholders}} by influence, sentiment, and role for strategic relationship building." },
@@ -2941,7 +2941,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "win-loss-analysis-prompt-template",
     category: "template",
-    meta: { title: "Win/Loss Analysis Prompt Template | TeamPrompt", description: "AI prompt templates for win/loss analysis — deal post-mortems, pattern identification, and competitive insights. Learn from every deal outcome with structured prompts.", keywords: ["win loss analysis template", "AI deal analysis", "sales post-mortem template"] },
+    meta: { title: "Win/Loss Analysis Prompt Template", description: "AI prompt templates for win/loss analysis — deal post-mortems, pattern identification, and competitive insights. Learn from every deal outcome with structured prompts.", keywords: ["win loss analysis template", "AI deal analysis", "sales post-mortem template"] },
     hero: { headline: "Learn from every deal outcome", subtitle: "Prompt templates for deal post-mortems, win/loss patterns, and competitive insights. Use {{deal}}, {{outcome}}, and {{factors}} variables for systematic deal analysis.", badges: ["Deal post-mortems", "Pattern analysis", "Competitive insights"] },
     features: { sectionLabel: "Templates", heading: "Win/loss analysis templates for every deal", items: [
       { icon: "Eye", title: "Deal post-mortem templates", description: "Templates that analyze {{deal}}, {{outcome}}, {{decision_criteria}}, and {{competitor_involvement}} for comprehensive post-mortems." },
@@ -2962,7 +2962,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "partner-outreach-prompt-template",
     category: "template",
-    meta: { title: "Partner Outreach Prompt Template | TeamPrompt", description: "AI prompt templates for partner outreach — partnership proposals, co-marketing plans, and channel enablement. Build partnerships with structured prompts.", keywords: ["partner outreach prompt template", "AI partnership", "channel partner template"] },
+    meta: { title: "Partner Outreach Prompt Template", description: "AI prompt templates for partner outreach — partnership proposals, co-marketing plans, and channel enablement. Build partnerships with structured prompts.", keywords: ["partner outreach prompt template", "AI partnership", "channel partner template"] },
     hero: { headline: "Partnerships that accelerate growth", subtitle: "Prompt templates for partnership proposals, co-marketing plans, and channel enablement. Use {{partner}}, {{mutual_value}}, and {{program}} variables for productive partnerships.", badges: ["Partnership proposals", "Co-marketing", "Channel enablement"] },
     features: { sectionLabel: "Templates", heading: "Partner outreach templates for every relationship", items: [
       { icon: "Users", title: "Partnership proposal templates", description: "Templates with {{partner}}, {{mutual_value}}, and {{proposed_structure}} variables for compelling partnership proposals." },
@@ -2983,7 +2983,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "renewal-email-prompt-template",
     category: "template",
-    meta: { title: "Renewal Email Prompt Template | TeamPrompt", description: "AI prompt templates for renewal emails — renewal reminders, value recaps, and expansion offers. Retain customers with structured renewal prompts.", keywords: ["renewal email prompt template", "AI customer retention", "renewal template"] },
+    meta: { title: "Renewal Email Prompt Template", description: "AI prompt templates for renewal emails — renewal reminders, value recaps, and expansion offers. Retain customers with structured renewal prompts.", keywords: ["renewal email prompt template", "AI customer retention", "renewal template"] },
     hero: { headline: "Renewals that retain and expand", subtitle: "Prompt templates for renewal reminders, value recaps, and expansion offers. Use {{customer}}, {{contract_end}}, and {{value_delivered}} variables for effective renewal outreach.", badges: ["Renewal reminders", "Value recaps", "Expansion offers"] },
     features: { sectionLabel: "Templates", heading: "Renewal email templates for every scenario", items: [
       { icon: "Zap", title: "Renewal reminder templates", description: "Multi-touch templates with {{contract_end}}, {{days_remaining}}, and {{renewal_terms}} variables for timely outreach." },
@@ -3004,7 +3004,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "upsell-pitch-prompt-template",
     category: "template",
-    meta: { title: "Upsell Pitch Prompt Template | TeamPrompt", description: "AI prompt templates for upsell pitches — upgrade justifications, feature adoption, and expansion proposals. Grow accounts with structured upsell prompts.", keywords: ["upsell pitch prompt template", "AI upselling", "account expansion template"] },
+    meta: { title: "Upsell Pitch Prompt Template", description: "AI prompt templates for upsell pitches — upgrade justifications, feature adoption, and expansion proposals. Grow accounts with structured upsell prompts.", keywords: ["upsell pitch prompt template", "AI upselling", "account expansion template"] },
     hero: { headline: "Upsells that customers welcome", subtitle: "Prompt templates for upgrade proposals, feature adoption, and expansion pitches. Use {{customer}}, {{current_usage}}, and {{upgrade_value}} to present relevant expansions.", badges: ["Upgrade proposals", "Feature adoption", "Expansion pitches"] },
     features: { sectionLabel: "Templates", heading: "Upsell pitch templates for every scenario", items: [
       { icon: "BarChart3", title: "Usage-based upsell templates", description: "Templates that leverage {{current_usage}} and {{usage_limits}} to present natural upgrade triggers." },
@@ -3025,7 +3025,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "customer-reference-prompt-template",
     category: "template",
-    meta: { title: "Customer Reference Prompt Template | TeamPrompt", description: "AI prompt templates for customer references — reference requests, reference call prep, and advocacy programs. Mobilize customer advocates with structured prompts.", keywords: ["customer reference prompt template", "AI customer advocacy", "reference program template"] },
+    meta: { title: "Customer Reference Prompt Template", description: "AI prompt templates for customer references — reference requests, reference call prep, and advocacy programs. Mobilize customer advocates with structured prompts.", keywords: ["customer reference prompt template", "AI customer advocacy", "reference program template"] },
     hero: { headline: "Customer references, ready when you need them", subtitle: "Prompt templates for reference requests, call preparation, and advocacy programs. Use {{customer}}, {{prospect}}, and {{use_case}} variables for effective reference engagement.", badges: ["Reference requests", "Call prep", "Advocacy programs"] },
     features: { sectionLabel: "Templates", heading: "Customer reference templates for every need", items: [
       { icon: "Users", title: "Reference request templates", description: "Templates for asking customers to be references with {{customer}}, {{prospect_context}}, and {{time_commitment}} variables." },
@@ -3046,7 +3046,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "roi-calculator-prompt-template",
     category: "template",
-    meta: { title: "ROI Calculator Prompt Template | TeamPrompt", description: "AI prompt templates for ROI calculators — value quantification, payback period analysis, and business case building. Prove value with structured ROI prompts.", keywords: ["ROI calculator prompt template", "AI ROI analysis", "business case template"] },
+    meta: { title: "ROI Calculator Prompt Template", description: "AI prompt templates for ROI calculators — value quantification, payback period analysis, and business case building. Prove value with structured ROI prompts.", keywords: ["ROI calculator prompt template", "AI ROI analysis", "business case template"] },
     hero: { headline: "Prove your ROI with numbers", subtitle: "Prompt templates for value quantification, payback analysis, and business cases. Use {{current_state}}, {{projected_improvements}}, and {{investment}} variables for compelling ROI stories.", badges: ["Value quantification", "Payback analysis", "Business cases"] },
     features: { sectionLabel: "Templates", heading: "ROI calculator templates for every deal", items: [
       { icon: "BarChart3", title: "Value quantification templates", description: "Templates that calculate {{time_savings}}, {{error_reduction}}, and {{revenue_impact}} from your solution." },
@@ -3067,7 +3067,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "sales-playbook-prompt-template",
     category: "template",
-    meta: { title: "Sales Playbook Prompt Template | TeamPrompt", description: "AI prompt templates for sales playbooks — process documentation, best practices, and new rep onboarding. Build your playbook with structured prompts.", keywords: ["sales playbook prompt template", "AI sales process", "sales enablement template"] },
+    meta: { title: "Sales Playbook Prompt Template", description: "AI prompt templates for sales playbooks — process documentation, best practices, and new rep onboarding. Build your playbook with structured prompts.", keywords: ["sales playbook prompt template", "AI sales process", "sales enablement template"] },
     hero: { headline: "Sales playbooks your reps actually follow", subtitle: "Prompt templates for process documentation, best practices, and onboarding guides. Use {{sales_stage}}, {{activities}}, and {{best_practices}} for actionable playbooks.", badges: ["Process docs", "Best practices", "Rep onboarding"] },
     features: { sectionLabel: "Templates", heading: "Playbook templates for every sales motion", items: [
       { icon: "BookOpen", title: "Process documentation templates", description: "Templates that document each sales stage with {{stage}}, {{activities}}, {{exit_criteria}}, and {{tools}} variables." },
@@ -3088,7 +3088,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "job-description-prompt-template",
     category: "template",
-    meta: { title: "Job Description Prompt Template | TeamPrompt", description: "AI prompt templates for job descriptions — role summaries, requirements, and inclusive language. Write better JDs with structured prompts.", keywords: ["job description prompt template", "AI job posting", "hiring template"] },
+    meta: { title: "Job Description Prompt Template", description: "AI prompt templates for job descriptions — role summaries, requirements, and inclusive language. Write better JDs with structured prompts.", keywords: ["job description prompt template", "AI job posting", "hiring template"] },
     hero: { headline: "Job descriptions that attract top talent", subtitle: "Prompt templates for role summaries, requirements, and benefits. Use {{role}}, {{level}}, and {{team}} variables for inclusive, compelling job descriptions.", badges: ["Role summaries", "Requirements", "Inclusive language"] },
     features: { sectionLabel: "Templates", heading: "Job description templates for every role", items: [
       { icon: "BookOpen", title: "Role summary templates", description: "Templates with {{role}}, {{team}}, and {{impact}} variables for compelling role overviews." },
@@ -3109,7 +3109,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "interview-questions-prompt-template",
     category: "template",
-    meta: { title: "Interview Questions Prompt Template | TeamPrompt", description: "AI prompt templates for interview questions — behavioral, technical, and situational. Generate role-specific questions with dynamic variables.", keywords: ["interview questions prompt template", "AI interview prep", "hiring questions template"] },
+    meta: { title: "Interview Questions Prompt Template", description: "AI prompt templates for interview questions — behavioral, technical, and situational. Generate role-specific questions with dynamic variables.", keywords: ["interview questions prompt template", "AI interview prep", "hiring questions template"] },
     hero: { headline: "Interview questions that reveal true fit", subtitle: "Prompt templates for behavioral, technical, and situational questions. Use {{role}}, {{competencies}}, and {{level}} variables for structured, fair interviews.", badges: ["Behavioral questions", "Technical questions", "Situational questions"] },
     features: { sectionLabel: "Templates", heading: "Interview question templates for every format", items: [
       { icon: "BookOpen", title: "Behavioral question templates", description: "STAR-format questions with {{competency}} and {{level}} variables for consistent behavioral assessment." },
@@ -3130,7 +3130,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "performance-review-prompt-template",
     category: "template",
-    meta: { title: "Performance Review Prompt Template | TeamPrompt", description: "AI prompt templates for performance reviews — self-assessments, manager feedback, and development plans. Run fair, consistent reviews with structured prompts.", keywords: ["performance review prompt template", "AI performance feedback", "employee review template"] },
+    meta: { title: "Performance Review Prompt Template", description: "AI prompt templates for performance reviews — self-assessments, manager feedback, and development plans. Run fair, consistent reviews with structured prompts.", keywords: ["performance review prompt template", "AI performance feedback", "employee review template"] },
     hero: { headline: "Performance reviews that drive growth", subtitle: "Prompt templates for self-assessments, manager feedback, and development plans. Use {{employee}}, {{period}}, and {{goals}} variables for fair, constructive reviews.", badges: ["Self-assessments", "Manager feedback", "Development plans"] },
     features: { sectionLabel: "Templates", heading: "Performance review templates for every cycle", items: [
       { icon: "BookOpen", title: "Self-assessment templates", description: "Templates that guide employees through {{accomplishments}}, {{challenges}}, and {{growth_areas}} reflection." },
@@ -3151,7 +3151,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "onboarding-guide-prompt-template",
     category: "template",
-    meta: { title: "Onboarding Guide Prompt Template | TeamPrompt", description: "AI prompt templates for employee onboarding — first-day checklists, 30-60-90 plans, and training schedules. Onboard effectively with structured prompts.", keywords: ["onboarding guide prompt template", "AI employee onboarding", "new hire template"] },
+    meta: { title: "Onboarding Guide Prompt Template", description: "AI prompt templates for employee onboarding — first-day checklists, 30-60-90 plans, and training schedules. Onboard effectively with structured prompts.", keywords: ["onboarding guide prompt template", "AI employee onboarding", "new hire template"] },
     hero: { headline: "Onboarding that sets people up to win", subtitle: "Prompt templates for first-day checklists, 30-60-90 plans, and training schedules. Use {{role}}, {{team}}, and {{start_date}} variables for smooth employee onboarding.", badges: ["First-day checklists", "30-60-90 plans", "Training schedules"] },
     features: { sectionLabel: "Templates", heading: "Onboarding templates for every phase", items: [
       { icon: "BookOpen", title: "First-day checklist templates", description: "Templates covering IT setup, introductions, and orientation with {{role}} and {{team}} variables." },
@@ -3172,7 +3172,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "policy-draft-prompt-template",
     category: "template",
-    meta: { title: "Policy Draft Prompt Template | TeamPrompt", description: "AI prompt templates for policy drafts — company policies, procedures, and guidelines. Draft clear, enforceable policies with structured prompts.", keywords: ["policy draft prompt template", "AI policy writing", "company policy template"] },
+    meta: { title: "Policy Draft Prompt Template", description: "AI prompt templates for policy drafts — company policies, procedures, and guidelines. Draft clear, enforceable policies with structured prompts.", keywords: ["policy draft prompt template", "AI policy writing", "company policy template"] },
     hero: { headline: "Policies that are clear and enforceable", subtitle: "Prompt templates for company policies, procedures, and guidelines. Use {{policy_area}}, {{scope}}, and {{requirements}} variables for professional policy documentation.", badges: ["Company policies", "Procedures", "Guidelines"] },
     features: { sectionLabel: "Templates", heading: "Policy draft templates for every area", items: [
       { icon: "Scale", title: "Policy structure templates", description: "Templates with {{purpose}}, {{scope}}, {{definitions}}, and {{requirements}} sections for complete policy documents." },
@@ -3193,7 +3193,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "meeting-agenda-prompt-template",
     category: "template",
-    meta: { title: "Meeting Agenda Prompt Template | TeamPrompt", description: "AI prompt templates for meeting agendas — structured agendas, time allocation, and pre-read materials. Run productive meetings with structured prompts.", keywords: ["meeting agenda prompt template", "AI meeting planning", "agenda template"] },
+    meta: { title: "Meeting Agenda Prompt Template", description: "AI prompt templates for meeting agendas — structured agendas, time allocation, and pre-read materials. Run productive meetings with structured prompts.", keywords: ["meeting agenda prompt template", "AI meeting planning", "agenda template"] },
     hero: { headline: "Meetings with purpose and structure", subtitle: "Prompt templates for meeting agendas with time blocks, discussion topics, and pre-read assignments. Use {{meeting_type}}, {{objectives}}, and {{attendees}} variables.", badges: ["Structured agendas", "Time allocation", "Pre-read materials"] },
     features: { sectionLabel: "Templates", heading: "Meeting agenda templates for every format", items: [
       { icon: "BookOpen", title: "Agenda structure templates", description: "Templates with {{objectives}}, {{topics}}, {{time_blocks}}, and {{owners}} for organized, productive meetings." },
@@ -3214,7 +3214,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "project-plan-prompt-template",
     category: "template",
-    meta: { title: "Project Plan Prompt Template | TeamPrompt", description: "AI prompt templates for project plans — WBS, milestone planning, resource allocation, and risk registers. Plan projects with structured prompts.", keywords: ["project plan prompt template", "AI project management", "WBS template"] },
+    meta: { title: "Project Plan Prompt Template", description: "AI prompt templates for project plans — WBS, milestone planning, resource allocation, and risk registers. Plan projects with structured prompts.", keywords: ["project plan prompt template", "AI project management", "WBS template"] },
     hero: { headline: "Project plans that keep teams on track", subtitle: "Prompt templates for work breakdown structures, milestones, and resource allocation. Use {{project}}, {{scope}}, and {{resources}} variables for comprehensive planning.", badges: ["Work breakdown", "Milestones", "Resource allocation"] },
     features: { sectionLabel: "Templates", heading: "Project plan templates for every methodology", items: [
       { icon: "BookOpen", title: "WBS templates", description: "Templates that decompose {{project_scope}} into work packages with {{deliverables}} and {{tasks}} variables." },
@@ -3235,7 +3235,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "status-report-prompt-template",
     category: "template",
-    meta: { title: "Status Report Prompt Template | TeamPrompt", description: "AI prompt templates for status reports — weekly updates, project dashboards, and executive summaries. Report progress with structured prompts.", keywords: ["status report prompt template", "AI status update", "project report template"] },
+    meta: { title: "Status Report Prompt Template", description: "AI prompt templates for status reports — weekly updates, project dashboards, and executive summaries. Report progress with structured prompts.", keywords: ["status report prompt template", "AI status update", "project report template"] },
     hero: { headline: "Status reports nobody dreads writing", subtitle: "Prompt templates for weekly updates, project dashboards, and executive summaries. Use {{project}}, {{progress}}, and {{blockers}} variables for consistent reporting.", badges: ["Weekly updates", "Project dashboards", "Executive summaries"] },
     features: { sectionLabel: "Templates", heading: "Status report templates for every audience", items: [
       { icon: "BarChart3", title: "Weekly update templates", description: "Templates with {{completed}}, {{in_progress}}, {{blocked}}, and {{next_week}} variables for quick weekly summaries." },
@@ -3256,7 +3256,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "sop-prompt-template",
     category: "template",
-    meta: { title: "SOP Prompt Template | TeamPrompt", description: "AI prompt templates for standard operating procedures — step-by-step processes, quality checks, and compliance documentation. Document SOPs with structured prompts.", keywords: ["SOP prompt template", "AI procedure writing", "standard operating procedure template"] },
+    meta: { title: "SOP Prompt Template", description: "AI prompt templates for standard operating procedures — step-by-step processes, quality checks, and compliance documentation. Document SOPs with structured prompts.", keywords: ["SOP prompt template", "AI procedure writing", "standard operating procedure template"] },
     hero: { headline: "SOPs that people actually follow", subtitle: "Prompt templates for standard operating procedures with step-by-step instructions, quality checks, and compliance requirements. Use {{process}}, {{steps}}, and {{quality_checks}} variables.", badges: ["Step-by-step processes", "Quality checks", "Compliance docs"] },
     features: { sectionLabel: "Templates", heading: "SOP templates for every department", items: [
       { icon: "BookOpen", title: "Process documentation templates", description: "Templates with {{process}}, {{steps}}, {{inputs}}, and {{outputs}} for clear, repeatable procedures." },
@@ -3277,7 +3277,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "training-material-prompt-template",
     category: "template",
-    meta: { title: "Training Material Prompt Template | TeamPrompt", description: "AI prompt templates for training materials — course content, exercises, quizzes, and certification guides. Create effective training with structured prompts.", keywords: ["training material prompt template", "AI training content", "course development template"] },
+    meta: { title: "Training Material Prompt Template", description: "AI prompt templates for training materials — course content, exercises, quizzes, and certification guides. Create effective training with structured prompts.", keywords: ["training material prompt template", "AI training content", "course development template"] },
     hero: { headline: "Training materials that stick", subtitle: "Prompt templates for course content, exercises, and quizzes. Use {{topic}}, {{audience}}, and {{learning_objectives}} variables for effective, engaging training materials.", badges: ["Course content", "Exercises", "Quizzes"] },
     features: { sectionLabel: "Templates", heading: "Training material templates for every format", items: [
       { icon: "BookOpen", title: "Course content templates", description: "Templates for training modules with {{topic}}, {{learning_objectives}}, and {{key_concepts}} variables." },
@@ -3298,7 +3298,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "employee-feedback-prompt-template",
     category: "template",
-    meta: { title: "Employee Feedback Prompt Template | TeamPrompt", description: "AI prompt templates for employee feedback — constructive criticism, praise, and coaching conversations. Give better feedback with structured prompts.", keywords: ["employee feedback prompt template", "AI feedback writing", "coaching template"] },
+    meta: { title: "Employee Feedback Prompt Template", description: "AI prompt templates for employee feedback — constructive criticism, praise, and coaching conversations. Give better feedback with structured prompts.", keywords: ["employee feedback prompt template", "AI feedback writing", "coaching template"] },
     hero: { headline: "Feedback that people hear and act on", subtitle: "Prompt templates for constructive feedback, recognition, and coaching. Use {{employee}}, {{situation}}, and {{behavior}} variables for clear, actionable feedback.", badges: ["Constructive criticism", "Recognition", "Coaching"] },
     features: { sectionLabel: "Templates", heading: "Feedback templates for every conversation", items: [
       { icon: "Users", title: "SBI feedback templates", description: "Situation-Behavior-Impact templates with {{situation}}, {{behavior}}, and {{impact}} variables for specific feedback." },
@@ -3319,7 +3319,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "exit-interview-prompt-template",
     category: "template",
-    meta: { title: "Exit Interview Prompt Template | TeamPrompt", description: "AI prompt templates for exit interviews — structured questions, theme analysis, and retention insights. Learn from departures with structured prompts.", keywords: ["exit interview prompt template", "AI exit interview", "employee departure template"] },
+    meta: { title: "Exit Interview Prompt Template", description: "AI prompt templates for exit interviews — structured questions, theme analysis, and retention insights. Learn from departures with structured prompts.", keywords: ["exit interview prompt template", "AI exit interview", "employee departure template"] },
     hero: { headline: "Exit interviews that improve retention", subtitle: "Prompt templates for departure questions, feedback analysis, and retention insights. Use {{departing_employee}}, {{role}}, and {{tenure}} variables for meaningful exit conversations.", badges: ["Departure questions", "Theme analysis", "Retention insights"] },
     features: { sectionLabel: "Templates", heading: "Exit interview templates for every departure", items: [
       { icon: "BookOpen", title: "Question set templates", description: "Templates with {{role}}, {{tenure}}, and {{department}} variables for role-appropriate exit interview questions." },
@@ -3340,7 +3340,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "compensation-analysis-prompt-template",
     category: "template",
-    meta: { title: "Compensation Analysis Prompt Template | TeamPrompt", description: "AI prompt templates for compensation analysis — salary benchmarking, equity reviews, and pay equity audits. Make data-driven comp decisions with structured prompts.", keywords: ["compensation analysis prompt template", "AI salary benchmarking", "pay equity template"] },
+    meta: { title: "Compensation Analysis Prompt Template", description: "AI prompt templates for compensation analysis — salary benchmarking, equity reviews, and pay equity audits. Make data-driven comp decisions with structured prompts.", keywords: ["compensation analysis prompt template", "AI salary benchmarking", "pay equity template"] },
     hero: { headline: "Compensation decisions backed by data", subtitle: "Prompt templates for salary benchmarking, equity reviews, and pay audits. Use {{role}}, {{market_data}}, and {{internal_bands}} variables for fair, competitive compensation.", badges: ["Salary benchmarking", "Equity reviews", "Pay audits"] },
     features: { sectionLabel: "Templates", heading: "Compensation analysis templates for every need", items: [
       { icon: "BarChart3", title: "Salary benchmarking templates", description: "Templates comparing {{role}} compensation against {{market_data}} for competitive positioning." },
@@ -3361,7 +3361,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "diversity-report-prompt-template",
     category: "template",
-    meta: { title: "Diversity Report Prompt Template | TeamPrompt", description: "AI prompt templates for diversity reports — demographic analysis, inclusion metrics, and DEI goal tracking. Report on diversity with structured prompts.", keywords: ["diversity report prompt template", "AI DEI reporting", "inclusion metrics template"] },
+    meta: { title: "Diversity Report Prompt Template", description: "AI prompt templates for diversity reports — demographic analysis, inclusion metrics, and DEI goal tracking. Report on diversity with structured prompts.", keywords: ["diversity report prompt template", "AI DEI reporting", "inclusion metrics template"] },
     hero: { headline: "Diversity reporting that drives action", subtitle: "Prompt templates for demographic analysis, inclusion metrics, and DEI goal tracking. Use {{data}}, {{metrics}}, and {{goals}} variables for meaningful diversity reporting.", badges: ["Demographic analysis", "Inclusion metrics", "DEI goals"] },
     features: { sectionLabel: "Templates", heading: "Diversity report templates for every metric", items: [
       { icon: "BarChart3", title: "Demographic analysis templates", description: "Templates for workforce composition with {{demographics}}, {{departments}}, and {{trends}} variables." },
@@ -3382,7 +3382,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "team-building-prompt-template",
     category: "template",
-    meta: { title: "Team Building Prompt Template | TeamPrompt", description: "AI prompt templates for team building — icebreakers, team exercises, and retrospective formats. Build stronger teams with structured activity prompts.", keywords: ["team building prompt template", "AI team activities", "icebreaker template"] },
+    meta: { title: "Team Building Prompt Template", description: "AI prompt templates for team building — icebreakers, team exercises, and retrospective formats. Build stronger teams with structured activity prompts.", keywords: ["team building prompt template", "AI team activities", "icebreaker template"] },
     hero: { headline: "Team building that people actually enjoy", subtitle: "Prompt templates for icebreakers, team exercises, and retrospectives. Use {{team_size}}, {{format}}, and {{objective}} variables for engaging team activities.", badges: ["Icebreakers", "Team exercises", "Retrospectives"] },
     features: { sectionLabel: "Templates", heading: "Team building templates for every occasion", items: [
       { icon: "Users", title: "Icebreaker templates", description: "Templates for conversation starters with {{team_size}}, {{familiarity_level}}, and {{time_available}} variables." },
@@ -3403,7 +3403,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "contract-summary-prompt-template",
     category: "template",
-    meta: { title: "Contract Summary Prompt Template | TeamPrompt", description: "AI prompt templates for contract summaries — key terms extraction, obligation tracking, and risk flagging. Summarize contracts quickly with structured prompts.", keywords: ["contract summary prompt template", "AI contract review", "legal summary template"] },
+    meta: { title: "Contract Summary Prompt Template", description: "AI prompt templates for contract summaries — key terms extraction, obligation tracking, and risk flagging. Summarize contracts quickly with structured prompts.", keywords: ["contract summary prompt template", "AI contract review", "legal summary template"] },
     hero: { headline: "Contract summaries in minutes, not hours", subtitle: "Prompt templates for extracting key terms, tracking obligations, and flagging risks. Use {{contract_type}}, {{parties}}, and {{key_sections}} variables for structured summaries.", badges: ["Key terms", "Obligation tracking", "Risk flagging"] },
     features: { sectionLabel: "Templates", heading: "Contract summary templates for every type", items: [
       { icon: "FileText", title: "Key terms extraction templates", description: "Templates that pull {{term_type}}, {{duration}}, {{value}}, and {{conditions}} from contract text." },
@@ -3424,7 +3424,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "policy-review-prompt-template",
     category: "template",
-    meta: { title: "Policy Review Prompt Template | TeamPrompt", description: "AI prompt templates for policy reviews — gap analysis, compliance mapping, and update recommendations. Review policies systematically with structured prompts.", keywords: ["policy review prompt template", "AI policy analysis", "compliance review template"] },
+    meta: { title: "Policy Review Prompt Template", description: "AI prompt templates for policy reviews — gap analysis, compliance mapping, and update recommendations. Review policies systematically with structured prompts.", keywords: ["policy review prompt template", "AI policy analysis", "compliance review template"] },
     hero: { headline: "Policy reviews that find every gap", subtitle: "Prompt templates for gap analysis, compliance mapping, and update recommendations. Use {{policy}}, {{regulations}}, and {{standards}} variables for thorough reviews.", badges: ["Gap analysis", "Compliance mapping", "Update recommendations"] },
     features: { sectionLabel: "Templates", heading: "Policy review templates for every analysis", items: [
       { icon: "Eye", title: "Gap analysis templates", description: "Templates comparing {{current_policy}} against {{best_practices}} to identify coverage gaps." },
@@ -3445,7 +3445,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "compliance-checklist-prompt-template",
     category: "template",
-    meta: { title: "Compliance Checklist Prompt Template | TeamPrompt", description: "AI prompt templates for compliance checklists — regulatory requirements, audit preparation, and control verification. Stay compliant with structured prompts.", keywords: ["compliance checklist prompt template", "AI compliance", "audit checklist template"] },
+    meta: { title: "Compliance Checklist Prompt Template", description: "AI prompt templates for compliance checklists — regulatory requirements, audit preparation, and control verification. Stay compliant with structured prompts.", keywords: ["compliance checklist prompt template", "AI compliance", "audit checklist template"] },
     hero: { headline: "Compliance checklists that miss nothing", subtitle: "Prompt templates for regulatory checklists, audit preparation, and control verification. Use {{regulation}}, {{controls}}, and {{evidence}} variables for complete compliance.", badges: ["Regulatory checklists", "Audit prep", "Control verification"] },
     features: { sectionLabel: "Templates", heading: "Compliance checklist templates for every framework", items: [
       { icon: "Scale", title: "Regulatory checklist templates", description: "Templates for {{regulation}}-specific checklists with {{requirements}}, {{controls}}, and {{status}} variables." },
@@ -3466,7 +3466,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "privacy-notice-prompt-template",
     category: "template",
-    meta: { title: "Privacy Notice Prompt Template | TeamPrompt", description: "AI prompt templates for privacy notices — data collection disclosures, cookie policies, and GDPR-compliant notices. Write clear privacy documentation with structured prompts.", keywords: ["privacy notice prompt template", "AI privacy policy", "GDPR notice template"] },
+    meta: { title: "Privacy Notice Prompt Template", description: "AI prompt templates for privacy notices — data collection disclosures, cookie policies, and GDPR-compliant notices. Write clear privacy documentation with structured prompts.", keywords: ["privacy notice prompt template", "AI privacy policy", "GDPR notice template"] },
     hero: { headline: "Privacy notices people can actually understand", subtitle: "Prompt templates for privacy policies, cookie notices, and data processing disclosures. Use {{data_collected}}, {{purposes}}, and {{rights}} variables for clear, compliant notices.", badges: ["Privacy policies", "Cookie notices", "GDPR compliance"] },
     features: { sectionLabel: "Templates", heading: "Privacy notice templates for every requirement", items: [
       { icon: "Lock", title: "Privacy policy templates", description: "Templates for comprehensive privacy policies with {{data_types}}, {{purposes}}, {{retention}}, and {{rights}} variables." },
@@ -3487,7 +3487,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "terms-of-service-prompt-template",
     category: "template",
-    meta: { title: "Terms of Service Prompt Template | TeamPrompt", description: "AI prompt templates for terms of service — user agreements, acceptable use policies, and service level terms. Draft ToS with structured prompts.", keywords: ["terms of service prompt template", "AI legal drafting", "user agreement template"] },
+    meta: { title: "Terms of Service Prompt Template", description: "AI prompt templates for terms of service — user agreements, acceptable use policies, and service level terms. Draft ToS with structured prompts.", keywords: ["terms of service prompt template", "AI legal drafting", "user agreement template"] },
     hero: { headline: "Terms of service that protect your business", subtitle: "Prompt templates for user agreements, acceptable use, and SLAs. Use {{service}}, {{restrictions}}, and {{liability}} variables for enforceable, clear terms.", badges: ["User agreements", "Acceptable use", "SLA terms"] },
     features: { sectionLabel: "Templates", heading: "Terms of service templates for every clause", items: [
       { icon: "Scale", title: "User agreement templates", description: "Templates for comprehensive ToS with {{service_description}}, {{user_obligations}}, and {{termination}} variables." },
@@ -3508,7 +3508,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "risk-assessment-prompt-template",
     category: "template",
-    meta: { title: "Risk Assessment Prompt Template | TeamPrompt", description: "AI prompt templates for risk assessments — risk identification, impact analysis, and mitigation planning. Assess risks systematically with structured prompts.", keywords: ["risk assessment prompt template", "AI risk analysis", "risk management template"] },
+    meta: { title: "Risk Assessment Prompt Template", description: "AI prompt templates for risk assessments — risk identification, impact analysis, and mitigation planning. Assess risks systematically with structured prompts.", keywords: ["risk assessment prompt template", "AI risk analysis", "risk management template"] },
     hero: { headline: "Risk assessments that prevent surprises", subtitle: "Prompt templates for risk identification, impact analysis, and mitigation planning. Use {{domain}}, {{risk_factors}}, and {{controls}} variables for thorough risk assessment.", badges: ["Risk identification", "Impact analysis", "Mitigation planning"] },
     features: { sectionLabel: "Templates", heading: "Risk assessment templates for every domain", items: [
       { icon: "ShieldAlert", title: "Risk identification templates", description: "Templates that systematically identify risks with {{domain}}, {{assets}}, and {{threats}} variables." },
@@ -3529,7 +3529,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "audit-response-prompt-template",
     category: "template",
-    meta: { title: "Audit Response Prompt Template | TeamPrompt", description: "AI prompt templates for audit responses — finding responses, remediation plans, and evidence documentation. Respond to audits professionally with structured prompts.", keywords: ["audit response prompt template", "AI audit management", "finding response template"] },
+    meta: { title: "Audit Response Prompt Template", description: "AI prompt templates for audit responses — finding responses, remediation plans, and evidence documentation. Respond to audits professionally with structured prompts.", keywords: ["audit response prompt template", "AI audit management", "finding response template"] },
     hero: { headline: "Audit responses that satisfy auditors", subtitle: "Prompt templates for finding responses, remediation plans, and evidence packages. Use {{finding}}, {{response}}, and {{evidence}} variables for professional audit responses.", badges: ["Finding responses", "Remediation plans", "Evidence packages"] },
     features: { sectionLabel: "Templates", heading: "Audit response templates for every finding", items: [
       { icon: "BookOpen", title: "Finding response templates", description: "Templates for structured responses with {{finding}}, {{root_cause}}, {{corrective_action}}, and {{timeline}} variables." },
@@ -3550,7 +3550,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "regulatory-summary-prompt-template",
     category: "template",
-    meta: { title: "Regulatory Summary Prompt Template | TeamPrompt", description: "AI prompt templates for regulatory summaries — regulation overviews, impact assessments, and compliance roadmaps. Understand regulations with structured prompts.", keywords: ["regulatory summary prompt template", "AI regulation analysis", "compliance summary template"] },
+    meta: { title: "Regulatory Summary Prompt Template", description: "AI prompt templates for regulatory summaries — regulation overviews, impact assessments, and compliance roadmaps. Understand regulations with structured prompts.", keywords: ["regulatory summary prompt template", "AI regulation analysis", "compliance summary template"] },
     hero: { headline: "Regulatory summaries that drive action", subtitle: "Prompt templates for regulation overviews, impact assessments, and compliance roadmaps. Use {{regulation}}, {{industry}}, and {{operations}} variables for actionable summaries.", badges: ["Regulation overviews", "Impact assessments", "Compliance roadmaps"] },
     features: { sectionLabel: "Templates", heading: "Regulatory summary templates for every framework", items: [
       { icon: "Scale", title: "Regulation overview templates", description: "Templates that summarize {{regulation}} with {{scope}}, {{requirements}}, and {{penalties}} variables." },
@@ -3571,7 +3571,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "nda-review-prompt-template",
     category: "template",
-    meta: { title: "NDA Review Prompt Template | TeamPrompt", description: "AI prompt templates for NDA reviews — clause analysis, risk flagging, and standard comparison. Review NDAs quickly with structured prompts.", keywords: ["NDA review prompt template", "AI NDA analysis", "confidentiality agreement template"] },
+    meta: { title: "NDA Review Prompt Template", description: "AI prompt templates for NDA reviews — clause analysis, risk flagging, and standard comparison. Review NDAs quickly with structured prompts.", keywords: ["NDA review prompt template", "AI NDA analysis", "confidentiality agreement template"] },
     hero: { headline: "NDA reviews in minutes, not days", subtitle: "Prompt templates for NDA clause analysis, risk flagging, and comparison to standards. Use {{nda_text}}, {{standard_terms}}, and {{party}} variables for fast NDA review.", badges: ["Clause analysis", "Risk flagging", "Standard comparison"] },
     features: { sectionLabel: "Templates", heading: "NDA review templates for every type", items: [
       { icon: "FileText", title: "Clause analysis templates", description: "Templates that extract and evaluate each clause with {{clause}}, {{standard}}, and {{deviation}} variables." },
@@ -3592,7 +3592,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "legal-research-prompt-template",
     category: "template",
-    meta: { title: "Legal Research Prompt Template | TeamPrompt", description: "AI prompt templates for legal research — case analysis, statutory interpretation, and legal memo drafting. Research more efficiently with structured prompts.", keywords: ["legal research prompt template", "AI legal research", "case analysis template"] },
+    meta: { title: "Legal Research Prompt Template", description: "AI prompt templates for legal research — case analysis, statutory interpretation, and legal memo drafting. Research more efficiently with structured prompts.", keywords: ["legal research prompt template", "AI legal research", "case analysis template"] },
     hero: { headline: "Legal research, structured and thorough", subtitle: "Prompt templates for case analysis, statutory interpretation, and legal memos. Use {{legal_question}}, {{jurisdiction}}, and {{area_of_law}} variables for efficient research.", badges: ["Case analysis", "Statutory interpretation", "Legal memos"] },
     features: { sectionLabel: "Templates", heading: "Legal research templates for every task", items: [
       { icon: "BookOpen", title: "Legal memo templates", description: "Templates for research memos with {{question}}, {{analysis}}, {{conclusion}}, and {{authorities}} variables." },
@@ -3613,7 +3613,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "patient-communication-prompt-template",
     category: "template",
-    meta: { title: "Patient Communication Prompt Template | TeamPrompt", description: "AI prompt templates for patient communication — appointment reminders, health education, and follow-up messages. Communicate with patients clearly using structured prompts.", keywords: ["patient communication prompt template", "AI healthcare messaging", "patient outreach template"] },
+    meta: { title: "Patient Communication Prompt Template", description: "AI prompt templates for patient communication — appointment reminders, health education, and follow-up messages. Communicate with patients clearly using structured prompts.", keywords: ["patient communication prompt template", "AI healthcare messaging", "patient outreach template"] },
     hero: { headline: "Patient communications that build trust", subtitle: "Prompt templates for appointment reminders, health education, and follow-ups. Use {{patient_name}}, {{condition}}, and {{provider}} variables for clear, compassionate messaging.", badges: ["Appointment reminders", "Health education", "Follow-up messages"] },
     features: { sectionLabel: "Templates", heading: "Patient communication templates for every touchpoint", items: [
       { icon: "Users", title: "Appointment reminder templates", description: "Templates with {{patient_name}}, {{date}}, {{time}}, and {{preparation}} variables for timely reminders." },
@@ -3634,7 +3634,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "clinical-summary-prompt-template",
     category: "template",
-    meta: { title: "Clinical Summary Prompt Template | TeamPrompt", description: "AI prompt templates for clinical summaries — visit notes, care transitions, and clinical handoffs. Document clinical encounters with structured prompts.", keywords: ["clinical summary prompt template", "AI clinical documentation", "visit summary template"] },
+    meta: { title: "Clinical Summary Prompt Template", description: "AI prompt templates for clinical summaries — visit notes, care transitions, and clinical handoffs. Document clinical encounters with structured prompts.", keywords: ["clinical summary prompt template", "AI clinical documentation", "visit summary template"] },
     hero: { headline: "Clinical summaries, accurate and fast", subtitle: "Prompt templates for visit notes, care transitions, and clinical handoffs. Use {{patient}}, {{encounter}}, and {{findings}} variables for structured clinical documentation.", badges: ["Visit notes", "Care transitions", "Clinical handoffs"] },
     features: { sectionLabel: "Templates", heading: "Clinical summary templates for every encounter", items: [
       { icon: "FileText", title: "Visit note templates", description: "Templates following SOAP format with {{subjective}}, {{objective}}, {{assessment}}, and {{plan}} variables." },
@@ -3655,7 +3655,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "research-abstract-prompt-template",
     category: "template",
-    meta: { title: "Research Abstract Prompt Template | TeamPrompt", description: "AI prompt templates for research abstracts — structured abstracts, background summaries, and results formatting. Write publication-ready abstracts with structured prompts.", keywords: ["research abstract prompt template", "AI academic writing", "publication abstract template"] },
+    meta: { title: "Research Abstract Prompt Template", description: "AI prompt templates for research abstracts — structured abstracts, background summaries, and results formatting. Write publication-ready abstracts with structured prompts.", keywords: ["research abstract prompt template", "AI academic writing", "publication abstract template"] },
     hero: { headline: "Research abstracts that get accepted", subtitle: "Prompt templates for structured abstracts with background, methods, results, and conclusions. Use {{study}}, {{findings}}, and {{journal}} variables for publication-ready abstracts.", badges: ["Structured abstracts", "Results formatting", "Journal-specific"] },
     features: { sectionLabel: "Templates", heading: "Research abstract templates for every format", items: [
       { icon: "BookOpen", title: "Structured abstract templates", description: "Templates with {{background}}, {{methods}}, {{results}}, and {{conclusions}} sections for journal submission." },
@@ -3676,7 +3676,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "care-plan-prompt-template",
     category: "template",
-    meta: { title: "Care Plan Prompt Template | TeamPrompt", description: "AI prompt templates for care plans — treatment goals, interventions, and progress tracking. Plan patient care with structured prompts.", keywords: ["care plan prompt template", "AI care planning", "treatment plan template"] },
+    meta: { title: "Care Plan Prompt Template", description: "AI prompt templates for care plans — treatment goals, interventions, and progress tracking. Plan patient care with structured prompts.", keywords: ["care plan prompt template", "AI care planning", "treatment plan template"] },
     hero: { headline: "Care plans that improve outcomes", subtitle: "Prompt templates for treatment goals, interventions, and progress monitoring. Use {{patient}}, {{diagnosis}}, and {{goals}} variables for comprehensive, individualized care plans.", badges: ["Treatment goals", "Interventions", "Progress tracking"] },
     features: { sectionLabel: "Templates", heading: "Care plan templates for every need", items: [
       { icon: "BookOpen", title: "Treatment goal templates", description: "Templates for SMART goals with {{condition}}, {{target_outcome}}, {{timeline}}, and {{measures}} variables." },
@@ -3697,7 +3697,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "hipaa-note-prompt-template",
     category: "template",
-    meta: { title: "HIPAA Note Prompt Template | TeamPrompt", description: "AI prompt templates for HIPAA-compliant notes — de-identified summaries, minimum necessary documentation, and compliance checklists. Document safely with structured prompts.", keywords: ["HIPAA note prompt template", "AI HIPAA compliance", "protected health information template"] },
+    meta: { title: "HIPAA Note Prompt Template", description: "AI prompt templates for HIPAA-compliant notes — de-identified summaries, minimum necessary documentation, and compliance checklists. Document safely with structured prompts.", keywords: ["HIPAA note prompt template", "AI HIPAA compliance", "protected health information template"] },
     hero: { headline: "HIPAA-compliant notes, every time", subtitle: "Prompt templates for de-identified summaries and minimum necessary documentation. Use {{note_type}}, {{purpose}}, and {{audience}} variables for compliant healthcare notes.", badges: ["De-identification", "Minimum necessary", "Compliance checklists"] },
     features: { sectionLabel: "Templates", heading: "HIPAA note templates for every use case", items: [
       { icon: "Shield", title: "De-identification templates", description: "Templates that strip {{identifiers}} from clinical notes while preserving clinically relevant information." },
@@ -3718,7 +3718,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "referral-letter-prompt-template",
     category: "template",
-    meta: { title: "Referral Letter Prompt Template | TeamPrompt", description: "AI prompt templates for referral letters — specialist referrals, inter-facility transfers, and consultation requests. Write effective referrals with structured prompts.", keywords: ["referral letter prompt template", "AI medical referral", "specialist referral template"] },
+    meta: { title: "Referral Letter Prompt Template", description: "AI prompt templates for referral letters — specialist referrals, inter-facility transfers, and consultation requests. Write effective referrals with structured prompts.", keywords: ["referral letter prompt template", "AI medical referral", "specialist referral template"] },
     hero: { headline: "Referral letters that get patients seen faster", subtitle: "Prompt templates for specialist referrals and consultation requests. Use {{patient}}, {{referring_provider}}, and {{reason}} variables for clear, actionable referral letters.", badges: ["Specialist referrals", "Consultation requests", "Transfer summaries"] },
     features: { sectionLabel: "Templates", heading: "Referral letter templates for every type", items: [
       { icon: "FileText", title: "Specialist referral templates", description: "Templates with {{reason}}, {{relevant_history}}, {{current_treatment}}, and {{specific_questions}} variables." },
@@ -3739,7 +3739,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "treatment-explanation-prompt-template",
     category: "template",
-    meta: { title: "Treatment Explanation Prompt Template | TeamPrompt", description: "AI prompt templates for treatment explanations — procedure descriptions, medication education, and risk/benefit discussions. Explain treatments clearly with structured prompts.", keywords: ["treatment explanation prompt template", "AI patient education", "medical explanation template"] },
+    meta: { title: "Treatment Explanation Prompt Template", description: "AI prompt templates for treatment explanations — procedure descriptions, medication education, and risk/benefit discussions. Explain treatments clearly with structured prompts.", keywords: ["treatment explanation prompt template", "AI patient education", "medical explanation template"] },
     hero: { headline: "Treatment explanations patients understand", subtitle: "Prompt templates for procedure descriptions, medication education, and risk/benefit discussions. Use {{treatment}}, {{condition}}, and {{reading_level}} variables for clear explanations.", badges: ["Procedure descriptions", "Medication education", "Risk/benefit discussions"] },
     features: { sectionLabel: "Templates", heading: "Treatment explanation templates for every scenario", items: [
       { icon: "BookOpen", title: "Procedure description templates", description: "Templates explaining {{procedure}} with {{steps}}, {{preparation}}, and {{recovery}} variables at appropriate reading levels." },
@@ -3760,7 +3760,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "discharge-instruction-prompt-template",
     category: "template",
-    meta: { title: "Discharge Instruction Prompt Template | TeamPrompt", description: "AI prompt templates for discharge instructions — medication lists, activity restrictions, and follow-up appointments. Send patients home safely with structured prompts.", keywords: ["discharge instruction prompt template", "AI discharge planning", "patient discharge template"] },
+    meta: { title: "Discharge Instruction Prompt Template", description: "AI prompt templates for discharge instructions — medication lists, activity restrictions, and follow-up appointments. Send patients home safely with structured prompts.", keywords: ["discharge instruction prompt template", "AI discharge planning", "patient discharge template"] },
     hero: { headline: "Discharge instructions patients follow", subtitle: "Prompt templates for medication lists, activity restrictions, and follow-up care. Use {{diagnosis}}, {{medications}}, and {{restrictions}} variables for clear discharge instructions.", badges: ["Medication lists", "Activity restrictions", "Follow-up care"] },
     features: { sectionLabel: "Templates", heading: "Discharge instruction templates for every case", items: [
       { icon: "FileText", title: "Medication list templates", description: "Templates with {{medication}}, {{dose}}, {{frequency}}, and {{duration}} variables for clear medication instructions." },
@@ -3781,7 +3781,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "medical-record-summary-prompt-template",
     category: "template",
-    meta: { title: "Medical Record Summary Prompt Template | TeamPrompt", description: "AI prompt templates for medical record summaries — chart reviews, history compilations, and care timeline creation. Summarize records quickly with structured prompts.", keywords: ["medical record summary prompt template", "AI chart review", "health record template"] },
+    meta: { title: "Medical Record Summary Prompt Template", description: "AI prompt templates for medical record summaries — chart reviews, history compilations, and care timeline creation. Summarize records quickly with structured prompts.", keywords: ["medical record summary prompt template", "AI chart review", "health record template"] },
     hero: { headline: "Medical records, summarized in minutes", subtitle: "Prompt templates for chart reviews, history compilations, and care timelines. Use {{patient}}, {{date_range}}, and {{focus_area}} variables for efficient record summaries.", badges: ["Chart reviews", "History compilations", "Care timelines"] },
     features: { sectionLabel: "Templates", heading: "Medical record summary templates for every need", items: [
       { icon: "FileText", title: "Chart review templates", description: "Templates that extract key information from {{records}} with {{focus_area}} and {{date_range}} variables." },
@@ -3802,7 +3802,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "informed-consent-prompt-template",
     category: "template",
-    meta: { title: "Informed Consent Prompt Template | TeamPrompt", description: "AI prompt templates for informed consent — procedure explanations, risk disclosures, and alternative discussions. Support informed decision-making with structured prompts.", keywords: ["informed consent prompt template", "AI consent documentation", "patient consent template"] },
+    meta: { title: "Informed Consent Prompt Template", description: "AI prompt templates for informed consent — procedure explanations, risk disclosures, and alternative discussions. Support informed decision-making with structured prompts.", keywords: ["informed consent prompt template", "AI consent documentation", "patient consent template"] },
     hero: { headline: "Informed consent that truly informs", subtitle: "Prompt templates for procedure explanations, risk disclosures, and alternative discussions. Use {{procedure}}, {{risks}}, and {{alternatives}} variables for thorough consent documentation.", badges: ["Procedure explanations", "Risk disclosures", "Alternative discussions"] },
     features: { sectionLabel: "Templates", heading: "Informed consent templates for every procedure", items: [
       { icon: "BookOpen", title: "Procedure explanation templates", description: "Templates explaining {{procedure}} in patient-friendly language with {{steps}}, {{duration}}, and {{anesthesia}} variables." },
@@ -3823,7 +3823,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "lesson-plan-prompt-template",
     category: "template",
-    meta: { title: "Lesson Plan Prompt Template | TeamPrompt", description: "AI prompt templates for lesson plans — learning objectives, activities, and assessments. Plan engaging lessons with structured prompts.", keywords: ["lesson plan prompt template", "AI lesson planning", "teaching template"] },
+    meta: { title: "Lesson Plan Prompt Template", description: "AI prompt templates for lesson plans — learning objectives, activities, and assessments. Plan engaging lessons with structured prompts.", keywords: ["lesson plan prompt template", "AI lesson planning", "teaching template"] },
     hero: { headline: "Lesson plans that engage every student", subtitle: "Prompt templates for learning objectives, activities, and assessments. Use {{subject}}, {{grade_level}}, and {{topic}} variables for standards-aligned, engaging lessons.", badges: ["Learning objectives", "Activities", "Assessments"] },
     features: { sectionLabel: "Templates", heading: "Lesson plan templates for every subject", items: [
       { icon: "BookOpen", title: "Standards-aligned templates", description: "Templates with {{standard}}, {{objective}}, and {{assessment}} variables for curriculum-aligned lesson plans." },
@@ -3844,7 +3844,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "rubric-prompt-template",
     category: "template",
-    meta: { title: "Rubric Prompt Template | TeamPrompt", description: "AI prompt templates for rubrics — scoring criteria, performance levels, and student-friendly language. Create fair, transparent rubrics with structured prompts.", keywords: ["rubric prompt template", "AI rubric creation", "assessment rubric template"] },
+    meta: { title: "Rubric Prompt Template", description: "AI prompt templates for rubrics — scoring criteria, performance levels, and student-friendly language. Create fair, transparent rubrics with structured prompts.", keywords: ["rubric prompt template", "AI rubric creation", "assessment rubric template"] },
     hero: { headline: "Rubrics that make expectations clear", subtitle: "Prompt templates for scoring criteria, performance levels, and student-friendly descriptors. Use {{assignment}}, {{criteria}}, and {{levels}} variables for transparent assessment.", badges: ["Scoring criteria", "Performance levels", "Student-friendly"] },
     features: { sectionLabel: "Templates", heading: "Rubric templates for every assignment type", items: [
       { icon: "BarChart3", title: "Analytic rubric templates", description: "Templates with separate scoring for each {{criterion}} with {{levels}} and {{descriptors}} variables." },
@@ -3865,7 +3865,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "student-feedback-prompt-template",
     category: "template",
-    meta: { title: "Student Feedback Prompt Template | TeamPrompt", description: "AI prompt templates for student feedback — formative comments, summative evaluations, and growth-focused narratives. Give meaningful feedback with structured prompts.", keywords: ["student feedback prompt template", "AI educational feedback", "student evaluation template"] },
+    meta: { title: "Student Feedback Prompt Template", description: "AI prompt templates for student feedback — formative comments, summative evaluations, and growth-focused narratives. Give meaningful feedback with structured prompts.", keywords: ["student feedback prompt template", "AI educational feedback", "student evaluation template"] },
     hero: { headline: "Feedback that helps students grow", subtitle: "Prompt templates for formative comments, summative evaluations, and growth narratives. Use {{student}}, {{assignment}}, and {{strengths}} variables for personalized, constructive feedback.", badges: ["Formative comments", "Growth narratives", "Constructive feedback"] },
     features: { sectionLabel: "Templates", heading: "Student feedback templates for every purpose", items: [
       { icon: "BookOpen", title: "Formative feedback templates", description: "Templates for in-process feedback with {{strengths}}, {{next_steps}}, and {{specific_examples}} variables." },
@@ -3886,7 +3886,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "course-outline-prompt-template",
     category: "template",
-    meta: { title: "Course Outline Prompt Template | TeamPrompt", description: "AI prompt templates for course outlines — unit plans, scope and sequence, and curriculum maps. Design courses with structured prompts.", keywords: ["course outline prompt template", "AI curriculum design", "course planning template"] },
+    meta: { title: "Course Outline Prompt Template", description: "AI prompt templates for course outlines — unit plans, scope and sequence, and curriculum maps. Design courses with structured prompts.", keywords: ["course outline prompt template", "AI curriculum design", "course planning template"] },
     hero: { headline: "Course outlines that guide learning", subtitle: "Prompt templates for unit plans, scope and sequence, and curriculum frameworks. Use {{course}}, {{standards}}, and {{duration}} variables for well-structured course design.", badges: ["Unit plans", "Scope and sequence", "Curriculum maps"] },
     features: { sectionLabel: "Templates", heading: "Course outline templates for every level", items: [
       { icon: "BookOpen", title: "Unit plan templates", description: "Templates for unit design with {{topic}}, {{duration}}, {{objectives}}, and {{assessments}} variables." },
@@ -3907,7 +3907,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "assignment-prompt-template",
     category: "template",
-    meta: { title: "Assignment Prompt Template | TeamPrompt", description: "AI prompt templates for assignments — project briefs, essay prompts, and lab instructions. Create engaging assignments with structured prompts.", keywords: ["assignment prompt template", "AI assignment design", "student assignment template"] },
+    meta: { title: "Assignment Prompt Template", description: "AI prompt templates for assignments — project briefs, essay prompts, and lab instructions. Create engaging assignments with structured prompts.", keywords: ["assignment prompt template", "AI assignment design", "student assignment template"] },
     hero: { headline: "Assignments that challenge and engage", subtitle: "Prompt templates for project briefs, essay prompts, and lab instructions. Use {{subject}}, {{objective}}, and {{difficulty}} variables for meaningful, well-structured assignments.", badges: ["Project briefs", "Essay prompts", "Lab instructions"] },
     features: { sectionLabel: "Templates", heading: "Assignment templates for every subject", items: [
       { icon: "BookOpen", title: "Essay prompt templates", description: "Templates for writing assignments with {{topic}}, {{thesis_requirement}}, {{length}}, and {{sources}} variables." },
@@ -3928,7 +3928,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "study-guide-prompt-template",
     category: "template",
-    meta: { title: "Study Guide Prompt Template | TeamPrompt", description: "AI prompt templates for study guides — key concepts, review questions, and practice problems. Help students prepare with structured study prompts.", keywords: ["study guide prompt template", "AI study materials", "exam prep template"] },
+    meta: { title: "Study Guide Prompt Template", description: "AI prompt templates for study guides — key concepts, review questions, and practice problems. Help students prepare with structured study prompts.", keywords: ["study guide prompt template", "AI study materials", "exam prep template"] },
     hero: { headline: "Study guides that help students succeed", subtitle: "Prompt templates for key concepts, review questions, and practice problems. Use {{unit}}, {{topics}}, and {{exam_format}} variables for comprehensive exam preparation.", badges: ["Key concepts", "Review questions", "Practice problems"] },
     features: { sectionLabel: "Templates", heading: "Study guide templates for every exam", items: [
       { icon: "BookOpen", title: "Concept summary templates", description: "Templates for key concept reviews with {{topic}}, {{definitions}}, and {{connections}} variables." },
@@ -3949,7 +3949,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "assessment-question-prompt-template",
     category: "template",
-    meta: { title: "Assessment Question Prompt Template | TeamPrompt", description: "AI prompt templates for assessment questions — multiple choice, short answer, and performance tasks. Build quality assessments with structured prompts.", keywords: ["assessment question prompt template", "AI test creation", "exam question template"] },
+    meta: { title: "Assessment Question Prompt Template", description: "AI prompt templates for assessment questions — multiple choice, short answer, and performance tasks. Build quality assessments with structured prompts.", keywords: ["assessment question prompt template", "AI test creation", "exam question template"] },
     hero: { headline: "Assessment questions that measure learning", subtitle: "Prompt templates for multiple choice, short answer, and performance tasks. Use {{objective}}, {{bloom_level}}, and {{content}} variables for valid, reliable assessments.", badges: ["Multiple choice", "Short answer", "Performance tasks"] },
     features: { sectionLabel: "Templates", heading: "Assessment question templates for every type", items: [
       { icon: "BookOpen", title: "Multiple choice templates", description: "Templates for MC questions with {{stem}}, {{correct_answer}}, and {{distractors}} variables following item-writing best practices." },
@@ -3970,7 +3970,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "learning-objective-prompt-template",
     category: "template",
-    meta: { title: "Learning Objective Prompt Template | TeamPrompt", description: "AI prompt templates for learning objectives — measurable outcomes, standards alignment, and backward design. Write clear objectives with structured prompts.", keywords: ["learning objective prompt template", "AI curriculum writing", "educational objective template"] },
+    meta: { title: "Learning Objective Prompt Template", description: "AI prompt templates for learning objectives — measurable outcomes, standards alignment, and backward design. Write clear objectives with structured prompts.", keywords: ["learning objective prompt template", "AI curriculum writing", "educational objective template"] },
     hero: { headline: "Learning objectives that drive instruction", subtitle: "Prompt templates for measurable outcomes, standards alignment, and backward design. Use {{subject}}, {{standard}}, and {{bloom_level}} variables for clear, actionable objectives.", badges: ["Measurable outcomes", "Standards alignment", "Backward design"] },
     features: { sectionLabel: "Templates", heading: "Learning objective templates for every level", items: [
       { icon: "BookOpen", title: "SMART objective templates", description: "Templates for specific, measurable, achievable, relevant, and time-bound learning objectives with {{content}} and {{skill}} variables." },
@@ -3991,7 +3991,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "curriculum-map-prompt-template",
     category: "template",
-    meta: { title: "Curriculum Map Prompt Template | TeamPrompt", description: "AI prompt templates for curriculum maps — scope and sequence, vertical alignment, and cross-curricular connections. Map curriculum with structured prompts.", keywords: ["curriculum map prompt template", "AI curriculum mapping", "scope and sequence template"] },
+    meta: { title: "Curriculum Map Prompt Template", description: "AI prompt templates for curriculum maps — scope and sequence, vertical alignment, and cross-curricular connections. Map curriculum with structured prompts.", keywords: ["curriculum map prompt template", "AI curriculum mapping", "scope and sequence template"] },
     hero: { headline: "Curriculum maps that ensure coverage", subtitle: "Prompt templates for scope and sequence, vertical alignment, and cross-curricular connections. Use {{subject}}, {{grade_levels}}, and {{standards}} variables for comprehensive mapping.", badges: ["Scope and sequence", "Vertical alignment", "Cross-curricular"] },
     features: { sectionLabel: "Templates", heading: "Curriculum map templates for every need", items: [
       { icon: "BookOpen", title: "Scope and sequence templates", description: "Templates for year-long curriculum maps with {{units}}, {{pacing}}, {{standards}}, and {{assessments}} variables." },
@@ -4012,7 +4012,7 @@ export const templatePages: SeoPageData[] = [
   {
     slug: "parent-communication-prompt-template",
     category: "template",
-    meta: { title: "Parent Communication Prompt Template | TeamPrompt", description: "AI prompt templates for parent communication — progress updates, behavior notices, and event announcements. Connect with families using structured prompts.", keywords: ["parent communication prompt template", "AI school communication", "parent letter template"] },
+    meta: { title: "Parent Communication Prompt Template", description: "AI prompt templates for parent communication — progress updates, behavior notices, and event announcements. Connect with families using structured prompts.", keywords: ["parent communication prompt template", "AI school communication", "parent letter template"] },
     hero: { headline: "Parent communications that build partnerships", subtitle: "Prompt templates for progress updates, behavior notices, and event announcements. Use {{student}}, {{message_type}}, and {{tone}} variables for professional family communication.", badges: ["Progress updates", "Behavior notices", "Event announcements"] },
     features: { sectionLabel: "Templates", heading: "Parent communication templates for every need", items: [
       { icon: "BookOpen", title: "Progress update templates", description: "Templates for academic updates with {{subject}}, {{strengths}}, {{areas_for_growth}}, and {{support_suggestions}} variables." },

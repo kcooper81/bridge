@@ -5,7 +5,7 @@ export const guidePages: SeoPageData[] = [
     slug: "prompt-management-101",
     category: "guide",
     meta: {
-      title: "Prompt Management 101 — A Complete Introduction | TeamPrompt",
+      title: "Prompt Management 101",
       description:
         "Learn what prompt management is, why teams need it, and how to get started. A complete beginner's guide to organizing, sharing, and governing AI prompts across your organization.",
       keywords: ["prompt management", "what is prompt management", "prompt management introduction", "AI prompt organization", "getting started prompt management"],
@@ -60,7 +60,7 @@ export const guidePages: SeoPageData[] = [
     slug: "prompt-engineering-best-practices",
     category: "guide",
     meta: {
-      title: "Prompt Engineering Best Practices for Teams | TeamPrompt",
+      title: "Prompt Engineering Best Practices for Teams",
       description:
         "Master prompt engineering at scale. Learn best practices for writing, organizing, and iterating on AI prompts across your team with structure, consistency, and governance.",
       keywords: ["prompt engineering best practices", "team prompt engineering", "AI prompt writing", "prompt optimization", "prompt engineering guide"],
@@ -115,7 +115,7 @@ export const guidePages: SeoPageData[] = [
     slug: "building-prompt-library",
     category: "guide",
     meta: {
-      title: "How to Build a Prompt Library for Your Team | TeamPrompt",
+      title: "How to Build a Prompt Library for Your Team",
       description:
         "A step-by-step guide to building a team prompt library from scratch. Learn how to organize, categorize, and scale a prompt library that your whole team actually uses.",
       keywords: ["build prompt library", "prompt library guide", "team prompt library", "prompt organization", "prompt library setup"],
@@ -170,7 +170,7 @@ export const guidePages: SeoPageData[] = [
     slug: "ai-governance-guide",
     category: "guide",
     meta: {
-      title: "AI Governance Guide for Enterprises | TeamPrompt",
+      title: "AI Governance Guide for Enterprises",
       description:
         "How enterprises establish AI governance policies, oversight structures, and compliance frameworks for responsible AI tool usage at scale.",
       keywords: ["AI governance guide", "enterprise AI governance", "AI policy", "AI oversight", "responsible AI", "AI compliance"],
@@ -225,7 +225,7 @@ export const guidePages: SeoPageData[] = [
     slug: "dlp-for-ai-tools",
     category: "guide",
     meta: {
-      title: "DLP for AI Tools: A Practical Guide | TeamPrompt",
+      title: "DLP for AI Tools: A Practical Guide",
       description:
         "Why DLP matters for AI tools, what to scan for, and how to implement automated protection across ChatGPT, Claude, Gemini, and Copilot.",
       keywords: ["DLP for AI", "data loss prevention AI tools", "AI DLP guide", "prevent data leaks AI", "AI security DLP"],
@@ -280,7 +280,7 @@ export const guidePages: SeoPageData[] = [
     slug: "ai-prompt-templates-guide",
     category: "guide",
     meta: {
-      title: "Creating Effective AI Prompt Templates | TeamPrompt",
+      title: "Creating Effective AI Prompt Templates",
       description:
         "How to design reusable AI prompt templates with dynamic variables. Best practices for structure, variable naming, and team-scale rollout.",
       keywords: ["AI prompt templates", "prompt template guide", "reusable prompts", "prompt variables", "template design", "prompt template best practices"],
@@ -334,7 +334,7 @@ export const guidePages: SeoPageData[] = [
     slug: "team-ai-adoption",
     category: "guide",
     meta: {
-      title: "Team AI Adoption Playbook | TeamPrompt",
+      title: "Team AI Adoption Playbook",
       description:
         "A practical playbook for rolling out AI tools across your team with governance, training, and measurement. Drive adoption without sacrificing security or consistency.",
       keywords: ["team AI adoption", "AI adoption playbook", "AI rollout guide", "enterprise AI adoption", "AI change management"],
@@ -389,7 +389,7 @@ export const guidePages: SeoPageData[] = [
     slug: "prompt-version-control",
     category: "guide",
     meta: {
-      title: "Prompt Version Control Guide | TeamPrompt",
+      title: "Prompt Version Control Guide",
       description:
         "Learn why version control for prompts matters and how to implement it. Covers diff views, rollback, collaboration patterns, and best practices for versioning AI prompts.",
       keywords: ["prompt version control", "prompt versioning", "prompt diff", "prompt rollback", "prompt history", "version control AI prompts"],
@@ -444,7 +444,7 @@ export const guidePages: SeoPageData[] = [
     slug: "ai-security-best-practices",
     category: "guide",
     meta: {
-      title: "AI Security Best Practices for Teams | TeamPrompt",
+      title: "AI Security Best Practices for Teams",
       description:
         "Practical guide to securing AI tool usage across your team: DLP, audit trails, access control, compliance frameworks, and rollout steps.",
       keywords: ["AI security best practices", "secure AI usage", "AI data security", "AI tool security", "enterprise AI security"],
@@ -499,7 +499,7 @@ export const guidePages: SeoPageData[] = [
     slug: "measuring-ai-roi",
     category: "guide",
     meta: {
-      title: "Measuring AI ROI with Prompt Analytics | TeamPrompt",
+      title: "Measuring AI ROI with Prompt Analytics",
       description:
         "Learn how to measure AI adoption and ROI using prompt usage analytics. Track adoption rates, time savings, prompt effectiveness, and make data-driven decisions about AI investment.",
       keywords: ["measuring AI ROI", "AI analytics", "prompt analytics", "AI adoption metrics", "AI usage tracking", "AI investment ROI"],
@@ -554,7 +554,7 @@ export const guidePages: SeoPageData[] = [
     slug: "ai-compliance-frameworks",
     category: "guide",
     meta: {
-      title: "AI Compliance Frameworks for Organizations | TeamPrompt",
+      title: "AI Compliance Frameworks for Organizations",
       description:
         "Understand how HIPAA, GDPR, SOX, PCI-DSS, and other compliance frameworks apply to AI tool usage. Learn what controls you need and how to implement them.",
       keywords: ["AI compliance frameworks", "HIPAA AI compliance", "GDPR AI tools", "SOX AI compliance", "AI regulatory compliance", "compliance for AI"],
@@ -609,7 +609,7 @@ export const guidePages: SeoPageData[] = [
     slug: "prompt-collaboration-guide",
     category: "guide",
     meta: {
-      title: "Collaborative Prompt Development Guide | TeamPrompt",
+      title: "Collaborative Prompt Development Guide",
       description:
         "Learn how teams can collaborate on prompt creation, review, and iteration. Build a culture of shared prompt development with approval workflows, version control, and team categories.",
       keywords: ["prompt collaboration", "collaborative prompt development", "team prompt writing", "prompt review process", "prompt co-authoring"],
@@ -664,7 +664,7 @@ export const guidePages: SeoPageData[] = [
     slug: "ai-tool-rollout",
     category: "guide",
     meta: {
-      title: "Rolling Out AI Tools Across Your Organization | TeamPrompt",
+      title: "Rolling Out AI Tools Across Your Organization",
       description:
         "A practical guide to deploying AI tools organization-wide with governance, training, and measurement. Avoid the pitfalls of ungoverned AI adoption.",
       keywords: ["AI tool rollout", "deploying AI tools", "organization AI rollout", "AI tool deployment", "enterprise AI deployment"],
@@ -719,7 +719,7 @@ export const guidePages: SeoPageData[] = [
     slug: "reducing-ai-hallucinations",
     category: "guide",
     meta: {
-      title: "Reducing AI Hallucinations with Better Prompts | TeamPrompt",
+      title: "Reducing AI Hallucinations with Better Prompts",
       description:
         "Learn how structured prompts, templates, and team guidelines reduce AI hallucinations. Practical techniques for getting more accurate and reliable outputs from AI tools.",
       keywords: ["reduce AI hallucinations", "AI hallucination prevention", "better AI prompts", "accurate AI output", "AI reliability", "prompt accuracy"],
@@ -774,7 +774,7 @@ export const guidePages: SeoPageData[] = [
     slug: "prompt-testing-strategies",
     category: "guide",
     meta: {
-      title: "Prompt Testing and Iteration Strategies | TeamPrompt",
+      title: "Prompt Testing and Iteration Strategies",
       description:
         "Learn how to test, iterate, and improve AI prompts systematically. Covers A/B testing approaches, iteration frameworks, performance measurement, and team-based prompt optimization.",
       keywords: ["prompt testing", "prompt iteration", "prompt optimization", "AI prompt testing", "prompt improvement", "prompt A/B testing"],
@@ -829,7 +829,7 @@ export const guidePages: SeoPageData[] = [
     slug: "how-to-write-chatgpt-prompts",
     category: "guide",
     meta: {
-      title: "How to Write Effective ChatGPT Prompts for Teams | TeamPrompt",
+      title: "How to Write Effective ChatGPT Prompts for Teams",
       description: "Learn how to write ChatGPT prompts that deliver consistent, high-quality results across your team. Practical techniques, templates, and best practices.",
       keywords: ["write ChatGPT prompts", "ChatGPT prompt guide", "effective ChatGPT prompts", "ChatGPT tips for teams", "ChatGPT prompt writing"],
     },
@@ -876,7 +876,7 @@ export const guidePages: SeoPageData[] = [
     slug: "how-to-chain-prompts",
     category: "guide",
     meta: {
-      title: "How to Chain Prompts for Complex AI Tasks | TeamPrompt",
+      title: "How to Chain Prompts for Complex AI Tasks",
       description: "Learn how to break complex AI tasks into sequential prompt chains that produce more accurate and reliable results. Step-by-step guide with examples.",
       keywords: ["chain prompts", "prompt chaining guide", "multi-step prompts", "sequential AI prompts", "prompt chain tutorial"],
     },
@@ -923,7 +923,7 @@ export const guidePages: SeoPageData[] = [
     slug: "how-to-use-prompt-variables",
     category: "guide",
     meta: {
-      title: "How to Use Prompt Variables for Reusable Templates | TeamPrompt",
+      title: "How to Use Prompt Variables for Reusable Templates",
       description: "Learn how to add dynamic variables to your prompt templates for maximum reusability. Step-by-step guide to creating flexible, team-ready templates.",
       keywords: ["prompt variables guide", "template variables", "dynamic prompts", "reusable prompt templates", "prompt variable tutorial"],
     },
@@ -970,7 +970,7 @@ export const guidePages: SeoPageData[] = [
     slug: "how-to-write-system-prompts",
     category: "guide",
     meta: {
-      title: "How to Write Effective System Prompts | TeamPrompt",
+      title: "How to Write Effective System Prompts",
       description: "Learn how to write system prompts that control AI behavior consistently. Best practices for persona, constraints, and output formatting.",
       keywords: ["write system prompts", "system prompt guide", "AI system instructions", "system message best practices", "system prompt tutorial"],
     },
@@ -1017,7 +1017,7 @@ export const guidePages: SeoPageData[] = [
     slug: "how-to-use-few-shot-prompts",
     category: "guide",
     meta: {
-      title: "How to Use Few-Shot Prompts for Consistent AI Output | TeamPrompt",
+      title: "How to Use Few-Shot Prompts for Consistent AI Output",
       description: "Learn how to use few-shot prompting to get consistent, formatted AI outputs. Practical guide with examples and best practices for teams.",
       keywords: ["few-shot prompts guide", "few-shot prompting tutorial", "AI examples prompts", "in-context learning guide", "few-shot best practices"],
     },
@@ -1064,7 +1064,7 @@ export const guidePages: SeoPageData[] = [
     slug: "how-to-structure-complex-prompts",
     category: "guide",
     meta: {
-      title: "How to Structure Complex Prompts for AI | TeamPrompt",
+      title: "How to Structure Complex Prompts for AI",
       description: "Learn how to structure multi-part prompts that handle complex tasks. Framework for organizing role, context, task, constraints, and output format.",
       keywords: ["structure complex prompts", "prompt structure guide", "multi-part prompts", "prompt framework", "organize AI prompts"],
     },
@@ -1111,7 +1111,7 @@ export const guidePages: SeoPageData[] = [
     slug: "how-to-write-role-based-prompts",
     category: "guide",
     meta: {
-      title: "How to Write Role-Based Prompts for AI | TeamPrompt",
+      title: "How to Write Role-Based Prompts for AI",
       description: "Learn how to assign roles and personas to AI for better, more focused outputs. Practical guide with examples for different team use cases.",
       keywords: ["role-based prompts", "AI persona prompts", "assign role to AI", "role prompting guide", "AI role definition"],
     },
@@ -1158,7 +1158,7 @@ export const guidePages: SeoPageData[] = [
     slug: "how-to-optimize-prompt-length",
     category: "guide",
     meta: {
-      title: "How to Optimize Prompt Length for Cost and Quality | TeamPrompt",
+      title: "How to Optimize Prompt Length for Cost and Quality",
       description: "Learn how to write concise prompts that maximize output quality while minimizing token costs. Practical optimization techniques for teams.",
       keywords: ["optimize prompt length", "prompt efficiency", "reduce AI costs", "token optimization", "concise prompts"],
     },
@@ -1205,7 +1205,7 @@ export const guidePages: SeoPageData[] = [
     slug: "how-to-test-prompts",
     category: "guide",
     meta: {
-      title: "How to Test AI Prompts Before Sharing with Your Team | TeamPrompt",
+      title: "How to Test AI Prompts Before Sharing with Your Team",
       description: "Learn a systematic approach to testing prompts before deploying them to your team. Evaluation criteria, test cases, and quality assurance practices.",
       keywords: ["test AI prompts", "prompt testing guide", "prompt QA", "evaluate prompts", "prompt quality testing"],
     },
@@ -1252,7 +1252,7 @@ export const guidePages: SeoPageData[] = [
     slug: "how-to-version-prompts",
     category: "guide",
     meta: {
-      title: "How to Version Control Your AI Prompts | TeamPrompt",
+      title: "How to Version Control Your AI Prompts",
       description: "Learn how to track prompt changes, compare versions, and roll back when needed. A practical guide to prompt version control for teams.",
       keywords: ["version control prompts", "prompt versioning guide", "track prompt changes", "prompt history", "prompt version management"],
     },
@@ -1299,7 +1299,7 @@ export const guidePages: SeoPageData[] = [
     slug: "how-to-write-chain-of-thought-prompts",
     category: "guide",
     meta: {
-      title: "How to Write Chain-of-Thought Prompts | TeamPrompt",
+      title: "How to Write Chain-of-Thought Prompts",
       description: "Learn how to use chain-of-thought prompting to improve AI reasoning. Step-by-step guide for better results on complex tasks.",
       keywords: ["chain of thought prompts", "CoT prompting guide", "AI reasoning prompts", "step by step prompts", "chain of thought tutorial"],
     },
@@ -1346,7 +1346,7 @@ export const guidePages: SeoPageData[] = [
     slug: "how-to-use-prompt-templates",
     category: "guide",
     meta: {
-      title: "How to Use Prompt Templates Effectively | TeamPrompt",
+      title: "How to Use Prompt Templates Effectively",
       description: "Learn how to create, organize, and deploy prompt templates across your team. Complete guide to template-driven AI workflows.",
       keywords: ["prompt templates guide", "use prompt templates", "AI templates tutorial", "prompt template best practices", "template management"],
     },
@@ -1393,7 +1393,7 @@ export const guidePages: SeoPageData[] = [
     slug: "how-to-evaluate-prompt-quality",
     category: "guide",
     meta: {
-      title: "How to Evaluate AI Prompt Quality | TeamPrompt",
+      title: "How to Evaluate AI Prompt Quality",
       description: "Learn systematic methods for evaluating prompt quality. Criteria, rubrics, and frameworks for assessing whether your prompts are working.",
       keywords: ["evaluate prompt quality", "prompt quality assessment", "AI prompt evaluation", "prompt quality metrics", "prompt scoring"],
     },
@@ -1440,7 +1440,7 @@ export const guidePages: SeoPageData[] = [
     slug: "how-to-debug-ai-outputs",
     category: "guide",
     meta: {
-      title: "How to Debug AI Outputs and Fix Prompt Issues | TeamPrompt",
+      title: "How to Debug AI Outputs and Fix Prompt Issues",
       description: "Learn systematic methods for diagnosing and fixing poor AI outputs. Debugging framework for identifying prompt problems and improving results.",
       keywords: ["debug AI outputs", "fix AI prompts", "troubleshoot prompts", "AI output issues", "prompt debugging guide"],
     },
@@ -1487,7 +1487,7 @@ export const guidePages: SeoPageData[] = [
     slug: "how-to-write-multi-step-prompts",
     category: "guide",
     meta: {
-      title: "How to Write Multi-Step Prompts for Complex Tasks | TeamPrompt",
+      title: "How to Write Multi-Step Prompts for Complex Tasks",
       description: "Learn how to design prompts that guide AI through multiple steps within a single interaction. Techniques for structured, multi-part outputs.",
       keywords: ["multi-step prompts", "complex AI prompts", "multi-part prompts guide", "structured prompt output", "step-by-step AI prompts"],
     },
@@ -1534,7 +1534,7 @@ export const guidePages: SeoPageData[] = [
     slug: "how-to-build-prompt-library",
     category: "guide",
     meta: {
-      title: "How to Build a Prompt Library from Scratch | TeamPrompt",
+      title: "How to Build a Prompt Library from Scratch",
       description: "Step-by-step guide to building a team prompt library. From collecting your first prompts to scaling a library your entire organization uses.",
       keywords: ["build prompt library", "create prompt library", "prompt library guide", "team prompt repository", "organize AI prompts"],
     },
@@ -1581,7 +1581,7 @@ export const guidePages: SeoPageData[] = [
     slug: "how-to-share-prompts-across-teams",
     category: "guide",
     meta: {
-      title: "How to Share AI Prompts Across Teams | TeamPrompt",
+      title: "How to Share AI Prompts Across Teams",
       description: "Learn how to share prompt templates across departments and teams while maintaining quality and security. Best practices for cross-team prompt sharing.",
       keywords: ["share prompts across teams", "cross-team prompts", "prompt sharing guide", "team prompt collaboration", "share AI templates"],
     },
@@ -1628,7 +1628,7 @@ export const guidePages: SeoPageData[] = [
     slug: "how-to-onboard-team-to-ai",
     category: "guide",
     meta: {
-      title: "How to Onboard Your Team to AI Tools | TeamPrompt",
+      title: "How to Onboard Your Team to AI Tools",
       description: "A practical guide to onboarding your team to AI tools with structure, training, and governance. Get everyone productive with AI safely and quickly.",
       keywords: ["onboard team AI", "AI onboarding guide", "team AI adoption", "introduce AI to team", "AI training team"],
     },
@@ -1675,7 +1675,7 @@ export const guidePages: SeoPageData[] = [
     slug: "how-to-manage-prompt-permissions",
     category: "guide",
     meta: {
-      title: "How to Manage AI Prompt Permissions | TeamPrompt",
+      title: "How to Manage AI Prompt Permissions",
       description: "Learn how to set up role-based permissions for your prompt library. Control who can view, create, edit, and manage prompts across your organization.",
       keywords: ["prompt permissions", "AI access control", "role-based permissions prompts", "manage prompt access", "prompt library permissions"],
     },
@@ -1722,7 +1722,7 @@ export const guidePages: SeoPageData[] = [
     slug: "how-to-measure-prompt-usage",
     category: "guide",
     meta: {
-      title: "How to Measure AI Prompt Usage and Adoption | TeamPrompt",
+      title: "How to Measure AI Prompt Usage and Adoption",
       description: "Learn how to track prompt usage, measure AI adoption, and use analytics to improve your prompt library. Metrics and KPIs for prompt management.",
       keywords: ["measure prompt usage", "AI adoption metrics", "prompt analytics guide", "track AI usage", "prompt KPIs"],
     },
@@ -1769,7 +1769,7 @@ export const guidePages: SeoPageData[] = [
     slug: "how-to-standardize-ai-workflows",
     category: "guide",
     meta: {
-      title: "How to Standardize AI Workflows Across Your Organization | TeamPrompt",
+      title: "How to Standardize AI Workflows Across Your Organization",
       description: "Learn how to create consistent, repeatable AI workflows that your entire organization follows. Templates, governance, and best practices.",
       keywords: ["standardize AI workflows", "AI workflow guide", "consistent AI processes", "team AI standards", "AI workflow templates"],
     },
@@ -1816,7 +1816,7 @@ export const guidePages: SeoPageData[] = [
     slug: "how-to-create-prompt-governance-policy",
     category: "guide",
     meta: {
-      title: "How to Create a Prompt Governance Policy | TeamPrompt",
+      title: "How to Create a Prompt Governance Policy",
       description: "Learn how to create a prompt governance policy covering quality standards, security requirements, and accountability for your organization's AI usage.",
       keywords: ["prompt governance policy", "AI governance guide", "create AI policy", "prompt management policy", "AI usage governance"],
     },
@@ -1863,7 +1863,7 @@ export const guidePages: SeoPageData[] = [
     slug: "how-to-train-team-prompt-engineering",
     category: "guide",
     meta: {
-      title: "How to Train Your Team on Prompt Engineering | TeamPrompt",
+      title: "How to Train Your Team on Prompt Engineering",
       description: "A practical guide to training your team on prompt engineering skills. Curriculum, exercises, and ongoing development for AI-using teams.",
       keywords: ["train team prompt engineering", "prompt engineering training", "AI skills training", "team AI education", "prompt writing training"],
     },
@@ -1910,7 +1910,7 @@ export const guidePages: SeoPageData[] = [
     slug: "how-to-organize-prompts-by-department",
     category: "guide",
     meta: {
-      title: "How to Organize Prompts by Department | TeamPrompt",
+      title: "How to Organize Prompts by Department",
       description: "Learn how to organize your prompt library by department for maximum discoverability and relevance. Category structures and naming conventions.",
       keywords: ["organize prompts by department", "prompt categories", "department AI prompts", "prompt library structure", "organize AI templates"],
     },
@@ -1957,7 +1957,7 @@ export const guidePages: SeoPageData[] = [
     slug: "how-to-set-up-prompt-approval-workflow",
     category: "guide",
     meta: {
-      title: "How to Set Up a Prompt Approval Workflow | TeamPrompt",
+      title: "How to Set Up a Prompt Approval Workflow",
       description: "Learn how to implement an approval process for shared prompts. Quality gates, review processes, and governance for your prompt library.",
       keywords: ["prompt approval workflow", "prompt review process", "AI prompt governance", "prompt quality gates", "prompt approval process"],
     },
@@ -2004,7 +2004,7 @@ export const guidePages: SeoPageData[] = [
     slug: "how-to-migrate-prompts-from-docs",
     category: "guide",
     meta: {
-      title: "How to Migrate Prompts from Google Docs and Notion | TeamPrompt",
+      title: "How to Migrate Prompts from Google Docs and Notion",
       description: "Step-by-step guide to migrating your team's AI prompts from documents, spreadsheets, and wikis into a proper prompt management platform.",
       keywords: ["migrate prompts", "move prompts from docs", "prompt migration guide", "import prompts", "transfer AI prompts"],
     },
@@ -2051,7 +2051,7 @@ export const guidePages: SeoPageData[] = [
     slug: "how-to-create-ai-style-guide",
     category: "guide",
     meta: {
-      title: "How to Create an AI Style Guide for Your Team | TeamPrompt",
+      title: "How to Create an AI Style Guide for Your Team",
       description: "Learn how to create a style guide for AI-generated content. Ensure consistent voice, tone, and quality across all AI outputs in your organization.",
       keywords: ["AI style guide", "AI content standards", "AI writing guide", "brand voice AI", "AI output consistency"],
     },
@@ -2098,7 +2098,7 @@ export const guidePages: SeoPageData[] = [
     slug: "how-to-measure-ai-roi",
     category: "guide",
     meta: {
-      title: "How to Measure AI ROI for Your Team | TeamPrompt",
+      title: "How to Measure AI ROI for Your Team",
       description: "Learn how to calculate the return on investment from AI tools. Metrics, frameworks, and practical approaches to measuring AI's business impact.",
       keywords: ["measure AI ROI", "AI return on investment", "AI business impact", "calculate AI value", "AI ROI metrics"],
     },
@@ -2145,7 +2145,7 @@ export const guidePages: SeoPageData[] = [
     slug: "how-to-roll-out-ai-tools",
     category: "guide",
     meta: {
-      title: "How to Roll Out AI Tools Across Your Organization | TeamPrompt",
+      title: "How to Roll Out AI Tools Across Your Organization",
       description: "A playbook for rolling out AI tools organization-wide. Phases, change management, and governance for successful enterprise AI adoption.",
       keywords: ["roll out AI tools", "AI deployment guide", "enterprise AI adoption", "AI rollout plan", "deploy AI organization"],
     },
@@ -2192,7 +2192,7 @@ export const guidePages: SeoPageData[] = [
     slug: "how-to-manage-multi-model-strategy",
     category: "guide",
     meta: {
-      title: "How to Manage a Multi-Model AI Strategy | TeamPrompt",
+      title: "How to Manage a Multi-Model AI Strategy",
       description: "Learn how to manage prompts across ChatGPT, Claude, Gemini, and other AI models. Strategies for multi-model governance and optimization.",
       keywords: ["multi-model AI strategy", "manage multiple AI models", "ChatGPT Claude Gemini strategy", "AI model management", "multi-model prompts"],
     },
@@ -2239,7 +2239,7 @@ export const guidePages: SeoPageData[] = [
     slug: "how-to-prevent-data-leaks-chatgpt",
     category: "guide",
     meta: {
-      title: "How to Prevent Data Leaks in ChatGPT | TeamPrompt",
+      title: "How to Prevent Data Leaks in ChatGPT",
       description: "Learn how to prevent sensitive data from being sent to ChatGPT. DLP scanning, policies, and training to protect your organization's data.",
       keywords: ["prevent data leaks ChatGPT", "ChatGPT data protection", "ChatGPT security", "stop data leaks AI", "ChatGPT DLP"],
     },
@@ -2286,7 +2286,7 @@ export const guidePages: SeoPageData[] = [
     slug: "how-to-set-up-dlp-for-ai",
     category: "guide",
     meta: {
-      title: "How to Set Up DLP for AI Tools | TeamPrompt",
+      title: "How to Set Up DLP for AI Tools",
       description: "Step-by-step guide to deploying data loss prevention for AI tools. Configure scanning rules, detection patterns, and enforcement policies.",
       keywords: ["set up DLP AI", "DLP for AI tools", "configure DLP scanning", "AI data loss prevention", "DLP deployment guide"],
     },
@@ -2333,7 +2333,7 @@ export const guidePages: SeoPageData[] = [
     slug: "how-to-implement-ai-policy",
     category: "guide",
     meta: {
-      title: "How to Implement an AI Usage Policy | TeamPrompt",
+      title: "How to Implement an AI Usage Policy",
       description: "Learn how to create and implement an AI usage policy for your organization. Templates, enforcement strategies, and best practices.",
       keywords: ["implement AI policy", "AI usage policy guide", "create AI policy", "AI governance policy", "enterprise AI policy"],
     },
@@ -2380,7 +2380,7 @@ export const guidePages: SeoPageData[] = [
     slug: "how-to-audit-ai-usage",
     category: "guide",
     meta: {
-      title: "How to Audit AI Usage in Your Organization | TeamPrompt",
+      title: "How to Audit AI Usage in Your Organization",
       description: "Learn how to conduct an AI usage audit. Discover what tools are being used, what data is at risk, and how to establish ongoing monitoring.",
       keywords: ["audit AI usage", "AI audit guide", "AI usage assessment", "discover AI tools", "AI security audit"],
     },
@@ -2427,7 +2427,7 @@ export const guidePages: SeoPageData[] = [
     slug: "how-to-comply-hipaa-ai",
     category: "guide",
     meta: {
-      title: "How to Use AI Tools in HIPAA Compliance | TeamPrompt",
+      title: "How to Use AI Tools in HIPAA Compliance",
       description: "A practical guide to using AI tools while maintaining HIPAA compliance. Protect PHI, implement safeguards, and enable safe AI in healthcare.",
       keywords: ["HIPAA AI compliance guide", "use AI HIPAA", "healthcare AI security", "protect PHI AI", "HIPAA compliant AI usage"],
     },
@@ -2474,7 +2474,7 @@ export const guidePages: SeoPageData[] = [
     slug: "how-to-gdpr-compliant-ai",
     category: "guide",
     meta: {
-      title: "How to Use AI Tools in GDPR Compliance | TeamPrompt",
+      title: "How to Use AI Tools in GDPR Compliance",
       description: "Practical guide to maintaining GDPR compliance while using AI tools. Protect personal data, manage consent, and document data processing activities.",
       keywords: ["GDPR AI compliance guide", "GDPR compliant AI", "AI data protection EU", "personal data AI guide", "GDPR AI tools"],
     },
@@ -2521,7 +2521,7 @@ export const guidePages: SeoPageData[] = [
     slug: "how-to-block-sensitive-data-prompts",
     category: "guide",
     meta: {
-      title: "How to Block Sensitive Data in AI Prompts | TeamPrompt",
+      title: "How to Block Sensitive Data in AI Prompts",
       description: "Learn how to prevent sensitive data from being sent to AI tools. Configure DLP rules, custom patterns, and enforcement policies.",
       keywords: ["block sensitive data AI", "prevent sensitive data prompts", "DLP AI prompts", "sensitive data scanning", "AI data blocking"],
     },
@@ -2568,7 +2568,7 @@ export const guidePages: SeoPageData[] = [
     slug: "how-to-monitor-ai-tool-access",
     category: "guide",
     meta: {
-      title: "How to Monitor AI Tool Access and Usage | TeamPrompt",
+      title: "How to Monitor AI Tool Access and Usage",
       description: "Learn how to monitor which AI tools your team uses, track access patterns, and identify security risks. Practical guide to AI usage monitoring.",
       keywords: ["monitor AI tool access", "AI usage monitoring", "track AI usage", "AI access management", "AI tool visibility"],
     },
@@ -2615,7 +2615,7 @@ export const guidePages: SeoPageData[] = [
     slug: "how-to-create-ai-acceptable-use-policy",
     category: "guide",
     meta: {
-      title: "How to Create an AI Acceptable Use Policy | TeamPrompt",
+      title: "How to Create an AI Acceptable Use Policy",
       description: "Step-by-step guide to creating an AI acceptable use policy. Template, key sections, and enforcement strategies for your organization.",
       keywords: ["AI acceptable use policy", "create AI AUP", "AI usage policy template", "AI policy guide", "acceptable use AI tools"],
     },
@@ -2662,7 +2662,7 @@ export const guidePages: SeoPageData[] = [
     slug: "how-to-detect-shadow-ai",
     category: "guide",
     meta: {
-      title: "How to Detect and Manage Shadow AI | TeamPrompt",
+      title: "How to Detect and Manage Shadow AI",
       description: "Learn how to discover unauthorized AI tool usage in your organization. Detection methods, remediation strategies, and prevention best practices.",
       keywords: ["detect shadow AI", "shadow AI management", "unauthorized AI tools", "discover shadow AI", "prevent shadow AI"],
     },
@@ -2709,7 +2709,7 @@ export const guidePages: SeoPageData[] = [
     slug: "how-to-secure-chatgpt-enterprise",
     category: "guide",
     meta: {
-      title: "How to Secure ChatGPT for Enterprise Use | TeamPrompt",
+      title: "How to Secure ChatGPT for Enterprise Use",
       description: "Learn how to deploy ChatGPT securely in an enterprise environment. DLP, access controls, governance, and compliance strategies.",
       keywords: ["secure ChatGPT enterprise", "ChatGPT enterprise security", "ChatGPT business security", "enterprise AI security", "ChatGPT governance"],
     },
@@ -2756,7 +2756,7 @@ export const guidePages: SeoPageData[] = [
     slug: "how-to-implement-ai-guardrails",
     category: "guide",
     meta: {
-      title: "How to Implement AI Guardrails for Your Team | TeamPrompt",
+      title: "How to Implement AI Guardrails for Your Team",
       description: "Learn how to set up technical and policy guardrails for AI usage. DLP, content controls, and governance that protect without blocking productivity.",
       keywords: ["AI guardrails", "implement AI guardrails", "AI safety guardrails", "AI content controls", "AI governance guardrails"],
     },
@@ -2803,7 +2803,7 @@ export const guidePages: SeoPageData[] = [
     slug: "how-to-create-ai-incident-response-plan",
     category: "guide",
     meta: {
-      title: "How to Create an AI Incident Response Plan | TeamPrompt",
+      title: "How to Create an AI Incident Response Plan",
       description: "Learn how to create an incident response plan for AI-related security events. Detection, containment, recovery, and prevention for AI incidents.",
       keywords: ["AI incident response", "AI security incident plan", "AI breach response", "AI incident management", "AI security response"],
     },
@@ -2850,7 +2850,7 @@ export const guidePages: SeoPageData[] = [
     slug: "how-to-conduct-ai-security-assessment",
     category: "guide",
     meta: {
-      title: "How to Conduct an AI Security Assessment | TeamPrompt",
+      title: "How to Conduct an AI Security Assessment",
       description: "Learn how to assess the security risks of AI tools in your organization. Risk identification, evaluation, and mitigation for AI systems.",
       keywords: ["AI security assessment", "AI risk assessment", "evaluate AI security", "AI security review", "AI threat assessment"],
     },
@@ -2897,7 +2897,7 @@ export const guidePages: SeoPageData[] = [
     slug: "how-to-manage-ai-vendor-risk",
     category: "guide",
     meta: {
-      title: "How to Manage AI Vendor Risk | TeamPrompt",
+      title: "How to Manage AI Vendor Risk",
       description: "Learn how to evaluate and manage risks from AI service providers. Vendor assessment, data handling policies, and ongoing monitoring for AI tools.",
       keywords: ["AI vendor risk", "manage AI vendor risk", "AI provider assessment", "AI vendor evaluation", "AI tool vendor risk"],
     },

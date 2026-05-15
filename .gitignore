@@ -53,3 +53,6 @@ extension/firefox-mv3.zip
 
 # claude code mcp config — contains live access tokens
 .mcp.json
+
+# mobile audit artifacts
+.mobile-audit-*

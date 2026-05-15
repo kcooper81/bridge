@@ -191,7 +191,7 @@ export default function NotificationsPage() {
         title="Notifications"
         description="Stay updated on security alerts, prompt approvals, and team activity"
         actions={
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {unreadCount > 0 && (
               <Button variant="outline" onClick={() => markAllRead()}>
                 <CheckCheck className="mr-2 h-4 w-4" />

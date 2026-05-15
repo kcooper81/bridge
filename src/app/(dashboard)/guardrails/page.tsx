@@ -639,7 +639,7 @@ export default function GuardrailsPage() {
         title="AI Guardrails"
         description="Protect sensitive data from leaking into AI prompts"
         actions={
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {rules.length === 0 && (
               <Button variant="outline" onClick={handleInstallDefaults} disabled={installingDefaults}>
                 {installingDefaults ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}

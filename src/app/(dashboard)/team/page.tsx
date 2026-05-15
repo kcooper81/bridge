@@ -1039,7 +1039,7 @@ export default function TeamPage() {
         title="Team"
         description="Manage members, teams, and invitations"
         actions={
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {canAccess("bulk_import") && (
               <Button variant="outline" size="sm" onClick={() => setBulkImportOpen(true)}>
                 <FileSpreadsheet className="mr-2 h-4 w-4" />

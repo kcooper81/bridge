@@ -58,16 +58,18 @@ export function ExtensionInstallBanner() {
   }
 
   return (
-    <div className="mb-4 flex items-center gap-3 rounded-lg border border-primary/20 bg-primary/5 px-4 py-3">
-      <BrowserIcon browser={browser} className="h-5 w-5 shrink-0 text-primary" />
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium">Install the TeamPrompt Extension</p>
-        <p className="text-xs text-muted-foreground">
-          Use your team&apos;s prompts directly in ChatGPT, Claude, Gemini, and more. DLP scanning keeps sensitive data safe.
-          Admins: <a href="/settings/deployment" className="text-primary hover:underline">deploy via MDM</a> for auto-install.
-        </p>
+    <div className="mb-4 relative flex flex-col sm:flex-row sm:items-center gap-3 rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 pr-10 sm:pr-4">
+      <div className="flex items-start gap-3 flex-1 min-w-0">
+        <BrowserIcon browser={browser} className="h-5 w-5 shrink-0 text-primary mt-0.5 sm:mt-0" />
+        <div className="min-w-0">
+          <p className="text-sm font-medium">Install the TeamPrompt Extension</p>
+          <p className="text-xs text-muted-foreground">
+            Use your team&apos;s prompts directly in ChatGPT, Claude, Gemini, and more. DLP scanning keeps sensitive data safe.
+            Admins: <a href="/settings/deployment" className="text-primary hover:underline">deploy via MDM</a> for auto-install.
+          </p>
+        </div>
       </div>
-      <Button asChild size="sm" className="shrink-0">
+      <Button asChild size="sm" className="shrink-0 w-full sm:w-auto">
         <a
           href={store.url}
           target="_blank"
@@ -80,8 +82,9 @@ export function ExtensionInstallBanner() {
       <Button
         variant="ghost"
         size="icon"
-        className="h-7 w-7 shrink-0"
+        className="h-7 w-7 shrink-0 absolute top-2 right-2 sm:static"
         onClick={handleDismiss}
+        aria-label="Dismiss banner"
       >
         <X className="h-3.5 w-3.5" />
       </Button>

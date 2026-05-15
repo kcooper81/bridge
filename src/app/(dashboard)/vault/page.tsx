@@ -385,7 +385,7 @@ export default function VaultPage() {
         title="Prompt Library"
         description="Manage prompts, guidelines, and template packs"
         actions={
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Button variant="outline" size="sm" onClick={() => setPacksOpen(true)}>
               <Library className="mr-2 h-4 w-4" />
               Browse Packs

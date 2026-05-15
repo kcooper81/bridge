@@ -154,7 +154,7 @@ export default function AuditPage() {
         title="Audit & Compliance"
         description="Security insights, violation analytics, and compliance reporting"
         actions={
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Button variant="outline" size="sm" onClick={() => exportAuditCSV(data, dateRange)}>
               <Download className="mr-2 h-4 w-4" />
               CSV
@@ -334,7 +334,7 @@ export default function AuditPage() {
           title="Violation Trend"
           description="Blocked and warned violations over time"
           actions={
-            <div className="flex gap-1">
+            <div className="flex flex-wrap gap-1">
               {(["30d", "90d"] as const).map((r) => (
                 <Button
                   key={r}

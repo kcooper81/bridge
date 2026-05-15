@@ -156,7 +156,7 @@ export default function LandingPage() {
       <section className="border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-10">
-            <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground shrink-0">
+            <p className="text-xs font-medium uppercase tracking-widest text-foreground/80 shrink-0">
               Works with
             </p>
             <div className="flex items-center gap-6 sm:gap-8 flex-wrap justify-center">
@@ -185,7 +185,7 @@ export default function LandingPage() {
               {["HIPAA Ready", "SOC 2 Ready", "PCI-DSS", "GDPR"].map((badge) => (
                 <span
                   key={badge}
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground bg-muted/60 border border-border rounded-full px-3 py-1"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-foreground/80 bg-muted/60 border border-border rounded-full px-3 py-1"
                 >
                   <ShieldCheck className="h-3 w-3" />
                   {badge}

@@ -3259,10 +3259,20 @@ export default function ChatPage() {
         )}
       </div>
 
+      {/* Mobile backdrop for the right prompt panel */}
+      {promptPanelOpen && (
+        <div
+          className="md:hidden fixed inset-0 z-30 bg-black/40"
+          onClick={() => setPromptPanelOpen(false)}
+          aria-hidden="true"
+        />
+      )}
       {/* ─── Prompt Library Panel (right sidebar) ─── */}
       <div className={cn(
         "border-l bg-background flex flex-col transition-all duration-200 overflow-hidden",
-        promptPanelOpen ? "w-80" : "w-0"
+        // Mobile: drawer overlay from the right; Desktop: inline column
+        "fixed inset-y-0 right-0 z-40 md:relative md:inset-auto md:z-auto",
+        promptPanelOpen ? "w-[85vw] max-w-xs md:w-80 md:max-w-none" : "w-0"
       )}>
         <div className="p-3 border-b flex items-center justify-between flex-shrink-0">
           <h3 className="text-sm font-semibold flex items-center gap-1.5">
@@ -3350,10 +3360,20 @@ export default function ChatPage() {
         </div>
       </div>
 
+      {/* Mobile backdrop for the outline panel */}
+      {outlinePanelOpen && (
+        <div
+          className="md:hidden fixed inset-0 z-30 bg-black/40"
+          onClick={() => setOutlinePanelOpen(false)}
+          aria-hidden="true"
+        />
+      )}
       {/* ─── Conversation Outline Panel (right flyout) ─── */}
       <div className={cn(
         "border-l bg-background flex flex-col transition-all duration-200 overflow-hidden",
-        outlinePanelOpen ? "w-80" : "w-0"
+        // Mobile: drawer overlay from the right; Desktop: inline column
+        "fixed inset-y-0 right-0 z-40 md:relative md:inset-auto md:z-auto",
+        outlinePanelOpen ? "w-[85vw] max-w-xs md:w-80 md:max-w-none" : "w-0"
       )}>
         <div className="flex items-center justify-between border-b flex-shrink-0 px-1">
           <div className="flex flex-1">

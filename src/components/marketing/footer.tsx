@@ -85,9 +85,9 @@ export function MarketingFooter() {
           {/* Link columns */}
           {Object.entries(footerLinks).map(([title, links]) => (
             <div key={title}>
-              <h4 className="text-sm font-semibold text-zinc-200 mb-4 uppercase tracking-wider">
+              <h3 className="text-sm font-semibold text-zinc-200 mb-4 uppercase tracking-wider">
                 {title}
-              </h4>
+              </h3>
               <ul className="space-y-3">
                 {links.map((link) => (
                   <li key={link.label}>

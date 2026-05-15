@@ -161,11 +161,14 @@ export default function LandingPage() {
             </p>
             <div className="flex items-center gap-6 sm:gap-8 flex-wrap justify-center">
               {[
-                { name: "ChatGPT", color: "text-emerald-600" },
-                { name: "Claude", color: "text-orange-600" },
-                { name: "Gemini", color: "text-blue-600" },
-                { name: "Copilot", color: "text-sky-600" },
-                { name: "Perplexity", color: "text-teal-600" },
+                // Brand-color shades bumped from -600 to -700 so each name
+                // clears WCAG AA 4.5:1 contrast on white. Each was failing
+                // Lighthouse mobile color-contrast at -600.
+                { name: "ChatGPT", color: "text-emerald-700" },
+                { name: "Claude", color: "text-orange-700" },
+                { name: "Gemini", color: "text-blue-700" },
+                { name: "Copilot", color: "text-sky-700" },
+                { name: "Perplexity", color: "text-teal-700" },
               ].map((tool) => (
                 <span
                   key={tool.name}

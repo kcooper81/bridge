@@ -363,23 +363,27 @@ export default function ChatPage() {
   const [loadingConvs, setLoadingConvs] = useState(true);
   const [dlpBlock, setDlpBlock] = useState<DlpViolation[] | null>(null);
   const [redactions, setRedactions] = useState<Array<{original: string; replacement: string; category: string}> | null>(null);
-  // Default sidebar OPEN on desktop, CLOSED on mobile so the chat conversation
-  // gets the full viewport. Use lazy initializer so it reads window.innerWidth
-  // only on the client (server renders the default true; client may correct).
-  const [sidebarOpen, setSidebarOpen] = useState(() => {
-    if (typeof window === "undefined") return true;
-    return window.innerWidth >= 768;
-  });
+  // Sidebar open by default. On mobile, useEffect closes it after mount so
+  // the chat conversation gets the full viewport. We CAN'T branch on
+  // window.innerWidth in the initializer or hydration mismatches because the
+  // server always renders desktop-mode (no window).
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   // Track viewport so the inline sidebarWidth (resizable on desktop) doesn't
-  // override our Tailwind mobile drawer width.
-  const [isDesktop, setIsDesktop] = useState(() => {
-    if (typeof window === "undefined") return true;
-    return window.innerWidth >= 768;
-  });
+  // override our Tailwind mobile drawer width. Initialize true (matches SSR);
+  // useEffect corrects to actual viewport after mount.
+  const [isDesktop, setIsDesktop] = useState(true);
   useEffect(() => {
-    const onResize = () => setIsDesktop(window.innerWidth >= 768);
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
+    const sync = () => {
+      const desktop = window.innerWidth >= 768;
+      setIsDesktop(desktop);
+      // Auto-close sidebar on first mount if we're on mobile.
+      // Subsequent toggles by user are honored.
+    };
+    sync();
+    // First-render mobile: close sidebar so the conversation is visible.
+    if (window.innerWidth < 768) setSidebarOpen(false);
+    window.addEventListener("resize", sync);
+    return () => window.removeEventListener("resize", sync);
   }, []);
   const [editingTitle, setEditingTitle] = useState<string | null>(null);
   const [editTitleValue, setEditTitleValue] = useState("");

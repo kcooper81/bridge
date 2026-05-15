@@ -750,28 +750,31 @@ export default function GuardrailsPage() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:inline-flex">
-          <TabsTrigger value="policies" className="gap-1.5">
+        {/* Mobile: horizontal-scrollable strip so 6 full-text tabs stay
+            readable instead of cramming into a 5-col grid. Desktop (lg+):
+            inline-flex single row as before. */}
+        <TabsList className="flex w-full overflow-x-auto h-auto lg:w-auto lg:inline-flex lg:h-11 scrollbar-hide">
+          <TabsTrigger value="policies" className="gap-1.5 shrink-0">
             <Shield className="h-4 w-4 hidden sm:inline" />
             Policies ({rules.length})
           </TabsTrigger>
-          <TabsTrigger value="terms" className="gap-1.5">
+          <TabsTrigger value="terms" className="gap-1.5 shrink-0">
             <FileText className="h-4 w-4 hidden sm:inline" />
             Sensitive Terms
           </TabsTrigger>
-          <TabsTrigger value="detection" className="gap-1.5">
+          <TabsTrigger value="detection" className="gap-1.5 shrink-0">
             <Settings2 className="h-4 w-4 hidden sm:inline" />
             Detection
           </TabsTrigger>
-          <TabsTrigger value="suggestions" className="gap-1.5">
+          <TabsTrigger value="suggestions" className="gap-1.5 shrink-0">
             <Lightbulb className="h-4 w-4 hidden sm:inline" />
             Suggestions
           </TabsTrigger>
-          <TabsTrigger value="violations" className="gap-1.5">
+          <TabsTrigger value="violations" className="gap-1.5 shrink-0">
             <ShieldAlert className="h-4 w-4 hidden sm:inline" />
             Violations ({violations.length})
           </TabsTrigger>
-          <TabsTrigger value="ai-tools" className="gap-1.5">
+          <TabsTrigger value="ai-tools" className="gap-1.5 shrink-0">
             <Globe className="h-4 w-4 hidden sm:inline" />
             AI Tools
           </TabsTrigger>

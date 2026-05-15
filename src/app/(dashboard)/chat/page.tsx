@@ -363,7 +363,24 @@ export default function ChatPage() {
   const [loadingConvs, setLoadingConvs] = useState(true);
   const [dlpBlock, setDlpBlock] = useState<DlpViolation[] | null>(null);
   const [redactions, setRedactions] = useState<Array<{original: string; replacement: string; category: string}> | null>(null);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  // Default sidebar OPEN on desktop, CLOSED on mobile so the chat conversation
+  // gets the full viewport. Use lazy initializer so it reads window.innerWidth
+  // only on the client (server renders the default true; client may correct).
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+    if (typeof window === "undefined") return true;
+    return window.innerWidth >= 768;
+  });
+  // Track viewport so the inline sidebarWidth (resizable on desktop) doesn't
+  // override our Tailwind mobile drawer width.
+  const [isDesktop, setIsDesktop] = useState(() => {
+    if (typeof window === "undefined") return true;
+    return window.innerWidth >= 768;
+  });
+  useEffect(() => {
+    const onResize = () => setIsDesktop(window.innerWidth >= 768);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
   const [editingTitle, setEditingTitle] = useState<string | null>(null);
   const [editTitleValue, setEditTitleValue] = useState("");
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -1986,14 +2003,26 @@ export default function ChatPage() {
   // ── Render ──
   return (
     <div className="flex h-[calc(100vh-64px)] overflow-hidden -m-4 md:-m-6">
+      {/* Mobile backdrop — tap to close sidebar */}
+      {sidebarOpen && (
+        <div
+          className="md:hidden fixed inset-0 z-30 bg-black/40"
+          onClick={() => setSidebarOpen(false)}
+          aria-hidden="true"
+        />
+      )}
       {/* ─── Sidebar ─── */}
       <div
         className={cn(
-          "border-r bg-muted/30 flex flex-col relative",
-          sidebarOpen ? "" : "w-0 min-w-0 overflow-hidden",
+          "border-r bg-muted/30 flex flex-col",
+          // Mobile: overlay drawer (fixed positioning so it doesn't squeeze
+          // the main column). Desktop: inline column with resizable width.
+          "fixed inset-y-0 left-0 z-40 w-[85vw] max-w-xs",
+          "md:relative md:inset-auto md:z-auto md:w-auto md:max-w-none",
+          sidebarOpen ? "" : "w-0 min-w-0 overflow-hidden md:w-0",
           !isResizing && "transition-all duration-200"
         )}
-        style={sidebarOpen ? { width: sidebarWidth, minWidth: sidebarWidth, maxWidth: sidebarWidth } : undefined}
+        style={sidebarOpen && isDesktop ? { width: sidebarWidth, minWidth: sidebarWidth, maxWidth: sidebarWidth } : undefined}
       >
         {sidebarView === "main" ? (<>
         {/* Top actions */}

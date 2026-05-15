@@ -5,7 +5,7 @@ export const industryData: IndustryPageData = {
   industry: "Finance",
   headline: "Compliant AI usage for financial teams",
   subtitle:
-    "Detect and block financial data, trading strategies, and customer PII before employees send it to AI. Shared prompt library for trading, risk, compliance, and advisory teams.",
+    "Block financial data, trading strategies, and customer PII before staff send them to AI. Prompt library for trading, risk, and compliance teams.",
   compliance: ["Financial Data Detection", "Audit Logging", "Access Control"],
   painPoints: [
     {

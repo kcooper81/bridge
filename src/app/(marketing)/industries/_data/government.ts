@@ -5,7 +5,7 @@ export const industryData: IndustryPageData = {
   industry: "Government",
   headline: "Secure AI prompt management for government agencies",
   subtitle:
-    "Detect and block classified markings, CUI, and citizen PII before staff send it to AI. Shared prompt library for policy, constituent services, and inter-agency teams.",
+    "Block classified markings, CUI, and citizen PII before staff send them to AI. Prompt library for policy, constituent services, and inter-agency teams.",
   compliance: ["PII Detection", "Audit Logging", "Access Control"],
   painPoints: [
     {

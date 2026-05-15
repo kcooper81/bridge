@@ -36,7 +36,7 @@ import { GetStartedSteps } from "@/components/marketing/get-started-steps";
 import { LeadCaptureForm } from "@/components/marketing/lead-capture-form";
 
 export const metadata: Metadata = generatePageMetadata({
-  title: "Features — AI DLP, Prompt Library, Compliance & Extensions",
+  title: "Features — AI DLP & Prompt Library",
   description:
     "AI data loss prevention, shared prompt library, 19 compliance packs, real-time scanning, audit logging, browser extension, and team analytics.",
   path: "/features",

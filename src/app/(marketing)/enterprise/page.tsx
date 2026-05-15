@@ -25,9 +25,9 @@ import {
 } from "lucide-react";
 
 export const metadata = generatePageMetadata({
-  title: "TeamPrompt Enterprise — AI Data Loss Prevention at Scale",
+  title: "Enterprise AI DLP at Scale",
   description:
-    "Deploy AI DLP across your organization with managed browser extension. Detect sensitive data, enforce compliance policies, and give teams a shared prompt library — from day one.",
+    "Deploy AI DLP org-wide with a managed browser extension. Detect sensitive data, enforce compliance, share a team prompt library — from day one.",
   path: "/enterprise",
   keywords: ["enterprise AI DLP", "managed chrome extension", "AI data protection", "AI compliance", "enterprise AI governance"],
 });

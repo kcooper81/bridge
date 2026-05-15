@@ -18,7 +18,7 @@ import { ExtensionHero } from "./_components/extension-hero";
 export const metadata: Metadata = generatePageMetadata({
   title: "Browser Extension — Chrome, Firefox & Edge",
   description:
-    "Install TeamPrompt for Chrome, Firefox, or Edge. AI data loss prevention, shared prompt library, and audit logging — directly in ChatGPT, Claude, Gemini, and more.",
+    "TeamPrompt for Chrome, Firefox, and Edge. AI DLP, shared prompt library, and audit logging — inside ChatGPT, Claude, Gemini, and more.",
   path: "/extensions",
   keywords: [
     "browser extension",

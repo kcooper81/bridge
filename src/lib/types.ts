@@ -1,4 +1,4 @@
-export type UserRole = "admin" | "manager" | "member";
+export type UserRole = "admin" | "manager" | "member" | "auditor";
 export type PromptStatus = "draft" | "pending" | "approved" | "archived";
 export type PromptTone =
   | "professional"

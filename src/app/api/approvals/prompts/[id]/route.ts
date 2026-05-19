@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { limiters, checkRateLimit } from "@/lib/rate-limit";
+import { emitAuditEvent } from "@/lib/audit-events";
 
 async function getAuthUser() {
   const supabase = createClient();
@@ -87,6 +88,17 @@ export async function PATCH(
         metadata: { prompt_id: id, reason, rejected_by: auth.userId },
       });
     }
+
+    await emitAuditEvent({
+      orgId: auth.orgId,
+      actorId: auth.userId,
+      action: action === "approve" ? "approval.approve" : "approval.reject",
+      targetType: "prompt",
+      targetId: id,
+      targetLabel: prompt.title,
+      metadata: action === "reject" && reason ? { reason } : undefined,
+      request,
+    });
 
     return NextResponse.json({ success: true, status: newStatus });
   } catch (error) {

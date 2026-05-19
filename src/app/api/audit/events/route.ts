@@ -29,8 +29,8 @@ export async function GET(req: NextRequest) {
     .eq("id", user.id)
     .single();
   if (!profile?.org_id) return NextResponse.json({ error: "No organization" }, { status: 400 });
-  if (!["admin", "manager"].includes(profile.role)) {
-    return NextResponse.json({ error: "Admin or manager access required" }, { status: 403 });
+  if (!["admin", "manager", "auditor"].includes(profile.role)) {
+    return NextResponse.json({ error: "Admin, manager, or auditor access required" }, { status: 403 });
   }
 
   const sp = req.nextUrl.searchParams;

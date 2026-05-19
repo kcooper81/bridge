@@ -72,6 +72,11 @@ export default function ApprovalsPage() {
   const [rejectTargetId, setRejectTargetId] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState("");
   const [previewPrompt, setPreviewPrompt] = useState<Prompt | null>(null);
+  // Bulk selection + SLA sort
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [sortOrder, setSortOrder] = useState<"oldest" | "newest">("oldest");
+  const [bulkBusy, setBulkBusy] = useState(false);
+  const [submitterFilter, setSubmitterFilter] = useState("");
 
   // Create-rule-from-suggestion modal state
   const [ruleModalOpen, setRuleModalOpen] = useState(false);
@@ -136,6 +141,7 @@ export default function ApprovalsPage() {
         trackPromptApproved();
         toast.success("Prompt approved");
         setPendingPrompts((prev) => prev.filter((p) => p.id !== id));
+        setSelectedIds((prev) => { const n = new Set(prev); n.delete(id); return n; });
       } else {
         toast.error("Failed to approve prompt");
       }
@@ -143,6 +149,74 @@ export default function ApprovalsPage() {
       setActionId(null);
     }
   }
+
+  async function handleBulkApprove() {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+    setBulkBusy(true);
+    let approved = 0;
+    let failed = 0;
+    for (const id of ids) {
+      try {
+        const ok = await approvePrompt(id);
+        if (ok) approved++; else failed++;
+      } catch {
+        failed++;
+      }
+    }
+    setPendingPrompts((prev) => prev.filter((p) => !selectedIds.has(p.id) || !ids.includes(p.id)));
+    setSelectedIds(new Set());
+    setBulkBusy(false);
+    if (approved > 0) {
+      trackPromptApproved();
+      toast.success(`Approved ${approved}${failed > 0 ? `, ${failed} failed` : ""}`);
+    } else if (failed > 0) {
+      toast.error(`Failed to approve ${failed}`);
+    }
+  }
+
+  async function handleBulkReject() {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+    if (!confirm(`Reject ${ids.length} prompt${ids.length === 1 ? "" : "s"}? They will be returned to draft state.`)) return;
+    setBulkBusy(true);
+    let rejected = 0;
+    let failed = 0;
+    for (const id of ids) {
+      try {
+        const ok = await rejectPrompt(id, "Bulk rejected");
+        if (ok) rejected++; else failed++;
+      } catch {
+        failed++;
+      }
+    }
+    setPendingPrompts((prev) => prev.filter((p) => !ids.includes(p.id)));
+    setSelectedIds(new Set());
+    setBulkBusy(false);
+    if (rejected > 0) {
+      trackPromptRejected();
+      toast.success(`Rejected ${rejected}${failed > 0 ? `, ${failed} failed` : ""}`);
+    } else if (failed > 0) {
+      toast.error(`Failed to reject ${failed}`);
+    }
+  }
+
+  // SLA helpers — color rows by age so old pending work surfaces.
+  function ageInHours(iso: string): number {
+    return (Date.now() - new Date(iso).getTime()) / 36e5;
+  }
+  function ageBucket(iso: string): "fresh" | "warn" | "overdue" {
+    const h = ageInHours(iso);
+    if (h >= 72) return "overdue";
+    if (h >= 24) return "warn";
+    return "fresh";
+  }
+  const ageStyle: Record<ReturnType<typeof ageBucket>, string> = {
+    fresh: "",
+    warn: "text-amber-600 dark:text-amber-400 font-medium",
+    overdue: "text-red-600 dark:text-red-400 font-semibold",
+  };
+  const overdueCount = pendingPrompts.filter((p) => ageBucket(p.updated_at) === "overdue").length;
 
   function openRejectModal(id: string) {
     setRejectTargetId(id);
@@ -295,11 +369,65 @@ export default function ApprovalsPage() {
         </TabsList>
 
         {/* Prompts Tab */}
-        <TabsContent value="prompts" className="mt-4">
+        <TabsContent value="prompts" className="mt-4 space-y-3">
+          {/* Filter bar + SLA summary */}
+          <div className="flex flex-wrap items-center gap-2">
+            <Input
+              value={submitterFilter}
+              onChange={(e) => setSubmitterFilter(e.target.value)}
+              placeholder="Filter by submitter…"
+              className="h-9 w-[220px]"
+            />
+            <Select value={sortOrder} onValueChange={(v) => setSortOrder(v as "oldest" | "newest")}>
+              <SelectTrigger className="h-9 w-[160px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="oldest">Oldest first</SelectItem>
+                <SelectItem value="newest">Newest first</SelectItem>
+              </SelectContent>
+            </Select>
+            {overdueCount > 0 && (
+              <Badge variant="outline" className="border-red-500/40 text-red-700 dark:text-red-300">
+                {overdueCount} overdue (&gt;72h)
+              </Badge>
+            )}
+          </div>
+
+          {/* Bulk action bar — appears when selection is non-empty */}
+          {selectedIds.size > 0 && (
+            <div className="flex flex-wrap items-center gap-2 rounded-lg border bg-muted/50 px-4 py-2">
+              <span className="text-sm font-medium">{selectedIds.size} selected</span>
+              <div className="h-4 w-px bg-border" />
+              <Button size="sm" className="h-7 text-xs bg-green-600 hover:bg-green-700" onClick={handleBulkApprove} disabled={bulkBusy}>
+                {bulkBusy && <Loader2 className="mr-1.5 h-3 w-3 animate-spin" />}
+                Approve all
+              </Button>
+              <Button size="sm" variant="destructive" className="h-7 text-xs" onClick={handleBulkReject} disabled={bulkBusy}>
+                Reject all
+              </Button>
+              <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => setSelectedIds(new Set())}>
+                Clear
+              </Button>
+            </div>
+          )}
+
           <div className="rounded-lg border border-border">
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-8">
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4 rounded border-input"
+                      checked={pendingPrompts.length > 0 && pendingPrompts.every((p) => selectedIds.has(p.id))}
+                      onChange={(e) => {
+                        if (e.target.checked) setSelectedIds(new Set(pendingPrompts.map((p) => p.id)));
+                        else setSelectedIds(new Set());
+                      }}
+                      aria-label="Select all"
+                    />
+                  </TableHead>
                   <TableHead>Title</TableHead>
                   <TableHead>Submitted By</TableHead>
                   <TableHead>Submitted</TableHead>
@@ -310,13 +438,42 @@ export default function ApprovalsPage() {
               <TableBody>
                 {pendingPrompts.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="h-32 text-center text-muted-foreground">
+                    <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
                       No prompts pending review.
                     </TableCell>
                   </TableRow>
                 ) : (
-                  pendingPrompts.map((p) => (
-                    <TableRow key={p.id}>
+                  pendingPrompts
+                    .filter((p) => {
+                      if (!submitterFilter.trim()) return true;
+                      const q = submitterFilter.toLowerCase();
+                      return (p.submitter_name || "").toLowerCase().includes(q)
+                        || (p.submitter_email || "").toLowerCase().includes(q);
+                    })
+                    .sort((a, b) => {
+                      const aT = new Date(a.updated_at).getTime();
+                      const bT = new Date(b.updated_at).getTime();
+                      return sortOrder === "oldest" ? aT - bT : bT - aT;
+                    })
+                    .map((p) => {
+                      const bucket = ageBucket(p.updated_at);
+                      return (
+                    <TableRow key={p.id} className={bucket === "overdue" ? "bg-red-500/5" : bucket === "warn" ? "bg-amber-500/5" : undefined}>
+                      <TableCell>
+                        <input
+                          type="checkbox"
+                          className="h-4 w-4 rounded border-input"
+                          checked={selectedIds.has(p.id)}
+                          onChange={(e) => {
+                            setSelectedIds((prev) => {
+                              const n = new Set(prev);
+                              if (e.target.checked) n.add(p.id); else n.delete(p.id);
+                              return n;
+                            });
+                          }}
+                          aria-label={`Select ${p.title}`}
+                        />
+                      </TableCell>
                       <TableCell>
                         <button
                           className="text-left hover:underline"
@@ -332,8 +489,9 @@ export default function ApprovalsPage() {
                       <TableCell className="text-sm">
                         {p.submitter_name || p.submitter_email || "Unknown"}
                       </TableCell>
-                      <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
+                      <TableCell className={`text-sm whitespace-nowrap ${ageStyle[bucket]}`}>
                         {formatDistanceToNow(new Date(p.updated_at), { addSuffix: true })}
+                        {bucket === "overdue" && <span className="ml-1.5 text-[10px] uppercase tracking-wider">overdue</span>}
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-1 flex-wrap">
@@ -372,7 +530,8 @@ export default function ApprovalsPage() {
                         </div>
                       </TableCell>
                     </TableRow>
-                  ))
+                      );
+                    })
                 )}
               </TableBody>
             </Table>

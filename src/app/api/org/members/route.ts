@@ -47,7 +47,7 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: "memberId and role are required" }, { status: 400 });
     }
 
-    const validRoles = ["admin", "manager", "member"];
+    const validRoles = ["admin", "manager", "member", "auditor"];
     if (!validRoles.includes(role)) {
       return NextResponse.json({ error: "Invalid role" }, { status: 400 });
     }

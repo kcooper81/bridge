@@ -8,6 +8,7 @@
 import "server-only";
 import type { NextRequest } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
+import { deliverWebhookEvent } from "@/lib/webhook-delivery";
 
 export type AuditAction =
   // Member/role management
@@ -69,6 +70,7 @@ export async function emitAuditEvent(opts: EmitAuditOptions): Promise<void> {
   try {
     const db = createServiceClient();
     const { ip, user_agent } = extractClient(opts.request);
+    const occurredAt = new Date().toISOString();
     await db.from("audit_events").insert({
       org_id: opts.orgId,
       actor_id: opts.actorId,
@@ -83,6 +85,26 @@ export async function emitAuditEvent(opts: EmitAuditOptions): Promise<void> {
       metadata: opts.metadata ?? null,
       ip,
       user_agent,
+    });
+
+    // Fan out to configured SIEM/webhook destinations — non-blocking.
+    void deliverWebhookEvent({
+      event: "audit",
+      org_id: opts.orgId,
+      occurred_at: occurredAt,
+      data: {
+        action: opts.action,
+        actor_id: opts.actorId,
+        actor_email: opts.actorEmail ?? null,
+        target_type: opts.targetType ?? null,
+        target_id: opts.targetId ?? null,
+        target_label: opts.targetLabel ?? null,
+        before: opts.before ?? null,
+        after: opts.after ?? null,
+        metadata: opts.metadata ?? null,
+        ip,
+        user_agent,
+      },
     });
   } catch (err) {
     // Auditing should never break the underlying mutation. Log and move on.

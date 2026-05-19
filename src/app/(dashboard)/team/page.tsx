@@ -1179,6 +1179,7 @@ export default function TeamPage() {
                 <SelectItem value="admin">Admin</SelectItem>
                 <SelectItem value="manager">Manager</SelectItem>
                 <SelectItem value="member">Member</SelectItem>
+                <SelectItem value="auditor">Auditor</SelectItem>
               </SelectContent>
             </Select>
             {currentUserRole === "admin" && (
@@ -1259,6 +1260,7 @@ export default function TeamPage() {
                   <SelectItem value="admin">Admin</SelectItem>
                   <SelectItem value="manager">Manager</SelectItem>
                   <SelectItem value="member">Member</SelectItem>
+                  <SelectItem value="auditor">Auditor</SelectItem>
                 </SelectContent>
               </Select>
               <Button size="sm" className="h-7 text-xs" onClick={handleBulkRoleChange} disabled={applyingBulkRole}>

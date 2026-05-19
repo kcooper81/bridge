@@ -62,7 +62,7 @@ const _POSTS: BlogPost[] = [
     coverImage: "/images/hero-tech-workers.jpg",
     coverImageAlt: "Engineers reviewing security policy on a laptop",
     relatedSlugs: ["how-to-prevent-data-leaks-to-chatgpt", "ai-dlp-preventing-data-leaks-to-chatgpt-and-claude", "what-is-ai-data-loss-prevention-dlp"],
-    content: \`
+    content: `
 ## What Is "Prompt DLP"?
 
 **Prompt DLP** is data loss prevention scoped specifically to AI prompts — the text employees type into ChatGPT, Claude, Gemini, Copilot, Perplexity, and other large language models. Where traditional DLP watches email attachments, file uploads, and cloud syncs, prompt DLP watches the AI prompt channel — which most organizations have no visibility into.
@@ -118,7 +118,7 @@ It also pairs with [Cloudflare Gateway](https://teamprompt.app/integrations) to 
 Prompt DLP isn't a product you can buy as an add-on to your existing DLP stack — it has to live where the prompts live: in the browser, scanning content before it ever reaches a third-party AI provider. Any team using AI seriously (which by 2026 is every team) needs this layer, regardless of whether you've already deployed Purview, Nightfall, or Symantec for traditional DLP. Those tools simply aren't built for this channel.
 
 Start with one capability — browser-level scanning of your three most-used AI tools — and expand from there.
-\`,
+`,
   },
   {
     slug: "ai-audit-trails-which-tools-actually-have-them",
@@ -133,7 +133,7 @@ Start with one capability — browser-level scanning of your three most-used AI 
     coverImage: "/images/hero-office-collab.jpg",
     coverImageAlt: "Colleagues reviewing compliance docs together",
     relatedSlugs: ["soc-2-and-ai-meeting-compliance-requirements", "hipaa-compliance-and-ai-what-healthcare-teams-must-know", "ai-governance-framework-practical-guide-for-teams"],
-    content: \`
+    content: `
 ## The Compliance Problem
 
 If you're reading this, your compliance team has probably said something like: **"We need audit trails of every prompt our employees send to an LLM. We need role-based access control on who can see what. And whatever we adopt has to map to our SOC 2 / HIPAA / ISO 27001 controls."**
@@ -205,7 +205,7 @@ Five questions:
 5. **Is the audit data residency configurable?** EU customers will require EU data residency for GDPR.
 
 If a vendor can't say yes to all five, treat their "audit trail" claim as marketing copy, not compliance evidence.
-\`,
+`,
   },
   // ── New SEO-targeted posts (2026-03-28) ──
   {

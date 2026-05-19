@@ -163,6 +163,10 @@ export default function LoginPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            autoComplete="email"
+            inputMode="email"
+            autoCapitalize="none"
+            autoCorrect="off"
           />
         </div>
         <div className="space-y-2">
@@ -182,6 +186,7 @@ export default function LoginPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            autoComplete="current-password"
           />
         </div>
         <Button type="submit" className="w-full" disabled={loading}>
@@ -200,6 +205,7 @@ export default function LoginPage() {
         <Button
           variant="outline"
           className="w-full"
+          disabled={loading}
           onClick={() => handleOAuth("google")}
         >
           <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
@@ -225,6 +231,7 @@ export default function LoginPage() {
         <Button
           variant="outline"
           className="w-full"
+          disabled={loading}
           onClick={() => handleOAuth("github")}
         >
           <svg className="mr-2 h-4 w-4" fill="currentColor" viewBox="0 0 24 24">

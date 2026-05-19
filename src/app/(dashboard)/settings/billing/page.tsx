@@ -62,15 +62,26 @@ export default function BillingPage() {
     return () => { cancelled = true; };
   }, [subscription?.stripe_customer_id, currentUserRole]);
 
-  // Handle checkout success redirect
+  // Handle checkout success redirect — guard against firing trackPurchase
+  // twice on back/forward navigation by stashing the session_id we acked.
   useEffect(() => {
-    if (searchParams.get("checkout") === "success") {
-      const plan = searchParams.get("plan") || "your new plan";
-      const sessionId = searchParams.get("session_id") || undefined;
-      trackPurchase(plan, sessionId);
-      toast.success(`Welcome to ${plan}! Your upgrade is active.`);
-      router.replace("/settings/billing");
+    if (searchParams.get("checkout") !== "success") return;
+    const plan = searchParams.get("plan") || "your new plan";
+    const sessionId = searchParams.get("session_id") || "";
+    let alreadyAcked = false;
+    try {
+      const key = "tp_purchase_acked";
+      const acked = sessionStorage.getItem(key);
+      if (sessionId && acked === sessionId) alreadyAcked = true;
+      else if (sessionId) sessionStorage.setItem(key, sessionId);
+    } catch {
+      // sessionStorage unavailable — proceed and accept the (rare) double-fire.
     }
+    if (!alreadyAcked) {
+      trackPurchase(plan, sessionId || undefined);
+      toast.success(`Welcome to ${plan}! Your upgrade is active.`);
+    }
+    router.replace("/settings/billing");
   }, [searchParams, router]);
 
   // Handle pending plan from signup/login flow

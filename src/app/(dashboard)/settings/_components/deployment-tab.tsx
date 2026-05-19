@@ -378,7 +378,12 @@ function generateRegFile(keys: ReturnType<typeof generateGpoConfig>): string {
         const hex = isNaN(num) ? "00000000" : num.toString(16).padStart(8, "0");
         lines.push(`"${entry.name}"=dword:${hex}`);
       } else {
-        lines.push(`"${entry.name}"="${entry.value.replace(/\\/g, "\\\\")}"`);
+        // Order matters: escape backslashes first, THEN double-quotes.
+        // Without the quote escape, a tool name containing `"` (or any
+        // future user-supplied value reaching this path) would break the
+        // .reg parser at import time.
+        const escaped = entry.value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+        lines.push(`"${entry.name}"="${escaped}"`);
       }
     }
     lines.push("");

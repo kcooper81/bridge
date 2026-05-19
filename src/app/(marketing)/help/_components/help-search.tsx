@@ -43,21 +43,37 @@ export function HelpSearch() {
         />
       </div>
 
-      {open && results.length > 0 && (
+      {open && query.trim().length > 0 && (
         <div className="absolute top-full mt-2 w-full rounded-xl border border-border bg-card shadow-lg z-50 max-h-80 overflow-y-auto">
-          {results.slice(0, 10).map(({ category, article }) => (
-            <Link
-              key={`${category.id}-${article.slug}`}
-              href={`/help/${category.id}/${article.slug}`}
-              onClick={() => setOpen(false)}
-              className="block px-4 py-3 hover:bg-muted transition-colors border-b border-border last:border-b-0"
-            >
-              <span className="text-sm font-medium">{article.q}</span>
-              <span className="block text-xs text-muted-foreground mt-0.5">
-                {category.title}
-              </span>
-            </Link>
-          ))}
+          {results.length === 0 ? (
+            <div className="px-4 py-6 text-center">
+              <p className="text-sm font-medium">No matches for &ldquo;{query}&rdquo;</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Try different keywords or{" "}
+                <a
+                  href={`mailto:support@teamprompt.app?subject=${encodeURIComponent(`Help with: ${query}`)}`}
+                  className="text-primary hover:underline"
+                >
+                  email support
+                </a>
+                .
+              </p>
+            </div>
+          ) : (
+            results.slice(0, 10).map(({ category, article }) => (
+              <Link
+                key={`${category.id}-${article.slug}`}
+                href={`/help/${category.id}/${article.slug}`}
+                onClick={() => setOpen(false)}
+                className="block px-4 py-3 hover:bg-muted transition-colors border-b border-border last:border-b-0"
+              >
+                <span className="text-sm font-medium">{article.q}</span>
+                <span className="block text-xs text-muted-foreground mt-0.5">
+                  {category.title}
+                </span>
+              </Link>
+            ))
+          )}
         </div>
       )}
     </div>

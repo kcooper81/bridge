@@ -344,37 +344,41 @@ export default function ActivityPage() {
       {/* Filter bar */}
       <div className="space-y-3 mb-4">
         <div className="flex items-center gap-2 flex-wrap">
-          {/* Search */}
-          {logMode === "full" && (
-            <form
-              className="flex items-center gap-1"
-              onSubmit={(e) => {
-                e.preventDefault();
-                setSearchQuery(searchInput);
-                setPage(0);
-              }}
-            >
-              <div className="relative">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-                <Input
-                  placeholder="Search prompts..."
-                  className="w-[200px] pl-8 h-9"
-                  value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
-                />
-              </div>
-              {searchQuery && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-9 px-2"
-                  onClick={() => { setSearchQuery(""); setSearchInput(""); setPage(0); }}
-                >
-                  <X className="h-3.5 w-3.5" />
-                </Button>
-              )}
-            </form>
-          )}
+          {/* Search — disabled (with explanation) in metadata-only mode so
+              users don't think the feature is missing */}
+          <form
+            className="flex items-center gap-1"
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (logMode !== "full") return;
+              setSearchQuery(searchInput);
+              setPage(0);
+            }}
+          >
+            <div className="relative">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+              <Input
+                placeholder={logMode === "full" ? "Search prompts..." : "Enable full logging to search"}
+                className="w-[220px] pl-8 h-9 disabled:opacity-60"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                disabled={logMode !== "full"}
+                title={logMode !== "full"
+                  ? "Search is only available in full prompt logging mode. Enable it in Settings → Security → Activity & Privacy."
+                  : undefined}
+              />
+            </div>
+            {logMode === "full" && searchQuery && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-9 px-2"
+                onClick={() => { setSearchQuery(""); setSearchInput(""); setPage(0); }}
+              >
+                <X className="h-3.5 w-3.5" />
+              </Button>
+            )}
+          </form>
 
           {/* AI Tool filter */}
           <Select value={toolFilter} onValueChange={(v) => { setToolFilter(v); setPage(0); }}>

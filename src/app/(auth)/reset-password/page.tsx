@@ -17,6 +17,18 @@ export default function ResetPasswordPage() {
   const [sessionValid, setSessionValid] = useState<boolean | null>(null);
 
   useEffect(() => {
+    // Synchronous early-fail: if the URL hash doesn't even claim to be a
+    // recovery, the long auth-state wait below is wasted. The Supabase
+    // recovery flow always sets `#type=recovery` in the hash before the
+    // SDK processes it.
+    if (typeof window !== "undefined") {
+      const hash = window.location.hash || "";
+      if (hash && !hash.includes("type=recovery")) {
+        setSessionValid(false);
+        return;
+      }
+    }
+
     const supabase = createClient();
 
     // Only accept PASSWORD_RECOVERY events — NOT regular SIGNED_IN.
@@ -30,11 +42,11 @@ export default function ResetPasswordPage() {
       }
     );
 
-    // Give the hash-based auth state change time to process
-    // Use a generous timeout to account for slow networks
+    // Network-blip safety net. The recovery hash exchange normally
+    // completes in <1s; 20s was way too long for the (common) bad-link case.
     const timeout = setTimeout(() => {
       setSessionValid((prev) => (prev === null ? false : prev));
-    }, 20000);
+    }, 4000);
 
     return () => {
       subscription.unsubscribe();

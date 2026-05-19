@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
   Dialog,
@@ -103,11 +104,21 @@ export function FillTemplateModal({
                 {v.description && (
                   <p className="text-xs text-muted-foreground">{v.description}</p>
                 )}
-                <Input
-                  value={values[v.name] || ""}
-                  onChange={(e) => updateValue(v.name, e.target.value)}
-                  placeholder={v.description || `Enter ${getDisplayLabel(v).toLowerCase()}...`}
-                />
+                {needsTextarea(v, values[v.name]) ? (
+                  <Textarea
+                    value={values[v.name] || ""}
+                    onChange={(e) => updateValue(v.name, e.target.value)}
+                    placeholder={v.description || `Enter ${getDisplayLabel(v).toLowerCase()}...`}
+                    rows={3}
+                    className="resize-y"
+                  />
+                ) : (
+                  <Input
+                    value={values[v.name] || ""}
+                    onChange={(e) => updateValue(v.name, e.target.value)}
+                    placeholder={v.description || `Enter ${getDisplayLabel(v).toLowerCase()}...`}
+                  />
+                )}
               </div>
             ))}
           </div>
@@ -144,4 +155,18 @@ export function FillTemplateModal({
       </DialogContent>
     </Dialog>
   );
+}
+
+// Branch to a textarea when the variable is long-form-shaped:
+// - explicitly typed "text"/"textarea"
+// - default value contains a newline
+// - current value contains a newline or exceeds 80 chars
+// Single-line Input forces these to horizontally scroll, which is a
+// terrible UX for description / instructions / context vars.
+function needsTextarea(v: { name: string; type?: string; default?: string }, current?: string): boolean {
+  const t = (v.type || "").toLowerCase();
+  if (t === "text" || t === "textarea" || t === "longtext") return true;
+  if (v.default && v.default.includes("\n")) return true;
+  if (current && (current.includes("\n") || current.length > 80)) return true;
+  return false;
 }

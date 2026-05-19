@@ -631,6 +631,17 @@ export default function TeamPage() {
   }
 
   async function handleToggleShield(memberId: string, currentlyDisabled: boolean) {
+    // Disabling DLP for a user is a high-impact action — all their prompts
+    // bypass scanning. Require an explicit confirmation that names the
+    // implication; previously this was a silent toggle.
+    if (!currentlyDisabled) {
+      const member = members.find((m) => m.id === memberId);
+      const who = member?.name || member?.email || "this member";
+      const ok = window.confirm(
+        `Disable DLP shield for ${who}?\n\nAll their prompts to ChatGPT, Claude, Gemini, etc. will be sent without scanning until you re-enable it. The action is logged to the audit trail.`
+      );
+      if (!ok) return;
+    }
     setTogglingShieldId(memberId);
     try {
       const success = await toggleMemberShield(memberId, !currentlyDisabled);

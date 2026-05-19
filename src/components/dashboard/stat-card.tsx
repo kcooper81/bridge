@@ -5,9 +5,10 @@ interface StatCardProps {
   value: string | number;
   icon: React.ReactNode;
   className?: string;
+  subtitle?: string;
 }
 
-export function StatCard({ label, value, icon, className }: StatCardProps) {
+export function StatCard({ label, value, icon, className, subtitle }: StatCardProps) {
   return (
     <div
       className={cn(
@@ -25,6 +26,7 @@ export function StatCard({ label, value, icon, className }: StatCardProps) {
       <div>
         <p className="text-3xl font-bold tracking-tight">{value}</p>
         <p className="text-sm text-muted-foreground font-medium">{label}</p>
+        {subtitle && <p className="text-[11px] text-muted-foreground/80 mt-0.5">{subtitle}</p>}
       </div>
     </div>
   );

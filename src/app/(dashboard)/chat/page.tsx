@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -447,6 +447,10 @@ export default function ChatPage() {
   // useState initializer would cause a server/client mismatch (same class
   // of bug as the recent #418 hydration fix).
   const [adminNoticeDismissed, setAdminNoticeDismissed] = useState(false);
+  // Stable suggestion-set index for the empty state. Picking it once per
+  // mount avoids a hydration-mismatch risk (Date.now()-derived index in
+  // SSR vs CSR) and stops the cards from jumping mid-session.
+  const suggestionSetIndex = useMemo(() => Math.floor(Math.random() * 4), []);
   useEffect(() => {
     try {
       if (localStorage.getItem("chat-admin-notice-dismissed") === "1") {
@@ -3061,7 +3065,7 @@ export default function ChatPage() {
                               { icon: Search, title: "Analyze this data", desc: "Insights and patterns" },
                             ],
                           ];
-                          const suggestions = allSuggestions[Math.floor(Date.now() / (1000 * 60 * 30)) % allSuggestions.length];
+                          const suggestions = allSuggestions[suggestionSetIndex % allSuggestions.length];
                           return (
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-lg">
                               {suggestions.map((s) => (

@@ -131,6 +131,7 @@ export function DashboardWidgets({ analytics, loading }: DashboardWidgetsProps) 
           label="Avg Rating"
           value={analytics?.avgRating ? analytics.avgRating.toFixed(1) : "—"}
           icon={<Star className="h-5 w-5" />}
+          subtitle={!analytics?.avgRating ? "Rate a prompt to begin" : undefined}
         />
       </div>
 

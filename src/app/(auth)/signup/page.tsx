@@ -11,6 +11,7 @@ import { Loader2 } from "lucide-react";
 import { trackSignUp } from "@/lib/analytics";
 import { authDebug } from "@/lib/auth-debug"; // AUTH-DEBUG
 import { ResendVerificationButton } from "../_components/resend-verification-button";
+import { PasswordStrengthMeter } from "../_components/password-strength-meter";
 
 export default function SignupPage() {
   const searchParams = useSearchParams();
@@ -174,6 +175,8 @@ export default function SignupPage() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
+            autoComplete="name"
+            autoCapitalize="words"
           />
         </div>
         <div className="space-y-2">
@@ -185,6 +188,10 @@ export default function SignupPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            autoComplete="email"
+            inputMode="email"
+            autoCapitalize="none"
+            autoCorrect="off"
           />
         </div>
         <div className="space-y-2">
@@ -192,12 +199,16 @@ export default function SignupPage() {
           <Input
             id="password"
             type="password"
-            placeholder="At least 6 characters"
+            placeholder="At least 10 characters"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            minLength={6}
+            minLength={10}
+            autoComplete="new-password"
           />
+          {password.length > 0 && (
+            <PasswordStrengthMeter value={password} />
+          )}
         </div>
         <Button type="submit" className="w-full" disabled={loading}>
           {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -215,6 +226,7 @@ export default function SignupPage() {
         <Button
           variant="outline"
           className="w-full"
+          disabled={loading}
           onClick={() => handleOAuth("google")}
         >
           <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
@@ -228,6 +240,7 @@ export default function SignupPage() {
         <Button
           variant="outline"
           className="w-full"
+          disabled={loading}
           onClick={() => handleOAuth("github")}
         >
           <svg className="mr-2 h-4 w-4" fill="currentColor" viewBox="0 0 24 24">

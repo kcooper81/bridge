@@ -61,6 +61,7 @@ export const limiters = {
   adminData: createLimiter(10, "1 m", "admin-data"),
   chatConversations: createLimiter(30, "1 m", "chat-conversations"),
   mcpKeys: createLimiter(5, "1 m", "mcp-keys"),
+  forgotPassword: createLimiter(3, "10 m", "forgot-password"),
 };
 
 export async function checkRateLimit(

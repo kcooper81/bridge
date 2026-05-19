@@ -1475,7 +1475,25 @@ export default function ChatPage() {
         }
         setMessageRatings(ratings);
       }
-      if (data.conversation?.model) {
+      // Honor the user's last manually-picked model: if they've explicitly
+      // chosen a model this session, don't overwrite when switching
+      // conversations. Previously this silently bumped them back to the
+      // conversation's stored model.
+      const stickyModel = typeof window !== "undefined"
+        ? localStorage.getItem("chat-sticky-model")
+        : null;
+      if (stickyModel) {
+        try {
+          const parsed = JSON.parse(stickyModel) as { model: string; provider: string };
+          setSelectedModel(parsed.model);
+          setSelectedProvider(parsed.provider);
+        } catch {
+          if (data.conversation?.model) {
+            setSelectedModel(data.conversation.model);
+            setSelectedProvider(data.conversation.provider || "openai");
+          }
+        }
+      } else if (data.conversation?.model) {
         setSelectedModel(data.conversation.model);
         setSelectedProvider(data.conversation.provider || "openai");
       }
@@ -2877,7 +2895,16 @@ export default function ChatPage() {
                   <ChevronLeft className={cn("h-4 w-4 transition-transform", !sidebarOpen && "rotate-180")} />
                 </Button>
                 {availableModels.length > 0 && (
-                  <Select value={`${selectedProvider}:${selectedModel}`} onValueChange={(val) => { const [p, ...r] = val.split(":"); setSelectedProvider(p); setSelectedModel(r.join(":")); }}>
+                  <Select value={`${selectedProvider}:${selectedModel}`} onValueChange={(val) => {
+                    const [p, ...r] = val.split(":");
+                    const model = r.join(":");
+                    setSelectedProvider(p);
+                    setSelectedModel(model);
+                    // Persist user pick so loadConversation doesn't override it later in the session.
+                    try {
+                      localStorage.setItem("chat-sticky-model", JSON.stringify({ model, provider: p }));
+                    } catch { /* localStorage unavailable — non-fatal */ }
+                  }}>
                     <SelectTrigger className="w-[200px] h-8 text-xs"><SelectValue placeholder="Model A" /></SelectTrigger>
                     <SelectContent>
                       {availableModels.map((m) => (

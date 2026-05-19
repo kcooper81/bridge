@@ -22,6 +22,13 @@ export async function GET(request: NextRequest) {
 
   // Check if caller wants archived conversations
   const showArchived = request.nextUrl.searchParams.get("archived") === "true";
+  // Pagination: ?before=<iso> returns the next page of older conversations.
+  // Default page size is 100; max 200 to bound payload. The previous hard
+  // cap was 100 with no way to fetch older — heavy users silently lost
+  // access to older conversations from the sidebar.
+  const before = request.nextUrl.searchParams.get("before");
+  const limitParam = parseInt(request.nextUrl.searchParams.get("limit") || "100", 10);
+  const pageLimit = Math.min(Math.max(limitParam, 10), 200);
 
   // Try with all columns (including archived_at), then progressively fall back
   // eslint-disable-next-line prefer-const, @typescript-eslint/no-explicit-any
@@ -36,7 +43,8 @@ export async function GET(request: NextRequest) {
     } else {
       q = q.is("archived_at", null);
     }
-    return q.order("updated_at", { ascending: false }).limit(100);
+    if (before) q = q.lt("updated_at", before);
+    return q.order("updated_at", { ascending: false }).limit(pageLimit);
   })();
 
   // Fallback: archived_at doesn't exist yet (migration 076)
@@ -48,7 +56,7 @@ export async function GET(request: NextRequest) {
       .eq("org_id", profile.org_id)
       .eq("user_id", user.id)
       .order("updated_at", { ascending: false })
-      .limit(100);
+      .limit(pageLimit);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     data = fb.data as any;
     error = fb.error;
@@ -64,7 +72,7 @@ export async function GET(request: NextRequest) {
       .eq("org_id", profile.org_id)
       .eq("user_id", user.id)
       .order("updated_at", { ascending: false })
-      .limit(100);
+      .limit(pageLimit);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     data = fb.data as any;
     error = fb.error;
@@ -78,7 +86,7 @@ export async function GET(request: NextRequest) {
       .eq("org_id", profile.org_id)
       .eq("user_id", user.id)
       .order("updated_at", { ascending: false })
-      .limit(100);
+      .limit(pageLimit);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     data = fb.data as any;
   }
@@ -104,7 +112,14 @@ export async function GET(request: NextRequest) {
     tag_ids: tagMap[c.id as string] || [],
   }));
 
-  return NextResponse.json({ conversations });
+  // Return a cursor when the page is full; client can request older with ?before=cursor.
+  const lastRow = conversations[conversations.length - 1] as Record<string, unknown> | undefined;
+  const nextCursor =
+    conversations.length === pageLimit && lastRow && typeof lastRow.updated_at === "string"
+      ? (lastRow.updated_at as string)
+      : null;
+
+  return NextResponse.json({ conversations, nextCursor });
 }
 
 /** PATCH — archive/unarchive conversations */

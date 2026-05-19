@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useCallback, useEffect } from "react";
+import React, { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useOrg } from "@/components/providers/org-provider";
 import { useSubscription } from "@/components/providers/subscription-provider";
@@ -40,6 +40,7 @@ import {
   Braces,
   CheckCircle2,
   Copy,
+  Download,
   Files,
   FolderOpen,
   Grid3X3,
@@ -64,6 +65,7 @@ import {
   updatePrompt,
   ratePrompt,
   getUserRatingsForOrg,
+  exportPack,
 } from "@/lib/vault-api";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
@@ -145,6 +147,7 @@ export default function VaultPage() {
   const [page, setPage] = useState(0);
   const [vaultPageSize, setVaultPageSize] = useState(VAULT_PAGE_SIZE);
   const [modalOpen, setModalOpen] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
   const [importExportOpen, setImportExportOpen] = useState(false);
   const [packsOpen, setPacksOpen] = useState(false);
   const [categoriesOpen, setCategoriesOpen] = useState(false);
@@ -171,6 +174,7 @@ export default function VaultPage() {
         (p) =>
           p.title.toLowerCase().includes(lower) ||
           p.content.toLowerCase().includes(lower) ||
+          (p.description || "").toLowerCase().includes(lower) ||
           (p.tags || []).some((t) => t.toLowerCase().includes(lower))
       );
     }
@@ -220,6 +224,33 @@ export default function VaultPage() {
     setSelectedIds(new Set());
   }, [page, vaultPageSize]);
 
+  // Keyboard shortcuts: `/` focuses search, `n` opens new-prompt modal.
+  // Chat has Ctrl+N; vault is the most-trafficked surface and should match.
+  useEffect(() => {
+    function handler(e: KeyboardEvent) {
+      const active = document.activeElement as HTMLElement | null;
+      const inEditable =
+        active && (
+          active.tagName === "INPUT" ||
+          active.tagName === "TEXTAREA" ||
+          active.isContentEditable
+        );
+      if (inEditable) return;
+      if (e.key === "/") {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+        return;
+      }
+      if (e.key.toLowerCase() === "n" && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        e.preventDefault();
+        if (!modalOpen) openNewPrompt();
+      }
+    }
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [modalOpen]);
+
   const totalUses = visiblePrompts.reduce((sum, p) => sum + (p.usage_count || 0), 0);
   const sharedCount = visiblePrompts.filter((p) => p.status === "approved").length;
   const enforcedGuidelines = guidelines.filter((s) => s.enforced).length;
@@ -237,17 +268,45 @@ export default function VaultPage() {
 
   const handleDelete = useCallback(
     async (id: string) => {
-      if (!confirm("Delete this prompt?")) return;
-      try {
-        await deletePrompt(id);
-        trackPromptDeleted();
-        toast.success("Prompt deleted");
-        refresh();
-      } catch {
-        toast.error("Failed to delete prompt");
-      }
+      const target = prompts.find((p) => p.id === id);
+      if (!target) return;
+      // Soft-delay: optimistic remove from view, then wait 4s for undo.
+      let undone = false;
+      // Don't actually mutate visiblePrompts state directly — refresh()
+      // re-reads from org provider. For the undo-window we just rely on
+      // the toast being the source of truth; the row stays in UI until
+      // the actual delete fires below.
+      toast(`Delete "${target.title}"?`, {
+        action: {
+          label: "Undo",
+          onClick: () => { undone = true; },
+        },
+        duration: 4000,
+        onDismiss: async () => {
+          if (undone) return;
+          try {
+            await deletePrompt(id);
+            trackPromptDeleted();
+            toast.success("Prompt deleted");
+            refresh();
+          } catch {
+            toast.error("Failed to delete prompt");
+          }
+        },
+        onAutoClose: async () => {
+          if (undone) return;
+          try {
+            await deletePrompt(id);
+            trackPromptDeleted();
+            toast.success("Prompt deleted");
+            refresh();
+          } catch {
+            toast.error("Failed to delete prompt");
+          }
+        },
+      });
     },
-    [refresh]
+    [prompts, refresh]
   );
 
   const handleDuplicate = useCallback(
@@ -522,7 +581,8 @@ export default function VaultPage() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search prompts..."
+            ref={searchInputRef}
+            placeholder="Search prompts… (press /)"
             aria-label="Search prompts"
             value={search}
             onChange={(e) => {
@@ -678,6 +738,30 @@ export default function VaultPage() {
           >
             <Archive className="mr-1.5 h-3.5 w-3.5" />
             Archive
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={bulkLoading}
+            onClick={async () => {
+              if (selectedIds.size === 0) return;
+              try {
+                const pack = await exportPack(Array.from(selectedIds), `selection-${new Date().toISOString().slice(0,10)}`);
+                const blob = new Blob([JSON.stringify(pack, null, 2)], { type: "application/json" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `teamprompt-pack-${new Date().toISOString().slice(0,10)}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                toast.success(`Exported ${selectedIds.size} prompt${selectedIds.size === 1 ? "" : "s"}`);
+              } catch {
+                toast.error("Failed to export prompts");
+              }
+            }}
+          >
+            <Download className="mr-1.5 h-3.5 w-3.5" />
+            Export
           </Button>
           <Button
             size="sm"

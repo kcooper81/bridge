@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { trackLogin } from "@/lib/analytics";
 import { authDebug } from "@/lib/auth-debug"; // AUTH-DEBUG
+import { ResendVerificationButton } from "../_components/resend-verification-button";
 
 export default function LoginPage() {
   const searchParams = useSearchParams();
@@ -131,11 +132,18 @@ export default function LoginPage() {
 
       {searchParams.get("error") && (
         <div className="mb-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
-          {searchParams.get("error") === "session_expired"
-            ? "Your session expired. Please sign in again."
-            : searchParams.get("error") === "email_not_verified"
-            ? "Please verify your email before signing in."
-            : "Authentication failed. Please try again."}
+          <div>
+            {searchParams.get("error") === "session_expired"
+              ? "Your session expired. Please sign in again."
+              : searchParams.get("error") === "email_not_verified"
+              ? "Please verify your email before signing in."
+              : "Authentication failed. Please try again."}
+          </div>
+          {searchParams.get("error") === "email_not_verified" && email && (
+            <div className="mt-2">
+              <ResendVerificationButton email={email} />
+            </div>
+          )}
         </div>
       )}
 

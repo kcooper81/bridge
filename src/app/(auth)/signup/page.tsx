@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { trackSignUp } from "@/lib/analytics";
 import { authDebug } from "@/lib/auth-debug"; // AUTH-DEBUG
+import { ResendVerificationButton } from "../_components/resend-verification-button";
 
 export default function SignupPage() {
   const searchParams = useSearchParams();
@@ -132,6 +133,7 @@ export default function SignupPage() {
           We sent a confirmation link to <strong>{email}</strong>. Click the
           link to activate your account.
         </p>
+        <ResendVerificationButton email={email} className="mt-4" />
       </div>
     );
   }

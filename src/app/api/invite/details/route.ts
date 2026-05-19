@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
 
   const { data: invite, error } = await db
     .from("invites")
-    .select("email, role, status, org_id, expires_at, organizations(name)")
+    .select("email, role, status, org_id, invited_by, expires_at, organizations(name)")
     .eq("token", token)
     .single();
 
@@ -21,13 +21,26 @@ export async function GET(request: NextRequest) {
 
   const orgData = invite.organizations as unknown as { name: string } | null;
 
-  // Only return minimal info needed to display the invite page
-  // Don't expose inviter details or internal IDs
+  // Look up inviter's display name (not email) so the invite page can say
+  // "Alex Chen invited you" instead of "undefined" or "A team member".
+  let invitedBy: string | null = null;
+  if (invite.invited_by) {
+    const { data: inviter } = await db
+      .from("profiles")
+      .select("name, email")
+      .eq("id", invite.invited_by)
+      .maybeSingle();
+    if (inviter) {
+      invitedBy = inviter.name || (inviter.email ? inviter.email.split("@")[0] : null);
+    }
+  }
+
   return NextResponse.json({
     email: invite.email,
     role: invite.role,
     status: invite.status,
     orgName: orgData?.name || "a team",
+    invitedBy,
     expired: new Date(invite.expires_at) < new Date(),
   });
 }

@@ -47,6 +47,166 @@ const TEAM_AUTHOR: BlogAuthor = {
 // ─── Posts ───
 
 const _POSTS: BlogPost[] = [
+  // ── New SEO-targeted posts (2026-05-15) — written to capture queries
+  //    that are already getting impressions but ranking past page 1.    ──
+  {
+    slug: "ai-prompt-dlp-complete-guide",
+    title: "AI Prompt DLP: How to Stop Sensitive Data Leaking to ChatGPT, Claude, and Gemini",
+    description:
+      "Prompt DLP is the new category of data loss prevention built for AI tools. Here's what it is, how it differs from traditional DLP, and how to implement it.",
+    publishedAt: "2026-05-15",
+    author: TEAM_AUTHOR,
+    category: "guide",
+    tags: ["AI DLP", "prompt DLP", "ChatGPT security", "Claude security", "Gemini security", "data protection"],
+    readingTime: "9 min read",
+    coverImage: "/images/hero-tech-workers.jpg",
+    coverImageAlt: "Engineers reviewing security policy on a laptop",
+    relatedSlugs: ["how-to-prevent-data-leaks-to-chatgpt", "ai-dlp-preventing-data-leaks-to-chatgpt-and-claude", "what-is-ai-data-loss-prevention-dlp"],
+    content: \`
+## What Is "Prompt DLP"?
+
+**Prompt DLP** is data loss prevention scoped specifically to AI prompts — the text employees type into ChatGPT, Claude, Gemini, Copilot, Perplexity, and other large language models. Where traditional DLP watches email attachments, file uploads, and cloud syncs, prompt DLP watches the AI prompt channel — which most organizations have no visibility into.
+
+The term emerged in late 2025 as enterprises realized their existing DLP stack (Microsoft Purview, Symantec, Forcepoint, Nightfall) was blind to AI tools. Prompts travel as normal HTTPS POST bodies to api.openai.com / anthropic.com / generativelanguage.googleapis.com — they don't look like a file exfiltration to network DLP, and they don't touch endpoint DLP triggers.
+
+## Why Traditional DLP Misses AI Prompts
+
+Three reasons:
+
+**1. Wrong content type.** Network DLP fingerprints files (PDFs, CSVs, images) leaving the organization. A 4,000-character prompt is just request body text — it passes through TLS to a normal SaaS endpoint and never appears as a file.
+
+**2. Wrong destination type.** Endpoint DLP watches USB writes, clipboard pastes to specific apps, and email egress. ChatGPT in the browser is none of those — it's just a webpage your employee already has permission to visit.
+
+**3. Wrong trigger granularity.** Even if your DLP catches a Cyberhaven study's [11% of employees pasting confidential data into ChatGPT](https://www.cyberhaven.com/blog/4-2-of-workers-have-pasted-company-data-into-chatgpt) (yes, that 2023 study still describes 2026 reality), traditional DLP either blocks the whole tool or sees nothing. There's no middle ground for "let this prompt through but redact the SSN inside it."
+
+## What Prompt DLP Does Differently
+
+A prompt-DLP system has to operate in the layer where the data exists: **inside the user's browser, before the prompt is sent**. That means a browser extension that:
+
+1. **Watches every chat-tool input field** (ChatGPT's textarea, Claude's composer, Gemini's input box, Copilot's chat panel).
+2. **Scans the prompt content** at submit time against a configurable detection set — PII, credentials, source code, financial records, patient data, internal document patterns.
+3. **Decides one of three things**: allow, block, or auto-redact. Block stops the submission. Auto-redact replaces \\\`SSN: 123-45-6789\\\` with \\\`SSN: [REDACTED]\\\` and forwards the cleaned prompt.
+4. **Logs the event** to an admin dashboard with what was detected, who tried to send it, which tool, and the redacted prompt for compliance review.
+
+Add to that two adjacent capabilities that round out the category:
+
+- **Tool allowlisting at the network layer** (Cloudflare Gateway, Zscaler, Cisco Umbrella) so shadow AI tools — Poe, Character.AI, the dozen Perplexity clones — can't reach the user in the first place.
+- **A shared prompt library** so when employees need a sensitive workflow (e.g. "summarize this legal contract"), they can use a vetted, redaction-aware template instead of inventing their own.
+
+## What to Look For When Evaluating Prompt DLP
+
+Five questions to ask any vendor:
+
+**Does it scan IN THE BROWSER, before the prompt leaves the device?** If the DLP runs on a proxy or in the LLM provider's API, the data has already left your control by the time it's evaluated. Browser-level scanning is non-negotiable.
+
+**Can you write custom detection rules?** Pre-built PII detection (SSNs, credit cards) is table stakes. The real question is whether you can add your own regex / classifier for company-specific patterns — internal project codenames, customer IDs, source-code conventions.
+
+**Does it support auto-redaction, not just blocking?** Block-only DLP gets disabled within a week because employees lose patience. Auto-redact preserves productivity while still protecting the underlying data.
+
+**Are audit trails detailed enough for SOC 2 / HIPAA / GDPR compliance?** You need: timestamp, user, AI tool, original prompt (or a hash of it), what was detected, what action was taken, redacted prompt if applicable. Lighter logs fail external audits.
+
+**Does it cover Claude, Gemini, Copilot, Perplexity — not just ChatGPT?** A solution that only handles ChatGPT misses the 30-50% of enterprise AI use that's spread across other tools.
+
+## How TeamPrompt Implements Prompt DLP
+
+[TeamPrompt](https://teamprompt.app) is built around this category. The browser extension scans every prompt in real time across ChatGPT, Claude, Gemini, Copilot, and Perplexity, with three enforcement modes (block / warn / auto-redact) and 40+ built-in detection rules plus custom-rule support. Detection events feed an audit dashboard with [SOC 2-aligned reporting](https://teamprompt.app/compliance/soc2), and the shared prompt library gives teams pre-approved templates so they don't reinvent risky prompts under deadline.
+
+It also pairs with [Cloudflare Gateway](https://teamprompt.app/integrations) to enforce the tool-allowlist at DNS — covering native apps, mobile devices, and CLIs that browser extensions can't touch.
+
+## The Bottom Line
+
+Prompt DLP isn't a product you can buy as an add-on to your existing DLP stack — it has to live where the prompts live: in the browser, scanning content before it ever reaches a third-party AI provider. Any team using AI seriously (which by 2026 is every team) needs this layer, regardless of whether you've already deployed Purview, Nightfall, or Symantec for traditional DLP. Those tools simply aren't built for this channel.
+
+Start with one capability — browser-level scanning of your three most-used AI tools — and expand from there.
+\`,
+  },
+  {
+    slug: "ai-audit-trails-which-tools-actually-have-them",
+    title: "AI Audit Trails: Which Tools Actually Have Them, and What Compliance Teams Need",
+    description:
+      "Your compliance team needs audit trails of every prompt sent to an LLM. Here's what ChatGPT, Claude, Gemini, and TeamPrompt give you — and what to ask before adopting any of them.",
+    publishedAt: "2026-05-15",
+    author: TEAM_AUTHOR,
+    category: "guide",
+    tags: ["audit trail", "SOC 2", "compliance", "AI governance", "RBAC"],
+    readingTime: "7 min read",
+    coverImage: "/images/hero-office-collab.jpg",
+    coverImageAlt: "Colleagues reviewing compliance docs together",
+    relatedSlugs: ["soc-2-and-ai-meeting-compliance-requirements", "hipaa-compliance-and-ai-what-healthcare-teams-must-know", "ai-governance-framework-practical-guide-for-teams"],
+    content: \`
+## The Compliance Problem
+
+If you're reading this, your compliance team has probably said something like: **"We need audit trails of every prompt our employees send to an LLM. We need role-based access control on who can see what. And whatever we adopt has to map to our SOC 2 / HIPAA / ISO 27001 controls."**
+
+This is a reasonable ask. The bad news is that most consumer-grade AI tools weren't built with this in mind. Here's what you actually get from each.
+
+## What ChatGPT Gives You
+
+**ChatGPT Plus / Pro / Free**: Nothing useful. Conversation history is private to the user, not admin-visible. No org-level export. No retention controls.
+
+**ChatGPT Team**: Admin can see workspace member list and seat allocation. **Conversations are not visible to admins**. There's no log of what prompts were sent — only that the user is active.
+
+**ChatGPT Enterprise**: Adds [audit logs (in beta)](https://help.openai.com/en/articles/8945021-audit-logging-for-chatgpt-enterprise) that include sign-ins, member changes, and policy updates. Conversation content is still not in the audit log — OpenAI explicitly excludes prompt and completion text from audit exports as of early 2026.
+
+So even at the most expensive tier, ChatGPT does not give you what your compliance team is asking for.
+
+## What Claude Gives You
+
+**Claude.ai (free + Pro)**: Same picture — user-private conversation history, no admin visibility.
+
+**Claude Team / Enterprise**: Anthropic's Team plan added admin audit logs in late 2025. They cover member activity (logins, projects created, prompts attempted against [usage policies](https://www.anthropic.com/policies/usage-policy)) but again **do not log the content of prompts**. Anthropic's stance is that prompt content is too sensitive to centralize for the customer.
+
+## What Gemini and Copilot Give You
+
+**Gemini for Workspace**: Logging is tied to your Google Workspace audit logs. You see who used Gemini, when, against which document — but not the prompt text itself.
+
+**Microsoft Copilot for Microsoft 365**: Audit logs are tied to the Microsoft Purview compliance center. You can see Copilot interactions at a metadata level (timestamp, user, app context) — Microsoft added some content logging in 2025 but it's per-tenant-opt-in and limited.
+
+## The Pattern
+
+Every AI vendor wants to charge enterprise prices but **none of them log the actual prompt content** by default. The reasons are reasonable from their side — prompts can contain customer PII, source code, medical records, anything — and storing all that in a central admin log creates a different compliance problem than it solves.
+
+But your compliance team isn't asking for "metadata about prompts." They're asking "what did our employees send to a third-party AI provider, who saw the response, and can we prove it for our auditor?"
+
+## What That Actually Requires
+
+To answer that question for any of {SOC 2 Type II, HIPAA, GDPR, ISO 27001, PCI-DSS}, you need a logging layer **between your employees and the AI provider** — not at the AI provider itself. That layer needs to:
+
+1. **Intercept every prompt at submit time** (browser extension or proxy).
+2. **Log the prompt content** (often hashed or redacted) plus user, AI tool, timestamp, model, response token count.
+3. **Apply role-based access** so engineers can see their team's prompts but not Finance's, and so an external auditor can be scoped to read-only export.
+4. **Retain logs in a customer-controlled store** that maps to your compliance evidence requirements.
+
+This is what a dedicated AI governance layer does. It's not something you can configure inside ChatGPT or Claude themselves — they don't have the hooks.
+
+## How TeamPrompt Handles This
+
+[TeamPrompt](https://teamprompt.app) intercepts at the browser level, so the audit trail captures the prompt before it leaves the employee's device. The log includes:
+
+- Timestamp + user ID + organization ID
+- AI tool (ChatGPT / Claude / Gemini / Copilot / Perplexity)
+- Model used (where the provider exposes it)
+- Original prompt + sensitive-data detections (with auto-redaction if configured)
+- Final cleaned prompt that was actually sent
+- Token counts in/out
+
+Logs are stored in your TeamPrompt workspace with role-based access (admin / manager / member views), and you can export them as CSV or PDF for [SOC 2 evidence](https://teamprompt.app/compliance/soc2), [HIPAA workforce activity reviews](https://teamprompt.app/compliance/hipaa), or [GDPR Article 30 records of processing](https://teamprompt.app/compliance/gdpr).
+
+It's the thing your compliance team is actually asking for — and you don't need to wait for ChatGPT or Claude to ship something that satisfies that requirement, because those vendors have structural reasons not to.
+
+## What to Ask Before Adopting Any AI Tool
+
+Five questions:
+
+1. **What prompt content is captured in your audit log?** "User activity" alone is not audit evidence.
+2. **What's the retention period? Can we extend it?** SOC 2 wants 12 months minimum; HIPAA wants 6 years.
+3. **Can roles be scoped?** Admin / manager / member / read-only auditor — at least four levels.
+4. **Can we export logs to CSV or SIEM?** Splunk, Datadog, Sumo Logic integration matters for enterprise.
+5. **Is the audit data residency configurable?** EU customers will require EU data residency for GDPR.
+
+If a vendor can't say yes to all five, treat their "audit trail" claim as marketing copy, not compliance evidence.
+\`,
+  },
   // ── New SEO-targeted posts (2026-03-28) ──
   {
     slug: "how-to-prevent-data-leaks-to-chatgpt",

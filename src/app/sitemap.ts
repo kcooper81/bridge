@@ -22,6 +22,8 @@ import { INDEXED_SOLUTION_SLUGS } from "@/lib/seo-pages/data";
  */
 
 const BLOG_SLUGS = [
+  "ai-prompt-dlp-complete-guide",
+  "ai-audit-trails-which-tools-actually-have-them",
   "how-to-build-a-team-prompt-library",
   "what-is-ai-data-loss-prevention-dlp",
   "5-signs-your-team-needs-prompt-management",

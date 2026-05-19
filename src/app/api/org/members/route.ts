@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { limiters, checkRateLimit } from "@/lib/rate-limit";
 import { emitAuditEvent } from "@/lib/audit-events";
+import { syncStripeSeats } from "@/lib/stripe-seats";
 
 /**
  * PATCH /api/org/members — Update a member's role
@@ -251,6 +252,10 @@ export async function DELETE(request: NextRequest) {
       before: { role: target.role, email: target.email },
       request,
     });
+
+    // Push the lower seat count to Stripe (non-blocking, won't fail
+    // the remove if Stripe call errors).
+    void syncStripeSeats(caller.org_id);
 
     return NextResponse.json({ success: true });
   } catch (error) {

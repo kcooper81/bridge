@@ -7,6 +7,7 @@ import { buildEmail } from "@/lib/email-template";
 import type { PlanTier } from "@/lib/types";
 import { logServiceError } from "@/lib/log-error";
 import { cancelOrgSubscription } from "@/lib/cancel-org-subscription";
+import { syncStripeSeats } from "@/lib/stripe-seats";
 
 export async function POST(request: NextRequest) {
   try {
@@ -408,6 +409,11 @@ export async function POST(request: NextRequest) {
       console.error("Extension email setup error:", emailErr);
       logServiceError("resend", emailErr, { url: "/api/invite/accept" });
     }
+
+    // Push the new seat count to Stripe so the customer is billed
+    // correctly. Non-blocking — invite accept must succeed even if
+    // seat sync fails (Stripe outage, no subscription, etc.).
+    void syncStripeSeats(invite.org_id);
 
     return NextResponse.json({ success: true, orgId: invite.org_id });
   } catch (error) {

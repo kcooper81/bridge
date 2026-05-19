@@ -134,6 +134,24 @@ export async function POST(request: NextRequest) {
 
     const db = createServiceClient();
 
+    // Idempotency: Stripe retries non-2xx and may re-deliver after timeouts.
+    // Before this guard, a retried checkout.session.completed re-fired
+    // notifyAdminsOfNewSubscription and double-counted analytics. Insert
+    // event.id at the top; on unique-violation short-circuit with 200 so
+    // Stripe stops retrying. The table auto-prunes events older than 30 days.
+    const { error: idemErr } = await db
+      .from("stripe_processed_events")
+      .insert({ id: event.id, type: event.type });
+    if (idemErr) {
+      // Unique-violation code 23505 = duplicate event; everything else is a
+      // hard error worth logging but we still ack so Stripe stops retrying.
+      const code = (idemErr as { code?: string }).code;
+      if (code === "23505") {
+        return NextResponse.json({ received: true, duplicate: true });
+      }
+      console.error("Webhook idempotency table insert failed", { id: event.id, type: event.type, error: idemErr });
+    }
+
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;

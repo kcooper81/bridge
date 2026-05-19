@@ -9,9 +9,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowRight, Lock, Loader2, Building, Mail, Plug, Settings, ShieldCheck } from "lucide-react";
+import { AlertTriangle, ArrowRight, CheckCircle2, Copy, Lock, Loader2, Building, Mail, Plug, Settings, ShieldCheck } from "lucide-react";
 import { saveOrg } from "@/lib/vault-api";
 import { useSubscription } from "@/components/providers/subscription-provider";
+import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import Link from "next/link";
 
@@ -37,6 +38,67 @@ export function OrganizationTab() {
     org?.settings?.invite_welcome_message ?? ""
   );
   const [savingPrefs, setSavingPrefs] = useState(false);
+
+  // Domain verification state — populated on mount + after init/check
+  interface VerifyState {
+    verified: boolean;
+    verifiedAt: string | null;
+    blocked: boolean;
+    instructions: { host: string; type: string; value: string } | null;
+  }
+  const [verifyState, setVerifyState] = useState<VerifyState | null>(null);
+  const [verifying, setVerifying] = useState(false);
+
+  const loadVerifyState = async () => {
+    try {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) return;
+      const res = await fetch("/api/org/domain/verify", {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      if (res.ok) setVerifyState(await res.json());
+    } catch {
+      // Non-fatal — UI just won't render verification widget
+    }
+  };
+
+  useEffect(() => {
+    if (org?.domain && currentUserRole === "admin") loadVerifyState();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [org?.domain, currentUserRole]);
+
+  async function handleVerifyAction(action: "init" | "check") {
+    setVerifying(true);
+    try {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) return;
+      const res = await fetch("/api/org/domain/verify", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ action }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error || "Domain verification failed");
+        return;
+      }
+      if (action === "init") {
+        toast.success("Verification token generated — add the DNS record, then click Check");
+      } else {
+        toast.success("Domain verified");
+      }
+      await loadVerifyState();
+    } catch {
+      toast.error("Domain verification failed");
+    } finally {
+      setVerifying(false);
+    }
+  }
 
   useEffect(() => {
     if (org && !dirty) {
@@ -170,31 +232,83 @@ export function OrganizationTab() {
             />
           </div>
 
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label htmlFor="auto-join-domain" className="flex items-center gap-1.5">
-                Auto-Join by Domain
-                {!canAccess("domain_auto_join") && (
-                  <Badge variant="secondary" className="text-[10px] px-1.5 py-0 font-normal">
-                    <Lock className="h-2.5 w-2.5 mr-0.5" />
-                    Team
-                  </Badge>
-                )}
-              </Label>
-              <p className="text-sm text-muted-foreground">
-                {!canAccess("domain_auto_join")
-                  ? "Upgrade to Team to let matching-domain users auto-join"
-                  : org?.domain
-                    ? `New users with @${org.domain} emails will automatically join this organization`
-                    : "Set a domain above to enable auto-join"}
-              </p>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="auto-join-domain" className="flex items-center gap-1.5">
+                  Auto-Join by Domain
+                  {!canAccess("domain_auto_join") && (
+                    <Badge variant="secondary" className="text-[10px] px-1.5 py-0 font-normal">
+                      <Lock className="h-2.5 w-2.5 mr-0.5" />
+                      Team
+                    </Badge>
+                  )}
+                  {verifyState?.verified && (
+                    <Badge variant="secondary" className="text-[10px] px-1.5 py-0 font-normal bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
+                      <CheckCircle2 className="h-2.5 w-2.5 mr-0.5" />
+                      Verified
+                    </Badge>
+                  )}
+                </Label>
+                <p className="text-sm text-muted-foreground">
+                  {!canAccess("domain_auto_join")
+                    ? "Upgrade to Team to let matching-domain users auto-join"
+                    : !org?.domain
+                      ? "Set a domain above to enable auto-join"
+                      : verifyState?.blocked
+                        ? `${org.domain} is a public webmail or disposable domain — auto-join is disabled for those.`
+                        : !verifyState?.verified
+                          ? `Verify ownership of ${org.domain} before enabling auto-join`
+                          : `New users with @${org.domain} emails will automatically join this organization`}
+                </p>
+              </div>
+              <Switch
+                id="auto-join-domain"
+                checked={autoJoinDomain}
+                onCheckedChange={setAutoJoinDomain}
+                disabled={
+                  !isAdmin ||
+                  !org?.domain ||
+                  !canAccess("domain_auto_join") ||
+                  !verifyState?.verified ||
+                  verifyState?.blocked
+                }
+              />
             </div>
-            <Switch
-              id="auto-join-domain"
-              checked={autoJoinDomain}
-              onCheckedChange={setAutoJoinDomain}
-              disabled={!isAdmin || !org?.domain || !canAccess("domain_auto_join")}
-            />
+
+            {isAdmin && canAccess("domain_auto_join") && org?.domain && !verifyState?.blocked && !verifyState?.verified && (
+              <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-4 space-y-3">
+                <div className="flex items-start gap-2">
+                  <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
+                  <div className="text-sm">
+                    <div className="font-medium">Verify domain ownership</div>
+                    <p className="text-muted-foreground mt-0.5">
+                      Add a TXT record to <code className="bg-background px-1 rounded text-xs">{org.domain}</code> so we know you control it.
+                      Without this, anyone with an @{org.domain} email could auto-join your org.
+                    </p>
+                  </div>
+                </div>
+                {verifyState?.instructions ? (
+                  <div className="rounded-md bg-background p-3 space-y-2 text-xs font-mono">
+                    <Row label="Host" value={verifyState.instructions.host} />
+                    <Row label="Type" value={verifyState.instructions.type} />
+                    <Row label="Value" value={verifyState.instructions.value} copyable />
+                  </div>
+                ) : null}
+                <div className="flex gap-2">
+                  <Button size="sm" variant="outline" onClick={() => handleVerifyAction("init")} disabled={verifying}>
+                    {verifying && <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />}
+                    {verifyState?.instructions ? "Regenerate token" : "Generate token"}
+                  </Button>
+                  {verifyState?.instructions && (
+                    <Button size="sm" onClick={() => handleVerifyAction("check")} disabled={verifying}>
+                      {verifying && <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />}
+                      Check now
+                    </Button>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           <Button onClick={handleSavePrefs} disabled={savingPrefs || !isAdmin}>
@@ -282,6 +396,30 @@ export function OrganizationTab() {
             </Link>
           </CardContent>
         </Card>
+      )}
+    </div>
+  );
+}
+
+function Row({ label, value, copyable }: { label: string; value: string; copyable?: boolean }) {
+  return (
+    <div className="grid grid-cols-[60px_1fr_auto] gap-2 items-center">
+      <span className="text-muted-foreground">{label}</span>
+      <code className="break-all">{value}</code>
+      {copyable && (
+        <button
+          type="button"
+          onClick={() => {
+            navigator.clipboard.writeText(value).then(
+              () => toast.success("Copied"),
+              () => toast.error("Couldn't copy")
+            );
+          }}
+          className="text-muted-foreground hover:text-foreground"
+          aria-label="Copy"
+        >
+          <Copy className="h-3.5 w-3.5" />
+        </button>
       )}
     </div>
   );

@@ -28,6 +28,8 @@ import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { deleteNotification, deleteAllNotifications } from "@/lib/notifications-api";
+import { NotificationPreferencesModal } from "@/components/dashboard/notification-preferences-modal";
+import { Settings as SettingsIcon } from "lucide-react";
 import Link from "next/link";
 import type { NotificationType, Notification } from "@/lib/types";
 
@@ -91,6 +93,7 @@ export default function NotificationsPage() {
   const [deleting, setDeleting] = useState(false);
   const [activeFilter, setActiveFilter] = useState<NotificationType | "all" | "unread">("all");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [prefsOpen, setPrefsOpen] = useState(false);
 
   const filtered = useMemo(() => {
     if (activeFilter === "all") return notifications;
@@ -192,6 +195,10 @@ export default function NotificationsPage() {
         description="Stay updated on security alerts, prompt approvals, and team activity"
         actions={
           <div className="flex flex-wrap gap-2">
+            <Button variant="outline" onClick={() => setPrefsOpen(true)}>
+              <SettingsIcon className="mr-2 h-4 w-4" />
+              Preferences
+            </Button>
             {unreadCount > 0 && (
               <Button variant="outline" onClick={() => markAllRead()}>
                 <CheckCheck className="mr-2 h-4 w-4" />
@@ -207,6 +214,7 @@ export default function NotificationsPage() {
           </div>
         }
       />
+      <NotificationPreferencesModal open={prefsOpen} onOpenChange={setPrefsOpen} />
 
       {/* Filter pills */}
       {notifications.length > 0 && (

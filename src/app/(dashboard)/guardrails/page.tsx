@@ -197,6 +197,7 @@ export default function GuardrailsPage() {
   const [scopeTeamId, setScopeTeamId] = useState<string>("global"); // "global" | team_id
   const [testContent, setTestContent] = useState("");
   const [testResult, setTestResult] = useState<{ matched: boolean; matchedText: string | null } | null>(null);
+  const [otherRuleMatches, setOtherRuleMatches] = useState<{ id: string; name: string; severity: string; matched: boolean }[]>([]);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [togglingId, setTogglingId] = useState<string | null>(null);
@@ -273,6 +274,7 @@ export default function GuardrailsPage() {
     }
     setTestContent("");
     setTestResult(null);
+    setOtherRuleMatches([]);
     setModalOpen(true);
   }
 
@@ -491,6 +493,20 @@ export default function GuardrailsPage() {
     if (!testContent || !pattern) return;
     const result = testPattern(testContent, pattern, patternType);
     setTestResult(result);
+    // Also run the test content against all other active rules so the admin
+    // can spot overlap / double-flagging before saving a redundant rule.
+    const others = rules
+      .filter((r) => r.is_active && r.id !== editRule?.id)
+      .map((r) => {
+        try {
+          const res = testPattern(testContent, r.pattern, r.pattern_type as typeof patternType);
+          return { id: r.id, name: r.name, severity: r.severity as string, matched: res.matched };
+        } catch {
+          return { id: r.id, name: r.name, severity: r.severity as string, matched: false };
+        }
+      })
+      .filter((r) => r.matched);
+    setOtherRuleMatches(others);
   }
 
   // Filter rules by team scope and pack
@@ -1544,6 +1560,32 @@ export default function GuardrailsPage() {
                   {testResult.matched
                     ? `Match found: ${testResult.matchedText}`
                     : "No match — content is safe"}
+                </p>
+              )}
+              {testResult && otherRuleMatches.length > 0 && (
+                <div className="rounded-md border border-amber-500/30 bg-amber-500/5 p-2.5 text-xs">
+                  <div className="font-medium text-amber-700 dark:text-amber-300 mb-1">
+                    {otherRuleMatches.length} other active rule{otherRuleMatches.length === 1 ? "" : "s"} also matched this content
+                  </div>
+                  <ul className="space-y-0.5 text-muted-foreground">
+                    {otherRuleMatches.slice(0, 5).map((r) => (
+                      <li key={r.id} className="flex items-center gap-1.5">
+                        <span className="font-mono text-[10px] uppercase tracking-wider">{r.severity}</span>
+                        <span>{r.name}</span>
+                      </li>
+                    ))}
+                    {otherRuleMatches.length > 5 && (
+                      <li className="italic">+{otherRuleMatches.length - 5} more</li>
+                    )}
+                  </ul>
+                  <div className="mt-1.5 text-[11px] text-muted-foreground italic">
+                    Consider whether this new rule duplicates coverage you already have.
+                  </div>
+                </div>
+              )}
+              {testResult && testResult.matched && otherRuleMatches.length === 0 && (
+                <p className="text-[11px] text-muted-foreground italic">
+                  No other active rules matched — this rule adds fresh coverage.
                 </p>
               )}
             </div>

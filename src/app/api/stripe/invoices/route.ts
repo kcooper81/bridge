@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 
@@ -19,7 +19,7 @@ function getStripe() {
  * Returns 200 with an empty list when Stripe isn't configured or when
  * the org has no Stripe customer record — callers render "No invoices yet".
  */
-export async function GET(_req: NextRequest) {
+export async function GET() {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

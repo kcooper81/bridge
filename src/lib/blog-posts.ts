@@ -841,6 +841,7 @@ Connect Slack in under a minute from **Settings → Integrations**. Your securit
     description:
       "A step-by-step guide to creating a shared prompt library that your team will actually adopt — from collecting initial prompts to driving daily usage.",
     publishedAt: "2025-11-12",
+    updatedAt: "2026-05-15",
     author: TEAM_AUTHOR,
     category: "guide",
     tags: ["prompt library", "team collaboration", "prompt management", "templates"],
@@ -921,6 +922,26 @@ Connect Slack in under a minute from **Settings → Integrations**. Your securit
 <p>Review the library quarterly. Archive prompts that are outdated, update ones that have drifted as AI models improve, and solicit new submissions from the team. A living library outperforms a static one every time.</p>
 
 <p>Building a prompt library is not a one-time project. It is an ongoing practice that compounds in value as your team grows and your AI usage matures. Start small, maintain quality, reduce friction, and the library will become the foundation of how your team works with AI.</p>
+
+<h2>What's Changed in 2026: Long Context, RAG, and Agents Reshape the Library</h2>
+
+<p><em>This section was added in May 2026 to reflect how the foundation models have evolved since this post was originally written.</em></p>
+
+<p>Three shifts are now affecting how teams design their prompt libraries:</p>
+
+<h3>1. Context windows grew 10x — and that changed what belongs in a template</h3>
+
+<p>When Claude 3 launched with a 200k-token context window in 2024, most prompts could already fit ten times more material than GPT-3.5 ever could. Today (Claude 4.7, GPT-4 Turbo, Gemini 2.5) the standard is 1M+ tokens. That sounds like more headroom, but it changes what a "template" should be. In 2024, a template for "summarize this contract" needed to be terse because every token cost. In 2026, the better template embeds the company's tone guide, three example summaries, the redlining checklist, and the legal-team review criteria — because the model can absorb all of it without truncating the actual contract. <strong>Practical takeaway:</strong> revisit your top 10 templates and ask whether they're optimized for tokens that no longer matter. Add the structure and examples you previously couldn't afford.</p>
+
+<h3>2. RAG and prompt libraries solve different problems — most teams need both</h3>
+
+<p>Retrieval-Augmented Generation (RAG) is the right pattern when the answer depends on knowledge your team has (docs, tickets, code) and you want the model to fetch and cite it. A prompt library is the right pattern when the <em>shape</em> of the request is what matters — the structure, the constraints, the output format. The two are complementary, not competitive. The mistake we see is teams building elaborate RAG pipelines for problems that were just bad-prompt problems all along. A well-templated "summarize this customer ticket" prompt that names the desired tone, structure, and length will outperform a RAG-over-tickets system that pulls 20 similar tickets and confuses the model. Rule of thumb: if the same prompt with different inputs works fine, you don't need RAG — you need a template.</p>
+
+<h3>3. Agent workflows make prompts compositional</h3>
+
+<p>The rise of MCP (Model Context Protocol), tool-use APIs, and agent frameworks (Claude's Computer Use, OpenAI's Assistants API, LangGraph) means a single user task often dispatches through 5-20 model calls — each with its own sub-prompt. Your library should now distinguish between <strong>user-facing prompts</strong> (what an analyst opens to summarize a deck) and <strong>tool prompts</strong> (the sub-step that extracts entities, the sub-step that generates a chart caption, etc.). Tag them separately. Engineers maintain the tool prompts; analysts maintain the user-facing ones. Mixing them in the same flat folder leads to non-engineers accidentally editing prompts that production systems depend on.</p>
+
+<p>The 6-step process above still applies — audit, categorize, templatize, set standards, make accessible, measure. But the categories you create and the standards you enforce should reflect that 2026 prompt libraries serve both humans and agentic systems. The teams that get this right ship faster than teams that treat their library as a 2024-era collection of one-off snippets.</p>
 `,
   },
 

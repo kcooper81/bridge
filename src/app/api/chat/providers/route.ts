@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { encrypt } from "@/lib/crypto";
 import { PROVIDER_MODELS } from "@/lib/ai/providers";
+import { emitAuditEvent } from "@/lib/audit-events";
 
 /** GET — list configured AI providers (never returns keys) */
 export async function GET() {
@@ -83,6 +84,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Failed to save provider key" }, { status: 500 });
   }
 
+  await emitAuditEvent({
+    orgId: profile.org_id,
+    actorId: user.id,
+    actorEmail: user.email ?? null,
+    action: "ai_provider.add",
+    targetType: "ai_provider",
+    targetLabel: PROVIDER_MODELS[provider]?.label || provider,
+    metadata: { provider, model_whitelist },
+    request,
+  });
+
   return NextResponse.json({
     provider: {
       ...data,
@@ -117,6 +129,17 @@ export async function DELETE(request: NextRequest) {
     .delete()
     .eq("org_id", profile.org_id)
     .eq("provider", provider);
+
+  await emitAuditEvent({
+    orgId: profile.org_id,
+    actorId: user.id,
+    actorEmail: user.email ?? null,
+    action: "ai_provider.remove",
+    targetType: "ai_provider",
+    targetLabel: PROVIDER_MODELS[provider]?.label || provider,
+    metadata: { provider },
+    request,
+  });
 
   return NextResponse.json({ success: true });
 }

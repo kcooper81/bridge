@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { exportRulesForFirewall, type DlpRuleForExport } from "@/lib/cloudflare-enterprise";
+import { emitAuditEvent } from "@/lib/audit-events";
 
 /**
  * GET /api/guardrails/export?format=json|csv|regex-list|suricata
@@ -49,6 +50,17 @@ export async function GET(req: NextRequest) {
     }
     const format = formatParam as "json" | "csv" | "regex-list" | "suricata";
     const exported = exportRulesForFirewall(rules as DlpRuleForExport[], format);
+
+    await emitAuditEvent({
+      orgId: profile.org_id,
+      actorId: user.id,
+      actorEmail: user.email ?? null,
+      action: "rule.export",
+      targetType: "security_rules",
+      targetLabel: `${rules.length} rules → ${format}`,
+      metadata: { format, count: rules.length },
+      request: req,
+    });
 
     const contentTypes: Record<string, string> = {
       json: "application/json",

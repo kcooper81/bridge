@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import { useOrg } from "@/components/providers/org-provider";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { Card, CardContent } from "@/components/ui/card";
@@ -317,10 +318,17 @@ export default function ActivityPage() {
 
   return (
     <>
-      <PageHeader
-        title="Activity & Audit"
-        description="Full audit trail of AI interactions — logged by the browser extension for compliance and security review"
-      />
+      <div className="flex items-start justify-between gap-3 mb-4">
+        <PageHeader
+          title="Activity & Audit"
+          description="Full audit trail of AI interactions — logged by the browser extension for compliance and security review"
+        />
+        <Button variant="outline" size="sm" asChild className="shrink-0 mt-1">
+          <Link href="/activity/admin">
+            <Shield className="h-3.5 w-3.5 mr-1.5" /> Admin Actions
+          </Link>
+        </Button>
+      </div>
 
       {/* Logging mode indicator */}
       {logMode === "metadata_only" && (

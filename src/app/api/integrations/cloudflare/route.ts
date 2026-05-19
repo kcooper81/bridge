@@ -7,6 +7,7 @@ import {
   type CloudflareConfig,
 } from "@/lib/cloudflare-gateway";
 import { getOrgSecrets, updateOrgSecrets, clearOrgSecrets } from "@/lib/organization-secrets";
+import { emitAuditEvent } from "@/lib/audit-events";
 
 /** Helper: get the current user's org and verify admin role */
 async function getOrgAdmin(req: NextRequest) {
@@ -119,6 +120,16 @@ export async function POST(req: NextRequest) {
         cloudflare_connected_at: new Date().toISOString(),
       });
 
+      await emitAuditEvent({
+        orgId: auth.orgId,
+        actorId: auth.userId,
+        action: "integration.connect",
+        targetType: "cloudflare",
+        targetLabel: `Cloudflare (account ${account_id})`,
+        metadata: { account_id },
+        request: req,
+      });
+
       return NextResponse.json({ success: true });
     }
 
@@ -167,6 +178,15 @@ export async function POST(req: NextRequest) {
       ]);
       await updateOrgSettings(auth.db, auth.orgId, {
         cloudflare_blocked_tools: null,
+      });
+
+      await emitAuditEvent({
+        orgId: auth.orgId,
+        actorId: auth.userId,
+        action: "integration.disconnect",
+        targetType: "cloudflare",
+        targetLabel: "Cloudflare",
+        request: req,
       });
 
       return NextResponse.json({ success: true });

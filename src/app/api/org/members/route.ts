@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { limiters, checkRateLimit } from "@/lib/rate-limit";
+import { emitAuditEvent } from "@/lib/audit-events";
 
 /**
  * PATCH /api/org/members — Update a member's role
@@ -63,7 +64,7 @@ export async function PATCH(request: NextRequest) {
     // Verify target is in the same org
     const { data: target } = await db
       .from("profiles")
-      .select("id, org_id, role")
+      .select("id, org_id, role, email, name")
       .eq("id", memberId)
       .single();
 
@@ -85,6 +86,19 @@ export async function PATCH(request: NextRequest) {
       console.error("Failed to update member role:", error);
       return NextResponse.json({ error: "Failed to update role" }, { status: 500 });
     }
+
+    await emitAuditEvent({
+      orgId: caller.org_id,
+      actorId: user.id,
+      actorEmail: user.email ?? null,
+      action: "member.role_change",
+      targetType: "user",
+      targetId: memberId,
+      targetLabel: target.name || target.email || memberId,
+      before: { role: target.role },
+      after: { role },
+      request,
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {
@@ -225,6 +239,18 @@ export async function DELETE(request: NextRequest) {
         }))
       );
     }
+
+    await emitAuditEvent({
+      orgId: caller.org_id,
+      actorId: user.id,
+      actorEmail: user.email ?? null,
+      action: "member.remove",
+      targetType: "user",
+      targetId: memberId,
+      targetLabel: target.name || target.email || memberId,
+      before: { role: target.role, email: target.email },
+      request,
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {

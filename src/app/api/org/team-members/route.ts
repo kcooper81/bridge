@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { limiters, checkRateLimit } from "@/lib/rate-limit";
+import { emitAuditEvent } from "@/lib/audit-events";
 
 /**
  * PATCH /api/org/team-members — Update a team member's role
@@ -157,7 +158,7 @@ export async function POST(request: NextRequest) {
   try {
     const auth = await authenticateAndGetCaller(request);
     if ("error" in auth) return auth.error;
-    const { db, caller } = auth;
+    const { db, user, caller } = auth;
 
     const { memberId, disabled } = await request.json();
     if (!memberId || typeof disabled !== "boolean") {
@@ -167,7 +168,7 @@ export async function POST(request: NextRequest) {
     // Verify target is in the same org
     const { data: target } = await db
       .from("profiles")
-      .select("id, org_id")
+      .select("id, org_id, name, email, shield_disabled")
       .eq("id", memberId)
       .single();
 
@@ -184,6 +185,19 @@ export async function POST(request: NextRequest) {
       console.error("Failed to toggle shield:", error);
       return NextResponse.json({ error: "Failed to toggle shield" }, { status: 500 });
     }
+
+    await emitAuditEvent({
+      orgId: caller.org_id,
+      actorId: user.id,
+      actorEmail: user.email ?? null,
+      action: "member.shield_toggled",
+      targetType: "user",
+      targetId: memberId,
+      targetLabel: target.name || target.email || memberId,
+      before: { shield_disabled: target.shield_disabled ?? false },
+      after: { shield_disabled: disabled },
+      request,
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {

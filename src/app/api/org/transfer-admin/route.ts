@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { createClient } from "@/lib/supabase/server";
 import { limiters, checkRateLimit } from "@/lib/rate-limit";
+import { emitAuditEvent } from "@/lib/audit-events";
 
 /**
  * POST — Transfer admin role to another org member.
@@ -119,6 +120,19 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
+
+    await emitAuditEvent({
+      orgId: currentProfile.org_id,
+      actorId: user.id,
+      actorEmail: user.email ?? null,
+      action: "org.transfer_admin",
+      targetType: "user",
+      targetId: targetProfile.id,
+      targetLabel: targetProfile.name || targetProfile.email || targetProfile.id,
+      before: { actor_role: "admin", target_role: targetProfile.role },
+      after: { actor_role: new_role, target_role: "admin" },
+      request,
+    });
 
     return NextResponse.json({
       success: true,

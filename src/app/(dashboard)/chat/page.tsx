@@ -442,10 +442,20 @@ export default function ChatPage() {
   // Full-text search state
   const [searchResults, setSearchResults] = useState<Array<{ messageId: string; conversationId: string; conversationTitle: string; role: string; snippet: string; created_at: string }> | null>(null);
   const [searchLoading, setSearchLoading] = useState(false);
-  const [adminNoticeDismissed, setAdminNoticeDismissed] = useState(() => {
-    if (typeof window !== "undefined") return localStorage.getItem("chat-admin-notice-dismissed") === "1";
-    return false;
-  });
+  // Hydration-safe default: server renders false, then the useEffect below
+  // syncs the localStorage value after mount. Reading localStorage in a
+  // useState initializer would cause a server/client mismatch (same class
+  // of bug as the recent #418 hydration fix).
+  const [adminNoticeDismissed, setAdminNoticeDismissed] = useState(false);
+  useEffect(() => {
+    try {
+      if (localStorage.getItem("chat-admin-notice-dismissed") === "1") {
+        setAdminNoticeDismissed(true);
+      }
+    } catch {
+      // localStorage may be unavailable in some embedded contexts; non-fatal.
+    }
+  }, []);
   // Archive state
   const [archivedConversations, setArchivedConversations] = useState<Conversation[]>([]);
   const [sidebarView, setSidebarView] = useState<"main" | "archived">("main");
@@ -570,12 +580,12 @@ export default function ChatPage() {
   }
 
   // ── Stream message to AI ──
-  async function sendMessage(messagesToSend?: ChatMsg[], overrideContext?: string) {
+  async function sendMessage(messagesToSend?: ChatMsg[], overrideContext?: string): Promise<boolean> {
     const input = chatInput.trim();
-    if (!input && !messagesToSend && pendingImages.length === 0 && pendingFiles.length === 0) return;
-    if (isLoading) return;
+    if (!input && !messagesToSend && pendingImages.length === 0 && pendingFiles.length === 0) return false;
+    if (isLoading) return false;
     // Don't send if files are still uploading
-    if (pendingFiles.some((f) => f.uploading)) { toast.info("Files are still processing..."); return; }
+    if (pendingFiles.some((f) => f.uploading)) { toast.info("Files are still processing..."); return false; }
 
     setDlpBlock(null);
     setRedactions(null);
@@ -604,7 +614,7 @@ export default function ChatPage() {
     if (!messageContent && filesMeta.length > 0) {
       messageContent = `Analyze ${filesMeta.length === 1 ? filesMeta[0].name : `these ${filesMeta.length} files`}`;
     }
-    if (!messageContent && !messagesToSend) return;
+    if (!messageContent && !messagesToSend) return false;
 
     const userMsg: ChatMsg = {
       id: nextMsgId(),
@@ -664,16 +674,16 @@ export default function ChatPage() {
           setDlpBlock(data.violations || []);
           if (!messagesToSend) setMessages((prev) => prev.slice(0, -1));
           setIsLoading(false);
-          return;
+          return false;
         }
-        if (data.error) { toast.error(data.error); setIsLoading(false); return; }
+        if (data.error) { toast.error(data.error); setIsLoading(false); return false; }
       }
 
       if (!res.ok) {
         toast.error(`Chat request failed (${res.status})`);
         if (!messagesToSend) setMessages((prev) => prev.slice(0, -1));
         setIsLoading(false);
-        return;
+        return false;
       }
 
       const reader = res.body?.getReader();
@@ -778,10 +788,12 @@ export default function ChatPage() {
       }
 
       loadConversations();
+      return true;
     } catch (err) {
       if ((err as Error).name !== "AbortError") {
         toast.error(err instanceof Error ? err.message : "Failed to send message");
       }
+      return false;
     } finally {
       setIsLoading(false);
       abortControllerRef.current = null;
@@ -880,8 +892,20 @@ export default function ChatPage() {
     if (lastAssistantIdx === -1) return;
     const idx = messages.length - 1 - lastAssistantIdx;
     const messagesWithoutLast = messages.slice(0, idx);
+    // Snapshot the model the user has selected RIGHT NOW. A fast
+    // load-conversation -> regenerate sequence can race because
+    // loadConversation overwrites selectedModel async — the regenerate
+    // would otherwise fire against the just-loaded conversation's stored
+    // model. We pass through ref values that reflect the latest user pick.
+    const modelAtClick = selectedModel;
+    const providerAtClick = selectedProvider;
     setMessages(messagesWithoutLast);
     setCompareMessages([]); // Clear stale compare response
+    // sendMessage uses selectedModel from state. Wrap with a microtask
+    // so the setMessages above is committed first; even if loadConversation
+    // beats us, we restore the desired model right before sending.
+    setSelectedModel(modelAtClick);
+    setSelectedProvider(providerAtClick);
     sendMessage(messagesWithoutLast);
   }
 
@@ -890,6 +914,7 @@ export default function ChatPage() {
     if (msgIndex === -1) return;
 
     const originalMsg = messages[msgIndex];
+    const originalMessages = messages;
     const truncated = messages.slice(0, msgIndex);
     const editedMsg: ChatMsg = {
       id: nextMsgId(),
@@ -899,24 +924,44 @@ export default function ChatPage() {
       files: originalMsg.files,
     };
 
-    // Delete messages from DB if conversation is saved
-    if (activeConvId) {
-      try {
-        const delRes = await fetch(`/api/chat/conversations/${activeConvId}/messages?after=${messageId}`, {
-          method: "DELETE",
-        });
-        if (!delRes.ok) console.warn("Failed to delete messages from DB:", delRes.status);
-      } catch (err) {
-        console.warn("Failed to delete messages:", err);
-      }
-    }
-
+    // Optimistic: show the edited UI immediately while we attempt the resend.
     const newMessages = [...truncated, editedMsg];
     setMessages(newMessages);
     setCompareMessages([]);
     setEditingMessageId(null);
     setEditMessageContent("");
-    sendMessage(newMessages);
+
+    // Don't delete the server-side trailing messages BEFORE the new stream
+    // resolves. If the user aborts, the network drops, or /api/chat blocks
+    // the resubmit (DLP), the previous turns are gone with no recovery.
+    // Attempt the send first; only delete on success.
+    let success = false;
+    try {
+      success = await sendMessage(newMessages);
+    } catch {
+      success = false;
+    }
+
+    if (!success) {
+      // Restore the original conversation so nothing is lost. The server
+      // copy was never touched.
+      setMessages(originalMessages);
+      toast.error("Couldn't resubmit — original messages restored.");
+      return;
+    }
+
+    // Stream completed cleanly. Now it's safe to delete the orphaned
+    // trailing messages from the server.
+    if (activeConvId) {
+      try {
+        const delRes = await fetch(`/api/chat/conversations/${activeConvId}/messages?after=${messageId}`, {
+          method: "DELETE",
+        });
+        if (!delRes.ok) console.warn("Post-send cleanup failed:", delRes.status);
+      } catch (err) {
+        console.warn("Post-send cleanup failed:", err);
+      }
+    }
   }
 
   function copyMessage(content: string, id: string) {
@@ -1604,14 +1649,29 @@ export default function ChatPage() {
 
     let undone = false;
     let archived = false;
-    const doArchive = () => {
+    const doArchive = async () => {
       if (undone || archived) return;
       archived = true;
-      fetch("/api/chat/conversations", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ids, archived: true }),
-      }).catch(() => {});
+      try {
+        const res = await fetch("/api/chat/conversations", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ids, archived: true }),
+        });
+        if (!res.ok) throw new Error(`PATCH failed (${res.status})`);
+      } catch {
+        // Server didn't archive — revert the optimistic move so what the
+        // user sees matches the DB. Previously the failure was swallowed,
+        // and on next reload the conversations came back, looking like an
+        // "undo" the user didn't request.
+        setArchivedConversations((prev) => prev.filter((c) => !ids.includes(c.id)));
+        setConversations((prev) =>
+          [...prev, ...movedConvs].sort(
+            (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime(),
+          ),
+        );
+        toast.error(`Couldn't archive ${ids.length} conversation${ids.length > 1 ? "s" : ""} — restored.`);
+      }
     };
     toast(`Archived ${ids.length} conversation${ids.length > 1 ? "s" : ""}`, {
       action: {

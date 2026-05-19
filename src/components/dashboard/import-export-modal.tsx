@@ -70,18 +70,25 @@ export function ImportExportModal({
     try {
       const text = await file.text();
       const data = JSON.parse(text);
+      // Validate shape before hitting the API. The standalone /import-export
+      // page does this check; the modal previously didn't, so malformed
+      // files reached the server and produced opaque 500s.
+      if (!data || typeof data !== "object" || !Array.isArray(data.prompts)) {
+        toast.error("Invalid file format: missing `prompts` array.");
+        return;
+      }
       const result = await importPack(data);
       if (result.imported > 0) {
         trackImport(result.imported);
-        toast.success(`Imported ${result.imported} prompts`);
+        toast.success(`Imported ${result.imported} prompt${result.imported === 1 ? "" : "s"}`);
         onImported();
       }
       if (result.errors.length > 0) {
-        toast.error(`${result.errors.length} errors during import`);
+        toast.error(`${result.errors.length} error${result.errors.length === 1 ? "" : "s"} during import`);
       }
       onOpenChange(false);
     } catch {
-      toast.error("Invalid file format");
+      toast.error("Couldn't parse the file. Make sure it's valid JSON.");
     } finally {
       setImporting(false);
       if (fileRef.current) fileRef.current.value = "";

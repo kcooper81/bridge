@@ -4,6 +4,55 @@ import { encrypt } from "@/lib/crypto";
 import { PROVIDER_MODELS } from "@/lib/ai/providers";
 import { emitAuditEvent } from "@/lib/audit-events";
 
+// Probe the provider's models endpoint with the supplied key. A 401 means
+// invalid/revoked; anything 2xx means at least the key is structurally
+// valid. We tolerate non-2xx network errors as "couldn't probe" and let
+// the save proceed — we don't want to refuse a save because the provider
+// is having an outage.
+async function probeProviderKey(
+  provider: string,
+  apiKey: string,
+): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const controller = AbortSignal.timeout(5000);
+    if (provider === "openai") {
+      const res = await fetch("https://api.openai.com/v1/models", {
+        headers: { Authorization: `Bearer ${apiKey}` },
+        signal: controller,
+      });
+      if (res.status === 401) return { ok: false, error: "OpenAI rejected the key (401 Unauthorized). Double-check the secret." };
+      if (res.status === 403) return { ok: false, error: "OpenAI returned 403 Forbidden — the key exists but lacks model access." };
+      return { ok: true };
+    }
+    if (provider === "anthropic") {
+      const res = await fetch("https://api.anthropic.com/v1/models", {
+        headers: {
+          "x-api-key": apiKey,
+          "anthropic-version": "2023-06-01",
+        },
+        signal: controller,
+      });
+      if (res.status === 401) return { ok: false, error: "Anthropic rejected the key (401 Unauthorized)." };
+      if (res.status === 403) return { ok: false, error: "Anthropic returned 403 Forbidden." };
+      return { ok: true };
+    }
+    if (provider === "google") {
+      // Google AI uses query-param API key — listModels is the cheapest validate.
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`,
+        { signal: controller },
+      );
+      if (res.status === 401 || res.status === 403) {
+        return { ok: false, error: "Google rejected the key. Verify it's a valid Generative Language API key." };
+      }
+      return { ok: true };
+    }
+    return { ok: true };
+  } catch {
+    return { ok: true };
+  }
+}
+
 /** GET — list configured AI providers (never returns keys) */
 export async function GET() {
   const auth = createClient();
@@ -60,6 +109,17 @@ export async function POST(request: NextRequest) {
 
   if (!PROVIDER_MODELS[provider]) {
     return NextResponse.json({ error: `Unsupported provider: ${provider}` }, { status: 400 });
+  }
+
+  // Validate the key with the provider before saving. A wrong/revoked key
+  // saved without this check breaks Chat silently for the whole org — the
+  // first time anyone discovers is when they try to chat and get a 401.
+  const probeResult = await probeProviderKey(provider, api_key.trim());
+  if (!probeResult.ok) {
+    return NextResponse.json(
+      { error: probeResult.error || "Provider rejected the API key" },
+      { status: 400 },
+    );
   }
 
   // Encrypt the API key

@@ -43,25 +43,43 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Slack not connected" }, { status: 400 });
     }
 
-    // Fetch channels from Slack
-    const res = await fetch(
-      "https://slack.com/api/conversations.list?types=public_channel,private_channel&exclude_archived=true&limit=200",
-      { headers: { Authorization: `Bearer ${integration.access_token}` } }
-    );
+    // Fetch all channels from Slack, paginating until cursor empties or we
+    // hit a safety cap. The previous single page of 200 silently lost the
+    // long tail in workspaces with >200 channels (common at 100+ companies).
+    const HARD_CAP = 2000;
+    const PER_PAGE = 200;
+    type SlackChannel = { id: string; name: string; is_private: boolean };
+    const channels: SlackChannel[] = [];
+    let cursor: string | undefined;
+    let pages = 0;
+    do {
+      const url = new URL("https://slack.com/api/conversations.list");
+      url.searchParams.set("types", "public_channel,private_channel");
+      url.searchParams.set("exclude_archived", "true");
+      url.searchParams.set("limit", String(PER_PAGE));
+      if (cursor) url.searchParams.set("cursor", cursor);
 
-    const data = await res.json();
-    if (!data.ok) {
-      console.error("Slack channels.list error:", data.error);
-      return NextResponse.json({ error: data.error || "Failed to list channels" }, { status: 500 });
-    }
+      const res = await fetch(url.toString(), {
+        headers: { Authorization: `Bearer ${integration.access_token}` },
+      });
+      const data = await res.json();
+      if (!data.ok) {
+        console.error("Slack channels.list error:", data.error);
+        return NextResponse.json({ error: data.error || "Failed to list channels" }, { status: 500 });
+      }
+      channels.push(...((data.channels || []) as SlackChannel[]));
+      cursor = data.response_metadata?.next_cursor;
+      pages++;
+      if (channels.length >= HARD_CAP) break;
+    } while (cursor && cursor.length > 0 && pages < 20);
 
-    const channels = (data.channels || []).map((ch: { id: string; name: string; is_private: boolean }) => ({
+    const out = channels.map((ch) => ({
       id: ch.id,
       name: ch.name,
       isPrivate: ch.is_private,
     }));
 
-    return NextResponse.json({ channels });
+    return NextResponse.json({ channels: out, truncated: channels.length >= HARD_CAP });
   } catch (error) {
     console.error("Slack channels error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

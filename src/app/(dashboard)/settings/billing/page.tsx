@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, CreditCard, ArrowUpRight, CheckCircle2, X } from "lucide-react";
+import { AlertTriangle, Download, FileText, Loader2, CreditCard, ArrowUpRight, CheckCircle2, X } from "lucide-react";
 import { PLAN_DISPLAY } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
@@ -26,6 +26,41 @@ export default function BillingPage() {
   const [loadingPortal, setLoadingPortal] = useState(false);
   const [loadingCheckout, setLoadingCheckout] = useState<string | null>(null);
   const [interval, setInterval] = useState<BillingInterval>("monthly");
+  interface InvoiceRow {
+    id: string;
+    number: string | null;
+    amount_paid: number;
+    amount_due: number;
+    currency: string;
+    status: string | null;
+    hosted_invoice_url: string | null;
+    invoice_pdf: string | null;
+    created: number;
+  }
+  const [invoices, setInvoices] = useState<InvoiceRow[]>([]);
+  const [loadingInvoices, setLoadingInvoices] = useState(false);
+
+  useEffect(() => {
+    if (!subscription?.stripe_customer_id || currentUserRole !== "admin") return;
+    let cancelled = false;
+    (async () => {
+      setLoadingInvoices(true);
+      try {
+        const supabase = createClient();
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.access_token) return;
+        const res = await fetch("/api/stripe/invoices", {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!cancelled) setInvoices(data.invoices || []);
+      } finally {
+        if (!cancelled) setLoadingInvoices(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [subscription?.stripe_customer_id, currentUserRole]);
 
   // Handle checkout success redirect
   useEffect(() => {
@@ -153,6 +188,28 @@ export default function BillingPage() {
 
   return (
     <div className="max-w-5xl space-y-6">
+        {/* Past-due / failed-payment recovery banner */}
+        {subscription?.status === "past_due" && (
+          <Card className="border-red-500/40 bg-red-500/5">
+            <CardContent className="p-4 flex items-start gap-3">
+              <AlertTriangle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
+              <div className="flex-1 min-w-0">
+                <div className="font-semibold text-sm">Your last payment failed</div>
+                <p className="text-sm text-muted-foreground mt-0.5">
+                  Update your card to keep <strong className="capitalize">{currentPlan}</strong> access
+                  {subscription.current_period_end && (
+                    <> through <strong>{format(new Date(subscription.current_period_end), "MMM d, yyyy")}</strong></>
+                  )}.
+                </p>
+              </div>
+              <Button size="sm" onClick={openPortal} disabled={loadingPortal}>
+                {loadingPortal && <Loader2 className="mr-1.5 h-3 w-3 animate-spin" />}
+                Update card
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Current Plan */}
         <Card>
           <CardHeader>
@@ -252,6 +309,58 @@ export default function BillingPage() {
             )}
           </CardContent>
         </Card>
+
+        {/* Recent invoices */}
+        {subscription?.stripe_customer_id && currentUserRole === "admin" && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                Recent invoices
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {loadingInvoices ? (
+                <div className="flex justify-center py-6"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
+              ) : invoices.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No invoices yet.</p>
+              ) : (
+                <div className="divide-y divide-border">
+                  {invoices.map((inv) => (
+                    <div key={inv.id} className="flex items-center justify-between py-2.5 text-sm">
+                      <div className="min-w-0">
+                        <div className="font-medium">
+                          {inv.number || inv.id.slice(0, 8)}
+                          {inv.status && inv.status !== "paid" && (
+                            <Badge variant="outline" className="ml-2 text-[10px] capitalize">{inv.status}</Badge>
+                          )}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {format(new Date(inv.created * 1000), "MMM d, yyyy")}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 shrink-0">
+                        <span className="font-mono tabular-nums">
+                          {(inv.amount_paid / 100).toLocaleString("en-US", { style: "currency", currency: inv.currency || "USD" })}
+                        </span>
+                        {inv.hosted_invoice_url && (
+                          <a href={inv.hosted_invoice_url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline">
+                            View
+                          </a>
+                        )}
+                        {inv.invoice_pdf && (
+                          <a href={inv.invoice_pdf} target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground hover:text-primary inline-flex items-center gap-1">
+                            <Download className="h-3 w-3" /> PDF
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Billing Interval Toggle */}
         <div className="flex items-center justify-center gap-3">

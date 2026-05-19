@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, ShieldCheck, Copy, Check } from "lucide-react";
+import { Download, KeyRound, Loader2, ShieldCheck, Copy, Check } from "lucide-react";
 import { toast } from "sonner";
 import QRCode from "qrcode";
 
@@ -29,10 +29,71 @@ export function TwoFactorCard() {
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
   const [disabling, setDisabling] = useState(false);
+  const [recoveryCodes, setRecoveryCodes] = useState<string[] | null>(null);
+  const [recoveryRemaining, setRecoveryRemaining] = useState<number | null>(null);
+  const [generatingCodes, setGeneratingCodes] = useState(false);
 
   useEffect(() => {
     loadFactors();
   }, []);
+
+  useEffect(() => {
+    if (state === "enabled") loadRecoveryStatus();
+  }, [state]);
+
+  async function loadRecoveryStatus() {
+    try {
+      const res = await fetch("/api/auth/mfa/recovery-codes");
+      if (res.ok) {
+        const data = await res.json();
+        setRecoveryRemaining(data.remaining ?? 0);
+      }
+    } catch {
+      // Non-fatal — recovery codes section just won't show count.
+    }
+  }
+
+  async function handleGenerateRecoveryCodes() {
+    if (recoveryRemaining && recoveryRemaining > 0) {
+      if (!confirm("Generating new recovery codes will invalidate your existing ones. Continue?")) return;
+    }
+    setGeneratingCodes(true);
+    try {
+      const res = await fetch("/api/auth/mfa/recovery-codes", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error || "Failed to generate codes");
+        return;
+      }
+      setRecoveryCodes(data.codes);
+      setRecoveryRemaining(data.codes.length);
+      toast.success("Recovery codes generated — save them now");
+    } finally {
+      setGeneratingCodes(false);
+    }
+  }
+
+  function downloadRecoveryCodes() {
+    if (!recoveryCodes) return;
+    const blob = new Blob(
+      [
+        `TeamPrompt MFA Recovery Codes\nGenerated: ${new Date().toISOString()}\n\nEach code is single-use. Keep these somewhere safe — they're your way back in if you lose your authenticator device.\n\n${recoveryCodes.join("\n")}\n`,
+      ],
+      { type: "text/plain" },
+    );
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "teamprompt-recovery-codes.txt";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function copyRecoveryCodes() {
+    if (!recoveryCodes) return;
+    navigator.clipboard.writeText(recoveryCodes.join("\n"));
+    toast.success("Recovery codes copied to clipboard");
+  }
 
   async function loadFactors() {
     setState("loading");
@@ -238,7 +299,7 @@ export function TwoFactorCard() {
         )}
 
         {state === "enabled" && (
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div className="flex items-center gap-2">
               <Badge className="bg-green-500/10 text-green-600 border-green-500/20 hover:bg-green-500/10">
                 Enabled
@@ -247,6 +308,56 @@ export function TwoFactorCard() {
                 Your account is protected with two-factor authentication.
               </span>
             </div>
+
+            {/* Recovery codes section — visible once 2FA is on */}
+            <div className="rounded-lg border border-border bg-muted/30 p-4 space-y-3">
+              <div className="flex items-start gap-2">
+                <KeyRound className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-semibold">Recovery codes</div>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Single-use codes that let you sign in if you lose access to your authenticator device. Each is consumed when used.
+                  </p>
+                  {recoveryRemaining !== null && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {recoveryRemaining > 0
+                        ? `${recoveryRemaining} unused recovery code${recoveryRemaining === 1 ? "" : "s"} on file.`
+                        : "No recovery codes generated yet. We strongly recommend generating a set now."}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {recoveryCodes ? (
+                <div className="space-y-2">
+                  <div className="rounded-md bg-background border border-border p-3 grid grid-cols-2 gap-1.5 text-xs font-mono">
+                    {recoveryCodes.map((c) => (
+                      <code key={c} className="select-all">{c}</code>
+                    ))}
+                  </div>
+                  <p className="text-xs text-amber-700 dark:text-amber-300">
+                    Save these now — we won&apos;t show them again.
+                  </p>
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="outline" onClick={copyRecoveryCodes}>
+                      <Copy className="h-3.5 w-3.5 mr-1.5" /> Copy
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={downloadRecoveryCodes}>
+                      <Download className="h-3.5 w-3.5 mr-1.5" /> Download .txt
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={() => setRecoveryCodes(null)}>
+                      I&apos;ve saved them
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <Button size="sm" variant="outline" onClick={handleGenerateRecoveryCodes} disabled={generatingCodes}>
+                  {generatingCodes && <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />}
+                  {recoveryRemaining && recoveryRemaining > 0 ? "Regenerate codes" : "Generate recovery codes"}
+                </Button>
+              )}
+            </div>
+
             <Button variant="outline" onClick={handleDisable} disabled={disabling}>
               {disabling && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Disable Two-Factor Authentication

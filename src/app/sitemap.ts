@@ -99,6 +99,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${baseUrl}/media`, lastModified: today, changeFrequency: "monthly", priority: 0.4 },
     { url: `${baseUrl}/privacy`, lastModified: today, changeFrequency: "monthly", priority: 0.3 },
     { url: `${baseUrl}/terms`, lastModified: today, changeFrequency: "monthly", priority: 0.3 },
+    { url: `${baseUrl}/about`, lastModified: today, changeFrequency: "monthly", priority: 0.6 },
   ];
 
   // Tier 2: Landing pages for Google Ads (must be indexed)
@@ -166,6 +167,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${baseUrl}/glossary`, lastModified: today, changeFrequency: "monthly", priority: 0.7 },
   ];
 
+  // Tier 10: Free tools (linkable assets — embeddable widgets that earn backlinks)
+  const toolPages: MetadataRoute.Sitemap = [
+    { url: `${baseUrl}/tools/prompt-pii-scanner`, lastModified: today, changeFrequency: "monthly", priority: 0.8 },
+  ];
+
+  // Tier 11: Security operational hubs (OWASP LLM Top 10 implementation guide)
+  const securityHubPages: MetadataRoute.Sitemap = [
+    { url: `${baseUrl}/security/owasp-llm-top-10`, lastModified: today, changeFrequency: "monthly", priority: 0.8 },
+  ];
+
   const all = [
     ...corePages,
     ...landingPages,
@@ -176,6 +187,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...comparePages,
     ...compliancePages,
     ...glossaryPages,
+    ...toolPages,
+    ...securityHubPages,
   ];
 
   // Deduplicate by URL

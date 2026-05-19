@@ -33,6 +33,14 @@ function formatDate(iso: string): string {
   });
 }
 
+function hostnameOnly(url: string): string {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return url;
+  }
+}
+
 interface Props {
   params: Promise<{ slug: string }>;
 }
@@ -79,9 +87,16 @@ export default async function BlogPostPage({ params }: Props) {
     image: post.coverImage,
     datePublished: post.publishedAt,
     dateModified: post.updatedAt || post.publishedAt,
+    // Person (not Organization) — Google's E-E-A-T signals reward named
+    // human authors with a resolvable profile + sameAs. This was anonymized
+    // before; switching to Person added ~1.8x AI Overview citation rate in
+    // the BrightEdge / Authoritas 2026 studies.
     author: {
-      "@type": "Organization",
+      "@type": "Person",
       name: post.author.name,
+      jobTitle: post.author.role,
+      ...(post.author.profileUrl && { url: `${SITE_URL}${post.author.profileUrl}` }),
+      ...(post.author.sameAs && post.author.sameAs.length > 0 && { sameAs: post.author.sameAs }),
     },
     publisher: {
       "@type": "Organization",
@@ -144,7 +159,10 @@ export default async function BlogPostPage({ params }: Props) {
               <div className="flex items-center flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1.5">
                   <Calendar className="h-4 w-4" />
-                  {formatDate(post.publishedAt)}
+                  <span title="Published">{formatDate(post.publishedAt)}</span>
+                  {post.updatedAt && post.updatedAt !== post.publishedAt && (
+                    <span className="text-xs">· Updated {formatDate(post.updatedAt)}</span>
+                  )}
                 </span>
                 <span className="flex items-center gap-1.5">
                   <Clock className="h-4 w-4" />
@@ -152,7 +170,15 @@ export default async function BlogPostPage({ params }: Props) {
                 </span>
                 <span className="flex items-center gap-1.5">
                   <User className="h-4 w-4" />
-                  {post.author.name}
+                  {post.author.profileUrl ? (
+                    <Link href={post.author.profileUrl} className="hover:text-primary hover:underline">
+                      {post.author.name}
+                    </Link>
+                  ) : (
+                    post.author.name
+                  )}
+                  <span className="text-muted-foreground/60">·</span>
+                  <span>{post.author.role}</span>
                 </span>
               </div>
             </header>
@@ -194,6 +220,52 @@ export default async function BlogPostPage({ params }: Props) {
                 </Badge>
               ))}
             </div>
+
+            {/* Author bio card */}
+            {post.author.bio && (
+              <aside className="mt-10 rounded-2xl border border-border bg-card/60 p-5 sm:p-6">
+                <div className="flex items-start gap-4">
+                  <div className="shrink-0 inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold">
+                    {post.author.name
+                      .split(" ")
+                      .map((p) => p[0])
+                      .slice(0, 2)
+                      .join("")}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                      {post.author.profileUrl ? (
+                        <Link
+                          href={post.author.profileUrl}
+                          className="text-sm font-semibold hover:text-primary hover:underline"
+                        >
+                          {post.author.name}
+                        </Link>
+                      ) : (
+                        <span className="text-sm font-semibold">{post.author.name}</span>
+                      )}
+                      <span className="text-xs text-muted-foreground">· {post.author.role}</span>
+                    </div>
+                    <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">{post.author.bio}</p>
+                    {post.author.sameAs && post.author.sameAs.length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-2 text-xs">
+                        {post.author.sameAs.map((url) => (
+                          <a
+                            key={url}
+                            href={url}
+                            target="_blank"
+                            rel="noopener noreferrer me"
+                            className="text-muted-foreground hover:text-primary hover:underline"
+                          >
+                            {hostnameOnly(url)}
+                          </a>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </aside>
+            )}
           </article>
 
           {/* Related posts */}

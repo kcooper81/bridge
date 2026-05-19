@@ -34,6 +34,11 @@ const footerLinks = {
     { label: "Contact", href: "/contact" },
     { label: "Changelog", href: "/changelog" },
     { label: "Case Studies", href: "/case-studies" },
+    { label: "About", href: "/about" },
+  ],
+  "Free Tools": [
+    { label: "Prompt PII Scanner", href: "/tools/prompt-pii-scanner" },
+    { label: "OWASP LLM Top 10", href: "/security/owasp-llm-top-10" },
   ],
 };
 
@@ -59,7 +64,7 @@ export function MarketingFooter() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-8 mb-12">
+        <div className="grid grid-cols-2 md:grid-cols-7 gap-8 mb-12">
           {/* Brand */}
           <div className="col-span-2">
             <div className="flex items-center gap-2.5 mb-4">

@@ -26,6 +26,8 @@ const PUBLIC_ROUTES = [
   "/compliance",
   "/glossary",
   "/case-studies",
+  "/about",
+  "/tools",
 ];
 
 function isPublicRoute(pathname: string) {
@@ -63,6 +65,15 @@ export async function middleware(request: NextRequest) {
   authDebug.log("middleware", `processing ${request.method} ${request.nextUrl.pathname}`);
 
   const { pathname } = request.nextUrl;
+
+  // Public embed routes — allow cross-origin iframing so external sites can
+  // embed the free tools. No auth check, relaxed frame-ancestors, no caching
+  // of HTTPS headers beyond the standard set.
+  if (pathname.startsWith("/embed/")) {
+    const response = NextResponse.next({ request: { headers: request.headers } });
+    setSecurityHeaders(response, { embeddable: true });
+    return response;
+  }
 
   // Skip expensive Supabase auth call for public marketing pages (faster landing page loads)
   if (isPublicRoute(pathname) && pathname !== "/") {
@@ -176,9 +187,17 @@ export async function middleware(request: NextRequest) {
   return supabaseResponse;
 }
 
-function setSecurityHeaders(response: NextResponse) {
-  // Prevent clickjacking
-  response.headers.set("X-Frame-Options", "DENY");
+function setSecurityHeaders(
+  response: NextResponse,
+  options: { embeddable?: boolean } = {},
+) {
+  // Prevent clickjacking — unless the route is an explicit public embed.
+  // For embed routes we drop X-Frame-Options entirely and use CSP
+  // frame-ancestors instead (modern browsers honour CSP; X-Frame-Options
+  // would override it with DENY).
+  if (!options.embeddable) {
+    response.headers.set("X-Frame-Options", "DENY");
+  }
   // Prevent MIME-type sniffing
   response.headers.set("X-Content-Type-Options", "nosniff");
   // Enable XSS filter (legacy browsers)
@@ -196,6 +215,7 @@ function setSecurityHeaders(response: NextResponse) {
     "camera=(), microphone=(), geolocation=(), interest-cohort=()"
   );
   // Content Security Policy
+  const frameAncestors = options.embeddable ? "frame-ancestors *" : "frame-ancestors 'self'";
   response.headers.set(
     "Content-Security-Policy",
     [
@@ -206,6 +226,7 @@ function setSecurityHeaders(response: NextResponse) {
       "font-src 'self' data:",
       "connect-src 'self' https://*.supabase.co https://api.stripe.com wss://*.supabase.co https://*.google.com https://*.google-analytics.com https://*.analytics.google.com https://*.doubleclick.net https://*.googleadservices.com https://images.unsplash.com https://px.ads.linkedin.com https://snap.licdn.com",
       "frame-src 'self' blob: https://js.stripe.com https://*.google.com https://*.doubleclick.net https://*.googleadservices.com",
+      frameAncestors,
       "object-src 'none'",
       "base-uri 'self'",
       "form-action 'self'",

@@ -178,6 +178,54 @@ export default function SecurityPage() {
           </div>
         </div>
 
+        {/* Operator resources — link the free tools / guides we maintain */}
+        <div className="mb-24">
+          <div className="text-center mb-8">
+            <SectionLabel>Free operator resources</SectionLabel>
+            <h2 className="mt-2 text-2xl sm:text-3xl font-bold">
+              Tools and guides you can use right now
+            </h2>
+            <p className="mt-3 text-muted-foreground max-w-xl mx-auto text-sm">
+              Free, no signup. Open source where it makes sense. We use these to
+              evaluate every prompt that flows through our own product.
+            </p>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 max-w-4xl mx-auto">
+            <Link
+              href="/tools/prompt-pii-scanner"
+              className="group rounded-2xl border border-border bg-card p-6 hover:border-primary/30 transition-all hover:shadow-md"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                  <ShieldCheck className="h-3 w-3" /> Client-side
+                </span>
+                <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition" />
+              </div>
+              <h3 className="font-semibold group-hover:text-primary transition">Prompt PII Scanner</h3>
+              <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">
+                Paste any prompt and instantly see what PII, PHI, credentials, or payment data it leaks
+                before it reaches an LLM. Runs 100% in your browser.
+              </p>
+            </Link>
+            <Link
+              href="/security/owasp-llm-top-10"
+              className="group rounded-2xl border border-border bg-card p-6 hover:border-primary/30 transition-all hover:shadow-md"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-violet-500/10 px-2.5 py-0.5 text-xs font-medium text-violet-600 dark:text-violet-400">
+                  <FileCheck className="h-3 w-3" /> 2025 edition
+                </span>
+                <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition" />
+              </div>
+              <h3 className="font-semibold group-hover:text-primary transition">OWASP LLM Top 10 — operational guide</h3>
+              <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">
+                How to detect, block, and log each LLM-specific risk in a real production chat workflow.
+                Compliance mappings to HIPAA, SOC 2, PCI-DSS, EU AI Act included.
+              </p>
+            </Link>
+          </div>
+        </div>
+
         {/* How it works — dark section */}
         <DarkSection gradient="right" className="mb-24">
           <SectionLabel dark>How it works</SectionLabel>

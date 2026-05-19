@@ -24,6 +24,9 @@ export default function robots(): MetadataRoute.Robots {
     "/invite",
     "/auth/",
     "/pitch",
+    // /embed/* mirrors content from canonical /tools/* — disallow to prevent
+    // duplicate-content competition with the canonical page in search.
+    "/embed/",
   ];
 
   return {

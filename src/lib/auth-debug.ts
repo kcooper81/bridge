@@ -2,6 +2,15 @@
 // Toggle: ?debug=auth URL param or localStorage.setItem("tp:auth-debug", "1")
 // View:  Console (colored) or JSON.parse(localStorage.getItem("tp:auth-debug-logs"))
 // NOTE: This entire file is for debug logging and should be removed when no longer needed.
+//
+// PRODUCTION GATE: every public entry-point on this module is no-op'd when
+// NODE_ENV === "production". The URL-based activation was already
+// dev-only, but the server-side cookie read at `initServer` previously was
+// not — so a user could set the cookie themselves and start receiving
+// server-side log payloads (user IDs, emails, internal flow data) in a
+// non-httpOnly cookie. That bypass is now closed.
+
+const IS_PROD = process.env.NODE_ENV === "production";
 
 type Category =
   | "middleware"
@@ -48,14 +57,11 @@ const MAX_LOGS = 500;
 let _enabled: boolean | null = null;
 
 function isEnabled(): boolean {
+  if (IS_PROD) return false;
   if (_enabled !== null) return _enabled;
   if (typeof window === "undefined") return false;
   try {
-    // Only allow URL-based activation in development
-    if (
-      process.env.NODE_ENV !== "production" &&
-      new URLSearchParams(window.location.search).get("debug") === "auth"
-    ) {
+    if (new URLSearchParams(window.location.search).get("debug") === "auth") {
       localStorage.setItem(ENABLED_KEY, "1");
       // Set cookie so middleware can read it
       document.cookie = `${COOKIE_NAME}=1; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
@@ -237,6 +243,11 @@ export const authDebug = {
 
   /** Initialize server-side logging by reading the debug cookie from the request */
   initServer(request: { cookies: { get: (name: string) => { value: string } | undefined } }) {
+    if (IS_PROD) {
+      _serverEnabled = false;
+      _serverLogs = [];
+      return;
+    }
     _serverLogs = [];
     const cookie = request.cookies.get(COOKIE_NAME);
     _serverEnabled = cookie?.value === "1";
@@ -244,6 +255,7 @@ export const authDebug = {
 
   /** Attach buffered server logs to the response as a cookie (call before returning response) */
   attachToResponse(response: { cookies: { set: (name: string, value: string, options: Record<string, unknown>) => void } }) {
+    if (IS_PROD) return;
     // Clear first to minimize cross-request bleed from concurrent requests
     const logsToSend = _serverLogs;
     _serverLogs = [];

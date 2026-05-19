@@ -9,6 +9,7 @@ import {
   type DlpRuleForExport,
 } from "@/lib/cloudflare-enterprise";
 import type { CloudflareConfig } from "@/lib/cloudflare-gateway";
+import { getOrgSecrets } from "@/lib/organization-secrets";
 
 /**
  * POST /api/integrations/cloudflare/enterprise
@@ -47,13 +48,14 @@ export async function POST(req: NextRequest) {
     .single();
 
   const settings = (org?.settings || {}) as Record<string, unknown>;
-  if (!settings.cloudflare_account_id || !settings.cloudflare_api_token) {
+  const secrets = await getOrgSecrets(profile.org_id);
+  if (!secrets.cloudflare_account_id || !secrets.cloudflare_api_token) {
     return NextResponse.json({ error: "Cloudflare not connected. Connect in Settings → Integrations first." }, { status: 400 });
   }
 
   const config: CloudflareConfig = {
-    account_id: settings.cloudflare_account_id as string,
-    api_token: settings.cloudflare_api_token as string,
+    account_id: secrets.cloudflare_account_id,
+    api_token: secrets.cloudflare_api_token,
   };
 
   const body = await req.json();

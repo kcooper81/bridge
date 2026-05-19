@@ -144,6 +144,34 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: "Managers cannot remove admins" }, { status: 403 });
     }
 
+    // Refuse to leave the org with zero admins. If removing an admin would
+    // drop the count to 0 while other members remain, block the action so
+    // we never end up with an admin-less org (which would lock everyone out
+    // of role changes, billing, integrations). The UI already guards this,
+    // but a scripted DELETE call wouldn't hit that path.
+    if (target.role === "admin") {
+      const { count: remainingAdmins } = await db
+        .from("profiles")
+        .select("id", { count: "exact", head: true })
+        .eq("org_id", caller.org_id)
+        .eq("role", "admin")
+        .neq("id", memberId);
+      const { count: remainingMembers } = await db
+        .from("profiles")
+        .select("id", { count: "exact", head: true })
+        .eq("org_id", caller.org_id)
+        .neq("id", memberId);
+      if ((remainingAdmins ?? 0) === 0 && (remainingMembers ?? 0) > 0) {
+        return NextResponse.json(
+          {
+            error:
+              "Can't remove the last admin while other members remain. Promote another member to admin first, or transfer admin via /api/org/transfer-admin.",
+          },
+          { status: 409 },
+        );
+      }
+    }
+
     // Remove from all teams in this org first
     const { data: orgTeams } = await db
       .from("teams")

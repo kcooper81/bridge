@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { AI_TOOL_DOMAINS, syncBlockedTools, verifyConnection, type CloudflareConfig } from "@/lib/cloudflare-gateway";
+import { getOrgSecrets } from "@/lib/organization-secrets";
 
 /** GET — Get current tool policy */
 export async function GET(req: NextRequest) {
@@ -34,8 +35,10 @@ export async function GET(req: NextRequest) {
     const approvedTools = (settings.approved_ai_tools as string[]) || ["chatgpt", "claude", "gemini", "copilot", "perplexity"];
     const policyEnabled = settings.allow_external_ai_tools === false;
 
-    // Check Cloudflare connection (stored in same settings JSONB)
-    const cloudflareConnected = !!(settings.cloudflare_account_id && settings.cloudflare_api_token);
+    // Cloudflare credentials live in organization_secrets now (admin-only, no
+    // SELECT RLS) — read via service role from the dedicated table.
+    const secrets = await getOrgSecrets(profile.org_id);
+    const cloudflareConnected = !!(secrets.cloudflare_account_id && secrets.cloudflare_api_token);
     const cloudflareBlockedTools = (settings.cloudflare_blocked_tools as string[]) || [];
 
     // Build tool list with status
@@ -112,10 +115,11 @@ export async function POST(req: NextRequest) {
     let cloudflareResult = null;
     let cloudflareError: string | null = null;
 
-    if (currentSettings.cloudflare_account_id && currentSettings.cloudflare_api_token) {
+    const secrets = await getOrgSecrets(profile.org_id);
+    if (secrets.cloudflare_account_id && secrets.cloudflare_api_token) {
       const config: CloudflareConfig = {
-        account_id: currentSettings.cloudflare_account_id as string,
-        api_token: currentSettings.cloudflare_api_token as string,
+        account_id: secrets.cloudflare_account_id,
+        api_token: secrets.cloudflare_api_token,
       };
 
       // Verify connection still works

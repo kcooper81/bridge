@@ -159,16 +159,36 @@ export async function middleware(request: NextRequest) {
     return resp;
   }
 
-  // MFA step-up: user has MFA enrolled but hasn't verified yet this session
-  if (
+  // MFA step-up: user has MFA enrolled but hasn't verified yet this session.
+  //
+  // Page routes redirect to /verify-mfa. API routes (which the previous
+  // implementation exempted entirely — letting an enrolled-but-unverified
+  // user call /api/* directly with their AAL1 token) now get a 403
+  // forbidden response. The MFA-bypass-on-API-routes path was the largest
+  // single auth issue from the review. /api/auth/* is exempted because
+  // those are the endpoints that complete the AAL1→AAL2 step-up itself
+  // (and signout). /api/extension/* is exempted because the extension
+  // session lifecycle is handled separately.
+  const needsMfaStepUp =
     user &&
     aal?.nextLevel === "aal2" &&
     aal?.currentLevel === "aal1" &&
     !isAuthRoute(pathname) &&
-    !pathname.startsWith("/api/") &&
     !pathname.startsWith("/auth/") &&
-    !pathname.startsWith("/extension/")
-  ) {
+    !pathname.startsWith("/api/auth/") &&
+    !pathname.startsWith("/api/extension/") &&
+    !pathname.startsWith("/extension/");
+
+  if (needsMfaStepUp) {
+    if (pathname.startsWith("/api/")) {
+      authDebug.log("middleware", "block: AAL1 → /api/* requires AAL2");
+      const resp = NextResponse.json(
+        { error: "MFA verification required", code: "mfa_required" },
+        { status: 403 },
+      );
+      authDebug.attachToResponse(resp);
+      return resp;
+    }
     authDebug.log("middleware", "redirect: AAL1 → /verify-mfa (MFA required)");
     const url = request.nextUrl.clone();
     url.pathname = "/verify-mfa";

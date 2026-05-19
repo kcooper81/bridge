@@ -51,21 +51,27 @@ export default function ResetPasswordPage() {
       return;
     }
 
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters");
+    if (password.length < 10) {
+      setError("Password must be at least 10 characters");
       return;
     }
 
     setLoading(true);
 
     try {
-      const supabase = createClient();
-      const { error: updateError } = await supabase.auth.updateUser({
-        password,
+      // Route through the server so the recovery-session check actually runs.
+      // The bare client `supabase.auth.updateUser({ password })` works for any
+      // authenticated session, not just recovery ones — so a signed-in user
+      // landing on this page from a forged URL would have been able to change
+      // their own password silently.
+      const res = await fetch("/api/auth/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
       });
-
-      if (updateError) {
-        setError(updateError.message);
+      const data = (await res.json().catch(() => ({}))) as { error?: string };
+      if (!res.ok) {
+        setError(data.error || "Failed to update password");
         return;
       }
 
@@ -125,11 +131,12 @@ export default function ResetPasswordPage() {
           <Input
             id="password"
             type="password"
-            placeholder="At least 6 characters"
+            placeholder="At least 10 characters"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            minLength={6}
+            minLength={10}
+            autoComplete="new-password"
           />
         </div>
         <div className="space-y-2">
@@ -141,7 +148,8 @@ export default function ResetPasswordPage() {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
-            minLength={6}
+            minLength={10}
+            autoComplete="new-password"
           />
         </div>
         <Button type="submit" className="w-full" disabled={loading}>

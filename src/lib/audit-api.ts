@@ -355,7 +355,7 @@ export async function getAuditData(filters?: AuditFilters): Promise<AuditData | 
     usageCount: p.usage_count || 0,
   }));
 
-  // Tool policy data (from same org settings)
+  // Tool policy data (from org settings — non-secret)
   const { data: orgForPolicy } = await db
     .from("organizations")
     .select("settings")
@@ -364,7 +364,24 @@ export async function getAuditData(filters?: AuditFilters): Promise<AuditData | 
   const orgSettings = (orgForPolicy?.settings || {}) as Record<string, unknown>;
   const approvedAiTools = (orgSettings.approved_ai_tools as string[]) || ["chatgpt", "claude", "gemini", "copilot", "perplexity"];
   const toolPolicyEnabled = orgSettings.allow_external_ai_tools === false;
-  const cfConnected = !!(orgSettings.cloudflare_account_id && orgSettings.cloudflare_api_token);
+  // Cloudflare credentials moved to the locked-down organization_secrets
+  // table; non-admin clients can't read them, so we hit a server endpoint
+  // that returns the connection status as a boolean.
+  let cfConnected = false;
+  try {
+    const session = (await db.auth.getSession()).data.session;
+    if (session?.access_token) {
+      const res = await fetch("/api/integrations/cloudflare/connected", {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      if (res.ok) {
+        const j = await res.json();
+        cfConnected = !!j.connected;
+      }
+    }
+  } catch {
+    // Non-fatal — badge just shows "Extension enforcement only" until next load.
+  }
 
   return {
     totalInteractions,

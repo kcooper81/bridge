@@ -21,6 +21,10 @@
       "schedule": "0 14 * * 1"
     },
     {
+      "path": "/api/cron/content-embeddings",
+      "schedule": "0 10 * * 1"
+    },
+    {
       "path": "/api/cron/llm-citations",
       "schedule": "0 11 * * 1"
     },

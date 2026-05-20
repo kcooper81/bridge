@@ -14,6 +14,7 @@ import {
   getBlogPostBySlugAsync,
   getRelatedPostsAsync,
 } from "@/lib/blog-posts.server";
+import { getRelatedBySimilarity, type RelatedItem } from "@/lib/content-embeddings";
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || "https://teamprompt.app";
@@ -69,8 +70,24 @@ export default async function BlogPostPage({ params }: Props) {
   const post = await getBlogPostBySlugAsync(slug);
   if (!post) notFound();
 
-  // Related posts from the relatedSlugs array
+  // Related posts from the manually-curated relatedSlugs array
   const related = await getRelatedPostsAsync(post);
+
+  // AI-driven internal linking — top-N most similar pieces by embedding
+  // cosine similarity, excluding anything already in the manual list.
+  // Falls back to empty if embeddings haven't been computed yet (e.g.
+  // pre-first-cron). Per the case studies, this kind of entity-overlap
+  // linking drives +44% top-10 ranking count and +61% non-branded sessions
+  // for mid-stage SaaS over 6 months.
+  const manualSlugs = new Set<string>([post.slug, ...related.map((r) => r.slug)]);
+  let aiRelated: RelatedItem[] = [];
+  try {
+    aiRelated = (await getRelatedBySimilarity(post.slug, 8)).filter(
+      (r) => !manualSlugs.has(r.slug),
+    ).slice(0, 4);
+  } catch {
+    aiRelated = [];
+  }
 
   // Schemas
   const breadcrumbSchema = generateBreadcrumbSchema([
@@ -367,6 +384,39 @@ export default async function BlogPostPage({ params }: Props) {
                       <span>{formatDate(rel.publishedAt)}</span>
                       <span>{rel.readingTime}</span>
                     </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* AI-driven related content — computed offline via embeddings.
+              Surfaces semantically-related glossary entries, /solutions pages,
+              and OWASP/tool hubs that the manually-curated relatedSlugs miss. */}
+          {aiRelated.length > 0 && (
+            <div className="max-w-7xl mx-auto mt-16">
+              <SectionLabel className="text-center">You might also find useful</SectionLabel>
+              <h2 className="text-xl sm:text-2xl font-semibold text-center mb-8">
+                Related from across TeamPrompt
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {aiRelated.map((r) => (
+                  <Link
+                    key={r.slug}
+                    href={r.href}
+                    className="group flex flex-col rounded-xl border border-border bg-card/60 p-4 hover:bg-muted/40 hover:border-primary/20 transition-all duration-200"
+                  >
+                    <Badge variant="outline" className="w-fit text-[10px] uppercase tracking-wider mb-2">
+                      {r.kind}
+                    </Badge>
+                    <h3 className="text-sm font-semibold leading-snug group-hover:text-primary transition-colors line-clamp-2">
+                      {r.title}
+                    </h3>
+                    {r.description && (
+                      <p className="text-xs text-muted-foreground leading-relaxed mt-1.5 line-clamp-3">
+                        {r.description}
+                      </p>
+                    )}
                   </Link>
                 ))}
               </div>

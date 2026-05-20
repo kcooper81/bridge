@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { generatePageMetadata } from "@/lib/seo/metadata";
 import { allSeoPages, getSeoPageBySlug, isIndexableSolution } from "@/lib/seo-pages/data";
 import { SeoLandingPage } from "../_components/seo-landing-page";
+import { getRelatedBySimilarity, type RelatedItem } from "@/lib/content-embeddings";
 
 export function generateStaticParams() {
   return allSeoPages.map((page) => ({ slug: page.slug }));
@@ -25,9 +26,20 @@ export function generateMetadata({
   });
 }
 
-export default function Page({ params }: { params: { slug: string } }) {
+export default async function Page({ params }: { params: { slug: string } }) {
   const page = getSeoPageBySlug(params.slug);
   if (!page) notFound();
 
-  return <SeoLandingPage data={page} />;
+  // AI-driven related content — embeddings-based similarity to other indexable
+  // pieces. Empty array on first deploy before embeddings are computed.
+  let aiRelated: RelatedItem[] = [];
+  if (isIndexableSolution(page.slug)) {
+    try {
+      aiRelated = await getRelatedBySimilarity(page.slug, 4);
+    } catch {
+      aiRelated = [];
+    }
+  }
+
+  return <SeoLandingPage data={page} aiRelated={aiRelated} />;
 }

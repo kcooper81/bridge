@@ -137,7 +137,16 @@ const categoryFallback: Record<SeoCategory, HeroImgData> = {
   policy:        { src: u("photo-1557804506-669a67965ba0"), alt: "Policy management", badgeIcon: "ShieldCheck", badgeHeadline: "Policy set", badgeSubtitle: "Enforce standards", topBadgeIcon: "Shield", topBadgeHeadline: "Auto-enforce", topBadgeSubtitle: "Company-wide" },
 };
 
-export function SeoLandingPage({ data }: { data: SeoPageData }) {
+interface AiRelatedItem {
+  slug: string;
+  kind: string;
+  title: string;
+  description: string | null;
+  href: string;
+  score: number;
+}
+
+export function SeoLandingPage({ data, aiRelated }: { data: SeoPageData; aiRelated?: AiRelatedItem[] }) {
   const heroImg = slugHeroImages[data.slug] || categoryFallback[data.category];
   return (
     <>
@@ -328,6 +337,41 @@ export function SeoLandingPage({ data }: { data: SeoPageData }) {
 
       {/* ━━━ RELATED SOLUTIONS ━━━ */}
       <RelatedSolutions slug={data.slug} />
+
+      {/* ━━━ AI-DRIVEN RELATED CONTENT ━━━ */}
+      {aiRelated && aiRelated.length > 0 && (
+        <section className="py-20 sm:py-24 border-t border-border bg-muted/30">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+            <div className="text-center mb-10">
+              <div className="text-xs font-semibold uppercase tracking-wider text-primary mb-2">
+                Related from across TeamPrompt
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-bold">You might also find useful</h2>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-6xl mx-auto">
+              {aiRelated.map((r) => (
+                <a
+                  key={r.slug}
+                  href={r.href}
+                  className="group flex flex-col rounded-xl border border-border bg-card p-5 hover:bg-card/80 hover:border-primary/20 transition-all"
+                >
+                  <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground mb-2">
+                    {r.kind}
+                  </span>
+                  <h3 className="text-sm font-semibold leading-snug group-hover:text-primary transition-colors line-clamp-2">
+                    {r.title}
+                  </h3>
+                  {r.description && (
+                    <p className="text-xs text-muted-foreground leading-relaxed mt-1.5 line-clamp-3">
+                      {r.description}
+                    </p>
+                  )}
+                </a>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ━━━ EXPLORE MORE ━━━ */}
       <ExploreMoreLinks />

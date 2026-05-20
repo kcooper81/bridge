@@ -11,7 +11,7 @@ export const metadata: Metadata = generatePageMetadata({
   path: "/about",
   keywords: [
     "about TeamPrompt",
-    "Kade Cooper founder",
+    "Eric Campton founder",
     "TeamPrompt company",
     "prompt DLP founder",
     "AI governance company",
@@ -28,7 +28,7 @@ const breadcrumbs = generateBreadcrumbSchema([
 const personSchema = {
   "@context": "https://schema.org",
   "@type": "Person",
-  name: "Kade Cooper",
+  name: "Eric Campton",
   jobTitle: "Founder",
   worksFor: { "@type": "Organization", name: "TeamPrompt", url: SITE_URL },
   url: `${SITE_URL}/about`,
@@ -55,7 +55,7 @@ const orgSchema = {
   description:
     "AI Data Loss Prevention and prompt management platform for teams. Monitor, redact, and audit every prompt across ChatGPT, Claude, Gemini, Copilot, and more.",
   sameAs: ["https://www.linkedin.com/company/teamprompt"],
-  founder: { "@type": "Person", name: "Kade Cooper" },
+  founder: { "@type": "Person", name: "Eric Campton" },
   contactPoint: [
     {
       "@type": "ContactPoint",
@@ -101,10 +101,10 @@ export default function AboutPage() {
             <div className="mt-3 rounded-2xl border border-border bg-card p-5">
               <div className="flex items-center gap-3">
                 <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary text-lg font-semibold">
-                  KC
+                  EC
                 </div>
                 <div>
-                  <div className="text-sm font-semibold">Kade Cooper</div>
+                  <div className="text-sm font-semibold">Eric Campton</div>
                   <div className="text-xs text-muted-foreground">Founder</div>
                 </div>
               </div>
@@ -118,15 +118,15 @@ export default function AboutPage() {
                   <Linkedin className="h-3.5 w-3.5" /> LinkedIn
                 </a>
                 <br />
-                <a href="mailto:kade@teamprompt.app" className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-primary">
-                  <Mail className="h-3.5 w-3.5" /> kade@teamprompt.app
+                <a href="mailto:eric@teamprompt.app" className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-primary">
+                  <Mail className="h-3.5 w-3.5" /> eric@teamprompt.app
                 </a>
               </div>
             </div>
           </div>
           <div className="lg:col-span-2 space-y-4 text-sm leading-relaxed text-foreground/85">
             <p>
-              Kade Cooper founded TeamPrompt after fifteen years building products at the intersection of
+              Eric Campton founded TeamPrompt after fifteen years building products at the intersection of
               security and developer experience. The pattern was the same every time: security teams want
               to say yes, employees keep saying yes anyway, and the gap between policy and reality widens
               until something embarrassing happens.
@@ -137,10 +137,10 @@ export default function AboutPage() {
               had a blind spot for the prompt channel. TeamPrompt closes it.
             </p>
             <p>
-              Kade writes most of the long-form on this site. If you want to challenge or correct anything
+              Eric writes most of the long-form on this site. If you want to challenge or correct anything
               you read, email{" "}
-              <a href="mailto:kade@teamprompt.app" className="text-primary hover:underline">
-                kade@teamprompt.app
+              <a href="mailto:eric@teamprompt.app" className="text-primary hover:underline">
+                eric@teamprompt.app
               </a>{" "}
               directly.
             </p>

@@ -32,7 +32,7 @@ export const REPORT_META = {
   subtitle:
     "What sensitive data actually leaks into AI prompts, by category, role, and tool. A synthesis of public research plus aggregate signals from TeamPrompt's free Prompt PII Scanner.",
   publishedAt: "2026-05-20",
-  authorName: "Kade Cooper",
+  authorName: "Eric Campton",
   authorRole: "Founder, TeamPrompt",
   edition: "Q2 2026 (1st edition)",
   headlineNumber: "11.3%",

@@ -63,17 +63,16 @@ export const BLOG_CATEGORIES: BlogCategory[] = [
 
 // ─── Authors ───
 //
-// All TeamPrompt content is written or edited by the founder. We use a
-// real named byline (rather than a generic "TeamPrompt Team") because
-// Google's E-E-A-T signals — and the AI Overview citation models built
-// on top of them — reward authored content over anonymous content. The
-// schema-rendered author on every blog post resolves to a Person with
-// jobTitle, url, and sameAs, not an Organization.
+// TeamPrompt content uses a named editorial byline (rather than a generic
+// "TeamPrompt Team") because Google's E-E-A-T signals — and the AI Overview
+// citation models built on top of them — reward authored content over
+// anonymous content. The schema-rendered author on every blog post resolves
+// to a Person with jobTitle, url, and sameAs, not an Organization.
 
 export const KADE_COOPER: BlogAuthor = {
-  name: "Kade Cooper",
+  name: "Eric Campton",
   role: "Founder, TeamPrompt",
-  bio: "Kade Cooper is the founder of TeamPrompt. Fifteen-plus years building security and developer-tooling products. Writes about prompt DLP, AI governance, and the operational side of running AI safely in regulated industries.",
+  bio: "Eric Campton is the founder of TeamPrompt. Fifteen-plus years building security and developer-tooling products. Writes about prompt DLP, AI governance, and the operational side of running AI safely in regulated industries.",
   profileUrl: "/about",
   sameAs: ["https://www.linkedin.com/company/teamprompt"],
 };

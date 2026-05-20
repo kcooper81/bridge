@@ -17,7 +17,7 @@ const INBOX_LABELS: Record<string, string> = {
   "contact@teamprompt.app": "TeamPrompt",
   "info@teamprompt.app": "TeamPrompt Info",
   "team@teamprompt.app": "TeamPrompt Team",
-  "kade@teamprompt.app": "Kade at TeamPrompt",
+  "eric@teamprompt.app": "Eric at TeamPrompt",
 };
 
 /**

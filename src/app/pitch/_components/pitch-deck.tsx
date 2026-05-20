@@ -1012,8 +1012,8 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
               <div className="flex flex-col sm:flex-row gap-8 items-start">
                 {/* Photo + name */}
                 <div className="text-center sm:text-left shrink-0">
-                  <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-purple-500/20 to-blue-500/20 mx-auto sm:mx-0 mb-4 flex items-center justify-center text-4xl font-black text-purple-400">KC</div>
-                  <h3 className="font-bold text-xl">Kade Cooper</h3>
+                  <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-purple-500/20 to-blue-500/20 mx-auto sm:mx-0 mb-4 flex items-center justify-center text-4xl font-black text-purple-400">EC</div>
+                  <h3 className="font-bold text-xl">Eric Campton</h3>
                   <p className="text-sm text-purple-400 font-medium">Founder & Product Visionary</p>
                   <p className="text-xs text-zinc-500 mt-1">Baton Rouge, Louisiana</p>
                 </div>
@@ -1021,13 +1021,13 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
                 {/* Bio */}
                 <div className="flex-1 space-y-4">
                   <p className="text-sm text-zinc-300 leading-relaxed">
-                    <span className="text-white font-semibold">15+ years turning complex problems into intuitive products.</span> Kade is a UI/UX developer who thinks like a founder — he doesn&apos;t just design interfaces, he conceptualizes entire product experiences from the business need down to the pixel.
+                    <span className="text-white font-semibold">15+ years turning complex problems into intuitive products.</span> Eric is a UI/UX developer who thinks like a founder — he doesn&apos;t just design interfaces, he conceptualizes entire product experiences from the business need down to the pixel.
                   </p>
                   <p className="text-sm text-zinc-400 leading-relaxed">
                     He co-founded <span className="text-purple-400 font-semibold">Omnidek</span>, where he conceptualized core features from both a business strategy and user experience perspective — bridging the gap between what users need and what the market demands. Across his career in enterprise SaaS, he&apos;s driven checkout optimization, platform usability at scale, and feature design for products used by millions.
                   </p>
                   <p className="text-sm text-zinc-400 leading-relaxed">
-                    When AI tools exploded in the workplace, Kade saw the wave coming before most: <span className="text-white font-medium">every team would need custom guardrails</span>. Employees pasting sensitive data into ChatGPT with zero oversight — no DLP, no audit trail, no compliance. Instead of waiting for someone else to build it, he used AI-assisted development to ship an entire SaaS platform, browser extension, and security engine — proving that a designer who understands both users <em>and</em> technology can move faster than a traditional dev team.
+                    When AI tools exploded in the workplace, Eric saw the wave coming before most: <span className="text-white font-medium">every team would need custom guardrails</span>. Employees pasting sensitive data into ChatGPT with zero oversight — no DLP, no audit trail, no compliance. Instead of waiting for someone else to build it, he used AI-assisted development to ship an entire SaaS platform, browser extension, and security engine — proving that a designer who understands both users <em>and</em> technology can move faster than a traditional dev team.
                   </p>
 
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 border-t border-white/5">
@@ -1394,7 +1394,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
                 <br className="hidden sm:block" />
                 With <span className="text-purple-400 font-bold">$100K</span>, we turn early traction into real scale.&rdquo;
               </blockquote>
-              <p className="text-sm text-zinc-500 mt-4">— Kade Cooper, Founder</p>
+              <p className="text-sm text-zinc-500 mt-4">— Eric Campton, Founder</p>
             </div>
           </RevealText>
 

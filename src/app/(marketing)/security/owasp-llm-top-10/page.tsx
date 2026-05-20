@@ -40,7 +40,7 @@ const techArticleSchema = {
   dateModified: "2026-05-19",
   author: {
     "@type": "Person",
-    name: "Kade Cooper",
+    name: "Eric Campton",
     jobTitle: "Founder, TeamPrompt",
     url: `${SITE_URL}/about`,
   },
@@ -96,7 +96,7 @@ export default function OwaspLlmTop10Page() {
             what to log for audit, and which compliance frameworks it maps to. Updated for the 2025 edition.
           </p>
           <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground">
-            <span>By <strong className="text-foreground">Kade Cooper</strong>, Founder · TeamPrompt</span>
+            <span>By <strong className="text-foreground">Eric Campton</strong>, Founder · TeamPrompt</span>
             <span>·</span>
             <span>Updated May 2026</span>
             <span>·</span>

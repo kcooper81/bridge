@@ -6,10 +6,14 @@ import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, ShieldCheck } from "lucide-react";
+import { Loader2, ShieldCheck, KeyRound, ArrowLeft } from "lucide-react";
+
+type Mode = "totp" | "recovery";
 
 export default function VerifyMfaPage() {
+  const [mode, setMode] = useState<Mode>("totp");
   const [code, setCode] = useState("");
+  const [recoveryCode, setRecoveryCode] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [factorId, setFactorId] = useState<string | null>(null);
@@ -26,8 +30,6 @@ export default function VerifyMfaPage() {
       const { data } = await supabase.auth.mfa.listFactors();
       const totp = data?.totp?.find((f: { status: string; id: string }) => f.status === "verified");
       if (!totp) {
-        // No verified TOTP factor — redirect to settings to set one up
-        // (redirecting to a protected route would loop back here via middleware)
         window.location.href = "/home?error=no_mfa_factor";
         return;
       }
@@ -36,6 +38,13 @@ export default function VerifyMfaPage() {
     }
     loadFactor();
   }, [redirectTo]);
+
+  function switchMode(next: Mode) {
+    setMode(next);
+    setError("");
+    setCode("");
+    setRecoveryCode("");
+  }
 
   async function handleVerify(e: React.FormEvent) {
     e.preventDefault();
@@ -64,8 +73,44 @@ export default function VerifyMfaPage() {
         return;
       }
 
-      // Hard nav to refresh middleware session
       window.location.href = redirectTo;
+    } catch {
+      setError("An unexpected error occurred");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleRecovery(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    try {
+      const res = await fetch("/api/auth/mfa/recovery-codes", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: recoveryCode.trim() }),
+      });
+      const data = (await res.json().catch(() => ({}))) as {
+        valid?: boolean;
+        unenrolled?: boolean;
+        error?: string;
+      };
+
+      if (!res.ok || !data.valid) {
+        setError(data.error || "Invalid or already-used code");
+        return;
+      }
+
+      if (data.unenrolled === false) {
+        setError(
+          "Code accepted, but we couldn't reset your authenticator automatically. Contact support to finish recovery."
+        );
+        return;
+      }
+
+      window.location.href = `/home?mfa_reset=1`;
     } catch {
       setError("An unexpected error occurred");
     } finally {
@@ -78,6 +123,67 @@ export default function VerifyMfaPage() {
       <div className="flex items-center justify-center py-12">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
       </div>
+    );
+  }
+
+  if (mode === "recovery") {
+    return (
+      <>
+        <div className="mb-6 text-center">
+          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-amber-500/10">
+            <KeyRound className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+          </div>
+          <h1 className="text-2xl font-bold">Use a recovery code</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Lost access to your authenticator app? Enter one of the one-time codes you saved
+            when you set up two-factor authentication.
+          </p>
+        </div>
+
+        {error && (
+          <div
+            role="alert"
+            aria-live="assertive"
+            className="mb-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive"
+          >
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleRecovery} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="recovery-code">Recovery code</Label>
+            <Input
+              id="recovery-code"
+              type="text"
+              placeholder="XXXXX-XXXXX"
+              value={recoveryCode}
+              onChange={(e) => setRecoveryCode(e.target.value.toUpperCase())}
+              autoFocus
+              autoComplete="one-time-code"
+              required
+              className="font-mono tracking-wider"
+            />
+            <p className="text-xs text-muted-foreground">
+              Each code works once. After you sign in, two-factor authentication will be
+              removed from your account so you can re-enroll a new device.
+            </p>
+          </div>
+          <Button type="submit" className="w-full" disabled={loading || recoveryCode.length < 10}>
+            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Verify and sign in
+          </Button>
+        </form>
+
+        <button
+          type="button"
+          onClick={() => switchMode("totp")}
+          className="mt-6 inline-flex items-center text-sm text-primary hover:underline mx-auto block"
+        >
+          <ArrowLeft className="mr-1 h-4 w-4" />
+          Back to authenticator code
+        </button>
+      </>
     );
   }
 
@@ -94,7 +200,11 @@ export default function VerifyMfaPage() {
       </div>
 
       {error && (
-        <div className="mb-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
+        <div
+          role="alert"
+          aria-live="assertive"
+          className="mb-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive"
+        >
           {error}
         </div>
       )}
@@ -121,6 +231,14 @@ export default function VerifyMfaPage() {
           Verify
         </Button>
       </form>
+
+      <button
+        type="button"
+        onClick={() => switchMode("recovery")}
+        className="mt-6 text-sm text-primary hover:underline mx-auto block"
+      >
+        Lost access to your authenticator? Use a recovery code
+      </button>
     </>
   );
 }

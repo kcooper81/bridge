@@ -83,5 +83,22 @@ export async function PUT(req: NextRequest) {
     .update({ used_at: new Date().toISOString() })
     .eq("id", match.id);
 
-  return NextResponse.json({ valid: true });
+  // Lost-device recovery: the user proved possession of a backup code, so
+  // unenroll their TOTP factor(s). On the next request, middleware sees
+  // aal.nextLevel === "aal1" and lets them through to the dashboard. They
+  // can re-enroll a new factor from settings (we surface a toast there).
+  // We do not invalidate other unused recovery codes — they may be needed
+  // again before the user re-enrolls.
+  try {
+    const { data: factorsList } = await db.auth.admin.mfa.listFactors({ userId: user.id });
+    for (const f of factorsList?.factors ?? []) {
+      await db.auth.admin.mfa.deleteFactor({ id: f.id, userId: user.id });
+    }
+  } catch {
+    // If unenroll fails, the recovery code is still consumed — surface a
+    // soft warning so the client can degrade gracefully.
+    return NextResponse.json({ valid: true, unenrolled: false });
+  }
+
+  return NextResponse.json({ valid: true, unenrolled: true });
 }

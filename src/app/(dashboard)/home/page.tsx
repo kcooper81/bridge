@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { useOrg } from "@/components/providers/org-provider";
 import { useAuth } from "@/components/providers/auth-provider";
@@ -18,8 +19,27 @@ export default function DashboardHomePage() {
   const { org, loading, noOrg } = useOrg();
   const { user } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [analyticsLoading, setAnalyticsLoading] = useState(true);
+
+  useEffect(() => {
+    if (searchParams.get("mfa_reset") === "1") {
+      toast.warning(
+        "Two-factor authentication was reset after recovery-code use. Re-enroll a new authenticator in Settings to keep your account protected.",
+        { duration: 10000, action: { label: "Open settings", onClick: () => router.push("/settings") } }
+      );
+      const url = new URL(window.location.href);
+      url.searchParams.delete("mfa_reset");
+      window.history.replaceState({}, "", url.toString());
+    }
+    if (searchParams.get("error") === "no_mfa_factor") {
+      toast.error("Set up two-factor authentication to continue.");
+      const url = new URL(window.location.href);
+      url.searchParams.delete("error");
+      window.history.replaceState({}, "", url.toString());
+    }
+  }, [searchParams, router]);
 
   const refreshAnalytics = useCallback(() => {
     getAnalytics()

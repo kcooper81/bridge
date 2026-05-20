@@ -363,10 +363,22 @@ export function TwoFactorCard() {
                     </Button>
                   </div>
                 </div>
+              ) : recoveryRemaining === 0 ? (
+                <div className="space-y-2">
+                  <div className="rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-xs text-amber-700 dark:text-amber-300">
+                    You have no recovery codes. If you lose your authenticator device,
+                    you&apos;ll be locked out of your account. Generate a set now and store
+                    them somewhere safe.
+                  </div>
+                  <Button size="sm" onClick={handleGenerateRecoveryCodes} disabled={generatingCodes}>
+                    {generatingCodes && <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />}
+                    Generate recovery codes
+                  </Button>
+                </div>
               ) : (
                 <Button size="sm" variant="outline" onClick={handleGenerateRecoveryCodes} disabled={generatingCodes}>
                   {generatingCodes && <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />}
-                  {recoveryRemaining && recoveryRemaining > 0 ? "Regenerate codes" : "Generate recovery codes"}
+                  Regenerate codes
                 </Button>
               )}
             </div>

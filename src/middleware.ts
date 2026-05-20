@@ -28,6 +28,7 @@ const PUBLIC_ROUTES = [
   "/case-studies",
   "/about",
   "/tools",
+  "/research",
 ];
 
 function isPublicRoute(pathname: string) {

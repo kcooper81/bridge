@@ -39,6 +39,7 @@ const footerLinks = {
   "Free Tools": [
     { label: "Prompt PII Scanner", href: "/tools/prompt-pii-scanner" },
     { label: "OWASP LLM Top 10", href: "/security/owasp-llm-top-10" },
+    { label: "Research", href: "/research" },
   ],
 };
 

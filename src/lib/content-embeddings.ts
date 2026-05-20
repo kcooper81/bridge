@@ -7,7 +7,7 @@ import "server-only";
 import { createHash } from "node:crypto";
 import { createServiceClient } from "@/lib/supabase/server";
 import { BLOG_POSTS, type BlogPost } from "@/lib/blog-posts";
-import { allSeoPages, INDEXED_SOLUTION_SLUGS, isIndexableSolution } from "@/lib/seo-pages/data";
+import { allSeoPages, isIndexableSolution } from "@/lib/seo-pages/data";
 
 const OPENAI_KEY = process.env.OPENAI_SEO_KEY || process.env.OPENAI_API_KEY;
 const EMBEDDING_MODEL = "text-embedding-3-small";

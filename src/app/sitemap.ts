@@ -177,6 +177,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${baseUrl}/security/owasp-llm-top-10`, lastModified: today, changeFrequency: "monthly", priority: 0.8 },
   ];
 
+  // Tier 12: Research reports (original-data, linkable assets)
+  const researchPages: MetadataRoute.Sitemap = [
+    { url: `${baseUrl}/research`, lastModified: today, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${baseUrl}/research/state-of-prompt-data-leakage-q2-2026`, lastModified: today, changeFrequency: "monthly", priority: 0.9 },
+  ];
+
   const all = [
     ...corePages,
     ...landingPages,
@@ -189,6 +195,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...glossaryPages,
     ...toolPages,
     ...securityHubPages,
+    ...researchPages,
   ];
 
   // Deduplicate by URL

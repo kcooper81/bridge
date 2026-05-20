@@ -2016,7 +2016,7 @@ export default function ChatPage() {
           isActive && !bulkMode
             ? "bg-primary/10 text-foreground"
             : "text-foreground/80 dark:text-zinc-400 hover:bg-muted hover:text-foreground",
-          isOld && !isActive && "opacity-60",
+          isOld && !isActive && "text-muted-foreground",
           bulkMode && isSelected && "bg-primary/10 ring-1 ring-primary/30"
         )}
         onClick={() => {
@@ -3067,16 +3067,16 @@ export default function ChatPage() {
                         {(() => {
                           const allSuggestions = [
                             [
-                              { icon: FileText, title: "Write a status update", desc: "Project progress report" },
-                              { icon: Search, title: "Review code for bugs", desc: "Find issues in your code" },
-                              { icon: MessageSquare, title: "Draft a customer email", desc: "Professional communication" },
-                              { icon: Bot, title: "Explain an error", desc: "Debug with context" },
+                              { icon: FileText, title: "Write a status update", desc: "Project progress report", prompt: "Draft a weekly status update for my team. Include sections for: progress this week, blockers, and what's planned for next week. Ask me for the details you need." },
+                              { icon: Search, title: "Review code for bugs", desc: "Find issues in your code", prompt: "I'm going to paste a code snippet. Review it for bugs, security issues, and obvious performance problems. Flag the most important issues first, with line references." },
+                              { icon: MessageSquare, title: "Draft a customer email", desc: "Professional communication", prompt: "Help me write a customer email. First ask me: (1) the customer's situation, (2) what outcome I want, and (3) the tone I should use. Then draft the email." },
+                              { icon: Bot, title: "Explain an error", desc: "Debug with context", prompt: "I'm going to paste an error message and the relevant code. Explain what's likely wrong, what to check first, and how to fix it." },
                             ],
                             [
-                              { icon: FileText, title: "Summarize a document", desc: "Key points and takeaways" },
-                              { icon: Sparkles, title: "Brainstorm ideas", desc: "Creative problem solving" },
-                              { icon: MessageSquare, title: "Write a meeting agenda", desc: "Structured discussion plan" },
-                              { icon: Search, title: "Analyze this data", desc: "Insights and patterns" },
+                              { icon: FileText, title: "Summarize a document", desc: "Key points and takeaways", prompt: "I'll paste a document. Give me: a 3-sentence summary, the 3 most important takeaways, and any action items it implies for the reader." },
+                              { icon: Sparkles, title: "Brainstorm ideas", desc: "Creative problem solving", prompt: "Help me brainstorm. First ask me what the problem or goal is, who it's for, and any constraints. Then generate 8 diverse ideas — boring-but-safe, expected, and a few weird ones." },
+                              { icon: MessageSquare, title: "Write a meeting agenda", desc: "Structured discussion plan", prompt: "Draft a meeting agenda. Ask me: who's attending, how long the meeting is, and what decisions or outcomes we need from it. Then propose an agenda with time blocks." },
+                              { icon: Search, title: "Analyze this data", desc: "Insights and patterns", prompt: "I'll paste data (CSV, JSON, or a table). Tell me what you notice: trends, anomalies, and the questions the data raises but doesn't answer." },
                             ],
                           ];
                           const suggestions = allSuggestions[suggestionSetIndex % allSuggestions.length];
@@ -3086,7 +3086,7 @@ export default function ChatPage() {
                                 <button
                                   key={s.title}
                                   className="flex items-start gap-3 border rounded-xl px-4 py-3 text-left hover:border-primary/40 hover:bg-muted/50 transition-all group"
-                                  onClick={() => { setChatInput(s.title); inputRef.current?.focus(); }}
+                                  onClick={() => { setChatInput(s.prompt); inputRef.current?.focus(); }}
                                 >
                                   <s.icon className="h-4 w-4 text-muted-foreground/50 mt-0.5 flex-shrink-0 group-hover:text-primary/60 transition-colors" />
                                   <div>
@@ -3277,16 +3277,21 @@ export default function ChatPage() {
                           disabled={isLoading || noProviders}
                         />
                         <button
-                          type="submit"
+                          type={isLoading ? "button" : "submit"}
+                          onClick={isLoading ? stopGeneration : undefined}
                           className={cn(
                             "pb-3.5 pt-3.5 px-3 flex-shrink-0 transition-colors self-end",
-                            (!chatInput.trim() && pendingImages.length === 0 && pendingFiles.length === 0) || isLoading || noProviders
-                              ? "text-muted-foreground/30"
-                              : "text-primary hover:text-primary/80"
+                            isLoading
+                              ? "text-primary hover:text-primary/80"
+                              : (!chatInput.trim() && pendingImages.length === 0 && pendingFiles.length === 0) || noProviders
+                                ? "text-muted-foreground/30"
+                                : "text-primary hover:text-primary/80"
                           )}
-                          disabled={(!chatInput.trim() && pendingImages.length === 0 && pendingFiles.length === 0) || isLoading || noProviders}
+                          disabled={!isLoading && ((!chatInput.trim() && pendingImages.length === 0 && pendingFiles.length === 0) || noProviders)}
+                          title={isLoading ? "Stop generating" : "Send"}
+                          aria-label={isLoading ? "Stop generating" : "Send"}
                         >
-                          {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
+                          {isLoading ? <Square className="h-5 w-5 fill-current" /> : <Send className="h-5 w-5" />}
                         </button>
                       </div>
                     </form>
@@ -3331,7 +3336,16 @@ export default function ChatPage() {
                           <Brain className={cn("h-3.5 w-3.5", thinkingMode && "animate-pulse")} />
                           {thinkingMode && <span className="text-[10px] font-medium">Thinking</span>}
                         </button>
-                        <span className="text-[10px] text-muted-foreground/40">Type / for commands</span>
+                        <span className="hidden sm:inline-flex items-center gap-1.5 text-[10px] text-muted-foreground/50">
+                          <kbd className="rounded border border-border/60 bg-muted px-1 py-px font-mono text-[9px]">↵</kbd>
+                          send
+                          <span className="text-muted-foreground/30">·</span>
+                          <kbd className="rounded border border-border/60 bg-muted px-1 py-px font-mono text-[9px]">⇧↵</kbd>
+                          newline
+                          <span className="text-muted-foreground/30">·</span>
+                          <kbd className="rounded border border-border/60 bg-muted px-1 py-px font-mono text-[9px]">/</kbd>
+                          commands
+                        </span>
                       </div>
                       <Link href="/guardrails" className="flex items-center gap-1 text-[10px] text-green-600/60 hover:text-green-600 transition-colors">
                         <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
@@ -3360,8 +3374,16 @@ export default function ChatPage() {
                 rows={1}
                 disabled={isLoading || noProviders}
               />
-              <Button type="submit" size="icon" className="h-[44px] w-[44px] rounded-xl flex-shrink-0" disabled={(!chatInput.trim() && pendingImages.length === 0 && pendingFiles.length === 0) || isLoading || noProviders} aria-label={isLoading ? "Generating response" : "Send message"}>
-                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+              <Button
+                type={isLoading ? "button" : "submit"}
+                onClick={isLoading ? stopGeneration : undefined}
+                size="icon"
+                className="h-[44px] w-[44px] rounded-xl flex-shrink-0"
+                disabled={!isLoading && ((!chatInput.trim() && pendingImages.length === 0 && pendingFiles.length === 0) || noProviders)}
+                aria-label={isLoading ? "Stop generating" : "Send message"}
+                title={isLoading ? "Stop generating" : "Send"}
+              >
+                {isLoading ? <Square className="h-4 w-4 fill-current" /> : <Send className="h-4 w-4" />}
               </Button>
             </form>
           </div>

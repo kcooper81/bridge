@@ -201,16 +201,22 @@ export default function BillingPage() {
     <div className="max-w-5xl space-y-6">
         {/* Past-due / failed-payment recovery banner */}
         {subscription?.status === "past_due" && (
-          <Card className="border-red-500/40 bg-red-500/5">
+          <Card
+            role="alert"
+            aria-live="polite"
+            className="border-red-500/60 bg-red-500/10"
+          >
             <CardContent className="p-4 flex items-start gap-3">
-              <AlertTriangle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
+              <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400 shrink-0 mt-0.5" />
               <div className="flex-1 min-w-0">
-                <div className="font-semibold text-sm">Your last payment failed</div>
+                <div className="font-semibold text-sm text-red-700 dark:text-red-300">
+                  Your last payment failed
+                </div>
                 <p className="text-sm text-muted-foreground mt-0.5">
                   Update your card to keep <strong className="capitalize">{currentPlan}</strong> access
                   {subscription.current_period_end && (
                     <> through <strong>{format(new Date(subscription.current_period_end), "MMM d, yyyy")}</strong></>
-                  )}.
+                  )}. After that, you&apos;ll drop to the Free plan and lose paid features.
                 </p>
               </div>
               <Button size="sm" onClick={openPortal} disabled={loadingPortal}>
@@ -334,7 +340,26 @@ export default function BillingPage() {
               {loadingInvoices ? (
                 <div className="flex justify-center py-6"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
               ) : invoices.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No invoices yet.</p>
+                <div className="py-4 text-sm text-muted-foreground">
+                  {subscription?.status === "trialing" ? (
+                    <>
+                      Your first invoice will appear here when your free trial ends
+                      {subscription.trial_ends_at && (
+                        <> on <span className="font-medium text-foreground">{format(new Date(subscription.trial_ends_at), "MMM d, yyyy")}</span></>
+                      )}.
+                    </>
+                  ) : subscription?.current_period_end ? (
+                    <>
+                      Your first invoice will be generated on{" "}
+                      <span className="font-medium text-foreground">
+                        {format(new Date(subscription.current_period_end), "MMM d, yyyy")}
+                      </span>
+                      .
+                    </>
+                  ) : (
+                    <>No invoices yet.</>
+                  )}
+                </div>
               ) : (
                 <div className="divide-y divide-border">
                   {invoices.map((inv) => (

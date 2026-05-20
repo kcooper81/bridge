@@ -446,8 +446,14 @@ export default function ApprovalsPage() {
               <TableBody>
                 {pendingPrompts.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
-                      No prompts pending review.
+                    <TableCell colSpan={6} className="h-40 text-center">
+                      <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/10">
+                          <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                        </div>
+                        <div className="text-sm font-medium text-foreground">You&apos;re all caught up</div>
+                        <div className="text-xs">No prompts are waiting for review right now.</div>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -563,8 +569,14 @@ export default function ApprovalsPage() {
               <TableBody>
                 {suggestions.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
-                      No rule suggestions pending review.
+                    <TableCell colSpan={6} className="h-40 text-center">
+                      <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/10">
+                          <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                        </div>
+                        <div className="text-sm font-medium text-foreground">No rule suggestions waiting</div>
+                        <div className="text-xs">Members can suggest new guardrails from the Guardrails page.</div>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ) : (

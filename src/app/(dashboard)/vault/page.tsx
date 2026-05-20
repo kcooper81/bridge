@@ -470,9 +470,12 @@ export default function VaultPage() {
                 </a>
               </Button>
             )}
-            <Button onClick={openNewPrompt}>
+            <Button onClick={openNewPrompt} title="New Prompt (press N)">
               <Plus className="mr-2 h-4 w-4" />
               New Prompt
+              <kbd className="ml-2 hidden md:inline-flex items-center rounded border border-primary-foreground/30 bg-primary-foreground/10 px-1.5 py-px font-mono text-[10px] font-normal">
+                N
+              </kbd>
             </Button>
           </div>
         }
@@ -501,29 +504,32 @@ export default function VaultPage() {
         <UsageIndicator label="Prompts" current={prompts.length} max={planLimits.max_prompts} className="mb-4" />
       )}
 
-      {/* Stats */}
-      <div className="mb-6 grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          label="Total Prompts"
-          value={prompts.length}
-          icon={<Archive className="h-5 w-5" />}
-        />
-        <StatCard
-          label="Total Uses"
-          value={totalUses}
-          icon={<BarChart3 className="h-5 w-5" />}
-        />
-        <StatCard
-          label="Shared"
-          value={sharedCount}
-          icon={<Share2 className="h-5 w-5" />}
-        />
-        <StatCard
-          label="Active Guidelines"
-          value={enforcedGuidelines}
-          icon={<BookOpen className="h-5 w-5" />}
-        />
-      </div>
+      {/* Stats — hidden until at least one prompt exists, so the first-run
+          view doesn't show a wall of zeroes. */}
+      {prompts.length > 0 && (
+        <div className="mb-6 grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard
+            label="Total Prompts"
+            value={prompts.length}
+            icon={<Archive className="h-5 w-5" />}
+          />
+          <StatCard
+            label="Total Uses"
+            value={totalUses}
+            icon={<BarChart3 className="h-5 w-5" />}
+          />
+          <StatCard
+            label="Shared"
+            value={sharedCount}
+            icon={<Share2 className="h-5 w-5" />}
+          />
+          <StatCard
+            label="Active Guidelines"
+            value={enforcedGuidelines}
+            icon={<BookOpen className="h-5 w-5" />}
+          />
+        </div>
+      )}
 
       {/* Onboarding card — shows until the user creates their own prompt */}
       {prompts.length <= 1 && (

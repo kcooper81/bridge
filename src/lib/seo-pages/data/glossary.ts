@@ -38,9 +38,11 @@ export const glossaryPages: SeoPageData[] = [
       ],
     },
     faqs: [
-      { question: "How is prompt management different from a shared doc?", answer: "A shared document lacks version control, search, permissions, DLP scanning, and direct integration with AI tools. Prompt management platforms like TeamPrompt provide all of these in a purpose-built system." },
-      { question: "When should a team start managing prompts?", answer: "As soon as more than one person uses AI tools regularly. Even small teams quickly accumulate dozens of prompts that benefit from organization and sharing." },
-      { question: "Does prompt management slow down AI usage?", answer: "No — it accelerates it. Instead of writing prompts from scratch, team members search a library of proven templates and insert them in one click." },
+      { question: "How is prompt management different from a shared doc?", answer: "A shared document lacks version control, search, permissions, DLP scanning, and direct integration with AI tools. Prompt management platforms like TeamPrompt provide all of these in a purpose-built system that lives one keystroke away from the chat composer." },
+      { question: "When should a team start managing prompts?", answer: "As soon as five or more people on the team use AI weekly and the same prompt exists in multiple places. Earlier than that, overhead exceeds benefit. Later than that, you've already lost weeks to re-inventing prompts someone else perfected six months ago." },
+      { question: "Does prompt management slow down AI usage?", answer: "No — it accelerates it. Browser-extension prompt managers like TeamPrompt let team members search a library of proven templates and insert them in one click, directly inside ChatGPT or Claude. Standalone web-app libraries plateau at low adoption; in-composer access is non-negotiable." },
+      { question: "What's the difference between prompt management and prompt engineering?", answer: "Prompt engineering is the craft of writing effective prompts. Prompt management is the system that organizes, versions, shares, and governs those prompts at scale. You need both, but most teams discover they need management long before they hire for engineering." },
+      { question: "How do I measure ROI on prompt management?", answer: "Track per-prompt usage count, time saved (prompts that previously took 10 minutes to draft now take 10 seconds to insert), and consistency of outputs across team members for the same task. The 80/20 will be brutal — 20% of prompts drive 80% of usage. Prune aggressively and let the data show the value." },
     ],
     cta: {
       headline: "Start managing prompts",
@@ -555,9 +557,11 @@ export const glossaryPages: SeoPageData[] = [
       ],
     },
     faqs: [
-      { question: "What metrics should we track first?", answer: "Start with usage frequency, unique users, and category distribution. These give you a baseline understanding of how your team uses AI prompts before diving into more advanced analytics." },
-      { question: "Does TeamPrompt provide analytics out of the box?", answer: "Yes. TeamPrompt's dashboard shows usage metrics, top prompts, active users, and category insights. Analytics are available on team and business plans." },
-      { question: "Can I export analytics data?", answer: "TeamPrompt provides dashboard views with key metrics. For teams needing custom reports, usage data can inform your broader AI adoption reporting." },
+      { question: "What metrics should we track first?", answer: "Start with usage frequency, unique users, and category distribution. These give you a baseline understanding of how your team uses AI prompts before diving into more advanced analytics like time-saved and detection-event rates." },
+      { question: "Does TeamPrompt provide analytics out of the box?", answer: "Yes. TeamPrompt's dashboard shows usage metrics, top prompts, active users, category insights, and DLP detection trends. Full analytics are available on team and business plans; basic dashboards on the free plan." },
+      { question: "Can I export analytics data?", answer: "Yes — usage data exports as CSV from the analytics dashboard, and audit-event data exports as CSV or JSON from the activity log. Both formats import directly into Sumo, Splunk, Datadog, or your existing BI tool for custom reporting." },
+      { question: "How is prompt analytics different from web analytics?", answer: "Web analytics measure page-level traffic and conversions. Prompt analytics measure prompt-level usage, output quality, and security events inside the AI workflow. They answer different questions: web tells you where users go, prompts tell you what they accomplish once there." },
+      { question: "What's the most valuable insight prompt analytics reveals?", answer: "The 80/20 — typically 20% of your library drives 80% of usage. Doubling down on those high-leverage prompts and pruning the rest is the highest-ROI action this data drives. Second most valuable: which teams are under-adopting, so you know where to focus enablement." },
     ],
     cta: {
       headline: "Measure your AI impact",
@@ -743,9 +747,11 @@ export const glossaryPages: SeoPageData[] = [
       ],
     },
     faqs: [
-      { question: "What types of data does TeamPrompt's DLP catch?", answer: "TeamPrompt scans for SSNs, credit card numbers, API keys, AWS credentials, email addresses, phone numbers, and other common sensitive data patterns. Custom patterns can be added for organization-specific needs." },
-      { question: "Does DLP scanning slow down prompt insertion?", answer: "No. Scanning happens in milliseconds before the prompt is sent. Users experience no noticeable delay in their workflow." },
-      { question: "Can I customize DLP rules for my industry?", answer: "Yes. Add custom patterns and keywords specific to your industry, such as patient identifiers for healthcare or account numbers for financial services." },
+      { question: "What types of data does TeamPrompt's DLP catch?", answer: "Out of the box: SSNs, Luhn-validated credit card numbers, AWS access keys (AKIA/ASIA), generic API key prefixes (sk_, pk_, ghp_, glpat-, xoxb-, SG.), JWTs, PEM private keys, IBANs, ICD-10 codes, MRN labels, dates of birth, US street addresses, email addresses, phone numbers, and IP addresses. Custom patterns add organization-specific terms." },
+      { question: "Does DLP scanning slow down prompt insertion?", answer: "No. Pattern-based scanning runs in 1-10 milliseconds entirely client-side, with no network round-trip. Users experience zero perceptible delay. Heavier ML-based detection adds 50-200ms and is best reserved for categories where accuracy matters more than speed." },
+      { question: "Can I customize DLP rules for my industry?", answer: "Yes. The rule editor accepts keyword, regex, and exact-match patterns. Compliance packs ship pre-built rule sets for HIPAA (the 18 identifiers), PCI-DSS (PAN + service codes), GDPR, SOC 2, and EU AI Act. Custom rules can be added to any pack with per-severity action (block, warn, redact)." },
+      { question: "How is DLP for AI different from traditional DLP?", answer: "Traditional DLP watches email, file uploads, and cloud storage — channels where data leaves as files. AI DLP watches the chat composer in the browser, scanning prompt text before submission. Same detection logic, different integration point. Network and endpoint DLP do not see prompts; they see HTTPS request bodies to api.openai.com." },
+      { question: "What happens to detected data — is it stored?", answer: "By default no — TeamPrompt logs the detection event (timestamp, user, AI tool, category, severity, action taken) but stores only a redacted version of the prompt or just the category, depending on the org's logging mode. Full-prompt logging is an opt-in setting for organizations that need it for compliance audits." },
     ],
     cta: {
       headline: "Protect sensitive data",
@@ -790,9 +796,11 @@ export const glossaryPages: SeoPageData[] = [
       ],
     },
     faqs: [
-      { question: "Is AI governance only for large enterprises?", answer: "No. Any organization using AI tools benefits from governance basics — acceptable use policies, data protection, and access controls. Start small and expand as AI usage grows." },
-      { question: "How does TeamPrompt support AI governance?", answer: "TeamPrompt provides DLP scanning, access controls, usage analytics, and audit logging. These features form the operational foundation of an AI governance framework." },
-      { question: "What is the first step in implementing AI governance?", answer: "Start with an acceptable use policy that defines what AI tools are approved, what data can be shared with them, and who is responsible for oversight. TeamPrompt helps enforce these policies technically." },
+      { question: "Is AI governance only for large enterprises?", answer: "No. Any organization using AI tools benefits from governance basics — acceptable use policies, data protection, and access controls. Start with a one-page AUP, a small approved-tool list, and browser-extension DLP. Expand the framework as AI usage and regulatory exposure grow." },
+      { question: "How does TeamPrompt support AI governance?", answer: "TeamPrompt provides the operational layer: prompt DLP for content rules, a shared prompt library with approval workflows, role-based access, audit logging of every AI interaction with detection events, and quarterly review dashboards. These map directly onto NIST AI RMF, ISO 42001, and EU AI Act control families." },
+      { question: "What's the first step in implementing AI governance?", answer: "Write a one-page AI acceptable use policy that names approved tools, prohibited data categories, employee responsibilities, and the enforcement mechanism. Then deploy the technical controls that actually enforce it (DLP + DNS allowlist + audit log). Policy without technical enforcement is theatre." },
+      { question: "Which framework should we align with: NIST AI RMF, ISO 42001, or EU AI Act?", answer: "Pick the one your industry or region actually requires. NIST AI RMF is voluntary and US-federal-aligned; ISO 42001 is the only certifiable AI management standard; the EU AI Act is mandatory for EU-facing businesses. In practice, ISO 42001-aligned controls satisfy most of NIST AI RMF and the foundational EU AI Act requirements — a good single target if you're unsure." },
+      { question: "Who owns AI governance inside an organization?", answer: "Co-owned by Security (technical controls, enforcement) and Legal/Compliance (policy, liability). HR runs training and acknowledgement. CTO/CIO owns the approved-tool list. Without explicit ownership, the policy goes stale within a quarter and stops mapping to current provider offerings." },
     ],
     cta: {
       headline: "Implement AI governance",
@@ -1401,9 +1409,11 @@ export const glossaryPages: SeoPageData[] = [
       ],
     },
     faqs: [
-      { question: "How common is shadow AI?", answer: "Very common. Studies suggest that a majority of employees use AI tools that IT does not know about. The ease of accessing free AI tools makes shadow AI even more prevalent than traditional shadow IT." },
-      { question: "How does TeamPrompt help prevent shadow AI?", answer: "TeamPrompt gives employees a managed, easy-to-use AI prompt platform that works inside the tools they already use. By making the approved option better than unauthorized alternatives, employees choose compliance voluntarily." },
-      { question: "Should I block all unapproved AI tools?", answer: "Blocking alone often backfires — employees find workarounds. A better approach is combining reasonable restrictions with excellent approved alternatives. TeamPrompt supports this by making managed AI usage more productive than unmanaged." },
+      { question: "How common is shadow AI?", answer: "A 2025 survey found 73% of employees use AI tools at work but only 38% of organizations have formal AI usage policies. That gap is shadow AI. In any company over 50 people, expect 10x more AI tools in actual use than your CISO knows about." },
+      { question: "How does TeamPrompt help prevent shadow AI?", answer: "TeamPrompt gives employees a managed, easy-to-use AI prompt platform that works inside the tools they already use (ChatGPT, Claude, Gemini, Copilot). The shared prompt library means the safe path is also the easy path; the browser DLP enforces the policy without requiring user discipline." },
+      { question: "Should I block all unapproved AI tools?", answer: "No. Block-everything policies fail because employees route around them via personal devices, mobile, or shadow alternatives. The working pattern is a small allowlist of enterprise-tier tools (ChatGPT Enterprise, Claude for Work, Gemini Workspace, Copilot) enforced at DNS, plus DLP on the approved tools." },
+      { question: "How do I discover shadow AI my team is already using?", answer: "Pull the last 30 days of DNS logs from your secure web gateway (Cloudflare, Zscaler, Cisco Umbrella) and filter for chat.openai.com, claude.ai, gemini.google.com, copilot.microsoft.com, perplexity.ai, poe.com, character.ai, and the long tail of model-router domains. Cross-reference with employee identity for the full picture." },
+      { question: "What's the legal risk of not controlling shadow AI?", answer: "For regulated industries: HIPAA §164.308 (workforce security) violations if PHI flows through unsanctioned AI, GDPR Art 32 (security of processing) breaches, SOC 2 findings for missing access controls. For non-regulated: data exposure liability, IP loss when proprietary code is pasted into consumer-tier ChatGPT (which may train on it)." },
     ],
     cta: {
       headline: "Eliminate shadow AI",
@@ -2341,9 +2351,11 @@ export const glossaryPages: SeoPageData[] = [
       ],
     },
     faqs: [
-      { question: "Are AI agents safe to use?", answer: "AI agents require proper guardrails including scope limitations, human oversight checkpoints, and activity logging. Without controls, agents could take unintended actions. TeamPrompt's governance features help manage agent-related risks." },
-      { question: "How do prompts work with agentic AI?", answer: "Agents are guided by system prompts that define their goals, tools, constraints, and decision-making rules. Well-engineered agent prompts are even more critical than chatbot prompts because agents act autonomously." },
-      { question: "How does TeamPrompt support agentic workflows?", answer: "TeamPrompt helps teams manage the system prompts, tool instructions, and constraint definitions that guide AI agents. Versioning, sharing, and governance are especially important for agent prompts that drive autonomous behavior." },
+      { question: "Are AI agents safe to use?", answer: "Agents require defense-in-depth: scoped tool access (least privilege), human-in-the-loop approval for any action with real-world side effects, recursion depth limits to bound runaway loops, audit logs of every tool call, and input/output schema validation. Without these, prompt injection in retrieved content can drive the agent to take destructive actions — see the 2024 Replit AI agent that wiped a production database." },
+      { question: "How do prompts work with agentic AI?", answer: "Agents are guided by system prompts that define goals, tools, constraints, and decision-making rules. System-prompt design is more critical for agents than chatbots because agents act autonomously — a sloppy system prompt becomes a security issue, not just a quality issue. Never put secrets in the system prompt (OWASP LLM07)." },
+      { question: "How does TeamPrompt support agentic workflows?", answer: "TeamPrompt's MCP server lets coding agents (Claude Desktop, Cursor, Windsurf) connect to your shared prompt library, run DLP scans on prompts before execution, and log every agent action to the central audit trail. The same governance you have for chat usage extends automatically to agent-driven workflows." },
+      { question: "What's the difference between agentic AI and a chatbot?", answer: "A chatbot generates output; an agent takes actions. The dividing line is tool access. Once an LLM can call functions that modify external state — send email, write to a database, make HTTP requests — it's an agent. The risk surface jumps from 'wrong answer' to 'unintended action' and the controls must match." },
+      { question: "Is agentic AI ready for regulated industries?", answer: "Yes with the right controls. Healthcare, finance, and legal teams successfully run agent-assisted workflows when the agent has scoped access (per-user RBAC, not service-account credentials), human approval on high-impact actions, full audit logging, and a documented model of who is accountable for the agent's outputs. EU AI Act Article 14 requires human oversight for high-risk systems." },
     ],
     cta: {
       headline: "Manage agent prompts",

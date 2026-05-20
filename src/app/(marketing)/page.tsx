@@ -82,7 +82,7 @@ export default function LandingPage() {
                     size="lg"
                     className="text-base px-8 h-12 rounded-lg font-bold"
                   >
-                    Get Started
+                    Start free workspace
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </Link>

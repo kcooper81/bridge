@@ -26,6 +26,30 @@ export default function NotFound() {
         >
           Back to Home
         </Link>
+
+        <div className="mt-10">
+          <p className="text-xs uppercase tracking-wider text-muted-foreground/70 mb-3">
+            Or try one of these
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            {[
+              { label: "Blog", href: "/blog" },
+              { label: "Pricing", href: "/pricing" },
+              { label: "Prompt PII Scanner", href: "/tools/prompt-pii-scanner" },
+              { label: "AI Glossary", href: "/glossary" },
+              { label: "Compare", href: "/compare" },
+              { label: "Help", href: "/help" },
+            ].map((l) => (
+              <Link
+                key={l.href}
+                href={l.href}
+                className="inline-flex items-center rounded-full border border-border bg-background/50 px-3 py-1 text-xs text-foreground/80 hover:text-foreground hover:border-primary/40 hover:bg-primary/5 transition-colors"
+              >
+                {l.label}
+              </Link>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -50,10 +50,10 @@ export function LeadCaptureForm() {
     <section className="py-20 sm:py-28 bg-zinc-950 text-white">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 text-center">
         <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-          Ready to secure your team&apos;s AI usage?
+          Want help getting set up?
         </h2>
         <p className="mt-4 text-lg text-zinc-400">
-          Drop your email and we&apos;ll get you set up with TeamPrompt.
+          Tell us where you are with AI today and we&apos;ll walk you through the right setup for your team. No demo gating, no pressure.
         </p>
 
         {submitted ? (
@@ -98,7 +98,7 @@ export function LeadCaptureForm() {
                 disabled={loading}
                 className="h-12 rounded-full px-8 font-semibold bg-white text-zinc-900 hover:bg-zinc-200 shrink-0"
               >
-                {loading ? "Sending..." : "Get Started"}
+                {loading ? "Sending..." : "Request setup help"}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </form>

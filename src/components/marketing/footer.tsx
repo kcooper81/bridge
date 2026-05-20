@@ -59,13 +59,13 @@ export function MarketingFooter() {
           </div>
           <Link href="/signup" className="shrink-0">
             <Button className="rounded-full px-8 font-semibold bg-white text-zinc-900 hover:bg-zinc-200">
-              Get Started
+              Create free workspace
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-7 gap-8 mb-12">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-8 mb-12">
           {/* Brand */}
           <div className="col-span-2">
             <div className="flex items-center gap-2.5 mb-4">

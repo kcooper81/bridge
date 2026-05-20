@@ -131,7 +131,11 @@ export default function LoginPage() {
       )}
 
       {searchParams.get("error") && (
-        <div className="mb-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
+        <div
+          role="alert"
+          aria-live="assertive"
+          className="mb-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive"
+        >
           <div>
             {searchParams.get("error") === "session_expired"
               ? "Your session expired. Please sign in again."
@@ -148,7 +152,11 @@ export default function LoginPage() {
       )}
 
       {error && (
-        <div className="mb-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
+        <div
+          role="alert"
+          aria-live="assertive"
+          className="mb-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive"
+        >
           {error}
         </div>
       )}
@@ -167,6 +175,7 @@ export default function LoginPage() {
             inputMode="email"
             autoCapitalize="none"
             autoCorrect="off"
+            autoFocus={!email}
           />
         </div>
         <div className="space-y-2">

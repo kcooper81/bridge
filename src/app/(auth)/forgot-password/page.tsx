@@ -80,7 +80,11 @@ export default function ForgotPasswordPage() {
       </div>
 
       {error && (
-        <div className="mb-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
+        <div
+          role="alert"
+          aria-live="assertive"
+          className="mb-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive"
+        >
           {error}
         </div>
       )}
@@ -99,6 +103,7 @@ export default function ForgotPasswordPage() {
             inputMode="email"
             autoCapitalize="none"
             autoCorrect="off"
+            autoFocus
           />
         </div>
         <Button type="submit" className="w-full" disabled={loading}>

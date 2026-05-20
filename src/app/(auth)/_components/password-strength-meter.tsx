@@ -29,7 +29,7 @@ export function PasswordStrengthMeter({ value }: { value: string }) {
       </div>
       <p className="text-[11px] text-muted-foreground">
         {labels[score]}
-        {score < 3 && " — mix letters, numbers, and symbols for a stronger password."}
+        {score < 3 && " — longer is stronger; a passphrase of four+ random words beats complex short passwords."}
       </p>
     </div>
   );
@@ -37,6 +37,9 @@ export function PasswordStrengthMeter({ value }: { value: string }) {
 
 function computeScore(pw: string): 0 | 1 | 2 | 3 {
   if (pw.length < 10) return 0;
+  // NIST SP 800-63B prefers length over forced character-class diversity.
+  // 20+ characters is strong on its own (passphrase pattern) regardless of mix.
+  if (pw.length >= 20) return 3;
   let classes = 0;
   if (/[a-z]/.test(pw)) classes++;
   if (/[A-Z]/.test(pw)) classes++;

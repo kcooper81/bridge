@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { createServiceClient } from "@/lib/supabase/server";
 import { SUPER_ADMIN_EMAILS } from "@/lib/constants";
+import { getLatestResults } from "@/lib/llm-citation-tracker";
 
 const CRON_SECRET = process.env.CRON_SECRET;
 
@@ -117,6 +118,18 @@ export async function GET(request: NextRequest) {
   // Find new "zero-click but top-10" pages — actionable for meta improvements
   const zeroClickTop10 = topPages.filter((row) => row.clicks === 0 && row.position <= 10 && row.impressions >= 3);
 
+  // Pull this week's LLM citation snapshot (Perplexity + OpenAI w/ web search).
+  // The llm-citations cron runs an hour earlier so this read is fresh.
+  const citationResults = await getLatestResults();
+  const citedCount = citationResults.filter((c) => c.cited).length;
+  const mentionedNotCitedCount = citationResults.filter((c) => !c.cited && c.mentionedInAnswer).length;
+  const citationsByProvider: Record<string, { total: number; cited: number }> = {};
+  for (const c of citationResults) {
+    const slot = (citationsByProvider[c.provider] ??= { total: 0, cited: 0 });
+    slot.total++;
+    if (c.cited) slot.cited++;
+  }
+
   const html = `
     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 640px; margin: 0 auto; padding: 24px; color: #0f172a;">
       <h1 style="font-size: 24px; margin: 0 0 8px;">Weekly SEO Digest</h1>
@@ -143,6 +156,38 @@ export async function GET(request: NextRequest) {
         </tbody>
       </table>
 
+      ${citationResults.length > 0 ? `
+      <h2 style="font-size: 18px; margin: 32px 0 12px;">LLM citation tracking (this week)</h2>
+      <p style="font-size: 13px; color: #64748b; margin: 0 0 8px;">Did teamprompt.app appear in the answer for our target queries?</p>
+      <div style="display:flex; gap:8px; margin-bottom:12px;">
+        <div style="flex:1; background:#ecfdf5; padding:10px; border-radius:8px;">
+          <div style="font-size:10px; color:#065f46; text-transform:uppercase; letter-spacing:0.05em; font-weight:600;">Cited</div>
+          <div style="font-size:22px; font-weight:700; color:#047857;">${citedCount}<span style="font-size:13px; color:#94a3b8; font-weight:500;"> / ${citationResults.length}</span></div>
+        </div>
+        <div style="flex:1; background:#fffbeb; padding:10px; border-radius:8px;">
+          <div style="font-size:10px; color:#92400e; text-transform:uppercase; letter-spacing:0.05em; font-weight:600;">Mentioned only</div>
+          <div style="font-size:22px; font-weight:700; color:#b45309;">${mentionedNotCitedCount}</div>
+        </div>
+      </div>
+      <table style="width:100%; border-collapse:collapse; font-size:12px;">
+        <thead><tr style="background:#f1f5f9;"><th style="padding:6px; text-align:left;">Query</th><th style="padding:6px; text-align:center;">Perplexity</th><th style="padding:6px; text-align:center;">OpenAI</th></tr></thead>
+        <tbody>
+          ${Array.from(new Set(citationResults.map((c) => c.query))).slice(0, 12).map((q) => {
+            const p = citationResults.find((c) => c.query === q && c.provider === "perplexity");
+            const o = citationResults.find((c) => c.query === q && c.provider === "openai");
+            const cell = (c?: { cited: boolean; mentionedInAnswer: boolean; citationRank: number | null; error?: string }) => {
+              if (!c) return `<td style="padding:6px; text-align:center; color:#94a3b8;">—</td>`;
+              if (c.error) return `<td style="padding:6px; text-align:center; color:#94a3b8;" title="${c.error.replace(/"/g, "&quot;")}">err</td>`;
+              if (c.cited) return `<td style="padding:6px; text-align:center; color:#15803d; font-weight:600;">✓ #${c.citationRank ?? "?"}</td>`;
+              if (c.mentionedInAnswer) return `<td style="padding:6px; text-align:center; color:#b45309;">~mention</td>`;
+              return `<td style="padding:6px; text-align:center; color:#94a3b8;">·</td>`;
+            };
+            return `<tr><td style="padding:6px;">${q}</td>${cell(p)}${cell(o)}</tr>`;
+          }).join("")}
+        </tbody>
+      </table>
+      ` : ""}
+
       ${zeroClickTop10.length > 0 ? `
       <h2 style="font-size: 18px; margin: 32px 0 12px; color: #b45309;">⚠ Top-10 pages with zero clicks (last 7d)</h2>
       <p style="font-size: 13px; color: #64748b; margin: 0 0 8px;">Pages ranking top-10 but not converting clicks. Likely meta-title or description issue.</p>
@@ -167,10 +212,17 @@ export async function GET(request: NextRequest) {
   const resend = new Resend(process.env.RESEND_API_KEY);
   const fromEmail = process.env.RESEND_FROM_EMAIL || "TeamPrompt <noreply@teamprompt.app>";
 
+  const citationSubject = citationResults.length > 0
+    ? ` · LLM cited ${citedCount}/${citationResults.length}`
+    : "";
+
+  // Note unused but useful for future per-provider subject summaries
+  void citationsByProvider;
+
   const sendResult = await resend.emails.send({
     from: fromEmail,
     to: SUPER_ADMIN_EMAILS,
-    subject: `Weekly SEO Digest — ${r.impressions} imp, ${r.clicks} clk (${pctChange(r.impressions, p.impressions)} imp WoW)`,
+    subject: `Weekly SEO Digest — ${r.impressions} imp, ${r.clicks} clk (${pctChange(r.impressions, p.impressions)} imp WoW)${citationSubject}`,
     html,
   });
 
@@ -179,6 +231,8 @@ export async function GET(request: NextRequest) {
     range: { start: fmt(d7), end: fmt(d0) },
     impressions: r.impressions,
     clicks: r.clicks,
+    citedQueries: citedCount,
+    totalCitationChecks: citationResults.length,
     sent: SUPER_ADMIN_EMAILS,
     resendId: sendResult.data?.id,
   });

@@ -62,10 +62,15 @@ export function PromptPiiScanner({ embedMode = false }: Props) {
   const [text, setText] = useState("");
   const [showRedacted, setShowRedacted] = useState(false);
   const result = useMemo<ScanResult | null>(() => (text.length > 0 ? scanPrompt(text) : null), [text]);
+  const resultsRef = useRef<HTMLDivElement>(null);
 
   const handleExample = (sample: string) => {
     setText(sample);
     setShowRedacted(false);
+  };
+
+  const scrollToResults = () => {
+    resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   return (
@@ -79,14 +84,17 @@ export function PromptPiiScanner({ embedMode = false }: Props) {
           result={result}
           showRedacted={showRedacted}
           embedMode={embedMode}
+          onJumpToResults={scrollToResults}
         />
-        <ResultCard
-          text={text}
-          result={result}
-          showRedacted={showRedacted}
-          onToggleRedacted={() => setShowRedacted((v) => !v)}
-          embedMode={embedMode}
-        />
+        <div ref={resultsRef} className="lg:contents">
+          <ResultCard
+            text={text}
+            result={result}
+            showRedacted={showRedacted}
+            onToggleRedacted={() => setShowRedacted((v) => !v)}
+            embedMode={embedMode}
+          />
+        </div>
       </div>
     </div>
   );
@@ -100,6 +108,7 @@ function InputCard({
   result,
   showRedacted,
   embedMode,
+  onJumpToResults,
 }: {
   text: string;
   onChange: (v: string) => void;
@@ -108,7 +117,10 @@ function InputCard({
   result: ScanResult | null;
   showRedacted: boolean;
   embedMode: boolean;
+  onJumpToResults: () => void;
 }) {
+  const findingsCount = result?.findings.length ?? 0;
+  const theme = result ? RISK_THEME[result.riskLevel] : null;
   return (
     <div className="lg:col-span-3 flex flex-col rounded-2xl border border-border bg-card overflow-hidden">
       <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
@@ -165,6 +177,24 @@ function InputCard({
           </span>
         )}
       </div>
+
+      {/* Mobile-only sticky findings chip — on lg+ the result card sits beside
+          the input, so this would be redundant. On smaller viewports the
+          findings live below the fold; this chip surfaces the headline number
+          and jumps the user down to them. */}
+      {findingsCount > 0 && theme && (
+        <button
+          type="button"
+          onClick={onJumpToResults}
+          className={`lg:hidden flex items-center justify-between gap-2 border-t border-border px-4 py-3 text-sm font-medium ${theme.bg} ${theme.text}`}
+        >
+          <span className="flex items-center gap-2">
+            <ShieldAlert className="h-4 w-4" />
+            {findingsCount} {findingsCount === 1 ? "finding" : "findings"} · {theme.label}
+          </span>
+          <span className="text-xs underline-offset-2 underline">See details ↓</span>
+        </button>
+      )}
     </div>
   );
 }

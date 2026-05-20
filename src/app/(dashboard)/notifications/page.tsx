@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useNotifications } from "@/hooks/use-notifications";
+import { useConfirm } from "@/components/providers/confirm-provider";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -90,6 +91,7 @@ function getNotificationLink(notification: Notification): string | null {
 
 export default function NotificationsPage() {
   const { notifications, unreadCount, loading, markRead, markAllRead, refresh } = useNotifications();
+  const confirm = useConfirm();
   const [deleting, setDeleting] = useState(false);
   const [activeFilter, setActiveFilter] = useState<NotificationType | "all" | "unread">("all");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -148,7 +150,12 @@ export default function NotificationsPage() {
 
   const handleBulkDelete = async () => {
     if (selectedIds.size === 0) return;
-    if (!confirm(`Delete ${selectedIds.size} notification${selectedIds.size > 1 ? "s" : ""}?`)) return;
+    const ok = await confirm({
+      title: `Delete ${selectedIds.size} notification${selectedIds.size > 1 ? "s" : ""}?`,
+      confirmLabel: "Delete",
+      variant: "destructive",
+    });
+    if (!ok) return;
     setDeleting(true);
     try {
       await Promise.all(Array.from(selectedIds).map((id) => deleteNotification(id)));
@@ -175,7 +182,13 @@ export default function NotificationsPage() {
   };
 
   const handleDeleteAll = async () => {
-    if (!confirm("Delete all notifications?")) return;
+    const ok = await confirm({
+      title: "Delete all notifications?",
+      description: "This clears your entire notification history. It cannot be undone.",
+      confirmLabel: "Delete all",
+      variant: "destructive",
+    });
+    if (!ok) return;
     setDeleting(true);
     try {
       await deleteAllNotifications();

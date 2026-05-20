@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { cn } from "@/lib/utils";
+import { useConfirm } from "@/components/providers/confirm-provider";
 import { createClient } from "@/lib/supabase/client";
 import { useOrg } from "@/components/providers/org-provider";
 import { useSubscription } from "@/components/providers/subscription-provider";
@@ -59,6 +60,7 @@ import Link from "next/link";
 export default function TeamPage() {
   const { org, teams, setTeams, members, currentUserRole, loading, refresh, noOrg } = useOrg();
   const { checkLimit, planLimits, canAccess } = useSubscription();
+  const confirm = useConfirm();
 
   const [teamModalOpen, setTeamModalOpen] = useState(false);
   const [editTeam, setEditTeam] = useState<Team | null>(null);
@@ -470,7 +472,13 @@ export default function TeamPage() {
         return;
       }
     }
-    if (!confirm(`Remove ${member?.name || member?.email || "this member"} from the organization? This cannot be undone.`)) return;
+    const ok = await confirm({
+      title: "Remove member?",
+      description: `Remove ${member?.name || member?.email || "this member"} from the organization. This cannot be undone.`,
+      confirmLabel: "Remove",
+      variant: "destructive",
+    });
+    if (!ok) return;
     setRemovingMemberId(memberId);
     try {
       await removeMember(memberId);
@@ -605,7 +613,13 @@ export default function TeamPage() {
   }
 
   async function handleRemoveFromTeam(teamId: string, userId: string) {
-    if (!confirm("Remove this member from the team?")) return;
+    const ok = await confirm({
+      title: "Remove from team?",
+      description: "They'll keep their organization membership but lose access to this team's prompts.",
+      confirmLabel: "Remove",
+      variant: "destructive",
+    });
+    if (!ok) return;
     setRemovingFromTeamId(userId);
     try {
       const success = await removeTeamMember(teamId, userId);
@@ -637,9 +651,12 @@ export default function TeamPage() {
     if (!currentlyDisabled) {
       const member = members.find((m) => m.id === memberId);
       const who = member?.name || member?.email || "this member";
-      const ok = window.confirm(
-        `Disable DLP shield for ${who}?\n\nAll their prompts to ChatGPT, Claude, Gemini, etc. will be sent without scanning until you re-enable it. The action is logged to the audit trail.`
-      );
+      const ok = await confirm({
+        title: `Disable DLP shield for ${who}?`,
+        description: "All their prompts to ChatGPT, Claude, Gemini, etc. will be sent without scanning until you re-enable it. The action is logged to the audit trail.",
+        confirmLabel: "Disable shield",
+        variant: "destructive",
+      });
       if (!ok) return;
     }
     setTogglingShieldId(memberId);
@@ -700,20 +717,23 @@ export default function TeamPage() {
     }
   }
 
-  function handleDeleteTeam(team: Team) {
+  async function handleDeleteTeam(team: Team) {
     const teamMembers = members.filter((m) => m.teamIds.includes(team.id));
     if (teamMembers.length === 0) {
-      // No members — just confirm and delete
-      if (!confirm(`Delete "${team.name}"? This cannot be undone.`)) return;
-      (async () => {
-        try {
-          const ok = await deleteTeamApi(team.id);
-          if (ok) { toast.success("Team deleted"); setSelectedTeam(null); await refresh(); }
-          else toast.error("Failed to delete team");
-        } catch {
-          toast.error("Failed to delete team");
-        }
-      })();
+      const ok = await confirm({
+        title: `Delete "${team.name}"?`,
+        description: "This cannot be undone.",
+        confirmLabel: "Delete team",
+        variant: "destructive",
+      });
+      if (!ok) return;
+      try {
+        const success = await deleteTeamApi(team.id);
+        if (success) { toast.success("Team deleted"); setSelectedTeam(null); await refresh(); }
+        else toast.error("Failed to delete team");
+      } catch {
+        toast.error("Failed to delete team");
+      }
     } else {
       // Has members — show dialog with reassignment options
       setDeleteTeamTarget(team);
@@ -1313,7 +1333,13 @@ export default function TeamPage() {
             onClick={async () => {
               const selected = members.filter((m) => selectedMemberIds.has(m.id) && !m.isCurrentUser && m.role !== "admin");
               if (selected.length === 0) { toast.error("No removable members selected (admins excluded)"); return; }
-              if (!confirm(`Remove ${selected.length} member(s) from the organization? This cannot be undone.`)) return;
+              const ok = await confirm({
+                title: `Remove ${selected.length} member${selected.length === 1 ? "" : "s"}?`,
+                description: "They'll lose access to the organization immediately. This cannot be undone.",
+                confirmLabel: `Remove ${selected.length}`,
+                variant: "destructive",
+              });
+              if (!ok) return;
               for (const m of selected) { await removeMember(m.id); }
               toast.success(`${selected.length} member(s) removed`);
               setSelectedMemberIds(new Set());

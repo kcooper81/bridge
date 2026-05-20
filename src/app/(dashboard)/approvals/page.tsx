@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useOrg } from "@/components/providers/org-provider";
+import { useConfirm } from "@/components/providers/confirm-provider";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { PageSkeleton } from "@/components/dashboard/skeleton-loader";
 import { Button } from "@/components/ui/button";
@@ -61,6 +62,7 @@ interface RuleSuggestion {
 
 export default function ApprovalsPage() {
   const { org, currentUserRole, noOrg } = useOrg();
+  const confirm = useConfirm();
   const canEdit = currentUserRole === "admin" || currentUserRole === "manager";
   const [loading, setLoading] = useState(true);
   const [pendingPrompts, setPendingPrompts] = useState<
@@ -178,7 +180,13 @@ export default function ApprovalsPage() {
   async function handleBulkReject() {
     const ids = Array.from(selectedIds);
     if (ids.length === 0) return;
-    if (!confirm(`Reject ${ids.length} prompt${ids.length === 1 ? "" : "s"}? They will be returned to draft state.`)) return;
+    const ok = await confirm({
+      title: `Reject ${ids.length} prompt${ids.length === 1 ? "" : "s"}?`,
+      description: "They will be returned to draft state. Authors will be notified.",
+      confirmLabel: `Reject ${ids.length}`,
+      variant: "destructive",
+    });
+    if (!ok) return;
     setBulkBusy(true);
     let rejected = 0;
     let failed = 0;

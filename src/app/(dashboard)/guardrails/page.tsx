@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useOrg } from "@/components/providers/org-provider";
 import { useSubscription } from "@/components/providers/subscription-provider";
+import { useConfirm } from "@/components/providers/confirm-provider";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { Button } from "@/components/ui/button";
@@ -171,6 +172,7 @@ function CompliancePackCard({
 export default function GuardrailsPage() {
   const { org, currentUserRole, noOrg } = useOrg();
   const { canAccess } = useSubscription();
+  const confirm = useConfirm();
   const canEdit = currentUserRole === "admin" || currentUserRole === "manager";
   const [dataLoading, setDataLoading] = useState(true);
   const [rules, setRules] = useState<SecurityRule[]>([]);
@@ -337,7 +339,13 @@ export default function GuardrailsPage() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm("Delete this policy? This action cannot be undone.")) return;
+    const ok = await confirm({
+      title: "Delete this policy?",
+      description: "This action cannot be undone. Prompts will no longer be checked against this rule.",
+      confirmLabel: "Delete",
+      variant: "destructive",
+    });
+    if (!ok) return;
     setDeleting(id);
     try {
       const supabase = createClient();
@@ -356,7 +364,12 @@ export default function GuardrailsPage() {
   async function handleInstallDefaults() {
     if (!org) return;
     if (!canAccess("custom_security")) return;
-    if (!confirm(`Install ${DEFAULT_SECURITY_RULES.length} default security policies? You can customize or disable them later.`)) return;
+    const ok = await confirm({
+      title: "Install default security policies?",
+      description: `Adds ${DEFAULT_SECURITY_RULES.length} starter rules covering API keys, PII, secrets, and more. You can customize or disable any of them later.`,
+      confirmLabel: "Install defaults",
+    });
+    if (!ok) return;
     setInstallingDefaults(true);
     try {
       const supabase = createClient();

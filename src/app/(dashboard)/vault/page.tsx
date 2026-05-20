@@ -4,6 +4,7 @@ import React, { useState, useMemo, useCallback, useEffect, useRef } from "react"
 import { useSearchParams, useRouter } from "next/navigation";
 import { useOrg } from "@/components/providers/org-provider";
 import { useSubscription } from "@/components/providers/subscription-provider";
+import { useConfirm } from "@/components/providers/confirm-provider";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { PromptModal } from "@/components/modals/prompt-modal";
@@ -103,6 +104,7 @@ const STATUS_BADGE_VARIANT: Record<PromptStatus, "default" | "secondary" | "dest
 export default function VaultPage() {
   const { prompts, folders, teams, members, guidelines, loading, refresh, currentUserRole, noOrg } = useOrg();
   const { checkLimit, planLimits, canAccess } = useSubscription();
+  const confirm = useConfirm();
   const searchParams = useSearchParams();
   const router = useRouter();
   const [search, setSearch] = useState("");
@@ -404,7 +406,13 @@ export default function VaultPage() {
 
   async function bulkDelete() {
     if (selectedIds.size === 0) return;
-    if (!confirm(`Delete ${selectedIds.size} prompt(s)? This cannot be undone.`)) return;
+    const ok = await confirm({
+      title: `Delete ${selectedIds.size} prompt${selectedIds.size === 1 ? "" : "s"}?`,
+      description: "Deleted prompts can't be recovered. Anyone using these prompts will lose access immediately.",
+      confirmLabel: `Delete ${selectedIds.size}`,
+      variant: "destructive",
+    });
+    if (!ok) return;
     setBulkLoading(true);
     try {
       const results = await Promise.allSettled(

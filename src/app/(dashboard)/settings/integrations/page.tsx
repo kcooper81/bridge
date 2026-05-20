@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useOrg } from "@/components/providers/org-provider";
+import { useConfirm } from "@/components/providers/confirm-provider";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -56,6 +57,7 @@ function ScimIcon() {
 export default function IntegrationsPage() {
   const { currentUserRole, teams, members, refresh } = useOrg();
   const { canAccess } = useSubscription();
+  const confirm = useConfirm();
   const searchParams = useSearchParams();
   const isAdmin = currentUserRole === "admin";
   const canGoogle = canAccess("google_workspace_sync");
@@ -206,7 +208,13 @@ export default function IntegrationsPage() {
   }
 
   async function handleDisconnect() {
-    if (!confirm("Disconnect Google Workspace? This won't remove any synced members.")) return;
+    const ok = await confirm({
+      title: "Disconnect Google Workspace?",
+      description: "Synced members will remain in your org, but new joiners won't be auto-provisioned and member directory sync will stop.",
+      confirmLabel: "Disconnect",
+      variant: "destructive",
+    });
+    if (!ok) return;
     setDisconnecting(true);
     try {
       const supabase = (await import("@/lib/supabase/client")).createClient();
@@ -255,7 +263,13 @@ export default function IntegrationsPage() {
   }
 
   async function handleSlackDisconnect() {
-    if (!confirm("Disconnect Slack? Notifications will stop.")) return;
+    const ok = await confirm({
+      title: "Disconnect Slack?",
+      description: "All notifications, alerts, and approval requests in Slack will stop. You can reconnect at any time.",
+      confirmLabel: "Disconnect",
+      variant: "destructive",
+    });
+    if (!ok) return;
     setSlackDisconnecting(true);
     try {
       const supabase = (await import("@/lib/supabase/client")).createClient();
@@ -631,6 +645,7 @@ function CloudflareIcon() {
 
 function CloudflareCard() {
   const { canAccess } = useSubscription();
+  const confirm = useConfirm();
   const [connected, setConnected] = useState(false);
   const [loading, setLoading] = useState(true);
   const [accountId, setAccountId] = useState("");
@@ -758,7 +773,13 @@ function CloudflareCard() {
   }
 
   async function handleDisconnect() {
-    if (!confirm("Disconnect Cloudflare Gateway? Existing block rules will remain in Cloudflare until manually removed.")) return;
+    const ok = await confirm({
+      title: "Disconnect Cloudflare Gateway?",
+      description: "Existing block rules will stay in Cloudflare until you remove them manually. TeamPrompt will stop pushing updates.",
+      confirmLabel: "Disconnect",
+      variant: "destructive",
+    });
+    if (!ok) return;
     try {
       const supabase = (await import("@/lib/supabase/client")).createClient();
       const { data: { session } } = await supabase.auth.getSession();
@@ -833,7 +854,13 @@ function CloudflareCard() {
   }
 
   async function handleDlpRemove() {
-    if (!confirm("Remove DLP content scanning from Cloudflare? DNS-level blocking will continue to work.")) return;
+    const ok = await confirm({
+      title: "Remove DLP content scanning?",
+      description: "Cloudflare's DNS-level blocking will continue to work, but inline prompt scanning at the Cloudflare edge will stop.",
+      confirmLabel: "Remove",
+      variant: "destructive",
+    });
+    if (!ok) return;
     setDlpRemoving(true);
     try {
       const supabase = (await import("@/lib/supabase/client")).createClient();

@@ -73,6 +73,7 @@ import rehypeKatex from "rehype-katex";
 import "katex/dist/katex.min.css";
 import { trackChatMessageSent, trackChatConversationCreated, trackChatFileUploaded, trackChatCompareUsed, trackChatPresetUsed, trackChatAdminCommand, trackChatCollectionCreated } from "@/lib/analytics";
 import { useOrg } from "@/components/providers/org-provider";
+import { useConfirm } from "@/components/providers/confirm-provider";
 
 // ── LaTeX delimiter normalizer (OpenAI uses \(...\) and \[...\], remark-math expects $...$ and $$...$$) ──
 function normalizeLatexDelimiters(content: string): string {
@@ -349,6 +350,7 @@ const TAG_COLORS = [
 
 export default function ChatPage() {
   const { currentUserRole, org, prompts: orgPrompts } = useOrg();
+  const confirm = useConfirm();
   const isAdmin = currentUserRole === "admin";
   const orgSettings = (org?.settings || {}) as Record<string, unknown>;
   const chatEnabledForMembers = orgSettings.ai_chat_enabled === true;
@@ -1636,7 +1638,13 @@ export default function ChatPage() {
   async function bulkDelete() {
     const ids = Array.from(selectedConvIds);
     if (ids.length === 0) return;
-    if (!confirm(`Delete ${ids.length} conversation${ids.length > 1 ? "s" : ""}?`)) return;
+    const ok = await confirm({
+      title: `Delete ${ids.length} conversation${ids.length > 1 ? "s" : ""}?`,
+      description: "Deleted conversations can't be recovered.",
+      confirmLabel: `Delete ${ids.length}`,
+      variant: "destructive",
+    });
+    if (!ok) return;
 
     const removedConvs = conversations.filter((c) => selectedConvIds.has(c.id));
     setConversations((prev) => prev.filter((c) => !selectedConvIds.has(c.id)));
@@ -2853,7 +2861,13 @@ export default function ChatPage() {
             <div className="flex justify-between items-center mt-4 pt-3 border-t">
               {memories.length > 0 ? (
                 <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive text-xs h-7" onClick={async () => {
-                  if (!confirm("Clear all memories? This cannot be undone.")) return;
+                  const ok = await confirm({
+                    title: "Clear all memories?",
+                    description: "All facts the assistant has remembered about you will be forgotten. This cannot be undone.",
+                    confirmLabel: "Clear memories",
+                    variant: "destructive",
+                  });
+                  if (!ok) return;
                   try {
                     await fetch("/api/chat/memory", {
                       method: "DELETE",

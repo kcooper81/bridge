@@ -8,22 +8,29 @@ import { Separator } from "@/components/ui/separator";
 import { Loader2, AlertTriangle, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import { useOrg } from "@/components/providers/org-provider";
+import { useConfirm } from "@/components/providers/confirm-provider";
 import { ProfileTab } from "./_components/profile-tab";
 import { TwoFactorCard } from "./_components/two-factor-card";
 
 export default function SettingsPage() {
   const { signOut } = useAuth();
   const { org, members, currentUserRole, refresh } = useOrg();
+  const confirm = useConfirm();
   const [deleting, setDeleting] = useState(false);
   const [leaving, setLeaving] = useState(false);
 
   async function handleLeaveOrg() {
     const memberCount = members.length;
-    const message = memberCount <= 1
-      ? "You are the only member. Leaving will delete this organization and all its data. Continue?"
-      : "Are you sure you want to leave this organization? You will lose access to all shared prompts and data.";
-
-    if (!confirm(message)) return;
+    const isLast = memberCount <= 1;
+    const ok = await confirm({
+      title: isLast ? "Leave and delete this organization?" : "Leave this organization?",
+      description: isLast
+        ? "You are the only member. Leaving will permanently delete the organization and all its data."
+        : "You will lose access to all shared prompts, audit logs, and team data. This cannot be undone.",
+      confirmLabel: isLast ? "Leave and delete" : "Leave organization",
+      variant: "destructive",
+    });
+    if (!ok) return;
 
     setLeaving(true);
     try {
@@ -56,7 +63,13 @@ export default function SettingsPage() {
   }
 
   async function handleDeleteAccount() {
-    if (!confirm("Are you sure you want to delete your account? This cannot be undone.")) return;
+    const ok = await confirm({
+      title: "Delete your account?",
+      description: "Your prompts, settings, and all personal data will be permanently removed. This cannot be undone.",
+      confirmLabel: "Delete my account",
+      variant: "destructive",
+    });
+    if (!ok) return;
 
     setDeleting(true);
     try {

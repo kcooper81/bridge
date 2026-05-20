@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { useConfirm } from "@/components/providers/confirm-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,6 +22,7 @@ interface EnrollData {
 }
 
 export function TwoFactorCard() {
+  const confirm = useConfirm();
   const [state, setState] = useState<State>("loading");
   const [factorId, setFactorId] = useState<string | null>(null);
   const [enrollData, setEnrollData] = useState<EnrollData | null>(null);
@@ -55,7 +57,12 @@ export function TwoFactorCard() {
 
   async function handleGenerateRecoveryCodes() {
     if (recoveryRemaining && recoveryRemaining > 0) {
-      if (!confirm("Generating new recovery codes will invalidate your existing ones. Continue?")) return;
+      const ok = await confirm({
+        title: "Generate new recovery codes?",
+        description: "This will invalidate your existing recovery codes immediately. Anyone who has them won't be able to use them to sign in.",
+        confirmLabel: "Generate new codes",
+      });
+      if (!ok) return;
     }
     setGeneratingCodes(true);
     try {
@@ -172,7 +179,13 @@ export function TwoFactorCard() {
 
   async function handleDisable() {
     if (!factorId) return;
-    if (!confirm("Are you sure you want to disable two-factor authentication?")) return;
+    const ok = await confirm({
+      title: "Disable two-factor authentication?",
+      description: "Your account will be less secure. Anyone with your password will be able to sign in without a second factor.",
+      confirmLabel: "Disable 2FA",
+      variant: "destructive",
+    });
+    if (!ok) return;
 
     setDisabling(true);
     try {

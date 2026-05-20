@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { ErrorReporter } from "@/components/providers/error-reporter";
+import { ConfirmDialogProvider } from "@/components/providers/confirm-provider";
 import { GA4RouteTracker } from "@/components/analytics/ga4";
 import { AuthEventTracker } from "@/components/analytics/auth-event-tracker";
 import "./globals.css";
@@ -141,7 +142,9 @@ export default function RootLayout({
         </Suspense>
         <ThemeProvider>
           <ErrorReporter>
-            {children}
+            <ConfirmDialogProvider>
+              {children}
+            </ConfirmDialogProvider>
           </ErrorReporter>
         </ThemeProvider>
         <Toaster

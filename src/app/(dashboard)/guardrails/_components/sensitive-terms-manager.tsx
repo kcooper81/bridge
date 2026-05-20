@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useConfirm } from "@/components/providers/confirm-provider";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -73,6 +74,7 @@ interface SensitiveTermsManagerProps {
 }
 
 export function SensitiveTermsManager({ canEdit, teams = [] }: SensitiveTermsManagerProps) {
+  const confirm = useConfirm();
   const [terms, setTerms] = useState<SensitiveTerm[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
@@ -178,7 +180,13 @@ export function SensitiveTermsManager({ canEdit, teams = [] }: SensitiveTermsMan
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Delete this sensitive term? This cannot be undone.")) return;
+    const ok = await confirm({
+      title: "Delete this sensitive term?",
+      description: "Prompts won't be checked against this term anymore. This cannot be undone.",
+      confirmLabel: "Delete",
+      variant: "destructive",
+    });
+    if (!ok) return;
     setDeletingId(id);
     try {
       await deleteSensitiveTerm(id);

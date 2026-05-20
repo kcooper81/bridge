@@ -843,7 +843,7 @@ export default function TeamPage() {
                           <SelectItem value="member">Member</SelectItem>
                         </SelectContent>
                       </Select>
-                      <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive opacity-0 group-hover:opacity-100" onClick={() => handleRemoveFromTeam(selectedTeam.id, member.id)} disabled={removingFromTeamId === member.id}>
+                      <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive opacity-30 md:opacity-0 md:group-hover:opacity-100 transition-opacity" onClick={() => handleRemoveFromTeam(selectedTeam.id, member.id)} disabled={removingFromTeamId === member.id}>
                         {removingFromTeamId === member.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <X className="h-3.5 w-3.5" />}
                       </Button>
                     </div>
@@ -1741,7 +1741,7 @@ export default function TeamPage() {
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  className="h-7 text-xs gap-1 opacity-0 group-hover:opacity-100"
+                                  className="h-7 text-xs gap-1 opacity-30 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                                   onClick={() => {
                                     setTransferTargetId("");
                                     setTransferNewRole("member");
@@ -1758,7 +1758,7 @@ export default function TeamPage() {
                                   <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="h-7 w-7 opacity-0 group-hover:opacity-100"
+                                    className="h-7 w-7 opacity-30 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                                     title="Change email"
                                     onClick={() => openEmailModal(member.id, member.name, member.email)}
                                   >
@@ -1768,7 +1768,7 @@ export default function TeamPage() {
                                 <Button
                                   variant="ghost"
                                   size="icon"
-                                  className="h-7 w-7 text-destructive opacity-0 group-hover:opacity-100"
+                                  className="h-7 w-7 text-destructive opacity-30 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                                   onClick={() => handleRemoveMember(member.id)}
                                   disabled={removingMemberId === member.id}
                                 >
@@ -1826,7 +1826,7 @@ export default function TeamPage() {
                                 <Button
                                   variant="ghost"
                                   size="icon"
-                                  className="h-7 w-7 opacity-0 group-hover:opacity-100"
+                                  className="h-7 w-7 opacity-30 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                                   title="Resend invite"
                                   onClick={() => {
                                     handleRevokeInvite(inv.id).then(() => {
@@ -1842,7 +1842,7 @@ export default function TeamPage() {
                                 <Button
                                   variant="ghost"
                                   size="icon"
-                                  className="h-7 w-7 text-destructive opacity-0 group-hover:opacity-100"
+                                  className="h-7 w-7 text-destructive opacity-30 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                                   title="Revoke invite"
                                   onClick={() => handleRevokeInvite(inv.id)}
                                 >
@@ -1962,7 +1962,7 @@ export default function TeamPage() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-7 w-7 text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="h-7 w-7 text-destructive opacity-30 md:opacity-0 md:group-hover:opacity-100 transition-opacity transition-opacity"
                         onClick={() => { setManageTeamsOpen(false); handleDeleteTeam(team); }}
                         title="Delete team"
                       >

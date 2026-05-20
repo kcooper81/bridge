@@ -2072,7 +2072,7 @@ export default function ChatPage() {
             </div>
             {!bulkMode && !options?.isArchived && (
               <button
-                className="flex-shrink-0 opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-destructive/10 hover:text-destructive transition-all"
+                className="flex-shrink-0 opacity-30 md:opacity-0 md:group-hover:opacity-100 p-0.5 rounded hover:bg-destructive/10 hover:text-destructive transition-all"
                 title="Delete"
                 onClick={(e) => { e.stopPropagation(); deleteConversation(conv.id); }}
               >
@@ -2081,7 +2081,7 @@ export default function ChatPage() {
             )}
             {!bulkMode && options?.isArchived && (
               <button
-                className="flex-shrink-0 opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-muted hover:text-foreground transition-all"
+                className="flex-shrink-0 opacity-30 md:opacity-0 md:group-hover:opacity-100 p-0.5 rounded hover:bg-muted hover:text-foreground transition-all"
                 title="Unarchive"
                 onClick={(e) => { e.stopPropagation(); unarchiveConversation(conv.id); }}
               >

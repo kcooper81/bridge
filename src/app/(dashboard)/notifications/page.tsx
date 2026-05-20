@@ -362,7 +362,7 @@ export default function NotificationsPage() {
                     {isSelected ? (
                       <CheckSquare className="h-4 w-4 text-primary" />
                     ) : (
-                      <Square className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <Square className="h-4 w-4 opacity-30 md:opacity-0 md:group-hover:opacity-100 transition-opacity" />
                     )}
                   </button>
 
@@ -396,7 +396,7 @@ export default function NotificationsPage() {
                   </span>
 
                   {/* Actions */}
-                  <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity flex gap-0.5">
+                  <div className="flex-shrink-0 opacity-30 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex gap-0.5">
                     {!notification.read && (
                       <Button
                         variant="ghost"

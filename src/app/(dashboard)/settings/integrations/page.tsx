@@ -372,10 +372,7 @@ export default function IntegrationsPage() {
               ) : loadingStatus ? (
                 <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
               ) : googleStatus.connected ? (
-                <Badge
-                  variant="outline"
-                  className="text-xs text-green-600 border-green-200 bg-green-50 dark:text-green-400 dark:border-green-800 dark:bg-green-950/30"
-                >
+                <Badge className="text-xs bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-0 hover:bg-emerald-500/10">
                   <CheckCircle2 className="mr-1 h-3 w-3" />
                   Connected
                 </Badge>
@@ -490,7 +487,7 @@ export default function IntegrationsPage() {
                 </svg>
               </div>
               {slackStatus.connected && (
-                <Badge variant="default" className="text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                <Badge className="text-xs bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-0 hover:bg-emerald-500/10">
                   <CheckCircle2 className="mr-1 h-2.5 w-2.5" />
                   Connected
                 </Badge>
@@ -910,7 +907,7 @@ function CloudflareCard() {
             <CloudflareIcon />
           </div>
           {connected ? (
-            <Badge className="bg-emerald-500/10 text-emerald-600 border-0">
+            <Badge className="text-xs bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-0 hover:bg-emerald-500/10">
               <CheckCircle2 className="mr-1 h-3 w-3" />
               Connected
             </Badge>

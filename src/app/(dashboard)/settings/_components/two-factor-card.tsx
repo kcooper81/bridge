@@ -314,7 +314,7 @@ export function TwoFactorCard() {
         {state === "enabled" && (
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <Badge className="bg-green-500/10 text-green-600 border-green-500/20 hover:bg-green-500/10">
+              <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-0 hover:bg-emerald-500/10">
                 Enabled
               </Badge>
               <span className="text-sm text-muted-foreground">

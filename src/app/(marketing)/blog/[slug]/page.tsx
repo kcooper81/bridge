@@ -112,6 +112,25 @@ export default async function BlogPostPage({ params }: Props) {
     },
   };
 
+  // FAQPage schema — even though FAQ rich results were removed from
+  // blue-link SERPs in May 2026, this schema still drives ~3.2x more
+  // AI-Overview citations (Frase/Sitebulb 2026 data). It's the highest
+  // ROI structured-data move for LLM citation eligibility.
+  const faqSchema = post.faqs && post.faqs.length > 0
+    ? {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: post.faqs.map((f) => ({
+          "@type": "Question",
+          name: f.q,
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: f.a,
+          },
+        })),
+      }
+    : null;
+
   return (
     <>
       <script
@@ -126,6 +145,12 @@ export default async function BlogPostPage({ params }: Props) {
           __html: JSON.stringify(articleSchema),
         }}
       />
+      {faqSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+        />
+      )}
 
       <div className="py-20 sm:py-28">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
@@ -197,6 +222,25 @@ export default async function BlogPostPage({ params }: Props) {
               </div>
             )}
 
+            {/* TL;DR / direct-answer card — the "ski-ramp" lede LLMs cite.
+                Per Indig's 2026 analysis of 1.2M ChatGPT answers, 44.2% of
+                citations come from the first 30% of a page. Render this
+                BEFORE the narrative content so AI crawlers (and impatient
+                humans) hit the direct answer first. */}
+            {post.tldr && (
+              <aside
+                className="mb-10 rounded-2xl border-l-4 border-primary bg-primary/5 px-5 py-4 sm:px-6 sm:py-5"
+                aria-label="Quick answer"
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-wider text-primary mb-1.5">
+                  Quick answer
+                </div>
+                <p className="text-base sm:text-lg leading-relaxed text-foreground/90 m-0">
+                  {post.tldr}
+                </p>
+              </aside>
+            )}
+
             {/* Content */}
             <div
               className="prose prose-lg prose-zinc dark:prose-invert max-w-none
@@ -211,6 +255,25 @@ export default async function BlogPostPage({ params }: Props) {
                 prose-img:rounded-xl prose-img:my-0"
               dangerouslySetInnerHTML={{ __html: post.content }}
             />
+
+            {/* FAQ section — question-shaped H2/H3s are the exact structure
+                LLMs extract for citations. The matching FAQPage schema is
+                already emitted above. */}
+            {post.faqs && post.faqs.length > 0 && (
+              <section className="mt-14 pt-10 border-t border-border" aria-labelledby="post-faq-heading">
+                <h2 id="post-faq-heading" className="text-2xl font-semibold tracking-tight mb-6">
+                  Frequently asked questions
+                </h2>
+                <div className="space-y-5">
+                  {post.faqs.map((f, i) => (
+                    <div key={i}>
+                      <h3 className="text-base sm:text-lg font-semibold mb-2">{f.q}</h3>
+                      <p className="text-sm sm:text-base text-foreground/80 leading-relaxed">{f.a}</p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
 
             {/* Tags */}
             <div className="mt-10 pt-6 border-t border-border flex flex-wrap gap-2">

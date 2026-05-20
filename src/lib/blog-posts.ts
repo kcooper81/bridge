@@ -14,11 +14,28 @@ export interface BlogAuthor {
   sameAs?: string[]; // external profiles (LinkedIn, Twitter) for schema sameAs
 }
 
+export interface BlogFaq {
+  q: string;
+  a: string;
+}
+
 export interface BlogPost {
   slug: string;
   title: string;
   description: string;
   content: string;
+  // 40-60 word direct answer rendered above the article body. The "ski-ramp"
+  // lede that AI Overviews and ChatGPT preferentially cite — per Indig's
+  // 2026 analysis, 44.2% of LLM citations come from the first 30% of a page.
+  // When present, this paragraph is what shows in the answer card AND seeds
+  // the Article schema's `about` + meta description for AI crawlers.
+  tldr?: string;
+  // 3-5 Q&A pairs appended to the article + serialized as FAQPage schema.
+  // Even though FAQ rich results were removed from blue-link SERPs in
+  // May 2026, FAQPage schema still drives ~3.2x more AI-Overview citations
+  // (Frase/Sitebulb 2026 data). Question-shaped H2/H3 structure is the
+  // exact shape LLMs extract for ChatGPT/Perplexity citations.
+  faqs?: BlogFaq[];
   publishedAt: string;
   updatedAt?: string;
   author: BlogAuthor;
@@ -83,6 +100,25 @@ const _POSTS: BlogPost[] = [
     coverImage: "/images/hero-tech-workers.jpg",
     coverImageAlt: "Engineers reviewing security policy on a laptop",
     relatedSlugs: ["how-to-prevent-data-leaks-to-chatgpt", "ai-dlp-preventing-data-leaks-to-chatgpt-and-claude", "what-is-ai-data-loss-prevention-dlp"],
+    tldr: "Prompt DLP is data loss prevention scoped to AI prompts — the text employees type into ChatGPT, Claude, Gemini, and Copilot. It scans inside the browser before the prompt leaves the device, then blocks, warns, or auto-redacts based on detected PII, credentials, or proprietary content. Traditional DLP misses this channel because prompts look like normal HTTPS requests, not file uploads.",
+    faqs: [
+      {
+        q: "How is prompt DLP different from traditional DLP?",
+        a: "Traditional DLP fingerprints files (PDFs, CSVs, images) leaving the network and watches endpoints for USB writes or clipboard activity. Prompts trigger neither path — they're just HTTPS POST bodies to api.openai.com. Prompt DLP runs inside the browser at the textarea level, scanning content before submission with three possible actions: allow, block, or auto-redact.",
+      },
+      {
+        q: "Why can't I just use my existing Microsoft Purview or Nightfall deployment for AI prompts?",
+        a: "Purview, Nightfall, Forcepoint, and Symantec scan documents, email, and storage — not chat-tool textareas. They have no integration point with the ChatGPT or Claude browser UI. You either get nothing (traffic passes invisibly) or you block the whole tool, which employees route around within a week.",
+      },
+      {
+        q: "Will prompt DLP slow down AI workflows?",
+        a: "Well-designed prompt DLP runs in milliseconds locally — there's no network round-trip. The latency cost is invisible. The bigger productivity factor is policy choice: auto-redaction keeps prompts flowing while removing sensitive substrings, where block-only disrupts the workflow and gets disabled. Teams using auto-redact see near-zero pushback.",
+      },
+      {
+        q: "Does prompt DLP need to cover tools beyond ChatGPT?",
+        a: "Yes. ChatGPT-only prompt DLP misses the 30-50% of enterprise AI usage spread across Claude, Gemini, Copilot, and Perplexity. Look for cross-tool coverage in the same browser extension, with detection rules that apply identically across composers, plus DNS-level allowlisting for tools that bypass the browser entirely.",
+      },
+    ],
     content: `
 ## What Is "Prompt DLP"?
 
@@ -154,6 +190,25 @@ Start with one capability — browser-level scanning of your three most-used AI 
     coverImage: "/images/hero-office-collab.jpg",
     coverImageAlt: "Colleagues reviewing compliance docs together",
     relatedSlugs: ["soc-2-and-ai-meeting-compliance-requirements", "hipaa-compliance-and-ai-what-healthcare-teams-must-know", "ai-governance-framework-practical-guide-for-teams"],
+    tldr: "Most consumer AI tools don't give compliance teams real audit trails. ChatGPT Enterprise logs sign-ins and policy changes but explicitly excludes prompt and completion text. Claude Team adds workspace activity but not conversation content. Gemini and Copilot vary by tier. Only purpose-built prompt-management layers like TeamPrompt capture full prompt-level audit logs with user, timestamp, tool, and detection events.",
+    faqs: [
+      {
+        q: "Does ChatGPT Enterprise include prompt-level audit logs?",
+        a: "No. ChatGPT Enterprise audit logs cover sign-ins, member changes, and policy updates only. OpenAI explicitly excludes prompt and completion text from audit exports as of early 2026. Workspace admins see who is active but not what was sent to the model.",
+      },
+      {
+        q: "What audit fields does SOC 2 actually require for AI usage?",
+        a: "Auditors typically want: timestamp, user identity, AI tool used, prompt content (or a hash), what was detected, what action was taken (allowed/blocked/redacted), and the resulting redacted prompt if applicable. Logs must be tamper-evident and retained per the org's policy (commonly 365 days for SOC 2 CC7.2).",
+      },
+      {
+        q: "Can I get this audit trail without disrupting employee AI use?",
+        a: "Yes — a browser-extension-based prompt DLP captures the full audit event without changing the underlying tool. Employees still use ChatGPT, Claude, or Gemini directly; the extension records the prompt, scans for sensitive data, and writes the event to a central log. Logging plus auto-redact is the productivity-preserving combination.",
+      },
+      {
+        q: "How long should AI audit logs be retained?",
+        a: "Default 365 days for SOC 2 alignment. HIPAA requires 6 years for any logs containing PHI. EU AI Act high-risk systems require logs for the lifetime of the system. Choose retention based on the strictest framework you're subject to and set it per-org rather than per-rule.",
+      },
+    ],
     content: `
 ## The Compliance Problem
 
@@ -241,6 +296,25 @@ If a vendor can't say yes to all five, treat their "audit trail" claim as market
     coverImage: "/images/hero-data-breach.jpg",
     coverImageAlt: "Data breach alert on laptop screen",
     relatedSlugs: ["ai-dlp-preventing-data-leaks-to-chatgpt-and-claude", "what-is-ai-data-loss-prevention-dlp"],
+    tldr: "To stop sensitive data leaking to ChatGPT, deploy a browser-level DLP that scans prompts before they're submitted, auto-redact PII and credentials instead of blocking outright, give the team a shared library of pre-approved prompts for common workflows, and log every detection event for compliance. Network and endpoint DLP don't catch this channel.",
+    faqs: [
+      {
+        q: "How much data is actually being leaked to ChatGPT?",
+        a: "Cyberhaven's 2023 study (still describing 2026 reality) found 11% of data employees paste into ChatGPT is confidential — source code, customer data, financial records, internal documents. Most teams have no visibility into this because it doesn't trigger traditional DLP and no central admin sees the prompts.",
+      },
+      {
+        q: "Can I just block ChatGPT at the firewall?",
+        a: "Block-only policies fail within a week. Employees route around them via personal devices, mobile, or shadow alternatives (Poe, Character.AI, hundreds of Perplexity clones). The pragmatic answer is allow + scan + auto-redact at the browser level, combined with DNS-level allowlisting of approved tools only.",
+      },
+      {
+        q: "What categories should I detect first?",
+        a: "Start with: credit cards (Luhn-validated), US SSNs, AWS access keys, generic API key prefixes (sk_, pk_, ghp_, glpat-, xoxb-, SG.), JWTs, PEM private key blocks, and any internal patterns your org uses (customer IDs, project codenames). Add PHI categories if you're in healthcare, PCI categories if you process payments.",
+      },
+      {
+        q: "What's the difference between blocking and auto-redacting a prompt?",
+        a: "Blocking stops the entire prompt and shows the user a policy violation; auto-redacting replaces detected substrings with placeholders ([SSN], [API_KEY], [PATIENT_NAME]) and forwards the cleaned prompt. Auto-redact preserves productivity and is the action enterprises ship by default for everything except critical-severity categories.",
+      },
+    ],
     content: `
 ## The Problem Is Bigger Than You Think
 
@@ -328,6 +402,25 @@ Data leaks to AI tools are the new shadow IT problem. You can't stop your team f
     coverImage: "/images/hero-ai-governance.webp",
     coverImageAlt: "Professional reviewing AI governance documents",
     relatedSlugs: ["how-to-create-an-ai-acceptable-use-policy", "ai-governance-framework-practical-guide-for-teams"],
+    tldr: "An AI acceptable use policy defines which AI tools are approved, what data classes can be shared with them, who owns enforcement, and what happens when violations occur. The 2026 baseline template covers approved-tool allowlist, prohibited data categories (PII/PHI/credentials/source code), employee responsibilities, automated enforcement via prompt DLP, and escalation paths — copy-and-customize below.",
+    faqs: [
+      {
+        q: "Is an AI acceptable use policy actually required by law?",
+        a: "Not directly in most US jurisdictions, but it's load-bearing for SOC 2 (CC1.1, CC2.3), HIPAA workforce security (§164.308), and EU AI Act Article 4 (AI literacy). Auditors expect a written policy plus evidence of enforcement. Without one, 'we didn't have a policy' becomes the worst possible answer in a breach review.",
+      },
+      {
+        q: "Which AI tools should I approve?",
+        a: "Start with the enterprise tiers of major providers: ChatGPT Enterprise, Claude for Work, Gemini Workspace, Microsoft Copilot. These commit to no-training-on-customer-data by contract. Block consumer tiers, Poe, Character.AI, and the long tail of Perplexity clones via DNS allowlist (Cloudflare Gateway, Zscaler, Cisco Umbrella).",
+      },
+      {
+        q: "How do I actually enforce the policy without becoming the AI police?",
+        a: "Combine three layers: DNS allowlist for tool-level control, browser-extension prompt DLP for content-level control (auto-redact > block), and a shared prompt library for risky-but-necessary workflows. Make the easy path the safe path; don't rely on employee discipline alone.",
+      },
+      {
+        q: "How often should the policy be updated?",
+        a: "Quarterly review minimum, with an immediate update trigger any time a major provider launches a new model class, your company adds a regulated data type, or a peer org in your industry has a public AI incident. Date-stamp every revision and require employee re-acknowledgement annually.",
+      },
+    ],
     content: `
 ## Why You Need an AI Acceptable Use Policy
 
@@ -437,6 +530,25 @@ A policy without enforcement is just a document. TeamPrompt makes enforcement au
     coverImage: "/images/hero-office-collab.jpg",
     coverImageAlt: "Two professionals collaborating at laptop",
     relatedSlugs: ["ai-dlp-preventing-data-leaks-to-chatgpt-and-claude", "complete-guide-to-ai-security-for-enterprise"],
+    tldr: "ChatGPT Enterprise and Claude for Work both ship SOC 2 Type II, AES-256 at rest, TLS in transit, and a no-training-on-customer-data contract. Claude has the edge on zero data retention by default and constitutional AI safety; ChatGPT has the edge on audit logging maturity and admin tooling. Neither provides prompt-level DLP — both require an additional governance layer for regulated industries.",
+    faqs: [
+      {
+        q: "Does Claude or ChatGPT train on my enterprise prompts?",
+        a: "Neither does — but only at the enterprise tier and only by contract. ChatGPT Team and Enterprise commit to no training on workspace conversations. Claude for Work has the same commitment plus zero-data-retention by default. Consumer-tier ChatGPT Free and Plus do use prompts for training unless you opt out per-conversation.",
+      },
+      {
+        q: "Which is better for HIPAA?",
+        a: "Both will sign a BAA at the enterprise tier (Anthropic via Claude for Work, OpenAI via ChatGPT Enterprise). BAA alone isn't enough — you still need prompt-level DLP to keep PHI out of prompts in the first place, plus an audit trail of what was sent, since both providers exclude prompt content from their own audit logs.",
+      },
+      {
+        q: "What controls are missing from both ChatGPT and Claude?",
+        a: "Prompt-level content scanning before submission, auto-redaction of detected PII/credentials, per-user audit logs that include the prompt text, role-based access to specific prompts or templates, and cross-tool enforcement when employees use both. These gaps are why prompt-management / DLP layers exist on top of the base providers.",
+      },
+      {
+        q: "Should we standardize on one tool or allow both?",
+        a: "Allow both — your team will use both anyway. Standardizing on a single AI tool is a 2023 strategy. The 2026 strategy is to centralize the governance layer (DLP, audit, prompt library) and let employees pick the best model for each task underneath it.",
+      },
+    ],
     content: `
 ## Enterprise Teams Use Both — But Which Is Safer?
 

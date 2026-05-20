@@ -614,6 +614,25 @@ Use both ChatGPT and Claude — each has strengths. But add TeamPrompt as the se
     coverImage: "/images/hero-tech-workers.jpg",
     coverImageAlt: "Tech workers in modern office at night",
     relatedSlugs: ["what-is-shadow-ai-and-how-to-control-it", "ai-governance-framework-practical-guide-for-teams"],
+    tldr: "Shadow AI is the use of AI tools by employees without IT approval — the AI equivalent of shadow IT. Detect it by pulling DNS logs from your secure web gateway (Cloudflare, Zscaler, Cisco Umbrella) and filtering for AI provider domains, then control it with a tool allowlist plus browser-extension DLP so approved tools stay safe and unapproved ones can't reach the user.",
+    faqs: [
+      {
+        q: "How widespread is shadow AI inside enterprises?",
+        a: "A 2025 survey found 73% of employees use AI tools at work, but only 38% of organizations have formal AI usage policies. That gap is shadow AI. In any company over 50 people, expect 10x more AI tools in actual use than your CISO knows about.",
+      },
+      {
+        q: "What's the fastest way to discover shadow AI my team is using?",
+        a: "Pull the last 30 days of DNS logs from your secure web gateway and filter for chat.openai.com, claude.ai, gemini.google.com, copilot.microsoft.com, perplexity.ai, poe.com, character.ai, and the long tail of model-router domains. Cross-reference with employee identity. You'll find more than you expected.",
+      },
+      {
+        q: "Should I block every unapproved AI tool?",
+        a: "No. Block-everything policies fail because employees route around them. The working pattern is: small allowlist of approved enterprise-tier tools (ChatGPT Enterprise, Claude for Work, Gemini Workspace, Copilot), DNS-block the rest at the gateway, and give the team a shared prompt library so the approved path is also the easiest path.",
+      },
+      {
+        q: "What's the difference between shadow AI and unapproved API use by developers?",
+        a: "Same root cause, different surface. Developers calling OpenAI/Anthropic APIs from internal services need code-scanning + secrets management, not browser DLP. Build separate detection for: API keys in source control, requests to LLM endpoints in CI logs, and unsanctioned model deployments in your cloud accounts.",
+      },
+    ],
     content: `
 ## What Is Shadow AI?
 
@@ -690,6 +709,25 @@ The goal isn't to eliminate AI usage — it's to make it visible, controlled, an
     coverImage: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1200&q=80&auto=format&fit=crop",
     coverImageAlt: "Healthcare professional reviewing patient information",
     relatedSlugs: ["hipaa-compliance-and-ai-what-healthcare-teams-must-know", "ai-governance-for-regulated-industries"],
+    tldr: "Healthcare teams can use ChatGPT under HIPAA — but only at the Enterprise tier with a signed Business Associate Agreement, plus prompt-level DLP that redacts PHI before it reaches OpenAI. Consumer-tier ChatGPT, Claude, and Gemini are not HIPAA-eligible because no BAA is available. The combination of BAA plus browser DLP plus a 6-year audit trail is the working compliance shape.",
+    faqs: [
+      {
+        q: "Will OpenAI sign a BAA for ChatGPT?",
+        a: "Yes, at the ChatGPT Enterprise tier only. The BAA covers PHI processed through the platform. Anthropic offers an equivalent BAA for Claude for Work. Google offers one for Gemini in Workspace. None of the consumer tiers (Free, Plus, Pro, Team) are HIPAA-eligible — a BAA is not available.",
+      },
+      {
+        q: "Does a BAA alone make ChatGPT HIPAA-compliant?",
+        a: "No. The BAA covers the provider's handling of PHI you legitimately send. It doesn't excuse exposing PHI you shouldn't have sent. HIPAA §164.312(a)(1) requires access controls AND audit logging of PHI access — which means you still need prompt-level DLP that blocks/redacts before submission and an audit log retained 6 years.",
+      },
+      {
+        q: "What categories should HIPAA prompt DLP detect?",
+        a: "The 18 HIPAA identifiers (45 CFR §164.514(b)(2)) plus medical-context specifics: ICD-10 codes (E11.9, F32.1, etc.), MRN labels, patient ID labels, dates of birth, addresses, phone numbers, NPI numbers, prescription drug names paired with patient identifiers. Combine pattern-based detection with proximity rules (e.g., a name + an ICD-10 within 50 chars triggers).",
+      },
+      {
+        q: "How long do I retain AI audit logs under HIPAA?",
+        a: "Six years from creation, per HIPAA §164.316(b)(2). Logs must include who accessed PHI, when, what was accessed, and what action followed. For AI usage, that means: user identity, prompt timestamp, AI tool used, detected PHI categories, action taken (block/redact/allow), and resulting redacted prompt — kept tamper-evident for the full retention period.",
+      },
+    ],
     content: `
 ## The HIPAA + AI Dilemma
 
@@ -784,6 +822,25 @@ TeamPrompt's HIPAA compliance pack is available on all paid plans. Start free wi
     relatedSlugs: [
       "how-to-build-a-team-prompt-library",
       "ai-dlp-101-what-it-is-and-why-your-team-needs-it",
+    ],
+    tldr: "Model Context Protocol (MCP) is an open standard that lets AI coding tools — Claude Desktop, Cursor, Windsurf — connect to external systems through a single interface. TeamPrompt ships a built-in MCP server so coding agents can search your shared prompt library, run DLP scans on prompts before they execute, and log usage to your audit trail without leaving the editor.",
+    faqs: [
+      {
+        q: "Which AI coding tools support MCP?",
+        a: "As of mid-2026: Claude Desktop, Cursor, Windsurf, Cline, Continue, and several Code OSS forks. ChatGPT does not yet support MCP. Setup is identical across supported clients — point the MCP config at https://teamprompt.app/mcp with your API key.",
+      },
+      {
+        q: "What does the TeamPrompt MCP server expose?",
+        a: "Three tool categories: (1) prompt-library search and fetch — your coding agent can pull approved templates by topic or tag, (2) DLP scan — submit a prompt and get categorized findings before sending to the LLM, (3) audit logging — every prompt executed through the agent gets logged with user, model, and detected events.",
+      },
+      {
+        q: "Is the MCP connection itself secure?",
+        a: "Yes. Authentication is via a per-user API key scoped to your workspace's RBAC. All traffic is over HTTPS. The server runs in our standard Vercel edge environment with the same rate limiting and audit logging as the rest of the API. Revoke the key in Settings → MCP Keys at any time.",
+      },
+      {
+        q: "Can I run prompt DLP checks from inside Cursor without manual review?",
+        a: "Yes — that's the default flow. The MCP server exposes a `scan_prompt` tool that Cursor calls automatically before sending any prompt to the model. If the scan returns critical findings (credentials, PHI, customer data), the agent halts and surfaces the violation to the user; otherwise it proceeds with the auto-redacted prompt.",
+      },
     ],
     content: `
 ## What is MCP?
@@ -893,6 +950,25 @@ Zero additional cost. Near-zero data usage. Maximum reach.
       "ai-dlp-101-what-it-is-and-why-your-team-needs-it",
       "connect-ai-coding-tools-to-your-prompt-library-with-mcp",
     ],
+    tldr: "TeamPrompt's Slack integration sends real-time DLP block alerts, prompt-approval requests, and weekly AI-usage digests to the channels your security and ops teams already live in. Connect once via OAuth, pick the destination channel per event type, and route critical violations to #security while routing weekly digests to #ai-ops. Latency is sub-second; no polling required.",
+    faqs: [
+      {
+        q: "What events trigger a Slack alert?",
+        a: "Three categories by default: (1) DLP block events for critical-severity rules (credentials, SSN, PHI), (2) prompt-approval requests when a member submits a prompt for manager review, (3) the Monday-morning AI-usage digest. Each event type routes to a separately configurable channel so #security doesn't drown in low-severity noise.",
+      },
+      {
+        q: "Can I route different severity levels to different Slack channels?",
+        a: "Yes. The integration honors per-severity routing — critical to #security-alerts, warn-level to #ai-ops, redact-level either to a low-priority channel or off. You can also filter by team or rule pack so the HIPAA team only sees PHI events.",
+      },
+      {
+        q: "Will Slack notifications include the actual prompt content?",
+        a: "No. Slack messages include user, timestamp, AI tool, rule that triggered, and severity — never the raw prompt text. Following the prompt content requires clicking through to the TeamPrompt audit dashboard, which respects RBAC. This avoids leaking sensitive substrings back into Slack history.",
+      },
+      {
+        q: "How fast is the alert?",
+        a: "Sub-second from prompt block to Slack message. The integration uses Slack's incoming-webhook API on the same request that records the DLP event, so the message lands before the user has finished reading the in-browser block notice.",
+      },
+    ],
     content: `
 ## Why Slack?
 
@@ -985,6 +1061,25 @@ Connect Slack in under a minute from **Settings → Integrations**. Your securit
       "5-signs-your-team-needs-prompt-management",
       "getting-started-with-teamprompt-in-under-2-minutes",
       "teamprompt-vs-shared-google-docs-for-prompts",
+    ],
+    tldr: "To build a team prompt library that gets used: audit the prompts already scattered across Slack and Notion, write them as templates with variables instead of one-off strings, organize by job-to-be-done (not by department), require an approval workflow for prompts touching sensitive data, and measure adoption via usage counts so you can prune what nobody reaches for. Most libraries fail because they're built once and never tended.",
+    faqs: [
+      {
+        q: "How many prompts should a team library start with?",
+        a: "Start with 10-20 high-leverage prompts that solve real recurring problems, not 100 'just in case' templates. Pull them from existing Slack threads and personal notes. Adoption fails when the library is too big to browse — under 30 items at launch is the working pattern.",
+      },
+      {
+        q: "Should I organize prompts by department or by task?",
+        a: "By task / job-to-be-done. Departments are how your org chart is structured; tasks are how people actually search. 'Draft customer response,' 'summarize meeting notes,' 'review pull request' beat 'Sales Team Prompts' or 'Engineering Prompts.' Departments can be secondary tags.",
+      },
+      {
+        q: "Do prompts need to be approved before being added to the library?",
+        a: "If your team handles regulated data — yes, with a manager-approval workflow for any prompt that processes PHI, financial records, or customer PII. For everything else, lightweight peer review is enough. The cost of friction has to be lower than the cost of unreviewed prompts going viral.",
+      },
+      {
+        q: "How do I know if the library is being used?",
+        a: "Track per-prompt usage count, recency, and approval-vs-personal status. The 80/20 will be brutal: 20% of prompts will drive 80% of usage. Prune the unused ones aggressively. Surface the top-10 most-used prompts at the top of the library so new employees see immediate value.",
+      },
     ],
     content: `
 <p>Every team that uses AI regularly reaches the same tipping point: prompts are scattered across Slack threads, personal notes, browser bookmarks, and shared documents that no one can find. At that point you have two choices — keep wasting time rewriting prompts from scratch, or build a shared prompt library that makes the best prompts available to everyone in one click.</p>
@@ -1096,6 +1191,25 @@ Connect Slack in under a minute from **Settings → Integrations**. Your securit
       "5-signs-your-team-needs-prompt-management",
       "teamprompt-vs-shared-google-docs-for-prompts",
     ],
+    tldr: "AI Data Loss Prevention (AI DLP) is the category of controls that stops sensitive data from leaving the organization through chat-tool inputs — ChatGPT, Claude, Gemini, Copilot, Perplexity. It scans prompt text in real time before submission, blocks or auto-redacts detected PII, credentials, and proprietary content, and logs every event for compliance. Traditional DLP can't see this channel.",
+    faqs: [
+      {
+        q: "What's the difference between AI DLP and traditional DLP?",
+        a: "Traditional DLP watches email, file uploads, cloud storage, and USB activity — channels where data leaves as files. AI DLP watches the chat composer in the browser, scanning prompt text before submission. The detection logic is similar (PII, credentials, regex) but the integration point is different: textarea hooks instead of file fingerprints.",
+      },
+      {
+        q: "Why can't network DLP solve this?",
+        a: "Prompts travel as standard HTTPS POST bodies to api.openai.com / anthropic.com / generativelanguage.googleapis.com. Network DLP sees a normal SaaS request, not a file exfiltration. Decrypting the body would require breaking TLS on every chat-tool domain, which has compliance and performance implications most orgs won't accept.",
+      },
+      {
+        q: "Is AI DLP a product category or a feature?",
+        a: "By 2026 it's a distinct product category with dedicated vendors (TeamPrompt, Nightfall AI DLP, Lakera, Prompt Security). Traditional DLP vendors (Microsoft Purview, Symantec, Forcepoint) have announced AI extensions but most ship limited proxy-based scanning rather than the in-browser approach the category requires.",
+      },
+      {
+        q: "How fast does AI DLP scan a prompt?",
+        a: "Well-designed pattern-based AI DLP scans a 4,000-character prompt in 1-10 milliseconds entirely client-side — no network round-trip. The user perceives zero added latency. Heavier ML-based detection adds 50-200ms and is best reserved for high-risk categories where accuracy matters more than speed.",
+      },
+    ],
     content: `
 <p>Data Loss Prevention — DLP — has been a staple of enterprise security for decades. Traditional DLP monitors email gateways, cloud storage, and USB ports to stop sensitive data from leaving the organization. But AI tools have created an entirely new exfiltration channel that legacy DLP was never designed to watch: the chat window.</p>
 
@@ -1170,6 +1284,25 @@ Connect Slack in under a minute from **Settings → Integrations**. Your securit
       "teamprompt-vs-shared-google-docs-for-prompts",
       "getting-started-with-teamprompt-in-under-2-minutes",
     ],
+    tldr: "Your team needs prompt management when (1) the same prompt exists in 5+ places, (2) output quality varies wildly between teammates running similar tasks, (3) nobody knows what data has been sent to AI, (4) onboarding new hires means hunting through Slack for prompt examples, and (5) a single departure took the best prompts with them. Any one of these signals you've outgrown ad-hoc AI usage.",
+    faqs: [
+      {
+        q: "When is the right time to introduce prompt management?",
+        a: "When 5+ people on a team are using AI weekly and prompts are being rewritten from scratch every time. Earlier than that, the overhead exceeds the benefit. Later than that, you've already lost weeks of productivity to inconsistent outputs and re-inventing prompts that someone else perfected six months ago.",
+      },
+      {
+        q: "What's the difference between a prompt library and prompt management?",
+        a: "A prompt library is a shared list of prompts — usually in Notion, Google Docs, or a wiki. Prompt management adds variables, versioning, approval workflows, usage tracking, RBAC, and DLP-aware execution. The library is content; management is the system that keeps the content correct, current, and safely used.",
+      },
+      {
+        q: "Will my team actually adopt a prompt manager?",
+        a: "Adoption follows distribution: the tool has to be one keystroke away from the chat composer, not three clicks across a separate web app. Browser-extension prompt managers (TeamPrompt, Mighty, PromptDrive) hit adoption above 70% within 30 days. Standalone web-app libraries plateau under 20%.",
+      },
+      {
+        q: "Can I just standardize on a single AI tool instead?",
+        a: "Standardizing on one provider doesn't solve the prompt-scatter problem — it just moves it inside that provider's UI. Even within ChatGPT, prompts end up in personal histories, Custom GPTs, and shared workspace conversations with no shared truth. Prompt management is the layer that survives whichever model wins.",
+      },
+    ],
     content: `
 <p>AI tools are easy to adopt individually. One person finds ChatGPT useful, shares a prompt in Slack, and within a few weeks half the team is using AI daily. That organic growth is great — until the cracks start showing. Here are five signs that your team has outgrown the ad-hoc approach and needs a structured prompt management system.</p>
 
@@ -1235,6 +1368,25 @@ Connect Slack in under a minute from **Settings → Integrations**. Your securit
       "how-to-build-a-team-prompt-library",
       "5-signs-your-team-needs-prompt-management",
       "getting-started-with-teamprompt-in-under-2-minutes",
+    ],
+    tldr: "A shared Google Doc works for 2-3 people sharing a handful of prompts. It stops working when you need variables, version history per prompt, usage tracking, role-based access, DLP enforcement, or one-click insertion into ChatGPT/Claude/Gemini. A dedicated prompt manager beats Google Docs on every dimension except setup time — but the migration takes one afternoon, not a week.",
+    faqs: [
+      {
+        q: "What specifically does a Google Doc lack for prompt management?",
+        a: "Per-prompt variables, version history scoped to each prompt, usage counters, approval workflows, role-based access (e.g., legal templates restricted to legal), one-click insertion into the chat tool, and any DLP integration. Comments and revision history are workspace-wide, not prompt-level, so finding 'when did this prompt change' takes minutes instead of seconds.",
+      },
+      {
+        q: "Can I just use Notion or Coda instead of Google Docs?",
+        a: "Notion and Coda improve on structure (databases, properties, filters) but still miss the AI-specific layer: no DLP scanning on prompt content, no integration with the chat composer, no audit log of who ran which prompt against which model. They're better than a Google Doc but they're a workspace tool, not an AI tool.",
+      },
+      {
+        q: "How long does migrating from Google Docs to a prompt manager take?",
+        a: "Most teams complete migration in one afternoon: copy-paste each prompt into the new tool, tag by topic, mark which are approved for shared use vs. personal. Bulk import via CSV/JSON cuts that to under an hour. The longer task is variable-izing prompts — turning literal substrings like 'our company name' into {{company_name}} variables.",
+      },
+      {
+        q: "Does a prompt manager replace Google Docs entirely?",
+        a: "No — Google Docs is still the right tool for collaborative writing, meeting notes, and document drafts. The right model is: Docs for writing, prompt manager for prompts. The split makes both better and prevents the Docs library from becoming the place nobody updates.",
+      },
     ],
     content: `
 <p>When teams first start sharing AI prompts, a Google Doc is the obvious choice. It is free, everyone already has access, and it takes thirty seconds to set up. For a team of two or three people sharing a handful of prompts, it works fine. But as the team grows and the prompt collection expands, the limitations of a general-purpose document start to compound.</p>

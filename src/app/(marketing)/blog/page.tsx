@@ -12,9 +12,9 @@ const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || "https://teamprompt.app";
 
 export const metadata: Metadata = generatePageMetadata({
-  title: "Blog — AI Security, Data Protection & Prompt Management Guides",
+  title: "AI DLP & Prompt Management Blog — Practical Guides for Security Teams",
   description:
-    "Insights on AI data loss prevention, sensitive data protection, compliance, and prompt management. Learn how to secure your team's AI usage.",
+    "Tactical guides on AI data loss prevention, ChatGPT/Claude/Gemini security, prompt governance, audit trails, HIPAA/SOC 2/GDPR compliance, and shadow-AI control. Written for CISOs, IT leads, and security engineers.",
   path: "/blog",
   keywords: [
     "AI blog",

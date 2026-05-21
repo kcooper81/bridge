@@ -25,11 +25,11 @@ import {
 } from "lucide-react";
 
 export const metadata = generatePageMetadata({
-  title: "Enterprise AI DLP at Scale",
+  title: "Enterprise AI DLP for ChatGPT, Claude & Gemini — Deploy in Days",
   description:
-    "Deploy AI DLP org-wide with a managed browser extension. Detect sensitive data, enforce compliance, share a team prompt library — from day one.",
+    "Stop sensitive data reaching ChatGPT, Claude, Gemini, and Copilot before it leaves the browser. Managed extension, audit logs, SSO, and 19 compliance packs — deployed in days, not quarters.",
   path: "/enterprise",
-  keywords: ["enterprise AI DLP", "managed chrome extension", "AI data protection", "AI compliance", "enterprise AI governance"],
+  keywords: ["enterprise AI DLP", "AI data leak prevention", "ChatGPT enterprise security", "managed chrome extension DLP", "enterprise AI governance"],
 });
 
 const deploymentMethods = [

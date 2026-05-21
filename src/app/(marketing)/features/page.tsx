@@ -36,9 +36,9 @@ import { GetStartedSteps } from "@/components/marketing/get-started-steps";
 import { LeadCaptureForm } from "@/components/marketing/lead-capture-form";
 
 export const metadata: Metadata = generatePageMetadata({
-  title: "Features — AI DLP & Prompt Library",
+  title: "TeamPrompt Features — AI DLP, Shared Prompt Library, Audit Logs & SSO",
   description:
-    "AI data loss prevention, shared prompt library, 19 compliance packs, real-time scanning, audit logging, browser extension, and team analytics.",
+    "Real-time DLP scanning across ChatGPT/Claude/Gemini, a shared prompt library with versioning, 19 compliance packs (HIPAA, SOC 2, GDPR), audit logs for every interaction, browser extension, and SSO.",
   path: "/features",
   keywords: ["AI DLP", "AI data loss prevention", "sensitive data detection", "compliance packs", "HIPAA AI", "SOC 2 AI", "prompt library", "browser extension", "AI governance", "audit logging"],
 });

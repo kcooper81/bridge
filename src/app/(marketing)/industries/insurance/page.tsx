@@ -4,7 +4,7 @@ import { industryData } from "../_data/insurance";
 import { IndustryPage } from "../_components/industry-page";
 
 export const metadata: Metadata = generatePageMetadata({
-  title: `TeamPrompt for ${industryData.industry}`,
+  title: `${industryData.industry} AI DLP — Block PHI, Claims & Underwriting Data in AI Prompts`,
   description: industryData.subtitle,
   path: `/industries/${industryData.slug}`,
   keywords: ["insurance AI", "claims processing AI", "underwriting prompts", "insurance compliance"],

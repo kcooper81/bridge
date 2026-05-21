@@ -4,7 +4,7 @@ import { industryData } from "../_data/government";
 import { IndustryPage } from "../_components/industry-page";
 
 export const metadata: Metadata = generatePageMetadata({
-  title: `TeamPrompt for ${industryData.industry}`,
+  title: `${industryData.industry} AI DLP — Block CUI, Classified Markings & Citizen PII`,
   description: industryData.subtitle,
   path: `/industries/${industryData.slug}`,
   keywords: ["government AI", "public sector AI prompts", "government AI compliance"],

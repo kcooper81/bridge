@@ -9,11 +9,11 @@ import { PricingGrid } from "./_components/pricing-grid";
 import { generateBreadcrumbSchema } from "@/lib/seo/schemas";
 
 export const metadata: Metadata = generatePageMetadata({
-  title: "Pricing — Plans for Every Team Size",
+  title: "TeamPrompt Pricing — Free for 3 Users · $12/Seat Teams · Custom Enterprise",
   description:
-    "Start free, no credit card required. Pro and Team plans include a 14-day trial. Upgrade when your team grows.",
+    "Free forever for up to 3 users. Pro at $12/seat/month, Team at $24/seat/month — both include a 14-day trial, full DLP, prompt library, and audit logs. Enterprise: SSO, SCIM, custom packs.",
   path: "/pricing",
-  keywords: ["TeamPrompt pricing", "AI tool pricing", "AI DLP pricing", "AI security pricing", "AI governance pricing"],
+  keywords: ["TeamPrompt pricing", "AI DLP pricing", "prompt library pricing", "ChatGPT DLP cost", "AI governance pricing"],
 });
 
 const faqs = [

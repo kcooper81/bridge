@@ -16,9 +16,9 @@ import {
 import { ExtensionHero } from "./_components/extension-hero";
 
 export const metadata: Metadata = generatePageMetadata({
-  title: "Browser Extension — Chrome, Firefox & Edge",
+  title: "DLP Browser Extension for ChatGPT, Claude & Gemini (Chrome / Firefox / Edge)",
   description:
-    "TeamPrompt for Chrome, Firefox, and Edge. AI DLP, shared prompt library, and audit logging — inside ChatGPT, Claude, Gemini, and more.",
+    "Block sensitive data before it leaves the browser. TeamPrompt's extension runs DLP inside ChatGPT, Claude, Gemini, Copilot, and Perplexity — no proxy, no IT setup. Free for up to 3 users.",
   path: "/extensions",
   keywords: [
     "browser extension",

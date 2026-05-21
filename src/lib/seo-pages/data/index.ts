@@ -79,13 +79,27 @@ export const INDEXED_SOLUTION_SLUGS: ReadonlySet<string> = new Set([
   "ai-governance-guide",
   "how-to-prevent-data-leaks-chatgpt",
   "how-to-set-up-dlp-for-ai",
-  // Glossary
+  // Glossary — definitional pages with unique 700+ word content. Skipped:
+  // generic terms like "prompt-engineering" (OpenAI dominates), "prompt-library"
+  // (overlaps ai-prompt-library-software), "hipaa-ai" (overlaps /compliance/hipaa).
   "what-is-prompt-analytics",
   "what-is-agentic-ai",
   "what-is-data-loss-prevention",
   "what-is-ai-governance",
   "what-is-prompt-management",
   "what-is-shadow-ai",
+  "what-is-prompt-injection",
+  "what-is-llm-security",
+  "what-is-prompt-templates",
+  "what-is-prompt-versioning",
+  "what-is-prompt-governance",
+  "what-is-ai-acceptable-use-policy",
+  "what-is-ai-audit-trail",
+  "what-is-pii-detection",
+  "what-is-ai-access-controls",
+  "what-is-ai-risk-management",
+  "what-is-data-exfiltration",
+  "what-is-eu-ai-act",
   // Comparison/alternative (high intent)
   "vs-notion",
   "vs-shared-docs",

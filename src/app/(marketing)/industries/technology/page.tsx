@@ -4,7 +4,7 @@ import { industryData } from "../_data/technology";
 import { IndustryPage } from "../_components/industry-page";
 
 export const metadata: Metadata = generatePageMetadata({
-  title: `TeamPrompt for ${industryData.industry}`,
+  title: `${industryData.industry} AI DLP — Block Secrets, Source Code & PII in ChatGPT / Claude / Copilot`,
   description: industryData.subtitle,
   path: `/industries/${industryData.slug}`,
   keywords: ["tech team AI", "developer prompt library", "engineering AI governance"],

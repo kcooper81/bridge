@@ -3,6 +3,35 @@ import { updateSession } from "@/lib/supabase/middleware";
 import { authDebug } from "@/lib/auth-debug"; // AUTH-DEBUG
 
 const AUTH_ROUTES = ["/login", "/signup", "/forgot-password", "/reset-password", "/verify-mfa"];
+
+// Pages that REQUIRE auth. Everything not in this list (and not in
+// AUTH_ROUTES / PUBLIC_ROUTES) falls through to Next.js, which will render
+// the not-found page. The previous "deny everything not public" behavior
+// turned a /typo into a /login redirect, hiding the 404 page entirely.
+const PROTECTED_PREFIXES = [
+  "/home",
+  "/vault",
+  "/chat",
+  "/templates",
+  "/approvals",
+  "/guidelines",
+  "/team",
+  "/guardrails",
+  "/activity",
+  "/audit",
+  "/analytics",
+  "/settings",
+  "/import-export",
+  "/testing-guide",
+  "/notifications",
+  "/admin",
+];
+function isProtectedRoute(pathname: string) {
+  return PROTECTED_PREFIXES.some(
+    (route) => pathname === route || pathname.startsWith(route + "/")
+  );
+}
+
 const PUBLIC_ROUTES = [
   "/",
   "/pricing",
@@ -120,16 +149,14 @@ export async function middleware(request: NextRequest) {
       return !!(shareToken && validToken && shareToken === validToken);
     })();
 
-  // Unauthenticated users on protected pages → redirect to login
+  // Unauthenticated users on protected pages → redirect to login.
+  // Note: we redirect only when the pathname matches a known protected
+  // prefix. Unknown paths fall through to Next.js, which renders the
+  // not-found page (otherwise typos turn into a confusing /login redirect).
   if (
     !user &&
-    !isPublicRoute(pathname) &&
-    !isAuthRoute(pathname) &&
-    !isPitchShareValid &&
-    !pathname.startsWith("/api/") &&
-    !pathname.startsWith("/auth/") &&
-    pathname !== "/invite" &&
-    !pathname.startsWith("/extension/")
+    isProtectedRoute(pathname) &&
+    !isPitchShareValid
   ) {
     const fullPath = pathname + request.nextUrl.search;
     authDebug.log("middleware", `redirect: protected → /login (no user)`, { redirect: fullPath });
@@ -145,11 +172,7 @@ export async function middleware(request: NextRequest) {
   if (
     user &&
     !user.email_confirmed_at &&
-    !isAuthRoute(pathname) &&
-    !isPublicRoute(pathname) &&
-    !pathname.startsWith("/api/") &&
-    !pathname.startsWith("/auth/") &&
-    !pathname.startsWith("/extension/")
+    isProtectedRoute(pathname)
   ) {
     authDebug.log("middleware", "redirect: unverified email → /login");
     const url = request.nextUrl.clone();

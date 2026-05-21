@@ -463,7 +463,7 @@ const WIZARD_STEPS = [
 ];
 
 export function DeploymentTab() {
-  const { currentUserRole } = useOrg();
+  const { currentUserRole, loading: orgLoading } = useOrg();
   const [step, setStep] = useState(1);
   const [platform, setPlatform] = useState<MdmPlatform>("google-admin");
   const [level, setLevel] = useState<EnforcementLevel>("restrict");
@@ -583,6 +583,17 @@ export function DeploymentTab() {
     toast.success(`Downloaded ${filename}`);
   }
 
+  // Wait for org to load before role-gating — currentUserRole defaults to
+  // "member" before the org fetch finishes, which would briefly flash the
+  // "admin-only" branch for real admins.
+  if (orgLoading || loading) {
+    return (
+      <div className="flex items-center justify-center py-16">
+        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
   if (!isAdmin) {
     return (
       <Card>
@@ -591,14 +602,6 @@ export function DeploymentTab() {
           <p className="text-sm text-muted-foreground">Only admins can manage browser deployment policies.</p>
         </CardContent>
       </Card>
-    );
-  }
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-16">
-        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-      </div>
     );
   }
 

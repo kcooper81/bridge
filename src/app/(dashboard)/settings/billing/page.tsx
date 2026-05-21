@@ -19,7 +19,7 @@ import type { PlanTier } from "@/lib/types";
 import type { BillingInterval } from "@/lib/billing/plans";
 
 export default function BillingPage() {
-  const { org, members, currentUserRole } = useOrg();
+  const { org, members, currentUserRole, loading: orgLoading } = useOrg();
   const { subscription } = useSubscription();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -184,6 +184,17 @@ export default function BillingPage() {
 
   const currentPlan = org?.plan || "free";
   const plans: PlanTier[] = ["free", "pro", "team", "business"];
+
+  // Wait for org to load before role-gating. Initial state of currentUserRole
+  // is "member" by default, so a real admin would briefly flash the
+  // "Billing is managed by your admin" empty state on first render.
+  if (orgLoading) {
+    return (
+      <div className="flex items-center justify-center py-16">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   if (currentUserRole === "member") {
     return (

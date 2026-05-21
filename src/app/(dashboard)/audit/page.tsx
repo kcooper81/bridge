@@ -93,6 +93,19 @@ export default function AuditPage() {
   // Role gate
   const isAdminOrManager = currentUserRole === "admin" || currentUserRole === "manager";
 
+  // Order matters: until the org has loaded, currentUserRole defaults to
+  // "member" and would briefly render the "admins only" branch, causing
+  // a visible content flip when the real role arrives. Always show the
+  // skeleton first; only gate on role/access/noOrg once we know them.
+  if (orgLoading || loading) {
+    return (
+      <>
+        <PageHeader title="Audit & Compliance" description="Security insights, violation analytics, and compliance reporting" />
+        <PageSkeleton />
+      </>
+    );
+  }
+
   if (noOrg) {
     return (
       <>
@@ -118,15 +131,6 @@ export default function AuditPage() {
       <>
         <PageHeader title="Audit & Compliance" />
         <UpgradeGate feature="analytics" />
-      </>
-    );
-  }
-
-  if (orgLoading || loading) {
-    return (
-      <>
-        <PageHeader title="Audit & Compliance" description="Security insights, violation analytics, and compliance reporting" />
-        <PageSkeleton />
       </>
     );
   }

@@ -5,17 +5,27 @@ import { useSubscription } from "@/components/providers/subscription-provider";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Sparkles, BarChart3, CreditCard } from "lucide-react";
+import { Sparkles, BarChart3, CreditCard, Loader2 } from "lucide-react";
 import { UsageBar } from "./usage-bar";
 import { format } from "date-fns";
 import Link from "next/link";
 
 export function PlanUsageTab() {
-  const { org, prompts, members, guidelines, currentUserRole } = useOrg();
+  const { org, prompts, members, guidelines, currentUserRole, loading: orgLoading } = useOrg();
   const { subscription, planLimits } = useSubscription();
 
   const currentPlan = org?.plan || "free";
   const isFree = currentPlan === "free";
+
+  // currentUserRole defaults to "member" before org loads, which would briefly
+  // flash the "Plan managed by your admin" empty state for real admins.
+  if (orgLoading) {
+    return (
+      <div className="flex items-center justify-center py-16">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   if (currentUserRole === "member") {
     return (

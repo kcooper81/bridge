@@ -60,7 +60,7 @@ export const COMPLIANCE_FRAMEWORKS: ComplianceFramework[] = [
     slug: "soc2",
     name: "SOC 2",
     fullName: "Service Organization Controls 2",
-    metaTitle: "Audit Trails for ChatGPT & Claude — SOC 2 Ready in Days | TeamPrompt",
+    metaTitle: "Audit Trails for ChatGPT & Claude — SOC 2 Ready in Days",
     metaDescription:
       "Need audit trails of everything your team tried in ChatGPT, Claude, and Gemini? TeamPrompt logs every AI interaction with DLP scanning and access controls — maps directly to SOC 2 trust service criteria.",
     keywords: ["SOC 2 AI compliance", "SOC 2 ChatGPT", "AI audit trail SOC 2", "SOC 2 DLP"],

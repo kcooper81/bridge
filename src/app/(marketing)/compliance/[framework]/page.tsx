@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { generatePageMetadata } from "@/lib/seo/metadata";
-import { generateFAQSchema, generateBreadcrumbSchema } from "@/lib/seo/schemas";
+import { generateFAQSchema, generateBreadcrumbSchema, generateTechArticleSchema } from "@/lib/seo/schemas";
 import { Button } from "@/components/ui/button";
 import { FAQSection } from "@/components/marketing/faq-section";
 import { GetStartedSteps } from "@/components/marketing/get-started-steps";
@@ -36,9 +36,15 @@ export default function ComplianceFrameworkPage({ params }: { params: { framewor
     { name: fw.name, url: `https://teamprompt.app/compliance/${fw.slug}` },
   ]);
   const faqSchema = fw.faq.length > 0 ? generateFAQSchema(fw.faq.map((f) => ({ question: f.q, answer: f.a }))) : null;
+  const articleSchema = generateTechArticleSchema({
+    headline: fw.metaTitle,
+    description: fw.metaDescription,
+    url: `https://teamprompt.app/compliance/${fw.slug}`,
+  });
 
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbs) }} />
       {faqSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />}
 

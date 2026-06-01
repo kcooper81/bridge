@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { generatePageMetadata } from "@/lib/seo/metadata";
+import { generateBreadcrumbSchema, generateTechArticleSchema } from "@/lib/seo/schemas";
 import { Button } from "@/components/ui/button";
 import { GetStartedSteps } from "@/components/marketing/get-started-steps";
 import { LeadCaptureForm } from "@/components/marketing/lead-capture-form";
@@ -29,9 +30,23 @@ export default function ComparisonDetailPage({ params }: { params: { slug: strin
   if (!page) notFound();
 
   const isListicle = page.slug === "best-ai-dlp-tools";
+  const url = `https://teamprompt.app/compare/${page.slug}`;
+  const articleSchema = generateTechArticleSchema({
+    headline: page.metaTitle,
+    description: page.metaDescription,
+    url,
+  });
+  const breadcrumbs = generateBreadcrumbSchema([
+    { name: "Home", url: "https://teamprompt.app" },
+    { name: "Compare", url: "https://teamprompt.app/compare" },
+    { name: page.title, url },
+  ]);
 
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbs) }} />
+
       {/* Hero */}
       <section
         className="border-b border-border pt-32 pb-20 sm:pt-40 sm:pb-28"

@@ -73,7 +73,16 @@ const INDUSTRY_SLUGS = [
   "insurance",
 ];
 
-const COMPARE_SLUGS = ["nightfall", "purview", "chatgpt-teams", "notion", "best-ai-dlp-tools"];
+const COMPARE_SLUGS = [
+  "nightfall",
+  "purview",
+  "chatgpt-teams",
+  "notion",
+  "best-ai-dlp-tools",
+  "polymer",
+  "prompt-security",
+  "lakera",
+];
 const COMPLIANCE_SLUGS = ["hipaa", "soc2", "gdpr", "pci-dss", "eu-ai-act"];
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -100,6 +109,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${baseUrl}/privacy`, lastModified: today, changeFrequency: "monthly", priority: 0.3 },
     { url: `${baseUrl}/terms`, lastModified: today, changeFrequency: "monthly", priority: 0.3 },
     { url: `${baseUrl}/about`, lastModified: today, changeFrequency: "monthly", priority: 0.6 },
+    // Author bio — exists primarily as the canonical Person entity that
+    // every Article schema across the site references via author.url.
+    // Indexable so Google can resolve the entity for E-E-A-T attribution.
+    { url: `${baseUrl}/about/team/eric-campton`, lastModified: today, changeFrequency: "monthly", priority: 0.5 },
   ];
 
   // Tier 2: Landing pages for Google Ads (must be indexed)

@@ -27,6 +27,7 @@ import {
 import {
   generateFAQSchema,
   generateBreadcrumbSchema,
+  generateTechArticleSchema,
 } from "@/lib/seo/schemas";
 import type { SeoPageData, SeoCategory, SeoContentSection } from "@/lib/seo-pages/types";
 import { getRelatedPages } from "@/lib/seo-pages/data";
@@ -155,6 +156,11 @@ export function SeoLandingPage({ data, aiRelated }: { data: SeoPageData; aiRelat
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify([
+            generateTechArticleSchema({
+              headline: data.meta.title,
+              description: data.meta.description,
+              url: `${SITE_URL}/solutions/${data.slug}`,
+            }),
             ...(data.faqs ? [generateFAQSchema(data.faqs)] : []),
             generateBreadcrumbSchema([
               { name: "Home", url: SITE_URL },

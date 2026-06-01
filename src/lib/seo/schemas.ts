@@ -95,6 +95,17 @@ export function generateWebSiteSchema() {
       name: "TeamPrompt",
       logo: `${SITE_URL}/brand/logo-icon-blue.svg`,
     },
+    // Enables the Google sitelinks searchbox in SERP results. Requires the
+    // "?q=" route to actually return a search results page; we ship one
+    // (Next.js redirect at /search → /blog?q= for now).
+    potentialAction: {
+      "@type": "SearchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: `${SITE_URL}/search?q={search_term_string}`,
+      },
+      "query-input": "required name=search_term_string",
+    },
   };
 }
 

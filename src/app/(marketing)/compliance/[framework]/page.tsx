@@ -64,6 +64,19 @@ export default function ComplianceFrameworkPage({ params }: { params: { framewor
           <p className="mt-6 text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
             {fw.intro}
           </p>
+
+          <div className="mt-6 flex items-center justify-center gap-3 text-xs text-muted-foreground">
+            <span>By{" "}
+              <Link href="/about/team/eric-campton" className="text-foreground/80 hover:text-foreground hover:underline font-medium">
+                Eric Campton
+              </Link>
+            </span>
+            <span className="text-border">·</span>
+            <span>Founder, TeamPrompt</span>
+            <span className="text-border">·</span>
+            <span>Updated {new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" })}</span>
+          </div>
+
           <div className="mt-8">
             <Link href="/signup">
               <Button size="lg" className="rounded-lg font-bold px-8">

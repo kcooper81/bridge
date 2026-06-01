@@ -58,6 +58,7 @@ const PUBLIC_ROUTES = [
   "/about",
   "/tools",
   "/research",
+  "/search",
 ];
 
 function isPublicRoute(pathname: string) {

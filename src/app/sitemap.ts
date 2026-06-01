@@ -113,6 +113,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // every Article schema across the site references via author.url.
     // Indexable so Google can resolve the entity for E-E-A-T attribution.
     { url: `${baseUrl}/about/team/eric-campton`, lastModified: today, changeFrequency: "monthly", priority: 0.5 },
+    { url: `${baseUrl}/search`, lastModified: today, changeFrequency: "weekly", priority: 0.4 },
   ];
 
   // Tier 2: Landing pages for Google Ads (must be indexed)

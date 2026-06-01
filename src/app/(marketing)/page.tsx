@@ -487,6 +487,85 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ━━━ INTERNAL LINKING HUB ━━━
+          Surfaces high-intent buyer pages (comparisons, industries,
+          compliance) from the homepage. The strongest internal link is
+          one that comes from a page Google already ranks well — the
+          homepage. This section spreads that equity into pages we want
+          to grow impressions on. */}
+      <section className="py-20 sm:py-24 border-t border-border bg-muted/20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl sm:text-3xl font-medium tracking-tight">
+              Choosing an AI DLP solution?
+            </h2>
+            <p className="mt-3 text-muted-foreground max-w-2xl mx-auto">
+              Compare TeamPrompt side-by-side with the most-evaluated alternatives.
+            </p>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 max-w-5xl mx-auto">
+            {[
+              { label: "vs Nightfall AI", href: "/compare/nightfall", desc: "Browser DLP vs API-based SaaS DLP" },
+              { label: "vs Microsoft Purview", href: "/compare/purview", desc: "Cross-AI-tool vs Microsoft ecosystem" },
+              { label: "vs Polymer", href: "/compare/polymer", desc: "Real-time prevention vs post-hoc detection" },
+              { label: "vs Prompt Security", href: "/compare/prompt-security", desc: "Self-serve extension vs reverse proxy" },
+              { label: "vs Lakera", href: "/compare/lakera", desc: "Team DLP vs API-level prompt firewall" },
+              { label: "vs Notion AI", href: "/compare/notion", desc: "Cross-platform vs single-platform" },
+              { label: "vs ChatGPT Teams", href: "/compare/chatgpt-teams", desc: "Multi-tool DLP vs OpenAI-only" },
+              { label: "Best AI DLP 2026", href: "/compare/best-ai-dlp-tools", desc: "Top platforms reviewed" },
+            ].map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="rounded-2xl border border-border bg-background p-4 hover:border-primary/40 hover:bg-primary/[0.02] transition-all"
+              >
+                <div className="text-sm font-semibold">{item.label}</div>
+                <div className="text-xs text-muted-foreground mt-1">{item.desc}</div>
+              </Link>
+            ))}
+          </div>
+
+          <div className="mt-12 grid gap-8 sm:grid-cols-2 max-w-5xl mx-auto">
+            <div>
+              <h3 className="text-xs uppercase tracking-wider text-muted-foreground mb-4 font-semibold">By industry</h3>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { label: "Government", href: "/industries/government" },
+                  { label: "Healthcare", href: "/industries/healthcare" },
+                  { label: "Finance", href: "/industries/finance" },
+                  { label: "Legal", href: "/industries/legal" },
+                  { label: "Insurance", href: "/industries/insurance" },
+                  { label: "Technology", href: "/industries/technology" },
+                  { label: "Education", href: "/industries/education" },
+                ].map((i) => (
+                  <Link key={i.href} href={i.href} className="rounded-full border border-border bg-background px-3 py-1.5 text-xs hover:border-primary/40 hover:bg-primary/5 transition-all">
+                    {i.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-xs uppercase tracking-wider text-muted-foreground mb-4 font-semibold">By compliance framework</h3>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { label: "HIPAA", href: "/compliance/hipaa" },
+                  { label: "SOC 2", href: "/compliance/soc2" },
+                  { label: "GDPR", href: "/compliance/gdpr" },
+                  { label: "PCI-DSS", href: "/compliance/pci-dss" },
+                  { label: "EU AI Act", href: "/compliance/eu-ai-act" },
+                ].map((c) => (
+                  <Link key={c.href} href={c.href} className="rounded-full border border-border bg-background px-3 py-1.5 text-xs hover:border-primary/40 hover:bg-primary/5 transition-all">
+                    {c.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ━━━ LEAD CAPTURE FORM ━━━ */}
       <LeadCaptureForm />
     </>

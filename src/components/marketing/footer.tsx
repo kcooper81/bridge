@@ -35,6 +35,7 @@ const footerLinks = {
     { label: "Changelog", href: "/changelog" },
     { label: "Case Studies", href: "/case-studies" },
     { label: "About", href: "/about" },
+    { label: "Eric Campton, Founder", href: "/about/team/eric-campton" },
   ],
   "Free Tools": [
     { label: "Prompt PII Scanner", href: "/tools/prompt-pii-scanner" },

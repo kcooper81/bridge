@@ -204,6 +204,21 @@ export function SeoLandingPage({ data, aiRelated }: { data: SeoPageData; aiRelat
                 {data.hero.subtitle}
               </p>
 
+              {/* Author byline + freshness — visible E-E-A-T signal. The
+                  Person schema in <head> attributes to Eric Campton; this
+                  surfaces it for users (and Google) to actually see. */}
+              <div className="mt-6 flex items-center gap-3 text-xs text-muted-foreground">
+                <span>By{" "}
+                  <Link href="/about/team/eric-campton" className="text-foreground/80 hover:text-foreground hover:underline font-medium">
+                    Eric Campton
+                  </Link>
+                </span>
+                <span className="text-border">·</span>
+                <span>Founder, TeamPrompt</span>
+                <span className="text-border">·</span>
+                <span>Updated {new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" })}</span>
+              </div>
+
               <div className="mt-10 flex flex-col sm:flex-row gap-4">
                 <Link href="/signup">
                   <Button

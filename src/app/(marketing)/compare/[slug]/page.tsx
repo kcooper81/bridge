@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { generatePageMetadata } from "@/lib/seo/metadata";
-import { generateBreadcrumbSchema, generateTechArticleSchema } from "@/lib/seo/schemas";
+import { generateBreadcrumbSchema, generateTechArticleSchema, generateFAQSchema } from "@/lib/seo/schemas";
 import { Button } from "@/components/ui/button";
 import { GetStartedSteps } from "@/components/marketing/get-started-steps";
 import { LeadCaptureForm } from "@/components/marketing/lead-capture-form";
@@ -42,10 +42,44 @@ export default function ComparisonDetailPage({ params }: { params: { slug: strin
     { name: page.title, url },
   ]);
 
+  // FAQ schema generated from the comparison data — single most impactful
+  // schema type for AI Overview citations (firepits/Authoritas 2026 data).
+  const faqSchema = !isListicle ? generateFAQSchema([
+    {
+      question: `How is TeamPrompt different from ${page.competitor}?`,
+      answer:
+        page.teamPromptStrengths.slice(0, 3).join(". ") +
+        (page.teamPromptStrengths.length > 0 ? "." : ""),
+    },
+    {
+      question: `When should I choose ${page.competitor} over TeamPrompt?`,
+      answer:
+        page.competitorStrengths.length > 0
+          ? page.competitorStrengths.slice(0, 3).join(". ") + "."
+          : `${page.competitor} can be a better fit when your DLP need extends well beyond AI tools. For teams whose primary concern is ChatGPT, Claude, Gemini, and Copilot, TeamPrompt covers more ground at a lower price point.`,
+    },
+    {
+      question: `Does TeamPrompt have a free tier?`,
+      answer:
+        "Yes — TeamPrompt is free for up to 3 users with full DLP scanning, prompt library, and audit logs included. Paid plans (Pro and Team) include a 14-day trial, no credit card required.",
+    },
+    {
+      question: `Which AI tools does TeamPrompt protect?`,
+      answer:
+        "TeamPrompt's browser extension protects ChatGPT, Claude, Gemini, Microsoft Copilot, and Perplexity. Network-level blocking via Cloudflare Gateway extends coverage to any other AI tool your team accesses.",
+    },
+    {
+      question: `How long does it take to deploy TeamPrompt vs ${page.competitor}?`,
+      answer:
+        "TeamPrompt is self-serve and deploys in under 5 minutes — install the extension, invite your team, done. Enterprise DLP vendors typically require multi-week onboarding with IT and security teams.",
+    },
+  ]) : null;
+
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbs) }} />
+      {faqSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />}
 
       {/* Hero */}
       <section
@@ -59,6 +93,19 @@ export default function ComparisonDetailPage({ params }: { params: { slug: strin
           <p className="mt-6 text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
             {page.intro}
           </p>
+
+          <div className="mt-6 flex items-center justify-center gap-3 text-xs text-muted-foreground">
+            <span>By{" "}
+              <Link href="/about/team/eric-campton" className="text-foreground/80 hover:text-foreground hover:underline font-medium">
+                Eric Campton
+              </Link>
+            </span>
+            <span className="text-border">·</span>
+            <span>Founder, TeamPrompt</span>
+            <span className="text-border">·</span>
+            <span>Updated {new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" })}</span>
+          </div>
+
           <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/signup">
               <Button size="lg" className="rounded-lg font-bold px-8">
@@ -153,6 +200,39 @@ export default function ComparisonDetailPage({ params }: { params: { slug: strin
               <Button size="lg" className="rounded-lg font-bold px-8">
                 Start Free with TeamPrompt <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Related comparisons — internal linking pass. Each comparison page
+          surfaces 4 sibling comparisons to (a) keep buyers in the funnel,
+          (b) distribute crawl budget across all comparison pages, and
+          (c) build topical authority for "AI DLP comparison" queries. */}
+      <section className="py-16 sm:py-20 border-t border-border bg-muted/20">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+          <h2 className="text-xl sm:text-2xl font-medium tracking-tight text-center mb-8">
+            More TeamPrompt comparisons
+          </h2>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {COMPARISON_PAGES.filter((p) => p.slug !== page.slug).slice(0, 4).map((p) => (
+              <Link
+                key={p.slug}
+                href={`/compare/${p.slug}`}
+                className="rounded-2xl border border-border bg-background p-4 hover:border-primary/40 hover:bg-primary/[0.02] transition-all group"
+              >
+                <div className="text-xs text-muted-foreground mb-1">vs</div>
+                <div className="text-sm font-semibold group-hover:text-primary transition-colors">{p.competitor}</div>
+                <div className="text-xs text-muted-foreground mt-2 line-clamp-2">{p.intro.split(". ")[0]}.</div>
+                <div className="mt-3 inline-flex items-center text-xs text-primary group-hover:underline">
+                  Read comparison <ArrowRight className="ml-1 h-3 w-3" />
+                </div>
+              </Link>
+            ))}
+          </div>
+          <div className="text-center mt-8">
+            <Link href="/compare" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground underline-offset-4 hover:underline">
+              See all AI DLP comparisons <ArrowRight className="ml-1 h-3 w-3" />
             </Link>
           </div>
         </div>

@@ -526,7 +526,7 @@ export default function LandingPage() {
             ))}
           </div>
 
-          <div className="mt-12 grid gap-8 sm:grid-cols-2 max-w-5xl mx-auto">
+          <div className="mt-12 grid gap-8 sm:grid-cols-3 max-w-5xl mx-auto">
             <div>
               <h3 className="text-xs uppercase tracking-wider text-muted-foreground mb-4 font-semibold">By industry</h3>
               <div className="flex flex-wrap gap-2">
@@ -560,6 +560,24 @@ export default function LandingPage() {
                     {c.label}
                   </Link>
                 ))}
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-xs uppercase tracking-wider text-muted-foreground mb-4 font-semibold">Free tools &amp; research</h3>
+              <div className="flex flex-col gap-2">
+                <Link href="/tools/prompt-pii-scanner" className="rounded-lg border border-border bg-background px-3 py-2 text-xs hover:border-primary/40 hover:bg-primary/5 transition-all">
+                  <div className="font-semibold">Prompt PII Scanner</div>
+                  <div className="text-muted-foreground mt-0.5">Detects 15+ sensitive data types — free, in-browser</div>
+                </Link>
+                <Link href="/research/state-of-prompt-data-leakage-q2-2026" className="rounded-lg border border-border bg-background px-3 py-2 text-xs hover:border-primary/40 hover:bg-primary/5 transition-all">
+                  <div className="font-semibold">State of Prompt Data Leakage Q2 2026</div>
+                  <div className="text-muted-foreground mt-0.5">Original research from real-world deployments</div>
+                </Link>
+                <Link href="/security/owasp-llm-top-10" className="rounded-lg border border-border bg-background px-3 py-2 text-xs hover:border-primary/40 hover:bg-primary/5 transition-all">
+                  <div className="font-semibold">OWASP LLM Top 10</div>
+                  <div className="text-muted-foreground mt-0.5">Threat reference for LLM-powered apps</div>
+                </Link>
               </div>
             </div>
           </div>

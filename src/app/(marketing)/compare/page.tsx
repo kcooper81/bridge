@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { generatePageMetadata } from "@/lib/seo/metadata";
+import { generateBreadcrumbSchema } from "@/lib/seo/schemas";
 import { ArrowRight, ShieldCheck } from "lucide-react";
 import { GetStartedSteps } from "@/components/marketing/get-started-steps";
 import { LeadCaptureForm } from "@/components/marketing/lead-capture-form";
+import { COMPARISON_PAGES } from "./[slug]/_data";
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://teamprompt.app";
 
 export const metadata: Metadata = generatePageMetadata({
   title: "Compare TeamPrompt — AI DLP & Prompt Management Alternatives",
@@ -55,11 +59,63 @@ const comparisons = [
     teamPromptWins: ["Two-layer protection (network + browser)", "Prompt governance built-in", "Free tier + self-serve", "19 compliance packs"],
     otherWins: [],
   },
+  {
+    slug: "polymer",
+    name: "Polymer",
+    tagline: "Real-time AI prevention vs Slack/Drive/M365 DLP",
+    teamPromptWins: ["Blocks data before send in ChatGPT/Claude/Gemini", "Built-in prompt library", "Network + browser two-layer defense", "Self-serve, free tier"],
+    otherWins: ["Broader SaaS surface (Slack, Drive, M365)", "Strong classification engine for non-AI data", "Mature enterprise partnerships"],
+  },
+  {
+    slug: "prompt-security",
+    name: "Prompt Security",
+    tagline: "Self-serve browser DLP vs enterprise reverse proxy",
+    teamPromptWins: ["Deploys in 5 minutes (vs weeks for proxy setup)", "Free tier for teams under 3 users", "Combined prompt management + DLP", "Works on BYOD without network access"],
+    otherWins: ["Proxy-level enforcement without browser extension", "Stronger inline prompt-injection blocking", "Better fit for strict endpoint policies"],
+  },
+  {
+    slug: "lakera",
+    name: "Lakera Guard",
+    tagline: "DLP for teams vs API security for AI app builders",
+    teamPromptWins: ["Protects employees using commercial AI tools", "Prompt management included", "Multi-tool coverage (ChatGPT/Claude/Gemini/Copilot)", "19 compliance frameworks"],
+    otherWins: ["Right tool if you're BUILDING an LLM-powered product", "Industry-leading prompt-injection research", "API-first integration"],
+  },
 ];
 
 export default function ComparePage() {
+  // Pull the canonical list from COMPARISON_PAGES so hub + detail never drift.
+  // Hardcoded `comparisons` above is used only for the curated win/lose bullets;
+  // listed comparisons in schema come from the source of truth.
+  const allComparisons = COMPARISON_PAGES.map((p) => p.slug);
+
+  const breadcrumbs = generateBreadcrumbSchema([
+    { name: "Home", url: SITE_URL },
+    { name: "Compare", url: `${SITE_URL}/compare` },
+  ]);
+  const collectionSchema = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: "Compare TeamPrompt — AI DLP & Prompt Management Alternatives",
+    description:
+      "Side-by-side comparisons of TeamPrompt vs Nightfall, Microsoft Purview, Polymer, Prompt Security, Lakera, ChatGPT Teams, Notion, and other AI DLP and prompt management tools.",
+    url: `${SITE_URL}/compare`,
+    mainEntity: {
+      "@type": "ItemList",
+      itemListElement: COMPARISON_PAGES.map((p, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        url: `${SITE_URL}/compare/${p.slug}`,
+        name: p.title,
+      })),
+    },
+  };
+  void allComparisons;
+
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbs) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionSchema) }} />
+
       <section
         className="border-b border-border pt-32 pb-20 sm:pt-40 sm:pb-28"
         style={{ background: "linear-gradient(180deg, #fff 0%, #F6F2FF 50%, #fff 100%)" }}

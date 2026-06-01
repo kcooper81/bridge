@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { generatePageMetadata } from "@/lib/seo/metadata";
+import { generateBreadcrumbSchema } from "@/lib/seo/schemas";
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://teamprompt.app";
 
 export const metadata: Metadata = generatePageMetadata({
   title: "Search TeamPrompt — Find Guides, Comparisons & Tools",
@@ -83,8 +86,31 @@ export default function SearchPage({ searchParams }: { searchParams: { q?: strin
 
   const total = filtered.reduce((sum, s) => sum + s.items.length, 0);
 
+  const breadcrumbs = generateBreadcrumbSchema([
+    { name: "Home", url: SITE_URL },
+    { name: "Search", url: `${SITE_URL}/search` },
+  ]);
+  const collectionSchema = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: "TeamPrompt Resource Library",
+    description: "Guides, comparisons, compliance frameworks, glossary, and free tools for AI data loss prevention.",
+    url: `${SITE_URL}/search`,
+    mainEntity: {
+      "@type": "ItemList",
+      itemListElement: SECTIONS.flatMap((s) => s.items).map((item, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        url: `${SITE_URL}${item.href}`,
+        name: item.label,
+      })),
+    },
+  };
+
   return (
     <section className="pt-32 pb-20 sm:pt-40 sm:pb-28">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbs) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionSchema) }} />
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
         <h1 className="text-4xl sm:text-5xl font-medium tracking-tight mb-3">
           {q ? `Results for "${searchParams.q}"` : "Search TeamPrompt"}

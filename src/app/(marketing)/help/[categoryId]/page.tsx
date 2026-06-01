@@ -3,8 +3,11 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { generatePageMetadata } from "@/lib/seo/metadata";
+import { generateBreadcrumbSchema } from "@/lib/seo/schemas";
 import { HELP_CATEGORIES, getCategoryById } from "@/lib/help-content";
 import { HelpBreadcrumbs } from "../_components/help-breadcrumbs";
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://teamprompt.app";
 
 interface Props {
   params: Promise<{ categoryId: string }>;
@@ -34,8 +37,32 @@ export default async function CategoryPage({ params }: Props) {
 
   const Icon = category.icon;
 
+  const breadcrumbs = generateBreadcrumbSchema([
+    { name: "Home", url: SITE_URL },
+    { name: "Help", url: `${SITE_URL}/help` },
+    { name: category.title, url: `${SITE_URL}/help/${category.id}` },
+  ]);
+  const collectionSchema = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: `${category.title} — TeamPrompt Help`,
+    description: category.description,
+    url: `${SITE_URL}/help/${category.id}`,
+    mainEntity: {
+      "@type": "ItemList",
+      itemListElement: category.articles.map((a, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        url: `${SITE_URL}/help/${category.id}/${a.slug}`,
+        name: a.q,
+      })),
+    },
+  };
+
   return (
     <div>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbs) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionSchema) }} />
       <HelpBreadcrumbs items={[{ label: category.title }]} />
 
       {/* Category header */}

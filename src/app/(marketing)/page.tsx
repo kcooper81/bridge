@@ -244,7 +244,7 @@ export default function LandingPage() {
               <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full -mr-10 -mt-10" />
               <div className="relative">
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xs font-bold uppercase tracking-widest text-emerald-500">Layer 2</span>
+                  <span className="text-xs font-bold uppercase tracking-widest text-emerald-700 dark:text-emerald-400">Layer 2</span>
                 </div>
                 <h3 className="text-2xl font-semibold mb-3">Content-Level DLP</h3>
                 <p className="text-muted-foreground leading-relaxed mb-6">

@@ -61,7 +61,11 @@
     --secondary: 225 20% 97%;       /* #f8f9fc */
     --secondary-foreground: 222 47% 11%;
     --muted: 224 18% 94%;           /* #eef0f6 */
-    --muted-foreground: 215 16% 47%; /* #94a3b8 */
+    /* Bumped from 47% → 42% lightness (Lighthouse audit 2026-06-05): the
+     * previous value rendered #65758b which gave 4.34:1 contrast against
+     * #f5f6fa and #f3f4f8 — under WCAG AA 4.5:1. Darker value now clears
+     * 4.5:1 on every muted-surface background variant we use. */
+    --muted-foreground: 215 18% 42%; /* ~#5b6878, AA-compliant on light */
     --accent: 215 20% 95%;          /* neutral blue-tint surface */
     --accent-foreground: 222 47% 11%;
     --destructive: 0 72% 51%;       /* #dc2626 */

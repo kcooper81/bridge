@@ -19,12 +19,44 @@ const breadcrumbs = generateBreadcrumbSchema([
   { name: "Contact", url: "https://teamprompt.app/contact" },
 ]);
 
+const contactPageSchema = {
+  "@context": "https://schema.org",
+  "@type": "ContactPage",
+  name: "Contact TeamPrompt",
+  url: "https://teamprompt.app/contact",
+  description: "Get in touch with the TeamPrompt team for sales, support, partnerships, or feedback.",
+  mainEntity: {
+    "@type": "Organization",
+    name: "TeamPrompt",
+    url: "https://teamprompt.app",
+    email: "support@teamprompt.app",
+    contactPoint: [
+      {
+        "@type": "ContactPoint",
+        contactType: "customer support",
+        email: "support@teamprompt.app",
+        availableLanguage: ["English"],
+      },
+      {
+        "@type": "ContactPoint",
+        contactType: "sales",
+        email: "sales@teamprompt.app",
+        availableLanguage: ["English"],
+      },
+    ],
+  },
+};
+
 export default function ContactPage() {
   return (
     <>
     <script
       type="application/ld+json"
       dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbs) }}
+    />
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(contactPageSchema) }}
     />
     <div className="py-20 sm:py-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">

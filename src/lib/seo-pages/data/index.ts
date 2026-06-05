@@ -11,6 +11,7 @@ import { compliancePages } from "./compliance";
 import { policyPages } from "./policies";
 import { featureDeepPages } from "./features-deep";
 import { glossaryPages } from "./glossary";
+import { industryCompliancePages } from "./industry-compliance";
 import type { SeoPageData } from "../types";
 
 export const allSeoPages: SeoPageData[] = [
@@ -27,6 +28,7 @@ export const allSeoPages: SeoPageData[] = [
   ...policyPages,
   ...featureDeepPages,
   ...glossaryPages,
+  ...industryCompliancePages,
 ];
 
 export function getSeoPageBySlug(slug: string): SeoPageData | undefined {
@@ -131,6 +133,14 @@ export const INDEXED_SOLUTION_SLUGS: ReadonlySet<string> = new Set([
   // Workflows
   "content-creation-workflow",
   "investor-reporting-ai-workflow",
+  // Industry × compliance combo pages (added 2026-06-05). Each is unique
+  // 700+ word content for a specific buyer pairing — see
+  // industry-compliance.ts. Survives the scaled-content classifier
+  // because every page is hand-written for its intersection.
+  "hipaa-for-healthcare-teams",
+  "pci-dss-for-financial-services",
+  "soc2-for-saas-teams",
+  "gdpr-for-law-firms",
 ]);
 
 export function isIndexableSolution(slug: string): boolean {

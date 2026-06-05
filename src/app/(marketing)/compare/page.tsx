@@ -80,6 +80,27 @@ const comparisons = [
     teamPromptWins: ["Protects employees using commercial AI tools", "Prompt management included", "Multi-tool coverage (ChatGPT/Claude/Gemini/Copilot)", "19 compliance frameworks"],
     otherWins: ["Right tool if you're BUILDING an LLM-powered product", "Industry-leading prompt-injection research", "API-first integration"],
   },
+  {
+    slug: "bigid",
+    name: "BigID",
+    tagline: "AI-specific DLP vs enterprise data discovery + DSPM",
+    teamPromptWins: ["Purpose-built for ChatGPT/Claude/Gemini prompt DLP", "5-minute deploy vs multi-month BigID rollout", "Free tier removes procurement", "Prompt management bundled"],
+    otherWins: ["Discovers and classifies data across the entire data estate", "DSPM and data minimization workflows", "Mature enterprise relationships"],
+  },
+  {
+    slug: "cyberhaven",
+    name: "Cyberhaven",
+    tagline: "Browser-first AI DLP vs endpoint DLP + data lineage",
+    teamPromptWins: ["No endpoint agent — just install the extension", "Free tier + transparent per-user pricing", "Prompt library included", "Purpose-built for AI prompts"],
+    otherWins: ["Data lineage tracking across endpoints + SaaS", "Insider risk + UEBA", "Endpoint file-movement DLP"],
+  },
+  {
+    slug: "witness-ai",
+    name: "Witness AI",
+    tagline: "Browser DLP vs network-level AI observability",
+    teamPromptWins: ["Works on BYOD without network routing", "Free tier + 5-min deploy", "Prompt management included", "No SSL inspection complexity"],
+    otherWins: ["Centralized network view across all AI tools", "Inline policy enforcement in the network path", "Fits environments with established SWG infrastructure"],
+  },
 ];
 
 export default function ComparePage() {

@@ -82,6 +82,9 @@ const COMPARE_SLUGS = [
   "polymer",
   "prompt-security",
   "lakera",
+  "bigid",
+  "cyberhaven",
+  "witness-ai",
 ];
 const COMPLIANCE_SLUGS = ["hipaa", "soc2", "gdpr", "pci-dss", "eu-ai-act"];
 

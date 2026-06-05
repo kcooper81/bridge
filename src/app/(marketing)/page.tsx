@@ -511,9 +511,13 @@ export default function LandingPage() {
               { label: "vs Polymer", href: "/compare/polymer", desc: "Real-time prevention vs post-hoc detection" },
               { label: "vs Prompt Security", href: "/compare/prompt-security", desc: "Self-serve extension vs reverse proxy" },
               { label: "vs Lakera", href: "/compare/lakera", desc: "Team DLP vs API-level prompt firewall" },
+              { label: "vs BigID", href: "/compare/bigid", desc: "AI-specific DLP vs enterprise data discovery" },
+              { label: "vs Cyberhaven", href: "/compare/cyberhaven", desc: "Browser DLP vs endpoint + data lineage" },
+              { label: "vs Witness AI", href: "/compare/witness-ai", desc: "Browser DLP vs network observability" },
               { label: "vs Notion AI", href: "/compare/notion", desc: "Cross-platform vs single-platform" },
               { label: "vs ChatGPT Teams", href: "/compare/chatgpt-teams", desc: "Multi-tool DLP vs OpenAI-only" },
               { label: "Best AI DLP 2026", href: "/compare/best-ai-dlp-tools", desc: "Top platforms reviewed" },
+              { label: "See all 11 comparisons →", href: "/compare", desc: "Full alternatives index" },
             ].map((item) => (
               <Link
                 key={item.href}

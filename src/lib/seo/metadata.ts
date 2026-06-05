@@ -42,14 +42,11 @@ export function generatePageMetadata({
       type: "website",
       siteName: "TeamPrompt",
       locale: "en_US",
-      images: [
-        {
-          url: `${SITE_URL}/og-default.png`,
-          width: 1200,
-          height: 630,
-          alt: "TeamPrompt — AI Prompt Management for Teams",
-        },
-      ],
+      // No explicit `images` here — Next.js auto-discovers opengraph-image.tsx
+      // from the route segment (and falls back to the root opengraph-image.tsx).
+      // This was previously hardcoded to og-default.png, which silently
+      // overrode every per-route OG image we added (compare/[slug],
+      // compliance/[framework], solutions/[slug]).
     },
     twitter: {
       card: "summary_large_image",
@@ -57,7 +54,8 @@ export function generatePageMetadata({
       description,
       site: "@teampromptapp",
       creator: "@teampromptapp",
-      images: [`${SITE_URL}/og-default.png`],
+      // Same — Next.js uses twitter-image.tsx if present, otherwise the
+      // route's opengraph-image.tsx, otherwise the root fallback.
     },
     alternates: {
       canonical: url,

@@ -124,6 +124,12 @@ export default function IntegrationsPage() {
     } else if (connected === "slack") {
       toast.success("Slack connected successfully!");
       fetchStatus();
+      // Auto-load channels so the picker isn't empty when the admin
+      // arrives back from OAuth. Previously the admin had to focus the
+      // select to trigger the load — a buyer expecting "Slack alerts"
+      // from /compliance/soc2 would connect, see no channel selected,
+      // and leave thinking the integration didn't work.
+      loadSlackChannels();
       window.history.replaceState({}, "", "/settings/integrations");
     }
     if (searchParams.get("error")) {

@@ -21,6 +21,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -527,6 +528,46 @@ export default function TeamPage() {
 
   async function handleSendInvite() {
     if (!inviteEmail.trim()) return;
+
+    // Bulk-invite path: if multiple emails are entered (comma or newline
+    // separated) the existing-member detection doesn't apply — just batch
+    // the invites. Falls through to the single-email flow below when only
+    // one email is parsed.
+    const parsedEmails = inviteEmail
+      .split(/[\n,;\s]+/)
+      .map((s) => s.trim().toLowerCase())
+      .filter((s) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s));
+    const uniqueEmails = Array.from(new Set(parsedEmails));
+
+    if (uniqueEmails.length > 1) {
+      if (!checkLimit("add_member", members.length + uniqueEmails.length - 1)) return;
+      setInviting(true);
+      let ok = 0;
+      let failed = 0;
+      try {
+        const results = await Promise.allSettled(
+          uniqueEmails.map((e) => sendInvite(e, inviteRole, inviteTeamId || undefined))
+        );
+        for (const r of results) {
+          if (r.status === "fulfilled" && r.value.success) ok++;
+          else failed++;
+        }
+        if (ok > 0) trackInviteSent();
+        if (failed === 0) toast.success(`${ok} invites sent`);
+        else if (ok === 0) toast.error(`All ${failed} invites failed`);
+        else toast.warning(`${ok} sent, ${failed} failed`);
+        setInviteEmail("");
+        setInviteTeamId("");
+        const newInvites = await getInvites();
+        setInvites(newInvites);
+        if (failed === 0) setInviteModalOpen(false);
+      } catch {
+        toast.error("Failed to send bulk invites");
+      } finally {
+        setInviting(false);
+      }
+      return;
+    }
 
     // If the email belongs to an existing member, add them to the selected team instead
     if (existingMemberMatch) {
@@ -2173,8 +2214,22 @@ export default function TeamPage() {
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Email</Label>
-              <Input type="email" value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} placeholder="colleague@company.com" />
+              <Label>Email{(() => {
+                const count = inviteEmail
+                  .split(/[\n,;\s]+/)
+                  .map((s) => s.trim().toLowerCase())
+                  .filter((s) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s)).length;
+                return count > 1 ? <span className="ml-2 text-xs font-normal text-muted-foreground">({count} addresses)</span> : null;
+              })()}</Label>
+              <Textarea
+                value={inviteEmail}
+                onChange={(e) => setInviteEmail(e.target.value)}
+                placeholder="colleague@company.com&#10;&#10;Or paste multiple — one per line or comma-separated."
+                className="min-h-[88px] resize-y font-mono text-sm"
+              />
+              <p className="text-[11px] text-muted-foreground">
+                Paste up to 50 emails at once. Each gets the same role and team assignment.
+              </p>
             </div>
 
             {/* Existing member detected banner */}

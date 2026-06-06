@@ -4,6 +4,7 @@ import { SectionLabel } from "@/components/marketing/section-label";
 import { DarkSection } from "@/components/marketing/dark-section";
 import { GetStartedSteps } from "@/components/marketing/get-started-steps";
 import { LeadCaptureForm } from "@/components/marketing/lead-capture-form";
+import { ResourcesHub } from "@/components/marketing/resources-hub";
 import { FAQSection } from "@/components/marketing/faq-section";
 import { StatsRow } from "@/components/marketing/stats-row";
 import { AppMockup } from "@/components/marketing/app-mockup";
@@ -257,7 +258,7 @@ export function IndustryPage({ data }: { data: IndustryPageData }) {
                     {point.title.includes("sensitive") || point.title.includes("data") || point.title.includes("leak")
                       ? "Real-time DLP scanning detects and blocks sensitive data before it reaches any AI tool."
                       : point.title.includes("compliance") || point.title.includes("audit") || point.title.includes("regulation")
-                      ? "19 pre-built compliance packs with full audit trails and exportable reports for regulators."
+                      ? "20 pre-built compliance packs with full audit trails and exportable reports for regulators."
                       : point.title.includes("prompt") || point.title.includes("quality") || point.title.includes("standard")
                       ? "One shared prompt library with approval workflows, templates, and quality guidelines."
                       : point.title.includes("visibility") || point.title.includes("shadow") || point.title.includes("monitor")
@@ -433,6 +434,42 @@ export function IndustryPage({ data }: { data: IndustryPageData }) {
           </div>
         </section>
       )}
+
+      {/* ━━━ INDUSTRY-SPECIFIC CTA ━━━
+          The data file authors wrote tailored CTA copy per industry
+          (data.cta) that was previously dropped. Surfacing it here puts
+          the highest-intent moment back in front of the right buyer. */}
+      {data.cta && (
+        <section
+          className="py-20 sm:py-24 border-t border-border"
+          style={{ background: "linear-gradient(180deg, #fff 0%, #F6F2FF 50%, #fff 100%)" }}
+        >
+          <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
+            <h2 className="text-3xl sm:text-4xl font-medium tracking-tight">
+              {data.cta.headline}{" "}
+              <span className="text-primary">{data.cta.gradientText}</span>
+            </h2>
+            <p className="mt-5 text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+              {data.cta.subtitle}
+            </p>
+            <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/signup">
+                <Button size="lg" className="text-base px-8 h-12 rounded-lg font-bold">
+                  Start free <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+              <Link href="/pricing">
+                <Button variant="outline" size="lg" className="text-base px-8 h-12 rounded-lg font-bold">
+                  See pricing
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ━━━ RESOURCES HUB ━━━ */}
+      <ResourcesHub />
 
       {/* ━━━ GET STARTED + LEAD CAPTURE ━━━ */}
       <div className="border-t border-border">

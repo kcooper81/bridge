@@ -52,7 +52,7 @@ export const comparisonPages: SeoPageData[] = [
           headers: ["TeamPrompt", "Notion"],
           rows: [
             { label: "DLP scanning", values: ["40+ rules + LLM classification", "Not available"] },
-            { label: "Compliance packs", values: ["19 frameworks (HIPAA, SOC 2, GDPR, etc.)", "Not available"] },
+            { label: "Compliance packs", values: ["20 frameworks (HIPAA, SOC 2, GDPR, etc.)", "Not available"] },
             { label: "Network-level blocking", values: ["Cloudflare Gateway DNS blocking", "Not available"] },
             { label: "Browser extension", values: ["Inserts prompts into 5 AI tools", "Not available"] },
             { label: "Audit trail", values: ["Full activity log + Sankey diagrams + CSV/PDF export", "Page view history only"] },

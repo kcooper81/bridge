@@ -38,7 +38,7 @@ import { LeadCaptureForm } from "@/components/marketing/lead-capture-form";
 export const metadata: Metadata = generatePageMetadata({
   title: "TeamPrompt Features — AI DLP, Shared Prompt Library, Audit Logs & SSO",
   description:
-    "Real-time DLP scanning across ChatGPT/Claude/Gemini, a shared prompt library with versioning, 19 compliance packs (HIPAA, SOC 2, GDPR), audit logs for every interaction, browser extension, and SSO.",
+    "Real-time DLP scanning across ChatGPT/Claude/Gemini, a shared prompt library with versioning, 20 compliance packs (HIPAA, SOC 2, GDPR), audit logs for every interaction, browser extension, and SSO.",
   path: "/features",
   keywords: ["AI DLP", "AI data loss prevention", "sensitive data detection", "compliance packs", "HIPAA AI", "SOC 2 AI", "prompt library", "browser extension", "AI governance", "audit logging"],
 });
@@ -375,7 +375,7 @@ const primaryFeatures = [
     description:
       "Pre-built compliance packs for regulated industries, plus a full activity log of every scan, block, and redaction. Export reports for auditors in one click.",
     details: [
-      "19 compliance frameworks: HIPAA, GDPR, PCI-DSS, SOC 2, CCPA, and more",
+      "20 compliance frameworks: HIPAA, GDPR, PCI-DSS, SOC 2, CCPA, and more",
       "One-click install activates all rules in a pack",
       "Full activity log with user, action, timestamp, and severity",
       "Exportable audit reports for compliance reviews",
@@ -515,7 +515,7 @@ export default function FeaturesPage() {
           <span className="text-primary">One Platform.</span>
         </h1>
         <p className="mt-6 text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto">
-          TeamPrompt combines a shared prompt library, real-time DLP protection, compliance packs for 19 frameworks, and a browser extension that works inside ChatGPT, Claude, and Gemini.
+          TeamPrompt combines a shared prompt library, real-time DLP protection, compliance packs for 20 frameworks, and a browser extension that works inside ChatGPT, Claude, and Gemini.
         </p>
       </div>
     </section>
@@ -644,7 +644,7 @@ export default function FeaturesPage() {
                 Every AI interaction is logged with user, tool, action, and risk score. Visual dashboards make compliance reporting effortless.
               </p>
               <div className="space-y-2.5">
-                {["Sankey flow diagrams show team → tool interaction patterns", "Violation heatmaps by day and hour", "19 compliance packs: HIPAA, SOC 2, PCI-DSS, GDPR, and more", "One-click CSV export for auditors"].map((item) => (
+                {["Sankey flow diagrams show team → tool interaction patterns", "Violation heatmaps by day and hour", "20 compliance packs: HIPAA, SOC 2, PCI-DSS, GDPR, and more", "One-click CSV export for auditors"].map((item) => (
                   <div key={item} className="flex items-start gap-2.5">
                     <CheckCircle2 className="h-4 w-4 text-violet-500 shrink-0 mt-0.5" />
                     <span className="text-sm text-muted-foreground">{item}</span>

@@ -9,7 +9,7 @@ export function generateSoftwareApplicationSchema() {
     applicationCategory: "BusinessApplication",
     operatingSystem: "Web, Chrome Extension",
     description:
-      "AI data loss prevention and prompt management for teams. Two layers of protection: network-level AI tool control via Cloudflare Gateway and content-level DLP scanning via browser extension. 19 compliance packs, shared prompt library, and audit dashboards.",
+      "AI data loss prevention and prompt management for teams. Two layers of protection: network-level AI tool control via Cloudflare Gateway and content-level DLP scanning via browser extension. 20 compliance packs, shared prompt library, and audit dashboards.",
     url: SITE_URL,
     offers: [
       {

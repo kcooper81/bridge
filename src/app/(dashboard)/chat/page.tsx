@@ -3018,18 +3018,54 @@ export default function ChatPage() {
               </div>
             )}
 
-            {/* No providers setup */}
+            {/* No providers setup — first-time experience for a new user
+                landing on /chat. Previously a thin "Set up an AI Provider"
+                card with no rationale. Now answers: why do I need this,
+                where do I get a key, what does my team get when I'm done. */}
             {noProviders ? (
-              <div className="flex-1 flex items-center justify-center p-8">
-                <div className="text-center max-w-md">
-                  <Bot className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h2 className="text-lg font-semibold mb-2">Set up an AI Provider</h2>
-                  <p className="text-sm text-muted-foreground mb-6">
-                    Add your OpenAI, Anthropic, or Google API key to start chatting. Your messages are protected by your workspace&apos;s DLP rules.
+              <div className="flex-1 flex items-center justify-center p-6 sm:p-10 overflow-y-auto">
+                <div className="max-w-2xl w-full">
+                  <div className="text-center mb-8">
+                    <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 mb-4">
+                      <Bot className="h-7 w-7 text-primary" />
+                    </div>
+                    <h2 className="text-2xl font-semibold mb-2">Bring your own AI</h2>
+                    <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                      TeamPrompt Chat is bring-your-own-key. Add an OpenAI, Anthropic, or Google API key once — your team can then chat through OpenAI, Claude, and Gemini with every prompt DLP-scanned automatically.
+                    </p>
+                  </div>
+
+                  <div className="grid sm:grid-cols-3 gap-3 mb-8 text-left">
+                    {[
+                      { num: "1", title: "Pick a provider", body: "OpenAI (GPT-4o), Anthropic (Claude), or Google (Gemini). One is enough to start." },
+                      { num: "2", title: "Get an API key", body: "Each provider has a console. 2-min process. You'll paste it on the next screen." },
+                      { num: "3", title: "Start chatting", body: "Every message scanned against your workspace DLP rules before it leaves." },
+                    ].map((s) => (
+                      <div key={s.num} className="rounded-xl border border-border bg-card p-4">
+                        <div className="text-xs font-bold text-primary mb-2">STEP {s.num}</div>
+                        <div className="text-sm font-semibold mb-1">{s.title}</div>
+                        <div className="text-xs text-muted-foreground leading-relaxed">{s.body}</div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row gap-2 justify-center">
+                    <Link href="/settings/ai-providers">
+                      <Button size="lg">
+                        <Settings className="h-4 w-4 mr-2" />
+                        Configure AI provider
+                      </Button>
+                    </Link>
+                    <Link href="/vault">
+                      <Button variant="outline" size="lg">
+                        Use Prompt Library instead
+                      </Button>
+                    </Link>
+                  </div>
+
+                  <p className="text-center text-xs text-muted-foreground mt-6">
+                    Your API key is stored encrypted and scoped to your workspace. We never see or log it.
                   </p>
-                  <Link href="/settings/ai-providers">
-                    <Button><Settings className="h-4 w-4 mr-2" />Configure AI Providers</Button>
-                  </Link>
                 </div>
               </div>
             ) : (

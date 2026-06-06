@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { FAQSection } from "@/components/marketing/faq-section";
 import { GetStartedSteps } from "@/components/marketing/get-started-steps";
 import { LeadCaptureForm } from "@/components/marketing/lead-capture-form";
+import { ResourcesHub } from "@/components/marketing/resources-hub";
 import { ArrowRight, AlertTriangle, CheckCircle2, Shield, ShieldCheck } from "lucide-react";
 import { COMPLIANCE_FRAMEWORKS, getFrameworkBySlug } from "./_data";
 import { cn } from "@/lib/utils";
@@ -77,10 +78,15 @@ export default function ComplianceFrameworkPage({ params }: { params: { framewor
             <span>Updated {new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" })}</span>
           </div>
 
-          <div className="mt-8">
+          <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
             <Link href="/signup">
               <Button size="lg" className="rounded-lg font-bold px-8">
-                Get {fw.name} Protected <ArrowRight className="ml-2 h-4 w-4" />
+                Start free <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+            <Link href="/pricing">
+              <Button size="lg" variant="outline" className="rounded-lg font-bold px-8">
+                See pricing
               </Button>
             </Link>
           </div>
@@ -166,6 +172,7 @@ export default function ComplianceFrameworkPage({ params }: { params: { framewor
         </section>
       )}
 
+      <ResourcesHub />
       <GetStartedSteps />
       <LeadCaptureForm />
     </>

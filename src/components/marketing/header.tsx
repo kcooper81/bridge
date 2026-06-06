@@ -184,7 +184,7 @@ const useCaseItems = [
 const solutionItems = [
   { label: "Shadow AI Analysis", desc: "Discover how AI is actually used.", href: "/security", icon: Eye, bg: "bg-violet-500/10" },
   { label: "Leakage Prevention", desc: "Block sensitive data in real time.", href: "/security", icon: Lock, bg: "bg-red-500/10" },
-  { label: "Maintaining Compliance", desc: "19 frameworks, one-click enable.", href: "/features#compliance-policy-packs", icon: FileSearch, bg: "bg-emerald-500/10" },
+  { label: "Maintaining Compliance", desc: "20 frameworks, one-click enable.", href: "/features#compliance-policy-packs", icon: FileSearch, bg: "bg-emerald-500/10" },
   { label: "Prompt Library", desc: "Organize and share prompt collections.", href: "/features#prompt-library", icon: ClipboardList, bg: "bg-blue-500/10" },
   { label: "Browser Extension", desc: "Works inside ChatGPT, Claude & more.", href: "/extensions", icon: ShieldCheck, bg: "bg-teal-500/10" },
 ];

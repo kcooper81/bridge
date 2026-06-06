@@ -254,7 +254,7 @@ export default function LandingPage() {
                   {[
                     "Real-time DLP scanning inside ChatGPT, Claude, Gemini, Copilot, Perplexity",
                     "40+ detection rules for PII, credentials, API keys, patient data",
-                    "19 compliance packs (HIPAA, SOC 2, PCI-DSS, GDPR, and more)",
+                    "20 compliance packs (HIPAA, SOC 2, PCI-DSS, GDPR, and more)",
                     "Auto-redact sensitive data with safe placeholders",
                   ].map((item) => (
                     <div key={item} className="flex items-start gap-2.5">
@@ -362,7 +362,7 @@ export default function LandingPage() {
                 src: "/images/hero-data-breach.jpg",
                 alt: "Data breach alert on laptop screen",
                 title: "Compliance & Audit Trail",
-                desc: "19 compliance packs for HIPAA, SOC 2, PCI-DSS, GDPR, and more. Full activity log with exportable reports for auditors.",
+                desc: "20 compliance packs for HIPAA, SOC 2, PCI-DSS, GDPR, and more. Full activity log with exportable reports for auditors.",
               },
             ].map((feature) => (
               <div key={feature.title}>
@@ -389,17 +389,95 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ━━━ 5. TESTIMONIAL ━━━ */}
+      {/* ━━━ 5. TESTIMONIALS ━━━
+          Real reviews from the Chrome Web Store (4.9★, 21 ratings, 78 users
+          as of 2026-06-06). FTC-compliant social proof — verifiable at
+          chrome.google.com/webstore/detail/hpdekjimndbhdkebpedfgaceohplbpil */}
       <section className="py-24 sm:py-32">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
-          <Quote className="h-10 w-10 text-primary/20 mx-auto mb-6" />
-          <blockquote className="text-2xl sm:text-3xl font-medium tracking-tight leading-snug">
-            &ldquo;TeamPrompt gives us visibility and control over AI usage that we simply didn&apos;t have before. The DLP scanning alone has prevented dozens of data exposure incidents.&rdquo;
-          </blockquote>
-          <div className="mt-8">
-            <p className="font-semibold">Dr. Rebecca Lin</p>
-            <p className="text-sm text-muted-foreground">Compliance Officer, Regional Health System</p>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/60 px-4 py-1.5 text-sm text-muted-foreground mb-4">
+              <span className="text-amber-500">★★★★★</span>
+              <span>4.9 on the Chrome Web Store · 21 reviews</span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-medium tracking-tight">
+              What teams using TeamPrompt say
+            </h2>
           </div>
+
+          <div className="grid gap-6 lg:grid-cols-3">
+            {/* Featured long-form review — Marcia, marketing/ops manager voice */}
+            <div className="lg:col-span-2 rounded-2xl border border-border bg-card p-8">
+              <Quote className="h-7 w-7 text-primary/30 mb-4" />
+              <blockquote className="text-base leading-relaxed text-foreground/90">
+                Three things convinced me this was worth writing a review for. <strong>First — the onboarding.</strong> I&apos;ve set up a lot of SaaS tools for teams and the part that always kills adoption is the first fifteen minutes. With this I set up our workspace, imported prompts from a doc we had, and sent the chrome extension link to my team in one Slack message. Everyone was set up before our next standup. <strong>Second — the search.</strong> Bad search in a prompt tool is fatal; this one is fast and accurate. <strong>Third — it just keeps working.</strong> No updates that break things, no prompts that mysteriously disappear. For a tool embedded in my daily workflow that consistency matters more than any feature.
+              </blockquote>
+              <div className="mt-6 flex items-center gap-3">
+                <div className="h-9 w-9 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center font-semibold text-primary text-sm">M</div>
+                <div>
+                  <p className="text-sm font-semibold">Marcia</p>
+                  <p className="text-xs text-muted-foreground">Chrome Web Store · ★★★★★</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid gap-6">
+              <div className="rounded-2xl border border-border bg-card p-6">
+                <Quote className="h-5 w-5 text-primary/30 mb-3" />
+                <blockquote className="text-sm leading-relaxed text-foreground/90">
+                  The data blocking caught something in my first week that would have been embarrassing to send to an AI tool. Not gonna say what but yeah. Install it.
+                </blockquote>
+                <div className="mt-4 flex items-center gap-2.5">
+                  <div className="h-7 w-7 rounded-full bg-gradient-to-br from-emerald-500/30 to-emerald-500/10 flex items-center justify-center font-semibold text-emerald-700 text-xs">A</div>
+                  <div>
+                    <p className="text-xs font-semibold">Alex Stanvia</p>
+                    <p className="text-[10px] text-muted-foreground">★★★★★</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-border bg-card p-6">
+                <Quote className="h-5 w-5 text-primary/30 mb-3" />
+                <blockquote className="text-sm leading-relaxed text-foreground/90">
+                  Switched jobs recently and the first thing I did was get my new team on this. That&apos;s probably the strongest endorsement I can give.
+                </blockquote>
+                <div className="mt-4 flex items-center gap-2.5">
+                  <div className="h-7 w-7 rounded-full bg-gradient-to-br from-blue-500/30 to-blue-500/10 flex items-center justify-center font-semibold text-blue-700 text-xs">S</div>
+                  <div>
+                    <p className="text-xs font-semibold">shmuel leibovich</p>
+                    <p className="text-[10px] text-muted-foreground">★★★★★</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Secondary row — three more punchy quotes */}
+          <div className="mt-6 grid gap-4 sm:grid-cols-3">
+            {[
+              { quote: "I've tried keeping prompts in Notion, in a pinned Slack message, in a Google Doc — nothing stuck because it was always one extra step away from where I was actually working. This sidebar is just there when I open ChatGPT or Claude. That proximity is everything.", name: "Elliot" },
+              { quote: "Our marketing team was copy-pasting prompts from a google doc like cavemen. Someone found this, we set it up in one sitting, and that doc hasn't been opened since.", name: "Car Spa 24" },
+              { quote: "Tried three other prompt tools this year. Two were too complicated, one didn't have a chrome extension that actually worked. This is the first one I've stuck with past week two.", name: "Aditi Jain" },
+            ].map((t) => (
+              <div key={t.name} className="rounded-2xl border border-border bg-muted/30 p-5">
+                <blockquote className="text-xs leading-relaxed text-foreground/80">
+                  &ldquo;{t.quote}&rdquo;
+                </blockquote>
+                <p className="mt-3 text-[11px] font-semibold text-muted-foreground">— {t.name} · Chrome Web Store</p>
+              </div>
+            ))}
+          </div>
+
+          <p className="text-center text-xs text-muted-foreground mt-8">
+            <a
+              href="https://chromewebstore.google.com/detail/teamprompt-%E2%80%94-ai-prompt-ma/hpdekjimndbhdkebpedfgaceohplbpil/reviews"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-foreground underline-offset-2 hover:underline"
+            >
+              Read all reviews on the Chrome Web Store →
+            </a>
+          </p>
         </div>
       </section>
 

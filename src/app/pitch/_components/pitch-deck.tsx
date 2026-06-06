@@ -768,7 +768,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
                     { feature: "Cross-platform (5 AI tools)", tp: true, chatgpt: false, claude: false },
                     { feature: "Real-time DLP scanning", tp: true, chatgpt: false, claude: false },
                     { feature: "Risk scoring (0–100)", tp: true, chatgpt: false, claude: false },
-                    { feature: "19 compliance packs", tp: true, chatgpt: false, claude: false },
+                    { feature: "20 compliance packs", tp: true, chatgpt: false, claude: false },
                     { feature: "Auto-sanitization", tp: true, chatgpt: false, claude: false },
                     { feature: "Prompt library + templates", tp: true, chatgpt: true, claude: false },
                     { feature: "Audit trail + export", tp: true, chatgpt: false, claude: false },
@@ -890,7 +890,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
                 {[
                   { title: "Full SaaS Platform", items: ["Prompt vault with versioning", "Team management + roles", "Analytics dashboard", "Billing with Stripe"] },
                   { title: "Browser Extension", items: ["Chrome, Firefox, Edge", "Real-time DLP scanning", "Side panel + prompt insertion", "Shield indicator"] },
-                  { title: "Security & Compliance", items: ["19 compliance packs", "Risk scoring 0–100", "Auto-sanitization", "Full audit trail + export"] },
+                  { title: "Security & Compliance", items: ["20 compliance packs", "Risk scoring 0–100", "Auto-sanitization", "Full audit trail + export"] },
                 ].map((col) => (
                   <div key={col.title}>
                     <p className="text-sm font-bold text-zinc-200 mb-2">{col.title}</p>
@@ -955,7 +955,7 @@ export function PitchDeck({ shareToken }: { shareToken: string }) {
                   {[
                     "Row-Level Security on every query",
                     "Client-side DLP — data never reaches AI tools",
-                    "19 compliance packs (HIPAA, SOC 2, GDPR...)",
+                    "20 compliance packs (HIPAA, SOC 2, GDPR...)",
                     "Full audit trail with risk scoring",
                     "2FA / TOTP for all users",
                     "Auto-sanitization with safe placeholders",

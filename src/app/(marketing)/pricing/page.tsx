@@ -135,7 +135,7 @@ export default function PricingPage() {
                 { feature: "Shared prompt library", chatgpt: false, tp: true },
                 { feature: "DLP scanning", chatgpt: false, tp: true },
                 { feature: "Admin audit trails", chatgpt: false, tp: true },
-                { feature: "Compliance packs", chatgpt: false, tp: "19 packs" },
+                { feature: "Compliance packs", chatgpt: false, tp: "20 packs" },
                 { feature: "Multi-model AI chat", chatgpt: false, tp: true },
               ].map((row) => (
                 <div key={row.feature} className="contents">

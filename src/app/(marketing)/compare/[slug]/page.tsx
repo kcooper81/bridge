@@ -106,12 +106,29 @@ export default function ComparisonDetailPage({ params }: { params: { slug: strin
             <span>Updated {new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" })}</span>
           </div>
 
-          <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
             <Link href="/signup">
               <Button size="lg" className="rounded-lg font-bold px-8">
-                Try TeamPrompt Free <ArrowRight className="ml-2 h-4 w-4" />
+                Start free <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
+            <Link href="/pricing">
+              <Button size="lg" variant="outline" className="rounded-lg font-bold px-8">
+                See pricing
+              </Button>
+            </Link>
+          </div>
+
+          {/* Pricing tile — buyers arriving from "X alternative" queries
+              want to see price before they finish reading the comparison.
+              Nightfall/BigID/Cyberhaven all hide pricing; we don't. */}
+          <div className="mt-8 inline-flex items-center gap-4 rounded-full border border-border bg-muted/40 px-5 py-2.5 text-xs">
+            <span><strong className="text-foreground">Free</strong> for 3 users</span>
+            <span className="text-border">·</span>
+            <span><strong className="text-foreground">$8</strong>/user/mo Pro</span>
+            <span className="text-border">·</span>
+            <span><strong className="text-foreground">$12</strong>/user/mo Team</span>
+            <Link href="/pricing" className="text-primary hover:underline">Full pricing →</Link>
           </div>
         </div>
       </section>
@@ -198,37 +215,78 @@ export default function ComparisonDetailPage({ params }: { params: { slug: strin
           <div className="text-center mt-8">
             <Link href="/signup">
               <Button size="lg" className="rounded-lg font-bold px-8">
-                Start Free with TeamPrompt <ArrowRight className="ml-2 h-4 w-4" />
+                Start free <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
           </div>
         </div>
       </section>
 
-      {/* Related comparisons — internal linking pass. Each comparison page
-          surfaces 4 sibling comparisons to (a) keep buyers in the funnel,
-          (b) distribute crawl budget across all comparison pages, and
-          (c) build topical authority for "AI DLP comparison" queries. */}
+      {/* Related comparisons — topically sorted by category. Polymer
+          buyer should see Cyberhaven / BigID / Witness AI (other DLP +
+          observability), not Notion / ChatGPT Teams (different category).
+          Groups: dlp-platform / enterprise-data / ai-firewall /
+          single-tool / listicle. */}
       <section className="py-16 sm:py-20 border-t border-border bg-muted/20">
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
           <h2 className="text-xl sm:text-2xl font-medium tracking-tight text-center mb-8">
             More TeamPrompt comparisons
           </h2>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {COMPARISON_PAGES.filter((p) => p.slug !== page.slug).slice(0, 4).map((p) => (
-              <Link
-                key={p.slug}
-                href={`/compare/${p.slug}`}
-                className="rounded-2xl border border-border bg-background p-4 hover:border-primary/40 hover:bg-primary/[0.02] transition-all group"
-              >
-                <div className="text-xs text-muted-foreground mb-1">vs</div>
-                <div className="text-sm font-semibold group-hover:text-primary transition-colors">{p.competitor}</div>
-                <div className="text-xs text-muted-foreground mt-2 line-clamp-2">{p.intro.split(". ")[0]}.</div>
-                <div className="mt-3 inline-flex items-center text-xs text-primary group-hover:underline">
-                  Read comparison <ArrowRight className="ml-1 h-3 w-3" />
-                </div>
-              </Link>
-            ))}
+            {(() => {
+              // Topical clusters — keep ordering stable so users coming
+              // from /compare/polymer see Cyberhaven first, not Notion.
+              const TOPICAL: Record<string, string[]> = {
+                "dlp-platform": ["nightfall", "polymer", "cyberhaven", "purview"],
+                "ai-observability": ["witness-ai", "prompt-security", "lakera"],
+                "data-discovery": ["bigid", "cyberhaven"],
+                "ai-tool-direct": ["chatgpt-teams", "notion"],
+                "listicle": ["best-ai-dlp-tools"],
+              };
+              // Map each slug to its primary cluster.
+              const SLUG_CLUSTER: Record<string, string> = {
+                "nightfall": "dlp-platform",
+                "polymer": "dlp-platform",
+                "purview": "dlp-platform",
+                "cyberhaven": "dlp-platform",
+                "bigid": "data-discovery",
+                "prompt-security": "ai-observability",
+                "witness-ai": "ai-observability",
+                "lakera": "ai-observability",
+                "chatgpt-teams": "ai-tool-direct",
+                "notion": "ai-tool-direct",
+                "best-ai-dlp-tools": "listicle",
+              };
+              const myCluster = SLUG_CLUSTER[page.slug] || "dlp-platform";
+              const sameCluster = (TOPICAL[myCluster] || []).filter((s) => s !== page.slug);
+              const otherClusters = Object.entries(TOPICAL)
+                .filter(([k]) => k !== myCluster)
+                .flatMap(([, slugs]) => slugs)
+                .filter((s) => s !== page.slug);
+              const seen = new Set<string>();
+              const deduped: string[] = [];
+              for (const s of [...sameCluster, ...otherClusters]) {
+                if (!seen.has(s)) { seen.add(s); deduped.push(s); }
+              }
+              const ranked = deduped
+                .map((slug) => COMPARISON_PAGES.find((p) => p.slug === slug))
+                .filter((p): p is NonNullable<typeof p> => Boolean(p))
+                .slice(0, 4);
+              return ranked.map((p) => (
+                <Link
+                  key={p.slug}
+                  href={`/compare/${p.slug}`}
+                  className="rounded-2xl border border-border bg-background p-4 hover:border-primary/40 hover:bg-primary/[0.02] transition-all group"
+                >
+                  <div className="text-xs text-muted-foreground mb-1">vs</div>
+                  <div className="text-sm font-semibold group-hover:text-primary transition-colors">{p.competitor}</div>
+                  <div className="text-xs text-muted-foreground mt-2 line-clamp-2">{p.intro.split(". ")[0]}.</div>
+                  <div className="mt-3 inline-flex items-center text-xs text-primary group-hover:underline">
+                    Read comparison <ArrowRight className="ml-1 h-3 w-3" />
+                  </div>
+                </Link>
+              ));
+            })()}
           </div>
           <div className="text-center mt-8">
             <Link href="/compare" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground underline-offset-4 hover:underline">

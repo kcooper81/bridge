@@ -19,6 +19,8 @@ interface ChecklistItem {
   href: string;
   actionLabel: string;
   external?: boolean;
+  /** Optional items don't gate the "all done → hide" decision. */
+  optional?: boolean;
 }
 
 export function SetupChecklist() {
@@ -70,10 +72,14 @@ export function SetupChecklist() {
       done: false, // We don't check this dynamically — it's always shown as a suggestion
       href: "/settings/integrations",
       actionLabel: "Connect",
+      optional: true,
     },
   ];
 
-  const allDone = items.every((item) => item.done);
+  // Optional items don't gate hide; otherwise the Cloudflare suggestion
+  // (intentionally never auto-completes) kept the checklist visible
+  // forever even after a team finished setup.
+  const allDone = items.filter((i) => !i.optional).every((item) => item.done);
   if (allDone) return null;
 
   function handleDismiss() {

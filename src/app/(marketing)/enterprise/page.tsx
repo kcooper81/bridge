@@ -27,7 +27,7 @@ import {
 export const metadata = generatePageMetadata({
   title: "Enterprise AI DLP for ChatGPT, Claude & Gemini — Deploy in Days",
   description:
-    "Stop sensitive data reaching ChatGPT, Claude, Gemini, and Copilot before it leaves the browser. Managed extension, audit logs, SSO, and 19 compliance packs — deployed in days, not quarters.",
+    "Stop sensitive data reaching ChatGPT, Claude, Gemini, and Copilot before it leaves the browser. Managed extension, audit logs, SSO, and 20 compliance packs — deployed in days, not quarters.",
   path: "/enterprise",
   keywords: ["enterprise AI DLP", "AI data leak prevention", "ChatGPT enterprise security", "managed chrome extension DLP", "enterprise AI governance"],
 });

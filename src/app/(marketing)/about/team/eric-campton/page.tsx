@@ -77,7 +77,7 @@ export default function EricCamptonPage() {
 
           <h2 className="text-2xl font-semibold mt-12 mb-4">Background</h2>
           <p>
-            Fifteen-plus years building security and developer-tooling products. Has shipped browser extensions used inside Fortune 500 environments, network-level access controls that survived real adversarial conditions, and developer SDKs that other teams have built on top of.
+            Fifteen-plus years building security and developer-tooling products. Has shipped browser extensions used in enterprise environments, network-level access controls that survived real adversarial conditions, and developer SDKs that other teams have built on top of.
           </p>
           <p>
             Day-to-day, Eric works at the intersection of three things most security vendors keep separate: data loss prevention, prompt engineering practice, and the audit-trail requirements that legal, compliance, and risk teams actually ask for in procurement.

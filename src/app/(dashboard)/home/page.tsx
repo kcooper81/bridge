@@ -99,6 +99,17 @@ export default function DashboardHomePage() {
     );
   }
 
+  // Hide DashboardWidgets until there's real activity. The widget grid
+  // renders 4 stat cards with 0 + "Top Prompts: No prompts yet" + "Recent:
+  // No prompts yet" on day 1 — a wall of zeros that demoralizes new users.
+  // Mirror the vault pattern (hide stats until ≥1 prompt). Show widgets
+  // when there's any signal: prompts, members beyond the founder, or
+  // analytics data has arrived.
+  const hasActivity =
+    !analyticsLoading &&
+    !!analytics &&
+    (analytics.totalPrompts > 0 || analytics.totalUses > 0 || (analytics.topPrompts?.length ?? 0) > 0);
+
   return (
     <>
       <PageHeader
@@ -107,8 +118,45 @@ export default function DashboardHomePage() {
       />
       <OnboardingFlow />
       <SetupChecklist />
-      <DashboardWidgets analytics={analytics} loading={analyticsLoading} />
+      {hasActivity && (
+        <DashboardWidgets analytics={analytics} loading={analyticsLoading} />
+      )}
+      {!hasActivity && !analyticsLoading && (
+        <FirstRunPanel firstName={firstName} />
+      )}
     </>
+  );
+}
+
+function FirstRunPanel({ firstName }: { firstName: string }) {
+  return (
+    <div className="mt-2 rounded-2xl border border-border bg-card p-8 sm:p-10">
+      <h2 className="text-xl sm:text-2xl font-semibold tracking-tight">
+        Welcome{firstName ? `, ${firstName}` : ""} — here&apos;s what to try first
+      </h2>
+      <p className="mt-2 text-sm text-muted-foreground">
+        Your workspace is empty. Pick any of these to start. Analytics, top prompts, and team activity will fill in as you use TeamPrompt.
+      </p>
+      <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {[
+          { href: "/vault", title: "Create your first prompt", desc: "Templates with variables, version history, and one-click insert into ChatGPT, Claude, and Gemini." },
+          { href: "/team", title: "Invite a teammate", desc: "TeamPrompt gets useful around 2 people — start with one." },
+          { href: "/guardrails", title: "Install default DLP policies", desc: "20 compliance packs ready to go: HIPAA, SOC 2, PCI-DSS, GDPR, and more." },
+          { href: "/chat", title: "Try AI Chat", desc: "Bring an OpenAI / Anthropic / Google key. Every prompt scanned by your DLP rules." },
+          { href: "/settings/integrations", title: "Connect Slack or Cloudflare", desc: "Slack notifications on violations. Cloudflare for network-level AI tool control." },
+          { href: "/settings/billing", title: "See plans", desc: "Free forever for 3 users. Upgrade when your team grows." },
+        ].map((item) => (
+          <a
+            key={item.href}
+            href={item.href}
+            className="block rounded-xl border border-border bg-background p-4 hover:border-primary/40 hover:bg-primary/[0.02] transition-all"
+          >
+            <div className="text-sm font-semibold">{item.title}</div>
+            <div className="text-xs text-muted-foreground mt-1 leading-relaxed">{item.desc}</div>
+          </a>
+        ))}
+      </div>
+    </div>
   );
 }
 

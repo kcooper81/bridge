@@ -294,7 +294,7 @@ const sections: Section[] = [
         action:
           'Click "Browse All Packs" on the Guardrails Policies tab',
         expected:
-          "Modal opens showing 19 compliance packs grouped into 8 industry categories (Healthcare, Education, Finance, etc.). Installed packs show a green checkmark.",
+          "Modal opens showing 20 compliance packs grouped into 8 industry categories (Healthcare, Education, Finance, etc.). Installed packs show a green checkmark.",
         priority: "P1",
       },
       {

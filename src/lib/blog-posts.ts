@@ -350,7 +350,7 @@ TeamPrompt integrates with Cloudflare Gateway to block unapproved AI tools at th
 On the approved tools, you need real-time content scanning:
 
 - **Pattern detection** — regex rules for SSNs, credit cards, API keys
-- **Compliance packs** — one-click install for HIPAA, SOC 2, PCI-DSS, GDPR (19 frameworks)
+- **Compliance packs** — one-click install for HIPAA, SOC 2, PCI-DSS, GDPR (20 frameworks)
 - **LLM classification** — define sensitive topics in plain English, let AI classify prompts
 - **Auto-redaction** — replace sensitive data with safe [PLACEHOLDER] tokens
 
@@ -510,7 +510,7 @@ This policy should be reviewed:
 A policy without enforcement is just a document. TeamPrompt makes enforcement automatic:
 
 1. **AI Tool Policy** — approve/block tools, sync to Cloudflare Gateway for DNS-level enforcement
-2. **DLP Scanning** — 40+ rules + 19 compliance packs scan every prompt in real time
+2. **DLP Scanning** — 40+ rules + 20 compliance packs scan every prompt in real time
 3. **User Education** — contextual explanations when blocks occur
 4. **Audit Trail** — every interaction logged, exportable for auditors
 
@@ -590,7 +590,7 @@ TeamPrompt sits between your team and their AI tools — regardless of which too
 
 - **Works across both** (and Gemini, Copilot, Perplexity)
 - **Real-time DLP** before any data reaches the AI
-- **19 compliance packs** for regulated industries
+- **20 compliance packs** for regulated industries
 - **Unified audit trail** across all AI tools
 - **Network-level tool policy** via Cloudflare Gateway
 
@@ -681,7 +681,7 @@ Blocking all AI is counterproductive. Instead:
 
 **Layer 2 — Browser (TeamPrompt Extension):**
 - Scan every prompt for sensitive data
-- 40+ detection rules + 19 compliance packs
+- 40+ detection rules + 20 compliance packs
 - Auto-redact, warn, or block
 
 **Layer 3 — Governance (TeamPrompt Dashboard):**

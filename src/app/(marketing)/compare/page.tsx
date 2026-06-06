@@ -42,7 +42,7 @@ const comparisons = [
     slug: "chatgpt-teams",
     name: "ChatGPT Team Plan",
     tagline: "Single-vendor AI vs cross-platform governance",
-    teamPromptWins: ["Works across ALL AI tools (not just ChatGPT)", "DLP scanning + data blocking", "19 compliance frameworks", "Shared prompt library with approvals"],
+    teamPromptWins: ["Works across ALL AI tools (not just ChatGPT)", "DLP scanning + data blocking", "20 compliance frameworks", "Shared prompt library with approvals"],
     otherWins: ["Native ChatGPT features", "GPT-4 access included", "Custom GPTs"],
   },
   {
@@ -56,7 +56,7 @@ const comparisons = [
     slug: "best-ai-dlp-tools",
     name: "Best AI DLP Tools 2026",
     tagline: "The complete guide to AI data loss prevention",
-    teamPromptWins: ["Two-layer protection (network + browser)", "Prompt governance built-in", "Free tier + self-serve", "19 compliance packs"],
+    teamPromptWins: ["Two-layer protection (network + browser)", "Prompt governance built-in", "Free tier + self-serve", "20 compliance packs"],
     otherWins: [],
   },
   {
@@ -77,7 +77,7 @@ const comparisons = [
     slug: "lakera",
     name: "Lakera Guard",
     tagline: "DLP for teams vs API security for AI app builders",
-    teamPromptWins: ["Protects employees using commercial AI tools", "Prompt management included", "Multi-tool coverage (ChatGPT/Claude/Gemini/Copilot)", "19 compliance frameworks"],
+    teamPromptWins: ["Protects employees using commercial AI tools", "Prompt management included", "Multi-tool coverage (ChatGPT/Claude/Gemini/Copilot)", "20 compliance frameworks"],
     otherWins: ["Right tool if you're BUILDING an LLM-powered product", "Industry-leading prompt-injection research", "API-first integration"],
   },
   {

@@ -201,7 +201,7 @@ export const useCasePages: SeoPageData[] = [
         content: {
           persona: "Nina, CISO",
           setup: "The board asks Nina for evidence that AI tools aren't leaking sensitive company data. Employees across every department use ChatGPT, Claude, and Gemini daily — but there's no record of what data goes in.",
-          trigger: "Nina installs TeamPrompt and activates all 19 compliance packs (HIPAA, GDPR, PCI-DSS, CCPA, SOC 2, and PII). Every AI interaction is now scanned against 31 detection rules before data reaches any AI tool.",
+          trigger: "Nina installs TeamPrompt and activates all 20 compliance packs (HIPAA, GDPR, PCI-DSS, CCPA, SOC 2, and PII). Every AI interaction is now scanned against 31 detection rules before data reaches any AI tool.",
           resolution: "Nina generates an audit report showing every AI interaction across the organization with DLP status — blocked, sanitized, or clean. She presents the report to the board as evidence of AI governance.",
         },
       },
@@ -279,7 +279,7 @@ export const useCasePages: SeoPageData[] = [
       headline: "AI data loss prevention that works in real-time",
       subtitle:
         "Scan every outbound prompt for sensitive data. Auto-sanitize with safe placeholders. Deploy compliance packs for HIPAA, GDPR, PCI-DSS, CCPA, SOC 2, and PII.",
-      badges: ["Real-time scanning", "Auto-sanitization", "19 compliance packs"],
+      badges: ["Real-time scanning", "Auto-sanitization", "20 compliance packs"],
     },
     features: {
       sectionLabel: "DLP",

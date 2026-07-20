@@ -60,6 +60,10 @@ export const limiters = {
   transferAdmin: createLimiter(3, "10 m", "transfer-admin"),
   adminData: createLimiter(10, "1 m", "admin-data"),
   chatConversations: createLimiter(30, "1 m", "chat-conversations"),
+  // The streaming completion endpoint runs real LLM calls (on the org's BYO
+  // key). 40/min per user is generous for interactive chat but stops a script
+  // from draining the org's provider budget.
+  chat: createLimiter(40, "1 m", "chat"),
   mcpKeys: createLimiter(5, "1 m", "mcp-keys"),
   forgotPassword: createLimiter(3, "10 m", "forgot-password"),
 };

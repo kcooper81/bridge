@@ -147,26 +147,50 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Failed to create template pack" }, { status: 500 });
     }
 
-    // Associate prompts, guidelines, and rules
+    // SECURITY: promptIds/guidelineIds/ruleIds come from the request body.
+    // Before associating them, confirm each id belongs to the caller's org —
+    // otherwise an admin could reference another org's prompt/guideline/rule
+    // UUIDs here, and the install route (which copies source rows by id) would
+    // duplicate that org's content into this one. We filter the supplied ids
+    // down to the ones actually owned by auth.orgId and associate only those.
+    const packOrgId = auth.orgId;
+    const ownedIds = async (table: string, ids: unknown): Promise<string[]> => {
+      if (!Array.isArray(ids) || ids.length === 0) return [];
+      const candidateIds = ids.filter((v): v is string => typeof v === "string");
+      if (candidateIds.length === 0) return [];
+      const { data } = await db
+        .from(table)
+        .select("id")
+        .eq("org_id", packOrgId)
+        .in("id", candidateIds);
+      return (data || []).map((r: { id: string }) => r.id);
+    };
+
+    const [ownedPromptIds, ownedGuidelineIds, ownedRuleIds] = await Promise.all([
+      ownedIds("prompts", promptIds),
+      ownedIds("standards", guidelineIds),
+      ownedIds("security_rules", ruleIds),
+    ]);
+
     const associations = [];
-    if (promptIds && promptIds.length > 0) {
+    if (ownedPromptIds.length > 0) {
       associations.push(
         db.from("template_pack_prompts").insert(
-          promptIds.map((pid: string) => ({ pack_id: pack.id, prompt_id: pid }))
+          ownedPromptIds.map((pid) => ({ pack_id: pack.id, prompt_id: pid }))
         )
       );
     }
-    if (guidelineIds && guidelineIds.length > 0) {
+    if (ownedGuidelineIds.length > 0) {
       associations.push(
         db.from("template_pack_guidelines").insert(
-          guidelineIds.map((gid: string) => ({ pack_id: pack.id, guideline_id: gid }))
+          ownedGuidelineIds.map((gid) => ({ pack_id: pack.id, guideline_id: gid }))
         )
       );
     }
-    if (ruleIds && ruleIds.length > 0) {
+    if (ownedRuleIds.length > 0) {
       associations.push(
         db.from("template_pack_rules").insert(
-          ruleIds.map((rid: string) => ({ pack_id: pack.id, rule_id: rid }))
+          ownedRuleIds.map((rid) => ({ pack_id: pack.id, rule_id: rid }))
         )
       );
     }

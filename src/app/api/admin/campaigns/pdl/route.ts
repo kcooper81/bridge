@@ -38,6 +38,8 @@ function getHunterKey(): string | null {
 export async function POST(request: NextRequest) {
   const auth = await verifyAdminAccess();
   if (!auth) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  // Burns metered paid-API credits — restrict to super admins.
+  if (!auth.isSuperAdmin) return NextResponse.json({ error: "Super admin required" }, { status: 403 });
 
   const pdlKey = getPdlKey();
   if (!pdlKey) {

@@ -5,6 +5,7 @@
 import "server-only";
 import { createHmac } from "node:crypto";
 import { createServiceClient } from "@/lib/supabase/server";
+import { assertPublicHttpsUrl } from "@/lib/ssrf-guard";
 
 export type WebhookEventType = "violation" | "audit";
 
@@ -45,10 +46,26 @@ export async function deliverWebhookEvent(payload: WebhookEventPayload): Promise
           }
 
           try {
+            // SSRF guard: re-validate at delivery time (the stored URL's DNS
+            // could now point at an internal address) and refuse to follow
+            // redirects, so a public host can't 302 us onto 169.254.169.254.
+            const check = await assertPublicHttpsUrl(d.url);
+            if (!check.ok) {
+              await db
+                .from("webhook_destinations")
+                .update({
+                  last_delivery_at: new Date().toISOString(),
+                  last_delivery_status: "blocked",
+                  last_delivery_error: check.reason || "URL blocked",
+                })
+                .eq("id", d.id);
+              return;
+            }
             const res = await fetch(d.url, {
               method: "POST",
               headers,
               body,
+              redirect: "manual",
               // Don't let a slow webhook back up the caller.
               signal: AbortSignal.timeout(8000),
             });

@@ -14,7 +14,40 @@ import { createServiceClient } from "@/lib/supabase/server";
  */
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    // Verify the Svix signature (Resend signs webhooks via Svix) before
+    // trusting any event. Without this, anyone could POST forged events to
+    // inflate campaign open/click counters, flip a campaign to "sent", or —
+    // most damaging — mass-unsubscribe arbitrary addresses via
+    // email.unsubscribed. Same pattern as the inbound-email webhook.
+    const webhookSecret = process.env.RESEND_WEBHOOK_SECRET;
+    const rawBody = await request.text();
+
+    if (webhookSecret) {
+      const svixId = request.headers.get("svix-id");
+      const svixTimestamp = request.headers.get("svix-timestamp");
+      const svixSignature = request.headers.get("svix-signature");
+
+      if (!svixId || !svixTimestamp || !svixSignature) {
+        return NextResponse.json({ error: "Missing webhook signature headers" }, { status: 401 });
+      }
+
+      try {
+        const { Webhook } = await import("svix");
+        const wh = new Webhook(webhookSecret);
+        wh.verify(rawBody, {
+          "svix-id": svixId,
+          "svix-timestamp": svixTimestamp,
+          "svix-signature": svixSignature,
+        });
+      } catch (verifyErr) {
+        console.error("[Resend Webhook] signature verification failed:", verifyErr);
+        return NextResponse.json({ error: "Invalid webhook signature" }, { status: 401 });
+      }
+    } else if (process.env.NODE_ENV === "production") {
+      return NextResponse.json({ error: "Webhook secret not configured" }, { status: 500 });
+    }
+
+    const body = JSON.parse(rawBody);
     const { type, data } = body;
 
     console.log("[Resend Webhook]", type, JSON.stringify(data || {}).slice(0, 200));
@@ -77,41 +110,29 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ received: true });
     }
 
-    // Increment counter directly (read + increment + write)
-    const { data: row, error: readError } = await db
-      .from("email_campaigns")
-      .select(column)
-      .eq("id", campaign.id)
-      .single();
-
-    if (readError) {
-      console.error("[Resend Webhook] Read error:", readError.message);
-    }
-
-    if (row) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const currentVal = ((row as any)[column] as number) || 0;
-      const { error: updateError } = await db
-        .from("email_campaigns")
-        .update({
-          [column]: currentVal + 1,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", campaign.id);
-
-      if (updateError) {
-        console.error("[Resend Webhook] Update error:", updateError.message);
-      } else {
-        console.log("[Resend Webhook] Incremented", column, "to", currentVal + 1);
-      }
+    // Atomic increment via RPC (defined in migration 094). Campaign blasts
+    // deliver thousands of concurrent open/click events — a read-then-write
+    // here loses updates under load. On a transient DB error we return 500 so
+    // Resend retries rather than silently dropping the event.
+    const { error: incErr } = await db.rpc("increment_campaign_counter", {
+      campaign_id: campaign.id,
+      counter_column: column,
+    });
+    if (incErr) {
+      console.error("[Resend Webhook] increment failed:", incErr.message);
+      return NextResponse.json({ error: "Increment failed" }, { status: 500 });
     }
 
     // Handle unsubscribe — also mark the contact as unsubscribed
     if (type === "email.unsubscribed" && data.email) {
-      await db
+      const { error: unsubErr } = await db
         .from("campaign_contacts")
         .update({ unsubscribed: true, updated_at: new Date().toISOString() })
         .eq("email", data.email.toLowerCase());
+      if (unsubErr) {
+        console.error("[Resend Webhook] unsubscribe write failed:", unsubErr.message);
+        return NextResponse.json({ error: "Unsubscribe write failed" }, { status: 500 });
+      }
     }
 
     return NextResponse.json({ received: true });

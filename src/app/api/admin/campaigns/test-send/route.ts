@@ -6,6 +6,8 @@ import { Resend } from "resend";
 export async function POST(request: NextRequest) {
   const auth = await verifyAdminAccess();
   if (!auth) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  // Sends arbitrary-HTML email to an arbitrary address — super-admin-only.
+  if (!auth.isSuperAdmin) return NextResponse.json({ error: "Super admin required" }, { status: 403 });
 
   if (!process.env.RESEND_API_KEY) {
     return NextResponse.json({ error: "Resend API key not configured" }, { status: 500 });

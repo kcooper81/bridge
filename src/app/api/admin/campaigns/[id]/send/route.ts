@@ -13,6 +13,9 @@ export async function POST(
 ) {
   const auth = await verifyAdminAccess();
   if (!auth) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  // Blasting a broadcast to the entire customer base is super-admin-only;
+  // support staff must not be able to trigger it.
+  if (!auth.isSuperAdmin) return NextResponse.json({ error: "Super admin required" }, { status: 403 });
 
   if (!process.env.RESEND_API_KEY) {
     return NextResponse.json({ error: "Resend API key not configured" }, { status: 500 });

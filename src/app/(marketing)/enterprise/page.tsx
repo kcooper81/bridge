@@ -218,15 +218,16 @@ export default function EnterprisePage() {
           </p>
 
           <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/signup">
-              <Button
-                size="lg"
-                className="text-base px-8 h-12 rounded-full font-semibold"
-              >
+            <Button
+              asChild
+              size="lg"
+              className="text-base px-8 h-12 rounded-full font-semibold"
+            >
+              <Link href="/signup">
                 Start for free
                 <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
+              </Link>
+            </Button>
             <ContactSalesModal />
           </div>
         </div>

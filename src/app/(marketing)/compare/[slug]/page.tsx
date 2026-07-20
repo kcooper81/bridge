@@ -107,16 +107,16 @@ export default function ComparisonDetailPage({ params }: { params: { slug: strin
           </div>
 
           <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
-            <Link href="/signup">
-              <Button size="lg" className="rounded-lg font-bold px-8">
+            <Button asChild size="lg" className="rounded-lg font-bold px-8">
+              <Link href="/signup">
                 Start free <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
-            <Link href="/pricing">
-              <Button size="lg" variant="outline" className="rounded-lg font-bold px-8">
+              </Link>
+            </Button>
+            <Button asChild size="lg" variant="outline" className="rounded-lg font-bold px-8">
+              <Link href="/pricing">
                 See pricing
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
 
           {/* Pricing tile — buyers arriving from "X alternative" queries
@@ -213,11 +213,11 @@ export default function ComparisonDetailPage({ params }: { params: { slug: strin
             {page.verdict}
           </p>
           <div className="text-center mt-8">
-            <Link href="/signup">
-              <Button size="lg" className="rounded-lg font-bold px-8">
+            <Button asChild size="lg" className="rounded-lg font-bold px-8">
+              <Link href="/signup">
                 Start free <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
         </div>
       </section>
@@ -236,14 +236,13 @@ export default function ComparisonDetailPage({ params }: { params: { slug: strin
             {(() => {
               // Topical clusters — keep ordering stable so users coming
               // from /compare/polymer see Cyberhaven first, not Notion.
-              const TOPICAL: Record<string, string[]> = {
-                "dlp-platform": ["nightfall", "polymer", "cyberhaven", "purview"],
-                "ai-observability": ["witness-ai", "prompt-security", "lakera"],
-                "data-discovery": ["bigid", "cyberhaven"],
-                "ai-tool-direct": ["chatgpt-teams", "notion"],
-                "listicle": ["best-ai-dlp-tools"],
-              };
-              // Map each slug to its primary cluster.
+              //
+              // SLUG_CLUSTER is the single source of truth for membership;
+              // TOPICAL is derived from it. These were previously two
+              // hand-maintained maps that had drifted — cyberhaven was listed
+              // under both dlp-platform and data-discovery in TOPICAL while
+              // SLUG_CLUSTER assigned it dlp-platform, so its "same cluster"
+              // set resolved inconsistently depending on which map was read.
               const SLUG_CLUSTER: Record<string, string> = {
                 "nightfall": "dlp-platform",
                 "polymer": "dlp-platform",
@@ -257,6 +256,21 @@ export default function ComparisonDetailPage({ params }: { params: { slug: strin
                 "notion": "ai-tool-direct",
                 "best-ai-dlp-tools": "listicle",
               };
+              const TOPICAL = Object.entries(SLUG_CLUSTER).reduce<Record<string, string[]>>(
+                (acc, [slug, cluster]) => {
+                  (acc[cluster] ||= []).push(slug);
+                  return acc;
+                },
+                {}
+              );
+
+              // The category hub is pinned rather than left to cluster
+              // overflow. It sits alone in the "listicle" cluster, so under
+              // plain declaration-order overflow it landed past the display
+              // cap on nearly every page and received almost no internal
+              // links — while being the page we most want to rank.
+              const HUB = "best-ai-dlp-tools";
+
               const myCluster = SLUG_CLUSTER[page.slug] || "dlp-platform";
               const sameCluster = (TOPICAL[myCluster] || []).filter((s) => s !== page.slug);
               const otherClusters = Object.entries(TOPICAL)
@@ -265,13 +279,16 @@ export default function ComparisonDetailPage({ params }: { params: { slug: strin
                 .filter((s) => s !== page.slug);
               const seen = new Set<string>();
               const deduped: string[] = [];
-              for (const s of [...sameCluster, ...otherClusters]) {
-                if (!seen.has(s)) { seen.add(s); deduped.push(s); }
+              for (const s of [HUB, ...sameCluster, ...otherClusters]) {
+                if (s !== page.slug && !seen.has(s)) { seen.add(s); deduped.push(s); }
               }
+              // 8, not 4: with 11 comparison pages this interlinks nearly the
+              // whole cluster and fills two clean rows at lg. The old cap of 4
+              // left the weakest pages with almost no inbound internal links.
               const ranked = deduped
                 .map((slug) => COMPARISON_PAGES.find((p) => p.slug === slug))
                 .filter((p): p is NonNullable<typeof p> => Boolean(p))
-                .slice(0, 4);
+                .slice(0, 8);
               return ranked.map((p) => (
                 <Link
                   key={p.slug}

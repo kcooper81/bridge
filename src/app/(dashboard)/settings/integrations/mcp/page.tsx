@@ -160,11 +160,11 @@ export default function McpSettingsPage() {
     <div className="space-y-6 max-w-3xl">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <Link href="/settings/integrations">
-          <Button variant="ghost" size="icon">
+        <Button asChild variant="ghost" size="icon">
+          <Link href="/settings/integrations">
             <ArrowLeft className="h-4 w-4" />
-          </Button>
-        </Link>
+          </Link>
+        </Button>
         <div className="flex-1">
           <h1 className="text-xl font-bold flex items-center gap-2">
             <Plug2 className="h-5 w-5" />

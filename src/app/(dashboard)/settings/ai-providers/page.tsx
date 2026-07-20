@@ -294,9 +294,9 @@ export default function AIProvidersPage() {
           <p className="text-sm font-medium">AI-Powered DLP Detection</p>
           <p className="text-xs text-muted-foreground">Use AI models for advanced PII detection in your guardrail rules — detects names, addresses, medical info that patterns miss.</p>
         </div>
-        <Link href="/guardrails">
-          <Button variant="outline" size="sm">Configure</Button>
-        </Link>
+        <Button asChild variant="outline" size="sm">
+          <Link href="/guardrails">Configure</Link>
+        </Button>
       </Card>
     </div>
   );

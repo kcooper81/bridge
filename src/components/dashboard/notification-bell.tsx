@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useNotifications } from "@/hooks/use-notifications";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -79,17 +80,42 @@ function NotificationItem({
   onMarkRead: (id: string) => void;
   onDelete: (id: string) => void;
 }) {
+  const router = useRouter();
   const Icon = NOTIFICATION_ICONS[notification.type] || Info;
   const colorClass = NOTIFICATION_COLORS[notification.type] || "text-muted-foreground bg-muted";
   const link = getNotificationLink(notification);
 
+  const navigate = () => {
+    if (!notification.read) onMarkRead(notification.id);
+    if (link) router.push(link);
+  };
+
   const content = (
+    // Navigation is handled by an onClick on this div rather than an outer
+    // <Link>. The row contains the mark-read/delete <button>s, and wrapping
+    // buttons in an <a> is invalid HTML that the parser reparents — the cause
+    // of the "removeChild NotFoundError" crashes on the shared dashboard header
+    // (/home, /vault, /chat).
     <div
       className={cn(
         "flex items-start gap-3 p-3 rounded-xl transition-all duration-200",
         !notification.read && "bg-primary/5",
-        "hover:bg-muted/50 group"
+        "hover:bg-muted/50 group",
+        link && "cursor-pointer"
       )}
+      {...(link
+        ? {
+            role: "button" as const,
+            tabIndex: 0,
+            onClick: navigate,
+            onKeyDown: (e: React.KeyboardEvent) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                navigate();
+              }
+            },
+          }
+        : {})}
     >
       <div className={cn("flex-shrink-0 h-9 w-9 rounded-lg flex items-center justify-center", colorClass)}>
         <Icon className="h-4 w-4" />
@@ -142,14 +168,6 @@ function NotificationItem({
       </div>
     </div>
   );
-
-  if (link) {
-    return (
-      <Link href={link} onClick={() => !notification.read && onMarkRead(notification.id)}>
-        {content}
-      </Link>
-    );
-  }
 
   return content;
 }
@@ -231,11 +249,11 @@ export function NotificationBell() {
 
         {notifications.length > 0 && (
           <div className="border-t border-border/50 p-2">
-            <Link href="/notifications" onClick={() => setOpen(false)}>
-              <Button variant="ghost" className="w-full text-sm">
+            <Button asChild variant="ghost" className="w-full text-sm">
+              <Link href="/notifications" onClick={() => setOpen(false)}>
                 View all notifications
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
         )}
       </PopoverContent>

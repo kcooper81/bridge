@@ -185,11 +185,11 @@ export default function CaseStudiesPage() {
           <p className="mt-4 text-lg text-muted-foreground">
             Start free. No credit card required.
           </p>
-          <Link href="/signup" className="mt-8 inline-block">
-            <Button size="lg" className="rounded-lg font-bold px-8">
+          <Button asChild size="lg" className="mt-8 rounded-lg font-bold px-8">
+            <Link href="/signup">
               Get Started Free <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       </section>
 

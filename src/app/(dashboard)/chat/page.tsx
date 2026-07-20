@@ -306,6 +306,9 @@ interface ChatMsg {
 }
 
 interface PendingFile {
+  // Stable identity for React keys. Index keys made removing a mid-upload file
+  // reassign another file's async DLP/scan status to the wrong row.
+  id: string;
   file: File;
   name: string;
   type: string;
@@ -535,7 +538,7 @@ export default function ChatPage() {
         } catch { toast.error(`Failed to process ${file.name}`); }
       } else {
         // Documents — add to pendingFiles, upload for text extraction
-        const pf: PendingFile = { file, name: file.name, type: file.type, size: file.size, uploading: true };
+        const pf: PendingFile = { id: `${file.name}-${file.size}-${file.lastModified}-${Date.now()}`, file, name: file.name, type: file.type, size: file.size, uploading: true };
         setPendingFiles((prev) => [...prev, pf]);
 
         // Upload for server-side text extraction + DLP scan
@@ -3050,17 +3053,17 @@ export default function ChatPage() {
                   </div>
 
                   <div className="flex flex-col sm:flex-row gap-2 justify-center">
-                    <Link href="/settings/ai-providers">
-                      <Button size="lg">
+                    <Button asChild size="lg">
+                      <Link href="/settings/ai-providers">
                         <Settings className="h-4 w-4 mr-2" />
                         Configure AI provider
-                      </Button>
-                    </Link>
-                    <Link href="/vault">
-                      <Button variant="outline" size="lg">
+                      </Link>
+                    </Button>
+                    <Button asChild variant="outline" size="lg">
+                      <Link href="/vault">
                         Use Prompt Library instead
-                      </Button>
-                    </Link>
+                      </Link>
+                    </Button>
                   </div>
 
                   <p className="text-center text-xs text-muted-foreground mt-6">
@@ -3260,7 +3263,7 @@ export default function ChatPage() {
                           </div>
                         ))}
                         {pendingFiles.map((pf, idx) => (
-                          <div key={`file-${idx}`} className={cn(
+                          <div key={pf.id} className={cn(
                             "relative group flex items-center gap-2 border rounded-lg px-3 py-2 max-w-[240px]",
                             pf.dlpPassed ? "border-green-200 dark:border-green-800/40 bg-green-50/50 dark:bg-green-950/20" :
                             pf.error ? "border-red-200 dark:border-red-800/40 bg-red-50/50 dark:bg-red-950/20" : "bg-muted/50"
@@ -3519,11 +3522,11 @@ export default function ChatPage() {
         </ScrollArea>
 
         <div className="p-2 border-t flex-shrink-0">
-          <Link href="/vault">
-            <Button variant="ghost" size="sm" className="w-full text-xs gap-1.5 text-muted-foreground">
+          <Button asChild variant="ghost" size="sm" className="w-full text-xs gap-1.5 text-muted-foreground">
+            <Link href="/vault">
               <FileText className="h-3 w-3" />Manage Prompts
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       </div>
 
@@ -3656,17 +3659,30 @@ export default function ChatPage() {
                     }
                   }
 
+                  const scrollToMessage = () => {
+                    const el = document.querySelector(`[data-msg-id="${m.id}"]`);
+                    if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+                  };
                   return (
-                    <button
+                    // Outer element is a div (role=button), not a <button>: it
+                    // contains the inner save <button>, and a button-in-button is
+                    // invalid HTML that the parser reparents — which desyncs
+                    // React's tree from the real DOM and throws
+                    // "removeChild NotFoundError" on unmount (the /chat crash).
+                    <div
                       key={m.id || i}
+                      role="button"
+                      tabIndex={0}
                       className={cn(
-                        "group/entry w-full flex items-start gap-2.5 px-2.5 py-2 rounded-lg text-left transition-colors hover:bg-muted/50",
+                        "group/entry w-full flex items-start gap-2.5 px-2.5 py-2 rounded-lg text-left transition-colors hover:bg-muted/50 cursor-pointer",
                         m.role === "user" ? "opacity-75" : ""
                       )}
-                      onClick={() => {
-                        // Scroll to this message
-                        const el = document.querySelector(`[data-msg-id="${m.id}"]`);
-                        if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+                      onClick={scrollToMessage}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          scrollToMessage();
+                        }
                       }}
                     >
                       <IconComp className={cn("h-3.5 w-3.5 flex-shrink-0 mt-0.5", accent)} />
@@ -3692,7 +3708,7 @@ export default function ChatPage() {
                           {savedItems.some(s => s.source_message_id === m.id) ? <BookmarkCheck className="h-3 w-3" /> : <Bookmark className="h-3 w-3" />}
                         </button>
                       )}
-                    </button>
+                    </div>
                   );
                 })}
 

@@ -587,11 +587,11 @@ export default function IntegrationsPage() {
             <p className="text-sm text-muted-foreground mb-4">
               Connect Claude Desktop, Cursor, Windsurf, and other AI tools to your prompt library, DLP, and audit logging.
             </p>
-            <Link href="/settings/integrations/mcp">
-              <Button variant="outline" size="sm" className="w-full">
+            <Button asChild variant="outline" size="sm" className="w-full">
+              <Link href="/settings/integrations/mcp">
                 Configure
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </CardContent>
         </Card>
 

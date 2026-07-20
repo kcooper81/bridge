@@ -58,12 +58,12 @@ export function MarketingFooter() {
               See and control how your team uses AI across ChatGPT, Claude, Gemini, Copilot, and Perplexity.
             </p>
           </div>
-          <Link href="/signup" className="shrink-0">
-            <Button className="rounded-full px-8 font-semibold bg-white text-zinc-900 hover:bg-zinc-200">
+          <Button asChild className="shrink-0 rounded-full px-8 font-semibold bg-white text-zinc-900 hover:bg-zinc-200">
+            <Link href="/signup">
               Create free workspace
               <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-8 mb-12">

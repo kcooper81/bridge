@@ -51,9 +51,9 @@ export function PlanUsageTab() {
           <p className="text-sm text-muted-foreground">
             Get unlimited prompts, advanced analytics, custom security rules, and more with a paid plan.
           </p>
-          <Link href="/settings/billing">
-            <Button>View Plans</Button>
-          </Link>
+          <Button asChild>
+            <Link href="/settings/billing">View Plans</Link>
+          </Button>
         </div>
       )}
 
@@ -114,9 +114,9 @@ export function PlanUsageTab() {
           <p className="text-sm text-muted-foreground mb-4">
             Manage your subscription, update payment methods, and view invoices.
           </p>
-          <Link href="/settings/billing">
-            <Button variant="outline">Manage Billing</Button>
-          </Link>
+          <Button asChild variant="outline">
+            <Link href="/settings/billing">Manage Billing</Link>
+          </Button>
         </CardContent>
       </Card>
     </div>

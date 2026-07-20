@@ -53,6 +53,12 @@ export interface Organization {
   domain: string | null;
   logo: string | null;
   plan: PlanTier;
+  /**
+   * Set when the org drops to a plan whose max_members is below its headcount.
+   * Until this passes, over-limit members keep access; afterwards seat
+   * entitlement is enforced. See src/lib/billing/seats.ts.
+   */
+  plan_grace_until?: string | null;
   settings: {
     allow_personal_prompts?: boolean;
     setup_complete?: boolean;

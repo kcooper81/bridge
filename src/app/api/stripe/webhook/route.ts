@@ -4,6 +4,9 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { limiters, checkRateLimit } from "@/lib/rate-limit";
 import { notifyAdminsOfNewSubscription } from "@/lib/notify-admins";
 import { logServiceError } from "@/lib/log-error";
+import { computeGraceUntil } from "@/lib/billing/seats";
+import { getPlanLimits } from "@/lib/billing/plans";
+import type { PlanTier } from "@/lib/types";
 
 // Pin to the latest version supported by stripe@^17 (the SDK only types
 // "2025-02-24.acacia"). Stripe maintains backward-compatible payload shapes,
@@ -59,6 +62,79 @@ function getPlanFromPriceId(priceId: string): string {
   return "free";
 }
 
+/**
+ * After an org's plan changes, reconcile its seat-grace window.
+ *
+ * A downgrade/cancel used to leave every member fully active on a smaller plan
+ * (an org could buy Team's 50 seats, then cancel and keep all 50 on Free's cap
+ * of 3, forever). We don't remove anyone — that's destructive and irreversible.
+ * Instead we stamp a grace deadline; once it passes, seat entitlement kicks in
+ * (src/lib/billing/seats.ts) and members beyond the cap lose access until the
+ * org upgrades or trims the team.
+ *
+ * Clears the stamp when the org is back within its limit. Never throws —
+ * billing bookkeeping must not fail the webhook.
+ */
+async function reconcilePlanGrace(
+  db: ReturnType<typeof createServiceClient>,
+  orgId: string,
+  plan: string
+) {
+  try {
+    const { count } = await db
+      .from("profiles")
+      .select("id", { count: "exact", head: true })
+      .eq("org_id", orgId);
+    const memberCount = count || 0;
+
+    const { data: org } = await db
+      .from("organizations")
+      .select("plan_grace_until")
+      .eq("id", orgId)
+      .maybeSingle();
+
+    const graceUntil = computeGraceUntil(plan as PlanTier, memberCount);
+
+    // Already inside a grace window — don't extend it on repeat webhooks.
+    if (graceUntil && org?.plan_grace_until) return;
+
+    const { error } = await db
+      .from("organizations")
+      .update({ plan_grace_until: graceUntil })
+      .eq("id", orgId);
+    if (error) {
+      console.error("reconcilePlanGrace: failed to write grace window", { orgId, error });
+      return;
+    }
+
+    if (!graceUntil) return; // back within limits; nothing to announce
+
+    const maxMembers = getPlanLimits(plan as PlanTier).max_members;
+    const deadline = new Date(graceUntil).toLocaleDateString("en-US", {
+      month: "long", day: "numeric", year: "numeric",
+    });
+
+    // Tell the admins. `system` is an allowed notifications.type value.
+    await db.from("notifications").insert(
+      (
+        await db.from("profiles").select("id").eq("org_id", orgId).eq("role", "admin")
+      ).data?.map((a: { id: string }) => ({
+        user_id: a.id,
+        org_id: orgId,
+        type: "system",
+        title: "Action needed: your team is over its plan limit",
+        message:
+          `Your workspace has ${memberCount} members but the ${plan} plan includes ${maxMembers}. ` +
+          `Everyone keeps access until ${deadline}. After that, members beyond the limit will lose ` +
+          `access until you upgrade or remove members.`,
+        metadata: { member_count: memberCount, max_members: maxMembers, plan, grace_until: graceUntil },
+      })) || []
+    );
+  } catch (err) {
+    console.error("reconcilePlanGrace: unexpected failure", { orgId, err });
+  }
+}
+
 async function upsertSubscription(
   db: ReturnType<typeof createServiceClient>,
   orgId: string,
@@ -102,6 +178,9 @@ async function upsertSubscription(
     console.error("upsertSubscription: failed to update organization plan", { orgId, plan, error: orgUpdateError });
     throw new Error(`Failed to update organization plan: ${orgUpdateError.message}`);
   }
+
+  // Covers plan *downgrades* delivered as customer.subscription.updated.
+  await reconcilePlanGrace(db, orgId, plan);
 }
 
 export async function POST(request: NextRequest) {
@@ -252,6 +331,10 @@ export async function POST(request: NextRequest) {
           console.error("Webhook customer.subscription.deleted: failed to update organization", { orgId, error: cancelOrgError });
           return await releaseAndRetry("db_error");
         }
+
+        // Org just dropped to Free — start the seat grace window if it's now
+        // over the cap, and notify its admins.
+        await reconcilePlanGrace(db, orgId, "free");
         break;
       }
 
@@ -488,6 +571,7 @@ export async function POST(request: NextRequest) {
         }
 
         await db.from("organizations").update({ plan: "free" }).eq("id", subRow.org_id);
+        await reconcilePlanGrace(db, subRow.org_id, "free");
         break;
       }
     }

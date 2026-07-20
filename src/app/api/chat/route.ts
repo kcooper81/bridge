@@ -5,6 +5,7 @@ import { createAIModel } from "@/lib/ai/providers";
 import { decrypt } from "@/lib/crypto";
 import { notifyDlpViolation } from "@/lib/slack/notify";
 import { limiters, checkRateLimit } from "@/lib/rate-limit";
+import { hasSeat } from "@/lib/billing/seats";
 
 // Ceiling on generated tokens per request. Without a cap, streamText runs
 // unbounded and a single request can burn a large amount of the org's provider
@@ -67,6 +68,16 @@ export async function POST(request: NextRequest) {
         status: 400,
         headers: { "Content-Type": "application/json" },
       });
+    }
+
+    // Seat gate. The dashboard redirects unseated members away, but this
+    // endpoint spends real money on the org's provider key, so it must be
+    // enforced server-side too rather than relying on the UI.
+    if (!(await hasSeat(user.id, profile.org_id))) {
+      return jsonError(
+        "Your workspace is over its plan's member limit and your seat is paused. Ask an admin to upgrade or free a seat.",
+        403,
+      );
     }
 
     const body = await request.json();

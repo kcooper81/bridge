@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { limiters, checkRateLimit } from "@/lib/rate-limit";
 import { cancelOrgSubscription } from "@/lib/cancel-org-subscription";
+import { syncStripeSeats } from "@/lib/stripe-seats";
 
 export async function POST(request: NextRequest) {
   try {
@@ -171,6 +172,11 @@ export async function POST(request: NextRequest) {
         db.from("subscriptions").delete().eq("org_id", oldOrgId),
       ]);
       await db.from("organizations").delete().eq("id", oldOrgId);
+    } else {
+      // Multi-member org just lost a seat — sync the lower quantity to Stripe.
+      // Previously this path never synced, so the org kept paying for the
+      // member who left until some unrelated membership change triggered it.
+      void syncStripeSeats(oldOrgId);
     }
 
     return NextResponse.json({ success: true, newOrgId: newOrg.id });

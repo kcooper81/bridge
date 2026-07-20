@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { getSeatStatus } from "@/lib/billing/seats";
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
@@ -30,6 +31,24 @@ export default async function DashboardLayout({
 
   if (!user) {
     redirect("/login");
+  }
+
+  // Seat entitlement gate. After a downgrade an org can hold more members than
+  // its plan allows; rather than deleting anyone, members outside the seat
+  // ordering lose access until the org upgrades or frees a seat. Admins are
+  // always seated (they rank first) so an org can always be fixed from inside.
+  // Fails open — see getSeatStatus.
+  const { data: seatProfile } = await createServiceClient()
+    .from("profiles")
+    .select("org_id, is_super_admin")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (seatProfile?.org_id && !seatProfile.is_super_admin) {
+    const seat = await getSeatStatus(user.id, seatProfile.org_id);
+    if (!seat.hasSeat) {
+      redirect("/seat-unavailable");
+    }
   }
 
   const {

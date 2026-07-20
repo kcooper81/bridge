@@ -4,6 +4,7 @@ import { PLAN_LIMITS } from "@/lib/constants";
 import { limiters, checkRateLimit } from "@/lib/rate-limit";
 import { cancelOrgSubscription } from "@/lib/cancel-org-subscription";
 import type { PlanTier } from "@/lib/types";
+import { syncStripeSeats } from "@/lib/stripe-seats";
 
 const FREE_PROVIDERS = new Set([
   "gmail.com",
@@ -139,6 +140,10 @@ export async function POST(request: NextRequest) {
       console.error("Domain join: failed to move user:", moveError);
       return NextResponse.json({ joined: false });
     }
+
+    // Push the higher seat count to Stripe. Without this the target org gains a
+    // member but keeps billing the old quantity (underbilling drift).
+    void syncStripeSeats(targetOrg.id);
 
     // Cancel any Stripe subscription before deleting
     await cancelOrgSubscription(db, oldOrgId);

@@ -8,7 +8,7 @@ import Link from "next/link";
 
 export function PaymentBanner() {
   const { subscription, planLimits } = useSubscription();
-  const { members, currentUserRole } = useOrg();
+  const { members, currentUserRole, org } = useOrg();
   const { isSuperAdmin } = useAuth();
 
   // Super admins bypass all plan restrictions
@@ -21,6 +21,21 @@ export function PaymentBanner() {
     isAdmin &&
     planLimits.max_members !== -1 &&
     members.length > planLimits.max_members;
+
+  // Grace window before over-limit members actually lose access. Set by the
+  // Stripe webhook on downgrade (see reconcilePlanGrace); enforced by
+  // src/lib/billing/seats.ts once it lapses.
+  const graceAt = org?.plan_grace_until ? new Date(org.plan_grace_until) : null;
+  const graceValid = graceAt !== null && !Number.isNaN(graceAt.getTime());
+  const graceExpired = overMemberLimit && (!graceValid || graceAt!.getTime() <= Date.now());
+  const graceDeadline =
+    graceValid && !graceExpired
+      ? graceAt!.toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" })
+      : null;
+  const daysLeft =
+    graceValid && !graceExpired
+      ? Math.ceil((graceAt!.getTime() - Date.now()) / (24 * 60 * 60 * 1000))
+      : null;
 
   return (
     <>
@@ -62,15 +77,36 @@ export function PaymentBanner() {
       )}
 
       {overMemberLimit && (
-        <div className="mb-4 flex items-center gap-3 rounded-lg border border-tp-yellow/30 bg-tp-yellow/10 px-4 py-3">
-          <AlertTriangle className="h-4 w-4 text-tp-yellow shrink-0" />
+        <div
+          className={`mb-4 flex items-center gap-3 rounded-lg border px-4 py-3 ${
+            graceExpired
+              ? "border-destructive/30 bg-destructive/10"
+              : "border-tp-yellow/30 bg-tp-yellow/10"
+          }`}
+        >
+          <AlertTriangle
+            className={`h-4 w-4 shrink-0 ${graceExpired ? "text-destructive" : "text-tp-yellow"}`}
+          />
           <p className="text-sm flex-1">
-            Your organization has {members.length} members but your plan allows {planLimits.max_members}.
-            New members cannot be added.{" "}
+            Your organization has {members.length} members but your plan allows{" "}
+            {planLimits.max_members}.{" "}
+            {graceExpired ? (
+              <>
+                Members beyond the limit have <strong>lost access</strong>.{" "}
+              </>
+            ) : graceDeadline ? (
+              <>
+                Everyone keeps access until <strong>{graceDeadline}</strong>
+                {daysLeft !== null && daysLeft >= 0 ? ` (${daysLeft} day${daysLeft === 1 ? "" : "s"} left)` : ""}
+                , after which members beyond the limit lose access.{" "}
+              </>
+            ) : (
+              <>New members cannot be added. </>
+            )}
             <Link href="/settings/billing" className="font-semibold text-primary underline">
               Upgrade your plan
             </Link>{" "}
-            to increase your member limit.
+            or remove members to restore access.
           </p>
         </div>
       )}

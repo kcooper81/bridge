@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { limiters, checkRateLimit } from "@/lib/rate-limit";
+import { syncStripeSeats } from "@/lib/stripe-seats";
 
 export async function POST(request: NextRequest) {
   try {
@@ -64,11 +65,25 @@ export async function POST(request: NextRequest) {
     // Remove from all teams
     await db.from("team_members").delete().in("user_id", targetIds);
 
-    // Remove from org (set org_id to null, clear sync source)
-    await db
+    // Remove from org (set org_id to null, clear sync source).
+    // NOTE: the DB-level last-admin trigger (migration 095) will reject this if
+    // it would strip an org of its final admin — this route has no app-level
+    // guard of its own, so surface the failure rather than reporting success.
+    const { error: removeError } = await db
       .from("profiles")
       .update({ org_id: null, directory_sync_source: null, role: "member" })
       .in("id", targetIds);
+
+    if (removeError) {
+      console.error("Deprovision: failed to remove members", removeError);
+      return NextResponse.json(
+        { error: "Failed to deprovision members", detail: removeError.message },
+        { status: 409 }
+      );
+    }
+
+    // Seat count dropped — reflect it in Stripe so we stop billing for them.
+    void syncStripeSeats(profile.org_id);
 
     return NextResponse.json({
       deprovisioned: targets.map((t) => ({

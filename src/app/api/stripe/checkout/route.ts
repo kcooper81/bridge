@@ -171,9 +171,21 @@ export async function POST(request: NextRequest) {
     }
 
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://teamprompt.app";
+
+    // The purchased seat count must cover the org's CURRENT members, otherwise
+    // a 12-person org could subscribe at the 2-seat minimum and use the product
+    // underbilled until an unrelated membership change happens to trigger a
+    // seat re-sync. Floor the quantity (and the buyer-adjustable minimum) at the
+    // live member count.
+    const { count: currentMembers } = await db
+      .from("profiles")
+      .select("id", { count: "exact", head: true })
+      .eq("org_id", orgId);
+    const seatFloor = Math.max(planConfig.minSeats, currentMembers || 0);
+
     const seatCount = Math.max(
-      planConfig.minSeats,
-      Math.min(seats || planConfig.minSeats, planConfig.maxSeats)
+      seatFloor,
+      Math.min(seats || seatFloor, planConfig.maxSeats)
     );
 
     const lineItem: Stripe.Checkout.SessionCreateParams.LineItem = {
@@ -181,7 +193,7 @@ export async function POST(request: NextRequest) {
       quantity: seatCount,
       adjustable_quantity: {
         enabled: true,
-        minimum: planConfig.minSeats,
+        minimum: Math.min(seatFloor, planConfig.maxSeats),
         maximum: planConfig.maxSeats,
       },
     };

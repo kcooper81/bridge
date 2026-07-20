@@ -106,6 +106,9 @@ async function upsertSubscription(
 
 export async function POST(request: NextRequest) {
   const stripe = getStripe();
+  // Hoisted so the outer catch can release the idempotency claim for whichever
+  // event was being processed when a throw occurred.
+  let parsedEventId: string | null = null;
   try {
     // Rate limit by IP to prevent abuse before doing signature verification
     // Prefer x-real-ip (set by Vercel, not spoofable) over x-forwarded-for
@@ -131,6 +134,7 @@ export async function POST(request: NextRequest) {
       console.error("Webhook signature verification failed:", err);
       return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
     }
+    parsedEventId = event.id;
 
     const db = createServiceClient();
 
@@ -151,6 +155,19 @@ export async function POST(request: NextRequest) {
       }
       console.error("Webhook idempotency table insert failed", { id: event.id, type: event.type, error: idemErr });
     }
+
+    // We claim the event id above BEFORE processing so concurrent redeliveries
+    // don't double-apply. But that means a processing failure must RELEASE the
+    // claim and return a non-2xx — otherwise the event stays marked "processed"
+    // and Stripe never retries, silently losing a subscription/cancellation
+    // update. This helper does exactly that.
+    const releaseAndRetry = async (context: string) => {
+      await db.from("stripe_processed_events").delete().eq("id", event.id);
+      return NextResponse.json(
+        { error: "Processing failed, will retry", context },
+        { status: 500 }
+      );
+    };
 
     switch (event.type) {
       case "checkout.session.completed": {
@@ -223,7 +240,7 @@ export async function POST(request: NextRequest) {
 
         if (cancelSubError) {
           console.error("Webhook customer.subscription.deleted: failed to update subscription", { orgId, error: cancelSubError });
-          return NextResponse.json({ error: "Database error", received: true }, { status: 200 });
+          return await releaseAndRetry("db_error");
         }
 
         const { error: cancelOrgError } = await db
@@ -233,7 +250,7 @@ export async function POST(request: NextRequest) {
 
         if (cancelOrgError) {
           console.error("Webhook customer.subscription.deleted: failed to update organization", { orgId, error: cancelOrgError });
-          return NextResponse.json({ error: "Database error", received: true }, { status: 200 });
+          return await releaseAndRetry("db_error");
         }
         break;
       }
@@ -254,7 +271,7 @@ export async function POST(request: NextRequest) {
 
         if (invoicePaidError) {
           console.error("Webhook invoice.paid: failed to update subscription", { subId, error: invoicePaidError });
-          return NextResponse.json({ error: "Database error", received: true }, { status: 200 });
+          return await releaseAndRetry("db_error");
         }
         break;
       }
@@ -275,7 +292,7 @@ export async function POST(request: NextRequest) {
 
         if (paymentFailedError) {
           console.error("Webhook invoice.payment_failed: failed to update subscription", { subId, error: paymentFailedError });
-          return NextResponse.json({ error: "Database error", received: true }, { status: 200 });
+          return await releaseAndRetry("db_error");
         }
         break;
       }
@@ -295,7 +312,7 @@ export async function POST(request: NextRequest) {
 
         if (trialEndError) {
           console.error("Webhook customer.subscription.trial_will_end: failed to update subscription", { orgId, error: trialEndError });
-          return NextResponse.json({ error: "Database error", received: true }, { status: 200 });
+          return await releaseAndRetry("db_error");
         }
         break;
       }
@@ -318,7 +335,7 @@ export async function POST(request: NextRequest) {
 
         if (pauseError) {
           console.error("Webhook customer.subscription.paused: failed to update subscription", { orgId, error: pauseError });
-          return NextResponse.json({ error: "Database error", received: true }, { status: 200 });
+          return await releaseAndRetry("db_error");
         }
         break;
       }
@@ -362,7 +379,7 @@ export async function POST(request: NextRequest) {
 
         if (disputeUpdateError) {
           console.error(`Webhook ${event.type}: failed to update subscription dispute status`, { subId, error: disputeUpdateError });
-          return NextResponse.json({ error: "Database error", received: true }, { status: 200 });
+          return await releaseAndRetry("db_error");
         }
         break;
       }
@@ -388,7 +405,7 @@ export async function POST(request: NextRequest) {
 
         if (disputeCloseError) {
           console.error("Webhook charge.dispute.closed: failed to update subscription dispute status", { subId, error: disputeCloseError });
-          return NextResponse.json({ error: "Database error", received: true }, { status: 200 });
+          return await releaseAndRetry("db_error");
         }
         break;
       }
@@ -410,7 +427,7 @@ export async function POST(request: NextRequest) {
           .eq("stripe_subscription_id", subId);
         if (error) {
           console.error("Webhook invoice.payment_action_required: failed to update subscription", { subId, error });
-          return NextResponse.json({ error: "Database error", received: true }, { status: 200 });
+          return await releaseAndRetry("db_error");
         }
         break;
       }
@@ -467,7 +484,7 @@ export async function POST(request: NextRequest) {
 
         if (subError) {
           console.error("Webhook customer.deleted: failed to clear subscription", { customerId: customer.id, error: subError });
-          return NextResponse.json({ error: "Database error", received: true }, { status: 200 });
+          return await releaseAndRetry("db_error");
         }
 
         await db.from("organizations").update({ plan: "free" }).eq("id", subRow.org_id);
@@ -477,13 +494,24 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ received: true });
   } catch (error) {
-    // Log the error but return 200 to prevent Stripe from retrying indefinitely.
-    // Signature verification failures are already handled above with proper 400 status.
+    // A processing failure (e.g. upsertSubscription throwing on a DB error)
+    // must NOT be acked as success — that would strand a paid customer on the
+    // wrong plan with no retry. Release the idempotency claim (best-effort) and
+    // return 500 so Stripe redelivers. Signature/parse failures returned 400
+    // above and never reach here.
     console.error("Webhook handler error:", error);
     logServiceError("stripe", error, { url: "/api/stripe/webhook" });
+    try {
+      if (parsedEventId) {
+        const db = createServiceClient();
+        await db.from("stripe_processed_events").delete().eq("id", parsedEventId);
+      }
+    } catch (releaseErr) {
+      console.error("Failed to release idempotency claim after error", releaseErr);
+    }
     return NextResponse.json(
-      { error: "Webhook handler failed", received: true },
-      { status: 200 }
+      { error: "Webhook handler failed, will retry" },
+      { status: 500 }
     );
   }
 }

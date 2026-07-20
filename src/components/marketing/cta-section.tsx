@@ -25,15 +25,16 @@ export function CTASection({
       <p className="mt-6 text-lg text-muted-foreground max-w-lg mx-auto">
         {subtitle}
       </p>
-      <Link href={buttonHref} className="mt-8 inline-block">
-        <Button
-          size="lg"
-          className="text-base px-8 h-12 rounded-full font-semibold"
-        >
+      <Button
+        asChild
+        size="lg"
+        className="mt-8 text-base px-8 h-12 rounded-full font-semibold"
+      >
+        <Link href={buttonHref}>
           {buttonText}
           <ArrowRight className="ml-2 h-4 w-4" />
-        </Button>
-      </Link>
+        </Link>
+      </Button>
     </div>
   );
 }

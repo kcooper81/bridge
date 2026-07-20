@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { randomBytes } from "node:crypto";
 import { createServiceClient } from "@/lib/supabase/server";
 import { emitAuditEvent } from "@/lib/audit-events";
+import { assertPublicHttpsUrl } from "@/lib/ssrf-guard";
 
 const ALLOWED_EVENTS = new Set(["violation", "audit"]);
 
@@ -43,18 +44,17 @@ export async function POST(req: NextRequest) {
   if ("error" in ctx) return ctx.error;
   const { db, user, orgId, email } = ctx;
 
-  const body = await req.json();
+  const body = await req.json().catch(() => null);
+  if (!body) return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   const { name, url, events } = body as { name?: string; url?: string; events?: string[] };
 
   if (!name || !url) return NextResponse.json({ error: "name and url are required" }, { status: 400 });
-  let parsed: URL;
-  try {
-    parsed = new URL(url);
-  } catch {
-    return NextResponse.json({ error: "Invalid URL" }, { status: 400 });
-  }
-  if (parsed.protocol !== "https:") {
-    return NextResponse.json({ error: "Webhook URL must use HTTPS" }, { status: 400 });
+  // SSRF guard: https-only AND the host must resolve to a public address, so an
+  // admin can't register an internal target (cloud metadata, RFC1918, loopback)
+  // that the server would later POST org events to.
+  const urlCheck = await assertPublicHttpsUrl(url);
+  if (!urlCheck.ok) {
+    return NextResponse.json({ error: urlCheck.reason || "Invalid URL" }, { status: 400 });
   }
   const eventsClean = Array.isArray(events) && events.length > 0
     ? events.filter((e) => ALLOWED_EVENTS.has(e))

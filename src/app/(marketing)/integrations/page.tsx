@@ -147,15 +147,16 @@ export default function IntegrationsPage() {
                 across ChatGPT, Claude, Gemini, Copilot, and Perplexity.
               </p>
               <div className="mt-10 flex flex-col sm:flex-row gap-4">
-                <Link href="/signup">
-                  <Button
-                    size="lg"
-                    className="text-base px-8 h-12 rounded-full bg-white text-zinc-900 hover:bg-zinc-200 font-semibold"
-                  >
+                <Button
+                  asChild
+                  size="lg"
+                  className="text-base px-8 h-12 rounded-full bg-white text-zinc-900 hover:bg-zinc-200 font-semibold"
+                >
+                  <Link href="/signup">
                     Get Started Free
                     <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </Link>
+                  </Link>
+                </Button>
               </div>
             </div>
 

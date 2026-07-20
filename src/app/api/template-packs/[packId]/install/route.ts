@@ -79,9 +79,13 @@ export async function POST(
 
     // 1. Duplicate prompts
     if (promptIds.length > 0) {
+      // Defense-in-depth: even though pack associations are now org-validated
+      // at creation time, scope the source read to this org so a pack can never
+      // copy another tenant's prompt content.
       const { data: sourcePrompts } = await db
         .from("prompts")
         .select("*")
+        .eq("org_id", profile.org_id)
         .in("id", promptIds);
 
       if (sourcePrompts && sourcePrompts.length > 0) {
@@ -108,7 +112,11 @@ export async function POST(
           };
         });
 
-        const { data: inserted } = await db.from("prompts").insert(inserts).select("id");
+        const { data: inserted, error: insertErr } = await db.from("prompts").insert(inserts).select("id");
+        if (insertErr) {
+          console.error("Template install: prompts insert failed", insertErr);
+          return NextResponse.json({ error: "Failed to install prompts" }, { status: 500 });
+        }
         promptsCreated = inserted?.length || 0;
       }
     }
@@ -118,6 +126,7 @@ export async function POST(
       const { data: sourceGuidelines } = await db
         .from("standards")
         .select("*")
+        .eq("org_id", profile.org_id)
         .in("id", guidelineIds);
 
       if (sourceGuidelines && sourceGuidelines.length > 0) {
@@ -132,7 +141,11 @@ export async function POST(
           created_by: user.id,
         }));
 
-        const { data: inserted } = await db.from("standards").insert(inserts).select("id");
+        const { data: inserted, error: insertErr } = await db.from("standards").insert(inserts).select("id");
+        if (insertErr) {
+          console.error("Template install: guidelines insert failed", insertErr);
+          return NextResponse.json({ error: "Failed to install guidelines" }, { status: 500 });
+        }
         guidelinesCreated = inserted?.length || 0;
       }
     }
@@ -142,6 +155,7 @@ export async function POST(
       const { data: sourceRules } = await db
         .from("security_rules")
         .select("*")
+        .eq("org_id", profile.org_id)
         .in("id", ruleIds);
 
       if (sourceRules && sourceRules.length > 0) {
@@ -158,7 +172,11 @@ export async function POST(
           created_by: user.id,
         }));
 
-        const { data: inserted } = await db.from("security_rules").insert(inserts).select("id");
+        const { data: inserted, error: insertErr } = await db.from("security_rules").insert(inserts).select("id");
+        if (insertErr) {
+          console.error("Template install: rules insert failed", insertErr);
+          return NextResponse.json({ error: "Failed to install rules" }, { status: 500 });
+        }
         rulesCreated = inserted?.length || 0;
       }
     }

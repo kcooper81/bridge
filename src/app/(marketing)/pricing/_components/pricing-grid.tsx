@@ -97,14 +97,15 @@ export function PricingGrid() {
                 ))}
               </ul>
 
-              <Link href={plan.href} className="mt-8">
-                <Button
-                  variant={plan.popular ? "default" : "outline"}
-                  className="w-full rounded-full font-semibold"
-                >
+              <Button
+                asChild
+                variant={plan.popular ? "default" : "outline"}
+                className="mt-8 w-full rounded-full font-semibold"
+              >
+                <Link href={plan.href}>
                   {plan.cta}
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             </div>
           );
         })}

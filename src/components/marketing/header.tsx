@@ -105,14 +105,15 @@ export function MarketingHeader() {
           >
             Log in
           </Link>
-          <Link href="/signup">
-            <Button
-              size="default"
-              className="rounded-full px-6 font-semibold"
-            >
+          <Button
+            asChild
+            size="default"
+            className="rounded-full px-6 font-semibold"
+          >
+            <Link href="/signup">
               Get Started
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
 
         {/* Mobile menu */}
@@ -148,9 +149,9 @@ export function MarketingHeader() {
                 <MobileAccordion title="Resources" onNavigate={() => setMobileOpen(false)} items={resourceItems} />
 
                 <div className="border-t border-border pt-4 mt-4 flex flex-col gap-3">
-                  <Link href="/signup" onClick={() => setMobileOpen(false)}>
-                    <Button className="w-full rounded-full">Get Started</Button>
-                  </Link>
+                  <Button asChild className="w-full rounded-full">
+                    <Link href="/signup" onClick={() => setMobileOpen(false)}>Get Started</Link>
+                  </Button>
                   <Link
                     href="/login"
                     onClick={() => setMobileOpen(false)}

@@ -15,9 +15,25 @@ import {
   getRelatedPostsAsync,
 } from "@/lib/blog-posts.server";
 import { getRelatedBySimilarity, type RelatedItem } from "@/lib/content-embeddings";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { sanitizeHtml } from "@/lib/sanitize-html";
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || "https://teamprompt.app";
+
+/**
+ * True when a post body is authored as HTML rather than Markdown.
+ *
+ * Checks for a block-level tag at the start of a line — the HTML posts all
+ * open their sections with <p>/<h2>/<ul>, while the Markdown posts contain no
+ * inline HTML whatsoever (verified across all 25 posts). Deliberately does not
+ * match bare "<" so a Markdown post mentioning "<script>" in prose isn't
+ * misdetected and passed to dangerouslySetInnerHTML.
+ */
+function isHtmlContent(content: string): boolean {
+  return /^\s*<(p|h[1-6]|ul|ol|div|figure|table|blockquote)[\s>]/im.test(content);
+}
 
 const CATEGORY_COLORS: Record<string, string> = {
   guide: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
@@ -270,8 +286,25 @@ export default async function BlogPostPage({ params }: Props) {
                 prose-a:text-primary hover:prose-a:underline
                 prose-figure:my-0 prose-figcaption:text-center prose-figcaption:text-sm prose-figcaption:text-muted-foreground prose-figcaption:mt-3
                 prose-img:rounded-xl prose-img:my-0"
-              dangerouslySetInnerHTML={{ __html: post.content }}
-            />
+            >
+              {/* Post bodies come in two formats. 16 posts are authored as raw
+                  HTML; 9 are authored as Markdown. Both were being piped
+                  through dangerouslySetInnerHTML, so the Markdown ones shipped
+                  their source to the browser verbatim — readers saw literal
+                  "## What Is Prompt DLP?" and "**bold**", and crawlers saw a
+                  wall of <p>-less text with no heading structure at all.
+                  Detected and confirmed live in production on 2026-07-19.
+
+                  Rendering by format rather than converting the 9 posts to HTML
+                  keeps Markdown viable for future authoring. */}
+              {isHtmlContent(post.content) ? (
+                <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(post.content) }} />
+              ) : (
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {post.content}
+                </ReactMarkdown>
+              )}
+            </div>
 
             {/* FAQ section — question-shaped H2/H3s are the exact structure
                 LLMs extract for citations. The matching FAQPage schema is

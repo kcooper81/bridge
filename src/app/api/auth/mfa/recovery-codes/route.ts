@@ -43,8 +43,14 @@ export async function POST() {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const db = createServiceClient();
 
-  // Wipe previous codes
-  await db.from("mfa_recovery_codes").delete().eq("user_id", user.id);
+  // Wipe previous codes. If this fails we must NOT insert the new set — that
+  // would leave both the old and new codes valid, contradicting the "old set
+  // invalidated" contract the UI promises the user.
+  const { error: wipeError } = await db.from("mfa_recovery_codes").delete().eq("user_id", user.id);
+  if (wipeError) {
+    console.error("recovery-codes: failed to wipe old codes", wipeError);
+    return NextResponse.json({ error: "Failed to rotate recovery codes" }, { status: 500 });
+  }
 
   const codes = Array.from({ length: CODE_COUNT }, generateCode);
   const rows = codes.map((c) => ({ user_id: user.id, code_hash: hashCode(c) }));

@@ -99,12 +99,12 @@ export default function SecurityPage() {
           it reaches AI tools like ChatGPT, Claude, and Gemini.
         </p>
         <div className="mt-8">
-          <Link href="/signup">
-            <Button size="lg" className="text-base px-8 h-12 rounded-full font-semibold">
+          <Button asChild size="lg" className="text-base px-8 h-12 rounded-full font-semibold">
+            <Link href="/signup">
               Get Protected
               <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       </div>
     </section>

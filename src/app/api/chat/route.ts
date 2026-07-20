@@ -4,6 +4,22 @@ import { streamText } from "ai";
 import { createAIModel } from "@/lib/ai/providers";
 import { decrypt } from "@/lib/crypto";
 import { notifyDlpViolation } from "@/lib/slack/notify";
+import { limiters, checkRateLimit } from "@/lib/rate-limit";
+
+// Ceiling on generated tokens per request. Without a cap, streamText runs
+// unbounded and a single request can burn a large amount of the org's provider
+// budget. High enough for long answers, low enough to bound worst-case cost.
+const MAX_OUTPUT_TOKENS = 4096;
+// Cap total inbound message content so a caller can't ship a multi-MB prompt
+// (cost + memory). Counts characters across all messages.
+const MAX_TOTAL_INPUT_CHARS = 200_000;
+
+function jsonError(message: string, status: number): Response {
+  return new Response(JSON.stringify({ error: message }), {
+    status,
+    headers: { "Content-Type": "application/json" },
+  });
+}
 
 /** Safe regex test with a length limit to prevent ReDoS on long content */
 function safeRegexTest(pattern: string, flags: string, content: string): boolean {
@@ -34,6 +50,12 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // Per-user rate limit — this endpoint drives real LLM spend.
+    const rl = await checkRateLimit(limiters.chat, user.id);
+    if (!rl.success) {
+      return jsonError("Too many requests. Please slow down.", 429);
+    }
+
     const { data: profile } = await db
       .from("profiles")
       .select("org_id")
@@ -55,6 +77,17 @@ export async function POST(request: NextRequest) {
         status: 400,
         headers: { "Content-Type": "application/json" },
       });
+    }
+
+    // Bound total inbound size — a caller shouldn't be able to ship a multi-MB
+    // prompt that inflates provider cost and memory.
+    const totalInputChars = messages.reduce(
+      (sum: number, m: { content?: unknown }) =>
+        sum + (typeof m?.content === "string" ? m.content.length : 0),
+      0,
+    );
+    if (totalInputChars > MAX_TOTAL_INPUT_CHARS) {
+      return jsonError("Message content is too large.", 413);
     }
 
     // Get the latest user message for DLP scanning
@@ -237,6 +270,25 @@ export async function POST(request: NextRequest) {
     // Create/update conversation (skip for compare-only requests)
     let convId = conversationId;
     if (!compareOnly) {
+      // SECURITY: conversationId arrives from the request body. Before writing
+      // any message into it, confirm it belongs to the caller — otherwise a
+      // user could inject messages into another user's (or another org's)
+      // conversation by passing its id. Scope by both user_id and org_id so a
+      // stolen/guessed id from any tenant is rejected. On mismatch we drop the
+      // supplied id and fall through to creating a fresh conversation rather
+      // than erroring, so a stale client id never breaks the chat.
+      if (convId) {
+        const { data: ownedConv } = await db
+          .from("chat_conversations")
+          .select("id")
+          .eq("id", convId)
+          .eq("user_id", user.id)
+          .eq("org_id", profile.org_id)
+          .maybeSingle();
+        if (!ownedConv) {
+          convId = undefined;
+        }
+      }
       if (!convId) {
         const { data: conv, error: convError } = await db
           .from("chat_conversations")
@@ -259,14 +311,20 @@ export async function POST(request: NextRequest) {
         convId = conv.id;
       }
 
-      // Save user message
+      // Save user message. If this fails we must not go on to stream and
+      // persist the assistant reply — that would leave a conversation with an
+      // answer and no preceding question (corrupted history).
       if (convId && lastUserMessage) {
-        await db.from("chat_messages").insert({
+        const { error: userMsgError } = await db.from("chat_messages").insert({
           conversation_id: convId,
           role: "user",
           content: lastUserMessage.content,
           model: selectedModel,
         });
+        if (userMsgError) {
+          console.error("Failed to save user message:", userMsgError);
+          return jsonError("Failed to save message", 500);
+        }
       }
     }
 
@@ -386,6 +444,7 @@ export async function POST(request: NextRequest) {
     const result = streamText({
       model: aiModel,
       messages: [...systemMessages, ...aiMessages],
+      maxOutputTokens: MAX_OUTPUT_TOKENS,
       ...(Object.keys(providerOptions).length > 0 ? { providerOptions } : {}),
       onFinish: async ({ text, usage }) => {
         // Save assistant message (skip for compare-only)

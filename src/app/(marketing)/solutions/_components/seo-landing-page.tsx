@@ -220,24 +220,26 @@ export function SeoLandingPage({ data, aiRelated }: { data: SeoPageData; aiRelat
               </div>
 
               <div className="mt-10 flex flex-col sm:flex-row gap-4">
-                <Link href="/signup">
-                  <Button
-                    size="lg"
-                    className="text-base px-8 h-12 rounded-lg font-bold"
-                  >
+                <Button
+                  asChild
+                  size="lg"
+                  className="text-base px-8 h-12 rounded-lg font-bold"
+                >
+                  <Link href="/signup">
                     Start for free
                     <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </Link>
-                <Link href="/features">
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    className="text-base px-8 h-12 rounded-lg font-bold"
-                  >
+                  </Link>
+                </Button>
+                <Button
+                  asChild
+                  variant="outline"
+                  size="lg"
+                  className="text-base px-8 h-12 rounded-lg font-bold"
+                >
+                  <Link href="/features">
                     See all features
-                  </Button>
-                </Link>
+                  </Link>
+                </Button>
               </div>
             </div>
 

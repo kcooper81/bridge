@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
     // If activity logging is disabled, skip the insert but still increment usage
     if (orgSettings.activity_logging_enabled === false) {
       if (prompt_id && action !== "blocked") {
-        await db.rpc("increment_usage_count", { prompt_id });
+        await db.rpc("increment_usage_count", { p_prompt_id: prompt_id, p_org_id: profile.org_id });
       }
       return withCors(NextResponse.json({ success: true, skipped: true }), request);
     }
@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
 
     // Also increment usage if a prompt_id was provided
     if (prompt_id && action !== "blocked") {
-      await db.rpc("increment_usage_count", { prompt_id });
+      await db.rpc("increment_usage_count", { p_prompt_id: prompt_id, p_org_id: profile.org_id });
     }
 
     return withCors(NextResponse.json({ success: true, logId: log.id, created_at: log.created_at }), request);

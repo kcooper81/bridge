@@ -261,13 +261,14 @@ export async function recordUsage(id: string): Promise<void> {
   if (!orgId || !userId) return;
 
   const db = supabase();
-  const { error: rpcError } = await db.rpc("increment_usage_count", { prompt_id: id });
+  const { error: rpcError } = await db.rpc("increment_usage_count", { p_prompt_id: id, p_org_id: orgId });
   if (rpcError) {
-    // Fallback: fetch current count and increment
-    const { data: current } = await db.from("prompts").select("usage_count").eq("id", id).single();
+    // Fallback: fetch current count and increment (scoped by org)
+    const { data: current } = await db.from("prompts").select("usage_count").eq("id", id).eq("org_id", orgId).single();
     await db.from("prompts")
       .update({ usage_count: (current?.usage_count || 0) + 1, last_used_at: new Date().toISOString() })
-      .eq("id", id);
+      .eq("id", id)
+      .eq("org_id", orgId);
   }
 
   await db.from("usage_events").insert({

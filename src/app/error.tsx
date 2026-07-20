@@ -29,9 +29,9 @@ export default function GlobalError({
           <Button onClick={reset} variant="outline">
             Try again
           </Button>
-          <Link href="/">
-            <Button>Go home</Button>
-          </Link>
+          <Button asChild>
+            <Link href="/">Go home</Link>
+          </Button>
         </div>
       </div>
     </div>

@@ -105,10 +105,14 @@ export async function POST(req: NextRequest) {
       allow_external_ai_tools: !policyEnabled,
     };
 
-    await db
+    const { error: settingsError } = await db
       .from("organizations")
       .update({ settings: updatedSettings })
       .eq("id", profile.org_id);
+    if (settingsError) {
+      console.error("tool-policy: failed to save settings", settingsError);
+      return NextResponse.json({ error: "Failed to save policy" }, { status: 500 });
+    }
 
     // Sync to Cloudflare if connected
     let cloudflareSynced = false;

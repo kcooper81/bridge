@@ -77,24 +77,26 @@ export default function LandingPage() {
               </p>
 
               <div className="mt-10 flex flex-col sm:flex-row gap-4">
-                <Link href="/signup">
-                  <Button
-                    size="lg"
-                    className="text-base px-8 h-12 rounded-lg font-bold"
-                  >
+                <Button
+                  asChild
+                  size="lg"
+                  className="text-base px-8 h-12 rounded-lg font-bold"
+                >
+                  <Link href="/signup">
                     Start free workspace
                     <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </Link>
-                <Link href="/features">
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    className="text-base px-8 h-12 rounded-lg font-bold"
-                  >
+                  </Link>
+                </Button>
+                <Button
+                  asChild
+                  variant="outline"
+                  size="lg"
+                  className="text-base px-8 h-12 rounded-lg font-bold"
+                >
+                  <Link href="/features">
                     See How It Works
-                  </Button>
-                </Link>
+                  </Link>
+                </Button>
               </div>
 
               <p className="mt-4 text-sm text-muted-foreground">
@@ -555,12 +557,12 @@ export default function LandingPage() {
           </div>
 
           <div className="text-center mt-10">
-            <Link href="/blog">
-              <Button variant="outline" className="rounded-lg px-8 font-bold">
+            <Button asChild variant="outline" className="rounded-lg px-8 font-bold">
+              <Link href="/blog">
                 Read the Blog
                 <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
         </div>
       </section>

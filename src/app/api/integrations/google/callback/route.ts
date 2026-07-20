@@ -81,13 +81,22 @@ export async function GET(request: NextRequest) {
     const tokenData = await tokenRes.json();
     const { access_token, refresh_token, expires_in } = tokenData;
 
-    // Get admin email from userinfo
+    // Get admin email from userinfo. Guard both the HTTP status and the shape:
+    // if userinfo returns a non-JSON error page, .json() would throw and the
+    // outer catch would discard an already-valid access/refresh token, forcing
+    // the user through full consent again.
     const userinfoRes = await fetch(
       "https://www.googleapis.com/oauth2/v2/userinfo",
       { headers: { Authorization: `Bearer ${access_token}` } }
     );
+    if (!userinfoRes.ok) {
+      return NextResponse.redirect(`${siteUrl}/settings/integrations?error=userinfo_failed`);
+    }
     const userinfo = await userinfoRes.json();
     const adminEmail = userinfo.email;
+    if (!adminEmail) {
+      return NextResponse.redirect(`${siteUrl}/settings/integrations?error=no_email`);
+    }
 
     // Look up the user's profile using the ID from state
     const db = createServiceClient();

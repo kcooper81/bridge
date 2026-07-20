@@ -155,14 +155,17 @@ export async function GET(request: NextRequest) {
     if (!senderEmail && t.user_id) {
       senderEmail = userMap.get(t.user_id) || null;
     }
+    // A feedback row can have a null message (empty inbound-email body). Coerce
+    // to "" before any string op — one null row was crashing the whole inbox.
+    const rawMessage = t.message || "";
     if (!senderEmail) {
-      const match = t.message.match(/From:.*?<([^>]+@[^>]+)>/i)
-        || t.message.match(/From:.*?([^\s<]+@[^\s>]+)/i);
+      const match = rawMessage.match(/From:.*?<([^>]+@[^>]+)>/i)
+        || rawMessage.match(/From:.*?([^\s<]+@[^\s>]+)/i);
       if (match) senderEmail = match[1];
     }
 
     // Clean message for display: strip legacy "From: ..." prefix
-    const displayMessage = t.message.replace(/^From:.*?\n\n/, "");
+    const displayMessage = rawMessage.replace(/^From:.*?\n\n/, "");
     const orgInfo = t.org_id ? orgMap.get(t.org_id) : null;
 
     return {
@@ -295,11 +298,18 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const body = await request.json();
+  const body = await request.json().catch(() => null);
+  if (!body) return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   const { ids, permanent } = body;
 
   if (!Array.isArray(ids) || ids.length === 0) {
     return NextResponse.json({ error: "ids array required" }, { status: 400 });
+  }
+
+  // Permanent hard-delete of tickets + notes + feedback history is
+  // irreversible — super-admin-only. (Soft-delete/archive stays open to support.)
+  if (permanent && !auth.isSuperAdmin) {
+    return NextResponse.json({ error: "Super admin required" }, { status: 403 });
   }
 
   const db = createServiceClient();

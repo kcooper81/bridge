@@ -47,47 +47,57 @@ export async function GET(request: NextRequest) {
 
   const redirectUri = `${baseUrl}/api/integrations/search-console/callback`;
 
-  // Exchange code for tokens
-  const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({
-      code,
-      client_id: GOOGLE_CLIENT_ID,
-      client_secret: GOOGLE_CLIENT_SECRET,
-      redirect_uri: redirectUri,
-      grant_type: "authorization_code",
-    }),
-  });
+  try {
+    // Exchange code for tokens
+    const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        code,
+        client_id: GOOGLE_CLIENT_ID,
+        client_secret: GOOGLE_CLIENT_SECRET,
+        redirect_uri: redirectUri,
+        grant_type: "authorization_code",
+      }),
+    });
 
-  if (!tokenRes.ok) {
-    console.error("Search Console token exchange failed:", await tokenRes.text());
-    return NextResponse.redirect(`${baseUrl}/admin/content?error=token_failed`);
+    if (!tokenRes.ok) {
+      console.error("Search Console token exchange failed:", await tokenRes.text());
+      return NextResponse.redirect(`${baseUrl}/admin/content?error=token_failed`);
+    }
+
+    const tokens = await tokenRes.json();
+
+    // Google only returns refresh_token on the FIRST consent. On re-consent it's
+    // absent — writing it blindly would null out the stored refresh_token and
+    // permanently break the weekly SEO-digest cron's token refresh. Only include
+    // the field when Google actually sent one.
+    const upsertRow: Record<string, unknown> = {
+      provider: "google_search_console",
+      access_token: tokens.access_token,
+      token_expires_at: new Date(Date.now() + (tokens.expires_in || 3600) * 1000).toISOString(),
+      connected_by: userId,
+      connected_at: new Date().toISOString(),
+    };
+    if (tokens.refresh_token) {
+      upsertRow.refresh_token = tokens.refresh_token;
+    }
+
+    const { error: dbError } = await db
+      .from("platform_integrations")
+      .upsert(upsertRow, { onConflict: "provider" });
+
+    if (dbError) {
+      console.error("Failed to save Search Console tokens:", dbError);
+      return NextResponse.redirect(`${baseUrl}/admin/content?error=save_failed`);
+    }
+
+    const response = NextResponse.redirect(`${baseUrl}/admin/content?connected=true`);
+    // Clear the nonce cookie after successful use
+    response.cookies.delete("sc_oauth_nonce");
+    return response;
+  } catch (err) {
+    console.error("Search Console callback error:", err);
+    return NextResponse.redirect(`${baseUrl}/admin/content?error=callback_failed`);
   }
-
-  const tokens = await tokenRes.json();
-
-  const { error: dbError } = await db
-    .from("platform_integrations")
-    .upsert(
-      {
-        provider: "google_search_console",
-        access_token: tokens.access_token,
-        refresh_token: tokens.refresh_token,
-        token_expires_at: new Date(Date.now() + (tokens.expires_in || 3600) * 1000).toISOString(),
-        connected_by: userId,
-        connected_at: new Date().toISOString(),
-      },
-      { onConflict: "provider" }
-    );
-
-  if (dbError) {
-    console.error("Failed to save Search Console tokens:", dbError);
-    return NextResponse.redirect(`${baseUrl}/admin/content?error=save_failed`);
-  }
-
-  const response = NextResponse.redirect(`${baseUrl}/admin/content?connected=true`);
-  // Clear the nonce cookie after successful use
-  response.cookies.delete("sc_oauth_nonce");
-  return response;
 }

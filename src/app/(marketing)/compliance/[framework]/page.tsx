@@ -79,16 +79,16 @@ export default function ComplianceFrameworkPage({ params }: { params: { framewor
           </div>
 
           <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
-            <Link href="/signup">
-              <Button size="lg" className="rounded-lg font-bold px-8">
+            <Button asChild size="lg" className="rounded-lg font-bold px-8">
+              <Link href="/signup">
                 Start free <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
-            <Link href="/pricing">
-              <Button size="lg" variant="outline" className="rounded-lg font-bold px-8">
+              </Link>
+            </Button>
+            <Button asChild size="lg" variant="outline" className="rounded-lg font-bold px-8">
+              <Link href="/pricing">
                 See pricing
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
         </div>
       </section>

@@ -123,7 +123,7 @@ const _POSTS: BlogPost[] = [
 
 **Prompt DLP** is data loss prevention scoped specifically to AI prompts — the text employees type into ChatGPT, Claude, Gemini, Copilot, Perplexity, and other large language models. Where traditional DLP watches email attachments, file uploads, and cloud syncs, prompt DLP watches the AI prompt channel — which most organizations have no visibility into.
 
-The term emerged in late 2025 as enterprises realized their existing DLP stack (Microsoft Purview, Symantec, Forcepoint, Nightfall) was blind to AI tools. Prompts travel as normal HTTPS POST bodies to api.openai.com / anthropic.com / generativelanguage.googleapis.com — they don't look like a file exfiltration to network DLP, and they don't touch endpoint DLP triggers.
+The term emerged in late 2025 as enterprises realized their existing DLP stack ([Microsoft Purview](/compare/purview), Symantec, Forcepoint, [Nightfall](/compare/nightfall)) was blind to AI tools. Prompts travel as normal HTTPS POST bodies to api.openai.com / anthropic.com / generativelanguage.googleapis.com — they don't look like a file exfiltration to network DLP, and they don't touch endpoint DLP triggers.
 
 ## Why Traditional DLP Misses AI Prompts
 
@@ -171,7 +171,7 @@ It also pairs with [Cloudflare Gateway](https://teamprompt.app/integrations) to 
 
 ## The Bottom Line
 
-Prompt DLP isn't a product you can buy as an add-on to your existing DLP stack — it has to live where the prompts live: in the browser, scanning content before it ever reaches a third-party AI provider. Any team using AI seriously (which by 2026 is every team) needs this layer, regardless of whether you've already deployed Purview, Nightfall, or Symantec for traditional DLP. Those tools simply aren't built for this channel.
+Prompt DLP isn't a product you can buy as an add-on to your existing DLP stack — it has to live where the prompts live: in the browser, scanning content before it ever reaches a third-party AI provider. Any team using AI seriously (which by 2026 is every team) needs this layer, regardless of whether you've already deployed Purview, Nightfall, or Symantec for traditional DLP. Those tools simply aren't built for this channel — we broke down exactly where each one stops short in our [comparison of the best AI DLP tools](/compare/best-ai-dlp-tools).
 
 Start with one capability — browser-level scanning of your three most-used AI tools — and expand from there.
 `,
@@ -235,7 +235,7 @@ So even at the most expensive tier, ChatGPT does not give you what your complian
 
 **Gemini for Workspace**: Logging is tied to your Google Workspace audit logs. You see who used Gemini, when, against which document — but not the prompt text itself.
 
-**Microsoft Copilot for Microsoft 365**: Audit logs are tied to the Microsoft Purview compliance center. You can see Copilot interactions at a metadata level (timestamp, user, app context) — Microsoft added some content logging in 2025 but it's per-tenant-opt-in and limited.
+**Microsoft Copilot for Microsoft 365**: Audit logs are tied to the [Microsoft Purview](/compare/purview) compliance center. You can see Copilot interactions at a metadata level (timestamp, user, app context) — Microsoft added some content logging in 2025 but it's per-tenant-opt-in and limited.
 
 ## The Pattern
 
@@ -317,7 +317,7 @@ If a vendor can't say yes to all five, treat their "audit trail" claim as market
     content: `
 ## The Problem Is Bigger Than You Think
 
-According to a 2025 study by Cyberhaven, **11% of data employees paste into ChatGPT is confidential**. That includes source code, customer data, financial records, and internal documents.
+According to a 2025 study by [Cyberhaven](/compare/cyberhaven), **11% of data employees paste into ChatGPT is confidential**. That includes source code, customer data, financial records, and internal documents.
 
 Most teams have no idea this is happening. There's no visibility, no controls, and no audit trail. By the time you discover a leak, the data has already been processed by an AI model.
 

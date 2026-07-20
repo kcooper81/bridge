@@ -164,24 +164,26 @@ export function IndustryPage({ data }: { data: IndustryPageData }) {
               </p>
 
               <div className="mt-10 flex flex-col sm:flex-row gap-4">
-                <Link href="/signup">
-                  <Button
-                    size="lg"
-                    className="text-base px-8 h-12 rounded-lg font-bold"
-                  >
+                <Button
+                  asChild
+                  size="lg"
+                  className="text-base px-8 h-12 rounded-lg font-bold"
+                >
+                  <Link href="/signup">
                     Start for free
                     <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </Link>
-                <Link href="/security">
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    className="text-base px-8 h-12 rounded-lg font-bold"
-                  >
+                  </Link>
+                </Button>
+                <Button
+                  asChild
+                  variant="outline"
+                  size="lg"
+                  className="text-base px-8 h-12 rounded-lg font-bold"
+                >
+                  <Link href="/security">
                     See data protection
-                  </Button>
-                </Link>
+                  </Link>
+                </Button>
               </div>
             </div>
 
@@ -453,16 +455,16 @@ export function IndustryPage({ data }: { data: IndustryPageData }) {
               {data.cta.subtitle}
             </p>
             <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/signup">
-                <Button size="lg" className="text-base px-8 h-12 rounded-lg font-bold">
+              <Button asChild size="lg" className="text-base px-8 h-12 rounded-lg font-bold">
+                <Link href="/signup">
                   Start free <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
-              <Link href="/pricing">
-                <Button variant="outline" size="lg" className="text-base px-8 h-12 rounded-lg font-bold">
+                </Link>
+              </Button>
+              <Button asChild variant="outline" size="lg" className="text-base px-8 h-12 rounded-lg font-bold">
+                <Link href="/pricing">
                   See pricing
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             </div>
           </div>
         </section>

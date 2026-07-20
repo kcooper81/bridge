@@ -5,11 +5,19 @@ import { SectionLabel } from "@/components/marketing/section-label";
 import { CTASection } from "@/components/marketing/cta-section";
 import { RELEASE_NOTES, APP_VERSION } from "@/lib/release-notes";
 
+// noIndex: the changelog was ranking ~position 7 for "'plan & usage' tab
+// missing cursor settings" and similar Cursor-IDE support queries (46
+// impressions / 0 clicks in the 28d to 2026-07-15). The match comes from the
+// v1.14.0 entry mentioning "Billing and Plan & Usage tabs". Those searchers
+// want a fix for a different product and will never convert, but the
+// impressions still divide into sitewide CTR. `follow: true` keeps link
+// equity flowing to the pages we do want ranked.
 export const metadata: Metadata = generatePageMetadata({
   title: "Changelog — What's New in TeamPrompt",
   description:
     "See what's new in TeamPrompt. Release notes, new features, improvements, and bug fixes — all in one place.",
   path: "/changelog",
+  noIndex: true,
   keywords: ["changelog", "release notes", "what's new", "TeamPrompt updates"],
 });
 

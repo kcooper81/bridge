@@ -8,6 +8,7 @@ import { ErrorReporter } from "@/components/providers/error-reporter";
 import { ConfirmDialogProvider } from "@/components/providers/confirm-provider";
 import { GA4RouteTracker } from "@/components/analytics/ga4";
 import { AuthEventTracker } from "@/components/analytics/auth-event-tracker";
+import { AttributionClaim } from "@/components/analytics/attribution";
 import "./globals.css";
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || "G-83VRNN79X8";
@@ -139,6 +140,7 @@ export default function RootLayout({
         <Suspense fallback={null}>
           <GA4RouteTracker />
           <AuthEventTracker />
+          <AttributionClaim />
         </Suspense>
         <ThemeProvider>
           <ErrorReporter>

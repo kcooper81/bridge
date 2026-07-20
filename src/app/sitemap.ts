@@ -107,7 +107,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${baseUrl}/blog`, lastModified: today, changeFrequency: "weekly", priority: 0.8 },
     { url: `${baseUrl}/help`, lastModified: today, changeFrequency: "monthly", priority: 0.6 },
     { url: `${baseUrl}/contact`, lastModified: today, changeFrequency: "monthly", priority: 0.5 },
-    { url: `${baseUrl}/changelog`, lastModified: today, changeFrequency: "weekly", priority: 0.5 },
+    // /changelog is intentionally omitted — it's noindex (see the page's
+    // metadata for why). Keeping it in the sitemap would signal the opposite.
     { url: `${baseUrl}/media`, lastModified: today, changeFrequency: "monthly", priority: 0.4 },
     { url: `${baseUrl}/privacy`, lastModified: today, changeFrequency: "monthly", priority: 0.3 },
     { url: `${baseUrl}/terms`, lastModified: today, changeFrequency: "monthly", priority: 0.3 },

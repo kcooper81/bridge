@@ -140,6 +140,14 @@ category must be one of: guide, insight, comparison, tutorial`;
     return NextResponse.json({ error: "Failed to parse AI response" }, { status: 500 });
   }
 
+  // The JSON can parse yet still omit `content`; sanitizeContent(undefined)
+  // would then throw outside the try above and 500 with a stack. Validate the
+  // shape before using it.
+  if (typeof generated?.content !== "string" || generated.content.trim().length === 0) {
+    logServiceError("app", new Error("AI response missing content field"), { url: "admin/content/generate", metadata: { provider: "anthropic" } });
+    return NextResponse.json({ error: "AI response was incomplete" }, { status: 502 });
+  }
+
   // Search Unsplash for cover image
   let coverImage =
     "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1200&q=80&auto=format&fit=crop";

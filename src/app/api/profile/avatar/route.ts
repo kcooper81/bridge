@@ -75,11 +75,16 @@ export async function POST(request: NextRequest) {
     // Add cache-bust to force browser refresh
     const avatarUrl = `${urlData.publicUrl}?t=${Date.now()}`;
 
-    // Update profile table
-    await db
+    // Update profile table — check the error so we don't return a new URL the
+    // DB never actually stored (which would show a stale avatar everywhere).
+    const { error: profileUpdateError } = await db
       .from("profiles")
       .update({ avatar_url: avatarUrl, updated_at: new Date().toISOString() })
       .eq("id", user.id);
+    if (profileUpdateError) {
+      console.error("Avatar: failed to update profile", profileUpdateError);
+      return NextResponse.json({ error: "Failed to save avatar" }, { status: 500 });
+    }
 
     // Keep auth metadata in sync
     await db.auth.admin.updateUserById(user.id, {

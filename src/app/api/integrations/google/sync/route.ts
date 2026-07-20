@@ -228,7 +228,10 @@ export async function POST(request: NextRequest) {
       .select("id, email, name, directory_sync_source")
       .eq("org_id", profile.org_id);
 
-    const allOrgMembers = existingMembers || [];
+    // Profiles can have a null email (rare, but it exists); a single null row
+    // here would throw TypeError on .toLowerCase() and 500 the whole org sync.
+    // Filter them out once so every downstream .map/.filter is safe.
+    const allOrgMembers = (existingMembers || []).filter((m) => m.email);
     const existingEmails = new Set(
       allOrgMembers.map((m) => m.email.toLowerCase())
     );

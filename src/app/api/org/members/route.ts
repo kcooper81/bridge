@@ -78,6 +78,28 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: "Cannot change your own role here" }, { status: 400 });
     }
 
+    // Refuse to demote the last admin. Without this an admin could be demoted
+    // to member, leaving the org with no admin at all (locking everyone out of
+    // role changes, billing, and integrations). The removal path already has
+    // this guard; the role-change path was missing it entirely.
+    if (target.role === "admin" && role !== "admin") {
+      const { count: otherAdmins } = await db
+        .from("profiles")
+        .select("id", { count: "exact", head: true })
+        .eq("org_id", caller.org_id)
+        .eq("role", "admin")
+        .neq("id", memberId);
+      if ((otherAdmins ?? 0) === 0) {
+        return NextResponse.json(
+          {
+            error:
+              "Can't demote the last admin. Promote another member to admin first, or transfer admin via /api/org/transfer-admin.",
+          },
+          { status: 409 },
+        );
+      }
+    }
+
     const { error } = await db
       .from("profiles")
       .update({ role })

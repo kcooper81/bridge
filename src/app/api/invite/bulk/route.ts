@@ -109,7 +109,9 @@ export async function POST(request: NextRequest) {
       .select("email")
       .eq("org_id", profile.org_id);
     const existingEmails = new Set(
-      (existingMembers || []).map((m) => m.email.toLowerCase())
+      (existingMembers || [])
+        .filter((m) => m.email)
+        .map((m) => m.email.toLowerCase())
     );
 
     // Get existing pending invite emails
@@ -119,7 +121,9 @@ export async function POST(request: NextRequest) {
       .eq("org_id", profile.org_id)
       .eq("status", "pending");
     const pendingEmails = new Set(
-      (existingInvites || []).map((i) => i.email.toLowerCase())
+      (existingInvites || [])
+        .filter((i) => i.email)
+        .map((i) => i.email.toLowerCase())
     );
 
     // Get existing teams

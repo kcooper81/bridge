@@ -79,11 +79,19 @@ export async function POST(request: NextRequest) {
       .eq("invited_by", user.id)
       .eq("status", "pending");
 
-    // Delete profile
-    await db.from("profiles").delete().eq("id", user.id);
+    // Delete the auth user FIRST. profiles.id references auth.users with
+    // ON DELETE CASCADE, so this also removes the profile atomically. Doing it
+    // the other way round risked the profile being gone while deleteUser fails,
+    // leaving an auth user who can still log in and gets a fresh org minted by
+    // /api/org/ensure. If deleteUser fails, abort before touching the profile.
+    const { error: authDeleteError } = await db.auth.admin.deleteUser(user.id);
+    if (authDeleteError) {
+      console.error("Delete account: failed to delete auth user", authDeleteError);
+      return NextResponse.json({ error: "Failed to delete account" }, { status: 500 });
+    }
 
-    // Delete auth user
-    await db.auth.admin.deleteUser(user.id);
+    // Defense-in-depth in case the cascade isn't present in some environment.
+    await db.from("profiles").delete().eq("id", user.id);
 
     return NextResponse.json({ success: true });
   } catch (error) {
